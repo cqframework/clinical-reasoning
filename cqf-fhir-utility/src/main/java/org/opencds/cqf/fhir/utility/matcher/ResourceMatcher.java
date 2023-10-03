@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -212,18 +211,19 @@ public interface ResourceMatcher {
         return false;
     }
 
-    default boolean isMatchCoding(TokenParam param, IBase pathResult, List<BaseCodingDt> codes) {
+    default boolean isMatchCoding(TokenParam param, IBase pathResult, List<TokenParam> codes) {
         if (codes == null || codes.isEmpty()) {
             return false;
         }
 
         // in value set
         if (param.getModifier() == TokenParamModifier.IN) {
-            return inValueSet(codes);
+            throw new UnsupportedOperationException("In modifier is unsupported");
         }
 
         for (var c : codes) {
-            var matches = c.matchesToken(param.getValueAsCoding());
+            var matches = param.getValue().equals(c.getValue())
+                    && (param.getSystem() == null || param.getSystem().equals(c.getSystem()));
             if (matches) {
                 return true;
             }
@@ -273,7 +273,5 @@ public interface ResourceMatcher {
 
     DateRangeParam getDateRange(ICompositeType type);
 
-    List<BaseCodingDt> getCodes(IBase codeElement);
-
-    boolean inValueSet(List<BaseCodingDt> codes);
+    List<TokenParam> getCodes(IBase codeElement);
 }

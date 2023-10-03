@@ -4,9 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.InternalCodingDt;
+import ca.uhn.fhir.rest.param.TokenParam;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,27 +48,22 @@ public class ResourceMatcherR4 implements ResourceMatcher {
     }
 
     @Override
-    public List<BaseCodingDt> getCodes(IBase codeElement) {
-        List<BaseCodingDt> resolvedCodes = new ArrayList<>();
+    public List<TokenParam> getCodes(IBase codeElement) {
+        List<TokenParam> resolvedCodes = new ArrayList<>();
         if (codeElement instanceof Coding) {
-            resolvedCodes.add(
-                    new InternalCodingDt(((Coding) codeElement).getSystem(), ((Coding) codeElement).getCode()));
+            var c = (Coding) codeElement;
+            resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
         } else if (codeElement instanceof CodeType) {
-            resolvedCodes.add(
-                    new InternalCodingDt(((CodeType) codeElement).getSystem(), ((CodeType) codeElement).getCode()));
+            var c = (CodeType) codeElement;
+            resolvedCodes.add(new TokenParam(c.getValue()));
         } else if (codeElement instanceof CodeableConcept) {
             resolvedCodes = ((CodeableConcept) codeElement)
                     .getCoding().stream()
-                            .map(code -> new InternalCodingDt(code.getSystem(), code.getCode()))
+                            .map(code -> new TokenParam(code.getSystem(), code.getCode()))
                             .collect(Collectors.toList());
         }
 
         return resolvedCodes;
-    }
-
-    @Override
-    public boolean inValueSet(List<BaseCodingDt> codes) {
-        throw new UnsupportedOperationException("InValueSet operation is not available");
     }
 
     @Override

@@ -17,6 +17,7 @@ public class PackageService {
     }
 
     public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
+        // TODO: this is incomplete and needs to be abstracted further
         final Bundle bundle = new Bundle();
         bundle.setType(BundleType.TRANSACTION);
         bundle.addEntry(PackageHelper.createEntry(questionnaire, isPut));

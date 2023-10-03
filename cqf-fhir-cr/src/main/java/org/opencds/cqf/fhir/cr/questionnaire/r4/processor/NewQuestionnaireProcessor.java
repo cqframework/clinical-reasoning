@@ -7,7 +7,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -15,16 +14,15 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.packager.PackageService;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate.PopulateService;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.ExpressionProcessorService;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateService;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveService;
 
 public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-    protected OperationOutcome oc;
-    protected Questionnaire populatedQuestionnaire;
     protected PopulateService myPopulateService;
     protected ResolveService myResolveService;
     protected PackageService myPackageService;
+    protected PrePopulateService myPrePopulateService;
 
     public NewQuestionnaireProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault());
@@ -34,6 +32,8 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
         super(repository, evaluationSettings);
         myResolveService = new ResolveService(repository);
         myPackageService = new PackageService(repository);
+        myPopulateService = new PopulateService();
+        myPrePopulateService = new PrePopulateService();
     }
 
     @Override
@@ -59,9 +59,8 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
         if (libraryEngine == null) {
             throw new IllegalArgumentException("No engine passed in");
         }
-        final ExpressionProcessorService expressionProcessorService = new ExpressionProcessorService(questionnaire, patientId, parameters, bundle, libraryEngine);
-        final PrePopulateService prePopulateService = new PrePopulateService(expressionProcessorService, questionnaire, patientId);
-        return prePopulateService.prePopulate();
+        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(questionnaire, patientId, parameters, bundle, libraryEngine);
+        return myPrePopulateService.prePopulate(prePopulateRequest);
     }
 
     @Override

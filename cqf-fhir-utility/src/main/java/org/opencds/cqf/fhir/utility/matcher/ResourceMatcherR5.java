@@ -62,9 +62,8 @@ public class ResourceMatcherR5 implements ResourceMatcher {
                     .getCoding().stream()
                             .map(code -> new InternalCodingDt(code.getSystem(), code.getCode()))
                             .collect(Collectors.toList());
-        } else {
-            return null;
         }
+
         return resolvedCodes;
     }
 

@@ -120,10 +120,9 @@ public interface ResourceMatcher {
                 } else if (param instanceof DateParam) {
                     match = isMatchDate((DateParam) param, r);
                 } else if (param instanceof TokenParam) {
-                    var codes = getCodes(r);
-                    if (codes == null) {
-                        match = isMatchToken((TokenParam) param, r);
-                    } else {
+                    match = isMatchToken((TokenParam) param, r);
+                    if (!match) {
+                        var codes = getCodes(r);
                         match = isMatchCoding((TokenParam) param, r, codes);
                     }
                 } else if (param instanceof UriParam) {
@@ -214,6 +213,10 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchCoding(TokenParam param, IBase pathResult, List<BaseCodingDt> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return false;
+        }
+
         // in value set
         if (param.getModifier() == TokenParamModifier.IN) {
             return inValueSet(codes);

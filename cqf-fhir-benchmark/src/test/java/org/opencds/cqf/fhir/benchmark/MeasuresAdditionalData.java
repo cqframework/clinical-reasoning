@@ -28,8 +28,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class MeasuresAdditionalData {
     private When when;
 
-    @Setup(Level.Iteration)
-    public void setupIteration() throws Exception {
+    @Setup(Level.Trial)
+    public void setupTrial() throws Exception {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
 

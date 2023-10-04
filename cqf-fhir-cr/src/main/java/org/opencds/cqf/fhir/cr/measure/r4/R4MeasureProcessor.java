@@ -97,12 +97,6 @@ public class R4MeasureProcessor {
 
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
-        /*
-        if (subjects.size() > 1) {
-            evalType = MeasureEvalType.POPULATION;
-        } else {
-            evalType = MeasureEvalType.SUBJECT;
-        }*/
 
         R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
         return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);

@@ -29,7 +29,7 @@ public class PrePopulateItem {
         PrePopulateRequest thePrePopulateRequest,
         QuestionnaireItemComponent theQuestionnaireItem
     ) throws ResolveExpressionException {
-        final QuestionnaireItemComponent populatedItem = theQuestionnaireItem.copy();
+        final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(theQuestionnaireItem);
         final List<IBase> expressionResults = getExpressionResults(thePrePopulateRequest, populatedItem);
         expressionResults.forEach(result -> {
             populatedItem.addExtension(ExtensionBuilders.questionnaireResponseAuthorExtension());
@@ -38,7 +38,9 @@ public class PrePopulateItem {
         return populatedItem;
     }
 
-    private List<IBase> getExpressionResults(
+    protected QuestionnaireItemComponent copyQuestionnaireItem(QuestionnaireItemComponent theQuestionnaireItem) {return theQuestionnaireItem.copy();}
+
+    protected List<IBase> getExpressionResults(
         PrePopulateRequest thePrePopulateRequest,
         QuestionnaireItemComponent theQuestionnaireItem
     ) throws ResolveExpressionException {

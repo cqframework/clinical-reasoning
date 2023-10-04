@@ -39,10 +39,10 @@ public class ExpressionProcessorService {
             return new ArrayList<>();
         }
         try {
-            final String libraryUrl = getLibraryUrl(thePrePopulateRequest.getQuestionnaire());
+            final CqfExpression cqfExpression = getCqfExpression(thePrePopulateRequest, theExpression);
             return thePrePopulateRequest.getLibraryEngine().resolveExpression(
                 thePrePopulateRequest.getPatientId(),
-                new CqfExpression(theExpression, libraryUrl, null),
+                cqfExpression,
                 thePrePopulateRequest.getParameters(),
                 thePrePopulateRequest.getBundle()
             );
@@ -50,6 +50,14 @@ public class ExpressionProcessorService {
             final String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, theExpression.getExpression(), theItemLinkId, ex.getMessage());
             throw new ResolveExpressionException(message);
         }
+    }
+
+    protected CqfExpression getCqfExpression(
+        PrePopulateRequest thePrePopulateRequest,
+        Expression theExpression
+    ) {
+        final String libraryUrl = getLibraryUrl(thePrePopulateRequest.getQuestionnaire());
+        return new CqfExpression(theExpression, libraryUrl, null);
     }
 
     protected String getLibraryUrl(Questionnaire theQuestionnaire) {

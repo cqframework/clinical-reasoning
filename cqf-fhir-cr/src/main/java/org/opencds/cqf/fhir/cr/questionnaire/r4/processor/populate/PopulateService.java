@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,7 +23,7 @@ public class PopulateService {
     }
     private PopulateService() {}
 
-    public IBaseResource populate(
+    public QuestionnaireResponse populate(
         Questionnaire theOriginalQuestionnaire,
         Questionnaire thePrePopulatedQuestionnaire,
         String thePatientId
@@ -64,12 +63,7 @@ public class PopulateService {
     }
 
     protected List<QuestionnaireResponseItemComponent> processResponseItems(List<QuestionnaireItemComponent> theQuestionnaireItems) {
-        final List<QuestionnaireResponseItemComponent> responseItems = new ArrayList<>();
-        theQuestionnaireItems.forEach(item -> {
-            final QuestionnaireResponseItemComponent populatedResponseItem = processResponseItem(item);
-            responseItems.add(populatedResponseItem);
-        });
-        return responseItems;
+        return theQuestionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 
     protected QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent theQuestionnaireItem) {

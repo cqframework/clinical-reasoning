@@ -342,9 +342,16 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         var sp = this.resolver.getSearchParameterDefinition(dataType, codePath, RestSearchParameterTypeEnum.TOKEN);
         if (codes != null) {
             List<IQueryParameterType> codeList = new ArrayList<>();
-            for (Code code : codes) {
-                codeList.add(new TokenParam(
-                        new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode())));
+            // TODO: Fix up the RetrieveProvider API in the engine
+            // This is stupid hacky
+            for (Object code : codes) {
+                if (code instanceof Code) {
+                    var c = (Code) code;
+                    codeList.add(new TokenParam(
+                            new InternalCodingDt().setSystem(c.getSystem()).setCode(c.getCode())));
+                } else if (code != null) {
+                    codeList.add(new TokenParam(code.toString()));
+                }
             }
             searchParams.put(sp.getName(), codeList);
         } else if (valueSet != null) {

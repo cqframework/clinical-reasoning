@@ -85,17 +85,18 @@ public class Dstu3MeasureProcessor {
                         new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 
         context.getState().init(lib.getLibrary());
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty()
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
 
         var actualRepo = this.repository;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
+
+        var evalType = MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
 
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());

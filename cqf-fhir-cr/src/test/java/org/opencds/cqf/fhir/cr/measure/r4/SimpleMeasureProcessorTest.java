@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -13,7 +12,6 @@ public class SimpleMeasureProcessorTest {
     protected static Given given = Measure.given().repositoryFor("EXM108");
 
     @Test
-    @Disabled("Need to test at the service level to enable this")
     public void exm108_partialSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")

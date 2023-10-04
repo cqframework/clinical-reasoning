@@ -13,11 +13,10 @@ import java.util.stream.Collectors;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
 
-public class PopulateItemWithNoContext {
+public class PrePopulateItem {
     final ExpressionProcessorService myExpressionProcessorService;
 
-    public PopulateItemWithNoContext() {
-        // TODO: renaming: PopulateItem (vs. PopulateItemWithExtension)
+    public PrePopulateItem() {
         myExpressionProcessorService = new ExpressionProcessorService();
     }
 

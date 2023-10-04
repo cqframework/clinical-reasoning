@@ -72,7 +72,7 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
         LibraryEngine libraryEngine
     ) {
         final Questionnaire prePopulatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
-        return myPopulateService.populate(questionnaire, prePopulatedQuestionnaire, oc, patientId);
+        return myPopulateService.populate(questionnaire, prePopulatedQuestionnaire, patientId);
     }
 
     @Override

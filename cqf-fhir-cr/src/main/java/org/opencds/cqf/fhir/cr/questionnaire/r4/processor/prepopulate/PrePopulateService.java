@@ -12,13 +12,13 @@ import java.util.List;
 
 public class PrePopulateService {
     protected static final Logger logger = LoggerFactory.getLogger(PrePopulateService.class);
-    final PopulateItemWithNoContext myPopulateItemWithNoContext;
-    final PopulateItemWithContext myPopulateItemWithContext;
+    final PrePopulateItem myPopulateItemWithNoContext;
+    final PrePopulateItemWithExtension myPrePopulateItemWithExtension;
     OperationOutcome myOperationOutcome;
 
     public PrePopulateService() {
-        this.myPopulateItemWithNoContext = new PopulateItemWithNoContext();
-        this.myPopulateItemWithContext = new PopulateItemWithContext();
+        this.myPopulateItemWithNoContext = new PrePopulateItem();
+        this.myPrePopulateItemWithExtension = new PrePopulateItemWithExtension();
     }
 
     public Questionnaire prePopulate(PrePopulateRequest thePrePopulateRequest) {
@@ -68,7 +68,7 @@ public class PrePopulateService {
         try {
             // extension value is the context resource we're using to populate
             // Expression-based Population
-            return myPopulateItemWithContext.processItem(thePrePopulateRequest, theItem);
+            return myPrePopulateItemWithExtension.processItem(thePrePopulateRequest, theItem);
         } catch (ResolveExpressionException e) {
             // would return empty list if exception thrown
             addExceptionToOperationOutcome(e.getMessage());

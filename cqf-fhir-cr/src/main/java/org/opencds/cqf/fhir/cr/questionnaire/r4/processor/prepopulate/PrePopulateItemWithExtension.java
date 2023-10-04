@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
 
-public class PopulateItemWithContext {
+public class PrePopulateItemWithExtension {
     private final ExpressionProcessorService myExpressionProcessorService;
 
-    public PopulateItemWithContext() {
+    public PrePopulateItemWithExtension() {
         // TODO: we don't have any resources that are currently using this
-        // let's not write unit tests yet until we have a practical implementation
+        // not writing unit tests till there is a practical implementation
         myExpressionProcessorService = new ExpressionProcessorService();
     }
 

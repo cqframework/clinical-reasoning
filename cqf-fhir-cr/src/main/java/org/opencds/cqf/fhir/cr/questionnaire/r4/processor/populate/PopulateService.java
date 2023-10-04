@@ -3,42 +3,35 @@ package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PopulateService {
 
     public IBaseResource populate(
         Questionnaire theOriginalQuestionnaire,
         Questionnaire thePrePopulatedQuestionnaire,
-        OperationOutcome theOperationOutcome,
         String patientId
     ) {
         final QuestionnaireResponse response = new QuestionnaireResponse();
         response.setId(thePrePopulatedQuestionnaire.getIdPart() + "-response");
-
-        // TODO: we are already adding the OperationOutcome to the prepopulated questionniare - lets just read it from there
-
-//        if (!myOperationOutcome.getIssue().isEmpty()) {
-//            prepopulatedQuestionnaire.addContained(myOperationOutcome);
-//            prepopulatedQuestionnaire.addExtension(ExtensionBuilders.crmiMessagesExtension(myOperationOutcome.getIdPart()));
-//        }
-
-        thePrePopulatedQuestionnaire.getContained();
-
-        if (thePrePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && !theOperationOutcome.getIssue().isEmpty()) {
-            response.addContained(theOperationOutcome);
-            response.addExtension(Constants.EXT_CRMI_MESSAGES, new Reference("#" + theOperationOutcome.getIdPart()));
+        final Optional<OperationOutcome> operationOutcome = getOperationOutcomeFromPrePopulatedQuestionnaire(thePrePopulatedQuestionnaire);
+        if (thePrePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
+            response.addContained(operationOutcome.get());
+            response.addExtension(ExtensionBuilders.crmiMessagesExtension(operationOutcome.get().getIdPart()));
         }
-
         response.addContained(thePrePopulatedQuestionnaire);
         response.addExtension(ExtensionBuilders.dtrQuestionnaireResponseExtension(thePrePopulatedQuestionnaire));
         response.setQuestionnaire(theOriginalQuestionnaire.getUrl());
@@ -46,6 +39,24 @@ public class PopulateService {
         response.setSubject(new Reference(new IdType("Patient", patientId)));
         response.setItem(processResponseItems(thePrePopulatedQuestionnaire.getItem()));
         return response;
+    }
+
+    protected Optional<OperationOutcome> getOperationOutcomeFromPrePopulatedQuestionnaire(Questionnaire thePrePopulatedQuestionnaire) {
+        return thePrePopulatedQuestionnaire.getContained().stream()
+            .filter(theResource -> theResource.getResourceType() == ResourceType.OperationOutcome)
+            .map(OperationOutcome.class::cast)
+            .filter(this::filterOperationOutcome)
+            .findFirst();
+    }
+
+    protected boolean filterOperationOutcome(OperationOutcome theOperationOutcome) {
+        if (theOperationOutcome.hasIssue()) {
+            final List<OperationOutcomeIssueComponent> filteredIssues = theOperationOutcome.getIssue().stream()
+                .filter(theIssue -> theIssue.getCode() == OperationOutcome.IssueType.EXCEPTION && theIssue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+                .collect(Collectors.toList());
+            return !filteredIssues.isEmpty();
+        }
+        return false;
     }
 
     protected List<QuestionnaireResponseItemComponent> processResponseItems(List<QuestionnaireItemComponent> items) {
@@ -80,5 +91,4 @@ public class PopulateService {
         });
         return responseItem;
     }
-
 }

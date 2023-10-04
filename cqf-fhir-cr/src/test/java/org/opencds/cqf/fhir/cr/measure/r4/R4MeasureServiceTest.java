@@ -116,21 +116,22 @@ public class R4MeasureServiceTest {
                 .population("denominator")
                 .hasCount(1);
     }
+
     @Test
     public void exm108_noReportTypeSummary() {
 
         given.when()
-            .measureId("measure-EXM108-8.3.000")
-            .periodStart("2018-12-31")
-            .periodEnd("2019-12-31")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("numerator")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(2);
+                .measureId("measure-EXM108-8.3.000")
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(2);
     }
 
     @Test

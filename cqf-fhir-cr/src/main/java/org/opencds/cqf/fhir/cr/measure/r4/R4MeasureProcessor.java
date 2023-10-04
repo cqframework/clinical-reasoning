@@ -84,9 +84,10 @@ public class R4MeasureProcessor {
         context.getState().init(lib.getLibrary());
 
         var evalType = MeasureEvalType.fromCode(reportType)
-            .orElse(subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
-                    ? MeasureEvalType.POPULATION
-                    : MeasureEvalType.SUBJECT);
+                .orElse(
+                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
 
         var actualRepo = this.repository;
         if (additionalData != null) {
@@ -96,7 +97,7 @@ public class R4MeasureProcessor {
 
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
-/*
+        /*
         if (subjects.size() > 1) {
             evalType = MeasureEvalType.POPULATION;
         } else {

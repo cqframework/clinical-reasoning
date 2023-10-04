@@ -35,8 +35,8 @@ public class Questionnaires {
 
     private QuestionnaireResult result;
 
-    @Setup(Level.Iteration)
-    public void setupIteration() throws Exception {
+    @Setup(Level.Trial)
+    public void setupTrial() throws Exception {
         this.result = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
                 .withRepository(REPOSITORY)
                 .withParameters(parameters(
@@ -47,7 +47,7 @@ public class Questionnaires {
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 10, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize

@@ -16,23 +16,25 @@ public class PrePopulateService {
     final PrePopulateItemWithExtension myPrePopulateItemWithExtension;
     OperationOutcome myOperationOutcome;
 
-    public PrePopulateService() {
-        this.myPopulateItemWithNoContext = new PrePopulateItem();
-        this.myPrePopulateItemWithExtension = new PrePopulateItemWithExtension();
+    public static PrePopulateService of() {
+        final PrePopulateItem prePopulateItem = PrePopulateItem.of();
+        final PrePopulateItemWithExtension prePopulateItemWithExtension = PrePopulateItemWithExtension.of();
+        return new PrePopulateService(prePopulateItem, prePopulateItemWithExtension);
+    }
+
+    private PrePopulateService(PrePopulateItem thePrePopulateItem, PrePopulateItemWithExtension thePrePopulateItemWithExtension) {
+        myPopulateItemWithNoContext = thePrePopulateItem;
+        myPrePopulateItemWithExtension = thePrePopulateItemWithExtension;
     }
 
     public Questionnaire prePopulate(PrePopulateRequest thePrePopulateRequest) {
         final String questionnaireId = getQuestionnaireId(thePrePopulateRequest);
         this.myOperationOutcome = getBaseOperationOutcome(questionnaireId);
-
         final Questionnaire prepopulatedQuestionnaire = thePrePopulateRequest.getQuestionnaire().copy();
-
         prepopulatedQuestionnaire.setId(questionnaireId);
         prepopulatedQuestionnaire.addExtension(ExtensionBuilders.prepopulateSubjectExtension(thePrePopulateRequest.getPatientId()));
-
         final List<QuestionnaireItemComponent> processedItems = processItems(thePrePopulateRequest, thePrePopulateRequest.getQuestionnaire().getItem());
         prepopulatedQuestionnaire.setItem(processedItems);
-
         if (!myOperationOutcome.getIssue().isEmpty()) {
             prepopulatedQuestionnaire.addContained(myOperationOutcome);
             prepopulatedQuestionnaire.addExtension(ExtensionBuilders.crmiMessagesExtension(myOperationOutcome.getIdPart()));

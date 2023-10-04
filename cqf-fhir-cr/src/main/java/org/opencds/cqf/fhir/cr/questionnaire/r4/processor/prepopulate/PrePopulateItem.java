@@ -16,15 +16,20 @@ import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValue
 public class PrePopulateItem {
     final ExpressionProcessorService myExpressionProcessorService;
 
-    public PrePopulateItem() {
-        myExpressionProcessorService = new ExpressionProcessorService();
+    public static PrePopulateItem of() {
+        final ExpressionProcessorService expressionProcessorService = ExpressionProcessorService.of();
+        return new PrePopulateItem(expressionProcessorService);
+    }
+
+    private PrePopulateItem(ExpressionProcessorService theExpressionProcessorService) {
+        myExpressionProcessorService = theExpressionProcessorService;
     }
 
     protected QuestionnaireItemComponent processItem(
         PrePopulateRequest thePrePopulateRequest,
-        QuestionnaireItemComponent item
+        QuestionnaireItemComponent theQuestionnaireItem
     ) throws ResolveExpressionException {
-        final QuestionnaireItemComponent populatedItem = item.copy();
+        final QuestionnaireItemComponent populatedItem = theQuestionnaireItem.copy();
         final List<IBase> expressionResults = getExpressionResults(thePrePopulateRequest, populatedItem);
         expressionResults.forEach(result -> {
             populatedItem.addExtension(ExtensionBuilders.questionnaireResponseAuthorExtension());
@@ -35,15 +40,15 @@ public class PrePopulateItem {
 
     private List<IBase> getExpressionResults(
         PrePopulateRequest thePrePopulateRequest,
-        QuestionnaireItemComponent item
+        QuestionnaireItemComponent theQuestionnaireItem
     ) throws ResolveExpressionException {
-        final Expression initialExpression = myExpressionProcessorService.getInitialExpression(item);
+        final Expression initialExpression = myExpressionProcessorService.getInitialExpression(theQuestionnaireItem);
         if (initialExpression != null) {
             // evaluate expression and set the result as the initialAnswer on the item
             final List<IBase> expressionResult = myExpressionProcessorService.getExpressionResult(
                 thePrePopulateRequest,
                 initialExpression,
-                item.getLinkId()
+                theQuestionnaireItem.getLinkId()
             );
             return expressionResult.stream().filter(Objects::nonNull).collect(Collectors.toList());
         }

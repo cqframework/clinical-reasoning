@@ -16,9 +16,10 @@ public class ExpressionProcessorService {
     protected static final Logger logger = LoggerFactory.getLogger(ExpressionProcessorService.class);
     protected static final String EXCEPTION_MESSAGE_TEMPLATE = "Error encountered evaluating expression (%s) for item (%s): %s";
 
-    public ExpressionProcessorService() {
-
+    public static ExpressionProcessorService of() {
+        return new ExpressionProcessorService();
     }
+    private ExpressionProcessorService() {}
 
     public Expression getInitialExpression(QuestionnaireItemComponent item) {
         if (item.hasExtension(Constants.CQF_EXPRESSION)) {
@@ -31,29 +32,29 @@ public class ExpressionProcessorService {
 
     public List<IBase> getExpressionResult(
         PrePopulateRequest thePrePopulateRequest,
-        Expression expression,
-        String itemLinkId
+        Expression theExpression,
+        String theItemLinkId
     ) throws ResolveExpressionException {
-        if (expression == null || !expression.hasExpression()) {
+        if (theExpression == null || !theExpression.hasExpression()) {
             return new ArrayList<>();
         }
         try {
             final String libraryUrl = getLibraryUrl(thePrePopulateRequest.getQuestionnaire());
             return thePrePopulateRequest.getLibraryEngine().resolveExpression(
                 thePrePopulateRequest.getPatientId(),
-                new CqfExpression(expression, libraryUrl, null),
+                new CqfExpression(theExpression, libraryUrl, null),
                 thePrePopulateRequest.getParameters(),
                 thePrePopulateRequest.getBundle()
             );
         } catch (Exception ex) {
-            final String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
+            final String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, theExpression.getExpression(), theItemLinkId, ex.getMessage());
             throw new ResolveExpressionException(message);
         }
     }
 
-    protected String getLibraryUrl(Questionnaire questionnaire) {
-        return questionnaire.hasExtension(Constants.CQF_LIBRARY)
-            ? ((CanonicalType) questionnaire
+    protected String getLibraryUrl(Questionnaire theQuestionnaire) {
+        return theQuestionnaire.hasExtension(Constants.CQF_LIBRARY)
+            ? ((CanonicalType) theQuestionnaire
             .getExtensionByUrl(Constants.CQF_LIBRARY)
             .getValue())
             .getValue()

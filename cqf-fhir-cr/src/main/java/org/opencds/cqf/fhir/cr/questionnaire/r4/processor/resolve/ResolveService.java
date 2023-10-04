@@ -11,7 +11,12 @@ import static org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor.c
 
 public class ResolveService {
     final Repository myRepository;
-    public ResolveService(Repository theRepository) {
+
+    public static ResolveService of(Repository theRepository) {
+        return new ResolveService(theRepository);
+    }
+
+    private ResolveService(Repository theRepository) {
         myRepository = theRepository;
     }
     public <C extends IPrimitiveType<String>> Questionnaire resolve(

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,66 +25,84 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
     protected PackageService myPackageService;
     protected PrePopulateService myPrePopulateService;
 
-    public NewQuestionnaireProcessor(Repository repository) {
-        this(repository, EvaluationSettings.getDefault());
+    public static NewQuestionnaireProcessor of(Repository theRepository, EvaluationSettings theEvaluationSettings) {
+        final ResolveService resolveService = ResolveService.of(theRepository);
+        final PackageService packageService = PackageService.of(theRepository);
+        final PopulateService populateService = PopulateService.of();
+        final PrePopulateService prePopulateService = PrePopulateService.of();
+        return new NewQuestionnaireProcessor(
+            theRepository,
+            theEvaluationSettings,
+            resolveService,
+            packageService,
+            populateService,
+            prePopulateService
+        );
     }
 
-    public NewQuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        super(repository, evaluationSettings);
-        myResolveService = new ResolveService(repository);
-        myPackageService = new PackageService(repository);
-        myPopulateService = new PopulateService();
-        myPrePopulateService = new PrePopulateService();
+    public static NewQuestionnaireProcessor of(Repository repository) {
+        return of(repository, EvaluationSettings.getDefault());
+    }
+
+    private NewQuestionnaireProcessor(
+        Repository theRepository,
+        EvaluationSettings theEvaluationSettings,
+        ResolveService theResolveService,
+        PackageService thePackageService,
+        PopulateService thePopulateService,
+        PrePopulateService thePrePopulateService
+    ) {
+        super(theRepository, theEvaluationSettings);
+        myResolveService = theResolveService;
+        myPackageService = thePackageService;
+        myPopulateService = thePopulateService;
+        myPrePopulateService = thePrePopulateService;
     }
 
     @Override
     public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
-        IIdType id,
-        C canonical,
-        IBaseResource questionnaire
+        IIdType theId,
+        C theCanonical,
+        IBaseResource theQuestionnaire
     ) {
-        return myResolveService.resolve(id, canonical, questionnaire);
+        return myResolveService.resolve(theId, theCanonical, theQuestionnaire);
     }
 
     @Override
     public Questionnaire prePopulate(
-        Questionnaire questionnaire,
-        String patientId,
-        IBaseParameters parameters,
-        IBaseBundle bundle,
-        LibraryEngine libraryEngine
+        Questionnaire theQuestionnaire,
+        String thePatientId,
+        IBaseParameters theParameters,
+        IBaseBundle theBundle,
+        LibraryEngine theLibraryEngine
     ) {
-        if (questionnaire == null) {
-            throw new IllegalArgumentException("No questionnaire passed in");
-        }
-        if (libraryEngine == null) {
-            throw new IllegalArgumentException("No engine passed in");
-        }
-        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(questionnaire, patientId, parameters, bundle, libraryEngine);
+        Validate.notNull(theQuestionnaire);
+        Validate.notNull(theLibraryEngine);
+        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
         return myPrePopulateService.prePopulate(prePopulateRequest);
     }
 
     @Override
     public IBaseResource populate(
-        Questionnaire questionnaire,
-        String patientId,
-        IBaseParameters parameters,
-        IBaseBundle bundle,
-        LibraryEngine libraryEngine
+        Questionnaire theQuestionnaire,
+        String thePatientId,
+        IBaseParameters theParameters,
+        IBaseBundle theBundle,
+        LibraryEngine theLibraryEngine
     ) {
-        final Questionnaire prePopulatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
-        return myPopulateService.populate(questionnaire, prePopulatedQuestionnaire, patientId);
+        final Questionnaire prePopulatedQuestionnaire = prePopulate(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
+        return myPopulateService.populate(theQuestionnaire, prePopulatedQuestionnaire, thePatientId);
     }
 
     @Override
-    public Questionnaire generateQuestionnaire(String id) {
+    public Questionnaire generateQuestionnaire(String theId) {
         var questionnaire = new Questionnaire();
-        questionnaire.setId(new IdType("Questionnaire", id));
+        questionnaire.setId(new IdType("Questionnaire", theId));
         return questionnaire;
     }
 
     @Override
-    public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
-        return myPackageService.packageQuestionnaire(questionnaire, isPut);
+    public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean isPut) {
+        return myPackageService.packageQuestionnaire(theQuestionnaire, isPut);
     }
 }

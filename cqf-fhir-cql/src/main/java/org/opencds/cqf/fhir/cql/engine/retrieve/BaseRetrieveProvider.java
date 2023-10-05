@@ -48,7 +48,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
 
-    public enum TERMINOLOGY_MODE {
+    public enum TERMINOLOGY_MODE { //fhirquerygenerator repository.capabilities
+        //INTERNAL
         INLINE,
         EXPAND,
         AUTO
@@ -60,11 +61,12 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         AUTO
     }
 
-    public enum PROFILE_MODE {
+    public enum PROFILE_MODE { //scrap for now
         OFF, // Don't check resource profile
-        ENFORCED, // Always check resource profile (and error if unable to do so or if resource fails validation)
-        OPTIONAL, // Check resource profile if possible, and error if validation fails (but don't error if not possible)
+        ENFORCED, // Always check resource profile (and error if unable to do so or if resource fails validation), or if structure defs aren't available for enforcement
+        OPTIONAL, // Check resource profile if possible, and error if validation fails (but don't error if not possible). vaidate or trust
         TRUST // Believe the underlying repository will validate profiles correctly
+        //DECLARED resources tell you profile they are implementing, but could be invalid
     }
 
     protected BaseRetrieveProvider(
@@ -287,7 +289,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     // Super hackery, just to get this running for connectathon
-    private String getValueSetFromCode(IBase base) {
+    private String getValueSetFromCode(IBase base) { //what valuesets is it a part of, but just picking one, why not done association Chris
         IBaseExtension<?, ?> ext = ExtensionUtil.getExtensionByUrl(
                 base, "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
         if (ext != null && ext.getValue() != null && ext.getValue() instanceof IPrimitiveType) {
@@ -377,7 +379,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
     protected boolean canInline(String valueSet) {
         // TODO: Check capability statement for inlineability
-        return true;
+        // was defaulted to true
+        return false;
     }
 
     public void populateDateSearchParams(

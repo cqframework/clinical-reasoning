@@ -217,9 +217,9 @@ public interface ResourceMatcher {
         }
 
         // in value set
-        if (param.getModifier() == TokenParamModifier.IN) {
-            throw new UnsupportedOperationException("In modifier is unsupported");
-        }
+       // if (param.getModifier() == TokenParamModifier.IN) {
+        //    throw new UnsupportedOperationException("In modifier is unsupported");
+        //}
 
         for (var c : codes) {
             var matches = param.getValue().equals(c.getValue())

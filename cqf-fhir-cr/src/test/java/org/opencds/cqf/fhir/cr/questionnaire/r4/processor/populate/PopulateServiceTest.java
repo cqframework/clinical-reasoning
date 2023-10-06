@@ -1,15 +1,24 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate;
 
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -20,16 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.utility.Constants;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PopulateServiceTest {
@@ -46,15 +45,16 @@ class PopulateServiceTest {
         final Questionnaire originalQuestionnaire = new Questionnaire();
         originalQuestionnaire.setUrl(questionnaireUrl);
         final OperationOutcome operationOutcome = withOperationOutcome(operationOutcomeId);
-        final Questionnaire prePopulatedQuestionnaire = withPrepopulatedQuestionnaire(operationOutcome, prePopulatedQuestionnaireId);
+        final Questionnaire prePopulatedQuestionnaire =
+                withPrepopulatedQuestionnaire(operationOutcome, prePopulatedQuestionnaireId);
         final List<QuestionnaireResponseItemComponent> expectedResponses = List.of(
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent()
-        );
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent());
         doReturn(expectedResponses).when(myFixture).processResponseItems(prePopulatedQuestionnaire.getItem());
         // execute
-        final QuestionnaireResponse actual = myFixture.populate(originalQuestionnaire, prePopulatedQuestionnaire, patientId);
+        final QuestionnaireResponse actual =
+                myFixture.populate(originalQuestionnaire, prePopulatedQuestionnaire, patientId);
         // validate
         assertEquals(prePopulatedQuestionnaireId + "-response", actual.getId());
         assertContainedResources(actual, operationOutcome, prePopulatedQuestionnaire);
@@ -76,44 +76,40 @@ class PopulateServiceTest {
         final Questionnaire prePopulatedQuestionnaire = new Questionnaire();
         prePopulatedQuestionnaire.addContained(theOperationOutcome);
         prePopulatedQuestionnaire.setId(theId);
-        prePopulatedQuestionnaire.addExtension(new Extension(Constants.EXT_CRMI_MESSAGES, new StringType("message value")));
+        prePopulatedQuestionnaire.addExtension(
+                new Extension(Constants.EXT_CRMI_MESSAGES, new StringType("message value")));
         prePopulatedQuestionnaire.setItem(List.of(
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent()
-        ));
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent()));
         return prePopulatedQuestionnaire;
     }
 
     private void assertExtensions(
-        QuestionnaireResponse theActual,
-        String theOperationOutcomeId,
-        String thePrePopulatedQuestionnaireId
-    ) {
+            QuestionnaireResponse theActual, String theOperationOutcomeId, String thePrePopulatedQuestionnaireId) {
         final Extension expectedCrmiExtension = theActual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES);
         assertEquals("#" + theOperationOutcomeId, ((Reference) expectedCrmiExtension.getValue()).getReference());
-        final Extension expectedDtrQuestionnaireExtension = theActual.getExtensionByUrl(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE);
-        assertEquals("#" + thePrePopulatedQuestionnaireId, ((Reference) expectedDtrQuestionnaireExtension.getValue()).getReference());
+        final Extension expectedDtrQuestionnaireExtension =
+                theActual.getExtensionByUrl(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE);
+        assertEquals(
+                "#" + thePrePopulatedQuestionnaireId,
+                ((Reference) expectedDtrQuestionnaireExtension.getValue()).getReference());
     }
 
     private void assertContainedResources(
-        QuestionnaireResponse theActual,
-        OperationOutcome theExpectedOperationOutcome,
-        Questionnaire theExpectedQuestionnaire
-    ) {
-        final OperationOutcome operationOutcome = (OperationOutcome) getContainedByResourceType(theActual, ResourceType.OperationOutcome);
+            QuestionnaireResponse theActual,
+            OperationOutcome theExpectedOperationOutcome,
+            Questionnaire theExpectedQuestionnaire) {
+        final OperationOutcome operationOutcome =
+                (OperationOutcome) getContainedByResourceType(theActual, ResourceType.OperationOutcome);
         assertEquals(theExpectedOperationOutcome, operationOutcome);
-        final Questionnaire questionnaire = (Questionnaire) getContainedByResourceType(theActual, ResourceType.Questionnaire);
+        final Questionnaire questionnaire =
+                (Questionnaire) getContainedByResourceType(theActual, ResourceType.Questionnaire);
         assertEquals(theExpectedQuestionnaire, questionnaire);
     }
 
-    private Resource getContainedByResourceType(
-        QuestionnaireResponse theActual,
-        ResourceType theResourceType
-    ) {
+    private Resource getContainedByResourceType(QuestionnaireResponse theActual, ResourceType theResourceType) {
         final Optional<Resource> resource = theActual.getContained().stream()
-            .filter(contained -> contained.getResourceType() == theResourceType)
-            .findFirst();
+                .filter(contained -> contained.getResourceType() == theResourceType)
+                .findFirst();
         assertTrue(resource.isPresent());
         return resource.get();
     }
@@ -125,7 +121,8 @@ class PopulateServiceTest {
         final Questionnaire prePopulatedQuestionnaire = new Questionnaire();
         prePopulatedQuestionnaire.addContained(operationOutcome);
         // execute
-        final Optional<OperationOutcome> actual = myFixture.getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
+        final Optional<OperationOutcome> actual =
+                myFixture.getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         // validate
         assertTrue(actual.isPresent());
         assertEquals(operationOutcome, actual.get());
@@ -158,9 +155,9 @@ class PopulateServiceTest {
         final String definition = "definition";
         final StringType textElement = new StringType("textElement");
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent()
-            .setLinkId(linkId)
-            .setDefinition(definition)
-            .setTextElement(textElement);
+                .setLinkId(linkId)
+                .setDefinition(definition)
+                .setTextElement(textElement);
         // execute
         final QuestionnaireResponseItemComponent actual = myFixture.processResponseItem(questionnaireItem);
         // validate
@@ -174,16 +171,14 @@ class PopulateServiceTest {
         // setup
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final List<QuestionnaireItemComponent> nestedQuestionnaireItems = List.of(
-            new QuestionnaireItemComponent().setLinkId("linkId1"),
-            new QuestionnaireItemComponent().setLinkId("linkId2"),
-            new QuestionnaireItemComponent().setLinkId("linkId3")
-        );
+                new QuestionnaireItemComponent().setLinkId("linkId1"),
+                new QuestionnaireItemComponent().setLinkId("linkId2"),
+                new QuestionnaireItemComponent().setLinkId("linkId3"));
         questionnaireItem.setItem(nestedQuestionnaireItems);
         List<QuestionnaireResponseItemComponent> expectedResponseItems = List.of(
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent()
-        );
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent());
         doReturn(expectedResponseItems).when(myFixture).processResponseItems(nestedQuestionnaireItems);
         // execute
         final QuestionnaireResponseItemComponent actual = myFixture.processResponseItem(questionnaireItem);
@@ -199,7 +194,8 @@ class PopulateServiceTest {
     void processResponseItemShouldSetAnswersIfTheQuestionnaireItemHasInitialValues() {
         // setup
         final List<Type> expectedValues = withTypeValues();
-        final QuestionnaireItemComponent questionnaireItemComponent = withQuestionnaireItemComponentWithInitialValues(expectedValues);
+        final QuestionnaireItemComponent questionnaireItemComponent =
+                withQuestionnaireItemComponentWithInitialValues(expectedValues);
         // execute
         final QuestionnaireResponseItemComponent actual = myFixture.processResponseItem(questionnaireItemComponent);
         // validate
@@ -210,14 +206,17 @@ class PopulateServiceTest {
     void setAnswersForInitialShouldPopulateQuestionnaireResponseItemWithAnswers() {
         // setup
         final List<Type> expectedValues = withTypeValues();
-        final QuestionnaireItemComponent questionnaireItemComponent = withQuestionnaireItemComponentWithInitialValues(expectedValues);
+        final QuestionnaireItemComponent questionnaireItemComponent =
+                withQuestionnaireItemComponentWithInitialValues(expectedValues);
         // execute
-        final QuestionnaireResponseItemComponent actual = myFixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
+        final QuestionnaireResponseItemComponent actual =
+                myFixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
         // validate
         validateQuestionnaireResponseItemAnswers(expectedValues, actual);
     }
 
-    private void validateQuestionnaireResponseItemAnswers(List<Type> theExpectedValues, QuestionnaireResponseItemComponent theQuestionnaireResponse) {
+    private void validateQuestionnaireResponseItemAnswers(
+            List<Type> theExpectedValues, QuestionnaireResponseItemComponent theQuestionnaireResponse) {
         assertEquals(3, theQuestionnaireResponse.getAnswer().size());
         for (int i = 0; i < theQuestionnaireResponse.getAnswer().size(); i++) {
             final List<QuestionnaireResponseItemAnswerComponent> answers = theQuestionnaireResponse.getAnswer();
@@ -232,16 +231,16 @@ class PopulateServiceTest {
         final Extension extension = new Extension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR, new StringType("theAuthor"));
         questionnaireItemComponent.addExtension(extension);
         // execute
-        final QuestionnaireResponseItemComponent actual = myFixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
+        final QuestionnaireResponseItemComponent actual =
+                myFixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
         // validate
         assertEquals(extension, actual.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
     }
 
     private QuestionnaireItemComponent withQuestionnaireItemComponentWithInitialValues(List<Type> theInitialValues) {
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
-        final List<QuestionnaireItemInitialComponent> initialComponents = theInitialValues.stream()
-            .map(this::withInitialWithValue)
-            .collect(Collectors.toList());
+        final List<QuestionnaireItemInitialComponent> initialComponents =
+                theInitialValues.stream().map(this::withInitialWithValue).collect(Collectors.toList());
         initialComponents.forEach(questionnaireItemComponent::addInitial);
         return questionnaireItemComponent;
     }
@@ -254,18 +253,14 @@ class PopulateServiceTest {
 
     private OperationOutcome withOperationOutcomeWithIssue() {
         final OperationOutcome operationOutcome = new OperationOutcome();
-        operationOutcome.addIssue()
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-            .setCode(OperationOutcome.IssueType.EXCEPTION);
+        operationOutcome
+                .addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setCode(OperationOutcome.IssueType.EXCEPTION);
         return operationOutcome;
     }
 
     private List<Type> withTypeValues() {
-        return List.of(
-            new BooleanType(true),
-            new StringType("sample string"),
-            new IntegerType(3)
-        );
+        return List.of(new BooleanType(true), new StringType("sample string"), new IntegerType(3));
     }
-
 }

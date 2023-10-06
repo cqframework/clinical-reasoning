@@ -12,9 +12,11 @@ import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
 public class PackageService {
     final Repository myRepository;
+
     public static PackageService of(Repository theRepository) {
         return new PackageService(theRepository);
     }
+
     private PackageService(Repository theRepository) {
         myRepository = theRepository;
     }

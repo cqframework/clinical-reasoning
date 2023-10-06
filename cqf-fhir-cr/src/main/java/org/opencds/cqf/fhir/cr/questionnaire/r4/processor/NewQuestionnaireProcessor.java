@@ -31,13 +31,12 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
         final PopulateService populateService = PopulateService.of();
         final PrePopulateService prePopulateService = PrePopulateService.of();
         return new NewQuestionnaireProcessor(
-            theRepository,
-            theEvaluationSettings,
-            resolveService,
-            packageService,
-            populateService,
-            prePopulateService
-        );
+                theRepository,
+                theEvaluationSettings,
+                resolveService,
+                packageService,
+                populateService,
+                prePopulateService);
     }
 
     public static NewQuestionnaireProcessor of(Repository repository) {
@@ -45,13 +44,12 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
     }
 
     private NewQuestionnaireProcessor(
-        Repository theRepository,
-        EvaluationSettings theEvaluationSettings,
-        ResolveService theResolveService,
-        PackageService thePackageService,
-        PopulateService thePopulateService,
-        PrePopulateService thePrePopulateService
-    ) {
+            Repository theRepository,
+            EvaluationSettings theEvaluationSettings,
+            ResolveService theResolveService,
+            PackageService thePackageService,
+            PopulateService thePopulateService,
+            PrePopulateService thePrePopulateService) {
         super(theRepository, theEvaluationSettings);
         myResolveService = theResolveService;
         myPackageService = thePackageService;
@@ -61,36 +59,33 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
 
     @Override
     public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
-        IIdType theId,
-        C theCanonical,
-        IBaseResource theQuestionnaire
-    ) {
+            IIdType theId, C theCanonical, IBaseResource theQuestionnaire) {
         return myResolveService.resolve(theId, theCanonical, theQuestionnaire);
     }
 
     @Override
     public Questionnaire prePopulate(
-        Questionnaire theQuestionnaire,
-        String thePatientId,
-        IBaseParameters theParameters,
-        IBaseBundle theBundle,
-        LibraryEngine theLibraryEngine
-    ) {
+            Questionnaire theQuestionnaire,
+            String thePatientId,
+            IBaseParameters theParameters,
+            IBaseBundle theBundle,
+            LibraryEngine theLibraryEngine) {
         Validate.notNull(theQuestionnaire);
         Validate.notNull(theLibraryEngine);
-        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
+        final PrePopulateRequest prePopulateRequest =
+                new PrePopulateRequest(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
         return myPrePopulateService.prePopulate(prePopulateRequest);
     }
 
     @Override
     public IBaseResource populate(
-        Questionnaire theQuestionnaire,
-        String thePatientId,
-        IBaseParameters theParameters,
-        IBaseBundle theBundle,
-        LibraryEngine theLibraryEngine
-    ) {
-        final Questionnaire prePopulatedQuestionnaire = prePopulate(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
+            Questionnaire theQuestionnaire,
+            String thePatientId,
+            IBaseParameters theParameters,
+            IBaseBundle theBundle,
+            LibraryEngine theLibraryEngine) {
+        final Questionnaire prePopulatedQuestionnaire =
+                prePopulate(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
         return myPopulateService.populate(theQuestionnaire, prePopulatedQuestionnaire, thePatientId);
     }
 

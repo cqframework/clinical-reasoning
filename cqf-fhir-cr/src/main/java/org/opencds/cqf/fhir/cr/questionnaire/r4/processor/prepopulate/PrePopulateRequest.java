@@ -13,12 +13,11 @@ public class PrePopulateRequest {
     private final LibraryEngine libraryEngine;
 
     public PrePopulateRequest(
-        Questionnaire theQuestionnaire,
-        String thePatientId,
-        IBaseParameters theParameters,
-        IBaseBundle theBundle,
-        LibraryEngine theLibraryEngine
-    ) {
+            Questionnaire theQuestionnaire,
+            String thePatientId,
+            IBaseParameters theParameters,
+            IBaseBundle theBundle,
+            LibraryEngine theLibraryEngine) {
         questionnaire = theQuestionnaire;
         patientId = thePatientId;
         parameters = theParameters;
@@ -46,5 +45,3 @@ public class PrePopulateRequest {
         return patientId;
     }
 }
-
-

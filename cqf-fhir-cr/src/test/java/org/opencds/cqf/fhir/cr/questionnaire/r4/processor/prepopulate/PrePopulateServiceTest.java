@@ -1,5 +1,15 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -18,17 +28,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
-;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class PrePopulateServiceTest {
@@ -60,20 +59,21 @@ class PrePopulateServiceTest {
     void prePopulateShouldReturnQuestionnaire() {
         // setup
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
-        final String populatedQuestionnaireId = PrePopulateRequestHelpers.QUESTIONNAIRE_ID + "-" + PrePopulateRequestHelpers.PATIENT_ID;
+        final String populatedQuestionnaireId =
+                PrePopulateRequestHelpers.QUESTIONNAIRE_ID + "-" + PrePopulateRequestHelpers.PATIENT_ID;
         final List<QuestionnaireItemComponent> expectedSubItems = List.of(
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent()
-        );
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         final OperationOutcome operationOutcomeWithIssues = new OperationOutcome();
         operationOutcomeWithIssues.setId("operation-outcome-id");
-        operationOutcomeWithIssues.addIssue()
-            .setCode(OperationOutcome.IssueType.EXCEPTION)
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-            .setDiagnostics("exception message");
+        operationOutcomeWithIssues
+                .addIssue()
+                .setCode(OperationOutcome.IssueType.EXCEPTION)
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setDiagnostics("exception message");
         doReturn(operationOutcomeWithIssues).when(myFixture).getBaseOperationOutcome(populatedQuestionnaireId);
-        doReturn(expectedSubItems).when(myFixture).processItems(prePopulateRequest, PrePopulateRequestHelpers.QUESTIONNAIRE_SUB_ITEMS);
+        doReturn(expectedSubItems)
+                .when(myFixture)
+                .processItems(prePopulateRequest, PrePopulateRequestHelpers.QUESTIONNAIRE_SUB_ITEMS);
         // execute
         final Questionnaire actual = myFixture.prePopulate(prePopulateRequest);
         // validate
@@ -87,14 +87,20 @@ class PrePopulateServiceTest {
 
     void validateOperationOutcomeResults(Questionnaire theActual) {
         assertFalse(myFixture.myOperationOutcome.getIssue().isEmpty());
-        final OperationOutcome contained = (OperationOutcome) theActual.getContained().get(0);
+        final OperationOutcome contained =
+                (OperationOutcome) theActual.getContained().get(0);
         assertEquals(myFixture.myOperationOutcome, contained);
     }
 
     void validateExtensions(Questionnaire theActual) {
-        final Reference sdcExtension = (Reference) theActual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT).getValue();
-        assertEquals(FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID, sdcExtension.getReference());
-        final Reference crmiExtension = (Reference) theActual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();
+        final Reference sdcExtension = (Reference) theActual
+                .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT)
+                .getValue();
+        assertEquals(
+                FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID,
+                sdcExtension.getReference());
+        final Reference crmiExtension = (Reference)
+                theActual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();
         assertEquals("#operation-outcome-id", crmiExtension.getReference());
     }
 
@@ -103,18 +109,20 @@ class PrePopulateServiceTest {
         // setup
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final List<QuestionnaireItemComponent> expectedItems = List.of(
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent()
-        );
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         final List<QuestionnaireItemComponent> questionnaireItems = List.of(
-            withQuestionnaireItemWithExtension(),
-            withQuestionnaireItemWithExtension(),
-            withQuestionnaireItemWithExtension()
-        );
-        doReturn(List.of(expectedItems.get(0))).when(myFixture).prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(0));
-        doReturn(List.of(expectedItems.get(1))).when(myFixture).prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(1));
-        doReturn(List.of(expectedItems.get(2))).when(myFixture).prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(2));
+                withQuestionnaireItemWithExtension(),
+                withQuestionnaireItemWithExtension(),
+                withQuestionnaireItemWithExtension());
+        doReturn(List.of(expectedItems.get(0)))
+                .when(myFixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(0));
+        doReturn(List.of(expectedItems.get(1)))
+                .when(myFixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(1));
+        doReturn(List.of(expectedItems.get(2)))
+                .when(myFixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(2));
         // execute
         final List<QuestionnaireItemComponent> actual = myFixture.processItems(prePopulateRequest, questionnaireItems);
         // validate
@@ -125,7 +133,8 @@ class PrePopulateServiceTest {
     }
 
     private QuestionnaireItemComponent withQuestionnaireItemWithExtension() {
-        final Extension extension = new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, new StringType("extension value"));
+        final Extension extension =
+                new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, new StringType("extension value"));
         final QuestionnaireItemComponent item = new QuestionnaireItemComponent();
         item.addExtension(extension);
         return item;
@@ -137,15 +146,11 @@ class PrePopulateServiceTest {
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final List<QuestionnaireItemComponent> subItems = List.of(
-            new QuestionnaireItemComponent().setLinkId("linkId1"),
-            new QuestionnaireItemComponent().setLinkId("linkId2"),
-            new QuestionnaireItemComponent().setLinkId("linkId3")
-        );
+                new QuestionnaireItemComponent().setLinkId("linkId1"),
+                new QuestionnaireItemComponent().setLinkId("linkId2"),
+                new QuestionnaireItemComponent().setLinkId("linkId3"));
         final List<QuestionnaireItemComponent> expected = List.of(
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent()
-        );
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         questionnaireItem.setItem(subItems);
         final List<QuestionnaireItemComponent> input = List.of(questionnaireItem);
         doReturn(expected).when(myFixture).processItems(prePopulateRequest, subItems);
@@ -185,13 +190,11 @@ class PrePopulateServiceTest {
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         final List<QuestionnaireItemComponent> expected = List.of(
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent(),
-            new QuestionnaireItemComponent()
-        );
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         doReturn(expected).when(myPrePopulateItemWithExtension).processItem(prePopulateRequest, input);
         // execute
-        final List<QuestionnaireItemComponent> actual = myFixture.prePopulateItemWithExtension(prePopulateRequest, input);
+        final List<QuestionnaireItemComponent> actual =
+                myFixture.prePopulateItemWithExtension(prePopulateRequest, input);
         // validate
         verify(myPrePopulateItemWithExtension).processItem(prePopulateRequest, input);
         assertEquals(expected, actual);
@@ -202,15 +205,17 @@ class PrePopulateServiceTest {
         // setup
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
-        doThrow(new ResolveExpressionException("message")).when(myPrePopulateItemWithExtension).processItem(prePopulateRequest, input);
+        doThrow(new ResolveExpressionException("message"))
+                .when(myPrePopulateItemWithExtension)
+                .processItem(prePopulateRequest, input);
         // execute
-        final List<QuestionnaireItemComponent> actual = myFixture.prePopulateItemWithExtension(prePopulateRequest, input);
+        final List<QuestionnaireItemComponent> actual =
+                myFixture.prePopulateItemWithExtension(prePopulateRequest, input);
         // validate
         verify(myPrePopulateItemWithExtension).processItem(prePopulateRequest, input);
         verify(myFixture).addExceptionToOperationOutcome("message");
         assertTrue(actual.isEmpty());
     }
-
 
     @Test
     void prePopulateItemShouldReturnQuestionnaireItemComponent() throws ResolveExpressionException {
@@ -233,7 +238,9 @@ class PrePopulateServiceTest {
         final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         input.setId(id);
-        doThrow(new ResolveExpressionException("message")).when(myPrePopulateItem).processItem(prePopulateRequest, input);
+        doThrow(new ResolveExpressionException("message"))
+                .when(myPrePopulateItem)
+                .processItem(prePopulateRequest, input);
         // execute
         final QuestionnaireItemComponent actual = myFixture.prePopulateItem(prePopulateRequest, input);
         // validate
@@ -250,7 +257,8 @@ class PrePopulateServiceTest {
         myFixture.addExceptionToOperationOutcome(errorMessage);
         // validate
         assertTrue(myFixture.myOperationOutcome.hasIssue());
-        final Optional<OperationOutcomeIssueComponent> issue = myFixture.myOperationOutcome.getIssue().stream().findFirst();
+        final Optional<OperationOutcomeIssueComponent> issue =
+                myFixture.myOperationOutcome.getIssue().stream().findFirst();
         assertTrue(issue.isPresent());
         assertEquals(OperationOutcome.IssueType.EXCEPTION, issue.get().getCode());
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.get().getSeverity());

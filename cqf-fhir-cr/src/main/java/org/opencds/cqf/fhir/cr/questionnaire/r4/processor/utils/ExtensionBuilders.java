@@ -8,10 +8,11 @@ import org.opencds.cqf.fhir.utility.Constants;
 
 public class ExtensionBuilders {
     ExtensionBuilders() {}
+
     public static Extension prepopulateSubjectExtension(String patientId) {
-        return new Extension(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT,
-            new Reference(FHIRAllTypes.PATIENT.toCode() + "/" + patientId)
-        );
+        return new Extension(
+                Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT,
+                new Reference(FHIRAllTypes.PATIENT.toCode() + "/" + patientId));
     }
 
     public static Extension questionnaireResponseAuthorExtension() {
@@ -24,8 +25,7 @@ public class ExtensionBuilders {
 
     public static Extension dtrQuestionnaireResponseExtension(Questionnaire thePrePopulatedQuestionnaire) {
         return new Extension(
-            Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE,
-            new Reference("#" + thePrePopulatedQuestionnaire.getIdPart())
-        );
+                Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE,
+                new Reference("#" + thePrePopulatedQuestionnaire.getIdPart()));
     }
 }

@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
-import org.hl7.fhir.OperationOutcomeIssue;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,18 +18,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
-
+;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,22 +56,47 @@ class PrePopulateServiceTest {
         verifyNoMoreInteractions(myPrePopulateItemWithExtension);
     }
 
-//
-//        public Questionnaire prePopulate(PrePopulateRequest thePrePopulateRequest) {
-//            final String questionnaireId = getQuestionnaireId(thePrePopulateRequest);
-//            this.myOperationOutcome = getBaseOperationOutcome(questionnaireId);
-//            final Questionnaire prepopulatedQuestionnaire = thePrePopulateRequest.getQuestionnaire().copy();
-//            prepopulatedQuestionnaire.setId(questionnaireId);
-//            prepopulatedQuestionnaire.addExtension(ExtensionBuilders.prepopulateSubjectExtension(thePrePopulateRequest.getPatientId()));
-//            final List<QuestionnaireItemComponent> processedItems = processItems(thePrePopulateRequest, thePrePopulateRequest.getQuestionnaire().getItem());
-//            prepopulatedQuestionnaire.setItem(processedItems);
-//            if (!myOperationOutcome.getIssue().isEmpty()) {
-//                prepopulatedQuestionnaire.addContained(myOperationOutcome);
-//                prepopulatedQuestionnaire.addExtension(ExtensionBuilders.crmiMessagesExtension(myOperationOutcome.getIdPart()));
-//            }
-//            return prepopulatedQuestionnaire;
-//        }
+    @Test
+    void prePopulateShouldReturnQuestionnaire() {
+        // setup
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
+        final String populatedQuestionnaireId = PrePopulateRequestHelpers.QUESTIONNAIRE_ID + "-" + PrePopulateRequestHelpers.PATIENT_ID;
+        final List<QuestionnaireItemComponent> expectedSubItems = List.of(
+            new QuestionnaireItemComponent(),
+            new QuestionnaireItemComponent(),
+            new QuestionnaireItemComponent()
+        );
+        final OperationOutcome operationOutcomeWithIssues = new OperationOutcome();
+        operationOutcomeWithIssues.setId("operation-outcome-id");
+        operationOutcomeWithIssues.addIssue()
+            .setCode(OperationOutcome.IssueType.EXCEPTION)
+            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+            .setDiagnostics("exception message");
+        doReturn(operationOutcomeWithIssues).when(myFixture).getBaseOperationOutcome(populatedQuestionnaireId);
+        doReturn(expectedSubItems).when(myFixture).processItems(prePopulateRequest, PrePopulateRequestHelpers.QUESTIONNAIRE_SUB_ITEMS);
+        // execute
+        final Questionnaire actual = myFixture.prePopulate(prePopulateRequest);
+        // validate
+        verify(myFixture).getBaseOperationOutcome(populatedQuestionnaireId);
+        verify(myFixture).processItems(prePopulateRequest, PrePopulateRequestHelpers.QUESTIONNAIRE_SUB_ITEMS);
+        assertEquals(populatedQuestionnaireId, actual.getId());
+        assertEquals(expectedSubItems, actual.getItem());
+        validateOperationOutcomeResults(actual);
+        validateExtensions(actual);
+    }
 
+    void validateOperationOutcomeResults(Questionnaire theActual) {
+        assertFalse(myFixture.myOperationOutcome.getIssue().isEmpty());
+        final OperationOutcome contained = (OperationOutcome) theActual.getContained().get(0);
+        assertEquals(myFixture.myOperationOutcome, contained);
+    }
+
+    void validateExtensions(Questionnaire theActual) {
+        final Reference sdcExtension = (Reference) theActual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT).getValue();
+        assertEquals(FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID, sdcExtension.getReference());
+        final Reference crmiExtension = (Reference) theActual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();
+        assertEquals("#operation-outcome-id", crmiExtension.getReference());
+    }
 
     @Test
     void processItemsShouldProcessItemsIfItemsHaveSdcExtension() {

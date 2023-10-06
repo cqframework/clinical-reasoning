@@ -35,15 +35,15 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
-public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
+public class DepreciatedQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
     protected OperationOutcome oc;
     protected Questionnaire populatedQuestionnaire;
 
-    public QuestionnaireProcessor(Repository repository) {
+    public DepreciatedQuestionnaireProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public DepreciatedQuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         super(repository, evaluationSettings);
     }
 

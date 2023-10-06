@@ -36,7 +36,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveService
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 
 @ExtendWith(MockitoExtension.class)
-class NewQuestionnaireProcessorTest {
+class QuestionnaireProcessorTest {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaire/r4/processor";
 
     @Mock
@@ -59,7 +59,7 @@ class NewQuestionnaireProcessorTest {
 
     @Spy
     @InjectMocks
-    private NewQuestionnaireProcessor myFixture = NewQuestionnaireProcessor.of(myRepository);
+    private QuestionnaireProcessor myFixture = QuestionnaireProcessor.of(myRepository);
 
     @AfterEach
     void tearDown() {

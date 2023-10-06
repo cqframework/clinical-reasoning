@@ -55,8 +55,8 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
@@ -73,7 +73,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
 
     private final ActivityDefinitionProcessor activityDefinitionProcessor;
-    private final QuestionnaireProcessor questionnaireProcessor;
+    private final QuestionnaireProcessor myQuestionnaireProcessor;
     private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
     private ExtensionResolver extensionResolver;
     private InputParameterResolver inputParameterResolver;
@@ -88,7 +88,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         super(repository, evaluationSettings);
         this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-        this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
+        this.myQuestionnaireProcessor = QuestionnaireProcessor.of(this.repository, evaluationSettings);
         this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
     }
 
@@ -660,7 +660,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 valueSets.forEach(
                         valueSet -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
-                var populatedQuestionnaire = questionnaireProcessor.prePopulate(
+                var populatedQuestionnaire = myQuestionnaireProcessor.prePopulate(
                         toPopulate, subjectId, this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
                     requestGroup.addContained(populatedQuestionnaire);

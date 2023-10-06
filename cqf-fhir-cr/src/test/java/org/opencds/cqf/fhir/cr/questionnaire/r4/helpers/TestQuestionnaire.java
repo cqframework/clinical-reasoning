@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
@@ -39,7 +39,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaire/r4";
-
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
@@ -61,7 +60,7 @@ public class TestQuestionnaire {
     }
 
     public static QuestionnaireProcessor buildProcessor(Repository repository) {
-        return new QuestionnaireProcessor(repository, evaluationSettings);
+        return QuestionnaireProcessor.of(repository, evaluationSettings);
     }
 
     /** Fluent interface starts here **/

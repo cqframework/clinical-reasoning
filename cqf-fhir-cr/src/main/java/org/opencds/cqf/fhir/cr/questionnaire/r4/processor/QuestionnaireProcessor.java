@@ -20,18 +20,18 @@ import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulat
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateService;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveService;
 
-public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
+public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
     protected PopulateService myPopulateService;
     protected ResolveService myResolveService;
     protected PackageService myPackageService;
     protected PrePopulateService myPrePopulateService;
 
-    public static NewQuestionnaireProcessor of(Repository theRepository, EvaluationSettings theEvaluationSettings) {
+    public static QuestionnaireProcessor of(Repository theRepository, EvaluationSettings theEvaluationSettings) {
         final ResolveService resolveService = ResolveService.of(theRepository);
         final PackageService packageService = PackageService.of(theRepository);
         final PopulateService populateService = PopulateService.of();
         final PrePopulateService prePopulateService = PrePopulateService.of();
-        return new NewQuestionnaireProcessor(
+        return new QuestionnaireProcessor(
                 theRepository,
                 theEvaluationSettings,
                 resolveService,
@@ -40,11 +40,11 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
                 prePopulateService);
     }
 
-    public static NewQuestionnaireProcessor of(Repository repository) {
+    public static QuestionnaireProcessor of(Repository repository) {
         return of(repository, EvaluationSettings.getDefault());
     }
 
-    private NewQuestionnaireProcessor(
+    public QuestionnaireProcessor(
             Repository theRepository,
             EvaluationSettings theEvaluationSettings,
             ResolveService theResolveService,

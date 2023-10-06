@@ -1,12 +1,10 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4;
 
-import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import ca.uhn.fhir.rest.annotation.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
-import org.apache.commons.lang3.Validate;
+import static java.util.Objects.requireNonNull;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -70,8 +71,8 @@ public class NewQuestionnaireProcessor extends BaseQuestionnaireProcessor<Questi
             IBaseParameters theParameters,
             IBaseBundle theBundle,
             LibraryEngine theLibraryEngine) {
-        Validate.notNull(theQuestionnaire);
-        Validate.notNull(theLibraryEngine);
+        requireNonNull(theQuestionnaire);
+        requireNonNull(theLibraryEngine);
         final PrePopulateRequest prePopulateRequest =
                 new PrePopulateRequest(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
         return myPrePopulateService.prePopulate(prePopulateRequest);

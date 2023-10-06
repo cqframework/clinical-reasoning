@@ -19,7 +19,7 @@ public class PrePopulateRequestHelpers {
     static final List<QuestionnaireItemComponent> QUESTIONNAIRE_SUB_ITEMS = List.of(
             new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
 
-    protected static PrePopulateRequest withPrePopulateRequest(LibraryEngine theLibraryEngine) {
+    public static PrePopulateRequest withPrePopulateRequest(LibraryEngine theLibraryEngine) {
         final Questionnaire questionnaire = new Questionnaire();
         final CanonicalType type = new CanonicalType(CQF_EXTENSION_URL);
         final Extension extension = new Extension(Constants.CQF_LIBRARY, type);

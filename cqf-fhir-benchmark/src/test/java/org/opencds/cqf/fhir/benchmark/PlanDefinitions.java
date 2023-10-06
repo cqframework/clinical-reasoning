@@ -34,8 +34,8 @@ public class PlanDefinitions {
 
     private Apply apply;
 
-    @Setup(Level.Iteration)
-    public void setupIteration() throws Exception {
+    @Setup(Level.Trial)
+    public void setupTrial() throws Exception {
         this.apply = PlanDefinition.Assert.that(
                         "ANCDT17",
                         "Patient/5946f880-b197-400b-9caa-a3c661d23041",

@@ -48,25 +48,35 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
 
-    public enum TERMINOLOGY_MODE { //fhirquerygenerator repository.capabilities
-        //INTERNAL
-        INLINE,
-        EXPAND,
-        AUTO
+    public enum TERMINOLOGY_MODE {
+        INLINE, // Use code:in=valueset where available
+        EXPAND, // Use code=system|code where possible (and fetch the expansion yourself)
+        AUTO // Use best available option
     }
 
     public enum FILTER_MODE {
-        INTERNAL,
-        REPOSITORY,
-        AUTO
+        REPOSITORY, // Offload all search parameters
+        INTERNAL, // Don't offload any search parameters, filter them all client side (this also impacts terminology
+        // filtering)
+        AUTO // Offload parameters you can, manually filter the ones you can't
     }
 
-    public enum PROFILE_MODE { //scrap for now
-        OFF, // Don't check resource profile
-        ENFORCED, // Always check resource profile (and error if unable to do so or if resource fails validation), or if structure defs aren't available for enforcement
-        OPTIONAL, // Check resource profile if possible, and error if validation fails (but don't error if not possible). vaidate or trust
-        TRUST // Believe the underlying repository will validate profiles correctly
-        //DECLARED resources tell you profile they are implementing, but could be invalid
+    // TODO: Profiles are completely unsupported for now. This just lays out some potential options for doing that
+    //
+    public enum PROFILE_MODE {
+        // Always check the resource profile by validating the returned resource against the profile
+        // This requires access to the structure defs that define the profile at runtime
+        // Meaning, they need to be loaded on the server or otherwise. If they are unavailable, it's an automatic
+        // failure.
+        ENFORCED,
+        // Same as above, but don't error if you don't have access to the profiles at runtime
+        OPTIONAL,
+        // Check that the resources declare the profile they conform too (generally considered a bad practice)
+        DECLARED,
+        // Let the underlying repository validate profiles (IOW, offload validation)
+        TRUST,
+        // Don't check resource profile, even if specified by the engine
+        OFF
     }
 
     protected BaseRetrieveProvider(
@@ -289,7 +299,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     // Super hackery, just to get this running for connectathon
-    private String getValueSetFromCode(IBase base) { //what valuesets is it a part of, but just picking one, why not done association Chris
+    private String getValueSetFromCode(
+            IBase base) { // what valuesets is it a part of, but just picking one, why not done association Chris
         IBaseExtension<?, ?> ext = ExtensionUtil.getExtensionByUrl(
                 base, "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
         if (ext != null && ext.getValue() != null && ext.getValue() instanceof IPrimitiveType) {
@@ -357,9 +368,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             }
             searchParams.put(sp.getName(), codeList);
         } else if (valueSet != null) {
-            boolean shouldInline = this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.INLINE
-                    || (this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && canInline(valueSet));
-
+            boolean shouldInline = shouldInline(valueSet);
             if (shouldInline) {
                 searchParams.put(
                         sp.getName(),
@@ -377,10 +386,16 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         }
     }
 
-    protected boolean canInline(String valueSet) {
-        // TODO: Check capability statement for inlineability
-        // was defaulted to true
-        return false;
+    protected boolean shouldInline(String valueSet) {
+        return this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.INLINE
+                || (this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && inlineSupported(valueSet));
+    }
+
+    protected boolean inlineSupported(String valueSet) {
+        // TODO: Check valueSet in the capability statement
+        // NOTE: If you need to control the inlining behavior, don't change this default, CONFIGURE THE TERMINOLOGY MODE
+        // that's the point of it!!
+        return true;
     }
 
     public void populateDateSearchParams(

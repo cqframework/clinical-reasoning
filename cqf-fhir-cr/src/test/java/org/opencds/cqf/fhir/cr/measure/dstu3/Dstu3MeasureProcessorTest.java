@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.Given;
 
 public class Dstu3MeasureProcessorTest {
-
     protected static Given given = Measure.given().repositoryFor("EXM105FHIR3Measure");
 
     @Test

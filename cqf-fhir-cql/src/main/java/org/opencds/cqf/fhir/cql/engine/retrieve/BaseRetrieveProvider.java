@@ -392,9 +392,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     protected boolean inlineSupported(String valueSet) {
-        // TODO: Check valueSet in the capability statement
-        // NOTE: If you need to control the inlining behavior, don't change this default, CONFIGURE THE TERMINOLOGY MODE
-        // that's the point of it!!
+        // TODO: Check valueSet in the capability statement.
         return true;
     }
 

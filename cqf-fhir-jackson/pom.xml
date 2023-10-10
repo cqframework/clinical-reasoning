@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-jackson</artifactId>
-  <version>3.0.0-PRE8-SNAPSHOT</version>
+  <version>3.0.0-PRE9-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning (Jackson)</name>
   <description>Aggregator module for Jackson dependencies</description>
@@ -13,17 +13,36 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE8-SNAPSHOT</version>
+    <version>3.0.0-PRE9-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>model-jackson</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>elm-jackson</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
+
+      <dependency>
+          <groupId>com.fasterxml.jackson.module</groupId>
+          <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+          <version>2.15.2</version>
+      </dependency>
+
   </dependencies>
 </project>

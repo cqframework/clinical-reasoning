@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -647,7 +648,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         } else if (measurementPeriod.getStart() instanceof Date) {
             Date dStart = (Date) measurementPeriod.getStart();
             Date dEnd = (Date) measurementPeriod.getEnd();
-            return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
+
+            return new Period()
+                    .setStart(dStart.toJavaDate(), TemporalPrecisionEnum.DAY)
+                    .setEnd(dEnd.toJavaDate(), TemporalPrecisionEnum.DAY);
         } else {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
         }

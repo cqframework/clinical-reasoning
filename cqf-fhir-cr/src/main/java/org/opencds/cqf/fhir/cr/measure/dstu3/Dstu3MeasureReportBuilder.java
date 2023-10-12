@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -474,7 +475,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         } else if (measurementPeriod.getStart() instanceof Date) {
             Date dStart = (Date) measurementPeriod.getStart();
             Date dEnd = (Date) measurementPeriod.getEnd();
-            return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
+            return new Period()
+                    .setStart(dStart.toJavaDate(), TemporalPrecisionEnum.DAY)
+                    .setEnd(dEnd.toJavaDate(), TemporalPrecisionEnum.DAY);
         } else {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
         }

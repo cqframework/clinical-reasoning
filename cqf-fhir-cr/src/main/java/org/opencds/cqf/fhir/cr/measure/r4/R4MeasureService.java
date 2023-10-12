@@ -67,7 +67,7 @@ public class R4MeasureService {
 
         if (StringUtils.isNotBlank(practitioner)) {
             if (practitioner.indexOf("/") == -1) {
-                subjectId = "Practitioner/".concat(practitioner);
+                practitioner = "Practitioner/".concat(practitioner);
             }
             subjectId = practitioner;
         }

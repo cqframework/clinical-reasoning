@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
@@ -120,6 +121,7 @@ public class Measure {
         private String reportType;
 
         private Bundle additionalData;
+        private Parameters parameters;
 
         private Supplier<MeasureReport> operation;
 
@@ -158,6 +160,11 @@ public class Measure {
             return this;
         }
 
+        public When parameters(Parameters parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
         public When evaluate() {
             this.operation = () -> processor.evaluateMeasure(
                     Eithers.forMiddle3(new IdType("Measure", measureId)),
@@ -165,7 +172,8 @@ public class Measure {
                     periodEnd,
                     reportType,
                     subjectIds,
-                    additionalData);
+                    additionalData,
+                    parameters);
             return this;
         }
 

@@ -1,0 +1,43 @@
+{
+  "resourceType":"Observation",
+  "id":"98a546bc-77e6-46b1-bb2b-8179cd66e8c3",
+  "status":"final",
+  "category":[
+    {
+      "coding":[
+        {
+          "system":"http://terminology.hl7.org/CodeSystem/observation-category",
+          "code":"exam",
+          "display":"Exam"
+        }
+      ]
+    }
+  ],
+  "code":{
+    "coding":[
+      {
+        "code":"5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "display":"Height (cm)"
+      },
+      {
+        "system":"https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+        "code":"5090",
+        "display":"Height (cm)"
+      }
+    ]
+  },
+  "subject":{
+    "reference":"Patient/457865b6-8f02-49e2-8a77-21b73eb266d4",
+    "type":"Patient",
+    "display":"obs_patient2 obs_patient2 obs_patient2 (OpenMRS ID: 10003P)"
+  },
+  "encounter":{
+    "reference":"Encounter/2d0ecfb4-9dec-4daa-a261-e37e426d0d7b",
+    "type":"Encounter"
+  },
+  "effectiveDateTime":"2021-01-26T08:14:44+00:00",
+  "issued":"2021-01-26T08:14:44.000+00:00",
+  "valueQuantity":{
+    "value":99
+  }
+}

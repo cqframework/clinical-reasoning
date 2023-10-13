@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -32,12 +33,13 @@ public class R4MeasureService {
             Endpoint contentEndpoint,
             Endpoint terminologyEndpoint,
             Endpoint dataEndpoint,
-            Bundle additionalData) {
+            Bundle additionalData,
+            Parameters parameters) {
 
         var repo = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());
 
         return processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), additionalData);
+                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), additionalData, parameters);
     }
 }

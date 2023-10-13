@@ -1,0 +1,187 @@
+{
+  "resourceType": "Library",
+  "id": "ANCIND01",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  } ],
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCIND01",
+  "name": "ANCIND01",
+  "title": "ANC.IND.01 Percentage of pregnant women with first ANC contact in the first trimester",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "description": "This library provides logic for calculating the percentage of pregnant women with first ANC contact in the first trimester",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/FHIRHelpers|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library BCx",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseConcepts"
+  }, {
+    "type": "depends-on",
+    "display": "Library Cx",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCConcepts"
+  }, {
+    "type": "depends-on",
+    "display": "Library BaseData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library PatientData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library ContactData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCContactDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library Stratifiers",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCStratifiers"
+  }, {
+    "type": "depends-on",
+    "display": "Library WC",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/WHOCommon"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ISO-8601-Derived Periods",
+    "resource": "http://ohie.org/CodeSystem/iso-8601-derived-periods"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Antenatal care case",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-case"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Antenatal care contact",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-contact"
+  }, {
+    "type": "depends-on",
+    "display": "Value set First Antenatal Care Contact Choices",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b5-de2"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Gestational age",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b6-de17"
+  } ],
+  "parameter": [ {
+    "name": "Measurement Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "Initial Population",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "First antenatal care contact",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Encounter"
+  }, {
+    "name": "Gestational age",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Quantity"
+  }, {
+    "name": "Numerator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Denominator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Age Stratifier",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "Education Level Stratifier",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "CodeableConcept"
+  }, {
+    "name": "Most Recent Encounter Location Reference",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Reference"
+  }, {
+    "name": "Location Code",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "CodeableConcept"
+  } ],
+  "dataRequirement": [ {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "location" ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+    "mustSupport": [ "period", "reasonCode", "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-contact"
+    } ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "value", "url" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code", "encounter.reference", "encounter", "status" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b6-de17"
+    } ]
+  }, {
+    "type": "Location",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Location" ],
+    "mustSupport": [ "identifier", "id" ]
+  }, {
+    "type": "EpisodeOfCare",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare" ],
+    "mustSupport": [ "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-case"
+    } ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "data": "LyoNCkxpYnJhcnkgQU5DLklORC4xDQpXSE8gQW50ZW5hdGFsIENhcmUgKEFOQykgSW5kaWNhdG9yIDENClBlcmNlbnRhZ2Ugb2YgcHJlZ25hbnQgd29tZW4gd2l0aCBmaXJzdCBBTkMgY29udGFjdCBpbiB0aGUgZmlyc3QgdHJpbWVzdGVyIChiZWZvcmUgMTIgd2Vla3Mgb2YgZ2VzdGF0aW9uKQ0KDQpOdW1lcmF0b3I6IE51bWJlciBvZiBwcmVnbmFudCB3b21lbiB3aG8gaGFkIHRoZWlyIGZpcnN0IEFOQyBjb250YWN0IGJlZm9yZSAxMiB3ZWVrcyAoZmFjaWxpdHkgbGV2ZWwpDQpOdW1lcmF0b3IgQ29tcHV0YXRpb246IENvdW50IG9mIHdvbWVuIHdob3NlIGdlc3RhdGlvbmFsIGFnZSA8PSAxMiB3ZWVrcyBhdCB0aGUgdGltZSBvZiBmaXJzdCBjb250YWN0DQpEZW5vbWluYXRvcjogVG90YWwgbnVtYmVyIG9mIGFudGVuYXRhbCBjbGllbnRzIHdpdGggYSBmaXJzdCBjb250YWN0DQpEZW5vbWluYXRvciBDb21wdXRhdGlvbjogQ291bnQgb2YgYWxsIHdvbWVuIHdobyBoYWQgZmlyc3QgY29udGFjdCB3aXRoaW4gdGhlIGxhc3QgcmVwb3J0aW5nIHBlcmlvZA0KRGlzYWdncmVnYXRpb246DQpBZ2UgKDEwLTE0LCAxNS0xOSwgMjArKQ0KRWR1Y2F0aW9uIExldmVsIChub25lLCBkb24ndCBrbm93LCBwcmltYXJ5LCBzZWNvbmRhcnksIGhpZ2hlcikNClJlZmVyZW5jZToNCldITyBBTkMgbW9uaXRvcmluZyBmcmFtZXdvcmvCoCgxKcKgDQoNCldIT+KAk1VOSUNFRsKgZ3VpZGFuY2UgZm9yIFJNTkNBSCBwcm9ncmFtbWUgbWFuYWdlcnMgb24gdGhlwqBhbmFseXNpc8KgYW5kIHVzZSBvZiBoZWFsdGgtY2FyZcKgZmFjaWxpdHkgZGF0YcKgKDIpwqANCg0KQXR0cmlidXRpb246DQpUeXBpY2FsbHkgZmFjaWxpdHkgYW5kIG9yZ2FuaXphdGlvbiBhcmUgMS4uMSwgYnV0IHRoZXJlIGFyZSBjYXNlcyB3aGVyZSB0aGVyZSBhcmUNCm11bHRpcGxlIG9yZ2FuaXphdGlvbnMgcmVwb3J0aW5nIGZyb20gdGhlIHNhbWUgZmFjaWxpdHkuIEluIHRoZXNlIGNhc2VzLCByZXBvcnRlciAtPiBsb2NhdGlvbiBpcyBpbnN1ZmZpY2llbnQNCiovDQpsaWJyYXJ5IEFOQ0lORDAxDQoNCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgQU5DQmFzZUNvbmNlcHRzIGNhbGxlZCBCQ3gNCmluY2x1ZGUgQU5DQ29uY2VwdHMgY2FsbGVkIEN4DQppbmNsdWRlIEFOQ0Jhc2VEYXRhRWxlbWVudHMgY2FsbGVkIEJhc2VEYXRhDQppbmNsdWRlIEFOQ0RhdGFFbGVtZW50cyBjYWxsZWQgUGF0aWVudERhdGENCmluY2x1ZGUgQU5DQ29udGFjdERhdGFFbGVtZW50cyBjYWxsZWQgQ29udGFjdERhdGENCmluY2x1ZGUgQU5DU3RyYXRpZmllcnMgY2FsbGVkIFN0cmF0aWZpZXJzDQoNCnBhcmFtZXRlciAiTWVhc3VyZW1lbnQgUGVyaW9kIiBJbnRlcnZhbDxEYXRlPiBkZWZhdWx0IEludGVydmFsW0AyMDIwLTAxLTAxLCBAMjAyMC0wMS0zMV0NCg0KY29udGV4dCBQYXRpZW50DQoNCi8qDQpJbml0aWFsIHBvcHVsYXRpb246IEFudGVuYXRhbCBjbGllbnRzDQoqLw0KZGVmaW5lICJJbml0aWFsIFBvcHVsYXRpb24iOg0KICBleGlzdHMgKEJhc2VEYXRhLiJBbnRlbmF0YWwgY2FyZSBjYXNlIikNCg0KZGVmaW5lICJGaXJzdCBhbnRlbmF0YWwgY2FyZSBjb250YWN0IjoNCiAgQmFzZURhdGEuIkFudGVuYXRhbCBjYXJlIGNvbnRhY3QiIEMNCiAgICB3aGVyZSBDLnJlYXNvbkNvZGUgaW4gQ3guIkZpcnN0IEFudGVuYXRhbCBDYXJlIENvbnRhY3QgQ2hvaWNlcyINCg0KZGVmaW5lICJHZXN0YXRpb25hbCBhZ2UiOg0KICBDb250YWN0RGF0YS4iR2VzdGF0aW9uYWwgYWdlIg0KDQovKg0KTnVtZXJhdG9yOiBOdW1iZXIgb2YgcHJlZ25hbnQgd29tZW4gd2hvIGhhZCB0aGVpciBmaXJzdCBBTkMgY29udGFjdCBiZWZvcmUgMTIgd2Vla3MgKGZhY2lsaXR5IGxldmVsKQ0KTnVtZXJhdG9yIENvbXB1dGF0aW9uOiBDb3VudCBvZiB3b21lbiB3aG9zZSBnZXN0YXRpb25hbCBhZ2UgPD0gMTIgd2Vla3MgYXQgdGhlIHRpbWUgb2YgZmlyc3QgY29udGFjdA0KKi8NCmRlZmluZSBOdW1lcmF0b3I6DQogIGV4aXN0cyAoDQogICAgIkZpcnN0IGFudGVuYXRhbCBjYXJlIGNvbnRhY3QiIEMNCiAgICAgIHdoZXJlIEMucGVyaW9kIHN0YXJ0cyBkdXJpbmcgIk1lYXN1cmVtZW50IFBlcmlvZCINCiAgICAgICAgYW5kIENvbnRhY3REYXRhLiJHZXN0YXRpb25hbCBhZ2UiIDw9IDEyIHdlZWtzDQogICkNCg0KLyoNCkRlbm9taW5hdG9yOiBUb3RhbCBudW1iZXIgb2YgYW50ZW5hdGFsIGNsaWVudHMgd2l0aCBhIGZpcnN0IGNvbnRhY3QNCkRlbm9taW5hdG9yIENvbXB1dGF0aW9uOiBDb3VudCBvZiBhbGwgd29tZW4gd2hvIGhhZCBmaXJzdCBjb250YWN0IHdpdGhpbiB0aGUgbGFzdCByZXBvcnRpbmcgcGVyaW9kDQoqLw0KZGVmaW5lIERlbm9taW5hdG9yOg0KICBleGlzdHMgKA0KICAgICJGaXJzdCBhbnRlbmF0YWwgY2FyZSBjb250YWN0IiBDDQogICAgICB3aGVyZSBDLnBlcmlvZCBzdGFydHMgZHVyaW5nICJNZWFzdXJlbWVudCBQZXJpb2QiDQogICkNCg0KLyoNCkRpc2FnZ3JlZ2F0aW9uOiBBZ2UgKDEwLTE0LCAxNS0xOSwgMjArKQ0KKi8NCmRlZmluZSAiQWdlIFN0cmF0aWZpZXIiOg0KICBTdHJhdGlmaWVycy4iQnkgQWdlIg0KDQovKg0KRGlzYWdncmVnYXRpb246IEVkdWNhdGlvbiBMZXZlbCAobm9uZSwgZG9uJ3Qga25vdywgcHJpbWFyeSwgc2Vjb25kYXJ5LCBoaWdoZXIpDQoqLw0KZGVmaW5lICJFZHVjYXRpb24gTGV2ZWwgU3RyYXRpZmllciI6DQogIFN0cmF0aWZpZXJzLiJCeSBFZHVjYXRpb24gTGV2ZWwiDQoNCi8qDQpNb3N0IHJlY2VudCBlbmNvdW50ZXIgbG9jYXRpb24NCiovDQpkZWZpbmUgIk1vc3QgUmVjZW50IEVuY291bnRlciBMb2NhdGlvbiBSZWZlcmVuY2UiOg0KICBMYXN0KA0KICAgIFtFbmNvdW50ZXJdIEUNCiAgICAgIHJldHVybiBGaXJzdChFLmxvY2F0aW9uIEwgcmV0dXJuIEwubG9jYXRpb24pDQogICAgICAvL3NvcnQgYnkgc3RhcnQgb2YgcGVyaW9kDQogICkNCg0KLyoNCkxvY2F0aW9uIENvZGUNCiovDQpkZWZpbmUgIkxvY2F0aW9uIENvZGUiOg0KICBzaW5nbGV0b24gZnJvbSAoDQogICAgW0xvY2F0aW9uXSBMDQogICAgICBsZXQgaWRlbnRpZmllcjogc2luZ2xldG9uIGZyb20gKEwuaWRlbnRpZmllciBJIHdoZXJlIEkuc3lzdGVtID0gJ2h0dHA6Ly9leGFtcGxlLm9yZy9vcGVuY3ItaWRlbnRpZmllcnMnKQ0KICAgICAgd2hlcmUgTC5pZCA9IExhc3QoU3BsaXQoIk1vc3QgUmVjZW50IEVuY291bnRlciBMb2NhdGlvbiBSZWZlcmVuY2UiLnJlZmVyZW5jZSwgJy8nKSkNCiAgICAgIHJldHVybiBDb2RlYWJsZUNvbmNlcHQgew0KICAgICAgICBjb2Rpbmc6IHsNCiAgICAgICAgICBDb2Rpbmcgew0KICAgICAgICAgICAgY29kZTogY29kZSB7IHZhbHVlOiBpZGVudGlmaWVyLnZhbHVlIH0sDQogICAgICAgICAgICBzeXN0ZW06IGlkZW50aWZpZXIuc3lzdGVtDQogICAgICAgICAgfQ0KICAgICAgICB9DQogICAgICB9DQogICkNCg=="
+  } ]
+}

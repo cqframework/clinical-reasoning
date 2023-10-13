@@ -1,0 +1,199 @@
+{
+  "resourceType": "Library",
+  "id": "ANCIND07",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  } ],
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCIND07",
+  "name": "ANCIND07",
+  "title": "ANC.IND.07 Percentage of pregnant women with at least one blood pressure measure during ANC",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "description": "This library provides logic for calculating the percentage of pregnant women with at least one blood pressure measure during ANC",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/FHIRHelpers|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FC",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/FHIRCommon"
+  }, {
+    "type": "depends-on",
+    "display": "Library AC",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCCommon"
+  }, {
+    "type": "depends-on",
+    "display": "Library BCx",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseConcepts"
+  }, {
+    "type": "depends-on",
+    "display": "Library Cx",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCConcepts"
+  }, {
+    "type": "depends-on",
+    "display": "Library BaseData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library PatientData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library ContactData",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCContactDataElements"
+  }, {
+    "type": "depends-on",
+    "display": "Library Stratifiers",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/ANCStratifiers"
+  }, {
+    "type": "depends-on",
+    "display": "Library WC",
+    "resource": "http://fhir.org/guides/who/anc-cds/Library/WHOCommon"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ISO-8601-Derived Periods",
+    "resource": "http://ohie.org/CodeSystem/iso-8601-derived-periods"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Antenatal care case",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-case"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Systolic blood pressure",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b8-de17"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Diastolic blood pressure",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b8-de19"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Reason for closing ANC record",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-end-1"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Qualifying Reason for closing ANC record Choices",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/qualifying-reason-for-closing-anc-record-choices"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Gestational age",
+    "resource": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b6-de17"
+  } ],
+  "parameter": [ {
+    "name": "Measurement Period",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "Period"
+  }, {
+    "name": "encounter",
+    "use": "in",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Patient"
+  }, {
+    "name": "Initial Population",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Numerator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Denominator",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "boolean"
+  }, {
+    "name": "Age Stratifier",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Coding"
+  }, {
+    "name": "Education Level Stratifier",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "CodeableConcept"
+  }, {
+    "name": "Trimester Category Stratifier",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  } ],
+  "dataRequirement": [ {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ],
+    "mustSupport": [ "url", "value" ]
+  }, {
+    "type": "EpisodeOfCare",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare" ],
+    "mustSupport": [ "type" ],
+    "codeFilter": [ {
+      "path": "type",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/antenatal-care-case"
+    } ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code", "status", "issued" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b8-de17"
+    } ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code", "status", "issued" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b8-de19"
+    } ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code", "status", "effective", "value" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-end-1"
+    } ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code", "status", "encounter", "encounter.reference" ],
+    "codeFilter": [ {
+      "path": "code",
+      "valueSet": "http://fhir.org/guides/who/anc-cds/ValueSet/anc-b6-de17"
+    } ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "data": "LyoNCkxpYnJhcnkgQU5DLklORC43DQpXSE8gQW50ZW5hdGFsIENhcmUgKEFOQykgSW5kaWNhdG9yIDcNClBlcmNlbnRhZ2Ugb2YgcHJlZ25hbnQgd29tZW4gd2l0aCBhdCBsZWFzdCBvbmUgYmxvb2QgcHJlc3N1cmUgbWVhc3VyZSBkdXJpbmfCoEFOQw0KDQpOdW1lcmF0b3I6IE51bWJlciBvZiBhbnRlbmF0YWwgY2xpZW50cyB3aXRoIGJsb29kIHByZXNzdXJlIG1lYXN1cmVkDQpOdW1lcmF0b3IgQ29tcHV0YXRpb246IENPVU5UIG9mIGFsbCB3b21lbiB3aG8gaGFkIHRoZWlyIGJsb29kIHByZXNzdXJlIG1lYXN1cmVkIGF0IGxlYXN0IG9uY2UgZHVyaW5nIHByZWduYW5jeQ0KRGVub21pbmF0b3I6IFRvdGFsIG51bWJlciBvZiBwcmVnbmFudCB3b21lbiB3aXRoIGHCoGZpcnN0IGNvbnRhY3QNCkRlbm9taW5hdG9yIENvbXB1dGF0aW9uOiBDT1VOVCBvZiBhbGwgd29tZW4gd2hvc2UgcmVjb3JkcyB3ZXJlIGNsb3NlZCAoQU5DIGNsb3NlIGZvcm0pIGluIHRoZSBsYXN0IHJlcG9ydGluZyBwZXJpb2QgZHVlIHRvIGFueSBvZiB0aGUgcmVhc29ucyBiZWxvdzoNCipsaXZlIGJpcnRoDQoqc3RpbGxiaXJ0aA0KKm1pc2NhcnJpYWdlDQoqYWJvcnRpb24NCip3b21hbiBkaWVkDQoqbG9zdCB0byBmb2xsb3ctdXANCiptb3ZlZCBhd2F5DQoNCkRpc2FnZ3JlZ2F0aW9uOg0KQWdlICgxMC0xNCwgMTUtMTksIDIwKykNCkVkdWNhdGlvbiBMZXZlbCAobm9uZSwgZG9uJ3Qga25vdywgcHJpbWFyeSwgc2Vjb25kYXJ5LCBoaWdoZXIpDQpUcmltZXN0ZXIgY2F0ZWdvcmllczogMXN0IChHQSDiiaQgMTLigK93ZWVrcyk7IDJuZCAoR0EgPiAxMuKAr3dlZWtzIHRvIOKJpCAyOOKAr3dlZWtzKTsgM3JkIChHQSA+IDI44oCvd2Vla3MpDQoNClJlZmVyZW5jZToNCldITyBBTkMgbW9uaXRvcmluZyBmcmFtZXdvcmvCoCgxKcKgDQoNCldIT+KAk1VOSUNFRsKgZ3VpZGFuY2UgZm9yIFJNTkNBSCBwcm9ncmFtbWUgbWFuYWdlcnMgb24gdGhlwqBhbmFseXNpc8KgYW5kIHVzZSBvZiBoZWFsdGgtY2FyZcKgZmFjaWxpdHkgZGF0YcKgKDIpwqANCiovDQpsaWJyYXJ5IEFOQ0lORDA3DQoNCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnDQoNCmluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjEnDQppbmNsdWRlIEZISVJDb21tb24gY2FsbGVkIEZDDQppbmNsdWRlIEFOQ0NvbW1vbiBjYWxsZWQgQUMNCmluY2x1ZGUgQU5DQmFzZUNvbmNlcHRzIGNhbGxlZCBCQ3gNCmluY2x1ZGUgQU5DQ29uY2VwdHMgY2FsbGVkIEN4DQppbmNsdWRlIEFOQ0Jhc2VEYXRhRWxlbWVudHMgY2FsbGVkIEJhc2VEYXRhDQppbmNsdWRlIEFOQ0RhdGFFbGVtZW50cyBjYWxsZWQgUGF0aWVudERhdGENCmluY2x1ZGUgQU5DQ29udGFjdERhdGFFbGVtZW50cyBjYWxsZWQgQ29udGFjdERhdGENCmluY2x1ZGUgQU5DU3RyYXRpZmllcnMgY2FsbGVkIFN0cmF0aWZpZXJzDQoNCnBhcmFtZXRlciAiTWVhc3VyZW1lbnQgUGVyaW9kIiBJbnRlcnZhbDxEYXRlPiBkZWZhdWx0IEludGVydmFsW0AyMDIwLTAxLTAxLCBAMjAyMC0wMS0zMV0NCg0KY29udGV4dCBQYXRpZW50DQoNCi8qDQpJbml0aWFsIHBvcHVsYXRpb246IEFudGVuYXRhbCBjbGllbnRzDQoqLw0KZGVmaW5lICJJbml0aWFsIFBvcHVsYXRpb24iOg0KICBleGlzdHMgKEJhc2VEYXRhLiJBbnRlbmF0YWwgY2FyZSBjYXNlIikNCg0KLyoNCk51bWVyYXRvcjogTnVtYmVyIG9mIGFudGVuYXRhbCBjbGllbnRzIHdpdGggYmxvb2QgcHJlc3N1cmUgbWVhc3VyZWQNCk51bWVyYXRvciBDb21wdXRhdGlvbjogQ09VTlQgb2YgYWxsIHdvbWVuIHdobyBoYWQgdGhlaXIgYmxvb2QgcHJlc3N1cmUgbWVhc3VyZWQgYXQgbGVhc3Qgb25jZSBkdXJpbmcgcHJlZ25hbmN5DQoqLw0KZGVmaW5lIE51bWVyYXRvcjoNCiAgZXhpc3RzICgNCiAgICBQYXRpZW50RGF0YS4iU3lzdG9saWMgYmxvb2QgcHJlc3N1cmUiIE8NCiAgICAgIHdoZXJlIE8uaXNzdWVkIGR1cmluZyBCYXNlRGF0YS4iUHJlZ25hbmN5Ii5wZXJpb2QNCiAgKQ0KICAgIG9yIGV4aXN0cyAoDQogICAgICBQYXRpZW50RGF0YS4iRGlhc3RvbGljIGJsb29kIHByZXNzdXJlIiBPDQogICAgICAgIHdoZXJlIE8uaXNzdWVkIGR1cmluZyBCYXNlRGF0YS4iUHJlZ25hbmN5Ii5wZXJpb2QNCiAgICApDQoNCi8qDQpEZW5vbWluYXRvcjogVG90YWwgbnVtYmVyIG9mIGFudGVuYXRhbCBjbGllbnRzIHdpdGggYcKgZmlyc3QgY29udGFjdA0KRGVub21pbmF0b3IgQ29tcHV0YXRpb246IENPVU5UIG9mIGFsbCB3b21lbiB3aG9zZSByZWNvcmRzIHdlcmUgY2xvc2VkIChBTkMgY2xvc2UgZm9ybSkgaW4gdGhlIGxhc3QgcmVwb3J0aW5nIHBlcmlvZCBkdWUgdG8gYW55IG9mIHRoZSByZWFzb25zIGJlbG93Og0KKmxpdmUgYmlydGgNCipzdGlsbGJpcnRoDQoqbWlzY2FycmlhZ2UNCiphYm9ydGlvbg0KKndvbWFuIGRpZWQNCipsb3N0IHRvIGZvbGxvdy11cA0KKm1vdmVkIGF3YXkNCiovDQpkZWZpbmUgRGVub21pbmF0b3I6DQogIGV4aXN0cyAoDQogICAgUGF0aWVudERhdGEuIlJlYXNvbiBmb3IgY2xvc2luZyBBTkMgcmVjb3JkIiBSDQogICAgICB3aGVyZSBGQy5Ub0ludGVydmFsKFIuZWZmZWN0aXZlKSBkdXJpbmcgIk1lYXN1cmVtZW50IFBlcmlvZCINCiAgICAgICAgYW5kIFIudmFsdWUgYXMgRkhJUi5Db2RlYWJsZUNvbmNlcHQgaW4gU3RyYXRpZmllcnMuIlF1YWxpZnlpbmcgUmVhc29uIGZvciBjbG9zaW5nIEFOQyByZWNvcmQgQ2hvaWNlcyINCiAgKQ0KDQovKg0KRGlzYWdncmVnYXRpb246IEFnZSAoMTAtMTQsIDE1LTE5LCAyMCspDQoqLw0KZGVmaW5lICJBZ2UgU3RyYXRpZmllciI6DQogIFN0cmF0aWZpZXJzLiJCeSBBZ2UiDQoNCi8qDQpEaXNhZ2dyZWdhdGlvbjogRWR1Y2F0aW9uIExldmVsIChub25lLCBkb24ndCBrbm93LCBwcmltYXJ5LCBzZWNvbmRhcnksIGhpZ2hlcikNCiovDQpkZWZpbmUgIkVkdWNhdGlvbiBMZXZlbCBTdHJhdGlmaWVyIjoNCiAgU3RyYXRpZmllcnMuIkJ5IEVkdWNhdGlvbiBMZXZlbCINCg0KLyoNCkRpc2FnZ3JlZ2F0aW9uOiBUcmltZXN0ZXIgY2F0ZWdvcmllczogMXN0IChHQSDiiaQgMTLigK93ZWVrcyk7IDJuZCAoR0EgPiAxMuKAr3dlZWtzIHRvIOKJpCAyOOKAr3dlZWtzKTsgM3JkIChHQSA+IDI44oCvd2Vla3MpDQoqLw0KZGVmaW5lICJUcmltZXN0ZXIgQ2F0ZWdvcnkgU3RyYXRpZmllciI6DQogIFN0cmF0aWZpZXJzLiJCeSBUcmltZXN0ZXIgQ2F0ZWdvcnkiDQo="
+  } ]
+}

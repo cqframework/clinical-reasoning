@@ -75,7 +75,13 @@ public class R4MeasureService {
         }
 
         measureReport = processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), additionalData, parameters);
+                measure,
+                periodStart,
+                periodEnd,
+                reportType,
+                Collections.singletonList(subjectId),
+                additionalData,
+                parameters);
 
         // add ProductLine after report is generated
         addProductLineExtension(measureReport, productLine);

@@ -76,7 +76,8 @@ public class R4MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
-        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+        return this.evaluateMeasure(
+                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
     }
 
     public MeasureReport evaluateMeasure(
@@ -89,7 +90,8 @@ public class R4MeasureProcessor {
             Parameters parameters,
             MeasureEvalType evalType) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+        return this.evaluateMeasure(
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
     }
 
     protected MeasureReport evaluateMeasure(
@@ -124,12 +126,14 @@ public class R4MeasureProcessor {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
             context.getState().setParameters(lib.getLibrary(), paramMap);
             // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different values)
+            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // values)
             if (lib.getLibrary().getIncludes() != null) {
-                lib.getLibrary().getIncludes().getDef().forEach(
-                    includeDef -> paramMap.forEach(
-                        (paramKey, paramValue) -> context.getState().setParameter(
-                            includeDef.getLocalIdentifier(), paramKey, paramValue)));
+                lib.getLibrary()
+                        .getIncludes()
+                        .getDef()
+                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
+                                .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
             }
         }
 
@@ -184,30 +188,28 @@ public class R4MeasureProcessor {
     private Map<String, Object> resolveParameterMap(Parameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
         R4FhirModelResolver modelResolver = new R4FhirModelResolver();
-        parameters.getParameter().forEach(
-            param -> {
-                Object value;
-                if (param.hasResource()) {
-                    value = param.getResource();
-                } else {
-                    value = param.getValue();
-                    if (value instanceof IPrimitiveType) {
-                        // TODO: handle Code, CodeableConcept, Quantity, etc
-                        // resolves Date/Time values
-                        value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
-                    }
-                }
-                if (parameterMap.containsKey(param.getName())) {
-                    if (parameterMap.get(param.getName()) instanceof List) {
-                        CollectionUtils.addIgnoreNull((List<?>) parameterMap.get(param.getName()), value);
-                    } else {
-                        parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
-                    }
-                } else {
-                    parameterMap.put(param.getName(), value);
+        parameters.getParameter().forEach(param -> {
+            Object value;
+            if (param.hasResource()) {
+                value = param.getResource();
+            } else {
+                value = param.getValue();
+                if (value instanceof IPrimitiveType) {
+                    // TODO: handle Code, CodeableConcept, Quantity, etc
+                    // resolves Date/Time values
+                    value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
                 }
             }
-        );
+            if (parameterMap.containsKey(param.getName())) {
+                if (parameterMap.get(param.getName()) instanceof List) {
+                    CollectionUtils.addIgnoreNull((List<?>) parameterMap.get(param.getName()), value);
+                } else {
+                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+                }
+            } else {
+                parameterMap.put(param.getName(), value);
+            }
+        });
         return parameterMap;
     }
 }

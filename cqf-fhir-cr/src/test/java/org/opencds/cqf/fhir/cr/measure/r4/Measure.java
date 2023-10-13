@@ -166,6 +166,8 @@ public class Measure {
 
         public When parameters(Parameters parameters) {
             this.parameters = parameters;
+            return this;
+        }
 
         public When practitoner(String practitioner) {
             this.practitioner = practitioner;

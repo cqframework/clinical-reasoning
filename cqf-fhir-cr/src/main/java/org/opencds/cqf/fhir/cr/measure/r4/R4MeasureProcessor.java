@@ -61,13 +61,10 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters) {
-        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
-            IBaseBundle additionalData) {
 
         var evalType = MeasureEvalType.fromCode(reportType)
                 .orElse(
-                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 
@@ -79,7 +76,7 @@ public class R4MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
-        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjects, additionalData, evalType);
+        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
     }
 
     public MeasureReport evaluateMeasure(
@@ -102,7 +99,7 @@ public class R4MeasureProcessor {
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
-            Parameters parameters) {
+            Parameters parameters,
             MeasureEvalType evalType) {
 
         if (!measure.hasLibrary()) {
@@ -136,15 +133,10 @@ public class R4MeasureProcessor {
             }
         }
 
-        var actualRepo = this.repository;
-        if (additionalData != null) {
-            actualRepo = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-
         if (evalType == null) {
             evalType = MeasureEvalType.fromCode(reportType)
                     .orElse(
-                            subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                            subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
                                     ? MeasureEvalType.POPULATION
                                     : MeasureEvalType.SUBJECT);
         }

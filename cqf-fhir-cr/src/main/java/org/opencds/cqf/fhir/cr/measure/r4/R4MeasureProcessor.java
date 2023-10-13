@@ -63,6 +63,36 @@ public class R4MeasureProcessor {
             Parameters parameters) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
+            IBaseBundle additionalData) {
+
+        var evalType = MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
+
+        var actualRepo = this.repository;
+        if (additionalData != null) {
+            actualRepo = new FederatedRepository(
+                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+        }
+        var subjects =
+                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+
+        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjects, additionalData, evalType);
+    }
+
+    public MeasureReport evaluateMeasure(
+            Either3<CanonicalType, IdType, Measure> measure,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData,
+            Parameters parameters,
+            MeasureEvalType evalType) {
+        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+        return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
     }
 
     protected MeasureReport evaluateMeasure(
@@ -73,6 +103,7 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters) {
+            MeasureEvalType evalType) {
 
         if (!measure.hasLibrary()) {
             throw new IllegalArgumentException(
@@ -105,23 +136,21 @@ public class R4MeasureProcessor {
             }
         }
 
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty()
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
-
         var actualRepo = this.repository;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+
+        if (evalType == null) {
+            evalType = MeasureEvalType.fromCode(reportType)
+                    .orElse(
+                            subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                                    ? MeasureEvalType.POPULATION
+                                    : MeasureEvalType.SUBJECT);
         }
 
-        var subjects =
-                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
-
         R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);
+        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod);
     }
 
     protected Measure resolveByUrl(CanonicalType url) {

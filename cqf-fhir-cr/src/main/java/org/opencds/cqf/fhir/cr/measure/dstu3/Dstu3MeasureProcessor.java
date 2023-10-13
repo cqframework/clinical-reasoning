@@ -120,6 +120,12 @@ public class Dstu3MeasureProcessor {
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
 
+        var evalType = MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
+
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 

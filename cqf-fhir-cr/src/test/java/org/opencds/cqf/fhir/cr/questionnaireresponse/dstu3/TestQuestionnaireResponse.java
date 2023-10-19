@@ -1,24 +1,25 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.json.JSONException;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
@@ -52,9 +53,9 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    static class Extract {
-        private Repository repository;
-        private QuestionnaireResponse baseResource;
+    public static class Extract {
+        private final Repository repository;
+        private final QuestionnaireResponse baseResource;
 
         private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
@@ -78,7 +79,7 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    static class GeneratedBundle {
+    public static class GeneratedBundle {
         Bundle bundle;
 
         public GeneratedBundle(Bundle bundle) {
@@ -89,7 +90,6 @@ public class TestQuestionnaireResponse {
             try {
                 JSONAssert.assertEquals(load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

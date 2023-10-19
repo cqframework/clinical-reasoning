@@ -1,26 +1,27 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -58,8 +59,8 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    static class Extract {
-        private IdType questionnaireResponseId;
+    public static class Extract {
+        private final IdType questionnaireResponseId;
         private Repository repository;
         private QuestionnaireResponse questionnaireResponse;
         private IdType expectedBundleId;
@@ -122,7 +123,7 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    static class GeneratedBundle {
+    public static class GeneratedBundle {
         Bundle myGeneratedBundle;
         Bundle myExpectedBundle;
 
@@ -136,7 +137,6 @@ public class TestQuestionnaireResponse {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName), jsonParser.encodeResourceToString(myGeneratedBundle), true);
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }
@@ -148,7 +148,6 @@ public class TestQuestionnaireResponse {
                         jsonParser.encodeResourceToString(myGeneratedBundle),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

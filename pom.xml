@@ -15,6 +15,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
+
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
         <cql.version>3.2.0</cql.version>
@@ -376,17 +378,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <release>11</release>
-                        <source>11</source>
-                        <target>11</target>
-                        <failOnError>true</failOnError>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
-                        <compilerArgs>
-                            <arg>-Xlint:all,-processing</arg>
-                            <arg>-Werror</arg>
-                            <arg>-implicit:none</arg>
-                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>

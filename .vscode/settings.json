@@ -33,6 +33,7 @@
     "INITIALPOPULATION",
     "INPROGRESS",
     "Javadoc",
+    "Jsons",
     "JXSON",
     "MEASUREOBSERVATION",
     "MEASUREPOPULATION",
@@ -66,7 +67,7 @@
     "testng",
     "Unvalidated",
     "uscore"
-  ],
+],
   "cSpell.enabledLanguageIds": [
     "java",
     "json",

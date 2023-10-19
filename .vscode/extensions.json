@@ -12,6 +12,9 @@
   "unwantedRecommendations": [
     "alexr00.formatallfilesinworkspace",
     "esbenp.prettier-vscode",
-    "vscjava.vscode-java-pack"
+    "vscjava.vscode-java-pack",
+    "shengchen.vscode-checkstyle",
+    "SonarSource.sonarlint-vscode",
+    "redhat.java"
   ]
 }

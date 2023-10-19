@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
@@ -15,7 +15,6 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -51,10 +50,9 @@ public class Measures {
         bh.consume(this.when.then().report());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt =
                 new OptionsBuilder().include(Measures.class.getSimpleName()).build();
-        Collection<RunResult> runResults = new Runner(opt).run();
+        new Runner(opt).run();
     }
 }

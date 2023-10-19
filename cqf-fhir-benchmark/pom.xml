@@ -36,7 +36,6 @@
             <artifactId>cqf-fhir-cr</artifactId>
             <version>3.0.0-PRE9-SNAPSHOT</version>
             <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>

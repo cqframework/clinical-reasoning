@@ -1,17 +1,15 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
-
-import ca.uhn.fhir.context.FhirContext;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessorTests;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -21,11 +19,12 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @State(Scope.Benchmark)
 public class Questionnaires {
@@ -55,11 +54,10 @@ public class Questionnaires {
         bh.consume(this.result.populate());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Questionnaires.class.getSimpleName())
                 .build();
-        Collection<RunResult> runResults = new Runner(opt).run();
+        new Runner(opt).run();
     }
 }

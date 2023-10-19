@@ -1,16 +1,14 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
-
-import ca.uhn.fhir.context.FhirContext;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition;
 import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition.Apply;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -20,11 +18,12 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @State(Scope.Benchmark)
 public class PlanDefinitions {
@@ -56,11 +55,10 @@ public class PlanDefinitions {
         bh.consume(this.apply.applyR5());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(PlanDefinitions.class.getSimpleName())
                 .build();
-        Collection<RunResult> runResults = new Runner(opt).run();
+        new Runner(opt).run();
     }
 }

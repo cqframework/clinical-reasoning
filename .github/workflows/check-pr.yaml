@@ -13,7 +13,8 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
-          java-version: 19
+          java-version: '19'
+          cache: 'maven'
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
       - name: Compile tests

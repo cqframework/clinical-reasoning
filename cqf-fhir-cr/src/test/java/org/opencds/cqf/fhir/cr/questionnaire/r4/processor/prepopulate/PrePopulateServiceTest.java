@@ -46,7 +46,7 @@ class PrePopulateServiceTest {
 
     @BeforeEach
     void setup() {
-        myFixture.myOperationOutcome = new OperationOutcome();
+        myFixture.operationOutcome = new OperationOutcome();
     }
 
     @AfterEach
@@ -86,10 +86,10 @@ class PrePopulateServiceTest {
     }
 
     void validateOperationOutcomeResults(Questionnaire theActual) {
-        assertFalse(myFixture.myOperationOutcome.getIssue().isEmpty());
+        assertFalse(myFixture.operationOutcome.getIssue().isEmpty());
         final OperationOutcome contained =
                 (OperationOutcome) theActual.getContained().get(0);
-        assertEquals(myFixture.myOperationOutcome, contained);
+        assertEquals(myFixture.operationOutcome, contained);
     }
 
     void validateExtensions(Questionnaire theActual) {
@@ -256,9 +256,9 @@ class PrePopulateServiceTest {
         // execute
         myFixture.addExceptionToOperationOutcome(errorMessage);
         // validate
-        assertTrue(myFixture.myOperationOutcome.hasIssue());
+        assertTrue(myFixture.operationOutcome.hasIssue());
         final Optional<OperationOutcomeIssueComponent> issue =
-                myFixture.myOperationOutcome.getIssue().stream().findFirst();
+                myFixture.operationOutcome.getIssue().stream().findFirst();
         assertTrue(issue.isPresent());
         assertEquals(OperationOutcome.IssueType.EXCEPTION, issue.get().getCode());
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.get().getSeverity());

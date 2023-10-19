@@ -13,16 +13,16 @@ public class PrePopulateRequest {
     private final LibraryEngine libraryEngine;
 
     public PrePopulateRequest(
-            Questionnaire theQuestionnaire,
-            String thePatientId,
-            IBaseParameters theParameters,
-            IBaseBundle theBundle,
-            LibraryEngine theLibraryEngine) {
-        questionnaire = theQuestionnaire;
-        patientId = thePatientId;
-        parameters = theParameters;
-        bundle = theBundle;
-        libraryEngine = theLibraryEngine;
+            Questionnaire questionnaire,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            LibraryEngine libraryEngine) {
+        this.questionnaire = questionnaire;
+        this.patientId = patientId;
+        this.parameters = parameters;
+        this.bundle = bundle;
+        this.libraryEngine = libraryEngine;
     }
 
     public IBaseBundle getBundle() {

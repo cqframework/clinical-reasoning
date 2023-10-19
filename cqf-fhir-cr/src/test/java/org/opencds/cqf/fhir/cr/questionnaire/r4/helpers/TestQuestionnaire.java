@@ -60,7 +60,7 @@ public class TestQuestionnaire {
     }
 
     public static QuestionnaireProcessor buildProcessor(Repository repository) {
-        return QuestionnaireProcessor.of(repository, evaluationSettings);
+        return new QuestionnaireProcessor(repository, evaluationSettings);
     }
 
     /** Fluent interface starts here **/

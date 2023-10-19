@@ -11,29 +11,26 @@ import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
 public class PackageService {
-    final Repository myRepository;
+    final Repository repository;
 
-    public static PackageService of(Repository theRepository) {
-        return new PackageService(theRepository);
+    public PackageService(Repository  repository) {
+        this.repository = repository;
     }
 
-    private PackageService(Repository theRepository) {
-        myRepository = theRepository;
-    }
-
-    public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean isPut) {
+    public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
         // TODO: this is incomplete and needs to be abstracted further
         final Bundle bundle = new Bundle();
         bundle.setType(BundleType.TRANSACTION);
-        bundle.addEntry(PackageHelper.createEntry(theQuestionnaire, isPut));
-        var libraryExtension = theQuestionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
+        bundle.addEntry(PackageHelper.createEntry(questionnaire, isPut));
+        var libraryExtension = questionnaire.getExtensionByUrl(Constants.CQF_LIBRARY);
         if (libraryExtension != null) {
             var libraryCanonical = (CanonicalType) libraryExtension.getValue();
-            var library = (Library) SearchHelper.searchRepositoryByCanonical(myRepository, libraryCanonical);
+            var library = (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
             if (library != null) {
                 bundle.addEntry(PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), myRepository, isPut);
+                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(),
+                        repository, isPut);
                 }
             }
         }

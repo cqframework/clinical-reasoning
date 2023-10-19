@@ -17,12 +17,6 @@ public class ExpressionProcessorService {
     protected static final String EXCEPTION_MESSAGE_TEMPLATE =
             "Error encountered evaluating expression (%s) for item (%s): %s";
 
-    public static ExpressionProcessorService of() {
-        return new ExpressionProcessorService();
-    }
-
-    private ExpressionProcessorService() {}
-
     public Expression getInitialExpression(QuestionnaireItemComponent item) {
         if (item.hasExtension(Constants.CQF_EXPRESSION)) {
             return (Expression) item.getExtensionByUrl(Constants.CQF_EXPRESSION).getValue();
@@ -34,35 +28,35 @@ public class ExpressionProcessorService {
     }
 
     public List<IBase> getExpressionResult(
-            PrePopulateRequest thePrePopulateRequest, Expression theExpression, String theItemLinkId)
+            PrePopulateRequest prePopulateRequest, Expression expression, String itemLinkId)
             throws ResolveExpressionException {
-        if (theExpression == null || !theExpression.hasExpression()) {
+        if (expression == null || !expression.hasExpression()) {
             return new ArrayList<>();
         }
         try {
-            final CqfExpression cqfExpression = getCqfExpression(thePrePopulateRequest, theExpression);
-            return thePrePopulateRequest
+            final CqfExpression cqfExpression = getCqfExpression(prePopulateRequest, expression);
+            return prePopulateRequest
                     .getLibraryEngine()
                     .resolveExpression(
-                            thePrePopulateRequest.getPatientId(),
+                            prePopulateRequest.getPatientId(),
                             cqfExpression,
-                            thePrePopulateRequest.getParameters(),
-                            thePrePopulateRequest.getBundle());
+                            prePopulateRequest.getParameters(),
+                            prePopulateRequest.getBundle());
         } catch (Exception ex) {
             final String message = String.format(
-                    EXCEPTION_MESSAGE_TEMPLATE, theExpression.getExpression(), theItemLinkId, ex.getMessage());
+                    EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
             throw new ResolveExpressionException(message);
         }
     }
 
-    protected CqfExpression getCqfExpression(PrePopulateRequest thePrePopulateRequest, Expression theExpression) {
-        final String libraryUrl = getLibraryUrl(thePrePopulateRequest.getQuestionnaire());
-        return new CqfExpression(theExpression, libraryUrl, null);
+    protected CqfExpression getCqfExpression(PrePopulateRequest prePopulateRequest, Expression expression) {
+        final String libraryUrl = getLibraryUrl(prePopulateRequest.getQuestionnaire());
+        return new CqfExpression(expression, libraryUrl, null);
     }
 
-    protected String getLibraryUrl(Questionnaire theQuestionnaire) {
-        return theQuestionnaire.hasExtension(Constants.CQF_LIBRARY)
-                ? ((CanonicalType) theQuestionnaire
+    protected String getLibraryUrl(Questionnaire questionnaire) {
+        return questionnaire.hasExtension(Constants.CQF_LIBRARY)
+                ? ((CanonicalType) questionnaire
                                 .getExtensionByUrl(Constants.CQF_LIBRARY)
                                 .getValue())
                         .getValue()

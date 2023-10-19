@@ -88,7 +88,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         super(repository, evaluationSettings);
         this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-        this.myQuestionnaireProcessor = QuestionnaireProcessor.of(this.repository, evaluationSettings);
+        this.myQuestionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
         this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
     }
 

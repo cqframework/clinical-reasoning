@@ -14,22 +14,20 @@ import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilders;
 
 public class PrePopulateItem {
-    final ExpressionProcessorService myExpressionProcessorService;
+    final ExpressionProcessorService expressionProcessorService;
 
-    public static PrePopulateItem of() {
-        final ExpressionProcessorService expressionProcessorService = ExpressionProcessorService.of();
-        return new PrePopulateItem(expressionProcessorService);
+    public PrePopulateItem() {
+        this(new ExpressionProcessorService());
     }
-
-    private PrePopulateItem(ExpressionProcessorService theExpressionProcessorService) {
-        myExpressionProcessorService = theExpressionProcessorService;
+    private PrePopulateItem(ExpressionProcessorService expressionProcessorService) {
+        this.expressionProcessorService = expressionProcessorService;
     }
 
     protected QuestionnaireItemComponent processItem(
-            PrePopulateRequest thePrePopulateRequest, QuestionnaireItemComponent theQuestionnaireItem)
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem)
             throws ResolveExpressionException {
-        final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(theQuestionnaireItem);
-        final List<IBase> expressionResults = getExpressionResults(thePrePopulateRequest, populatedItem);
+        final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(questionnaireItem);
+        final List<IBase> expressionResults = getExpressionResults(prePopulateRequest, populatedItem);
         expressionResults.forEach(result -> {
             populatedItem.addExtension(ExtensionBuilders.questionnaireResponseAuthorExtension());
             populatedItem.addInitial(
@@ -38,18 +36,18 @@ public class PrePopulateItem {
         return populatedItem;
     }
 
-    protected QuestionnaireItemComponent copyQuestionnaireItem(QuestionnaireItemComponent theQuestionnaireItem) {
-        return theQuestionnaireItem.copy();
+    protected QuestionnaireItemComponent copyQuestionnaireItem(QuestionnaireItemComponent questionnaireItem) {
+        return questionnaireItem.copy();
     }
 
     protected List<IBase> getExpressionResults(
-            PrePopulateRequest thePrePopulateRequest, QuestionnaireItemComponent theQuestionnaireItem)
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem)
             throws ResolveExpressionException {
-        final Expression initialExpression = myExpressionProcessorService.getInitialExpression(theQuestionnaireItem);
+        final Expression initialExpression = expressionProcessorService.getInitialExpression(questionnaireItem);
         if (initialExpression != null) {
             // evaluate expression and set the result as the initialAnswer on the item
-            final List<IBase> expressionResult = myExpressionProcessorService.getExpressionResult(
-                    thePrePopulateRequest, initialExpression, theQuestionnaireItem.getLinkId());
+            final List<IBase> expressionResult = expressionProcessorService.getExpressionResult(
+                    prePopulateRequest, initialExpression, questionnaireItem.getLinkId());
             return expressionResult.stream().filter(Objects::nonNull).collect(Collectors.toList());
         }
         return new ArrayList<>();

@@ -38,7 +38,7 @@ class ExpressionProcessorServiceTest {
 
     @Spy
     @InjectMocks
-    private final ExpressionProcessorService myFixture = ExpressionProcessorService.of();
+    private final ExpressionProcessorService myFixture = new ExpressionProcessorService();
 
     @Test
     void getInitialExpressionShouldReturnExpressionIfItemHasCqfExpressionExtension() {

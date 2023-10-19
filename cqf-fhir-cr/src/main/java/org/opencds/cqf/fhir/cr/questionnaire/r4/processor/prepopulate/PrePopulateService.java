@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
@@ -12,56 +13,60 @@ import org.slf4j.LoggerFactory;
 
 public class PrePopulateService {
     protected static final Logger logger = LoggerFactory.getLogger(PrePopulateService.class);
-    final PrePopulateItem myPrePopulateItem;
-    final PrePopulateItemWithExtension myPrePopulateItemWithExtension;
-    OperationOutcome myOperationOutcome;
+    private final PrePopulateItem prePopulateItem;
+    private final PrePopulateItemWithExtension prePopulateItemWithExtension;
+    OperationOutcome operationOutcome;
 
-    public static PrePopulateService of() {
-        final PrePopulateItem prePopulateItem = PrePopulateItem.of();
-        final PrePopulateItemWithExtension prePopulateItemWithExtension = PrePopulateItemWithExtension.of();
-        return new PrePopulateService(prePopulateItem, prePopulateItemWithExtension);
+    public PrePopulateService() {
+        this(new PrePopulateItem(), new PrePopulateItemWithExtension());
     }
 
     private PrePopulateService(
-            PrePopulateItem thePrePopulateItem, PrePopulateItemWithExtension thePrePopulateItemWithExtension) {
-        myPrePopulateItem = thePrePopulateItem;
-        myPrePopulateItemWithExtension = thePrePopulateItemWithExtension;
+        PrePopulateItem prePopulateItem,
+        PrePopulateItemWithExtension prePopulateItemWithExtension
+    ) {
+        this.prePopulateItem = prePopulateItem;
+        this.prePopulateItemWithExtension = prePopulateItemWithExtension;
     }
 
-    public Questionnaire prePopulate(PrePopulateRequest thePrePopulateRequest) {
-        final String questionnaireId = getQuestionnaireId(thePrePopulateRequest);
-        this.myOperationOutcome = getBaseOperationOutcome(questionnaireId);
+    public Optional<OperationOutcome> getOperationOutcome() {
+        return Optional.ofNullable(operationOutcome);
+    }
+
+    public Questionnaire prePopulate(PrePopulateRequest prePopulateRequest) {
+        final String questionnaireId = getQuestionnaireId(prePopulateRequest);
+        this.operationOutcome = getBaseOperationOutcome(questionnaireId);
         final Questionnaire prepopulatedQuestionnaire =
-                thePrePopulateRequest.getQuestionnaire().copy();
+                prePopulateRequest.getQuestionnaire().copy();
         prepopulatedQuestionnaire.setId(questionnaireId);
         prepopulatedQuestionnaire.addExtension(
-                ExtensionBuilders.prepopulateSubjectExtension(thePrePopulateRequest.getPatientId()));
+                ExtensionBuilders.prepopulateSubjectExtension(prePopulateRequest.getPatientId()));
         final List<QuestionnaireItemComponent> processedItems = processItems(
-                thePrePopulateRequest, thePrePopulateRequest.getQuestionnaire().getItem());
+                prePopulateRequest, prePopulateRequest.getQuestionnaire().getItem());
         prepopulatedQuestionnaire.setItem(processedItems);
-        if (!myOperationOutcome.getIssue().isEmpty()) {
-            prepopulatedQuestionnaire.addContained(myOperationOutcome);
+        if (!operationOutcome.getIssue().isEmpty()) {
+            prepopulatedQuestionnaire.addContained(operationOutcome);
             prepopulatedQuestionnaire.addExtension(
-                    ExtensionBuilders.crmiMessagesExtension(myOperationOutcome.getIdPart()));
+                    ExtensionBuilders.crmiMessagesExtension(operationOutcome.getIdPart()));
         }
         return prepopulatedQuestionnaire;
     }
 
     List<QuestionnaireItemComponent> processItems(
-            PrePopulateRequest thePrePopulateRequest, List<QuestionnaireItemComponent> questionnaireItems) {
+            PrePopulateRequest prePopulateRequest, List<QuestionnaireItemComponent> questionnaireItems) {
         final List<QuestionnaireItemComponent> populatedItems = new ArrayList<>();
         questionnaireItems.forEach(item -> {
             if (item.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)) {
-                populatedItems.addAll(prePopulateItemWithExtension(thePrePopulateRequest, item));
+                populatedItems.addAll(prePopulateItemWithExtension(prePopulateRequest, item));
             } else {
                 final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(item);
                 if (item.hasItem()) {
                     final List<QuestionnaireItemComponent> processedSubItems =
-                            processItems(thePrePopulateRequest, item.getItem());
+                            processItems(prePopulateRequest, item.getItem());
                     populatedItem.setItem(processedSubItems);
                     populatedItems.add(populatedItem);
                 } else {
-                    populatedItems.add(prePopulateItem(thePrePopulateRequest, populatedItem));
+                    populatedItems.add(prePopulateItem(prePopulateRequest, populatedItem));
                 }
             }
         });
@@ -69,49 +74,49 @@ public class PrePopulateService {
     }
 
     List<QuestionnaireItemComponent> prePopulateItemWithExtension(
-            PrePopulateRequest thePrePopulateRequest, QuestionnaireItemComponent theItem) {
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem) {
         try {
             // extension value is the context resource we're using to populate
             // Expression-based Population
-            return myPrePopulateItemWithExtension.processItem(thePrePopulateRequest, theItem);
+            return prePopulateItemWithExtension.processItem(prePopulateRequest, questionnaireItem);
         } catch (ResolveExpressionException e) {
             // would return empty list if exception thrown
             addExceptionToOperationOutcome(e.getMessage());
-            return new ArrayList<>();
+            return List.of();
         }
     }
 
     QuestionnaireItemComponent prePopulateItem(
-            PrePopulateRequest thePrePopulateRequest, QuestionnaireItemComponent theItem) {
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem) {
         try {
-            return myPrePopulateItem.processItem(thePrePopulateRequest, theItem);
+            return prePopulateItem.processItem(prePopulateRequest, questionnaireItem);
         } catch (ResolveExpressionException e) {
             // would return just the item.copy if exception thrown
             addExceptionToOperationOutcome(e.getMessage());
-            return theItem.copy();
+            return questionnaireItem.copy();
         }
     }
 
-    void addExceptionToOperationOutcome(String theExceptionMessage) {
-        logger.error(theExceptionMessage);
-        myOperationOutcome
+    void addExceptionToOperationOutcome(String exceptionMessage) {
+        logger.error(exceptionMessage);
+        operationOutcome
                 .addIssue()
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                .setDiagnostics(theExceptionMessage);
+                .setDiagnostics(exceptionMessage);
     }
 
-    OperationOutcome getBaseOperationOutcome(String theQuestionnaireId) {
-        OperationOutcome operationOutcome = new OperationOutcome();
-        operationOutcome.setId("populate-outcome-" + theQuestionnaireId);
-        return operationOutcome;
+    OperationOutcome getBaseOperationOutcome(String questionnaireId) {
+        OperationOutcome baseOperationOutcome = new OperationOutcome();
+        baseOperationOutcome.setId("populate-outcome-" + questionnaireId);
+        return baseOperationOutcome;
     }
 
-    String getQuestionnaireId(PrePopulateRequest thePrePopulateRequest) {
-        return thePrePopulateRequest.getQuestionnaire().getIdPart() + "-" + thePrePopulateRequest.getPatientId();
+    String getQuestionnaireId(PrePopulateRequest prePopulateRequest) {
+        return prePopulateRequest.getQuestionnaire().getIdPart() + "-" + prePopulateRequest.getPatientId();
     }
 
-    QuestionnaireItemComponent copyQuestionnaireItem(QuestionnaireItemComponent theQuestionnaireItem) {
-        return theQuestionnaireItem.copy();
+    QuestionnaireItemComponent copyQuestionnaireItem(QuestionnaireItemComponent questionnaireItem) {
+        return questionnaireItem.copy();
     }
 }

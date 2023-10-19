@@ -10,14 +10,10 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
 public class ResolveService {
-    final Repository myRepository;
+    final Repository repository;
 
-    public static ResolveService of(Repository theRepository) {
-        return new ResolveService(theRepository);
-    }
-
-    private ResolveService(Repository theRepository) {
-        myRepository = theRepository;
+    public ResolveService(Repository repository) {
+        this.repository = repository;
     }
 
     public <C extends IPrimitiveType<String>> Questionnaire resolve(
@@ -25,8 +21,8 @@ public class ResolveService {
         var baseQuestionnaire = questionnaire;
         if (baseQuestionnaire == null) {
             baseQuestionnaire = id != null
-                    ? myRepository.read(Questionnaire.class, id)
-                    : (Questionnaire) SearchHelper.searchRepositoryByCanonical(myRepository, canonical);
+                    ? repository.read(Questionnaire.class, id)
+                    : (Questionnaire) SearchHelper.searchRepositoryByCanonical(repository, canonical);
         }
         return castOrThrow(
                         baseQuestionnaire,

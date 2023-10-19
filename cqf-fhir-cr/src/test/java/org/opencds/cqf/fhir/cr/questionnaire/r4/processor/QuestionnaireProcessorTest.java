@@ -59,7 +59,7 @@ class QuestionnaireProcessorTest {
 
     @Spy
     @InjectMocks
-    private QuestionnaireProcessor myFixture = QuestionnaireProcessor.of(myRepository);
+    private QuestionnaireProcessor myFixture = new QuestionnaireProcessor(myRepository);
 
     @AfterEach
     void tearDown() {

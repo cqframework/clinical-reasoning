@@ -33,7 +33,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 @ExtendWith(MockitoExtension.class)
 class PopulateServiceTest {
     @Spy
-    private final PopulateService myFixture = PopulateService.of();
+    private final PopulateService myFixture = new PopulateService();
 
     @Test
     void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFields() {

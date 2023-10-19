@@ -17,44 +17,38 @@ import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilder
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateService {
-    public static PopulateService of() {
-        return new PopulateService();
-    }
-
-    private PopulateService() {}
-
     public QuestionnaireResponse populate(
-            Questionnaire theOriginalQuestionnaire, Questionnaire thePrePopulatedQuestionnaire, String thePatientId) {
+            Questionnaire originalQuestionnaire, Questionnaire prePopulatedQuestionnaire, String patientId) {
         final QuestionnaireResponse response = new QuestionnaireResponse();
-        response.setId(thePrePopulatedQuestionnaire.getIdPart() + "-response");
+        response.setId(prePopulatedQuestionnaire.getIdPart() + "-response");
         final Optional<OperationOutcome> operationOutcome =
-                getOperationOutcomeFromPrePopulatedQuestionnaire(thePrePopulatedQuestionnaire);
-        if (thePrePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
+                getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
+        if (prePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
             response.addContained(operationOutcome.get());
             response.addExtension(ExtensionBuilders.crmiMessagesExtension(
                     operationOutcome.get().getIdPart()));
         }
-        response.addContained(thePrePopulatedQuestionnaire);
-        response.addExtension(ExtensionBuilders.dtrQuestionnaireResponseExtension(thePrePopulatedQuestionnaire));
-        response.setQuestionnaire(theOriginalQuestionnaire.getUrl());
+        response.addContained(prePopulatedQuestionnaire);
+        response.addExtension(ExtensionBuilders.dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire));
+        response.setQuestionnaire(originalQuestionnaire.getUrl());
         response.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
-        response.setSubject(new Reference(new IdType("Patient", thePatientId)));
-        response.setItem(processResponseItems(thePrePopulatedQuestionnaire.getItem()));
+        response.setSubject(new Reference(new IdType("Patient", patientId)));
+        response.setItem(processResponseItems(prePopulatedQuestionnaire.getItem()));
         return response;
     }
 
     protected Optional<OperationOutcome> getOperationOutcomeFromPrePopulatedQuestionnaire(
-            Questionnaire thePrePopulatedQuestionnaire) {
-        return thePrePopulatedQuestionnaire.getContained().stream()
+            Questionnaire prePopulatedQuestionnaire) {
+        return prePopulatedQuestionnaire.getContained().stream()
                 .filter(theResource -> theResource.getResourceType() == ResourceType.OperationOutcome)
                 .map(OperationOutcome.class::cast)
                 .filter(this::filterOperationOutcome)
                 .findFirst();
     }
 
-    protected boolean filterOperationOutcome(OperationOutcome theOperationOutcome) {
-        if (theOperationOutcome.hasIssue()) {
-            final List<OperationOutcomeIssueComponent> filteredIssues = theOperationOutcome.getIssue().stream()
+    protected boolean filterOperationOutcome(OperationOutcome operationOutcome) {
+        if (operationOutcome.hasIssue()) {
+            final List<OperationOutcomeIssueComponent> filteredIssues = operationOutcome.getIssue().stream()
                     .filter(theIssue -> theIssue.getCode() == OperationOutcome.IssueType.EXCEPTION
                             && theIssue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
                     .collect(Collectors.toList());
@@ -64,37 +58,37 @@ public class PopulateService {
     }
 
     protected List<QuestionnaireResponseItemComponent> processResponseItems(
-            List<QuestionnaireItemComponent> theQuestionnaireItems) {
-        return theQuestionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
+            List<QuestionnaireItemComponent> questionnaireItems) {
+        return questionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 
-    protected QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent theQuestionnaireItem) {
+    protected QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent questionnaireItem) {
         QuestionnaireResponseItemComponent responseItem =
-                new QuestionnaireResponseItemComponent(theQuestionnaireItem.getLinkIdElement());
-        responseItem.setDefinition(theQuestionnaireItem.getDefinition());
-        responseItem.setTextElement(theQuestionnaireItem.getTextElement());
-        if (theQuestionnaireItem.hasItem()) {
+                new QuestionnaireResponseItemComponent(questionnaireItem.getLinkIdElement());
+        responseItem.setDefinition(questionnaireItem.getDefinition());
+        responseItem.setTextElement(questionnaireItem.getTextElement());
+        if (questionnaireItem.hasItem()) {
             final List<QuestionnaireResponseItemComponent> nestedResponseItems =
-                    processResponseItems(theQuestionnaireItem.getItem());
+                    processResponseItems(questionnaireItem.getItem());
             responseItem.setItem(nestedResponseItems);
-        } else if (theQuestionnaireItem.hasInitial()) {
-            responseItem = setAnswersForInitial(theQuestionnaireItem, responseItem);
+        } else if (questionnaireItem.hasInitial()) {
+            responseItem = setAnswersForInitial(questionnaireItem, responseItem);
         }
         return responseItem;
     }
 
     protected QuestionnaireResponseItemComponent setAnswersForInitial(
-            QuestionnaireItemComponent theQuestionnaireItem,
-            QuestionnaireResponseItemComponent theQuestionnaireResponseItem) {
-        if (theQuestionnaireItem.hasExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR)) {
-            theQuestionnaireResponseItem.addExtension(
-                    theQuestionnaireItem.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
+            QuestionnaireItemComponent questionnaireItem,
+            QuestionnaireResponseItemComponent questionnaireResponseItem) {
+        if (questionnaireItem.hasExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR)) {
+            questionnaireResponseItem.addExtension(
+                    questionnaireItem.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
         }
-        theQuestionnaireItem.getInitial().forEach(initial -> {
+        questionnaireItem.getInitial().forEach(initial -> {
             final QuestionnaireResponseItemAnswerComponent answer =
                     new QuestionnaireResponseItemAnswerComponent().setValue(initial.getValue());
-            theQuestionnaireResponseItem.addAnswer(answer);
+            questionnaireResponseItem.addAnswer(answer);
         });
-        return theQuestionnaireResponseItem;
+        return questionnaireResponseItem;
     }
 }

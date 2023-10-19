@@ -21,84 +21,81 @@ import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulat
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveService;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-    protected PopulateService myPopulateService;
-    protected ResolveService myResolveService;
-    protected PackageService myPackageService;
-    protected PrePopulateService myPrePopulateService;
+    protected PopulateService populateService;
+    protected ResolveService resolveService;
+    protected PackageService packageService;
+    protected PrePopulateService prePopulateService;
 
-    public static QuestionnaireProcessor of(Repository theRepository, EvaluationSettings theEvaluationSettings) {
-        final ResolveService resolveService = ResolveService.of(theRepository);
-        final PackageService packageService = PackageService.of(theRepository);
-        final PopulateService populateService = PopulateService.of();
-        final PrePopulateService prePopulateService = PrePopulateService.of();
-        return new QuestionnaireProcessor(
-                theRepository,
-                theEvaluationSettings,
-                resolveService,
-                packageService,
-                populateService,
-                prePopulateService);
+    public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+        this(repository,
+            evaluationSettings,
+            new ResolveService(repository),
+            new PackageService(repository),
+            new PopulateService(),
+            new PrePopulateService()
+        );
     }
 
-    public static QuestionnaireProcessor of(Repository repository) {
-        return of(repository, EvaluationSettings.getDefault());
+    public QuestionnaireProcessor(Repository repository) {
+       this(repository, EvaluationSettings.getDefault());
     }
 
-    public QuestionnaireProcessor(
-            Repository theRepository,
-            EvaluationSettings theEvaluationSettings,
-            ResolveService theResolveService,
-            PackageService thePackageService,
-            PopulateService thePopulateService,
-            PrePopulateService thePrePopulateService) {
-        super(theRepository, theEvaluationSettings);
-        myResolveService = theResolveService;
-        myPackageService = thePackageService;
-        myPopulateService = thePopulateService;
-        myPrePopulateService = thePrePopulateService;
+    private QuestionnaireProcessor(
+            Repository repository,
+            EvaluationSettings evaluationSettings,
+            ResolveService resolveService,
+            PackageService packageService,
+            PopulateService populateService,
+            PrePopulateService prePopulateService
+    ) {
+        super(repository, evaluationSettings);
+        this.resolveService = resolveService;
+        this.packageService = packageService;
+        this.populateService = populateService;
+        this.prePopulateService = prePopulateService;
     }
 
     @Override
     public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
-            IIdType theId, C theCanonical, IBaseResource theQuestionnaire) {
-        return myResolveService.resolve(theId, theCanonical, theQuestionnaire);
+            IIdType id, C canonical, IBaseResource questionnaire) {
+        return resolveService.resolve(id, canonical, questionnaire);
     }
 
     @Override
     public Questionnaire prePopulate(
-            Questionnaire theQuestionnaire,
-            String thePatientId,
-            IBaseParameters theParameters,
-            IBaseBundle theBundle,
-            LibraryEngine theLibraryEngine) {
-        requireNonNull(theQuestionnaire);
-        requireNonNull(theLibraryEngine);
+            Questionnaire questionnaire,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            LibraryEngine libraryEngine) {
+        requireNonNull(questionnaire);
+        requireNonNull(libraryEngine);
         final PrePopulateRequest prePopulateRequest =
-                new PrePopulateRequest(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
-        return myPrePopulateService.prePopulate(prePopulateRequest);
+                new PrePopulateRequest(questionnaire, patientId, parameters, bundle, libraryEngine);
+        return prePopulateService.prePopulate(prePopulateRequest);
     }
 
     @Override
     public IBaseResource populate(
-            Questionnaire theQuestionnaire,
-            String thePatientId,
-            IBaseParameters theParameters,
-            IBaseBundle theBundle,
-            LibraryEngine theLibraryEngine) {
+            Questionnaire questionnaire,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            LibraryEngine libraryEngine) {
         final Questionnaire prePopulatedQuestionnaire =
-                prePopulate(theQuestionnaire, thePatientId, theParameters, theBundle, theLibraryEngine);
-        return myPopulateService.populate(theQuestionnaire, prePopulatedQuestionnaire, thePatientId);
+                prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
+        return populateService.populate(questionnaire, prePopulatedQuestionnaire, patientId);
     }
 
     @Override
-    public Questionnaire generateQuestionnaire(String theId) {
+    public Questionnaire generateQuestionnaire(String id) {
         var questionnaire = new Questionnaire();
-        questionnaire.setId(new IdType("Questionnaire", theId));
+        questionnaire.setId(new IdType("Questionnaire", id));
         return questionnaire;
     }
 
     @Override
-    public Bundle packageQuestionnaire(Questionnaire theQuestionnaire, boolean isPut) {
-        return myPackageService.packageQuestionnaire(theQuestionnaire, isPut);
+    public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
+        return packageService.packageQuestionnaire(questionnaire, isPut);
     }
 }

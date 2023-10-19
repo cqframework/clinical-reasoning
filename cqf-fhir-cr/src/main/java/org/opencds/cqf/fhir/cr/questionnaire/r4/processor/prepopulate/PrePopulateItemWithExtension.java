@@ -18,45 +18,42 @@ import org.opencds.cqf.fhir.utility.Constants;
 public class PrePopulateItemWithExtension {
     // TODO: we don't have any resources that are currently using this
     // not writing unit tests till there is a practical implementation
-    private final ExpressionProcessorService myExpressionProcessorService;
-
-    public static PrePopulateItemWithExtension of() {
-        final ExpressionProcessorService expressionProcessorService = ExpressionProcessorService.of();
-        return new PrePopulateItemWithExtension(expressionProcessorService);
+    private final ExpressionProcessorService expressionProcessorService;
+    public PrePopulateItemWithExtension() {
+        this(new ExpressionProcessorService());
     }
-
-    private PrePopulateItemWithExtension(ExpressionProcessorService theExpressionProcessorService) {
-        myExpressionProcessorService = theExpressionProcessorService;
+    private PrePopulateItemWithExtension(ExpressionProcessorService expressionProcessorService) {
+        this.expressionProcessorService = expressionProcessorService;
     }
 
     protected List<QuestionnaireItemComponent> processItem(
-            PrePopulateRequest thePrePopulateRequest, QuestionnaireItemComponent theQuestionnaireGroupItem)
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem)
             throws ResolveExpressionException {
-        final Expression contextExpression = (Expression) theQuestionnaireGroupItem
+        final Expression contextExpression = (Expression) questionnaireItem
                 .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)
                 .getValue();
-        final List<IBase> populationContext = myExpressionProcessorService.getExpressionResult(
-                thePrePopulateRequest, contextExpression, theQuestionnaireGroupItem.getLinkId());
+        final List<IBase> populationContext = expressionProcessorService.getExpressionResult(
+                prePopulateRequest, contextExpression, questionnaireItem.getLinkId());
         return populationContext.stream()
-                .map(context -> processPopulationContext(theQuestionnaireGroupItem, context))
+                .map(context -> processPopulationContext(questionnaireItem, context))
                 .collect(Collectors.toList());
     }
 
     protected QuestionnaireItemComponent processPopulationContext(
-            QuestionnaireItemComponent theQuestionnaireGroupItem, IBase theContext) {
-        final QuestionnaireItemComponent contextItem = copyItemWithNoSubItems(theQuestionnaireGroupItem);
-        theQuestionnaireGroupItem.getItem().forEach(item -> {
-            final QuestionnaireItemComponent processedSubItem = createNewQuestionnaireItemComponent(item, theContext);
+            QuestionnaireItemComponent questionnaireGroupItem, IBase context) {
+        final QuestionnaireItemComponent contextItem = copyItemWithNoSubItems(questionnaireGroupItem);
+        questionnaireGroupItem.getItem().forEach(item -> {
+            final QuestionnaireItemComponent processedSubItem = createNewQuestionnaireItemComponent(item, context);
             contextItem.addItem(processedSubItem);
         });
         return contextItem;
     }
 
     protected QuestionnaireItemComponent createNewQuestionnaireItemComponent(
-            QuestionnaireItemComponent theQuestionnaireItemComponent, IBase theContext) {
-        final QuestionnaireItemComponent item = theQuestionnaireItemComponent.copy();
+            QuestionnaireItemComponent questionnaireItem, IBase context) {
+        final QuestionnaireItemComponent item = questionnaireItem.copy();
         final String path = item.getDefinition().split("#")[1].split("\\.")[1];
-        final Property initialProperty = ((Base) theContext).getNamedProperty(path);
+        final Property initialProperty = ((Base) context).getNamedProperty(path);
         if (initialProperty.hasValues() && !initialProperty.isList()) {
             final Type initialValue =
                     transformValue((Type) initialProperty.getValues().get(0));
@@ -68,8 +65,8 @@ public class PrePopulateItemWithExtension {
         return item;
     }
 
-    protected QuestionnaireItemComponent copyItemWithNoSubItems(QuestionnaireItemComponent theQuestionnaireItem) {
-        final QuestionnaireItemComponent questionnaireItemComponent = theQuestionnaireItem.copy();
+    protected QuestionnaireItemComponent copyItemWithNoSubItems(QuestionnaireItemComponent questionnaireItem) {
+        final QuestionnaireItemComponent questionnaireItemComponent = questionnaireItem.copy();
         questionnaireItemComponent.setItem(new ArrayList<>());
         return questionnaireItemComponent;
     }

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.benchmark;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.concurrent.TimeUnit;
-
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
@@ -20,8 +20,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import ca.uhn.fhir.context.FhirContext;
 
 @State(Scope.Benchmark)
 public class TerminologyProviders {

@@ -1,25 +1,24 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.r5;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.json.JSONException;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R5);

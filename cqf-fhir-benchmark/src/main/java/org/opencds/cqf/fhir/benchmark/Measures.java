@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.benchmark;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;

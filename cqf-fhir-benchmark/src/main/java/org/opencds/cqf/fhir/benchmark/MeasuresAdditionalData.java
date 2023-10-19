@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.benchmark;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
@@ -21,8 +21,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import ca.uhn.fhir.context.FhirContext;
 
 @State(Scope.Benchmark)
 public class MeasuresAdditionalData {

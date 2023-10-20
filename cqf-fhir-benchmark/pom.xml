@@ -68,6 +68,9 @@
                     <configuration>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-implicit:class</arg>
+                        </compilerArgs>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.openjdk.jmh</groupId>

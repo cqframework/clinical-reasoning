@@ -7,15 +7,15 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
-import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     private final Repository repository;
@@ -48,28 +48,77 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         var bt = (Class<? extends IBaseBundle>)
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
-        // TODO: Like TerminologyMode, we should detect supported search parameters from the underlying repository if
-        // possible. And then offload only the supported ones.
-        var filterMode = this.getRetrieveSettings().getFilterMode();
-        if (filterMode == FILTER_MODE.REPOSITORY || filterMode == FILTER_MODE.AUTO) { // TODO: The auto logic here..
-            Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-            populateTemplateSearchParams(searchParams, templateId);
-            populateContextSearchParams(searchParams, dataType, contextPath, context, contextValue);
-            populateTerminologySearchParams(searchParams, dataType, codePath, codes, valueSet);
-            populateDateSearchParams(searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
-            var resources = this.repository.search(bt, resourceType, searchParams);
+        var config = new SearchConfig();
+        this.configureTerminology(config, dataType, codePath, codes, valueSet);
+        this.configureContext(config, dataType, context, contextPath, contextValue);
+        this.configureProfile(config, templateId);
+        this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
 
-            return new BundleMappingIterable<>(repository, resources, p -> p.getResource());
-        } else {
-            var resources = this.repository.search(bt, resourceType, Searches.ALL);
-            var iter = new BundleIterable<IBaseBundle>(repository, resources);
-            return iter.toStream()
-                    .map(x -> x.getResource())
-                    .filter(filterByTemplateId(dataType, templateId))
-                    .filter(filterByContext(dataType, context, contextPath, contextValue))
-                    .filter(filterByTerminology(dataType, codePath, codes, valueSet))
-                    // TODO: filter by date search
-                    .collect(Collectors.toList());
+        var resources = this.repository.search(bt, resourceType, config.searchParams);
+        var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
+        return iter.toStream().filter(config.filter).collect(Collectors.toList());
+    }
+
+    private void configureProfile(SearchConfig config, String templateId) {
+        var mode = this.getRetrieveSettings().getFilterMode();
+        switch (mode) {
+            case INTERNAL:
+                config.filter = config.filter.and(filterByTemplateId(templateId, templateId));
+                break;
+            default:
+                // TODO: offload detection based on CapabilityStatement
+                populateTemplateSearchParams(config.searchParams, templateId);
         }
+    }
+
+    private void configureContext(
+            SearchConfig config, String dataType, String contextPath, String context, Object contextValue) {
+        var mode = this.getRetrieveSettings().getFilterMode();
+        switch (mode) {
+            case INTERNAL:
+                config.filter = config.filter.and(filterByContext(dataType, context, contextPath, contextValue));
+                break;
+            default:
+                // TODO: offload detection based on CapabilityStatement
+                populateContextSearchParams(config.searchParams, dataType, contextPath, context, contextValue);
+        }
+    }
+
+    private void configureTerminology(
+            SearchConfig config, String dataType, String codePath, Iterable<Code> codes, String valueSet) {
+        var mode = this.getRetrieveSettings().getFilterMode();
+        switch (mode) {
+            case INTERNAL:
+                config.filter = config.filter.and(filterByTerminology(dataType, codePath, codes, valueSet));
+                break;
+            default:
+                // TODO: offload detection based on CapabilityStatement
+                populateTerminologySearchParams(config.searchParams, dataType, codePath, codes, valueSet);
+        }
+    }
+
+    private void configureDates(
+            SearchConfig config,
+            String dataType,
+            String datePath,
+            String dateLowPath,
+            String dateHighPath,
+            Interval dateRange) {
+        var mode = this.getRetrieveSettings().getFilterMode();
+        switch (mode) {
+            case INTERNAL:
+                if (datePath != null) {
+                    throw new UnsupportedOperationException("in-memory dateFilters are not supported");
+                }
+                break;
+            default:
+                // TODO: offload detection based on CapabilityStatement
+                populateDateSearchParams(config.searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
+        }
+    }
+
+    private class SearchConfig {
+        public Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+        public Predicate<IBaseResource> filter = x -> true;
     }
 }

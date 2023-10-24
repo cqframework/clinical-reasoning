@@ -138,6 +138,8 @@ public class LibraryConstructor {
             throw new IllegalArgumentException(
                     "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
+
+        // TODO: Use the namespace manager here to do the mapping?
         String cqlNamespaceUrl = urlSplit[0];
 
         String cqlName = urlSplit[1];

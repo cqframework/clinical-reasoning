@@ -1,16 +1,14 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessorTests;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
+import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition;
+import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition.Apply;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
@@ -21,45 +19,45 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State(Scope.Benchmark)
-public class Questionnaires {
+public class PlanDefinitions {
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
     private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(
-            FHIR_CONTEXT, QuestionnaireProcessorTests.class, TestQuestionnaire.CLASS_PATH + "/pa-aslp");
+            FHIR_CONTEXT, PlanDefinition.Assert.class, PlanDefinition.CLASS_PATH + "/anc-dak");
 
-    private QuestionnaireResult result;
+    private Apply apply;
 
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
-        this.result = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
+        this.apply = PlanDefinition.Assert.that(
+                        "ANCDT17",
+                        "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+                        "Encounter/helloworld-patient-1-encounter-1",
+                        null)
                 .withRepository(REPOSITORY)
-                .withParameters(parameters(
-                        stringPart("Service Request Id", "SleepStudy"),
-                        stringPart("Service Request Id", "SleepStudy2"),
-                        stringPart("Coverage Id", "Coverage-positive")));
+                .withParameters(parameters(part("encounter", "helloworld-patient-1-encounter-1")))
+                .withExpectedBundleId(new IdType("Bundle", "ANCDT17"));
     }
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 10, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize
         // away this call, which does nothing with the result of the evaluation
-        bh.consume(this.result.populate());
+        bh.consume(this.apply.applyR5());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(Questionnaires.class.getSimpleName())
+                .include(PlanDefinitions.class.getSimpleName())
                 .build();
-        Collection<RunResult> runResults = new Runner(opt).run();
+        new Runner(opt).run();
     }
 }

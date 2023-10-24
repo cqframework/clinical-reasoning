@@ -15,9 +15,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
+
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.2.1-SNAPSHOT</cql.version>
+        <cql.version>3.3.0-SNAPSHOT</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>5.3.23</spring.version>
         <fhir-core.version>6.0.22</fhir-core.version>
@@ -348,13 +350,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.9.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -383,17 +383,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <release>11</release>
-                        <source>11</source>
-                        <target>11</target>
-                        <failOnError>true</failOnError>
-<!--                        <failOnWarning>true</failOnWarning>-->
+                        <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
-                        <compilerArgs>
-                            <arg>-Xlint:all,-processing</arg>
-<!--                            <arg>-Werror</arg>-->
-                            <arg>-implicit:none</arg>
-                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>

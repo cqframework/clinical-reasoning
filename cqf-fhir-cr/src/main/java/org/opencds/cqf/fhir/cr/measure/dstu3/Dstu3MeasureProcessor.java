@@ -94,7 +94,7 @@ public class Dstu3MeasureProcessor {
 
         var evalType = MeasureEvalType.fromCode(reportType)
                 .orElse(
-                        subjectIds.get(0) == null || subjectIds == null || subjectIds.isEmpty()
+                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 

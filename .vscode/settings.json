@@ -110,5 +110,7 @@
     "MD007": {
       "indent": 4
     }
-  }
+},
+"java.compile.nullAnalysis.mode": "automatic",
+"java.configuration.updateBuildConfiguration": "automatic"
 }

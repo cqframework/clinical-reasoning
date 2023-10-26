@@ -16,9 +16,7 @@ jobs:
           java-version: '19'
           cache: 'maven'
       - name: Compile
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
-      - name: Compile tests
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
+        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 compile test-compile
       - name: Tests and additional checks
         run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: Publish test report

@@ -42,8 +42,5 @@
     "given": [ "Jill" ]
   } ],
   "gender": "female",
-  "birthDate": "1963-09-13",
-  "generalPractitioner": {
-    "reference": "Practitioner/exm108-practitioner-2"
-  }
+  "birthDate": "1963-09-13"
 }

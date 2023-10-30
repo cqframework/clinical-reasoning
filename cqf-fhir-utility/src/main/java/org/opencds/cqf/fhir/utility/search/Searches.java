@@ -25,14 +25,6 @@ public class Searches {
         return new SearchBuilder();
     }
 
-    public static Map<String, List<IQueryParameterType>> byId(String... ids) {
-        return builder().withTokenParam("_id", ids).build();
-    }
-
-    public static Map<String, List<IQueryParameterType>> byId(String id) {
-        return builder().withTokenParam("_id", id).build();
-    }
-
     public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
         if (canonical.contains("|")) {
             var split = canonical.split("|");
@@ -116,12 +108,14 @@ public class Searches {
             return this;
         }
 
-        SearchBuilder withTokenParam(String name, String... values) {
+        SearchBuilder withTokenParam(String name, String value, String... values) {
             if (this.values == null) {
                 this.values = new HashMap<>();
             }
 
             var params = new ArrayList<IQueryParameterType>(1 + values.length);
+            params.add(new TokenParam(value));
+
             for (var v : values) {
                 params.add(new TokenParam(v));
             }

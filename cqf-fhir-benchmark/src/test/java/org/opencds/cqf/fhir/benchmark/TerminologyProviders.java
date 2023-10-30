@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
@@ -16,6 +17,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -39,8 +41,8 @@ public class TerminologyProviders {
             .withId("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1190.58")
             .withVersion("20220304");
 
-    @Setup(Level.Trial)
-    public void setupTrial() throws Exception {
+    @Setup(Level.Iteration)
+    public void setupIteration() throws Exception {
         var repository = TestRepositoryFactory.createRepository(
                 FhirContext.forR4Cached(), MeasureProcessorEvaluateTest.class, "CaseRepresentation101");
         this.terminologyProvider = new RepositoryTerminologyProvider(repository);
@@ -48,7 +50,7 @@ public class TerminologyProviders {
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 10, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 3, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void testSmall(Blackhole bh) throws Exception {
         bh.consume(this.terminologyProvider.in(smallCode, smallValueSet));
@@ -56,7 +58,7 @@ public class TerminologyProviders {
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 10, timeUnit = TimeUnit.MILLISECONDS)
+    @Measurement(iterations = 3, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void testLarge(Blackhole bh) throws Exception {
         // NOTE: There's an issue with this valueSet in that it does not contain many duplicate codes.
@@ -65,10 +67,11 @@ public class TerminologyProviders {
         bh.consume(this.terminologyProvider.in(largeCode, largeValueSet));
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(TerminologyProviders.class.getSimpleName())
                 .build();
-        new Runner(opt).run();
+        Collection<RunResult> runResults = new Runner(opt).run();
     }
 }

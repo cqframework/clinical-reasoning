@@ -58,8 +58,8 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    public static class Extract {
-        private final IdType questionnaireResponseId;
+    static class Extract {
+        private IdType questionnaireResponseId;
         private Repository repository;
         private QuestionnaireResponse questionnaireResponse;
         private IdType expectedBundleId;
@@ -122,7 +122,7 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    public static class GeneratedBundle {
+    static class GeneratedBundle {
         Bundle myGeneratedBundle;
         Bundle myExpectedBundle;
 
@@ -136,6 +136,7 @@ public class TestQuestionnaireResponse {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName), jsonParser.encodeResourceToString(myGeneratedBundle), true);
             } catch (JSONException | IOException e) {
+                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }
@@ -147,6 +148,7 @@ public class TestQuestionnaireResponse {
                         jsonParser.encodeResourceToString(myGeneratedBundle),
                         true);
             } catch (JSONException e) {
+                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

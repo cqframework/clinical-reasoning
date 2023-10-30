@@ -7,7 +7,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 
 /**
@@ -196,9 +193,9 @@ public class IGFileStructureRepository implements Repository {
         return new MethodOutcome(resource.getIdElement());
     }
 
-    protected <T extends IBaseResource> Map<IIdType, T> readLocation(Class<T> resourceClass) {
+    protected <T extends IBaseResource> List<T> readLocation(Class<T> resourceClass) {
         var location = this.directoryForResource(resourceClass);
-        var resources = new HashMap<IIdType, T>();
+        List<T> resources = new ArrayList<>();
         var inputDir = new File(location);
         if (inputDir.isDirectory()) {
             for (var file : inputDir.listFiles()) {
@@ -208,7 +205,7 @@ public class IGFileStructureRepository implements Repository {
                     try {
                         var r = this.readLocation(resourceClass, file.getPath());
                         if (r.fhirType().equals(resourceClass.getSimpleName())) {
-                            resources.put(r.getIdElement().toUnqualifiedVersionless(), r);
+                            resources.add(r);
                         }
                     } catch (RuntimeException e) {
                         // intentionally empty
@@ -311,48 +308,23 @@ public class IGFileStructureRepository implements Repository {
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
 
-        var resourceIdMap = readLocation(resourceType);
+        var resourceList = readLocation(resourceType);
         if (searchParameters == null || searchParameters.isEmpty()) {
-            resourceIdMap.values().forEach(builder::addCollectionEntry);
-            builder.setType("searchset");
-            return (B) builder.getBundle();
-        }
-
-        Collection<T> candidates;
-        if (searchParameters.containsKey("_id")) {
-            // We are consuming the _id parameter in this if statement
-            var idQueries = searchParameters.get("_id");
-            searchParameters.remove("_id");
-
-            var idResources = new ArrayList<T>(idQueries.size());
-            for (var idQuery : idQueries) {
-                var idToken = (TokenParam) idQuery;
-                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
-                var r = resourceIdMap.get(id);
-                if (r != null) {
-                    idResources.add(r);
-                }
-            }
-
-            candidates = idResources;
+            resourceList.forEach(builder::addCollectionEntry);
         } else {
-            candidates = resourceIdMap.values();
-        }
-
-        for (var resource : candidates) {
-            boolean include = true;
-            for (var nextEntry : searchParameters.entrySet()) {
-                var paramName = nextEntry.getKey();
-                if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                    include = false;
-                    break;
+            for (var resource : resourceList) {
+                boolean include = true;
+                for (var nextEntry : searchParameters.entrySet()) {
+                    var paramName = nextEntry.getKey();
+                    if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
+                        include = false;
+                        break;
+                    }
                 }
-            }
 
-            if (include) {
-                builder.addCollectionEntry(resource);
+                if (include) {
+                    builder.addCollectionEntry(resource);
+                }
             }
         }
 

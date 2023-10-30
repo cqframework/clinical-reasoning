@@ -451,7 +451,7 @@ public interface Repository {
      */
     default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
             Class<T> resourceType, String name, P parameters) {
-        return this.invoke(resourceType, name, parameters, Collections.emptyMap());
+        return this.invoke(name, parameters, Collections.emptyMap());
     }
 
     /**
@@ -520,7 +520,7 @@ public interface Repository {
      * @return a MethodOutcome with a status code
      */
     default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I id, String name, P parameters) {
-        return this.invoke(id, name, parameters, Collections.emptyMap());
+        return this.invoke(name, parameters, Collections.emptyMap());
     }
 
     /**

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -98,33 +99,29 @@ public class Measure {
             return new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider());
         }
 
-        private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions);
-        }
-
         public When when() {
-            return new When(buildMeasureService());
+            return new When(buildProcessor());
         }
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
-        private final R4MeasureService service;
+        private final R4MeasureProcessor processor;
 
-        When(R4MeasureService service) {
-            this.service = service;
+        When(R4MeasureProcessor processor) {
+            this.processor = processor;
         }
 
         private String measureId;
+
         private String periodStart;
         private String periodEnd;
+
         private List<String> subjectIds;
-        private String subject;
         private String reportType;
+
         private Bundle additionalData;
+
         private Supplier<MeasureReport> operation;
-        private String practitioner;
-        private String productLine;
 
         public When measureId(String measureId) {
             this.measureId = measureId;
@@ -142,7 +139,7 @@ public class Measure {
         }
 
         public When subject(String subjectId) {
-            this.subject = subjectId;
+            this.subjectIds = Collections.singletonList(subjectId);
             return this;
         }
 
@@ -161,30 +158,14 @@ public class Measure {
             return this;
         }
 
-        public When practitoner(String practitioner) {
-            this.practitioner = practitioner;
-            return this;
-        }
-
-        public When productLine(String productLine) {
-            this.productLine = productLine;
-            return this;
-        }
-
         public When evaluate() {
-            this.operation = () -> service.evaluate(
+            this.operation = () -> processor.evaluateMeasure(
                     Eithers.forMiddle3(new IdType("Measure", measureId)),
                     periodStart,
                     periodEnd,
                     reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    productLine,
-                    practitioner);
+                    subjectIds,
+                    additionalData);
             return this;
         }
 
@@ -276,12 +257,6 @@ public class Measure {
             var ex = this.value().getExtensionsByUrl(url);
             assertEquals(ex.size(), count);
 
-            return this;
-        }
-
-        public SelectedReport hasSubjectReference(String subjectReference) {
-            var ref = this.report().getSubject();
-            assertEquals(ref.getReference(), subjectReference);
             return this;
         }
     }

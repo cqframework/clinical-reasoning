@@ -3,12 +3,9 @@ package org.opencds.cqf.fhir.utility.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,52 +119,27 @@ public class InMemoryFhirRepository implements Repository {
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.context);
-        var resourceIdMap = resourceMap.computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>());
 
+        var resourceList = resourceMap
+                .computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>())
+                .values();
         if (searchParameters == null || searchParameters.isEmpty()) {
-            resourceIdMap.values().forEach(builder::addCollectionEntry);
-            builder.setType("searchset");
-            return (B) builder.getBundle();
-        }
-
-        Collection<IBaseResource> candidates;
-        if (searchParameters.containsKey("_id")) {
-            // We are consuming the _id parameter in this if statement
-            var idQueries = searchParameters.get("_id");
-            searchParameters.remove("_id");
-
-            // The _id param can be a list of ids
-            var idResources = new ArrayList<IBaseResource>(idQueries.size());
-            for (var idQuery : idQueries) {
-                var idToken = (TokenParam) idQuery;
-                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
-                var r = resourceIdMap.get(id);
-                if (r != null) {
-                    idResources.add(r);
-                }
-            }
-
-            candidates = idResources;
+            resourceList.forEach(builder::addCollectionEntry);
         } else {
-            candidates = resourceIdMap.values();
-        }
-
-        // Apply the rest of the filters
-        var resourceMatcher = Repositories.getResourceMatcher(this.context);
-        for (var resource : candidates) {
-            boolean include = true;
-            for (var nextEntry : searchParameters.entrySet()) {
-                var paramName = nextEntry.getKey();
-                if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                    include = false;
-                    break;
+            var resourceMatcher = Repositories.getResourceMatcher(this.context);
+            for (var resource : resourceList) {
+                boolean include = true;
+                for (var nextEntry : searchParameters.entrySet()) {
+                    var paramName = nextEntry.getKey();
+                    if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
+                        include = false;
+                        break;
+                    }
                 }
-            }
 
-            if (include) {
-                builder.addCollectionEntry(resource);
+                if (include) {
+                    builder.addCollectionEntry(resource);
+                }
             }
         }
 

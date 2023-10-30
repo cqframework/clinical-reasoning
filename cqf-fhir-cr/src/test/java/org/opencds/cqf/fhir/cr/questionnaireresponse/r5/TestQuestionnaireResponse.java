@@ -52,9 +52,9 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    public static class Extract {
-        private final Repository repository;
-        private final QuestionnaireResponse baseResource;
+    static class Extract {
+        private Repository repository;
+        private QuestionnaireResponse baseResource;
 
         private final FhirContext fhirContext = FhirContext.forR5Cached();
 
@@ -78,7 +78,7 @@ public class TestQuestionnaireResponse {
         }
     }
 
-    public static class GeneratedBundle {
+    static class GeneratedBundle {
         Bundle bundle;
 
         public GeneratedBundle(Bundle bundle) {
@@ -89,6 +89,7 @@ public class TestQuestionnaireResponse {
             try {
                 JSONAssert.assertEquals(load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
             } catch (JSONException | IOException e) {
+                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

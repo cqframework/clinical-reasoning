@@ -4,8 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.InternalCodingDt;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,22 +49,27 @@ public class ResourceMatcherDSTU3 implements ResourceMatcher {
     }
 
     @Override
-    public List<TokenParam> getCodes(IBase codeElement) {
-        List<TokenParam> resolvedCodes = new ArrayList<>();
+    public List<BaseCodingDt> getCodes(IBase codeElement) {
+        List<BaseCodingDt> resolvedCodes = new ArrayList<>();
         if (codeElement instanceof Coding) {
-            var c = (Coding) codeElement;
-            resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
+            resolvedCodes.add(
+                    new InternalCodingDt(((Coding) codeElement).getSystem(), ((Coding) codeElement).getCode()));
         } else if (codeElement instanceof CodeType) {
-            var c = (CodeType) codeElement;
-            resolvedCodes.add(new TokenParam(c.getValue()));
+            resolvedCodes.add(new InternalCodingDt().setCode(((CodeType) codeElement).getValue()));
         } else if (codeElement instanceof CodeableConcept) {
             resolvedCodes = ((CodeableConcept) codeElement)
                     .getCoding().stream()
-                            .map(code -> new TokenParam(code.getSystem(), code.getCode()))
+                            .map(code -> new InternalCodingDt(code.getSystem(), code.getCode()))
                             .collect(Collectors.toList());
+        } else {
+            return null;
         }
-
         return resolvedCodes;
+    }
+
+    @Override
+    public boolean inValueSet(List<BaseCodingDt> codes) {
+        throw new UnsupportedOperationException("InValueSet operation is not available");
     }
 
     @Override

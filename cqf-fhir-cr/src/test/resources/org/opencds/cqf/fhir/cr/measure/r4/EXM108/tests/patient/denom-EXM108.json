@@ -42,8 +42,5 @@
     "given": [ "Frank" ]
   } ],
   "gender": "male",
-  "birthDate": "1951-05-01",
-  "generalPractitioner": {
-    "reference": "Practitioner/exm108-practitioner-1"
-  }
+  "birthDate": "1951-05-01"
 }

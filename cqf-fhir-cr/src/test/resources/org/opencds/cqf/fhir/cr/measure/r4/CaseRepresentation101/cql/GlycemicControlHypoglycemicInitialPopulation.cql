@@ -82,7 +82,7 @@ define function "GetMedicationCode"(choice Choice<FHIR.CodeableConcept, FHIR.Ref
 
 define function "GetMedication"(reference Reference ):
   singleton from (
-    [Medication: id in {Global.GetId(reference.reference)}]
+    [Medication] M where M.id = Global.GetId(reference.reference)
   )
 
 define function "HospitalizationWithObservationOrEmergency"(TheEncounter FHIR.Encounter ):
@@ -102,7 +102,7 @@ define function "HospitalizationWithObservationOrEmergency"(TheEncounter FHIR.En
 
 define function "GetSpecimen"(reference Reference):
   singleton from (
-    [Specimen: id in {Global.GetId(reference.reference)}]
+    [Specimen] S where S.id = Global.GetId(reference.reference)
   )
 
 define function "GetIdExtensions"(domainResource DomainResource):

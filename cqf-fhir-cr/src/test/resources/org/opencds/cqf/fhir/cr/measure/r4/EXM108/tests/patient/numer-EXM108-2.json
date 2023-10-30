@@ -1,6 +1,6 @@
 {
   "resourceType": "Patient",
-  "id": "numer-EXM108",
+  "id": "numer-EXM108-2",
   "meta": {
     "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
   },
@@ -35,14 +35,14 @@
       } ]
     },
     "system": "http://hospital.smarthealthit.org",
-    "value": "999999997"
+    "value": "999999999"
   } ],
   "name": [ {
-    "family": "Smith",
-    "given": [ "Jill" ]
+    "family": "Smithers",
+    "given": [ "Jillian" ]
   } ],
   "gender": "female",
-  "birthDate": "1963-09-13",
+  "birthDate": "1962-07-13",
   "generalPractitioner": {
     "reference": "Practitioner/exm108-practitioner-2"
   }

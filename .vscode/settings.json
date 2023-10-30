@@ -33,6 +33,7 @@
     "INITIALPOPULATION",
     "INPROGRESS",
     "Javadoc",
+    "Jsons",
     "JXSON",
     "MEASUREOBSERVATION",
     "MEASUREPOPULATION",
@@ -86,9 +87,6 @@
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "editor.codeActionsOnSave": {
-    // "source.organizeImports": true
-  },
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,
   "editor.tabSize": 4,
@@ -107,21 +105,6 @@
   //   }
   // ],
   "json.schemaDownload.enable": true,
-  // "runOnSave.commands": [
-  //   {
-  //     "match": ".*\\.java$",
-  //     "command": "./mvnw spotless:apply -DspotlessFiles=${file}",
-  //     "runIn": "backend",
-  //     "runningStatusMessage": "Formatting ${fileBasename}",
-  //     "finishStatusMessage": "${fileBasename} formatted"
-  //   },
-  // ],
-  "[java]": {
-    "editor.formatOnSave": false
-  },
-  "[cql]": {
-    "editor.formatOnSave": false
-  },
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,
@@ -141,5 +124,5 @@
     "MD007": {
       "indent": 4
     }
-  }
+  },
 }

@@ -9,7 +9,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.dstu3.helpers.TestingHelper.
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.util.Collections;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire;

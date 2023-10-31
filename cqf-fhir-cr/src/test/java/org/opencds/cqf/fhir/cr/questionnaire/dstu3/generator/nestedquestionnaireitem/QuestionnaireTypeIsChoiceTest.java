@@ -8,7 +8,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.dstu3.helpers.TestingHelper.
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;

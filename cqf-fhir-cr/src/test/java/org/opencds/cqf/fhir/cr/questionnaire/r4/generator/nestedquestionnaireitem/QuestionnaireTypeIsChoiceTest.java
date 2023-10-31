@@ -8,7 +8,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestingHelper.wit
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;

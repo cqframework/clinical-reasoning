@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.cr.questionnaire.r5.helpers.TestingHelper.withQuestionnaireItemComponent;
 
 import java.util.List;
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;

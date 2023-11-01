@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -23,7 +22,6 @@ import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-@Named
 public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -85,17 +83,18 @@ public class Dstu3MeasureProcessor {
                         new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 
         context.getState().init(lib.getLibrary());
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty()
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
 
         var actualRepo = this.repository;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
+
+        var evalType = MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                                ? MeasureEvalType.POPULATION
+                                : MeasureEvalType.SUBJECT);
 
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());

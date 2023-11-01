@@ -33,6 +33,7 @@
     "INITIALPOPULATION",
     "INPROGRESS",
     "Javadoc",
+    "Jsons",
     "JXSON",
     "MEASUREOBSERVATION",
     "MEASUREPOPULATION",
@@ -66,7 +67,7 @@
     "testng",
     "Unvalidated",
     "uscore"
-  ],
+],
   "cSpell.enabledLanguageIds": [
     "java",
     "json",
@@ -86,9 +87,6 @@
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "editor.codeActionsOnSave": {
-    // "source.organizeImports": true
-  },
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,
   "editor.tabSize": 4,
@@ -97,31 +95,7 @@
   "java.dependency.packagePresentation": "hierarchical",
   "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
   "java.compile.nullAnalysis.mode": "automatic",
-  // "java.test.config": [
-  //   {
-  //     "name": "jacoco",
-  //     "vmargs": [
-  //       "-javaagent:/home/jp/.m2/repository/org/jacoco/org.jacoco.agent/0.8.9/org.jacoco.agent-0.8.9-runtime.jar=destfile=target/jacoco.exec,append=false"
-  //     ],
-  //     "postDebugTask": "generate code coverage report"
-  //   }
-  // ],
   "json.schemaDownload.enable": true,
-  // "runOnSave.commands": [
-  //   {
-  //     "match": ".*\\.java$",
-  //     "command": "./mvnw spotless:apply -DspotlessFiles=${file}",
-  //     "runIn": "backend",
-  //     "runningStatusMessage": "Formatting ${fileBasename}",
-  //     "finishStatusMessage": "${fileBasename} formatted"
-  //   },
-  // ],
-  "[java]": {
-    "editor.formatOnSave": false
-  },
-  "[cql]": {
-    "editor.formatOnSave": false
-  },
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.unicodeHighlight.ambiguousCharacters": true,

@@ -12,12 +12,11 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'adopt'
+          java-version: '19'
+          cache: 'maven'
       - name: Compile
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
-      - name: Compile tests
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
+        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Tests and additional checks
         run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: Publish test report

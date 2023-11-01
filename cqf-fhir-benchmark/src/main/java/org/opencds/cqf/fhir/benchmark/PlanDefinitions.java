@@ -4,7 +4,6 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.api.Repository;
@@ -20,7 +19,6 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -34,8 +32,8 @@ public class PlanDefinitions {
 
     private Apply apply;
 
-    @Setup(Level.Iteration)
-    public void setupIteration() throws Exception {
+    @Setup(Level.Trial)
+    public void setupTrial() throws Exception {
         this.apply = PlanDefinition.Assert.that(
                         "ANCDT17",
                         "Patient/5946f880-b197-400b-9caa-a3c661d23041",
@@ -56,11 +54,10 @@ public class PlanDefinitions {
         bh.consume(this.apply.applyR5());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(PlanDefinitions.class.getSimpleName())
                 .build();
-        Collection<RunResult> runResults = new Runner(opt).run();
+        new Runner(opt).run();
     }
 }

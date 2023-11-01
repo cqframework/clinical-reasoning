@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that

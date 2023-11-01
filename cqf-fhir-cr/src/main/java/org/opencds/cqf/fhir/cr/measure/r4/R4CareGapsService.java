@@ -461,8 +461,8 @@ public class R4CareGapsService {
                 inNumerator.setValue(true);
             }
             if (population.hasCode()
-                && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominator.getKey())
-                && population.getCount() == 1){
+                    && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominator.getKey())
+                    && population.getCount() == 1) {
                 inDenominator.setValue(true);
             }
         }));
@@ -470,12 +470,13 @@ public class R4CareGapsService {
         boolean isPositive =
                 theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
 
-        if (!inDenominator.getValue()){
+        if (!inDenominator.getValue()) {
             // patient is not in eligible population
             return CareGapsStatusCode.NOT_APPLICABLE;
         }
 
-        if (inDenominator.getValue() && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
+        if (inDenominator.getValue()
+                && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
             return CareGapsStatusCode.OPEN_GAP;
         }
 

@@ -10,10 +10,10 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
-public class PackageService {
+public class PackageProcessor {
     final Repository repository;
 
-    public PackageService(Repository  repository) {
+    public PackageProcessor(Repository  repository) {
         this.repository = repository;
     }
 

@@ -29,16 +29,19 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.cr.questionnaire.helpers.PrePopulateRequestHelpers;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
-class ExpressionProcessorServiceTest {
+class ExpressionProcessorTest {
     @Mock
     protected LibraryEngine myLibraryEngine;
 
     @Spy
     @InjectMocks
-    private final ExpressionProcessorService myFixture = new ExpressionProcessorService();
+    private final ExpressionProcessor myFixture = new ExpressionProcessor();
 
     @Test
     void getInitialExpressionShouldReturnExpressionIfItemHasCqfExpressionExtension() {
@@ -86,9 +89,10 @@ class ExpressionProcessorServiceTest {
     @Test
     void getExpressionResultShouldReturnEmptyListIfNullParameters() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = withPrePopulateRequest();
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
+        final Questionnaire questionnaire = withQuestionnaire();
         // execute
-        final List<IBase> actual = myFixture.getExpressionResult(prePopulateRequest, null, "itemLinkId");
+        final List<IBase> actual = myFixture.getExpressionResult(prePopulateRequest, null, "itemLinkId", questionnaire);
         // validate
         assertTrue(actual.isEmpty());
         verify(myLibraryEngine, never()).resolveExpression(any(), any(), any(), any());
@@ -97,11 +101,12 @@ class ExpressionProcessorServiceTest {
     @Test
     void getExpressionResultShouldReturnListOfIBaseResources() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = withPrePopulateRequest();
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final Expression expression = withExpression();
         final List<IBase> expected = List.of(new Bundle(), new Bundle(), new Bundle());
         final CqfExpression cqfExpression = new CqfExpression();
-        doReturn(cqfExpression).when(myFixture).getCqfExpression(prePopulateRequest, expression);
+        final Questionnaire questionnaire = withQuestionnaire();
+        doReturn(cqfExpression).when(myFixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
         doReturn(expected)
                 .when(myLibraryEngine)
                 .resolveExpression(
@@ -110,10 +115,10 @@ class ExpressionProcessorServiceTest {
                         prePopulateRequest.getParameters(),
                         prePopulateRequest.getBundle());
         // execute
-        final List<IBase> actual = myFixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId");
+        final List<IBase> actual = myFixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId", questionnaire);
         // validate
         assertEquals(expected, actual);
-        verify(myFixture).getCqfExpression(prePopulateRequest, expression);
+        verify(myFixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
         verify(myLibraryEngine)
                 .resolveExpression(
                         prePopulateRequest.getPatientId(),
@@ -125,10 +130,11 @@ class ExpressionProcessorServiceTest {
     @Test
     void getExpressionResultShouldThrowResolveExpressionException() {
         // setup
-        final PrePopulateRequest prePopulateRequest = withPrePopulateRequest();
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
         final Expression expression = withExpression();
         final CqfExpression cqfExpression = new CqfExpression();
-        doReturn(cqfExpression).when(myFixture).getCqfExpression(prePopulateRequest, expression);
+        final Questionnaire questionnaire = withQuestionnaire();
+        doReturn(cqfExpression).when(myFixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
         // TODO: VERIFY THIS IS THE ONLY KIND OF EXCEPTION THROWN -> THEN CAN DELETE ResolveExpressionException
         doThrow(new IllegalArgumentException("message"))
                 .when(myLibraryEngine)
@@ -140,12 +146,12 @@ class ExpressionProcessorServiceTest {
         // execute
         final ResolveExpressionException actual = assertThrows(
                 ResolveExpressionException.class,
-                () -> myFixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId"));
+                () -> myFixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId", questionnaire));
         // validate
         assertEquals(
                 "Error encountered evaluating expression (%subject.name.given[0]) for item (itemLinkId): message",
                 actual.getMessage());
-        verify(myFixture).getCqfExpression(prePopulateRequest, expression);
+        verify(myFixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
         verify(myLibraryEngine)
                 .resolveExpression(
                         prePopulateRequest.getPatientId(),
@@ -154,14 +160,18 @@ class ExpressionProcessorServiceTest {
                         prePopulateRequest.getBundle());
     }
 
-    private PrePopulateRequest withPrePopulateRequest() {
-        final Questionnaire questionnaire = new Questionnaire();
+//    private PrePopulateRequest withPrePopulateRequest() {
+//        final String patientId = "patientId";
+//        final IBaseParameters parameters = new Parameters();
+//        final IBaseBundle bundle = new Bundle();
+//        return new PrePopulateRequest(patientId, parameters, bundle, myLibraryEngine);
+//    }
+
+    private Questionnaire withQuestionnaire() {
         final CanonicalType type = new CanonicalType("url");
+        final Questionnaire questionnaire = new Questionnaire();
         final Extension extension = new Extension(Constants.CQF_LIBRARY, type);
         questionnaire.addExtension(extension);
-        final String patientId = "patientId";
-        final IBaseParameters parameters = new Parameters();
-        final IBaseBundle bundle = new Bundle();
-        return new PrePopulateRequest(questionnaire, patientId, parameters, bundle, myLibraryEngine);
+        return questionnaire;
     }
 }

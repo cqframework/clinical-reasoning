@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,37 +9,40 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Property;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilders;
+import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PrePopulateItemWithExtension {
     // TODO: we don't have any resources that are currently using this
     // not writing unit tests till there is a practical implementation
-    private final ExpressionProcessorService expressionProcessorService;
+    private final ExpressionProcessor expressionProcessor;
     public PrePopulateItemWithExtension() {
-        this(new ExpressionProcessorService());
+        this(new ExpressionProcessor());
     }
-    private PrePopulateItemWithExtension(ExpressionProcessorService expressionProcessorService) {
-        this.expressionProcessorService = expressionProcessorService;
+    private PrePopulateItemWithExtension(ExpressionProcessor expressionProcessor) {
+        this.expressionProcessor = expressionProcessor;
     }
 
-    protected List<QuestionnaireItemComponent> processItem(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem)
+    List<QuestionnaireItemComponent> processItem(
+            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire)
             throws ResolveExpressionException {
         final Expression contextExpression = (Expression) questionnaireItem
                 .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)
                 .getValue();
-        final List<IBase> populationContext = expressionProcessorService.getExpressionResult(
-                prePopulateRequest, contextExpression, questionnaireItem.getLinkId());
+        final List<IBase> populationContext = expressionProcessor.getExpressionResult(
+                prePopulateRequest, contextExpression, questionnaireItem.getLinkId(), questionnaire);
         return populationContext.stream()
                 .map(context -> processPopulationContext(questionnaireItem, context))
                 .collect(Collectors.toList());
     }
 
-    protected QuestionnaireItemComponent processPopulationContext(
+    QuestionnaireItemComponent processPopulationContext(
             QuestionnaireItemComponent questionnaireGroupItem, IBase context) {
         final QuestionnaireItemComponent contextItem = copyItemWithNoSubItems(questionnaireGroupItem);
         questionnaireGroupItem.getItem().forEach(item -> {
@@ -49,7 +52,7 @@ public class PrePopulateItemWithExtension {
         return contextItem;
     }
 
-    protected QuestionnaireItemComponent createNewQuestionnaireItemComponent(
+    QuestionnaireItemComponent createNewQuestionnaireItemComponent(
             QuestionnaireItemComponent questionnaireItem, IBase context) {
         final QuestionnaireItemComponent item = questionnaireItem.copy();
         final String path = item.getDefinition().split("#")[1].split("\\.")[1];
@@ -65,7 +68,7 @@ public class PrePopulateItemWithExtension {
         return item;
     }
 
-    protected QuestionnaireItemComponent copyItemWithNoSubItems(QuestionnaireItemComponent questionnaireItem) {
+    QuestionnaireItemComponent copyItemWithNoSubItems(QuestionnaireItemComponent questionnaireItem) {
         final QuestionnaireItemComponent questionnaireItemComponent = questionnaireItem.copy();
         questionnaireItemComponent.setItem(new ArrayList<>());
         return questionnaireItemComponent;

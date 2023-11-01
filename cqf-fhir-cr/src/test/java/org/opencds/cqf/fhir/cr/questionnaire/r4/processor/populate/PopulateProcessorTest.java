@@ -31,9 +31,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
-class PopulateServiceTest {
+class PopulateProcessorTest {
     @Spy
-    private final PopulateService myFixture = new PopulateService();
+    private final PopulateProcessor myFixture = new PopulateProcessor();
 
     @Test
     void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFields() {

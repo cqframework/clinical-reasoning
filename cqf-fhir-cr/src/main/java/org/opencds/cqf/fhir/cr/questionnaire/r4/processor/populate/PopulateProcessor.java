@@ -13,10 +13,10 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnsw
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.utils.ExtensionBuilders;
+import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 
-public class PopulateService {
+public class PopulateProcessor {
     public QuestionnaireResponse populate(
             Questionnaire originalQuestionnaire, Questionnaire prePopulatedQuestionnaire, String patientId) {
         final QuestionnaireResponse response = new QuestionnaireResponse();
@@ -37,7 +37,7 @@ public class PopulateService {
         return response;
     }
 
-    protected Optional<OperationOutcome> getOperationOutcomeFromPrePopulatedQuestionnaire(
+    Optional<OperationOutcome> getOperationOutcomeFromPrePopulatedQuestionnaire(
             Questionnaire prePopulatedQuestionnaire) {
         return prePopulatedQuestionnaire.getContained().stream()
                 .filter(theResource -> theResource.getResourceType() == ResourceType.OperationOutcome)
@@ -46,7 +46,7 @@ public class PopulateService {
                 .findFirst();
     }
 
-    protected boolean filterOperationOutcome(OperationOutcome operationOutcome) {
+    boolean filterOperationOutcome(OperationOutcome operationOutcome) {
         if (operationOutcome.hasIssue()) {
             final List<OperationOutcomeIssueComponent> filteredIssues = operationOutcome.getIssue().stream()
                     .filter(theIssue -> theIssue.getCode() == OperationOutcome.IssueType.EXCEPTION
@@ -57,12 +57,12 @@ public class PopulateService {
         return false;
     }
 
-    protected List<QuestionnaireResponseItemComponent> processResponseItems(
+    List<QuestionnaireResponseItemComponent> processResponseItems(
             List<QuestionnaireItemComponent> questionnaireItems) {
         return questionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 
-    protected QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent questionnaireItem) {
+    QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent questionnaireItem) {
         QuestionnaireResponseItemComponent responseItem =
                 new QuestionnaireResponseItemComponent(questionnaireItem.getLinkIdElement());
         responseItem.setDefinition(questionnaireItem.getDefinition());
@@ -77,7 +77,7 @@ public class PopulateService {
         return responseItem;
     }
 
-    protected QuestionnaireResponseItemComponent setAnswersForInitial(
+    QuestionnaireResponseItemComponent setAnswersForInitial(
             QuestionnaireItemComponent questionnaireItem,
             QuestionnaireResponseItemComponent questionnaireResponseItem) {
         if (questionnaireItem.hasExtension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR)) {

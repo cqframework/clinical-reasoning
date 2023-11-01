@@ -9,10 +9,10 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
-public class ResolveService {
+public class ResolveProcessor {
     final Repository repository;
 
-    public ResolveService(Repository repository) {
+    public ResolveProcessor(Repository repository) {
         this.repository = repository;
     }
 

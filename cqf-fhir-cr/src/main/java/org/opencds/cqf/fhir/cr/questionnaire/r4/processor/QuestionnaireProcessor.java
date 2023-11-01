@@ -8,31 +8,33 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.packager.PackageService;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate.PopulateService;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateRequest;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateService;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveService;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.generate.GenerateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.packager.PackageProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate.PopulateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveProcessor;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-    protected PopulateService populateService;
-    protected ResolveService resolveService;
-    protected PackageService packageService;
-    protected PrePopulateService prePopulateService;
+    private final PopulateProcessor populateProcessor;
+    private final ResolveProcessor resolveProcessor;
+    private final PackageProcessor packageProcessor;
+    private final PrePopulateProcessor prePopulateProcessor;
+//    private final GenerateProcessor generateProcessor;
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         this(repository,
             evaluationSettings,
-            new ResolveService(repository),
-            new PackageService(repository),
-            new PopulateService(),
-            new PrePopulateService()
+            new ResolveProcessor(repository),
+            new PackageProcessor(repository),
+            new PopulateProcessor(),
+            new PrePopulateProcessor()
+//            new GenerateProcessor()
         );
     }
 
@@ -40,25 +42,27 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
        this(repository, EvaluationSettings.getDefault());
     }
 
-    private QuestionnaireProcessor(
+    QuestionnaireProcessor(
             Repository repository,
             EvaluationSettings evaluationSettings,
-            ResolveService resolveService,
-            PackageService packageService,
-            PopulateService populateService,
-            PrePopulateService prePopulateService
+            ResolveProcessor resolveProcessor,
+            PackageProcessor packageProcessor,
+            PopulateProcessor populateProcessor,
+            PrePopulateProcessor prePopulateProcessor
+//            GenerateProcessor generateProcessor
     ) {
         super(repository, evaluationSettings);
-        this.resolveService = resolveService;
-        this.packageService = packageService;
-        this.populateService = populateService;
-        this.prePopulateService = prePopulateService;
+        this.resolveProcessor = resolveProcessor;
+        this.packageProcessor = packageProcessor;
+        this.populateProcessor = populateProcessor;
+        this.prePopulateProcessor = prePopulateProcessor;
+//        this.generateProcessor = generateProcessor;
     }
 
     @Override
     public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
             IIdType id, C canonical, IBaseResource questionnaire) {
-        return resolveService.resolve(id, canonical, questionnaire);
+        return resolveProcessor.resolve(id, canonical, questionnaire);
     }
 
     @Override
@@ -70,9 +74,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             LibraryEngine libraryEngine) {
         requireNonNull(questionnaire);
         requireNonNull(libraryEngine);
-        final PrePopulateRequest prePopulateRequest =
-                new PrePopulateRequest(questionnaire, patientId, parameters, bundle, libraryEngine);
-        return prePopulateService.prePopulate(prePopulateRequest);
+        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(patientId, parameters, bundle, libraryEngine);
+        return prePopulateProcessor.prePopulate(questionnaire, prePopulateRequest);
     }
 
     @Override
@@ -82,20 +85,18 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        final Questionnaire prePopulatedQuestionnaire =
-                prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
-        return populateService.populate(questionnaire, prePopulatedQuestionnaire, patientId);
+        final Questionnaire prePopulatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
+        return populateProcessor.populate(questionnaire, prePopulatedQuestionnaire, patientId);
     }
 
     @Override
     public Questionnaire generateQuestionnaire(String id) {
-        var questionnaire = new Questionnaire();
-        questionnaire.setId(new IdType("Questionnaire", id));
-        return questionnaire;
+        return new Questionnaire();
+//        return generateProcessor.generate(id);
     }
 
     @Override
     public Bundle packageQuestionnaire(Questionnaire questionnaire, boolean isPut) {
-        return packageService.packageQuestionnaire(questionnaire, isPut);
+        return packageProcessor.packageQuestionnaire(questionnaire, isPut);
     }
 }

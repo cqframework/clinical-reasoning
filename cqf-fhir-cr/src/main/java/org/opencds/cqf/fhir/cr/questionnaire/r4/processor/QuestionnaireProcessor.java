@@ -25,7 +25,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     private final ResolveProcessor resolveProcessor;
     private final PackageProcessor packageProcessor;
     private final PrePopulateProcessor prePopulateProcessor;
-//    private final GenerateProcessor generateProcessor;
+    private final GenerateProcessor generateProcessor;
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         this(repository,
@@ -33,8 +33,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             new ResolveProcessor(repository),
             new PackageProcessor(repository),
             new PopulateProcessor(),
-            new PrePopulateProcessor()
-//            new GenerateProcessor()
+            new PrePopulateProcessor(),
+            new GenerateProcessor()
         );
     }
 
@@ -48,15 +48,15 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             ResolveProcessor resolveProcessor,
             PackageProcessor packageProcessor,
             PopulateProcessor populateProcessor,
-            PrePopulateProcessor prePopulateProcessor
-//            GenerateProcessor generateProcessor
+            PrePopulateProcessor prePopulateProcessor,
+            GenerateProcessor generateProcessor
     ) {
         super(repository, evaluationSettings);
         this.resolveProcessor = resolveProcessor;
         this.packageProcessor = packageProcessor;
         this.populateProcessor = populateProcessor;
         this.prePopulateProcessor = prePopulateProcessor;
-//        this.generateProcessor = generateProcessor;
+        this.generateProcessor = generateProcessor;
     }
 
     @Override
@@ -91,8 +91,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
 
     @Override
     public Questionnaire generateQuestionnaire(String id) {
-        return new Questionnaire();
-//        return generateProcessor.generate(id);
+        return generateProcessor.generate(id);
     }
 
     @Override

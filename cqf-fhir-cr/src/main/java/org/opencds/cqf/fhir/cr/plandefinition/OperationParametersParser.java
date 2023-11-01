@@ -5,8 +5,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -19,13 +17,11 @@ import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
 /**
  * This class maps the standard input parameters of an Operation to key, value pairs.
  */
-@Named
 public class OperationParametersParser {
 
     protected AdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
 
-    @Inject
     public OperationParametersParser(AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         requireNonNull(adapterFactory, "adapterFactory must not be null");
         requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");

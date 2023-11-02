@@ -105,7 +105,7 @@ class ExpressionProcessorTest {
         final List<IBase> expected = List.of(new Bundle(), new Bundle(), new Bundle());
         final CqfExpression cqfExpression = new CqfExpression();
         final Questionnaire questionnaire = QuestionnaireHelpers.withQuestionnaire();
-        doReturn(cqfExpression).when(fixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
+        doReturn(cqfExpression).when(fixture).getCqfExpression(expression, questionnaire);
         doReturn(expected)
                 .when(libraryEngine)
                 .resolveExpression(
@@ -117,7 +117,7 @@ class ExpressionProcessorTest {
         final List<IBase> actual = fixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId", questionnaire);
         // validate
         assertEquals(expected, actual);
-        verify(fixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
+        verify(fixture).getCqfExpression(expression, questionnaire);
         verify(libraryEngine)
                 .resolveExpression(
                         prePopulateRequest.getPatientId(),
@@ -134,7 +134,7 @@ class ExpressionProcessorTest {
         final Expression expression = withExpression();
         final CqfExpression cqfExpression = new CqfExpression();
         final Questionnaire questionnaire = QuestionnaireHelpers.withQuestionnaire();
-        doReturn(cqfExpression).when(fixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
+        doReturn(cqfExpression).when(fixture).getCqfExpression(expression, questionnaire);
         // TODO: VERIFY THIS IS THE ONLY KIND OF EXCEPTION THROWN -> THEN CAN DELETE ResolveExpressionException
         doThrow(new IllegalArgumentException("message"))
                 .when(libraryEngine)
@@ -151,7 +151,7 @@ class ExpressionProcessorTest {
         assertEquals(
                 "Error encountered evaluating expression (%subject.name.given[0]) for item (itemLinkId): message",
                 actual.getMessage());
-        verify(fixture).getCqfExpression(prePopulateRequest, expression, questionnaire);
+        verify(fixture).getCqfExpression(expression, questionnaire);
         verify(libraryEngine)
                 .resolveExpression(
                         prePopulateRequest.getPatientId(),

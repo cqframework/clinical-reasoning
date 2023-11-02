@@ -36,7 +36,7 @@ public class ExpressionProcessor {
             return new ArrayList<>();
         }
         try {
-            final CqfExpression cqfExpression = getCqfExpression(prePopulateRequest, expression, questionnaire);
+            final CqfExpression cqfExpression = getCqfExpression(expression, questionnaire);
             return prePopulateRequest
                     .getLibraryEngine()
                     .resolveExpression(
@@ -51,7 +51,7 @@ public class ExpressionProcessor {
         }
     }
 
-    CqfExpression getCqfExpression(PrePopulateRequest prePopulateRequest, Expression expression, Questionnaire questionnaire) {
+    CqfExpression getCqfExpression(Expression expression, Questionnaire questionnaire) {
         final String libraryUrl = getLibraryUrl(questionnaire);
         return new CqfExpression(expression, libraryUrl, null);
     }

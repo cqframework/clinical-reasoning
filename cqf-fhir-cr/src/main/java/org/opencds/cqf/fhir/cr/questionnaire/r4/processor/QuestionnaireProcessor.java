@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -21,11 +22,11 @@ import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulat
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveProcessor;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
-    private final PopulateProcessor populateProcessor;
-    private final ResolveProcessor resolveProcessor;
-    private final PackageProcessor packageProcessor;
-    private final PrePopulateProcessor prePopulateProcessor;
-    private final GenerateProcessor generateProcessor;
+    private PopulateProcessor populateProcessor;
+    private ResolveProcessor resolveProcessor;
+    private PackageProcessor packageProcessor;
+    private PrePopulateProcessor prePopulateProcessor;
+    private GenerateProcessor generateProcessor;
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         this(repository,
@@ -79,7 +80,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public IBaseResource populate(
+    public QuestionnaireResponse populate(
             Questionnaire questionnaire,
             String patientId,
             IBaseParameters parameters,

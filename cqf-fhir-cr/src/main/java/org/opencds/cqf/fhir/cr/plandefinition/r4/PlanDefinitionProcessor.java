@@ -384,17 +384,6 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
         if (Boolean.TRUE.equals(meetsConditions(defaultLibraryUrl, action))) {
             // TODO: Figure out why this was here and what it was trying to do
-            // if (action.hasRelatedAction()) {
-            // for (var relatedActionComponent : action.getRelatedAction()) {
-            // if
-            // (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
-            // && metConditions.containsKey(relatedActionComponent.getActionId())) {
-            // metConditions.put(action.getId(), action);
-            // resolveDefinition(planDefinition, requestGroup, action);
-            // resolveDynamicValues(planDefinition, requestGroup, action);
-            // }
-            // }
-            // }
             metConditions.put(action.getId(), action);
             var requestAction = createRequestAction(action);
             extensionResolver.resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);

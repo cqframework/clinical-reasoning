@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.dstu3;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
-import static org.opencds.cqf.fhir.cr.questionnaire.dstu3.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -44,7 +44,7 @@ public class QuestionnaireProcessorTests {
 
     @Test
     void testPrePopulate_noQuestionnaire_throwsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             TestQuestionnaire.Assert.that("", null).prePopulate();
         });
     }
@@ -87,7 +87,7 @@ public class QuestionnaireProcessorTests {
 
     @Test
     void testPopulate_noQuestionnaire_throwsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             TestQuestionnaire.Assert.that("", null).populate();
         });
     }

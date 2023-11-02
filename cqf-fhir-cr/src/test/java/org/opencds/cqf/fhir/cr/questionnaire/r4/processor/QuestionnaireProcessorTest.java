@@ -35,6 +35,7 @@ import java.util.Objects;
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireProcessorTest {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaire/r4/processor";
+
     @Mock
     private PopulateProcessor populateProcessor;
     @Mock
@@ -44,7 +45,7 @@ class QuestionnaireProcessorTest {
     @Mock
     private PrePopulateProcessor prePopulateProcessor;
     @Mock
-    private FhirContext myFhirContext = FhirContext.forR4();
+    private final FhirContext myFhirContext = FhirContext.forR4();
     @Mock
     private EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
     @Mock

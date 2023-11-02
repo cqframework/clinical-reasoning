@@ -29,6 +29,10 @@ public class ExtensionBuilders {
                 "#" + questionnaireId);
     }
 
+    public static org.hl7.fhir.dstu3.model.Extension buildDstu3(SimpleEntry<String, String> entry) {
+        return new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), new org.hl7.fhir.dstu3.model.Reference(entry.getValue()));
+    }
+
     public static org.hl7.fhir.r4.model.Extension buildR4(SimpleEntry<String, String> entry) {
         return new org.hl7.fhir.r4.model.Extension(entry.getKey(), new org.hl7.fhir.r4.model.Reference(entry.getValue()));
     }

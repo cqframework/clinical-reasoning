@@ -9,17 +9,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.generate.GenerateProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.packager.PackageProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve.ResolveProcessor;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
     private PopulateProcessor populateProcessor;
@@ -80,7 +75,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public QuestionnaireResponse populate(
+    public IBaseResource populate(
             Questionnaire questionnaire,
             String patientId,
             IBaseParameters parameters,

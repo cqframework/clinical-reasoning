@@ -34,41 +34,42 @@ import org.opencds.cqf.fhir.utility.Constants;
 @ExtendWith(MockitoExtension.class)
 class PrePopulateItemTest {
     @Mock
-    private ExpressionProcessor myExpressionProcessorService;
+    private ExpressionProcessor expressionProcessorService;
 
     @Mock
-    private LibraryEngine myLibraryEngine;
+    private LibraryEngine libraryEngine;
 
     @Spy
     @InjectMocks
-    private PrePopulateItem myFixture;
+    private PrePopulateItem fixture;
 
     @AfterEach
     void tearDown() {
-        verifyNoMoreInteractions(myExpressionProcessorService);
-        verifyNoMoreInteractions(myLibraryEngine);
+        verifyNoMoreInteractions(expressionProcessorService);
+        verifyNoMoreInteractions(libraryEngine);
     }
 
     @Test
     void processItemShouldReturnQuestionnaireItemComponent() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
+            libraryEngine);
         final QuestionnaireItemComponent originalQuestionnaireItemComponent = new QuestionnaireItemComponent();
         final QuestionnaireItemComponent populatedQuestionnaireItemComponent = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         final List<IBase> expressionResults = withExpressionResults();
         doReturn(populatedQuestionnaireItemComponent)
-                .when(myFixture)
+                .when(fixture)
                 .copyQuestionnaireItem(originalQuestionnaireItemComponent);
         doReturn(expressionResults)
-                .when(myFixture)
+                .when(fixture)
                 .getExpressionResults(prePopulateRequest, questionnaire, populatedQuestionnaireItemComponent);
         // execute
         final QuestionnaireItemComponent actual =
-                myFixture.processItem(prePopulateRequest, originalQuestionnaireItemComponent, questionnaire);
+                fixture.processItem(prePopulateRequest, originalQuestionnaireItemComponent, questionnaire);
         // validate
-        verify(myFixture).getExpressionResults(prePopulateRequest, questionnaire, populatedQuestionnaireItemComponent);
-        verify(myFixture).copyQuestionnaireItem(originalQuestionnaireItemComponent);
+        verify(fixture).getExpressionResults(prePopulateRequest, questionnaire, populatedQuestionnaireItemComponent);
+        verify(fixture).copyQuestionnaireItem(originalQuestionnaireItemComponent);
         final List<Extension> extensions = actual.getExtensionsByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
         assertEquals(3, extensions.size());
         final List<QuestionnaireItemInitialComponent> initials = actual.getInitial();
@@ -85,16 +86,17 @@ class PrePopulateItemTest {
     @Test
     void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
+            libraryEngine);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
-        doReturn(null).when(myExpressionProcessorService).getInitialExpression(questionnaireItemComponent);
+        doReturn(null).when(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
         // execute
-        final List<IBase> actual = myFixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
+        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
         // validate
         assertTrue(actual.isEmpty());
-        verify(myExpressionProcessorService).getInitialExpression(questionnaireItemComponent);
-        verify(myExpressionProcessorService, never()).getExpressionResult(any(), any(), any(), any());
+        verify(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
+        verify(expressionProcessorService, never()).getExpressionResult(any(), any(), any(), any());
     }
 
     @Test
@@ -102,21 +104,22 @@ class PrePopulateItemTest {
             throws ResolveExpressionException {
         // setup
         final List<IBase> expected = withExpressionResults();
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(myLibraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
+            libraryEngine);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         questionnaireItemComponent.setLinkId("linkId");
         final Expression expression = withExpression();
         final Questionnaire questionnaire = new Questionnaire();
-        doReturn(expression).when(myExpressionProcessorService).getInitialExpression(questionnaireItemComponent);
+        doReturn(expression).when(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
         doReturn(expected)
-                .when(myExpressionProcessorService)
+                .when(expressionProcessorService)
                 .getExpressionResult(prePopulateRequest, expression, "linkId", questionnaire);
         // execute
-        final List<IBase> actual = myFixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
+        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
         // validate
         assertEquals(expected, actual);
-        verify(myExpressionProcessorService).getInitialExpression(questionnaireItemComponent);
-        verify(myExpressionProcessorService).getInitialExpression(questionnaireItemComponent);
+        verify(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
+        verify(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
     }
 
     private Expression withExpression() {

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.packager;
+package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;

@@ -16,9 +16,9 @@ import org.opencds.cqf.fhir.utility.Constants;
 public class PrePopulateRequestHelpers {
     public static final String PATIENT_ID = "patientId";
 
-    public static PrePopulateRequest withPrePopulateRequest(LibraryEngine theLibraryEngine) {
+    public static PrePopulateRequest withPrePopulateRequest(LibraryEngine libraryEngine) {
         final IBaseParameters parameters = new Parameters();
         final IBaseBundle bundle = new Bundle();
-        return new PrePopulateRequest(PATIENT_ID, parameters, bundle, theLibraryEngine);
+        return new PrePopulateRequest(PATIENT_ID, parameters, bundle, libraryEngine);
     }
 }

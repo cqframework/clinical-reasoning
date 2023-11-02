@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.populate;
+package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +16,10 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
+
 public class PopulateProcessor {
     public QuestionnaireResponse populate(
             Questionnaire originalQuestionnaire, Questionnaire prePopulatedQuestionnaire, String patientId) {
@@ -25,11 +29,11 @@ public class PopulateProcessor {
                 getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         if (prePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
             response.addContained(operationOutcome.get());
-            response.addExtension(ExtensionBuilders.crmiMessagesExtension(
-                    operationOutcome.get().getIdPart()));
+            response.addExtension(buildR4(crmiMessagesExtension(
+                    operationOutcome.get().getIdPart())));
         }
         response.addContained(prePopulatedQuestionnaire);
-        response.addExtension(ExtensionBuilders.dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire));
+        response.addExtension(buildR4(dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire.getIdPart())));
         response.setQuestionnaire(originalQuestionnaire.getUrl());
         response.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS);
         response.setSubject(new Reference(new IdType("Patient", patientId)));
@@ -40,7 +44,7 @@ public class PopulateProcessor {
     Optional<OperationOutcome> getOperationOutcomeFromPrePopulatedQuestionnaire(
             Questionnaire prePopulatedQuestionnaire) {
         return prePopulatedQuestionnaire.getContained().stream()
-                .filter(theResource -> theResource.getResourceType() == ResourceType.OperationOutcome)
+                .filter(resource -> resource.getResourceType() == ResourceType.OperationOutcome)
                 .map(OperationOutcome.class::cast)
                 .filter(this::filterOperationOutcome)
                 .findFirst();
@@ -49,8 +53,8 @@ public class PopulateProcessor {
     boolean filterOperationOutcome(OperationOutcome operationOutcome) {
         if (operationOutcome.hasIssue()) {
             final List<OperationOutcomeIssueComponent> filteredIssues = operationOutcome.getIssue().stream()
-                    .filter(theIssue -> theIssue.getCode() == OperationOutcome.IssueType.EXCEPTION
-                            && theIssue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+                    .filter(issue -> issue.getCode() == OperationOutcome.IssueType.EXCEPTION
+                            && issue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
                     .collect(Collectors.toList());
             return !filteredIssues.isEmpty();
         }

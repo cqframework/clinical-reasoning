@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class PrePopulateItemWithExtension {
         if (initialProperty.hasValues() && !initialProperty.isList()) {
             final Type initialValue =
                     transformValue((Type) initialProperty.getValues().get(0));
-            item.addExtension(ExtensionBuilders.questionnaireResponseAuthorExtension());
+            item.addExtension(buildR4(QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION));
             item.addInitial(new QuestionnaireItemInitialComponent().setValue(initialValue));
         } else {
             // TODO: handle lists

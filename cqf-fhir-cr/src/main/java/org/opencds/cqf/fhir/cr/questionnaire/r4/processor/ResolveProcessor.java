@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.resolve;
+package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor.castOrThrow;
 

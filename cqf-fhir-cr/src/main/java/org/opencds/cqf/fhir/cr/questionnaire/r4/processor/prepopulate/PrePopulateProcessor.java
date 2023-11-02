@@ -12,6 +12,10 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
+
 public class PrePopulateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(PrePopulateProcessor.class);
     private final PrePopulateItem prePopulateItem;
@@ -35,15 +39,13 @@ public class PrePopulateProcessor {
         this.operationOutcome = getBaseOperationOutcome(questionnaireId);
         final Questionnaire prepopulatedQuestionnaire = questionnaire.copy();
         prepopulatedQuestionnaire.setId(questionnaireId);
-        prepopulatedQuestionnaire.addExtension(
-                ExtensionBuilders.prepopulateSubjectExtension(prePopulateRequest.getPatientId()));
+        prepopulatedQuestionnaire.addExtension(buildR4(prepopulateSubjectExtension(prePopulateRequest.getPatientId())));
         final List<QuestionnaireItemComponent> processedItems = processItems(
                 prePopulateRequest, questionnaire.getItem(), questionnaire);
         prepopulatedQuestionnaire.setItem(processedItems);
         if (!operationOutcome.getIssue().isEmpty()) {
             prepopulatedQuestionnaire.addContained(operationOutcome);
-            prepopulatedQuestionnaire.addExtension(
-                    ExtensionBuilders.crmiMessagesExtension(operationOutcome.getIdPart()));
+            prepopulatedQuestionnaire.addExtension(buildR4(crmiMessagesExtension(operationOutcome.getIdPart())));
         }
         return prepopulatedQuestionnaire;
     }

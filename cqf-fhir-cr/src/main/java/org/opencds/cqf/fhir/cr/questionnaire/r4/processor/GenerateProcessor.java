@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.generate;
+package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;

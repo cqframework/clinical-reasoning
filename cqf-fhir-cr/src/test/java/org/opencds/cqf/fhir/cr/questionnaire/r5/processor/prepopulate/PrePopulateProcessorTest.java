@@ -1,23 +1,9 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
+package org.opencds.cqf.fhir.cr.questionnaire.r5.processor.prepopulate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.util.List;
-import java.util.Optional;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
+import org.hl7.fhir.r5.model.OperationOutcome.OperationOutcomeIssueComponent;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +16,13 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.cr.questionnaire.helpers.PrePopulateRequestHelpers;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestingHelper;
+import org.opencds.cqf.fhir.cr.questionnaire.r5.helpers.TestingHelper;
 import org.opencds.cqf.fhir.utility.Constants;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PrePopulateProcessorTest {
@@ -104,7 +95,7 @@ class PrePopulateProcessorTest {
                 .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT)
                 .getValue();
         assertEquals(
-                FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID,
+                FHIRTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID,
                 sdcExtension.getReference());
         final Reference crmiExtension = (Reference)
                 actual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();

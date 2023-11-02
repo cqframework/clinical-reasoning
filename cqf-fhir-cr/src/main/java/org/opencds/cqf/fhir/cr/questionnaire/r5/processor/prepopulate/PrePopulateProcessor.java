@@ -1,21 +1,20 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
+package org.opencds.cqf.fhir.cr.questionnaire.r5.processor.prepopulate;
+
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR5;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
+import org.hl7.fhir.r5.model.OperationOutcome;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
 
 public class PrePopulateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(PrePopulateProcessor.class);
@@ -40,13 +39,13 @@ public class PrePopulateProcessor {
         this.operationOutcome = getBaseOperationOutcome(questionnaireId);
         final Questionnaire prepopulatedQuestionnaire = questionnaire.copy();
         prepopulatedQuestionnaire.setId(questionnaireId);
-        prepopulatedQuestionnaire.addExtension(buildR4(prepopulateSubjectExtension(FHIRAllTypes.PATIENT.toCode(), prePopulateRequest.getPatientId())));
+        prepopulatedQuestionnaire.addExtension(buildR5(prepopulateSubjectExtension(FHIRTypes.PATIENT.toCode(), prePopulateRequest.getPatientId())));
         final List<QuestionnaireItemComponent> processedItems = processItems(
                 prePopulateRequest, questionnaire.getItem(), questionnaire);
         prepopulatedQuestionnaire.setItem(processedItems);
         if (!operationOutcome.getIssue().isEmpty()) {
             prepopulatedQuestionnaire.addContained(operationOutcome);
-            prepopulatedQuestionnaire.addExtension(buildR4(crmiMessagesExtension(operationOutcome.getIdPart())));
+            prepopulatedQuestionnaire.addExtension(buildR5(crmiMessagesExtension(operationOutcome.getIdPart())));
         }
         return prepopulatedQuestionnaire;
     }

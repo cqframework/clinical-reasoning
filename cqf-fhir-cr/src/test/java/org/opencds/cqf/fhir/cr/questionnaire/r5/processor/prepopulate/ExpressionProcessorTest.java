@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
+package org.opencds.cqf.fhir.cr.questionnaire.r5.processor.prepopulate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -12,11 +12,11 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.cr.questionnaire.helpers.PrePopulateRequestHelpers;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestingHelper;
+import org.opencds.cqf.fhir.cr.questionnaire.r5.helpers.TestingHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)

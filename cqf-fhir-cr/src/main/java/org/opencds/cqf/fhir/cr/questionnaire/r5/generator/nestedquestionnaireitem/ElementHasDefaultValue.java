@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r5.generator.nestedquestionnaireitem;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.r5.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.DataType;

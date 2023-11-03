@@ -73,7 +73,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
 
     private final ActivityDefinitionProcessor activityDefinitionProcessor;
-    private final QuestionnaireProcessor myQuestionnaireProcessor;
+    private final QuestionnaireProcessor questionnaireProcessor;
     private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
     private ExtensionResolver extensionResolver;
     private InputParameterResolver inputParameterResolver;
@@ -88,7 +88,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         super(repository, evaluationSettings);
         this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-        this.myQuestionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
+        this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
         this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
     }
 
@@ -649,7 +649,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 valueSets.forEach(
                         valueSet -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
-                var populatedQuestionnaire = myQuestionnaireProcessor.prePopulate(
+                var populatedQuestionnaire = questionnaireProcessor.prePopulate(
                         toPopulate, subjectId, this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
                     requestGroup.addContained(populatedQuestionnaire);

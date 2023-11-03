@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.dstu3.generator.questionnaireitem;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Extension;

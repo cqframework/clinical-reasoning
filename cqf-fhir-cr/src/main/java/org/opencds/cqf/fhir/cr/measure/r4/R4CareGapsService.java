@@ -454,18 +454,30 @@ public class R4CareGapsService {
 
     private CareGapsStatusCode getGapStatus(Measure theMeasure, MeasureReport theMeasureReport) {
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
+        Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
         theMeasureReport.getGroup().forEach(group -> group.getPopulation().forEach(population -> {
             if (population.hasCode()
                     && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
                     && population.getCount() == 1) {
                 inNumerator.setValue(true);
             }
+            if (population.hasCode()
+                    && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominator.getKey())
+                    && population.getCount() == 1) {
+                inDenominator.setValue(true);
+            }
         }));
 
         boolean isPositive =
                 theMeasure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
 
-        if ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue())) {
+        if (!inDenominator.getValue()) {
+            // patient is not in eligible population
+            return CareGapsStatusCode.NOT_APPLICABLE;
+        }
+
+        if (inDenominator.getValue()
+                && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
             return CareGapsStatusCode.OPEN_GAP;
         }
 

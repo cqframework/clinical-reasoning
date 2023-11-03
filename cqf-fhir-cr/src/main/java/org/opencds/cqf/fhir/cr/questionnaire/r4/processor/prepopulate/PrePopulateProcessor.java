@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PrePopulateItemWithExtension {

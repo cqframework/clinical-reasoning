@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildDstu3;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 

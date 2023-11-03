@@ -1,20 +1,15 @@
 package org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.prepopulate;
 
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 
 public class ExpressionProcessor {
     private PrePopulateHelper prePopulateHelper;

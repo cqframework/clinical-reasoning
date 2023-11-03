@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.prepopulate;
 
-import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildDstu3;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
@@ -8,14 +7,12 @@ import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.Property;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;

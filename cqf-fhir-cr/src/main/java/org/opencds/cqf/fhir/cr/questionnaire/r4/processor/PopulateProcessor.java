@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnsw
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.Constants;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;

@@ -29,8 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.helpers.PrePopulateRequestHelpers;
 import org.opencds.cqf.fhir.cr.questionnaire.dstu3.helpers.TestingHelper;
+import org.opencds.cqf.fhir.cr.questionnaire.helpers.PrePopulateRequestHelpers;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,25 +62,24 @@ class PrePopulateProcessorTest {
     @Test
     void prePopulateShouldReturnQuestionnaire() {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final Questionnaire questionnaire = TestingHelper.withQuestionnaire();
         questionnaire.setId(TestingHelper.QUESTIONNAIRE_ID);
         final String populatedQuestionnaireId =
-            TestingHelper.QUESTIONNAIRE_ID + "-" + PrePopulateRequestHelpers.PATIENT_ID;
+                TestingHelper.QUESTIONNAIRE_ID + "-" + PrePopulateRequestHelpers.PATIENT_ID;
         final List<QuestionnaireItemComponent> expectedSubItems = List.of(
-            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         final OperationOutcome operationOutcomeWithIssues = new OperationOutcome();
         operationOutcomeWithIssues.setId("operation-outcome-id");
         operationOutcomeWithIssues
-            .addIssue()
-            .setCode(OperationOutcome.IssueType.EXCEPTION)
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-            .setDiagnostics("exception message");
+                .addIssue()
+                .setCode(OperationOutcome.IssueType.EXCEPTION)
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setDiagnostics("exception message");
         doReturn(operationOutcomeWithIssues).when(fixture).getBaseOperationOutcome(populatedQuestionnaireId);
         doReturn(expectedSubItems)
-            .when(fixture)
-            .processItems(prePopulateRequest, TestingHelper.QUESTIONNAIRE_SUB_ITEMS, questionnaire);
+                .when(fixture)
+                .processItems(prePopulateRequest, TestingHelper.QUESTIONNAIRE_SUB_ITEMS, questionnaire);
         // execute
         final Questionnaire actual = fixture.prePopulate(questionnaire, prePopulateRequest);
         // validate
@@ -95,45 +94,45 @@ class PrePopulateProcessorTest {
     void validateOperationOutcomeResults(Questionnaire actual) {
         assertFalse(fixture.operationOutcome.getIssue().isEmpty());
         final OperationOutcome contained =
-            (OperationOutcome) actual.getContained().get(0);
+                (OperationOutcome) actual.getContained().get(0);
         assertEquals(fixture.operationOutcome, contained);
     }
 
     void validateExtensions(Questionnaire actual) {
-        final Reference sdcExtension = (Reference) actual
-            .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT)
-            .getValue();
+        final Reference sdcExtension =
+                (Reference) actual.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT)
+                        .getValue();
         assertEquals(
-            FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID,
-            sdcExtension.getReference());
+                FHIRAllTypes.PATIENT.toCode() + "/" + PrePopulateRequestHelpers.PATIENT_ID,
+                sdcExtension.getReference());
         final Reference crmiExtension = (Reference)
-            actual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();
+                actual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES).getValue();
         assertEquals("#operation-outcome-id", crmiExtension.getReference());
     }
 
     @Test
     void processItemsShouldProcessItemsIfItemsHaveSdcExtension() {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final Questionnaire questionnaire = new Questionnaire();
         final List<QuestionnaireItemComponent> expectedItems = List.of(
-            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         final List<QuestionnaireItemComponent> questionnaireItems = List.of(
-            withQuestionnaireItemWithExtension(),
-            withQuestionnaireItemWithExtension(),
-            withQuestionnaireItemWithExtension());
+                withQuestionnaireItemWithExtension(),
+                withQuestionnaireItemWithExtension(),
+                withQuestionnaireItemWithExtension());
         doReturn(List.of(expectedItems.get(0)))
-            .when(fixture)
-            .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(0), questionnaire);
+                .when(fixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(0), questionnaire);
         doReturn(List.of(expectedItems.get(1)))
-            .when(fixture)
-            .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(1), questionnaire);
+                .when(fixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(1), questionnaire);
         doReturn(List.of(expectedItems.get(2)))
-            .when(fixture)
-            .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(2), questionnaire);
+                .when(fixture)
+                .prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(2), questionnaire);
         // execute
-        final List<QuestionnaireItemComponent> actual = fixture.processItems(prePopulateRequest, questionnaireItems, questionnaire);
+        final List<QuestionnaireItemComponent> actual =
+                fixture.processItems(prePopulateRequest, questionnaireItems, questionnaire);
         // validate
         assertEquals(expectedItems, actual);
         verify(fixture).prePopulateItemWithExtension(prePopulateRequest, questionnaireItems.get(0), questionnaire);
@@ -143,7 +142,7 @@ class PrePopulateProcessorTest {
 
     private QuestionnaireItemComponent withQuestionnaireItemWithExtension() {
         final Extension extension =
-            new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, new StringType("extension value"));
+                new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, new StringType("extension value"));
         final QuestionnaireItemComponent item = new QuestionnaireItemComponent();
         item.addExtension(extension);
         return item;
@@ -152,16 +151,15 @@ class PrePopulateProcessorTest {
     @Test
     void processItemsShouldRecursivelyProcessItemsIfThereAreSubItems() {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         final List<QuestionnaireItemComponent> subItems = List.of(
-            new QuestionnaireItemComponent().setLinkId("linkId1"),
-            new QuestionnaireItemComponent().setLinkId("linkId2"),
-            new QuestionnaireItemComponent().setLinkId("linkId3"));
+                new QuestionnaireItemComponent().setLinkId("linkId1"),
+                new QuestionnaireItemComponent().setLinkId("linkId2"),
+                new QuestionnaireItemComponent().setLinkId("linkId3"));
         final List<QuestionnaireItemComponent> expected = List.of(
-            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         questionnaireItem.setItem(subItems);
         final List<QuestionnaireItemComponent> input = List.of(questionnaireItem);
         doReturn(expected).when(fixture).processItems(prePopulateRequest, subItems, questionnaire);
@@ -178,8 +176,7 @@ class PrePopulateProcessorTest {
     @Test
     void processItemsShouldProcessItemsIfThereAreNoSubItems() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         final QuestionnaireItemComponent expected = new QuestionnaireItemComponent();
@@ -200,16 +197,15 @@ class PrePopulateProcessorTest {
     @Test
     void prePopulateItemWithExtensionShouldReturnQuestionnaireItemComponent() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         final List<QuestionnaireItemComponent> expected = List.of(
-            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
         doReturn(expected).when(prePopulateItemWithExtension).processItem(prePopulateRequest, input, questionnaire);
         // execute
         final List<QuestionnaireItemComponent> actual =
-            fixture.prePopulateItemWithExtension(prePopulateRequest, input, questionnaire);
+                fixture.prePopulateItemWithExtension(prePopulateRequest, input, questionnaire);
         // validate
         verify(prePopulateItemWithExtension).processItem(prePopulateRequest, input, questionnaire);
         assertEquals(expected, actual);
@@ -218,16 +214,15 @@ class PrePopulateProcessorTest {
     @Test
     void prePopulateItemWithExceptionShouldReturnEmptyListWhenExceptionCaught() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         doThrow(new ResolveExpressionException("message"))
-            .when(prePopulateItemWithExtension)
-            .processItem(prePopulateRequest, input, questionnaire);
+                .when(prePopulateItemWithExtension)
+                .processItem(prePopulateRequest, input, questionnaire);
         // execute
         final List<QuestionnaireItemComponent> actual =
-            fixture.prePopulateItemWithExtension(prePopulateRequest, input, questionnaire);
+                fixture.prePopulateItemWithExtension(prePopulateRequest, input, questionnaire);
         // validate
         verify(prePopulateItemWithExtension).processItem(prePopulateRequest, input, questionnaire);
         verify(fixture).addExceptionToOperationOutcome("message");
@@ -237,8 +232,7 @@ class PrePopulateProcessorTest {
     @Test
     void prePopulateItemShouldReturnQuestionnaireItemComponent() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         final QuestionnaireItemComponent expected = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
@@ -254,14 +248,13 @@ class PrePopulateProcessorTest {
     void prePopulateItemShouldReturnQuestionnaireItemComponentWhenExceptionCaught() throws ResolveExpressionException {
         // setup
         final String id = "questionnaire-item-id";
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent input = new QuestionnaireItemComponent();
         input.setId(id);
         final Questionnaire questionnaire = new Questionnaire();
         doThrow(new ResolveExpressionException("message"))
-            .when(prePopulateItem)
-            .processItem(prePopulateRequest, input, questionnaire);
+                .when(prePopulateItem)
+                .processItem(prePopulateRequest, input, questionnaire);
         // execute
         final QuestionnaireItemComponent actual = fixture.prePopulateItem(prePopulateRequest, input, questionnaire);
         // validate
@@ -279,7 +272,7 @@ class PrePopulateProcessorTest {
         // validate
         assertTrue(fixture.operationOutcome.hasIssue());
         final Optional<OperationOutcomeIssueComponent> issue =
-            fixture.operationOutcome.getIssue().stream().findFirst();
+                fixture.operationOutcome.getIssue().stream().findFirst();
         assertTrue(issue.isPresent());
         assertEquals(OperationOutcome.IssueType.EXCEPTION, issue.get().getCode());
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.get().getSeverity());

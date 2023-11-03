@@ -13,7 +13,7 @@ import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 public class PackageProcessor {
     final Repository repository;
 
-    public PackageProcessor(Repository  repository) {
+    public PackageProcessor(Repository repository) {
         this.repository = repository;
     }
 
@@ -29,8 +29,7 @@ public class PackageProcessor {
             if (library != null) {
                 bundle.addEntry(PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(),
-                        repository, isPut);
+                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, isPut);
                 }
             }
         }

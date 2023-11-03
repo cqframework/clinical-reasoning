@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor.castOrThrow;
 
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 

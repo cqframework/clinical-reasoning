@@ -5,12 +5,12 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class TestingHelper {
@@ -58,6 +58,9 @@ public class TestingHelper {
         questionnaire.setItem(QUESTIONNAIRE_SUB_ITEMS);
         return questionnaire;
     }
+
     public static final List<Questionnaire.QuestionnaireItemComponent> QUESTIONNAIRE_SUB_ITEMS = List.of(
-        new Questionnaire.QuestionnaireItemComponent(), new Questionnaire.QuestionnaireItemComponent(), new Questionnaire.QuestionnaireItemComponent());
+            new Questionnaire.QuestionnaireItemComponent(),
+            new Questionnaire.QuestionnaireItemComponent(),
+            new Questionnaire.QuestionnaireItemComponent());
 }

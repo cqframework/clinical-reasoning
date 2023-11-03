@@ -28,8 +28,8 @@ public class PopulateProcessor {
                 getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         if (prePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
             response.addContained(operationOutcome.get());
-            response.addExtension(buildR5(crmiMessagesExtension(
-                    operationOutcome.get().getIdPart())));
+            response.addExtension(
+                    buildR5(crmiMessagesExtension(operationOutcome.get().getIdPart())));
         }
         response.addContained(prePopulatedQuestionnaire);
         response.addExtension(buildR5(dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire.getIdPart())));
@@ -60,13 +60,13 @@ public class PopulateProcessor {
         return false;
     }
 
-    List<QuestionnaireResponseItemComponent> processResponseItems(
-            List<QuestionnaireItemComponent> questionnaireItems) {
+    List<QuestionnaireResponseItemComponent> processResponseItems(List<QuestionnaireItemComponent> questionnaireItems) {
         return questionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 
     QuestionnaireResponseItemComponent processResponseItem(QuestionnaireItemComponent questionnaireItem) {
-        QuestionnaireResponseItemComponent responseItem = new QuestionnaireResponseItemComponent(questionnaireItem.getLinkIdElement().getValue());
+        QuestionnaireResponseItemComponent responseItem = new QuestionnaireResponseItemComponent(
+                questionnaireItem.getLinkIdElement().getValue());
         responseItem.setDefinition(questionnaireItem.getDefinition());
         responseItem.setTextElement(questionnaireItem.getTextElement());
         if (questionnaireItem.hasItem()) {

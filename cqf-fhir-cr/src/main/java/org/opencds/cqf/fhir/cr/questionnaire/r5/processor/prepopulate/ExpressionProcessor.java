@@ -30,7 +30,10 @@ public class ExpressionProcessor {
     }
 
     List<IBase> getExpressionResult(
-            PrePopulateRequest prePopulateRequest, Expression expression, String itemLinkId, Questionnaire questionnaire)
+            PrePopulateRequest prePopulateRequest,
+            Expression expression,
+            String itemLinkId,
+            Questionnaire questionnaire)
             throws ResolveExpressionException {
         if (expression == null || !expression.hasExpression()) {
             return new ArrayList<>();
@@ -45,8 +48,8 @@ public class ExpressionProcessor {
                             prePopulateRequest.getParameters(),
                             prePopulateRequest.getBundle());
         } catch (Exception ex) {
-            final String message = String.format(
-                    EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
+            final String message =
+                    String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
             throw new ResolveExpressionException(message);
         }
     }

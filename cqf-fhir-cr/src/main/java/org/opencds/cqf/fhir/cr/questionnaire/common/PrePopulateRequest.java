@@ -9,25 +9,27 @@ public class PrePopulateRequest {
     private final IBaseParameters parameters;
     private final IBaseBundle bundle;
     private final LibraryEngine libraryEngine;
+
     public PrePopulateRequest(
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            LibraryEngine libraryEngine) {
+            String patientId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
         this.patientId = patientId;
         this.parameters = parameters;
         this.bundle = bundle;
         this.libraryEngine = libraryEngine;
     }
+
     public IBaseBundle getBundle() {
         return bundle;
     }
+
     public IBaseParameters getParameters() {
         return parameters;
     }
+
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }
+
     public String getPatientId() {
         return patientId;
     }

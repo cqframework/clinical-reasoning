@@ -27,9 +27,7 @@ public class PrePopulateProcessor {
     }
 
     private PrePopulateProcessor(
-        PrePopulateItem prePopulateItem,
-        PrePopulateItemWithExtension prePopulateItemWithExtension
-    ) {
+            PrePopulateItem prePopulateItem, PrePopulateItemWithExtension prePopulateItemWithExtension) {
         this.prePopulateItem = prePopulateItem;
         this.prePopulateItemWithExtension = prePopulateItemWithExtension;
     }
@@ -39,9 +37,10 @@ public class PrePopulateProcessor {
         this.operationOutcome = getBaseOperationOutcome(questionnaireId);
         final Questionnaire prepopulatedQuestionnaire = questionnaire.copy();
         prepopulatedQuestionnaire.setId(questionnaireId);
-        prepopulatedQuestionnaire.addExtension(buildR5(prepopulateSubjectExtension(FHIRTypes.PATIENT.toCode(), prePopulateRequest.getPatientId())));
-        final List<QuestionnaireItemComponent> processedItems = processItems(
-                prePopulateRequest, questionnaire.getItem(), questionnaire);
+        prepopulatedQuestionnaire.addExtension(
+                buildR5(prepopulateSubjectExtension(FHIRTypes.PATIENT.toCode(), prePopulateRequest.getPatientId())));
+        final List<QuestionnaireItemComponent> processedItems =
+                processItems(prePopulateRequest, questionnaire.getItem(), questionnaire);
         prepopulatedQuestionnaire.setItem(processedItems);
         if (!operationOutcome.getIssue().isEmpty()) {
             prepopulatedQuestionnaire.addContained(operationOutcome);
@@ -51,7 +50,9 @@ public class PrePopulateProcessor {
     }
 
     List<QuestionnaireItemComponent> processItems(
-            PrePopulateRequest prePopulateRequest, List<QuestionnaireItemComponent> questionnaireItems, Questionnaire questionnaire) {
+            PrePopulateRequest prePopulateRequest,
+            List<QuestionnaireItemComponent> questionnaireItems,
+            Questionnaire questionnaire) {
         final List<QuestionnaireItemComponent> populatedItems = new ArrayList<>();
         questionnaireItems.forEach(item -> {
             if (item.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)) {
@@ -72,7 +73,9 @@ public class PrePopulateProcessor {
     }
 
     List<QuestionnaireItemComponent> prePopulateItemWithExtension(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire) {
+            PrePopulateRequest prePopulateRequest,
+            QuestionnaireItemComponent questionnaireItem,
+            Questionnaire questionnaire) {
         try {
             // extension value is the context resource we're using to populate
             // Expression-based Population
@@ -85,7 +88,9 @@ public class PrePopulateProcessor {
     }
 
     QuestionnaireItemComponent prePopulateItem(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire) {
+            PrePopulateRequest prePopulateRequest,
+            QuestionnaireItemComponent questionnaireItem,
+            Questionnaire questionnaire) {
         try {
             return prePopulateItem.processItem(prePopulateRequest, questionnaireItem, questionnaire);
         } catch (ResolveExpressionException e) {

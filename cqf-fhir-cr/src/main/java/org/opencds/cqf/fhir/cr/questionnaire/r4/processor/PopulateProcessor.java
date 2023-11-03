@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,10 +19,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.utility.Constants;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
-
 public class PopulateProcessor {
     public QuestionnaireResponse populate(
             Questionnaire originalQuestionnaire, Questionnaire prePopulatedQuestionnaire, String patientId) {
@@ -28,8 +28,8 @@ public class PopulateProcessor {
                 getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         if (prePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
             response.addContained(operationOutcome.get());
-            response.addExtension(buildR4(crmiMessagesExtension(
-                    operationOutcome.get().getIdPart())));
+            response.addExtension(
+                    buildR4(crmiMessagesExtension(operationOutcome.get().getIdPart())));
         }
         response.addContained(prePopulatedQuestionnaire);
         response.addExtension(buildR4(dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire.getIdPart())));
@@ -60,8 +60,7 @@ public class PopulateProcessor {
         return false;
     }
 
-    List<QuestionnaireResponseItemComponent> processResponseItems(
-            List<QuestionnaireItemComponent> questionnaireItems) {
+    List<QuestionnaireResponseItemComponent> processResponseItems(List<QuestionnaireItemComponent> questionnaireItems) {
         return questionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 

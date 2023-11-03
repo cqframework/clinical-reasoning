@@ -23,15 +23,19 @@ public class PrePopulateItemWithExtension {
     // TODO: we don't have any resources that are currently using this
     // not writing unit tests till there is a practical implementation
     private final ExpressionProcessor expressionProcessor;
+
     public PrePopulateItemWithExtension() {
         this(new ExpressionProcessor());
     }
+
     private PrePopulateItemWithExtension(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 
     List<QuestionnaireItemComponent> processItem(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire)
+            PrePopulateRequest prePopulateRequest,
+            QuestionnaireItemComponent questionnaireItem,
+            Questionnaire questionnaire)
             throws ResolveExpressionException {
         final Expression contextExpression = (Expression) questionnaireItem
                 .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)

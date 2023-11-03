@@ -86,8 +86,7 @@ class ExpressionProcessorTest {
     @Test
     void getExpressionResultShouldReturnEmptyListIfNullParameters() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final Questionnaire questionnaire = TestingHelper.withQuestionnaire();
         // execute
         final List<IBase> actual = fixture.getExpressionResult(prePopulateRequest, null, "itemLinkId", questionnaire);
@@ -99,8 +98,7 @@ class ExpressionProcessorTest {
     @Test
     void getExpressionResultShouldReturnListOfIBaseResources() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final Expression expression = withExpression();
         final List<IBase> expected = List.of(new Bundle(), new Bundle(), new Bundle());
         final CqfExpression cqfExpression = new CqfExpression();
@@ -114,7 +112,8 @@ class ExpressionProcessorTest {
                         prePopulateRequest.getParameters(),
                         prePopulateRequest.getBundle());
         // execute
-        final List<IBase> actual = fixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId", questionnaire);
+        final List<IBase> actual =
+                fixture.getExpressionResult(prePopulateRequest, expression, "itemLinkId", questionnaire);
         // validate
         assertEquals(expected, actual);
         verify(fixture).getCqfExpression(expression, questionnaire);
@@ -129,8 +128,7 @@ class ExpressionProcessorTest {
     @Test
     void getExpressionResultShouldThrowResolveExpressionException() {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final Expression expression = withExpression();
         final CqfExpression cqfExpression = new CqfExpression();
         final Questionnaire questionnaire = TestingHelper.withQuestionnaire();

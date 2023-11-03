@@ -22,12 +22,15 @@ public class PrePopulateItem {
     public PrePopulateItem() {
         this(new ExpressionProcessor());
     }
+
     private PrePopulateItem(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 
     QuestionnaireItemComponent processItem(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire)
+            PrePopulateRequest prePopulateRequest,
+            QuestionnaireItemComponent questionnaireItem,
+            Questionnaire questionnaire)
             throws ResolveExpressionException {
         final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(questionnaireItem);
         final List<IBase> expressionResults = getExpressionResults(prePopulateRequest, questionnaire, populatedItem);
@@ -44,7 +47,9 @@ public class PrePopulateItem {
     }
 
     List<IBase> getExpressionResults(
-            PrePopulateRequest prePopulateRequest, Questionnaire questionnaire, QuestionnaireItemComponent questionnaireItem)
+            PrePopulateRequest prePopulateRequest,
+            Questionnaire questionnaire,
+            QuestionnaireItemComponent questionnaireItem)
             throws ResolveExpressionException {
         final Expression initialExpression = expressionProcessor.getInitialExpression(questionnaireItem);
         if (initialExpression != null) {

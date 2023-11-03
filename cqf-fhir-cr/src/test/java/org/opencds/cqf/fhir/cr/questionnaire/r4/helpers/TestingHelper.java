@@ -56,6 +56,7 @@ public class TestingHelper {
         questionnaire.setItem(QUESTIONNAIRE_SUB_ITEMS);
         return questionnaire;
     }
+
     public static final List<QuestionnaireItemComponent> QUESTIONNAIRE_SUB_ITEMS = List.of(
-        new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
 }

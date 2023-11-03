@@ -52,8 +52,7 @@ class PrePopulateItemTest {
     @Test
     void processItemShouldReturnQuestionnaireItemComponent() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent originalQuestionnaireItemComponent = new QuestionnaireItemComponent();
         final QuestionnaireItemComponent populatedQuestionnaireItemComponent = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
@@ -86,13 +85,13 @@ class PrePopulateItemTest {
     @Test
     void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() throws ResolveExpressionException {
         // setup
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         final Questionnaire questionnaire = new Questionnaire();
         doReturn(null).when(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
         // execute
-        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
+        final List<IBase> actual =
+                fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
         // validate
         assertTrue(actual.isEmpty());
         verify(expressionProcessorService).getInitialExpression(questionnaireItemComponent);
@@ -104,8 +103,7 @@ class PrePopulateItemTest {
             throws ResolveExpressionException {
         // setup
         final List<IBase> expected = withExpressionResults();
-        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(
-            libraryEngine);
+        final PrePopulateRequest prePopulateRequest = PrePopulateRequestHelpers.withPrePopulateRequest(libraryEngine);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         questionnaireItemComponent.setLinkId("linkId");
         final Expression expression = withExpression();
@@ -115,7 +113,8 @@ class PrePopulateItemTest {
                 .when(expressionProcessorService)
                 .getExpressionResult(prePopulateRequest, expression, "linkId", questionnaire);
         // execute
-        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
+        final List<IBase> actual =
+                fixture.getExpressionResults(prePopulateRequest, questionnaire, questionnaireItemComponent);
         // validate
         assertEquals(expected, actual);
         verify(expressionProcessorService).getInitialExpression(questionnaireItemComponent);

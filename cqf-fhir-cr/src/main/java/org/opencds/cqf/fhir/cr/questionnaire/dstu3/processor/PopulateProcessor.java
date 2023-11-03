@@ -28,8 +28,8 @@ public class PopulateProcessor {
                 getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         if (prePopulatedQuestionnaire.hasExtension(Constants.EXT_CRMI_MESSAGES) && operationOutcome.isPresent()) {
             response.addContained(operationOutcome.get());
-            response.addExtension(buildDstu3(crmiMessagesExtension(
-                    operationOutcome.get().getIdPart())));
+            response.addExtension(
+                    buildDstu3(crmiMessagesExtension(operationOutcome.get().getIdPart())));
         }
         response.addContained(prePopulatedQuestionnaire);
         response.addExtension(buildDstu3(dtrQuestionnaireResponseExtension(prePopulatedQuestionnaire.getIdPart())));
@@ -60,8 +60,7 @@ public class PopulateProcessor {
         return false;
     }
 
-    List<QuestionnaireResponseItemComponent> processResponseItems(
-            List<QuestionnaireItemComponent> questionnaireItems) {
+    List<QuestionnaireResponseItemComponent> processResponseItems(List<QuestionnaireItemComponent> questionnaireItems) {
         return questionnaireItems.stream().map(this::processResponseItem).collect(Collectors.toList());
     }
 
@@ -87,7 +86,8 @@ public class PopulateProcessor {
             questionnaireResponseItem.addExtension(
                     questionnaireItem.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
         }
-        final QuestionnaireResponseItemAnswerComponent answer = new QuestionnaireResponseItemAnswerComponent().setValue(questionnaireItem.getInitial());
+        final QuestionnaireResponseItemAnswerComponent answer =
+                new QuestionnaireResponseItemAnswerComponent().setValue(questionnaireItem.getInitial());
         questionnaireResponseItem.addAnswer(answer);
         return questionnaireResponseItem;
     }

@@ -43,15 +43,15 @@ class PopulateProcessorTest {
         originalQuestionnaire.setUrl(questionnaireUrl);
         final OperationOutcome operationOutcome = withOperationOutcome(operationOutcomeId);
         final Questionnaire prePopulatedQuestionnaire =
-            withPrepopulatedQuestionnaire(operationOutcome, prePopulatedQuestionnaireId);
+                withPrepopulatedQuestionnaire(operationOutcome, prePopulatedQuestionnaireId);
         final List<QuestionnaireResponseItemComponent> expectedResponses = List.of(
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent());
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent());
         doReturn(expectedResponses).when(fixture).processResponseItems(prePopulatedQuestionnaire.getItem());
         // execute
         final QuestionnaireResponse actual =
-            fixture.populate(originalQuestionnaire, prePopulatedQuestionnaire, patientId);
+                fixture.populate(originalQuestionnaire, prePopulatedQuestionnaire, patientId);
         // validate
         assertEquals(prePopulatedQuestionnaireId + "-response", actual.getId());
         assertContainedResources(actual, operationOutcome, prePopulatedQuestionnaire);
@@ -74,39 +74,39 @@ class PopulateProcessorTest {
         prePopulatedQuestionnaire.addContained(operationOutcome);
         prePopulatedQuestionnaire.setId(id);
         prePopulatedQuestionnaire.addExtension(
-            new Extension(Constants.EXT_CRMI_MESSAGES, new StringType("message value")));
+                new Extension(Constants.EXT_CRMI_MESSAGES, new StringType("message value")));
         prePopulatedQuestionnaire.setItem(List.of(
-            new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent()));
+                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent()));
         return prePopulatedQuestionnaire;
     }
 
     private void assertExtensions(
-        QuestionnaireResponse theActual, String operationOutcomeId, String prePopulatedQuestionnaireId) {
+            QuestionnaireResponse theActual, String operationOutcomeId, String prePopulatedQuestionnaireId) {
         final Extension expectedCrmiExtension = theActual.getExtensionByUrl(Constants.EXT_CRMI_MESSAGES);
         assertEquals("#" + operationOutcomeId, ((Reference) expectedCrmiExtension.getValue()).getReference());
         final Extension expectedDtrQuestionnaireExtension =
-            theActual.getExtensionByUrl(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE);
+                theActual.getExtensionByUrl(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE);
         assertEquals(
-            "#" + prePopulatedQuestionnaireId,
-            ((Reference) expectedDtrQuestionnaireExtension.getValue()).getReference());
+                "#" + prePopulatedQuestionnaireId,
+                ((Reference) expectedDtrQuestionnaireExtension.getValue()).getReference());
     }
 
     private void assertContainedResources(
-        QuestionnaireResponse actual,
-        OperationOutcome expectedOperationOutcome,
-        Questionnaire expectedQuestionnaire) {
+            QuestionnaireResponse actual,
+            OperationOutcome expectedOperationOutcome,
+            Questionnaire expectedQuestionnaire) {
         final OperationOutcome operationOutcome =
-            (OperationOutcome) getContainedByResourceType(actual, ResourceType.OperationOutcome);
+                (OperationOutcome) getContainedByResourceType(actual, ResourceType.OperationOutcome);
         assertEquals(expectedOperationOutcome, operationOutcome);
         final Questionnaire questionnaire =
-            (Questionnaire) getContainedByResourceType(actual, ResourceType.Questionnaire);
+                (Questionnaire) getContainedByResourceType(actual, ResourceType.Questionnaire);
         assertEquals(expectedQuestionnaire, questionnaire);
     }
 
     private Resource getContainedByResourceType(QuestionnaireResponse actual, ResourceType resourceType) {
         final Optional<Resource> resource = actual.getContained().stream()
-            .filter(contained -> contained.getResourceType() == resourceType)
-            .findFirst();
+                .filter(contained -> contained.getResourceType() == resourceType)
+                .findFirst();
         assertTrue(resource.isPresent());
         return resource.get();
     }
@@ -119,7 +119,7 @@ class PopulateProcessorTest {
         prePopulatedQuestionnaire.addContained(operationOutcome);
         // execute
         final Optional<OperationOutcome> actual =
-            fixture.getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
+                fixture.getOperationOutcomeFromPrePopulatedQuestionnaire(prePopulatedQuestionnaire);
         // validate
         assertTrue(actual.isPresent());
         assertEquals(operationOutcome, actual.get());
@@ -152,9 +152,9 @@ class PopulateProcessorTest {
         final String definition = "definition";
         final StringType textElement = new StringType("textElement");
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent()
-            .setLinkId(linkId)
-            .setDefinition(definition)
-            .setTextElement(textElement);
+                .setLinkId(linkId)
+                .setDefinition(definition)
+                .setTextElement(textElement);
         // execute
         final QuestionnaireResponseItemComponent actual = fixture.processResponseItem(questionnaireItem);
         // validate
@@ -168,14 +168,14 @@ class PopulateProcessorTest {
         // setup
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final List<QuestionnaireItemComponent> nestedQuestionnaireItems = List.of(
-            new QuestionnaireItemComponent().setLinkId("linkId1"),
-            new QuestionnaireItemComponent().setLinkId("linkId2"),
-            new QuestionnaireItemComponent().setLinkId("linkId3"));
+                new QuestionnaireItemComponent().setLinkId("linkId1"),
+                new QuestionnaireItemComponent().setLinkId("linkId2"),
+                new QuestionnaireItemComponent().setLinkId("linkId3"));
         questionnaireItem.setItem(nestedQuestionnaireItems);
         List<QuestionnaireResponseItemComponent> expectedResponseItems = List.of(
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent(),
-            new QuestionnaireResponseItemComponent());
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent(),
+                new QuestionnaireResponseItemComponent());
         doReturn(expectedResponseItems).when(fixture).processResponseItems(nestedQuestionnaireItems);
         // execute
         final QuestionnaireResponseItemComponent actual = fixture.processResponseItem(questionnaireItem);
@@ -192,7 +192,7 @@ class PopulateProcessorTest {
         // setup
         final Type expectedValue = withTypeValue();
         final QuestionnaireItemComponent questionnaireItemComponent =
-            withQuestionnaireItemComponentWithInitialValue(expectedValue);
+                withQuestionnaireItemComponentWithInitialValue(expectedValue);
         // execute
         final QuestionnaireResponseItemComponent actual = fixture.processResponseItem(questionnaireItemComponent);
         // validate
@@ -205,10 +205,10 @@ class PopulateProcessorTest {
         // setup
         final Type expectedValue = withTypeValue();
         final QuestionnaireItemComponent questionnaireItemComponent =
-            withQuestionnaireItemComponentWithInitialValue(expectedValue);
+                withQuestionnaireItemComponentWithInitialValue(expectedValue);
         // execute
         final QuestionnaireResponseItemComponent actual =
-            fixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
+                fixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
         // validate
         assertEquals(1, actual.getAnswer().size());
         assertEquals(expectedValue, actual.getAnswer().get(0).getValue());
@@ -222,7 +222,7 @@ class PopulateProcessorTest {
         questionnaireItemComponent.addExtension(extension);
         // execute
         final QuestionnaireResponseItemComponent actual =
-            fixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
+                fixture.setAnswersForInitial(questionnaireItemComponent, new QuestionnaireResponseItemComponent());
         // validate
         assertEquals(extension, actual.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
     }
@@ -236,9 +236,9 @@ class PopulateProcessorTest {
     private OperationOutcome withOperationOutcomeWithIssue() {
         final OperationOutcome operationOutcome = new OperationOutcome();
         operationOutcome
-            .addIssue()
-            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-            .setCode(OperationOutcome.IssueType.EXCEPTION);
+                .addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setCode(OperationOutcome.IssueType.EXCEPTION);
         return operationOutcome;
     }
 
@@ -250,4 +250,3 @@ class PopulateProcessorTest {
         return List.of(new BooleanType(true), new StringType("sample string"), new IntegerType(3));
     }
 }
-

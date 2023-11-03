@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -30,7 +31,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateProcessor;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import java.util.Objects;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireProcessorTest {
@@ -38,18 +38,25 @@ class QuestionnaireProcessorTest {
 
     @Mock
     private PopulateProcessor populateProcessor;
+
     @Mock
     private ResolveProcessor resolveProcessor;
+
     @Mock
     private PackageProcessor packageProcessor;
+
     @Mock
     private PrePopulateProcessor prePopulateProcessor;
+
     @Mock
     private final FhirContext myFhirContext = FhirContext.forR4();
+
     @Mock
     private EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
+
     @Mock
     private final Repository repository = new IGFileStructureRepository(myFhirContext, CLASS_PATH);
+
     @InjectMocks
     @Spy
     private QuestionnaireProcessor fixture = new QuestionnaireProcessor(repository);
@@ -87,16 +94,20 @@ class QuestionnaireProcessorTest {
         final Bundle bundle = new Bundle();
         final LibraryEngine libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
         final Questionnaire expected = new Questionnaire();
-        doReturn(expected).when(prePopulateProcessor).prePopulate(any(Questionnaire.class), any(PrePopulateRequest.class));
+        doReturn(expected)
+                .when(prePopulateProcessor)
+                .prePopulate(any(Questionnaire.class), any(PrePopulateRequest.class));
         // execute
         final Questionnaire actual = fixture.prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
         // validate
         assertEquals(expected, actual);
-        verify(prePopulateProcessor).prePopulate(argThat(q -> Objects.equals(questionnaire, q)),
-            argThat(request -> Objects.equals(patientId, request.getPatientId())
-            && Objects.equals(parameters, request.getParameters())
-            && Objects.equals(bundle, request.getBundle())
-            && Objects.equals(libraryEngine, request.getLibraryEngine())));
+        verify(prePopulateProcessor)
+                .prePopulate(
+                        argThat(q -> Objects.equals(questionnaire, q)),
+                        argThat(request -> Objects.equals(patientId, request.getPatientId())
+                                && Objects.equals(parameters, request.getParameters())
+                                && Objects.equals(bundle, request.getBundle())
+                                && Objects.equals(libraryEngine, request.getLibraryEngine())));
     }
 
     @Test

@@ -1,16 +1,16 @@
 package org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor;
 
-import org.hl7.fhir.instance.model.api.*;
+import static java.util.Objects.requireNonNull;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.instance.model.api.*;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.prepopulate.PrePopulateProcessor;
-
-import static java.util.Objects.requireNonNull;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
     private PopulateProcessor populateProcessor;
@@ -20,18 +20,18 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     private GenerateProcessor generateProcessor;
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository,
-            evaluationSettings,
-            new ResolveProcessor(repository),
-            new PackageProcessor(repository),
-            new PopulateProcessor(),
-            new PrePopulateProcessor(),
-            new GenerateProcessor()
-        );
+        this(
+                repository,
+                evaluationSettings,
+                new ResolveProcessor(repository),
+                new PackageProcessor(repository),
+                new PopulateProcessor(),
+                new PrePopulateProcessor(),
+                new GenerateProcessor());
     }
 
     public QuestionnaireProcessor(Repository repository) {
-       this(repository, EvaluationSettings.getDefault());
+        this(repository, EvaluationSettings.getDefault());
     }
 
     QuestionnaireProcessor(
@@ -41,8 +41,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             PackageProcessor packageProcessor,
             PopulateProcessor populateProcessor,
             PrePopulateProcessor prePopulateProcessor,
-            GenerateProcessor generateProcessor
-    ) {
+            GenerateProcessor generateProcessor) {
         super(repository, evaluationSettings);
         this.resolveProcessor = resolveProcessor;
         this.packageProcessor = packageProcessor;
@@ -66,7 +65,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             LibraryEngine libraryEngine) {
         requireNonNull(questionnaire);
         requireNonNull(libraryEngine);
-        final PrePopulateRequest prePopulateRequest = new PrePopulateRequest(patientId, parameters, bundle, libraryEngine);
+        final PrePopulateRequest prePopulateRequest =
+                new PrePopulateRequest(patientId, parameters, bundle, libraryEngine);
         return prePopulateProcessor.prePopulate(questionnaire, prePopulateRequest);
     }
 
@@ -77,7 +77,8 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        final Questionnaire prePopulatedQuestionnaire = prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
+        final Questionnaire prePopulatedQuestionnaire =
+                prePopulate(questionnaire, patientId, parameters, bundle, libraryEngine);
         return populateProcessor.populate(questionnaire, prePopulatedQuestionnaire, patientId);
     }
 

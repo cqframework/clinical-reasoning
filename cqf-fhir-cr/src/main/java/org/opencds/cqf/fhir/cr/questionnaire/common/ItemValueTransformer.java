@@ -5,7 +5,9 @@ public class ItemValueTransformer {
 
     public static org.hl7.fhir.dstu3.model.Type transformValue(org.hl7.fhir.dstu3.model.Type value) {
         if (value instanceof org.hl7.fhir.dstu3.model.CodeableConcept) {
-            return ((org.hl7.fhir.dstu3.model.CodeableConcept) value).getCoding().get(0);
+            return ((org.hl7.fhir.dstu3.model.CodeableConcept) value)
+                    .getCoding()
+                    .get(0);
         }
 
         return value;
@@ -25,5 +27,3 @@ public class ItemValueTransformer {
         return value;
     }
 }
-
-

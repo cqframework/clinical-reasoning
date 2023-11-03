@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.Base;
+import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Property;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemInitialComponent;
-import org.hl7.fhir.r5.model.DataType;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -23,15 +23,19 @@ public class PrePopulateItemWithExtension {
     // TODO: we don't have any resources that are currently using this
     // not writing unit tests till there is a practical implementation
     private final ExpressionProcessor expressionProcessor;
+
     public PrePopulateItemWithExtension() {
         this(new ExpressionProcessor());
     }
+
     private PrePopulateItemWithExtension(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 
     List<QuestionnaireItemComponent> processItem(
-            PrePopulateRequest prePopulateRequest, QuestionnaireItemComponent questionnaireItem, Questionnaire questionnaire)
+            PrePopulateRequest prePopulateRequest,
+            QuestionnaireItemComponent questionnaireItem,
+            Questionnaire questionnaire)
             throws ResolveExpressionException {
         final Expression contextExpression = (Expression) questionnaireItem
                 .getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)

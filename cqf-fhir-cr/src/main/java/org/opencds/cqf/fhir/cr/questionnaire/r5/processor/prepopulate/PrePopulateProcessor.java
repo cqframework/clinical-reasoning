@@ -83,7 +83,7 @@ public class PrePopulateProcessor {
         } catch (ResolveExpressionException e) {
             // would return empty list if exception thrown
             addExceptionToOperationOutcome(e.getMessage());
-            return List.of();
+            return new ArrayList<>();
         }
     }
 

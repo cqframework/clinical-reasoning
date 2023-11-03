@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -31,10 +32,11 @@ public class PrePopulateItem {
             throws ResolveExpressionException {
         final QuestionnaireItemComponent populatedItem = copyQuestionnaireItem(questionnaireItem);
         final List<IBase> expressionResults = getExpressionResults(prePopulateRequest, questionnaire, populatedItem);
-        expressionResults.forEach(result -> {
+        final Optional<IBase> firstExpressionResult = expressionResults.stream().findFirst();
+        if (firstExpressionResult.isPresent()) {
             populatedItem.addExtension(buildDstu3(QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION));
-            populatedItem.setInitial(transformValue((Type) result));
-        });
+            populatedItem.setInitial(transformValue((Type) firstExpressionResult.get()));
+        }
         return populatedItem;
     }
 

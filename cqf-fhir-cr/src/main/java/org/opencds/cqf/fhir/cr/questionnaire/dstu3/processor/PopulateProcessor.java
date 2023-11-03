@@ -88,8 +88,7 @@ public class PopulateProcessor {
             questionnaireResponseItem.addExtension(
                     questionnaireItem.getExtensionByUrl(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
         }
-        var answer = new QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-            .setValue(questionnaireItem.getInitial());
+        final QuestionnaireResponseItemAnswerComponent answer = new QuestionnaireResponseItemAnswerComponent().setValue(questionnaireItem.getInitial());
         questionnaireResponseItem.addAnswer(answer);
         return questionnaireResponseItem;
     }

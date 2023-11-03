@@ -17,7 +17,15 @@ import org.slf4j.LoggerFactory;
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionByUrl;
 
 public class ExpressionProcessor {
-    final PrePopulateHelper prePopulateHelper = new PrePopulateHelper();
+    private PrePopulateHelper prePopulateHelper;
+    ExpressionProcessor() {
+        new ExpressionProcessor(new PrePopulateHelper());
+    }
+
+    private ExpressionProcessor(PrePopulateHelper prePopulateHelper) {
+        this.prePopulateHelper = prePopulateHelper;
+    }
+
     protected static final Logger logger = LoggerFactory.getLogger(ExpressionProcessor.class);
     protected static final String EXCEPTION_MESSAGE_TEMPLATE =
             "Error encountered evaluating expression (%s) for item (%s): %s";

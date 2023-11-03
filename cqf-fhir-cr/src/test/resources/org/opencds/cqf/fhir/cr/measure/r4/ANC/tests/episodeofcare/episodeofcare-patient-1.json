@@ -1,0 +1,20 @@
+{
+  "resourceType": "EpisodeOfCare",
+  "id": "episodeofcare-patient-1",
+  "status": "active",
+  "type": [ {
+    "coding": [ {
+      "system": "http://fhir.org/guides/who/anc-cds/CodeSystem/anc-care-codes",
+      "code": "ANC.Case",
+      "display": "Antenatal care case"
+    } ]
+  } ],
+  "patient": {
+    "reference": "Patient/457865b6-8f02-49e2-8a77-21b73eb266d4",
+    "display": "Bareera Hadi"
+  },
+  "period": {
+    "start": "2019-09-03T10:00:00",
+    "end": "2024-06-03T10:00:00"
+  }
+}

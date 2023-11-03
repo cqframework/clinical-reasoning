@@ -5,9 +5,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,24 +15,23 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class ProcessDefinitionItem {
     protected static final Logger logger = LoggerFactory.getLogger(ProcessDefinitionItem.class);
     private static final String PROPERTY_SETTING_ERROR_MESSAGE = "Error encountered attempting to set property (%s) on resource type (%s): %s";
+    private static final String EXPRESSION_EVALUATION_ERROR_MESSAGE = "Error encountered evaluating expression (%s) for item (%s): %s";
+    private static final String INVALID_RESOURCE_TYPE_ERROR_MESSAGE = "Unable to determine resource type from item definition: %s";
     ProcessorHelper processorHelper;
     ModelResolver modelResolver;
-    Repository repository;
+    PropertyHelper propertyHelper;
     String libraryUrl;
     LibraryEngine libraryEngine;
     String patientId;
@@ -66,9 +62,9 @@ class ProcessDefinitionItem {
 
     private Resource createBaseResource(QuestionnaireResponse questionnaireResponse, QuestionnaireResponseItemComponent item) {
         final String resourceType = getDefinitionType(item.getDefinition());
-        final Resource resource = (Resource) newValue(resourceType);
+        final Resource resource = (Resource) processorHelper.newValue(resourceType);
         resource.setId(new IdType(resourceType, processorHelper.getExtractId(questionnaireResponse) + "-" + item.getLinkId()));
-        resolveMeta((DomainResource) resource, item.getDefinition());
+        resource.setMeta(getMeta(item.getDefinition()));
         return resource;
     }
 
@@ -97,21 +93,21 @@ class ProcessDefinitionItem {
     }
 
     void setSubjectProperty(Resource resource, Reference subject) {
-        final Property subjectProperty = getSubjectProperty(resource);
+        final Property subjectProperty = propertyHelper.getSubjectProperty(resource);
         if (subjectProperty != null) {
             resource.setProperty(subjectProperty.getName(), subject);
         }
     }
 
     void setAuthorProperty(Resource resource, QuestionnaireResponse questionnaireResponse) {
-        final Property authorProperty = getAuthorProperty(resource);
+        final Property authorProperty = propertyHelper.getAuthorProperty(resource);
         if (authorProperty != null && questionnaireResponse.hasAuthor()) {
             resource.setProperty(authorProperty.getName(), questionnaireResponse.getAuthor());
         }
     }
 
     void setDateProperty(Resource resource, QuestionnaireResponse questionnaireResponse) {
-        var dateProperties = getDateProperties(resource);
+        final List<Property> dateProperties = propertyHelper.getDateProperties(resource);
         if (dateProperties != null && !dateProperties.isEmpty() && questionnaireResponse.hasAuthored()) {
             dateProperties.forEach(property -> {
                 try {
@@ -128,7 +124,7 @@ class ProcessDefinitionItem {
 
     void setPropertyValueWithModelResolver(Property property, Resource resource, QuestionnaireResponse questionnaireResponse)
         throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        final BaseRuntimeElementDefinition propertyDef = getPropertyDefinition(property);
+        final BaseRuntimeElementDefinition propertyDef = propertyHelper.getPropertyDefinition(property);
         if (propertyDef != null) {
             modelResolver.setValue(
                 resource,
@@ -140,46 +136,13 @@ class ProcessDefinitionItem {
         }
     }
 
-    BaseRuntimeElementDefinition getPropertyDefinition(Property property) {
-        return repository.fhirContext().getElementDefinition(
-            property.getTypeCode().contains("|")
-                ? property.getTypeCode().split("\\|")[0]
-                : property.getTypeCode());
-    }
-
-    private Property getSubjectProperty(Resource resource) {
-        Property property = resource.getNamedProperty("subject");
-        if (property == null) {
-            property = resource.getNamedProperty("patient");
-        }
-
-        return property;
-    }
-
-    private Property getAuthorProperty(Resource resource) {
-        Property property = resource.getNamedProperty("recorder");
-        if (property == null && resource.fhirType().equals(FHIRAllTypes.OBSERVATION.toCode())) {
-            property = resource.getNamedProperty("performer");
-        }
-        return property;
-    }
-
-    private List<Property> getDateProperties(Resource resource) {
-        List<Property> results = new ArrayList<>();
-        results.add(resource.getNamedProperty("onset"));
-        results.add(resource.getNamedProperty("issued"));
-        results.add(resource.getNamedProperty("effective"));
-        results.add(resource.getNamedProperty("recordDate"));
-        return results.stream().filter(p -> p != null).collect(Collectors.toList());
-    }
-
-    private void resolveMeta(DomainResource resource, String definition) {
-        var meta = new Meta();
+    private Meta getMeta(String definition) {
+        final Meta meta = new Meta();
         // Consider setting source and lastUpdated here?
         if (definition != null && !definition.isEmpty()) {
             meta.addProfile(definition.split("#")[0]);
-            resource.setMeta(meta);
         }
+        return meta;
     }
 
     private List<IBase> getExpressionResult(Expression expression, String itemLinkId) {
@@ -190,29 +153,18 @@ class ProcessDefinitionItem {
             return libraryEngine.resolveExpression(
                 patientId, new CqfExpression(expression, libraryUrl, null), parameters, bundle);
         } catch (Exception ex) {
-            var message = String.format(
-                "Error encountered evaluating expression (%s) for item (%s): %s",
-                expression.getExpression(), itemLinkId, ex.getMessage());
-            logger.error(message);
+            logger.error(String.format(
+                EXPRESSION_EVALUATION_ERROR_MESSAGE,
+                expression.getExpression(), itemLinkId, ex.getMessage())
+            );
         }
         return null;
     }
 
     private String getDefinitionType(String definition) {
         if (!definition.contains("#")) {
-            throw new IllegalArgumentException(
-                String.format("Unable to determine resource type from item definition: %s", definition));
+            throw new IllegalArgumentException(String.format(INVALID_RESOURCE_TYPE_ERROR_MESSAGE, definition));
         }
         return definition.split("#")[1];
-    }
-
-    private Base newValue(String type) {
-        try {
-            return (Base) Class.forName("org.hl7.fhir.r4.model." + type)
-                .getConstructor()
-                .newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

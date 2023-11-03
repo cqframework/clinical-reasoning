@@ -18,21 +18,19 @@ class ProcessGroupItem {
         QuestionnaireResponse questionnaireResponse,
         Map<String, List<Coding>> questionnaireCodeMap,
         List<IBaseResource> resources,
-        Reference subject)
-    {
-        var subjectItems = item.getItem().stream()
+        Reference subject
+    ) {
+        final List<QuestionnaireResponseItemComponent> subjectItems = item.getItem().stream()
             .filter(child -> child.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))
             .collect(Collectors.toList());
-        var groupSubject =
-            !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference() : subject.copy();
+        final Reference groupSubject = !subjectItems.isEmpty() ? subjectItems.get(0).getAnswer().get(0).getValueReference() : subject.copy();
         if (item.hasDefinition()) {
             processDefinitionItem.process(item, questionnaireResponse, resources, groupSubject);
         } else {
             item.getItem().forEach(childItem -> {
                 if (!childItem.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT)) {
                     if (childItem.hasItem()) {
-                        process(
-                            childItem, questionnaireResponse, questionnaireCodeMap, resources, groupSubject);
+                        process(childItem, questionnaireResponse, questionnaireCodeMap, resources, groupSubject);
                     } else {
                         processItem.process(childItem, questionnaireResponse, questionnaireCodeMap, resources, groupSubject);
                     }

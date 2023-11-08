@@ -6,21 +6,21 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cr-spring</artifactId>
-  <version>3.0.0-PRE11-SNAPSHOT</version>
+  <version>3.0.0-PRE11</version>
   <name>FHIR Clinical Reasoning (Spring)</name>
   <description>Spring configurations for FHIR Clinical Reasoning</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE11-SNAPSHOT</version>
+    <version>3.0.0-PRE11</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cr</artifactId>
-      <version>3.0.0-PRE11-SNAPSHOT</version>
+      <version>3.0.0-PRE11</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

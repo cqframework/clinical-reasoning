@@ -6,9 +6,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestingHelper.withElementDefinition;
 import static org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestingHelper.withQuestionnaireItemComponent;
 
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;

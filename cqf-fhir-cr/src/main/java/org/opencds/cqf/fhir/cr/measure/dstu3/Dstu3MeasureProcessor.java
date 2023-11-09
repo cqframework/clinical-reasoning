@@ -1,16 +1,22 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.inject.Named;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
@@ -23,7 +29,6 @@ import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-@Named
 public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -47,9 +52,11 @@ public class Dstu3MeasureProcessor {
             String periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData) {
+            IBaseBundle additionalData,
+            Parameters parameters) {
         var measure = this.repository.read(Measure.class, measureId);
-        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjectIds, additionalData);
+        return this.evaluateMeasure(
+                measure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
     }
 
     // NOTE: Do not make a top-level function that takes a Measure resource. This ensures that
@@ -60,7 +67,8 @@ public class Dstu3MeasureProcessor {
             String periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData) {
+            IBaseBundle additionalData,
+            Parameters parameters) {
 
         if (!measure.hasLibrary()) {
             throw new IllegalArgumentException(
@@ -85,6 +93,21 @@ public class Dstu3MeasureProcessor {
                         new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
 
         context.getState().init(lib.getLibrary());
+
+        if (parameters != null) {
+            Map<String, Object> paramMap = resolveParameterMap(parameters);
+            context.getState().setParameters(lib.getLibrary(), paramMap);
+            // Set parameters for included libraries
+            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // values)
+            if (lib.getLibrary().getIncludes() != null) {
+                lib.getLibrary()
+                        .getIncludes()
+                        .getDef()
+                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
+                                .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
+            }
+        }
 
         var actualRepo = this.repository;
         if (additionalData != null) {
@@ -128,5 +151,33 @@ public class Dstu3MeasureProcessor {
                 true,
                 DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
                 true);
+    }
+
+    private Map<String, Object> resolveParameterMap(Parameters parameters) {
+        Map<String, Object> parameterMap = new HashMap<>();
+        Dstu3FhirModelResolver modelResolver = new Dstu3FhirModelResolver();
+        parameters.getParameter().forEach(param -> {
+            Object value;
+            if (param.hasResource()) {
+                value = param.getResource();
+            } else {
+                value = param.getValue();
+                if (value instanceof IPrimitiveType) {
+                    // TODO: handle Code, CodeableConcept, Quantity, etc
+                    // resolves Date/Time values
+                    value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
+                }
+            }
+            if (parameterMap.containsKey(param.getName())) {
+                if (parameterMap.get(param.getName()) instanceof List) {
+                    CollectionUtils.addIgnoreNull((List<?>) parameterMap.get(param.getName()), value);
+                } else {
+                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+                }
+            } else {
+                parameterMap.put(param.getName(), value);
+            }
+        });
+        return parameterMap;
     }
 }

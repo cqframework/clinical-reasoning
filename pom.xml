@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE9-SNAPSHOT</version>
+    <version>3.0.0-PRE12-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -19,11 +19,11 @@
 
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.2.0</cql.version>
+        <cql.version>3.4.1</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>5.3.23</spring.version>
-        <fhir-core.version>6.0.22</fhir-core.version>
-        <hapi.version>6.8.0</hapi.version>
+        <fhir-core.version>6.0.22.2</fhir-core.version>
+        <hapi.version>6.8.5</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <caffeine.version>2.9.0</caffeine.version>
         <guava.version>32.1.2-jre</guava.version>
@@ -107,9 +107,8 @@
             <dependency>
                 <groupId>org.fhir</groupId>
                 <artifactId>ucum</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.8</version>
             </dependency>
-
 
             <!-- CQL dependencies -->
             <dependency>
@@ -189,11 +188,6 @@
                 <artifactId>org.eclipse.persistence.moxy</artifactId>
                 <version>2.7.13</version>
             </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
-                <version>1.1.4</version>
-            </dependency>
 
             <!-- Guava-->
             <dependency>
@@ -216,18 +210,11 @@
                 <version>${picocli.version}</version>
             </dependency>
 
-            <!-- DI APIs -->
-            <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>1</version>
-            </dependency>
-
             <!-- Generated annotation -->
             <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>2.1.1</version>
             </dependency>
 
             <!-- NPM Packaging Dependencies -->
@@ -328,6 +315,10 @@
 
     <!-- Dependencies shared by all projects -->
     <dependencies>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

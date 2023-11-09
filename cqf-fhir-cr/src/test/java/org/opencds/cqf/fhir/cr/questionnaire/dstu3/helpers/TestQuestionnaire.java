@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.questionnaire.dstu3.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;

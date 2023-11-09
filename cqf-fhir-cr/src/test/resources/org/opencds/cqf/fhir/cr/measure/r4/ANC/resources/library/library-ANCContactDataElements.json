@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "ANCContactDataElements",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCContactDataElements",
+  "name": "ANCContactDataElements",
+  "title": "ANC Contact Data Elements",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ANCContactDataElements.cql"
+    }
+  ]
+}

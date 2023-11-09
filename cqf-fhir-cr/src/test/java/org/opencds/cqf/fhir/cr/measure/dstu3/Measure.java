@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -97,6 +98,7 @@ public class Measure {
         private String reportType;
 
         private Bundle additionalData;
+        private Parameters parameters;
 
         private Supplier<MeasureReport> operation;
 
@@ -130,6 +132,11 @@ public class Measure {
             return this;
         }
 
+        public When parameters(Parameters parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
         public When evaluate() {
             this.operation = () -> processor.evaluateMeasure(
                     new IdType("Measure", measureId),
@@ -137,7 +144,8 @@ public class Measure {
                     periodEnd,
                     reportType,
                     Collections.singletonList(this.subjectId),
-                    additionalData);
+                    additionalData,
+                    parameters);
             return this;
         }
 

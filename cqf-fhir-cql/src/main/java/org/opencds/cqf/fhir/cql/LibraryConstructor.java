@@ -5,8 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -15,8 +13,6 @@ import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unused")
-@Named
 public class LibraryConstructor {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryConstructor.class);
@@ -24,7 +20,6 @@ public class LibraryConstructor {
     protected FhirContext fhirContext;
     protected IFhirPath fhirPath;
 
-    @Inject
     public LibraryConstructor(FhirContext fhirContext) {
 
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");

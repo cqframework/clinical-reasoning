@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
@@ -102,6 +103,7 @@ public class Dstu3MeasureService {
             String theLastReceivedOn,
             String theProductLine,
             Bundle theAdditionalData,
+            Parameters parameters,
             Endpoint theTerminologyEndpoint) {
 
         ensureSupplementalDataElementSearchParameter();
@@ -114,7 +116,8 @@ public class Dstu3MeasureService {
                 thePeriodEnd,
                 theReportType,
                 Collections.singletonList(theSubject),
-                theAdditionalData);
+                theAdditionalData,
+                parameters);
 
         if (theProductLine != null) {
             Extension ext = new Extension();

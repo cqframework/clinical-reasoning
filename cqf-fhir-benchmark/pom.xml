@@ -35,6 +35,7 @@
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-cr</artifactId>
             <version>3.0.0-PRE12-SNAPSHOT</version>
+            <!--TODO: test-jars don't seem to work very well. Need to investigate some alternatives -->
             <type>test-jar</type>
         </dependency>
         <dependency>

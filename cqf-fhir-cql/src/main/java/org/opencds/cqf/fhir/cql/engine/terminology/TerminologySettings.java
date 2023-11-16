@@ -13,8 +13,11 @@ public class TerminologySettings {
     // How to treat pre-expanded value sets. If a value set is not pre-expanded, fall back to the expansion behavior
     // defined by the expansion mode.
     public enum VALUESET_PRE_EXPANSION_MODE {
+        // Require value sets to be pre-expanded, never perform expansion operations
         REQUIRE,
+        // Use a pre-expansion if it's present on the value set resource, other perform an expansion
         USE_IF_PRESENT,
+        // Ignore any pre-expansion and always perform an expansion
         IGNORE
     }
 

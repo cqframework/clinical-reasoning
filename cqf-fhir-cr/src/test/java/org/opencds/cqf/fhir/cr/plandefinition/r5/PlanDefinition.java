@@ -36,7 +36,7 @@ public class PlanDefinition {
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
-    public PlanDefinition() {
+    static {
         evaluationSettings
                 .getRetrieveSettings()
                 .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)

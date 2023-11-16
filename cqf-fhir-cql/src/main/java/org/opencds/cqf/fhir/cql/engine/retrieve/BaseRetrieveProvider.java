@@ -361,7 +361,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
     protected boolean shouldUseInCodeModifier(String valueSet, String resourceName, String searchParamName) {
         return this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.REPOSITORY
-                || (this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.AUTO && inModifierSupported(valueSet, resourceName, searchParamName));
+                || (this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.AUTO
+                        && inModifierSupported(valueSet, resourceName, searchParamName));
     }
 
     protected boolean inModifierSupported(String valueSet, String resourceName, String searchParamName) {

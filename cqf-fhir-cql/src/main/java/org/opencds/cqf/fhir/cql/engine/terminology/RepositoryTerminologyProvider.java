@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
-
     private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
 
     private static final Comparator<Code> CODE_COMPARATOR =
@@ -171,8 +170,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
                     valueSet.getId());
         }
 
-        boolean shouldUseRepoExpansion = (this.terminologySettings.getExpansionMode() == EXPANSION_MODE.AUTO && canRepositoryExpand(valueSet)) ||
-            this.terminologySettings.getExpansionMode() == EXPANSION_MODE.REPOSITORY;
+        boolean shouldUseRepoExpansion =
+                (this.terminologySettings.getExpansionMode() == EXPANSION_MODE.AUTO && canRepositoryExpand(valueSet))
+                        || this.terminologySettings.getExpansionMode() == EXPANSION_MODE.REPOSITORY;
         if (codes == null && shouldUseRepoExpansion) {
             vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
             codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);

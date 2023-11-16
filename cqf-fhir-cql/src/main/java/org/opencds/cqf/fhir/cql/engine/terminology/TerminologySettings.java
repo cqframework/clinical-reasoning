@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cql.engine.terminology;
 
-
 /*
  * There are three general terminology operations the the CQL engine performs.
  * 1. Terminology expansion - given a ValueSet url, calculate the set of codes in the value set.
@@ -12,7 +11,7 @@ package org.opencds.cqf.fhir.cql.engine.terminology;
  */
 public class TerminologySettings {
 
-      // How to do an expansion, if and when we need an expansion.
+    // How to do an expansion, if and when we need an expansion.
     public enum EXPANSION_MODE {
         // Decreasing order of performance
         // Detect from capability statements
@@ -53,5 +52,6 @@ public class TerminologySettings {
     public TerminologySettings setMemberShipMode(MEMBERSHIP_MODE memberShipMode) {
         this.memberShipMode = memberShipMode;
         return this;
-    };
+    }
+    ;
 }

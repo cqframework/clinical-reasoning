@@ -1,4 +1,5 @@
 package org.opencds.cqf.fhir.cql.engine.retrieve;
+
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 
 public class RetrieveSettings {
@@ -46,7 +47,7 @@ public class RetrieveSettings {
         return this;
     }
 
-       // How to do a filter, if and when we need a filter.
+    // How to do a filter, if and when we need a filter.
     // e.g. Observation O where O.code ~ "ValueSet"
     public enum TERMINOLOGY_PARAMETER_MODE {
         // Decreasing order of performance
@@ -54,9 +55,11 @@ public class RetrieveSettings {
         AUTO,
         // Use code:in=valueSetUrl - Force the use of the in modifier of the search parameter to filter resources.
         REPOSITORY,
-        // Use code=system|value,system|value - Force the use of the the relevant search parameter WITHOUT the in modifier to filter resources.
+        // Use code=system|value,system|value - Force the use of the the relevant search parameter WITHOUT the in
+        // modifier to filter resources.
         INLINE,
-        // CQL engine does the filter - Retrieve all potentially applicable resources and apply terminology filtering in the CQL engine.
+        // CQL engine does the filter - Retrieve all potentially applicable resources and apply terminology filtering in
+        // the CQL engine.
         CQL
     }
 

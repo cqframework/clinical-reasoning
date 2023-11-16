@@ -50,11 +50,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
         var config = new SearchConfig();
         this.configureTerminology(config, dataType, codePath, codes, valueSet);
-        this.configureContext(config, dataType, context, contextPath, contextValue);
+        this.configureContext(config, dataType, contextPath, context, contextValue);
         this.configureProfile(config, templateId);
         this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
 
         var resources = this.repository.search(bt, resourceType, config.searchParams);
+
         var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         return iter.toStream().filter(config.filter).collect(Collectors.toList());
     }
@@ -92,7 +93,7 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
             case CQL:
                 config.filter = config.filter.and(filterByTerminology(dataType, codePath, codes, valueSet));
                 break;
-            case AUTO:  // TODO: offload detection based on CapabilityStatement
+            case AUTO: // TODO: offload detection based on CapabilityStatement
             case INLINE:
             case REPOSITORY:
                 populateTerminologySearchParams(config.searchParams, dataType, codePath, codes, valueSet);

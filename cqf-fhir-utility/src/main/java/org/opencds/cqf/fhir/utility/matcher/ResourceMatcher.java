@@ -216,7 +216,6 @@ public interface ResourceMatcher {
             return false;
         }
 
-        // in value set
         if (param.getModifier() == TokenParamModifier.IN) {
             throw new UnsupportedOperationException("In modifier is unsupported");
         }

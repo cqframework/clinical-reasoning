@@ -25,7 +25,6 @@
         <fhir-core.version>6.0.22.2</fhir-core.version>
         <hapi.version>6.8.5</hapi.version>
         <picocli.version>4.6.1</picocli.version>
-        <caffeine.version>2.9.0</caffeine.version>
         <guava.version>32.1.2-jre</guava.version>
     </properties>
 
@@ -294,12 +293,6 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
                 <version>${spring.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>${caffeine.version}</version>
                 <scope>test</scope>
             </dependency>
 

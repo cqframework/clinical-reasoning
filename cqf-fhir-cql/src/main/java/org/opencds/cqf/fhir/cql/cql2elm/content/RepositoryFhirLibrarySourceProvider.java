@@ -15,9 +15,9 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
 
-    private Repository repository;
-    private FhirContext fhirContext;
-    private LibraryVersionSelector libraryVersionSelector;
+    private final Repository repository;
+    private final FhirContext fhirContext;
+    private final LibraryVersionSelector libraryVersionSelector;
 
     public RepositoryFhirLibrarySourceProvider(
             Repository repository, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
@@ -46,7 +46,7 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
         var libs = repository.search(
                 bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
 
-        var iter = new BundleIterable<IBaseBundle>(repository, libs).iterator();
+        var iter = new BundleIterable<>(repository, libs).iterator();
 
         if (!iter.hasNext()) {
             return null;

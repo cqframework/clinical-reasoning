@@ -50,7 +50,7 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
         var config = new SearchConfig();
         this.configureTerminology(config, dataType, codePath, codes, valueSet);
-        this.configureContext(config, dataType, contextPath, context, contextValue);
+        this.configureContext(config, dataType, context, contextPath, contextValue);
         this.configureProfile(config, templateId);
         this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
 
@@ -63,25 +63,25 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     private void configureProfile(SearchConfig config, String templateId) {
         var mode = this.getRetrieveSettings().getSearchParameterMode();
         switch (mode) {
-            case CQL:
+            case FILTER_IN_MEMORY:
             case AUTO: // TODO: Auto-detect based on CapabilityStatement
                 config.filter = config.filter.and(filterByTemplateId(templateId, templateId));
                 break;
-            case REPOSITORY:
+            case USE_SEARCH_PARAMETERS:
                 populateTemplateSearchParams(config.searchParams, templateId);
         }
     }
 
     private void configureContext(
-            SearchConfig config, String dataType, String contextPath, String context, Object contextValue) {
+            SearchConfig config, String dataType, String context, String contextPath, Object contextValue) {
         var mode = this.getRetrieveSettings().getSearchParameterMode();
         switch (mode) {
-            case CQL:
+            case FILTER_IN_MEMORY:
                 config.filter = config.filter.and(filterByContext(dataType, context, contextPath, contextValue));
                 break;
             case AUTO: // TODO: offload detection based on CapabilityStatement
-            case REPOSITORY:
-                populateContextSearchParams(config.searchParams, dataType, contextPath, context, contextValue);
+            case USE_SEARCH_PARAMETERS:
+                populateContextSearchParams(config.searchParams, dataType, context, contextPath, contextValue);
                 break;
         }
     }
@@ -90,12 +90,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
             SearchConfig config, String dataType, String codePath, Iterable<Code> codes, String valueSet) {
         var mode = this.getRetrieveSettings().getTerminologyParameterMode();
         switch (mode) {
-            case CQL:
+            case FILTER_IN_MEMORY:
                 config.filter = config.filter.and(filterByTerminology(dataType, codePath, codes, valueSet));
                 break;
             case AUTO: // TODO: offload detection based on CapabilityStatement
-            case INLINE:
-            case REPOSITORY:
+            case USE_INLINE_CODES:
+            case USE_VALUE_SET_URL:
                 populateTerminologySearchParams(config.searchParams, dataType, codePath, codes, valueSet);
                 break;
         }
@@ -110,13 +110,13 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
             Interval dateRange) {
         var mode = this.getRetrieveSettings().getSearchParameterMode();
         switch (mode) {
-            case CQL:
-            case AUTO:  // TODO: offload detection based on CapabilityStatement
+            case FILTER_IN_MEMORY:
+            case AUTO: // TODO: offload detection based on CapabilityStatement
                 if (datePath != null) {
                     throw new UnsupportedOperationException("in-memory dateFilters are not supported");
                 }
                 break;
-            case REPOSITORY:
+            case USE_SEARCH_PARAMETERS:
                 populateDateSearchParams(config.searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
         }
     }

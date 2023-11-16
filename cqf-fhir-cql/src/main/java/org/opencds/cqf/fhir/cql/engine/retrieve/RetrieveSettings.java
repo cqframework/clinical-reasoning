@@ -1,80 +1,37 @@
 package org.opencds.cqf.fhir.cql.engine.retrieve;
 
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
-
 public class RetrieveSettings {
 
-    public RetrieveSettings() {
-        this(new TerminologySettings());
-    }
-
-    public RetrieveSettings(TerminologySettings terminologySettings) {
-        this.terminologySettings = terminologySettings;
-    }
-
-    private final TerminologySettings terminologySettings;
-    private SEARCH_PARAMETER_MODE searchParameterMode = SEARCH_PARAMETER_MODE.AUTO;
+    private SEARCH_FILTER_MODE searchParameterMode = SEARCH_FILTER_MODE.AUTO;
     private PROFILE_MODE profileMode = PROFILE_MODE.OFF;
-    private TERMINOLOGY_PARAMETER_MODE terminologyParameterMode = TERMINOLOGY_PARAMETER_MODE.AUTO;
-
-    public TerminologySettings getTerminologySettings() {
-        return terminologySettings;
-    }
+    private TERMINOLOGY_FILTER_MODE terminologyParameterMode = TERMINOLOGY_FILTER_MODE.AUTO;
 
     // Decreasing order of performance
     // Applies to all search parameters
     // EXCEPT terminology search parameters, which are controlled by the terminology settings.
-    public enum SEARCH_PARAMETER_MODE {
+    public enum SEARCH_FILTER_MODE {
         // Detect from capability statements, and make best guess in the absence of capability statements.
         AUTO,
         // Force use of repository search parameters
-        REPOSITORY,
+        USE_SEARCH_PARAMETERS,
         // Force use of CQL filtering
-        CQL
-    }
-
-    public SEARCH_PARAMETER_MODE getSearchParameterMode() {
-        return searchParameterMode;
-    }
-
-    /**
-     * Applies to all search parameters EXCEPT terminology search parameters.
-     * @param searchParameterMode whether to use repository search parameters or CQL filtering
-     * @return this
-     */
-    public RetrieveSettings setSearchParameterMode(SEARCH_PARAMETER_MODE searchParameterMode) {
-        this.searchParameterMode = searchParameterMode;
-        return this;
+        FILTER_IN_MEMORY
     }
 
     // How to do a filter, if and when we need a filter.
     // e.g. Observation O where O.code ~ "ValueSet"
-    public enum TERMINOLOGY_PARAMETER_MODE {
+    public enum TERMINOLOGY_FILTER_MODE {
         // Decreasing order of performance
         // Detect from capability statements
         AUTO,
-        // Use code:in=valueSetUrl - Force the use of the in modifier of the search parameter to filter resources.
-        REPOSITORY,
+        // Use code:in=valueSetUrl - Force the use of the :in modifier of the search parameter to filter resources.
+        USE_VALUE_SET_URL,
         // Use code=system|value,system|value - Force the use of the the relevant search parameter WITHOUT the in
         // modifier to filter resources.
-        INLINE,
+        USE_INLINE_CODES,
         // CQL engine does the filter - Retrieve all potentially applicable resources and apply terminology filtering in
         // the CQL engine.
-        CQL
-    }
-
-    /**
-     * Applies ONLY to terminology search parameters
-     * @param terminologyParameterMode mode to use for terminology search parameters
-     * @return this
-     */
-    public RetrieveSettings setTerminologyParameterMode(TERMINOLOGY_PARAMETER_MODE terminologyParameterMode) {
-        this.terminologyParameterMode = terminologyParameterMode;
-        return this;
-    }
-
-    public TERMINOLOGY_PARAMETER_MODE getTerminologyParameterMode() {
-        return terminologyParameterMode;
+        FILTER_IN_MEMORY
     }
 
     // TODO: Profiles are completely unsupported for now. This just lays out some potential options for doing that
@@ -92,6 +49,34 @@ public class RetrieveSettings {
         TRUST,
         // Don't check resource profile, even if specified by the engine
         OFF
+    }
+
+    public SEARCH_FILTER_MODE getSearchParameterMode() {
+        return searchParameterMode;
+    }
+
+    /**
+     * Applies to all search parameters EXCEPT terminology search parameters.
+     * @param searchParameterMode whether to use repository search parameters or CQL filtering
+     * @return this
+     */
+    public RetrieveSettings setSearchParameterMode(SEARCH_FILTER_MODE searchParameterMode) {
+        this.searchParameterMode = searchParameterMode;
+        return this;
+    }
+
+    /**
+     * Applies ONLY to terminology search parameters
+     * @param terminologyParameterMode mode to use for terminology search parameters
+     * @return this
+     */
+    public RetrieveSettings setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE terminologyParameterMode) {
+        this.terminologyParameterMode = terminologyParameterMode;
+        return this;
+    }
+
+    public TERMINOLOGY_FILTER_MODE getTerminologyParameterMode() {
+        return terminologyParameterMode;
     }
 
     public PROFILE_MODE getProfileMode() {

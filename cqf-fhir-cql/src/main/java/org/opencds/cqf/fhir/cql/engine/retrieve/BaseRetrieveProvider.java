@@ -36,7 +36,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_PARAMETER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.utility.CodeExtractor;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
@@ -293,8 +293,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     public void populateContextSearchParams(
             Map<String, List<IQueryParameterType>> searchParams,
             final String dataType,
-            final String contextPath,
             final String context,
+            final String contextPath,
             final Object contextValue) {
         if (contextPath == null || contextPath.isEmpty() || contextValue == null) {
             return;
@@ -360,8 +360,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     protected boolean shouldUseInCodeModifier(String valueSet, String resourceName, String searchParamName) {
-        return this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.REPOSITORY
-                || (this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.AUTO
+        return this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_FILTER_MODE.USE_VALUE_SET_URL
+                || (this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_FILTER_MODE.AUTO
                         && inModifierSupported(valueSet, resourceName, searchParamName));
     }
 

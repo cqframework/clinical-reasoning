@@ -9,6 +9,7 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 
 public class EvaluationSettings {
 
@@ -19,6 +20,7 @@ public class EvaluationSettings {
     private CqlOptions cqlOptions;
 
     private RetrieveSettings retrieveSettings;
+    private TerminologySettings terminologySettings;
 
     public static EvaluationSettings getDefault() {
         EvaluationSettings settings = new EvaluationSettings();
@@ -95,5 +97,18 @@ public class EvaluationSettings {
 
     public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
         this.retrieveSettings = retrieveSettings;
+    }
+
+    public TerminologySettings getTerminologySettings() {
+        return this.terminologySettings;
+    }
+
+    public EvaluationSettings withTerminologySettings(TerminologySettings terminologySettings) {
+        setTerminologySettings(terminologySettings);
+        return this;
+    }
+
+    public void setTerminologySettings(TerminologySettings terminologySettings) {
+        this.terminologySettings = terminologySettings;
     }
 }

@@ -31,6 +31,7 @@ public class EvaluationSettings {
         settings.setLibraryCache(new ConcurrentHashMap<>());
         settings.setValueSetCache(new ConcurrentHashMap<>());
         settings.setRetrieveSettings(new RetrieveSettings());
+        settings.setTerminologySettings(new TerminologySettings());
         return settings;
     }
 

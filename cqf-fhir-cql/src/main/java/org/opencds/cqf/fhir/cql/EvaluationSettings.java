@@ -9,14 +9,12 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
-import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider.EXPANSION_MODE;
 
 public class EvaluationSettings {
 
     private Map<ModelIdentifier, Model> modelCache;
     private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
     private Map<String, List<Code>> valueSetCache;
-    private EXPANSION_MODE expansionMode;
 
     private CqlOptions cqlOptions;
 
@@ -31,8 +29,6 @@ public class EvaluationSettings {
         settings.setLibraryCache(new ConcurrentHashMap<>());
         settings.setValueSetCache(new ConcurrentHashMap<>());
         settings.setRetrieveSettings(new RetrieveSettings());
-        settings.setExpansionMode(EXPANSION_MODE.AUTO);
-
         return settings;
     }
 
@@ -72,19 +68,6 @@ public class EvaluationSettings {
 
     public EvaluationSettings withValueSetCache(Map<String, List<Code>> valueSetCache) {
         setValueSetCache(valueSetCache);
-        return this;
-    }
-
-    public EXPANSION_MODE getExpansionMode() {
-        return this.expansionMode;
-    }
-
-    public void setExpansionMode(EXPANSION_MODE expansionMode) {
-        this.expansionMode = expansionMode;
-    }
-
-    public EvaluationSettings withExpansionMode(EXPANSION_MODE expansionMode) {
-        setExpansionMode(expansionMode);
         return this;
     }
 

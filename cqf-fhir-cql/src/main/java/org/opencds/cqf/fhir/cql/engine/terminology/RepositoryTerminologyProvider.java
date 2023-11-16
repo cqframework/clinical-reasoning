@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.utility.ValueSets;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -33,14 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
-    // eventually, we want to be able to detect expansion capabilities from the
-    // capability statement. For now, we hard code based on the our knowledge
-    // of where we set this terminology provider up.
-    public enum EXPANSION_MODE {
-        INTERNAL,
-        REPOSITORY,
-        AUTO
-    }
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
 
@@ -50,7 +43,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     private final FhirContext fhirContext;
     private final IFhirPath fhirPath;
     private final Map<String, List<Code>> valueSetIndex;
-    private final EXPANSION_MODE expansionMode;
+    private final TerminologySettings terminologySettings;
 
     // The cached expansions are sorted by code order
     // This is used determine the range of codes to check
@@ -67,22 +60,22 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         public final int end;
     }
 
-    public RepositoryTerminologyProvider(Repository repository, EXPANSION_MODE expansionMode) {
-        this(repository, new HashMap<>(), expansionMode);
+    public RepositoryTerminologyProvider(Repository repository, TerminologySettings terminologySettings) {
+        this(repository, new HashMap<>(), terminologySettings);
     }
 
     public RepositoryTerminologyProvider(
-            Repository repository, Map<String, List<Code>> valueSetIndex, EXPANSION_MODE expansionMode) {
+            Repository repository, Map<String, List<Code>> valueSetIndex, TerminologySettings terminologySettings) {
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
-        this.expansionMode = requireNonNull(expansionMode, "expansionMode can not be null.");
+        this.terminologySettings = requireNonNull(terminologySettings, "terminologySettings can not be null.");
 
         this.fhirContext = repository.fhirContext();
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
     public RepositoryTerminologyProvider(Repository repository) {
-        this(repository, new HashMap<>(), EXPANSION_MODE.AUTO);
+        this(repository, new HashMap<>(), new TerminologySettings());
     }
 
     /**
@@ -178,8 +171,8 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
                     valueSet.getId());
         }
 
-        boolean shouldUseRepoExpansion = this.expansionMode == EXPANSION_MODE.INTERNAL
-                || (this.expansionMode == EXPANSION_MODE.REPOSITORY && canRepositoryExpand(valueSet));
+        boolean shouldUseRepoExpansion = (this.terminologySettings.getExpansionMode() == EXPANSION_MODE.AUTO && canRepositoryExpand(valueSet)) ||
+            this.terminologySettings.getExpansionMode() == EXPANSION_MODE.REPOSITORY;
         if (codes == null && shouldUseRepoExpansion) {
             vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
             codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);

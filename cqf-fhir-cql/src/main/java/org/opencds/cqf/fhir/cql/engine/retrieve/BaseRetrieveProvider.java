@@ -35,6 +35,8 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_PARAMETER_MODE;
 import org.opencds.cqf.fhir.cql.engine.utility.CodeExtractor;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
@@ -47,37 +49,6 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final RetrieveSettings retrieveSettings;
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
-
-    public enum TERMINOLOGY_MODE {
-        INLINE, // Use code:in=valueset where available
-        EXPAND, // Use code=system|code where possible (and fetch the expansion yourself)
-        AUTO // Use best available option
-    }
-
-    public enum FILTER_MODE {
-        REPOSITORY, // Offload all search parameters
-        INTERNAL, // Don't offload any search parameters, filter them all client side (this also impacts terminology
-        // filtering)
-        AUTO // Offload parameters you can, manually filter the ones you can't
-    }
-
-    // TODO: Profiles are completely unsupported for now. This just lays out some potential options for doing that
-    //
-    public enum PROFILE_MODE {
-        // Always check the resource profile by validating the returned resource against the profile
-        // This requires access to the structure defs that define the profile at runtime
-        // Meaning, they need to be loaded on the server or otherwise. If they are unavailable, it's an automatic
-        // failure.
-        ENFORCED,
-        // Same as above, but don't error if you don't have access to the profiles at runtime
-        OPTIONAL,
-        // Check that the resources declare the profile they conform too (generally considered a bad practice)
-        DECLARED,
-        // Let the underlying repository validate profiles (IOW, offload validation)
-        TRUST,
-        // Don't check resource profile, even if specified by the engine
-        OFF
-    }
 
     protected BaseRetrieveProvider(
             final FhirContext fhirContext,
@@ -368,14 +339,16 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             }
             searchParams.put(sp.getName(), codeList);
         } else if (valueSet != null) {
-            boolean shouldInline = shouldInline(valueSet);
-            if (shouldInline) {
+            boolean shouldUseInCodeModifier = shouldUseInCodeModifier(valueSet, dataType, sp.getName());
+            if (shouldUseInCodeModifier) {
+                // Use the in modifier e.g. Observation?code:in=valueSetUrl
                 searchParams.put(
                         sp.getName(),
                         Collections.singletonList(new TokenParam()
                                 .setModifier(TokenParamModifier.IN)
                                 .setValue(valueSet)));
             } else {
+                // Inline the codes into the retrieve e.g. Observation?code=system|code,system|code
                 List<IQueryParameterType> codeList = new ArrayList<>();
                 for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
                     codeList.add(new TokenParam(
@@ -386,13 +359,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         }
     }
 
-    protected boolean shouldInline(String valueSet) {
-        return this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.INLINE
-                || (this.retrieveSettings.getTerminologyMode() == TERMINOLOGY_MODE.AUTO && inlineSupported(valueSet));
+    protected boolean shouldUseInCodeModifier(String valueSet, String resourceName, String searchParamName) {
+        return this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.REPOSITORY
+                || (this.retrieveSettings.getTerminologyParameterMode() == TERMINOLOGY_PARAMETER_MODE.AUTO && inModifierSupported(valueSet, resourceName, searchParamName));
     }
 
-    protected boolean inlineSupported(String valueSet) {
-        // TODO: Check valueSet in the capability statement.
+    protected boolean inModifierSupported(String valueSet, String resourceName, String searchParamName) {
+        // TODO: Check valueSet in the capability statement,
+        // also check that the selected search parameter supports that modifier.
         return true;
     }
 

@@ -56,7 +56,7 @@ public class Engines {
     public static CqlEngine forRepository(
             Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
         var terminologyProvider =
-                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getRetrieveSettings().getTerminologySettings());
         var sources = Collections.singletonList(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
@@ -82,7 +82,7 @@ public class Engines {
         checkNotNull(repository);
 
         var terminologyProvider =
-                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getExpansionMode());
+                new RepositoryTerminologyProvider(repository, settings.getValueSetCache(), settings.getRetrieveSettings().getTerminologySettings());
         var sourceProviders = new ArrayList<LibrarySourceProvider>();
         sourceProviders.add(buildLibrarySource(repository));
 

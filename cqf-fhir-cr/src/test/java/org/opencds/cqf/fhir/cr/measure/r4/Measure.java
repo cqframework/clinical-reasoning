@@ -20,6 +20,9 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
@@ -75,6 +78,20 @@ public class Measure {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
+
+        public Given() {
+            this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getRetrieveSettings()
+                    .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                    .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getTerminologySettings()
+                    .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+        }
 
         public Given repository(Repository repository) {
             this.repository = repository;

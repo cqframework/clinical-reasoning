@@ -10,6 +10,9 @@ import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
@@ -114,6 +117,17 @@ public class MeasureProcessorEvaluateTest {
     public void test_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+        evaluationOptions
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+        evaluationOptions
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
         var when = Measure.given()
                 .repositoryFor("CaseRepresentation101")
                 .evaluationOptions(evaluationOptions)
@@ -135,6 +149,16 @@ public class MeasureProcessorEvaluateTest {
     public void test_additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+        evaluationOptions
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+        evaluationOptions
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()

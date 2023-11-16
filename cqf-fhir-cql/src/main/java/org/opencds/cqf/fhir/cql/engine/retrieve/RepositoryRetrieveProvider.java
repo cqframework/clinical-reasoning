@@ -110,13 +110,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         var mode = this.getRetrieveSettings().getSearchParameterMode();
         switch (mode) {
             case CQL:
-            case AUTO:
+            case AUTO:  // TODO: offload detection based on CapabilityStatement
                 if (datePath != null) {
                     throw new UnsupportedOperationException("in-memory dateFilters are not supported");
                 }
                 break;
             case REPOSITORY:
-                // TODO: offload detection based on CapabilityStatement
                 populateDateSearchParams(config.searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
         }
     }

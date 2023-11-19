@@ -91,6 +91,11 @@
   "editor.detectIndentation": false,
   "editor.foldingImportsByDefault": true,
   "editor.tabSize": 4,
+  "editor.formatOnSave": true,
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.dependency.packagePresentation": "hierarchical",
+  "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
+  "java.compile.nullAnalysis.mode": "automatic",
   "json.schemaDownload.enable": true,
   "[markdown]": {
     "diffEditor.ignoreTrimWhitespace": false,
@@ -111,7 +116,5 @@
     "MD007": {
       "indent": 4
     }
-},
-"java.compile.nullAnalysis.mode": "automatic",
-"java.configuration.updateBuildConfiguration": "automatic"
+  }
 }

@@ -19,5 +19,3 @@ coverage:
           - master
         if_ci_failed: error #success, failure, error, ignore
         only_pulls: false
-        paths:
-          - "src/main/java"

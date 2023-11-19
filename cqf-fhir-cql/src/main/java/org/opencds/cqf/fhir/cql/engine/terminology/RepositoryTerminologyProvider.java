@@ -19,6 +19,8 @@ import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.utility.ValueSets;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -33,15 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
-    // eventually, we want to be able to detect expansion capabilities from the
-    // capability statement. For now, we hard code based on the our knowledge
-    // of where we set this terminology provider up.
-    public enum EXPANSION_MODE {
-        INTERNAL,
-        REPOSITORY,
-        AUTO
-    }
-
     private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
 
     private static final Comparator<Code> CODE_COMPARATOR =
@@ -50,7 +43,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     private final FhirContext fhirContext;
     private final IFhirPath fhirPath;
     private final Map<String, List<Code>> valueSetIndex;
-    private final EXPANSION_MODE expansionMode;
+    private final TerminologySettings terminologySettings;
 
     // The cached expansions are sorted by code order
     // This is used determine the range of codes to check
@@ -67,22 +60,22 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         public final int end;
     }
 
-    public RepositoryTerminologyProvider(Repository repository, EXPANSION_MODE expansionMode) {
-        this(repository, new HashMap<>(), expansionMode);
+    public RepositoryTerminologyProvider(Repository repository, TerminologySettings terminologySettings) {
+        this(repository, new HashMap<>(), terminologySettings);
     }
 
     public RepositoryTerminologyProvider(
-            Repository repository, Map<String, List<Code>> valueSetIndex, EXPANSION_MODE expansionMode) {
+            Repository repository, Map<String, List<Code>> valueSetIndex, TerminologySettings terminologySettings) {
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
-        this.expansionMode = requireNonNull(expansionMode, "expansionMode can not be null.");
+        this.terminologySettings = requireNonNull(terminologySettings, "terminologySettings can not be null.");
 
         this.fhirContext = repository.fhirContext();
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
     public RepositoryTerminologyProvider(Repository repository) {
-        this(repository, new HashMap<>(), EXPANSION_MODE.AUTO);
+        this(repository, new HashMap<>(), new TerminologySettings());
     }
 
     /**
@@ -150,7 +143,54 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     // possible. A "naive" expansion includes only codes directly referenced in the ValueSet
     // It's not possible to run expansion filters without the support of a terminology server.
     private List<Code> tryExpand(ValueSetInfo valueSet) {
+        var codes = performExpansion(valueSet);
+        Collections.sort(codes, CODE_COMPARATOR);
+        return codes;
+    }
 
+    private List<Code> tryExpandOperation(IBaseResource vs, ValueSetInfo valueSet) {
+        boolean useExpandOperation = (this.terminologySettings.getValuesetExpansionMode()
+                                == VALUESET_EXPANSION_MODE.AUTO
+                        && canRepositoryExpand(valueSet))
+                || this.terminologySettings.getValuesetExpansionMode() == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION;
+
+        List<Code> codes = null;
+        if (useExpandOperation) {
+            vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
+            codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
+        }
+
+        if (codes == null
+                && this.terminologySettings.getValuesetExpansionMode()
+                        == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION) {
+            throw new IllegalArgumentException(String.format("Failed to expand ValueSet %s", valueSet.getId()));
+        }
+
+        return codes;
+    }
+
+    private List<Code> tryNaiveExpansion(IBaseResource vs, ValueSetInfo valueSet) {
+
+        if (containsExpansionLogic(vs)) {
+            throw new IllegalArgumentException(String.format(
+                    "ValueSet %s requires $expand to support correctly, and $expand is not available",
+                    valueSet.getId()));
+        }
+
+        logger.warn(
+                "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
+                valueSet.getId());
+
+        var codes = ValueSets.getCodesInCompose(fhirContext, vs);
+
+        if (codes == null) {
+            throw new IllegalArgumentException(String.format("Failed to expand ValueSet %s", valueSet.getId()));
+        }
+
+        return codes;
+    }
+
+    private List<Code> performExpansion(ValueSetInfo valueSet) {
         var search = valueSet.getVersion() != null
                 ? Searches.byUrlAndVersion(valueSet.getId(), valueSet.getVersion())
                 : Searches.byUrl(valueSet.getId());
@@ -170,41 +210,38 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         }
 
         var vs = resources.get(0);
+        var codes = tryPreExpansion(vs, valueSet);
+        if (codes != null) {
+            return codes;
+        }
 
-        List<Code> codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
+        codes = tryExpandOperation(vs, valueSet);
+        if (codes != null) {
+            return codes;
+        }
+
+        return tryNaiveExpansion(vs, valueSet);
+    }
+
+    private List<Code> tryPreExpansion(IBaseResource vs, ValueSetInfo valueSet) {
+        if (this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.IGNORE) {
+            return null;
+        }
+
+        var codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
+        if (codes == null
+                && this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.REQUIRE) {
+            throw new IllegalArgumentException(String.format(
+                    "ValueSet PreExpansion mode was set to REQUIRE, and valueSet %s did not have an expansion",
+                    valueSet.getId()));
+        }
+
         if (codes != null && Boolean.TRUE.equals(isNaiveExpansion(vs))) {
             logger.warn(
                     "Codes for ValueSet {} expanded without a terminology server, some results may not be correct.",
                     valueSet.getId());
         }
 
-        boolean shouldUseRepoExpansion = this.expansionMode == EXPANSION_MODE.INTERNAL
-                || (this.expansionMode == EXPANSION_MODE.REPOSITORY && canRepositoryExpand(valueSet));
-        if (codes == null && shouldUseRepoExpansion) {
-            vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
-            codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
-        }
-
-        // Still don't have any codes, so try a naive expansion
-        if (codes == null) {
-            if (containsExpansionLogic(vs)) {
-                throw new IllegalArgumentException(String.format(
-                        "ValueSet %s requires $expand to support correctly, and $expand is not available",
-                        valueSet.getId()));
-            }
-
-            logger.warn(
-                    "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
-                    valueSet.getId());
-
-            codes = ValueSets.getCodesInCompose(fhirContext, vs);
-        }
-
-        if (codes == null) {
-            throw new IllegalArgumentException(String.format("Failed to expand ValueSet %s", valueSet.getId()));
-        }
-
-        Collections.sort(codes, CODE_COMPARATOR);
         return codes;
     }
 

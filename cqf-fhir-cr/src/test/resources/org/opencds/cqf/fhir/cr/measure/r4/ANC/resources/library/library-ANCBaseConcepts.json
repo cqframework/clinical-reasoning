@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "ANCBaseConcepts",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseConcepts",
+  "name": "ANCBaseConcepts",
+  "title": "ANC Base Concepts",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ANCBaseConcepts.cql"
+    }
+  ]
+}

@@ -5,36 +5,36 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir-cr-cli</artifactId>
-    <version>3.0.0-PRE10-SNAPSHOT</version>
+    <version>3.0.0-PRE13-SNAPSHOT</version>
     <name>FHIR Clinical Reasoning (CLI)</name>
     <description>CLI for running FHIR Clincial Reasoning operations</description>
 
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir</artifactId>
-        <version>3.0.0-PRE10-SNAPSHOT</version>
+        <version>3.0.0-PRE13-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-api</artifactId>
-            <version>3.0.0-PRE10-SNAPSHOT</version>
+            <version>3.0.0-PRE13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-utility</artifactId>
-            <version>3.0.0-PRE10-SNAPSHOT</version>
+            <version>3.0.0-PRE13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-cql</artifactId>
-            <version>3.0.0-PRE10-SNAPSHOT</version>
+            <version>3.0.0-PRE13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-jackson</artifactId>
-            <version>3.0.0-PRE10-SNAPSHOT</version>
+            <version>3.0.0-PRE13-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -47,11 +47,7 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <scope>compile</scope>
-        </dependency>
+
         <!-- NPM Packaging Dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>

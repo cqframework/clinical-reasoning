@@ -72,7 +72,8 @@
     "java",
     "json",
     "xml",
-    "markdown"
+    "markdown",
+    "cql"
   ],
   "cSpell.ignorePaths": [
     ".git",

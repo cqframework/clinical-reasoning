@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "ANCIND07",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCIND07",
+  "name": "ANCIND07",
+  "title": "ANC.IND.07 Percentage of pregnant women with at least one blood pressure measure during ANC",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ANCIND07.cql"
+    }
+  ]
+}

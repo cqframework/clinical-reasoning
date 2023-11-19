@@ -23,6 +23,9 @@ import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -33,6 +36,17 @@ public class PlanDefinition {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
     private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
+
+    static {
+        evaluationSettings
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+        evaluationSettings
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+    }
 
     private static InputStream open(String asset) {
         return PlanDefinition.class.getResourceAsStream(asset);

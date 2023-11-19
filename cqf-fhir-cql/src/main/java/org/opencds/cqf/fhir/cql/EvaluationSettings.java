@@ -9,18 +9,18 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
-import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider.EXPANSION_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 
 public class EvaluationSettings {
 
     private Map<ModelIdentifier, Model> modelCache;
     private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
     private Map<String, List<Code>> valueSetCache;
-    private EXPANSION_MODE expansionMode;
 
     private CqlOptions cqlOptions;
 
     private RetrieveSettings retrieveSettings;
+    private TerminologySettings terminologySettings;
 
     public static EvaluationSettings getDefault() {
         EvaluationSettings settings = new EvaluationSettings();
@@ -31,8 +31,7 @@ public class EvaluationSettings {
         settings.setLibraryCache(new ConcurrentHashMap<>());
         settings.setValueSetCache(new ConcurrentHashMap<>());
         settings.setRetrieveSettings(new RetrieveSettings());
-        settings.setExpansionMode(EXPANSION_MODE.AUTO);
-
+        settings.setTerminologySettings(new TerminologySettings());
         return settings;
     }
 
@@ -75,19 +74,6 @@ public class EvaluationSettings {
         return this;
     }
 
-    public EXPANSION_MODE getExpansionMode() {
-        return this.expansionMode;
-    }
-
-    public void setExpansionMode(EXPANSION_MODE expansionMode) {
-        this.expansionMode = expansionMode;
-    }
-
-    public EvaluationSettings withExpansionMode(EXPANSION_MODE expansionMode) {
-        setExpansionMode(expansionMode);
-        return this;
-    }
-
     public CqlOptions getCqlOptions() {
         return this.cqlOptions;
     }
@@ -112,5 +98,18 @@ public class EvaluationSettings {
 
     public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
         this.retrieveSettings = retrieveSettings;
+    }
+
+    public TerminologySettings getTerminologySettings() {
+        return this.terminologySettings;
+    }
+
+    public EvaluationSettings withTerminologySettings(TerminologySettings terminologySettings) {
+        setTerminologySettings(terminologySettings);
+        return this;
+    }
+
+    public void setTerminologySettings(TerminologySettings terminologySettings) {
+        this.terminologySettings = terminologySettings;
     }
 }

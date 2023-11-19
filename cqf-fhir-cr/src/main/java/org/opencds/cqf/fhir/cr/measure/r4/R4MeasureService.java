@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
@@ -55,6 +56,7 @@ public class R4MeasureService {
             Endpoint terminologyEndpoint,
             Endpoint dataEndpoint,
             Bundle additionalData,
+            Parameters parameters,
             String productLine,
             String practitioner) {
 
@@ -73,7 +75,13 @@ public class R4MeasureService {
         }
 
         measureReport = processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, Collections.singletonList(subjectId), additionalData);
+                measure,
+                periodStart,
+                periodEnd,
+                reportType,
+                Collections.singletonList(subjectId),
+                additionalData,
+                parameters);
 
         // add ProductLine after report is generated
         addProductLineExtension(measureReport, productLine);

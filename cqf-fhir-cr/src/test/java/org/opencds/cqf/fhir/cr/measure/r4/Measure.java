@@ -16,9 +16,13 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
@@ -75,6 +79,20 @@ public class Measure {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
 
+        public Given() {
+            this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getRetrieveSettings()
+                    .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                    .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getTerminologySettings()
+                    .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+        }
+
         public Given repository(Repository repository) {
             this.repository = repository;
             return this;
@@ -122,6 +140,8 @@ public class Measure {
         private String subject;
         private String reportType;
         private Bundle additionalData;
+        private Parameters parameters;
+
         private Supplier<MeasureReport> operation;
         private String practitioner;
         private String productLine;
@@ -161,6 +181,11 @@ public class Measure {
             return this;
         }
 
+        public When parameters(Parameters parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
         public When practitoner(String practitioner) {
             this.practitioner = practitioner;
             return this;
@@ -183,6 +208,7 @@ public class Measure {
                     null,
                     null,
                     additionalData,
+                    parameters,
                     productLine,
                     practitioner);
             return this;

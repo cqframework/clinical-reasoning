@@ -14,15 +14,15 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
 public class CodeExtractor {
-    private RuntimeCompositeDatatypeDefinition conceptDefinition;
-    private RuntimeCompositeDatatypeDefinition codingDefinition;
+    private final RuntimeCompositeDatatypeDefinition conceptDefinition;
+    private final RuntimeCompositeDatatypeDefinition codingDefinition;
 
-    private BaseRuntimeChildDefinition conceptCodingChild;
+    private final BaseRuntimeChildDefinition conceptCodingChild;
 
-    private BaseRuntimeChildDefinition versionDefinition;
-    private BaseRuntimeChildDefinition codeDefinition;
-    private BaseRuntimeChildDefinition systemDefinition;
-    private BaseRuntimeChildDefinition displayDefinition;
+    private final BaseRuntimeChildDefinition versionDefinition;
+    private final BaseRuntimeChildDefinition codeDefinition;
+    private final BaseRuntimeChildDefinition systemDefinition;
+    private final BaseRuntimeChildDefinition displayDefinition;
 
     public CodeExtractor(FhirContext fhirContext) {
         this.conceptDefinition =
@@ -37,7 +37,7 @@ public class CodeExtractor {
     }
 
     public List<Code> getElmCodesFromObject(Object object) {
-        List<Code> codes = new ArrayList<Code>();
+        var codes = new ArrayList<Code>();
         if (object instanceof Iterable) {
             for (Object innerObject : (Iterable<?>) object) {
                 List<Code> elmCodes = getElmCodesFromObject(innerObject);
@@ -46,7 +46,7 @@ public class CodeExtractor {
                 }
             }
         } else {
-            List<Code> elmCodes = getElmCodesFromObjectInner(object);
+            var elmCodes = getElmCodesFromObjectInner(object);
             if (elmCodes != null) {
                 codes.addAll(elmCodes);
             }
@@ -55,7 +55,7 @@ public class CodeExtractor {
     }
 
     private List<Code> getElmCodesFromObjectInner(Object object) {
-        List<Code> codes = new ArrayList<Code>();
+        List<Code> codes = new ArrayList<>();
         if (object == null) {
             return codes;
         } else if (object instanceof IBase) {

@@ -12,7 +12,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 
 public class LibraryVersionSelector {
 
-    private AdapterFactory adapterFactory;
+    private final AdapterFactory adapterFactory;
 
     public LibraryVersionSelector(AdapterFactory adapterFactory) {
         this.adapterFactory = adapterFactory;

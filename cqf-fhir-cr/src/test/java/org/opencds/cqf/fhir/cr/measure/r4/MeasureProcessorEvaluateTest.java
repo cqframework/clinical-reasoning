@@ -2,14 +2,20 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.utility.r4.Parameters;
 
 public class MeasureProcessorEvaluateTest {
 
@@ -55,9 +61,73 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
+    void measure_eval_with_parameters_ip_den() {
+        // This test should fail on numerator due to the encounter parameter not being set
+        var when = Measure.given()
+                .repositoryFor("ANC")
+                .when()
+                .measureId("ANCIND01")
+                .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("subject")
+                .evaluate();
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(1, report.getGroup().size());
+        var group = report.getGroupFirstRep();
+        assertEquals(0, group.getMeasureScore().getValue().intValue());
+        group.getPopulation().forEach(population -> {
+            assertTrue(population.hasCount());
+            assertTrue(population.hasCode());
+            assertTrue(population.getCode().hasCoding());
+            assertTrue(population.getCode().getCodingFirstRep().hasCode());
+            String code = population.getCode().getCodingFirstRep().getCode();
+            switch (code) {
+                case "initial-population":
+                case "denominator":
+                    assertEquals(1, population.getCount());
+                    break;
+                case "numerator":
+                    assertEquals(0, population.getCount());
+                    break;
+            }
+        });
+    }
+
+    @Test
+    void measure_eval_with_parameters_ip_den_num() {
+        var when = Measure.given()
+                .repositoryFor("ANC")
+                .when()
+                .measureId("ANCIND01")
+                .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("subject")
+                .parameters(Parameters.parameters(Parameters.part("encounter", "2d0ecfb4-9dec-4daa-a261-e37e426d0d7b")))
+                .evaluate();
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(1, report.getGroup().size());
+        assertEquals(1, report.getGroupFirstRep().getMeasureScore().getValue().intValue());
+    }
+
+    @Test
     public void test_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+        evaluationOptions
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+        evaluationOptions
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
         var when = Measure.given()
                 .repositoryFor("CaseRepresentation101")
                 .evaluationOptions(evaluationOptions)
@@ -79,6 +149,16 @@ public class MeasureProcessorEvaluateTest {
     public void test_additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
+        evaluationOptions
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+        evaluationOptions
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()

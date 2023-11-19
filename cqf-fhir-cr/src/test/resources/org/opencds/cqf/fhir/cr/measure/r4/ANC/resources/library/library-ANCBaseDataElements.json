@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "ANCBaseDataElements",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCBaseDataElements",
+  "name": "ANCBaseDataElements",
+  "title": "ANC Base Data Elements",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ANCBaseDataElements.cql"
+    }
+  ]
+}

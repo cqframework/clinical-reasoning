@@ -381,6 +381,7 @@ public class R4CareGapsService {
                     thePeriodEnd,
                     theReportType,
                     subjects,
+                    null,
                     null);
 
             if (!report.hasGroup()) {

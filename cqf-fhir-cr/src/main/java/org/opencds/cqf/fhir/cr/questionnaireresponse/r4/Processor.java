@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased.ProcessDefinitionItem;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased.ProcessItem;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import javax.annotation.Nonnull;

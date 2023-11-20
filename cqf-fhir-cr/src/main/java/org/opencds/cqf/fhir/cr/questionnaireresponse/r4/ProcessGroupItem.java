@@ -5,6 +5,8 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased.ProcessDefinitionItem;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased.ProcessItem;
 import org.opencds.cqf.fhir.utility.Constants;
 import java.util.List;
 import java.util.Map;

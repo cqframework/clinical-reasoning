@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;

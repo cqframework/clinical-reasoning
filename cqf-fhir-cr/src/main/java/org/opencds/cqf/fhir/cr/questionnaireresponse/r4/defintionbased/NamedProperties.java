@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased;
 
 class NamedProperties {
     private NamedProperties() {}

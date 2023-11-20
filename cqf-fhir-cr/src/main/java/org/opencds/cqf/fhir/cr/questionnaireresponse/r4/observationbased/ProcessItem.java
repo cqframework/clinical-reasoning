@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
@@ -10,9 +10,9 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
-class ProcessItem {
+public class ProcessItem {
     ObservationBuilder observationBuilder;
-    void process(
+    public void process(
         QuestionnaireResponseItemComponent item,
         QuestionnaireResponse questionnaireResponse,
         Map<String, List<Coding>> questionnaireCodeMap,

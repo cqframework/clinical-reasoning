@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.common.ProcessorHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 
-class ProcessDefinitionItem {
+public class ProcessDefinitionItem {
     protected static final Logger logger = LoggerFactory.getLogger(ProcessDefinitionItem.class);
     private static final String PROPERTY_SETTING_ERROR_MESSAGE = "Error encountered attempting to set property (%s) on resource type (%s): %s";
     private static final String EXPRESSION_EVALUATION_ERROR_MESSAGE = "Error encountered evaluating expression (%s) for item (%s): %s";
@@ -37,11 +38,11 @@ class ProcessDefinitionItem {
     String patientId;
     IBaseParameters parameters;
     IBaseBundle bundle;
-     void process(
-        QuestionnaireResponseItemComponent item,
-        QuestionnaireResponse questionnaireResponse,
-        List<IBaseResource> resources,
-        Reference subject)
+     public void process(
+         QuestionnaireResponseItemComponent item,
+         QuestionnaireResponse questionnaireResponse,
+         List<IBaseResource> resources,
+         Reference subject)
     {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction

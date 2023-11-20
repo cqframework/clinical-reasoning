@@ -1,15 +1,26 @@
 package org.opencds.cqf.fhir.utility;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Optional;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class Resources {
 
     private Resources() {}
+
+    public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
+        if (obj == null) return Optional.empty();
+        if (type.isInstance(obj)) {
+            return Optional.of(type.cast(obj));
+        }
+        throw new IllegalArgumentException(errorMessage);
+    }
 
     public static <T extends IBaseResource, I extends IIdType> T newResource(
             Class<T> theResourceClass, String theIdPart) {

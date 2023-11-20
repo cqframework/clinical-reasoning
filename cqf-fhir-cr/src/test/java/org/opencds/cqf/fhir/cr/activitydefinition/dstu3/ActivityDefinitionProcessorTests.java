@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -11,8 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -38,9 +41,7 @@ public class ActivityDefinitionProcessorTests {
     @Test
     public void testActivityDefinitionApply() throws FHIRException {
         var result = this.activityDefinitionProcessor.apply(
-                new IdType("ActivityDefinition", "activityDefinition-test"),
-                null,
-                null,
+                Eithers.forMiddle3(new IdType("ActivityDefinition", "activityDefinition-test")),
                 "patient-1",
                 null,
                 null,

@@ -67,7 +67,7 @@ public class R4CqlExecutionService {
             if (StringUtils.isBlank(content)) {
 
                 return (Parameters) libraryEngine.evaluateExpression(
-                        expression, parameters == null ? new Parameters() : parameters, subject, libraries, data);
+                        expression, parameters == null ? new Parameters() : parameters, subject, libraries, data, null);
             }
 
             var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, null);

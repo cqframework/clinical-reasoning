@@ -1,14 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import ca.uhn.fhir.context.FhirContext;
 import java.util.Objects;
+
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,18 +12,28 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.ResourceResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateProcessor;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionnaireProcessorTest {
@@ -40,7 +43,7 @@ class QuestionnaireProcessorTest {
     private PopulateProcessor populateProcessor;
 
     @Mock
-    private ResolveProcessor resolveProcessor;
+    private ResourceResolver resourceResolver;
 
     @Mock
     private PackageProcessor packageProcessor;
@@ -52,20 +55,20 @@ class QuestionnaireProcessorTest {
     private final FhirContext myFhirContext = FhirContext.forR4();
 
     @Mock
-    private EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
+    private final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
     @Mock
     private final Repository repository = new IGFileStructureRepository(myFhirContext, CLASS_PATH);
 
     @InjectMocks
     @Spy
-    private QuestionnaireProcessor fixture = new QuestionnaireProcessor(repository);
+    private final QuestionnaireProcessor fixture = new QuestionnaireProcessor(repository);
 
     @AfterEach
     void tearDown() {
         verifyNoMoreInteractions(evaluationSettings);
         verifyNoMoreInteractions(populateProcessor);
-        verifyNoMoreInteractions(resolveProcessor);
+        verifyNoMoreInteractions(resourceResolver);
         verifyNoMoreInteractions(packageProcessor);
         verifyNoMoreInteractions(prePopulateProcessor);
     }
@@ -77,11 +80,11 @@ class QuestionnaireProcessorTest {
         final StringType canonical = new StringType("canonical");
         final Questionnaire questionnaire = new Questionnaire();
         final Questionnaire expected = new Questionnaire();
-        doReturn(expected).when(resolveProcessor).resolve(idType, canonical, questionnaire);
+        doReturn(expected).when(resourceResolver).resolve(Eithers.for3(canonical, idType, questionnaire));
         // execute
         final Questionnaire actual = fixture.resolveQuestionnaire(idType, canonical, questionnaire);
         // validate
-        verify(resolveProcessor).resolve(idType, canonical, questionnaire);
+        verify(resourceResolver).resolve(Eithers.for3(canonical, idType, questionnaire));
         assertEquals(expected, actual);
     }
 

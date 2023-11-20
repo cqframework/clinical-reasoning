@@ -12,13 +12,16 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.ResourceResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.PrePopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate.PrePopulateProcessor;
+import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionnaire> {
+    private ResourceResolver resourceResolver;
     private PopulateProcessor populateProcessor;
-    private ResolveProcessor resolveProcessor;
     private PackageProcessor packageProcessor;
     private PrePopulateProcessor prePopulateProcessor;
     private GenerateProcessor generateProcessor;
@@ -27,7 +30,7 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
         this(
                 repository,
                 evaluationSettings,
-                new ResolveProcessor(repository),
+                new ResourceResolver("Questionnaire", repository),
                 new PackageProcessor(repository),
                 new PopulateProcessor(),
                 new PrePopulateProcessor(),
@@ -41,13 +44,13 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     QuestionnaireProcessor(
             Repository repository,
             EvaluationSettings evaluationSettings,
-            ResolveProcessor resolveProcessor,
+            ResourceResolver resourceResolver,
             PackageProcessor packageProcessor,
             PopulateProcessor populateProcessor,
             PrePopulateProcessor prePopulateProcessor,
             GenerateProcessor generateProcessor) {
         super(repository, evaluationSettings);
-        this.resolveProcessor = resolveProcessor;
+        this.resourceResolver = resourceResolver;
         this.packageProcessor = packageProcessor;
         this.populateProcessor = populateProcessor;
         this.prePopulateProcessor = prePopulateProcessor;
@@ -55,9 +58,14 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public <C extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
-            IIdType id, C canonical, IBaseResource questionnaire) {
-        return resolveProcessor.resolve(id, canonical, questionnaire);
+    public <CanonicalType extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(IIdType id,
+            CanonicalType canonical, IBaseResource questionnaire) {
+        return resolveQuestionnaire(Eithers.for3(canonical, id, questionnaire));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> Questionnaire resolveQuestionnaire(
+        Either3<C, IIdType, R> questionnaire) {
+        return (Questionnaire) resourceResolver.resolve(questionnaire);
     }
 
     @Override

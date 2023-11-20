@@ -2,72 +2,63 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
-import ca.uhn.fhir.context.FhirContext;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opencds.cqf.fhir.cr.ResourceResolver;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.utility.monad.Either3;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
-public abstract class BaseActivityDefinitionProcessor<T> {
-    private static final Logger logger = LoggerFactory.getLogger(BaseActivityDefinitionProcessor.class);
-    public static final String TARGET_STATUS_URL = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
-    public static final String PRODUCT_ERROR_PREAMBLE = "Product does not map to ";
-    public static final String DOSAGE_ERROR_PREAMBLE = "Dosage does not map to ";
-    public static final String BODYSITE_ERROR_PREAMBLE = "BodySite does not map to ";
-    public static final String CODE_ERROR_PREAMBLE = "Code does not map to ";
-    public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
-    public static final String MISSING_CODE_PROPERTY = "Missing required code property";
-    protected static final List<String> EXCLUDED_EXTENSION_LIST =
-            Arrays.asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
-    protected final ModelResolver modelResolver;
+public class ActivityDefinitionProcessor {
+    // private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
     protected final EvaluationSettings evaluationSettings;
-    protected ExtensionResolver extensionResolver;
+    protected final IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
+    protected ExtensionResolver extensionResolver;
+    protected ResourceResolver resourceResolver;
 
-    protected String subjectId;
-    protected String encounterId;
-    protected String practitionerId;
-    protected String organizationId;
-    protected IBaseParameters parameters;
-    protected Boolean useServerData;
-    protected IBaseBundle bundle;
-    protected LibraryEngine libraryEngine;
+    public ActivityDefinitionProcessor(Repository repository) {
+        this(repository, EvaluationSettings.getDefault(), null);
+    }
 
-    protected BaseActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+        this(repository, evaluationSettings, null);
+    }
+
+    public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings, IRequestResolverFactory requestResolverFactory) {
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.repository = requireNonNull(repository, "repository can not be null");
-        modelResolver = FhirModelResolverCache.resolverForVersion(
-                repository.fhirContext().getVersion().getVersion());
+        this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
+        this.requestResolverFactory = requestResolverFactory == null ? getDefaultRequestResolverFactory() : requestResolverFactory;
     }
 
-    public static <T extends IBase> Optional<T> castOrThrow(IBase obj, Class<T> type, String errorMessage) {
-        if (obj == null) return Optional.empty();
-        if (type.isInstance(obj)) {
-            return Optional.of(type.cast(obj));
+    private IRequestResolverFactory getDefaultRequestResolverFactory() {
+        var fhirVersion = repository.fhirContext().getVersion().getVersion();
+        switch (fhirVersion) {
+            case DSTU3:
+                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.Dstu3ResolverFactory();
+            case R4:
+                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R4ResolverFactory();
+            case R5:
+                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R5ResolverFactory();
+            default:
+                throw new IllegalArgumentException(String.format("No default resolver factory exists for FHIR version: %s", fhirVersion));
         }
-        throw new IllegalArgumentException(errorMessage);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(
-            IIdType id,
-            CanonicalType canonical,
-            IBaseResource activityDefinition,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
+            Either3<C, IIdType, R> activityDefinition,
             String subjectId,
             String encounterId,
             String practitionerId,
@@ -78,8 +69,6 @@ public abstract class BaseActivityDefinitionProcessor<T> {
             IBaseDatatype setting,
             IBaseDatatype settingContext) {
         return apply(
-                id,
-                canonical,
                 activityDefinition,
                 subjectId,
                 encounterId,
@@ -96,10 +85,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
                 new LibraryEngine(this.repository, this.evaluationSettings));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(
-            IIdType id,
-            CanonicalType canonical,
-            IBaseResource activityDefinition,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
+            Either3<C, IIdType, R> activityDefinition,
             String subjectId,
             String encounterId,
             String practitionerId,
@@ -119,8 +106,6 @@ public abstract class BaseActivityDefinitionProcessor<T> {
                 repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
         return apply(
-                id,
-                canonical,
                 activityDefinition,
                 subjectId,
                 encounterId,
@@ -137,10 +122,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
                 new LibraryEngine(this.repository, this.evaluationSettings));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource apply(
-            IIdType id,
-            CanonicalType canonical,
-            IBaseResource activityDefinition,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
+            Either3<C, IIdType, R> activityDefinition,
             String subjectId,
             String encounterId,
             String practitionerId,
@@ -155,7 +138,7 @@ public abstract class BaseActivityDefinitionProcessor<T> {
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
         return apply(
-                resolveActivityDefinition(id, canonical, activityDefinition),
+                resolveActivityDefinition(activityDefinition),
                 subjectId,
                 encounterId,
                 practitionerId,
@@ -171,8 +154,8 @@ public abstract class BaseActivityDefinitionProcessor<T> {
                 libraryEngine);
     }
 
-    public IBaseResource apply(
-            T activityDefinition,
+    public <R extends IBaseResource> IBaseResource apply(
+            R activityDefinition,
             String subjectId,
             String encounterId,
             String practitionerId,
@@ -186,34 +169,13 @@ public abstract class BaseActivityDefinitionProcessor<T> {
             Boolean useServerData,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        this.subjectId = subjectId;
-        this.encounterId = encounterId;
-        this.practitionerId = practitionerId;
-        this.organizationId = organizationId;
-        this.parameters = parameters;
-        this.useServerData = useServerData;
-        this.bundle = bundle;
-        this.libraryEngine = libraryEngine;
-
-        return applyActivityDefinition(initApply(activityDefinition));
+        return new ApplyProcessor(this.repository, activityDefinition, libraryEngine, requestResolverFactory)
+            .applyActivityDefinition(subjectId, encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle);
     }
 
-    protected abstract <CanonicalType extends IPrimitiveType<String>> T resolveActivityDefinition(
-            IIdType id, CanonicalType canonical, IBaseResource activityDefinition);
-
-    protected abstract T initApply(T activityDefinition);
-
-    protected abstract IBaseResource applyActivityDefinition(T activityDefinition);
-
-    protected void resolveDynamicValue(List<IBase> result, String expression, String path, IBaseResource resource) {
-        if (result == null || result.isEmpty()) {
-            return;
-        }
-        if (result.size() > 1) {
-            throw new IllegalArgumentException(
-                    String.format("Dynamic value resolution received multiple values for expression: %s", expression));
-        }
-        modelResolver.setValue(resource, path, result.get(0));
+    protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveActivityDefinition(
+            Either3<C, IIdType, R> activityDefinition) {
+        return resourceResolver.resolve(activityDefinition);
     }
 
     protected FhirContext fhirContext() {

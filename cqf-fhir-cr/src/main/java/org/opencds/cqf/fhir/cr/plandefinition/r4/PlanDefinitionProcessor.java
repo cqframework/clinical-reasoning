@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -53,7 +55,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.inputparameters.r4.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
@@ -61,7 +64,6 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponsePro
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
-import org.opencds.cqf.fhir.utility.r4.InputParameterResolver;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.slf4j.Logger;
@@ -86,10 +88,18 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+        this(repository, evaluationSettings, new ActivityDefinitionProcessor(repository, evaluationSettings),
+            new QuestionnaireProcessor(repository, evaluationSettings),
+            new QuestionnaireResponseProcessor(repository, evaluationSettings));
+    }
+
+    public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings,
+            ActivityDefinitionProcessor activityDefinitionProcessor, QuestionnaireProcessor questionnaireProcessor,
+            QuestionnaireResponseProcessor questionnaireResponseProcessor) {
         super(repository, evaluationSettings);
-        this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
-        this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
-        this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
+        this.activityDefinitionProcessor = activityDefinitionProcessor;
+        this.questionnaireProcessor = questionnaireProcessor;
+        this.questionnaireResponseProcessor = questionnaireResponseProcessor;
     }
 
     @Override
@@ -125,26 +135,26 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     @Override
     public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition, boolean theIsPut) {
-        var bundle = new Bundle();
-        bundle.setType(BundleType.TRANSACTION);
-        bundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
+        var packageBundle = new Bundle();
+        packageBundle.setType(BundleType.TRANSACTION);
+        packageBundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
         var libraryCanonical =
                 thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
         if (libraryCanonical != null) {
             var library = (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
             if (library != null) {
-                bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
+                packageBundle.addEntry(PackageHelper.createEntry(library, theIsPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(packageBundle, library.getRelatedArtifact(), repository, theIsPut);
                 }
             }
         }
         if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+            PackageHelper.addRelatedArtifacts(packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
         }
 
-        return bundle;
+        return packageBundle;
     }
 
     @Override
@@ -180,7 +190,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         this.questionnaireItemGenerator =
                 QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle, libraryEngine);
         this.inputParameterResolver = new InputParameterResolver(
-                subjectId, encounterId, practitionerId, parameters, useServerData, bundle, repository);
+                repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
         this.extensionResolver =
                 new ExtensionResolver(subjectId, inputParameterResolver.getParameters(), bundle, libraryEngine);
 
@@ -226,7 +236,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         || planDefinition.getLibrary().isEmpty()
                 ? null
                 : planDefinition.getLibrary().get(0).getValue();
-        extensionResolver.resolveExtensions(requestGroup.getExtension(), defaultLibraryUrl);
+        extensionResolver.resolveExtensions(requestGroup, requestGroup.getExtension(), defaultLibraryUrl);
 
         for (int i = 0; i < planDefinition.getGoal().size(); i++) {
             var goal = convertGoal(planDefinition.getGoal().get(i));
@@ -382,7 +392,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
         }
 
-        if (Boolean.TRUE.equals(meetsConditions(defaultLibraryUrl, action))) {
+        if (Boolean.TRUE.equals(meetsConditions(defaultLibraryUrl, action, requestGroup))) {
             // TODO: Figure out why this was here and what it was trying to do
             // if (action.hasRelatedAction()) {
             // for (var relatedActionComponent : action.getRelatedAction()) {
@@ -397,7 +407,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             // }
             metConditions.put(action.getId(), action);
             var requestAction = createRequestAction(action);
-            extensionResolver.resolveExtensions(requestAction.getExtension(), defaultLibraryUrl);
+            extensionResolver.resolveExtensions(requestGroup, requestAction.getExtension(), defaultLibraryUrl);
             if (action.hasAction()) {
                 for (var containedAction : action.getAction()) {
                     requestAction.addAction(resolveAction(
@@ -420,7 +430,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 var definition = action.getDefinitionUriType();
                 requestAction.setResource(new Reference(definition.asStringValue()));
             }
-            resolveDynamicValues(defaultLibraryUrl, requestAction, resource, action);
+            resolveDynamicValues(defaultLibraryUrl, requestAction, resource, action, requestGroup);
 
             return requestAction;
         }
@@ -771,7 +781,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             String defaultLibraryUrl,
             IElement requestAction,
             IBase resource,
-            PlanDefinition.PlanDefinitionActionComponent action) {
+            PlanDefinition.PlanDefinitionActionComponent action,
+            RequestGroup requestGroup) {
         if (!action.hasDynamicValue()) {
             return;
         }
@@ -787,7 +798,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                                     defaultLibraryUrl,
                                     dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
                             inputParams,
-                            bundle);
+                            bundle,
+                            requestGroup);
                     resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
                 } catch (Exception e) {
                     var message = String.format(
@@ -800,7 +812,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         });
     }
 
-    private Boolean meetsConditions(String defaultLibraryUrl, PlanDefinition.PlanDefinitionActionComponent action) {
+    private Boolean meetsConditions(
+            String defaultLibraryUrl, PlanDefinition.PlanDefinitionActionComponent action, RequestGroup requestGroup) {
         if (!action.hasCondition()) {
             return true;
         }
@@ -816,7 +829,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                                     defaultLibraryUrl,
                                     condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
                             inputParams,
-                            bundle);
+                            bundle,
+                            requestGroup);
                     result = results == null || results.isEmpty() ? null : results.get(0);
                 } catch (Exception e) {
                     var message = String.format(

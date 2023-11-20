@@ -1,26 +1,28 @@
-package org.opencds.cqf.fhir.utility.dstu3;
+package org.opencds.cqf.fhir.cr.inputparameters.r5;
 
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DataRequirement;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Practitioner;
+import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * This class provides the default parameters passed into an operation as CQL Resource parameters
  * for evaluation. e.g. "%subject"
  */
-public class InputParameterResolver {
+public class InputParameterResolver implements IInputParameterResolver {
     private static final Logger logger = LoggerFactory.getLogger(InputParameterResolver.class);
 
     private final String subjectId;
@@ -39,20 +41,19 @@ public class InputParameterResolver {
     private final Repository repository;
 
     public InputParameterResolver(
+            Repository repository,
             String subjectId,
             String encounterId,
             String practitionerId,
             IBaseParameters parameters,
             Boolean useServerData,
-            IBaseBundle bundle,
-            Repository repository) {
+            IBaseBundle bundle) {
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
         Repository bundleRepository = null;
         if (bundle != null) {
-            bundleRepository = new org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository(
-                    repository.fhirContext(), bundle);
+            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), bundle);
         }
         this.repository = resolveRepository(useServerData, repository, bundleRepository);
         this.parameters = resolveParameters(parameters);
@@ -107,6 +108,7 @@ public class InputParameterResolver {
         return params;
     }
 
+    @Override
     public Parameters getParameters() {
         return parameters;
     }
@@ -126,9 +128,7 @@ public class InputParameterResolver {
                 for (var filter : req.getCodeFilter()) {
                     if (filter != null && filter.hasPath() && filter.hasValueSet()) {
                         var valueSets = repository.search(
-                                Bundle.class,
-                                ValueSet.class,
-                                Searches.byCanonical(filter.getValueSet().primitiveValue()));
+                                Bundle.class, ValueSet.class, Searches.byCanonical(filter.getValueSet()));
                         if (valueSets.hasEntry()) {
                             var valueSet =
                                     (ValueSet) valueSets.getEntryFirstRep().getResource();
@@ -141,7 +141,7 @@ public class InputParameterResolver {
                             var searchBuilder = Searches.builder();
                             codes.forEach(c -> searchBuilder.withTokenParam("code", c.getCode()));
                             var resourceType = fhirContext()
-                                    .getResourceDefinition(req.getType())
+                                    .getResourceDefinition(req.getType().toCode())
                                     .getImplementingClass();
                             var searchResults =
                                     repository.search(Bundle.class, resourceType, searchBuilder.build(), null);

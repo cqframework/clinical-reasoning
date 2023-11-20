@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.r4;
+package org.opencds.cqf.fhir.cr.inputparameters.r4;
 
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * This class provides the default parameters passed into an operation as CQL Resource parameters
  * for evaluation. e.g. "%subject"
  */
-public class InputParameterResolver {
+public class InputParameterResolver implements IInputParameterResolver {
     private static final Logger logger = LoggerFactory.getLogger(InputParameterResolver.class);
 
     private final String subjectId;
@@ -40,13 +41,13 @@ public class InputParameterResolver {
     private final Repository repository;
 
     public InputParameterResolver(
+            Repository repository,
             String subjectId,
             String encounterId,
             String practitionerId,
             IBaseParameters parameters,
             Boolean useServerData,
-            IBaseBundle bundle,
-            Repository repository) {
+            IBaseBundle bundle) {
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -107,6 +108,7 @@ public class InputParameterResolver {
         return params;
     }
 
+    @Override
     public Parameters getParameters() {
         return parameters;
     }

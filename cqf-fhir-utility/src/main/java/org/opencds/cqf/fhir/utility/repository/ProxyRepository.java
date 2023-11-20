@@ -124,7 +124,13 @@ public class ProxyRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return null;
+        if (isTerminologyResource(resourceType.getSimpleName())) {
+            return terminology.invoke(resourceType, name, parameters, returnType, headers);
+        } else if (isContentResource(resourceType.getSimpleName())) {
+            return content.invoke(resourceType, name, parameters, returnType, headers);
+        } else {
+            return data.invoke(resourceType, name, parameters, returnType, headers);
+        }
     }
 
     @Override

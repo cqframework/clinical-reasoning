@@ -409,7 +409,7 @@ public class IGFileStructureRepository implements Repository {
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+        return invokeOperation(name, parameters);
     }
 
     @Override
@@ -438,5 +438,9 @@ public class IGFileStructureRepository implements Repository {
             I id, P parameters, Class<B> returnType, Map<String, String> headers) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'history'");
+    }
+
+    protected <R extends Object> R invokeOperation(String operationName, IBaseParameters parameters) {
+        return null;
     }
 }

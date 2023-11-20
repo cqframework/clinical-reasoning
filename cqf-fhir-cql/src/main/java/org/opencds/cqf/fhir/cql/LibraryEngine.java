@@ -1,15 +1,12 @@
 package org.opencds.cqf.fhir.cql;
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.ParametersUtil;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import static java.util.Objects.requireNonNull;
 import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
@@ -18,9 +15,16 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ParametersUtil;
 
 public class LibraryEngine {
 
@@ -82,10 +86,18 @@ public class LibraryEngine {
             IBaseParameters parameters,
             String patientId,
             List<Pair<String, String>> libraries,
-            IBaseBundle bundle) {
+            IBaseBundle bundle,
+            IBaseResource resourceParameter) {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
+        if (resourceParameter != null) {
+            cqlParameters.add(new CqlParameterDefinition(
+                    resourceParameter.fhirType(),
+                    resourceParameter.getClass().getSimpleName(),
+                    false,
+                    resourceParameter));
+        }
         var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
 
         Set<String> expressions = new HashSet<>();
@@ -100,6 +112,9 @@ public class LibraryEngine {
             providers.registerProvider(source);
         }
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+        if (resourceParameter != null) {
+            evaluationParameters.put(resourceParameter.fhirType(), resourceParameter);
+        }
         var id = new VersionedIdentifier().withId("expression").withVersion("1.0.0");
         var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
 
@@ -113,6 +128,17 @@ public class LibraryEngine {
             String libraryToBeEvaluated,
             IBaseParameters parameters,
             IBaseBundle bundle) {
+        return getExpressionResult(subjectId, expression, language, libraryToBeEvaluated, parameters, bundle, null);
+    }
+
+    public List<IBase> getExpressionResult(
+            String subjectId,
+            String expression,
+            String language,
+            String libraryToBeEvaluated,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            IBaseResource resourceParameter) {
         validateExpression(language, expression);
         List<IBase> results = null;
         IBaseParameters parametersResult;
@@ -121,7 +147,8 @@ public class LibraryEngine {
             case "text/cql.expression":
             case "text/cql-expression":
             case "text/fhirpath":
-                parametersResult = this.evaluateExpression(expression, parameters, subjectId, null, bundle);
+                parametersResult =
+                        this.evaluateExpression(expression, parameters, subjectId, null, bundle, resourceParameter);
                 // The expression is assumed to be the parameter component name
                 // The expression evaluator creates a library with a single expression defined as "return"
                 results = resolveParameterValues(
@@ -207,13 +234,23 @@ public class LibraryEngine {
 
     public List<IBase> resolveExpression(
             String patientId, CqfExpression expression, IBaseParameters params, IBaseBundle bundle) {
+        return resolveExpression(patientId, expression, params, bundle, null);
+    }
+
+    public List<IBase> resolveExpression(
+            String patientId,
+            CqfExpression expression,
+            IBaseParameters params,
+            IBaseBundle bundle,
+            IBaseResource resourceParameter) {
         var result = getExpressionResult(
                 patientId,
                 expression.getExpression(),
                 expression.getLanguage(),
                 expression.getLibraryUrl(),
                 params,
-                bundle);
+                bundle,
+                resourceParameter);
         if (result == null && expression.getAltExpression() != null) {
             result = getExpressionResult(
                     patientId,
@@ -221,7 +258,8 @@ public class LibraryEngine {
                     expression.getAltLanguage(),
                     expression.getAltLibraryUrl(),
                     params,
-                    bundle);
+                    bundle,
+                    resourceParameter);
         }
 
         return result;

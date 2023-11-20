@@ -81,7 +81,7 @@ public class QuestionnaireItemGenerator {
         try {
             final StructureDefinition profile = (StructureDefinition) getProfileDefinition(actionInput);
             this.questionnaireItem = questionnaireItemService.createQuestionnaireItem(actionInput, linkId, profile);
-            extensionResolver.resolveExtensions(this.questionnaireItem.getExtension(), null);
+            extensionResolver.resolveExtensions(null, this.questionnaireItem.getExtension(), null);
             processElements(profile);
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());

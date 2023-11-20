@@ -1,14 +1,12 @@
 package org.opencds.cqf.fhir.cr.plandefinition.dstu3;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.util.List;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class PlanDefinitionProcessorTests {
     @Test
@@ -34,18 +32,8 @@ public class PlanDefinitionProcessorTests {
     @Disabled("Unable to get the cql to run against dstu3")
     public void testOpioidRec10PatientView() {
         FhirContext fhirContext = FhirContext.forDstu3Cached();
-        var data = new InMemoryFhirRepository(
-                fhirContext, this.getClass(), List.of("opioid-Rec10-patient-view/tests"), false);
-        var content = new InMemoryFhirRepository(
-                fhirContext, this.getClass(), List.of("opioid-Rec10-patient-view/content"), false);
-        var terminology = new InMemoryFhirRepository(
-                fhirContext,
-                this.getClass(),
-                List.of(
-                        "opioid-Rec10-patient-view/vocabulary/CodeSystem",
-                        "opioid-Rec10-patient-view/vocabulary/ValueSet"),
-                false);
-        var repository = Repositories.proxy(data, content, terminology);
+        var repository = TestRepositoryFactory.createRepository(
+                fhirContext, this.getClass(), "org/opencds/cqf/fhir/cr/plandefinition/dstu3/opioid-Rec10-patient-view");
         PlanDefinition.Assert.that(
                         "opioidcds-10-patient-view",
                         "example-rec-10-patient-view-POS-Cocaine-drugs",

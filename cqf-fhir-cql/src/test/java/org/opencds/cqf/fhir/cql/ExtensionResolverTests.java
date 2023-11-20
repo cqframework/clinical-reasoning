@@ -35,7 +35,7 @@ public class ExtensionResolverTests {
         extensionValue.addExtension(expressionExtension);
         var extensions = Collections.singletonList(new Extension(EXTENSION_URL, extensionValue));
         var extensionResolver = new ExtensionResolver(patientId, params, null, libraryEngine);
-        extensionResolver.resolveExtensions(extensions, null);
+        extensionResolver.resolveExtensions(null, extensions, null);
         assertEquals("Alice", extensions.get(0).getValueAsPrimitive().getValueAsString());
     }
 }

@@ -1,15 +1,12 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import static java.util.Objects.requireNonNull;
 import java.util.Optional;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -17,10 +14,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
@@ -28,6 +23,10 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public abstract class BasePlanDefinitionProcessor<T> {
@@ -40,7 +39,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
             Constants.CQFM_LOGIC_DEFINITION,
             Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
 
-    protected final OperationParametersParser operationParametersParser;
+    // protected final OperationParametersParser operationParametersParser;
     protected final ModelResolver modelResolver;
     protected Repository repository;
     protected LibraryEngine libraryEngine;
@@ -67,8 +66,8 @@ public abstract class BasePlanDefinitionProcessor<T> {
     protected BasePlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-        this.operationParametersParser = new OperationParametersParser(
-                Engines.getAdapterFactory(fhirContext()), new FhirTypeConverterFactory().create(fhirVersion()));
+        // this.operationParametersParser = new OperationParametersParser(
+        //         Engines.getAdapterFactory(fhirContext()), new FhirTypeConverterFactory().create(fhirVersion()));
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 repository.fhirContext().getVersion().getVersion());
     }

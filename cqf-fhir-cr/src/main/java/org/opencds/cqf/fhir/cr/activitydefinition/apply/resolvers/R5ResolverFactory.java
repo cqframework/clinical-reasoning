@@ -89,5 +89,4 @@ public class R5ResolverFactory implements IRequestResolverFactory {
                 throw new FHIRException(msg);
         }
     }
-    
 }

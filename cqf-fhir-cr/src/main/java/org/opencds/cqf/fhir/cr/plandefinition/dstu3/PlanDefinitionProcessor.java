@@ -133,12 +133,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             if (library != null) {
                 packageBundle.addEntry(PackageHelper.createEntry(library, theIsPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(packageBundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(
+                            packageBundle, library.getRelatedArtifact(), repository, theIsPut);
                 }
             }
         }
         if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+            PackageHelper.addRelatedArtifacts(
+                    packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
         }
 
         return packageBundle;

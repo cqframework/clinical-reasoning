@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.plandefinition.dstu3;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 public class PlanDefinitionProcessorTests {
     @Test

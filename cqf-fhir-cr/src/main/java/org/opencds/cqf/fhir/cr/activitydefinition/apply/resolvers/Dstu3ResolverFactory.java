@@ -52,7 +52,5 @@ public class Dstu3ResolverFactory implements IRequestResolverFactory {
                 logger.error(msg);
                 throw new FHIRException(msg);
         }
-
     }
-    
 }

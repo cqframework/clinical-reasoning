@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import java.util.Collections;
-
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.CanonicalType;

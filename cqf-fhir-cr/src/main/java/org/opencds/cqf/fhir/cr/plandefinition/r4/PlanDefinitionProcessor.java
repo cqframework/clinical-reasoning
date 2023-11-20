@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -88,13 +87,19 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, new ActivityDefinitionProcessor(repository, evaluationSettings),
-            new QuestionnaireProcessor(repository, evaluationSettings),
-            new QuestionnaireResponseProcessor(repository, evaluationSettings));
+        this(
+                repository,
+                evaluationSettings,
+                new ActivityDefinitionProcessor(repository, evaluationSettings),
+                new QuestionnaireProcessor(repository, evaluationSettings),
+                new QuestionnaireResponseProcessor(repository, evaluationSettings));
     }
 
-    public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings,
-            ActivityDefinitionProcessor activityDefinitionProcessor, QuestionnaireProcessor questionnaireProcessor,
+    public PlanDefinitionProcessor(
+            Repository repository,
+            EvaluationSettings evaluationSettings,
+            ActivityDefinitionProcessor activityDefinitionProcessor,
+            QuestionnaireProcessor questionnaireProcessor,
             QuestionnaireResponseProcessor questionnaireResponseProcessor) {
         super(repository, evaluationSettings);
         this.activityDefinitionProcessor = activityDefinitionProcessor;
@@ -146,12 +151,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             if (library != null) {
                 packageBundle.addEntry(PackageHelper.createEntry(library, theIsPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(packageBundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(
+                            packageBundle, library.getRelatedArtifact(), repository, theIsPut);
                 }
             }
         }
         if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+            PackageHelper.addRelatedArtifacts(
+                    packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
         }
 
         return packageBundle;

@@ -1,12 +1,15 @@
 package org.opencds.cqf.fhir.cql;
 
+import static java.util.Objects.requireNonNull;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import static java.util.Objects.requireNonNull;
 import java.util.Set;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
@@ -20,11 +23,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.ParametersUtil;
 
 public class LibraryEngine {
 

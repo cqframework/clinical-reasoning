@@ -1,8 +1,9 @@
 package org.opencds.cqf.fhir.cr;
 
 import static java.util.Objects.requireNonNull;
-import java.util.function.Function;
+import static org.opencds.cqf.fhir.utility.Resources.castOrThrow;
 
+import java.util.function.Function;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import static org.opencds.cqf.fhir.utility.Resources.castOrThrow;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -49,8 +49,8 @@ public class ResourceResolver {
 
     protected <C extends IPrimitiveType<String>> IBaseResource resolveByUrl(C url) {
         var parts = Canonicals.getParts(url);
-        var result = this.repository.search(
-                bundleClazz, clazz, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+        var result =
+                this.repository.search(bundleClazz, clazz, Searches.byNameAndVersion(parts.idPart(), parts.version()));
         var iterator = new BundleMappingIterable<>(repository, result, p -> p.getResource()).iterator();
         return iterator.hasNext() ? iterator.next() : null;
     }
@@ -60,8 +60,8 @@ public class ResourceResolver {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends IPrimitiveType<String>, T extends IBaseResource> T resolve(
-            Either3<C, IIdType, T> resource) throws FHIRException {
+    public <C extends IPrimitiveType<String>, T extends IBaseResource> T resolve(Either3<C, IIdType, T> resource)
+            throws FHIRException {
         var baseResource = resource.fold(this::resolveByUrl, this::resolveById, Function.identity());
 
         requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
@@ -72,5 +72,4 @@ public class ResourceResolver {
                         String.format("The resource passed in was not a valid instance of %s.class", resourceType))
                 .orElse(null);
     }
-    
 }

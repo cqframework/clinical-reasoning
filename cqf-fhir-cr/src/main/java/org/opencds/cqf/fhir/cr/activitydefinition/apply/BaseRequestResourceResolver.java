@@ -26,5 +26,6 @@ public abstract class BaseRequestResourceResolver {
     //     // this.organizationId = organizationId;
     // }
 
-    public abstract IBaseResource resolve(String subjectId, String encounterId, String practitionerId, String organizationId);
+    public abstract IBaseResource resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId);
 }

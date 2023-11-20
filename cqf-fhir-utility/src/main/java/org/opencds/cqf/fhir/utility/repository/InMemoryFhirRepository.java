@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -36,7 +35,8 @@ public class InMemoryFhirRepository implements Repository {
         this.operationMap = new HashMap<>();
     }
 
-    // public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive) {
+    // public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive)
+    // {
     //     this.context = context;
     //     // TODO: Resource loader.
     //     this.resourceMap = new HashMap<>();

@@ -16,7 +16,8 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public MedicationRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public MedicationRequest resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setStatus(MedicationrequestStatus.DRAFT);

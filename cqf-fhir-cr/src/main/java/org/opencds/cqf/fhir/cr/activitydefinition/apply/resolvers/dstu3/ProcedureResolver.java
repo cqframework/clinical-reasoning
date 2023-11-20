@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3;
 
 import java.util.Collections;
-
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.Reference;

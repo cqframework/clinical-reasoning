@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3;
 
 import java.util.Collections;
-
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -16,7 +15,8 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ProcedureRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public ProcedureRequest resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         // status, intent, code, and subject are required
         var procedureRequest = new ProcedureRequest();
         procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.DRAFT);

@@ -88,5 +88,5 @@ public class R4ResolverFactory implements IRequestResolverFactory {
                 logger.error(msg);
                 throw new FHIRException(msg);
         }
-    }    
+    }
 }

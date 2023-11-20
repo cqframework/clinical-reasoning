@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
@@ -18,7 +17,8 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public DiagnosticReport resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public DiagnosticReport resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);

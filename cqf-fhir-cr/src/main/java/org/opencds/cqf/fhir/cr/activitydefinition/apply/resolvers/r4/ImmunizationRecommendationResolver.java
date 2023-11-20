@@ -12,7 +12,8 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
     }
 
     @Override
-    public ImmunizationRecommendation resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public ImmunizationRecommendation resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         if (activityDefinition == null) {
             return null;
         }

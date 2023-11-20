@@ -58,13 +58,13 @@ public class QuestionnaireProcessor extends BaseQuestionnaireProcessor<Questionn
     }
 
     @Override
-    public <CanonicalType extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(IIdType id,
-            CanonicalType canonical, IBaseResource questionnaire) {
+    public <CanonicalType extends IPrimitiveType<String>> Questionnaire resolveQuestionnaire(
+            IIdType id, CanonicalType canonical, IBaseResource questionnaire) {
         return resolveQuestionnaire(Eithers.for3(canonical, id, questionnaire));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> Questionnaire resolveQuestionnaire(
-        Either3<C, IIdType, R> questionnaire) {
+            Either3<C, IIdType, R> questionnaire) {
         return (Questionnaire) resourceResolver.resolve(questionnaire);
     }
 

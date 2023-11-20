@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -16,8 +17,6 @@ import org.opencds.cqf.fhir.cr.ResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-
-import ca.uhn.fhir.context.FhirContext;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public class ActivityDefinitionProcessor {
@@ -36,11 +35,15 @@ public class ActivityDefinitionProcessor {
         this(repository, evaluationSettings, null);
     }
 
-    public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings, IRequestResolverFactory requestResolverFactory) {
+    public ActivityDefinitionProcessor(
+            Repository repository,
+            EvaluationSettings evaluationSettings,
+            IRequestResolverFactory requestResolverFactory) {
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.repository = requireNonNull(repository, "repository can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
-        this.requestResolverFactory = requestResolverFactory == null ? getDefaultRequestResolverFactory() : requestResolverFactory;
+        this.requestResolverFactory =
+                requestResolverFactory == null ? getDefaultRequestResolverFactory() : requestResolverFactory;
     }
 
     private IRequestResolverFactory getDefaultRequestResolverFactory() {
@@ -53,7 +56,8 @@ public class ActivityDefinitionProcessor {
             case R5:
                 return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R5ResolverFactory();
             default:
-                throw new IllegalArgumentException(String.format("No default resolver factory exists for FHIR version: %s", fhirVersion));
+                throw new IllegalArgumentException(
+                        String.format("No default resolver factory exists for FHIR version: %s", fhirVersion));
         }
     }
 
@@ -170,7 +174,19 @@ public class ActivityDefinitionProcessor {
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
         return new ApplyProcessor(this.repository, activityDefinition, libraryEngine, requestResolverFactory)
-            .applyActivityDefinition(subjectId, encounterId, practitionerId, organizationId, userType, userLanguage, userTaskContext, setting, settingContext, parameters, useServerData, bundle);
+                .applyActivityDefinition(
+                        subjectId,
+                        encounterId,
+                        practitionerId,
+                        organizationId,
+                        userType,
+                        userLanguage,
+                        userTaskContext,
+                        setting,
+                        settingContext,
+                        parameters,
+                        useServerData,
+                        bundle);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveActivityDefinition(

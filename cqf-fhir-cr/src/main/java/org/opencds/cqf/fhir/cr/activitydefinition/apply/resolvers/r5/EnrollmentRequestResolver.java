@@ -12,7 +12,8 @@ public class EnrollmentRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public EnrollmentRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public EnrollmentRequest resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'resolve'");
     }

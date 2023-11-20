@@ -18,14 +18,17 @@ public class InputParameterResolverFactory {
         var fhirVersion = repository.fhirContext().getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:
-                return (T) new org.opencds.cqf.fhir.cr.inputparameters.dstu3.InputParameterResolver(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                return (T) new org.opencds.cqf.fhir.cr.inputparameters.dstu3.InputParameterResolver(
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
             case R4:
-                return (T) new org.opencds.cqf.fhir.cr.inputparameters.r4.InputParameterResolver(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                return (T) new org.opencds.cqf.fhir.cr.inputparameters.r4.InputParameterResolver(
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
             case R5:
-                return (T) new org.opencds.cqf.fhir.cr.inputparameters.r5.InputParameterResolver(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                return (T) new org.opencds.cqf.fhir.cr.inputparameters.r5.InputParameterResolver(
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
             default:
-                throw new IllegalArgumentException(String.format("Unsupported FHIR version for parameter resolution: %s", fhirVersion));
+                throw new IllegalArgumentException(
+                        String.format("Unsupported FHIR version for parameter resolution: %s", fhirVersion));
         }
     }
-    
 }

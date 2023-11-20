@@ -15,7 +15,8 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public CommunicationRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public CommunicationRequest resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(CommunicationRequestStatus.DRAFT);

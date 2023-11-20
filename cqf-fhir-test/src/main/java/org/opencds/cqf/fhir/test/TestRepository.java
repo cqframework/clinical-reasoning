@@ -1,9 +1,8 @@
 package org.opencds.cqf.fhir.test;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-
-import ca.uhn.fhir.context.FhirContext;
 
 /**
  * @deprecated This class has been deprecated. Use InMemoryFhirRepository instead.

@@ -139,12 +139,14 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             if (library != null) {
                 packageBundle.addEntry(PackageHelper.createEntry(library, theIsPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(packageBundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(
+                            packageBundle, library.getRelatedArtifact(), repository, theIsPut);
                 }
             }
         }
         if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+            PackageHelper.addRelatedArtifacts(
+                    packageBundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
         }
 
         return packageBundle;
@@ -229,7 +231,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         || planDefinition.getLibrary().isEmpty()
                 ? null
                 : planDefinition.getLibrary().get(0).getValue();
-        extensionResolver.resolveExtensions(requestOrchestration, requestOrchestration.getExtension(), defaultLibraryUrl);
+        extensionResolver.resolveExtensions(
+                requestOrchestration, requestOrchestration.getExtension(), defaultLibraryUrl);
 
         for (int i = 0; i < planDefinition.getGoal().size(); i++) {
             var goal = convertGoal(planDefinition.getGoal().get(i));

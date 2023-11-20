@@ -12,7 +12,8 @@ public class RequestOrchestrationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public RequestOrchestration resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public RequestOrchestration resolve(
+            String subjectId, String encounterId, String practitionerId, String organizationId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'resolve'");
     }

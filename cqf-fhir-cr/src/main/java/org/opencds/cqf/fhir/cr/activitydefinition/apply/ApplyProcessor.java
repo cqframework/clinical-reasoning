@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Arrays;
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -16,8 +16,6 @@ import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ApplyProcessor {
     private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
@@ -43,7 +41,11 @@ public class ApplyProcessor {
     protected String defaultLibraryUrl;
     protected IInputParameterResolver inputParameterResolver;
 
-    public ApplyProcessor(Repository repository, IBaseResource activityDefinition, LibraryEngine libraryEngine, IRequestResolverFactory resolverFactory) {
+    public ApplyProcessor(
+            Repository repository,
+            IBaseResource activityDefinition,
+            LibraryEngine libraryEngine,
+            IRequestResolverFactory resolverFactory) {
         this.repository = repository;
         this.activityDefinition = activityDefinition;
         this.libraryEngine = libraryEngine;
@@ -67,7 +69,9 @@ public class ApplyProcessor {
             IBaseParameters parameters,
             Boolean useServerData,
             IBaseBundle bundle) {
-        logger.info("Performing $apply operation on {}", activityDefinition.getIdElement().getIdPart());
+        logger.info(
+                "Performing $apply operation on {}",
+                activityDefinition.getIdElement().getIdPart());
 
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -94,15 +98,24 @@ public class ApplyProcessor {
         switch (fhirVersion) {
             case DSTU3:
                 return ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition).getLibrary().get(0).getReference()
+                        ? ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getReference()
                         : null;
             case R4:
                 return ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition).getLibrary().get(0).getValueAsString()
+                        ? ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getValueAsString()
                         : null;
             case R5:
                 return ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition).getLibrary().get(0).getValueAsString()
+                        ? ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getValueAsString()
                         : null;
             default:
                 return null;
@@ -134,10 +147,22 @@ public class ApplyProcessor {
     }
 
     protected void resolveExtensions(IBaseResource resource) {
-        extensionProcessor.processExtensions(subjectId, bundle, resource, activityDefinition, defaultLibraryUrl, inputParameterResolver.getParameters());
+        extensionProcessor.processExtensions(
+                subjectId,
+                bundle,
+                resource,
+                activityDefinition,
+                defaultLibraryUrl,
+                inputParameterResolver.getParameters());
     }
 
     protected void resolveDynamicValues(IBaseResource resource) {
-        dynamicValueProcessor.processDynamicValues(subjectId, bundle, resource, activityDefinition, defaultLibraryUrl, inputParameterResolver.getParameters());
+        dynamicValueProcessor.processDynamicValues(
+                subjectId,
+                bundle,
+                resource,
+                activityDefinition,
+                defaultLibraryUrl,
+                inputParameterResolver.getParameters());
     }
 }

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cql;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -30,7 +29,8 @@ public class ExtensionResolver {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <E extends IBaseExtension> void resolveExtensions(IBaseResource resource, List<E> extensions, String defaultLibraryUrl) {
+    public <E extends IBaseExtension> void resolveExtensions(
+            IBaseResource resource, List<E> extensions, String defaultLibraryUrl) {
         for (var extension : extensions) {
             var nestedExtensions = extension.getExtension();
             if (nestedExtensions != null && !nestedExtensions.isEmpty()) {

@@ -23,5 +23,4 @@ public class CustomActivityResolver extends BaseRequestResourceResolver {
 
         return task;
     }
-    
 }

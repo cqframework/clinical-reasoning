@@ -9,8 +9,8 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbased.ProcessDefinitionItem;
-import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased.ProcessItem;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.defintionbasedextraction.ProcessDefinitionItem;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbasedextraction.ProcessObservationItem;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import javax.annotation.Nonnull;
@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class Processor {
+public class ProcessorService {
     Repository repository;
-    ProcessGroupItem processGroupItem;
-    ProcessItem processItem;
+    ProcessObservationItem processObservationItem;
     ProcessDefinitionItem processDefinitionItem;
     public List<IBaseResource> processItems(QuestionnaireResponse questionnaireResponse) {
         final ArrayList<IBaseResource> resources = new ArrayList<>();
@@ -31,15 +31,56 @@ public class Processor {
         final Optional<Questionnaire> questionnaire = getQuestionnaire(questionnaireResponse);
         final Map<String, List<Coding>> questionnaireCodeMap = questionnaire.map(this::createCodeMap).orElse(null);
         questionnaireResponse.getItem().forEach(item -> {
+            final ProcessParameters processParameters = new ProcessParameters(
+                item,
+                questionnaireResponse,
+                resources,
+                subject,
+                questionnaireCodeMap
+            );
             if (processDefinitionBased(questionnaireResponse, item)) {
-                processDefinitionItem.process(item, questionnaireResponse, resources, subject);
+                processDefinitionItem.process(processParameters);
             } else if (item.hasItem()) {
-                processGroupItem.process(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
+                processGroupItem(processParameters);
             } else {
-                processItem.process(item, questionnaireResponse, questionnaireCodeMap, resources, subject);
+                processObservationItem.process(processParameters);
             }
         });
         return resources;
+    }
+
+    void processGroupItem(ProcessParameters processParameters) {
+        final Reference groupSubject = getGroupSubject(processParameters.getItem(), processParameters.getSubject());
+        processParameters.setSubject(groupSubject);
+        if (processParameters.getItem().hasDefinition()) {
+            processDefinitionItem.process(processParameters);
+        } else {
+            processParameters.getItem().getItem().forEach(childItem -> {
+                if (!childItem.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT)) {
+                    if (childItem.hasItem()) {
+                        processGroupItem(processParameters);
+                    } else {
+                        processObservationItem.process(processParameters);
+                    }
+                }
+            });
+        }
+    }
+
+    @Nonnull
+    private Reference getGroupSubject(QuestionnaireResponseItemComponent item, Reference subject) {
+        final List<QuestionnaireResponseItemComponent> subjectItems = getSubjectItems(item);
+        if (!subjectItems.isEmpty()) {
+            return subjectItems.get(0).getAnswer().get(0).getValueReference();
+        }
+        return subject.copy();
+    }
+
+    @Nonnull
+    private List<QuestionnaireResponseItemComponent> getSubjectItems(QuestionnaireResponseItemComponent item) {
+        return item.getItem().stream()
+            .filter(child -> child.hasExtension(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))
+            .collect(Collectors.toList());
     }
 
     boolean processDefinitionBased(QuestionnaireResponse questionnaireResponse, QuestionnaireResponseItemComponent item) {
@@ -66,13 +107,13 @@ public class Processor {
     @Nonnull
     private Map<String, List<Coding>> createCodeMap(@Nonnull Questionnaire questionnaire) {
         var questionnaireCodeMap = new HashMap<String, List<Coding>>();
-        questionnaire.getItem().forEach(item -> processQuestionnaireItems(item, questionnaireCodeMap));
+        questionnaire.getItem().forEach(item -> buildQuestionnaireCodeMap(item, questionnaireCodeMap));
         return questionnaireCodeMap;
     }
 
-    private void processQuestionnaireItems(QuestionnaireItemComponent item, Map<String, List<Coding>> questionnaireCodeMap) {
+    private void buildQuestionnaireCodeMap(QuestionnaireItemComponent item, Map<String, List<Coding>> questionnaireCodeMap) {
         if (item.hasItem()) {
-            item.getItem().forEach(qItem -> processQuestionnaireItems(qItem, questionnaireCodeMap));
+            item.getItem().forEach(qItem -> buildQuestionnaireCodeMap(qItem, questionnaireCodeMap));
         } else {
             questionnaireCodeMap.put(item.getLinkId(), item.getCode());
         }

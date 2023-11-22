@@ -57,7 +57,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
-import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.DepreciatedQuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
@@ -74,7 +74,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     private final ActivityDefinitionProcessor activityDefinitionProcessor;
     private final QuestionnaireProcessor questionnaireProcessor;
-    private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
+    private final DepreciatedQuestionnaireResponseProcessor depreciatedQuestionnaireResponseProcessor;
     private ExtensionResolver extensionResolver;
     private InputParameterResolver inputParameterResolver;
     private QuestionnaireItemGenerator questionnaireItemGenerator;
@@ -89,7 +89,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         super(repository, evaluationSettings);
         this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
         this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
-        this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
+        this.depreciatedQuestionnaireResponseProcessor = new DepreciatedQuestionnaireResponseProcessor(this.repository, evaluationSettings);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
             for (var questionnaireResponse : questionnaireResponses) {
                 try {
-                    var extractBundle = (Bundle) questionnaireResponseProcessor.extract(
+                    var extractBundle = (Bundle) depreciatedQuestionnaireResponseProcessor.extract(
                             questionnaireResponse, parameters, bundle, libraryEngine);
                     extractedResources.add(questionnaireResponse);
                     for (var entry : extractBundle.getEntry()) {

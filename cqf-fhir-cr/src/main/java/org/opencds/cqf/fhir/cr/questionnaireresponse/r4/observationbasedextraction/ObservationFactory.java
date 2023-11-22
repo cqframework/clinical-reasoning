@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbasedextraction;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -7,12 +7,12 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.codesystems.ObservationStatus;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.common.ProcessorHelper;
 import java.time.Instant;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 class ObservationFactory {
     ProcessorHelper processorHelper;
-    final ObservationStatus status = ObservationStatus.FINAL;
+    static final ObservationStatus status = Observation.ObservationStatus.FINAL;
 
     final Observation makeObservation(
         QuestionnaireResponseItemAnswerComponent answer,
@@ -45,18 +45,20 @@ class ObservationFactory {
         return new ObservationBuilder()
             .id(id)
             .basedOn(basedOn)
-            .performer(partOf)
+            .partOf(partOf)
+            .performer(performer)
             .status(status)
             .category(category)
             .code(code)
             .subject(subject)
             .encounter(encounter)
             .effective(effective)
-            .issued(issued)
+            .issuedElement(issued)
             .performer(performer)
             .value(value)
             .derived(derived)
-            .extension(extension);
+            .extension(extension)
+            .build();
     }
 
     final String getId(QuestionnaireResponse questionnaireResponse, String linkId) {

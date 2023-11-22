@@ -1,8 +1,9 @@
-package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbased;
+package org.opencds.cqf.fhir.cr.questionnaireresponse.r4.observationbasedextraction;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
@@ -12,14 +13,14 @@ import java.util.List;
 public class ObservationBuilder {
     private String id;
     private List<Reference> basedOn;
-    private Reference partOf;
+    private List<Reference> partOf;
     private ObservationStatus status;
     private List<CodeableConcept> category;
     private CodeableConcept code;
     private Reference encounter;
     private Reference subject;
     private Type effective;
-    private InstantType issued;
+    private InstantType issuedElement;
     private List<Reference> performer;
     private Type value;
     private List<Reference> derivedFrom;
@@ -38,7 +39,7 @@ public class ObservationBuilder {
     }
 
     @Nonnull
-    ObservationBuilder partOf(Reference partOf) {
+    ObservationBuilder partOf(List<Reference> partOf) {
         this.partOf = partOf;
         return this;
     }
@@ -80,8 +81,8 @@ public class ObservationBuilder {
     }
 
     @Nonnull
-    ObservationBuilder issued(InstantType issued) {
-        this.issued = issued;
+    ObservationBuilder issuedElement(InstantType issued) {
+        this.issuedElement = issued;
         return this;
     }
 
@@ -107,5 +108,25 @@ public class ObservationBuilder {
     ObservationBuilder extension(Extension extension) {
         this.extension = extension;
         return this;
+    }
+
+    @Nonnull
+    Observation build() {
+        final Observation observation = new Observation();
+        observation.setId(this.id);
+        observation.setBasedOn(this.basedOn);
+        observation.setPartOf(this.partOf);
+        observation.setStatus(this.status);
+        observation.setCategory(this.category);
+        observation.setCode(this.code);
+        observation.setEncounter(this.encounter);
+        observation.setSubject(this.subject);
+        observation.setEffective(this.effective);
+        observation.setIssuedElement(this.issuedElement);
+        observation.setPerformer(this.performer);
+        observation.setValue(this.value);
+        observation.setDerivedFrom(this.derivedFrom);
+        observation.setExtension(List.of(this.extension));
+        return observation;
     }
 }

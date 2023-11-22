@@ -43,8 +43,8 @@ public class TestQuestionnaireResponse {
         return jsonParser.parseResource(open(asset));
     }
 
-    public static QuestionnaireResponseProcessor buildProcessor(Repository repository) {
-        return new QuestionnaireResponseProcessor(repository);
+    public static DepreciatedQuestionnaireResponseProcessor buildProcessor(Repository repository) {
+        return new DepreciatedQuestionnaireResponseProcessor(repository);
     }
 
     /** Fluent interface starts here **/

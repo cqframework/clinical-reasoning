@@ -51,7 +51,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
         }
         var subjectClass =
-                fhirContext().getResourceDefinition(subjectId.fhirType()).getImplementingClass();
+                fhirContext().getResourceDefinition(subjectId.getResourceType()).getImplementingClass();
         var subject = readRepository(subjectClass, subjectId);
         if (subject != null) {
             params.addParameter(part("%subject", (Resource) subject));

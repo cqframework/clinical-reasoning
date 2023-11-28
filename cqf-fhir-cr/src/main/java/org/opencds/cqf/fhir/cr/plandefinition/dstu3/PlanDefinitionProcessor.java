@@ -54,8 +54,8 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.inputparameters.dstu3.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.dstu3.generator.questionnaireitem.QuestionnaireItemGenerator;
-import org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.dstu3.ContainedHelper;
@@ -634,12 +634,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 var populatedQuestionnaire = questionnaireProcessor.prePopulate(
                         toPopulate, subjectId.getValue(), this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
-                    requestGroup.addContained(populatedQuestionnaire);
+                    requestGroup.addContained((Resource) populatedQuestionnaire);
                 } else {
                     requestResources.add(populatedQuestionnaire);
                 }
-                task.setFocus(new Reference(
-                        new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), populatedQuestionnaire.getIdPart())));
+                task.setFocus(new Reference(new IdType(
+                        FHIRAllTypes.QUESTIONNAIRE.toCode(),
+                        populatedQuestionnaire.getIdElement().getIdPart())));
                 task.setFor(requestGroup.getSubject());
             }
         }

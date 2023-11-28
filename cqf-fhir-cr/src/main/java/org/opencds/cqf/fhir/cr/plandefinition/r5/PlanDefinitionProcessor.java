@@ -60,8 +60,8 @@ import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.inputparameters.r5.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;
-import org.opencds.cqf.fhir.cr.questionnaire.r5.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.r5.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
@@ -467,9 +467,9 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             result = this.activityDefinitionProcessor.apply(
                     activityDefinition,
                     subjectId.getValue(),
-                    encounterId.getValue(),
-                    practitionerId.getValue(),
-                    organizationId.getValue(),
+                    encounterId == null ? null : encounterId.getValue(),
+                    practitionerId == null ? null : practitionerId.getValue(),
+                    organizationId == null ? null : organizationId.getValue(),
                     userType,
                     userLanguage,
                     userTaskContext,
@@ -614,12 +614,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 var populatedQuestionnaire = questionnaireProcessor.prePopulate(
                         toPopulate, subjectId.getValue(), this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
-                    requestOrchestration.addContained(populatedQuestionnaire);
+                    requestOrchestration.addContained((Resource) populatedQuestionnaire);
                 } else {
                     requestResources.add(populatedQuestionnaire);
                 }
-                task.setFocus(new Reference(
-                        new IdType(FHIRTypes.QUESTIONNAIRE.toCode(), populatedQuestionnaire.getIdPart())));
+                task.setFocus(new Reference(new IdType(
+                        FHIRTypes.QUESTIONNAIRE.toCode(),
+                        populatedQuestionnaire.getIdElement().getIdPart())));
                 task.setFor(requestOrchestration.getSubject());
             }
         }

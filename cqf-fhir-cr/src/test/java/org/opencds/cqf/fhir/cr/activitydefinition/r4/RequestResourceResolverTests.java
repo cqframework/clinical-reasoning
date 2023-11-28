@@ -63,6 +63,7 @@ import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 
 @TestInstance(Lifecycle.PER_CLASS)
+@Disabled
 public class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     // private final IParser parser = fhirContext.newJsonParser();

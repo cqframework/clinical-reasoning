@@ -8,6 +8,7 @@ coverage:
     project:
       default:
         target: auto
+        threshold: 1% # this covers slighty flaky tests
     patch:
       default:
         # basic

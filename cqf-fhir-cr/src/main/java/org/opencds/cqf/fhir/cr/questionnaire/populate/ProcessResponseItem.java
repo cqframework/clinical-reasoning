@@ -19,13 +19,12 @@ public class ProcessResponseItem {
     protected IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item) {
         var responseItem = createResponseItem(request.getFhirVersion(), item);
         var items = request.getItems(item);
-        if (items != null) {
+        if (!items.isEmpty()) {
             final List<IBaseBackboneElement> nestedResponseItems = processItems(request, items);
             request.getModelResolver().setValue(responseItem, "item", nestedResponseItems);
-            // responseItem.setItem(nestedResponseItems);
         } else {
             var authorExt = item.getExtension().stream()
-                    .map(e -> e.getUrl().equals(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR))
+                    .filter(e -> e.getUrl().equals(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR))
                     .findFirst()
                     .orElse(null);
             if (authorExt != null) {

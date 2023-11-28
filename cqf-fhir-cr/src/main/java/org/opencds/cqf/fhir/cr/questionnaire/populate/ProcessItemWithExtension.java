@@ -16,8 +16,6 @@ import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ProcessItemWithExtension {
-    // TODO: we don't have any resources that are currently using this
-    // not writing unit tests till there is a practical implementation
     private final ExpressionProcessor expressionProcessor;
 
     public ProcessItemWithExtension() {
@@ -47,7 +45,6 @@ public class ProcessItemWithExtension {
         request.getItems(groupItem).forEach(item -> {
             final IBaseBackboneElement processedSubItem = createNewQuestionnaireItemComponent(request, item, context);
             request.getModelResolver().setValue(contextItem, "item", Collections.singletonList(processedSubItem));
-            // contextItem.addItem(processedSubItem);
         });
         return contextItem;
     }

@@ -65,7 +65,12 @@ public class PopulateProcessor {
 
     public IBaseResource populate(PopulateRequest request) {
         final IBaseResource response = createQuestionnaireResponse(request);
-        response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-response");
+        response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-"
+                + request.getSubjectId().getIdPart());
+        var items = request.getItems(request.getQuestionnaire());
+        var responseItems = processResponseItems(request, processItems(request, items));
+        request.getModelResolver().setValue(response, "item", responseItems);
+        resolveOperationOutcome(request, response);
         request.getModelResolver()
                 .setValue(response, "contained", Collections.singletonList(request.getQuestionnaire()));
         request.getModelResolver()
@@ -77,11 +82,6 @@ public class PopulateProcessor {
                                 dtrQuestionnaireResponseExtension(request.getQuestionnaire()
                                         .getIdElement()
                                         .getIdPart()))));
-
-        var items = request.getItems(request.getQuestionnaire());
-        var responseItems = processResponseItems(request, processItems(request, items));
-        request.getModelResolver().setValue(response, "item", responseItems);
-        resolveOperationOutcome(request, response);
         return response;
     }
 
@@ -89,7 +89,7 @@ public class PopulateProcessor {
         var pathResult = request.getModelResolver().resolvePath(operationOutcome, "issue");
         var issues = (pathResult instanceof List ? (List<?>) pathResult : null);
         if (issues != null && !issues.isEmpty()) {
-            operationOutcome.setId(resource.getIdElement());
+            operationOutcome.setId("populate-outcome-" + resource.getIdElement().getIdPart());
             request.getModelResolver().setValue(resource, "contained", Collections.singletonList(operationOutcome));
             request.getModelResolver()
                     .setValue(

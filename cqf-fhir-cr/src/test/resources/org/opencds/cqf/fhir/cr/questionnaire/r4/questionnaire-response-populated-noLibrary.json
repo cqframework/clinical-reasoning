@@ -1,6 +1,6 @@
 {
   "resourceType": "QuestionnaireResponse",
-  "id": "OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1-response",
+  "id": "OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
   "contained": [
     {
       "resourceType": "OperationOutcome",
@@ -130,7 +130,7 @@
     },
     {
       "resourceType": "Questionnaire",
-      "id": "OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
+      "id": "OutpatientPriorAuthorizationRequest-noLibrary",
       "meta": {
         "source": "#Szj0RYKKLb3zYK89",
         "profile": [
@@ -141,18 +141,6 @@
         {
           "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
           "valueCanonical": "http://somewhere.org/fhir/uv/mycontentig/Library/noLibrary"
-        },
-        {
-          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
-          "valueReference": {
-            "reference": "Patient/OPA-Patient1"
-          }
-        },
-        {
-          "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
-          "valueReference": {
-            "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
-          }
         }
       ],
       "url": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary",
@@ -690,7 +678,7 @@
     {
       "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
       "valueReference": {
-        "reference": "#OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
+        "reference": "#OutpatientPriorAuthorizationRequest-noLibrary"
       }
     }
   ],

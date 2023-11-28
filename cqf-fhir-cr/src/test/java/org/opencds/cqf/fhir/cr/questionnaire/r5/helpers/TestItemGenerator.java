@@ -17,6 +17,7 @@ import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Resource;
@@ -56,7 +57,8 @@ public class TestItemGenerator {
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        return QuestionnaireItemGenerator.of(repository, patientId, parameters, bundle, libraryEngine);
+        return QuestionnaireItemGenerator.of(
+                repository, new IdType("Patient", patientId), parameters, bundle, libraryEngine);
     }
 
     /** Fluent interface starts here **/

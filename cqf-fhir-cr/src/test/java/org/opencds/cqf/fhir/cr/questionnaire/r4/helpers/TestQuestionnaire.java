@@ -31,7 +31,7 @@ import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
@@ -158,7 +158,7 @@ public class TestQuestionnaire {
         public Bundle questionnairePackage() {
             buildRepository();
             var generatedPackage = buildProcessor(repository).packageQuestionnaire(questionnaire, true);
-            return generatedPackage;
+            return (Bundle) generatedPackage;
         }
     }
 
@@ -250,7 +250,7 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaireResponse hasItems(int expectedItemCount) {
-            assertEquals(myItems.size(), expectedItemCount);
+            assertEquals(expectedItemCount, myItems.size());
 
             return this;
         }

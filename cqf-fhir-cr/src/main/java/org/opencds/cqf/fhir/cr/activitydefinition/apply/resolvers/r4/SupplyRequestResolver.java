@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SupplyRequest;
@@ -14,7 +15,8 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public SupplyRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public SupplyRequest resolve(
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var supplyRequest = new SupplyRequest();
 
         supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.DRAFT);

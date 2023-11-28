@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -27,14 +28,14 @@ public class NestedQuestionnaireItemService {
 
     public static NestedQuestionnaireItemService of(
             Repository repository,
-            String patientId,
+            IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
         final QuestionnaireTypeIsChoice questionnaireTypeIsChoice = QuestionnaireTypeIsChoice.of(repository);
         final ElementHasDefaultValue elementHasDefault = new ElementHasDefaultValue();
         final ElementHasCqfExpression elementHasCqfExpression =
-                new ElementHasCqfExpression(patientId, parameters, bundle, libraryEngine);
+                new ElementHasCqfExpression(subjectId, parameters, bundle, libraryEngine);
         return new NestedQuestionnaireItemService(
                 questionnaireTypeIsChoice,
                 elementHasDefault,

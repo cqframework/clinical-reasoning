@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.CommunicationRequest;
 import org.hl7.fhir.dstu3.model.CommunicationRequest.CommunicationRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class CommunicationRequestResolver extends BaseRequestResourceResolver {
@@ -16,7 +17,7 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public CommunicationRequest resolve(
-            String subjectId, String encounterId, String practitionerId, String organizationId) {
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.DRAFT);

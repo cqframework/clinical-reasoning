@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class ReferralRequestResolver extends BaseRequestResourceResolver {
@@ -16,7 +17,8 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ReferralRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public ReferralRequest resolve(
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         // status, intent, code, and subject are required
         var referralRequest = new ReferralRequest();
         referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.DRAFT);

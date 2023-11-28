@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "diagnosticreport-test",
+  "name": "DiagnosticReport_Test",
+  "title": "CreateDiagnosticReport",
+  "status": "draft",
+  "description": "Create the diagnostic report.",
+  "kind": "DiagnosticReport"
+}

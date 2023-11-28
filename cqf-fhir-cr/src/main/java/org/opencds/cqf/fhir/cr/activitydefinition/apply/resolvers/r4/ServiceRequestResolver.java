@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Reference;
@@ -16,7 +17,8 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ServiceRequest resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public ServiceRequest resolve(
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);

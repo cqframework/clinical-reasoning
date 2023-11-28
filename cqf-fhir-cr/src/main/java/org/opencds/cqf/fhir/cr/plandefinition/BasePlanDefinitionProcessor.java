@@ -23,13 +23,12 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public abstract class BasePlanDefinitionProcessor<T> {
-    private static final Logger logger = LoggerFactory.getLogger(BasePlanDefinitionProcessor.class);
+    // private static final Logger logger = LoggerFactory.getLogger(BasePlanDefinitionProcessor.class);
     protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays.asList(
             Constants.CPG_KNOWLEDGE_CAPABILITY,
             Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL,
@@ -39,15 +38,16 @@ public abstract class BasePlanDefinitionProcessor<T> {
             Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
 
     // protected final OperationParametersParser operationParametersParser;
+
     protected final ModelResolver modelResolver;
     protected Repository repository;
     protected LibraryEngine libraryEngine;
     protected EvaluationSettings evaluationSettings;
 
-    protected String subjectId;
-    protected String encounterId;
-    protected String practitionerId;
-    protected String organizationId;
+    protected IIdType subjectId;
+    protected IIdType encounterId;
+    protected IIdType practitionerId;
+    protected IIdType organizationId;
     protected IBaseDatatype userType;
     protected IBaseDatatype userLanguage;
     protected IBaseDatatype userTaskContext;
@@ -67,6 +67,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         // this.operationParametersParser = new OperationParametersParser(
         //         Engines.getAdapterFactory(fhirContext()), new FhirTypeConverterFactory().create(fhirVersion()));
+
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 repository.fhirContext().getVersion().getVersion());
     }
@@ -118,9 +119,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
             CanonicalType canonical,
             IBaseResource planDefinition,
             String subject,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -130,10 +131,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
                 id,
                 canonical,
                 planDefinition,
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
+                subject,
+                encounter,
+                practitioner,
+                organization,
                 userType,
                 userLanguage,
                 userTaskContext,
@@ -151,9 +152,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
             CanonicalType canonical,
             IBaseResource planDefinition,
             String subject,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -172,9 +173,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
                 canonical,
                 planDefinition,
                 subject,
-                encounterId,
-                practitionerId,
-                organizationId,
+                encounter,
+                practitioner,
+                organization,
                 userType,
                 userLanguage,
                 userTaskContext,
@@ -192,9 +193,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
             CanonicalType canonical,
             IBaseResource planDefinition,
             String subject,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -211,9 +212,9 @@ public abstract class BasePlanDefinitionProcessor<T> {
                     canonical,
                     planDefinition,
                     subject,
-                    encounterId,
-                    practitionerId,
-                    organizationId,
+                    encounter,
+                    practitioner,
+                    organization,
                     userType,
                     userLanguage,
                     userTaskContext,
@@ -225,10 +226,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
                     prefetchData,
                     libraryEngine);
         }
-        this.subjectId = subject;
-        this.encounterId = encounterId;
-        this.practitionerId = practitionerId;
-        this.organizationId = organizationId;
+        this.subjectId = Ids.newId(fhirVersion(), Ids.ensureIdType(subject, "Patient"));
+        this.encounterId =
+                encounter == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(encounter, "Encounter"));
+        this.practitionerId =
+                practitioner == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(practitioner, "Practitioner"));
+        this.organizationId =
+                organization == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(organization, "Organization"));
         this.userType = userType;
         this.userLanguage = userLanguage;
         this.userTaskContext = userTaskContext;
@@ -250,10 +254,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
             IIdType id,
             CanonicalType canonical,
             IBaseResource planDefinition,
-            String patientId,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String subject,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -271,10 +275,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
                 id,
                 canonical,
                 planDefinition,
-                patientId,
-                encounterId,
-                practitionerId,
-                organizationId,
+                subject,
+                encounter,
+                practitioner,
+                organization,
                 userType,
                 userLanguage,
                 userTaskContext,
@@ -291,10 +295,10 @@ public abstract class BasePlanDefinitionProcessor<T> {
             IIdType id,
             CanonicalType canonical,
             IBaseResource planDefinition,
-            String patientId,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String subject,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -305,10 +309,13 @@ public abstract class BasePlanDefinitionProcessor<T> {
             IBaseBundle bundle,
             IBaseParameters prefetchData,
             LibraryEngine libraryEngine) {
-        this.subjectId = patientId;
-        this.encounterId = encounterId;
-        this.practitionerId = practitionerId;
-        this.organizationId = organizationId;
+        this.subjectId = Ids.newId(fhirVersion(), Ids.ensureIdType(subject, "Patient"));
+        this.encounterId =
+                encounter == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(encounter, "Encounter"));
+        this.practitionerId =
+                practitioner == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(practitioner, "Practitioner"));
+        this.organizationId =
+                organization == null ? null : Ids.newId(fhirVersion(), Ids.ensureIdType(organization, "Organization"));
         this.userType = userType;
         this.userLanguage = userLanguage;
         this.userTaskContext = userTaskContext;

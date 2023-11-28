@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -24,7 +25,7 @@ public class ExtensionProcessor {
 
     @SuppressWarnings({"rawtypes"})
     public void processExtensions(
-            String subjectId,
+            IIdType subjectId,
             IBaseBundle bundle,
             IBaseResource resource,
             IBaseResource definition,

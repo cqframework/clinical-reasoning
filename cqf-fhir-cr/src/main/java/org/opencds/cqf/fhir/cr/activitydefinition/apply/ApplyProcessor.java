@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -14,6 +16,7 @@ import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +34,16 @@ public class ApplyProcessor {
     protected final ExtensionProcessor extensionProcessor;
     protected final DynamicValueProcessor dynamicValueProcessor;
 
-    protected String subjectId;
-    protected String encounterId;
-    protected String practitionerId;
-    protected String organizationId;
+    protected IIdType subjectId;
+    protected IIdType encounterId;
+    protected IIdType practitionerId;
+    protected IIdType organizationId;
     protected IBaseParameters parameters;
     protected Boolean useServerData;
     protected IBaseBundle bundle;
     protected String defaultLibraryUrl;
     protected IInputParameterResolver inputParameterResolver;
+    protected IBaseOperationOutcome operationOutcome;
 
     public ApplyProcessor(
             Repository repository,
@@ -57,10 +61,10 @@ public class ApplyProcessor {
     }
 
     public IBaseResource applyActivityDefinition(
-            String subjectId,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
+            String subject,
+            String encounter,
+            String practitioner,
+            String organization,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -73,10 +77,12 @@ public class ApplyProcessor {
                 "Performing $apply operation on {}",
                 activityDefinition.getIdElement().getIdPart());
 
-        this.subjectId = subjectId;
-        this.encounterId = encounterId;
-        this.practitionerId = practitionerId;
-        this.organizationId = organizationId;
+        this.subjectId = Ids.newId(fhirVersion, Ids.ensureIdType(subject, "Patient"));
+        this.encounterId = encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter"));
+        this.practitionerId =
+                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner"));
+        this.organizationId =
+                organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization"));
         this.parameters = parameters;
         this.useServerData = useServerData;
         this.bundle = bundle;

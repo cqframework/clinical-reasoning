@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import java.util.Collections;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -17,7 +18,8 @@ public class CommunicationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Communication resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public Communication resolve(
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var communication = new Communication();
 
         communication.setStatus(EventStatus.UNKNOWN);

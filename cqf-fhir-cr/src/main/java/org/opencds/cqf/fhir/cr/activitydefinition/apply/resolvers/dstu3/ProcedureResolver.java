@@ -4,6 +4,7 @@ import java.util.Collections;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Procedure;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class ProcedureResolver extends BaseRequestResourceResolver {
@@ -14,7 +15,7 @@ public class ProcedureResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Procedure resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public Procedure resolve(IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var procedure = new Procedure();
 
         procedure.setStatus(Procedure.ProcedureStatus.UNKNOWN);

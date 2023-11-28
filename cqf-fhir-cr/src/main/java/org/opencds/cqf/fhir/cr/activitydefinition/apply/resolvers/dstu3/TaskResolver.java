@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class TaskResolver extends BaseRequestResourceResolver {
@@ -13,7 +14,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Task resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public Task resolve(IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var task = new Task();
         if (activityDefinition.hasExtension()) {
             var value = activityDefinition

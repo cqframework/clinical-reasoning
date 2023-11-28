@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -26,7 +27,7 @@ public class DynamicValueProcessor {
     }
 
     public void processDynamicValues(
-            String subjectId,
+            IIdType subjectId,
             IBaseBundle bundle,
             IBaseResource resource,
             IBaseResource activityDefinition,
@@ -37,8 +38,8 @@ public class DynamicValueProcessor {
             var path = getDynamicValuePath(dynamicValue);
             var cqfExpression = getDynamicValueExpression(dynamicValue, defaultLibraryUrl);
             if (path != null && cqfExpression != null) {
-                var expressionResult =
-                        libraryEngine.resolveExpression(subjectId, cqfExpression, inputParams, bundle, resource);
+                var expressionResult = libraryEngine.resolveExpression(
+                        subjectId.getIdPart(), cqfExpression, inputParams, bundle, resource);
                 resolveDynamicValue(expressionResult, cqfExpression.getExpression(), path, resource);
             }
         }

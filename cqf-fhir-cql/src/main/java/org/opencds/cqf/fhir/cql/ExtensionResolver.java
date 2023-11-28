@@ -9,19 +9,20 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Constants;
 
 /**
  * This class is used to resolve any CQFExpression extensions that exist on an extension.
  */
 public class ExtensionResolver {
-    private final String subjectId;
+    private final IIdType subjectId;
     private final IBaseParameters parameters;
     private final IBaseBundle bundle;
     private final LibraryEngine libraryEngine;
 
     public ExtensionResolver(
-            String subjectId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+            IIdType subjectId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
@@ -62,7 +63,7 @@ public class ExtensionResolver {
         List<IBase> result = null;
         if (expression instanceof org.hl7.fhir.r4.model.Expression) {
             result = libraryEngine.resolveExpression(
-                    subjectId,
+                    subjectId.getIdPart(),
                     new CqfExpression(
                             (org.hl7.fhir.r4.model.Expression) expression,
                             defaultLibraryUrl,
@@ -74,7 +75,7 @@ public class ExtensionResolver {
 
         if (expression instanceof org.hl7.fhir.r5.model.Expression) {
             result = libraryEngine.resolveExpression(
-                    subjectId,
+                    subjectId.getIdPart(),
                     new CqfExpression(
                             (org.hl7.fhir.r5.model.Expression) expression,
                             defaultLibraryUrl,

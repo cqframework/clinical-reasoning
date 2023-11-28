@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "communication-test",
+  "name": "Communication_Test",
+  "title": "CreateCommunication",
+  "status": "draft",
+  "description": "Create the communication.",
+  "kind": "Communication"
+}

@@ -3,26 +3,22 @@ package org.opencds.cqf.fhir.cr.inputparameters.r5;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Encounter;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,64 +27,31 @@ import org.slf4j.LoggerFactory;
  * This class provides the default parameters passed into an operation as CQL Resource parameters
  * for evaluation. e.g. "%subject"
  */
-public class InputParameterResolver implements IInputParameterResolver {
+public class InputParameterResolver extends BaseInputParameterResolver {
     private static final Logger logger = LoggerFactory.getLogger(InputParameterResolver.class);
 
-    private final String subjectId;
-    private final String encounterId;
-    private final String practitionerId;
     private final Parameters parameters;
-    private final Repository repository;
 
     public InputParameterResolver(
             Repository repository,
-            String subjectId,
-            String encounterId,
-            String practitionerId,
+            IIdType subjectId,
+            IIdType encounterId,
+            IIdType practitionerId,
             IBaseParameters parameters,
             Boolean useServerData,
             IBaseBundle bundle) {
-        this.subjectId = subjectId;
-        this.encounterId = encounterId;
-        this.practitionerId = practitionerId;
-        Repository bundleRepository = null;
-        if (bundle != null) {
-            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), bundle);
-        }
-        this.repository = resolveRepository(useServerData, repository, bundleRepository);
+        super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
         this.parameters = resolveParameters(parameters);
     }
 
-    private Repository resolveRepository(
-            Boolean useServerData, Repository serverRepository, Repository bundleRepository) {
-        if (bundleRepository == null) {
-            return serverRepository;
-        } else {
-            return Boolean.TRUE.equals(useServerData)
-                    ? new FederatedRepository(serverRepository, bundleRepository)
-                    : bundleRepository;
-        }
-    }
-
-    private FhirContext fhirContext() {
-        return repository.fhirContext();
-    }
-
-    private <R extends IBaseResource> R readRepository(Class<R> resourceType, String id) {
-        try {
-            return repository.read(resourceType, new IdType(id), null);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Parameters resolveParameters(IBaseParameters baseParameters) {
+    @Override
+    protected final Parameters resolveParameters(IBaseParameters baseParameters) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
         }
-        var subjectType = subjectId.contains("/") ? subjectId.split("/")[0] : "Patient";
-        var subjectClass = fhirContext().getResourceDefinition(subjectType).getImplementingClass();
+        var subjectClass =
+                fhirContext().getResourceDefinition(subjectId.fhirType()).getImplementingClass();
         var subject = readRepository(subjectClass, subjectId);
         if (subject != null) {
             params.addParameter(part("%subject", (Resource) subject));

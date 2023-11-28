@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.cr.questionnaire.common;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.utility.Constants;
 
+@SuppressWarnings("rawtypes")
 public class ExtensionBuilders {
-    ExtensionBuilders() {}
+    private ExtensionBuilders() {}
 
     public static final SimpleEntry<String, String> QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION =
             new SimpleEntry<>(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR, Constants.CQL_ENGINE_DEVICE);
@@ -19,6 +22,23 @@ public class ExtensionBuilders {
 
     public static SimpleEntry<String, String> dtrQuestionnaireResponseExtension(String questionnaireId) {
         return new SimpleEntry<>(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE, "#" + questionnaireId);
+    }
+
+    public static IBaseExtension build(FhirVersionEnum fhirVersion, SimpleEntry<String, String> entry) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.Extension(
+                        entry.getKey(), new org.hl7.fhir.dstu3.model.Reference(entry.getValue()));
+            case R4:
+                return new org.hl7.fhir.r4.model.Extension(
+                        entry.getKey(), new org.hl7.fhir.r4.model.Reference(entry.getValue()));
+            case R5:
+                return new org.hl7.fhir.r5.model.Extension(
+                        entry.getKey(), new org.hl7.fhir.r5.model.Reference(entry.getValue()));
+
+            default:
+                return null;
+        }
     }
 
     public static org.hl7.fhir.dstu3.model.Extension buildDstu3(SimpleEntry<String, String> entry) {

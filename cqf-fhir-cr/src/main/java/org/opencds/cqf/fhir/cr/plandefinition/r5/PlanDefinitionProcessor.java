@@ -466,10 +466,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                             : SearchHelper.searchRepositoryByCanonical(repository, definition));
             result = this.activityDefinitionProcessor.apply(
                     activityDefinition,
-                    subjectId,
-                    encounterId,
-                    practitionerId,
-                    organizationId,
+                    subjectId.getValue(),
+                    encounterId.getValue(),
+                    practitionerId.getValue(),
+                    organizationId.getValue(),
                     userType,
                     userLanguage,
                     userTaskContext,
@@ -612,7 +612,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         valueSet -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
                 var populatedQuestionnaire = questionnaireProcessor.prePopulate(
-                        toPopulate, subjectId, this.parameters, additionalData, libraryEngine);
+                        toPopulate, subjectId.getValue(), this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
                     requestOrchestration.addContained(populatedQuestionnaire);
                 } else {
@@ -731,7 +731,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 List<IBase> result = null;
                 try {
                     result = libraryEngine.resolveExpression(
-                            subjectId,
+                            subjectId.getIdPart(),
                             getCqfExpression(
                                     dynamicValue.getExpression(),
                                     defaultLibraryUrl,
@@ -765,7 +765,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 IBase result = null;
                 try {
                     var results = libraryEngine.resolveExpression(
-                            subjectId,
+                            subjectId.getIdPart(),
                             getCqfExpression(
                                     condition.getExpression(),
                                     defaultLibraryUrl,

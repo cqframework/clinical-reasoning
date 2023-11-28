@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "requestgroup-test",
+  "name": "RequestGroup_Test",
+  "title": "CreateRequestGroup",
+  "status": "draft",
+  "description": "Create the request group.",
+  "kind": "RequestGroup"
+}

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -17,7 +18,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public MedicationRequest resolve(
-            String subjectId, String encounterId, String practitionerId, String organizationId) {
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.DRAFT);

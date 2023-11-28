@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,5 +28,5 @@ public abstract class BaseRequestResourceResolver {
     // }
 
     public abstract IBaseResource resolve(
-            String subjectId, String encounterId, String practitionerId, String organizationId);
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId);
 }

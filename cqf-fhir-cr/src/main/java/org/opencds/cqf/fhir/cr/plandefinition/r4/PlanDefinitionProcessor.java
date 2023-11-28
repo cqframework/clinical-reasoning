@@ -57,8 +57,8 @@ import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.inputparameters.r4.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.generator.questionnaireitem.QuestionnaireItemGenerator;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.r4.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
@@ -534,10 +534,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                             : SearchHelper.searchRepositoryByCanonical(repository, definition));
             result = this.activityDefinitionProcessor.apply(
                     activityDefinition,
-                    subjectId,
-                    encounterId,
-                    practitionerId,
-                    organizationId,
+                    subjectId.getValue(),
+                    encounterId == null ? null : encounterId.getValue(),
+                    practitionerId == null ? null : practitionerId.getValue(),
+                    organizationId == null ? null : organizationId.getValue(),
                     userType,
                     userLanguage,
                     userTaskContext,
@@ -678,14 +678,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         valueSet -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
                 var populatedQuestionnaire = questionnaireProcessor.prePopulate(
-                        toPopulate, subjectId, this.parameters, additionalData, libraryEngine);
+                        toPopulate, subjectId.getIdPart(), this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
-                    requestGroup.addContained(populatedQuestionnaire);
+                    requestGroup.addContained((Resource) populatedQuestionnaire);
                 } else {
                     requestResources.add(populatedQuestionnaire);
                 }
-                task.setFocus(new Reference(
-                        new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), populatedQuestionnaire.getIdPart())));
+                task.setFocus(new Reference(new IdType(
+                        FHIRAllTypes.QUESTIONNAIRE.toCode(),
+                        populatedQuestionnaire.getIdElement().getIdPart())));
                 task.setFor(requestGroup.getSubject());
             }
         }
@@ -796,10 +797,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         var inputParams = inputParameterResolver.resolveInputParameters(action.getInput());
         action.getDynamicValue().forEach(dynamicValue -> {
             if (dynamicValue.hasExpression()) {
-                List<IBase> result = null;
+                // List<IBase> result = null;
                 try {
-                    result = libraryEngine.resolveExpression(
-                            subjectId,
+                    var result = libraryEngine.resolveExpression(
+                            subjectId.getIdPart(),
                             getCqfExpression(
                                     dynamicValue.getExpression(),
                                     defaultLibraryUrl,
@@ -830,7 +831,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 IBase result = null;
                 try {
                     var results = libraryEngine.resolveExpression(
-                            subjectId,
+                            subjectId.getIdPart(),
                             getCqfExpression(
                                     condition.getExpression(),
                                     defaultLibraryUrl,

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 import org.hl7.fhir.dstu2016may.model.Task;
 import org.hl7.fhir.dstu2016may.model.Task.TaskStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
@@ -14,7 +15,8 @@ public class CustomActivityResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public IBaseResource resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public IBaseResource resolve(
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         // Do custom logic
 
         var task = new Task();

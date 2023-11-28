@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class ProcedureRequestResolver extends BaseRequestResourceResolver {
@@ -16,7 +17,7 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public ProcedureRequest resolve(
-            String subjectId, String encounterId, String practitionerId, String organizationId) {
+            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         // status, intent, code, and subject are required
         var procedureRequest = new ProcedureRequest();
         procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.DRAFT);

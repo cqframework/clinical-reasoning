@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "procedure-test",
+  "name": "Procedure_Test",
+  "title": "CreateProcedure",
+  "status": "draft",
+  "description": "Create the procedure.",
+  "kind": "Procedure"
+}

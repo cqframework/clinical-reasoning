@@ -13,6 +13,7 @@ import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
@@ -34,7 +35,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.r5.helpers.TestingHelper;
 class ElementHasCqfExpressionTest {
     static final String TYPE_CODE = "typeCode";
     static final String PATH_VALUE = "pathValue";
-    static final String PATIENT_ID = "patientId";
+    static final IdType PATIENT_ID = new IdType("Patient", "patientId");
     static final String EXPRESSION_EXPRESSION = "expressionExpression";
     static final String EXPRESSION_LANGUAGE = "expressionLanguage";
     static final String EXPRESSION_REFERENCE = "expressionReference";
@@ -48,7 +49,7 @@ class ElementHasCqfExpressionTest {
 
     @BeforeEach
     void setUp() {
-        myFixture.patientId = PATIENT_ID;
+        myFixture.subjectId = PATIENT_ID;
     }
 
     @Test
@@ -63,7 +64,7 @@ class ElementHasCqfExpressionTest {
         doReturn(expected)
                 .when(libraryEngine)
                 .getExpressionResult(
-                        PATIENT_ID,
+                        PATIENT_ID.getIdPart(),
                         EXPRESSION_EXPRESSION,
                         EXPRESSION_LANGUAGE,
                         EXPRESSION_REFERENCE,
@@ -74,7 +75,7 @@ class ElementHasCqfExpressionTest {
         // validate
         verify(libraryEngine)
                 .getExpressionResult(
-                        PATIENT_ID,
+                        PATIENT_ID.getIdPart(),
                         EXPRESSION_EXPRESSION,
                         EXPRESSION_LANGUAGE,
                         EXPRESSION_REFERENCE,

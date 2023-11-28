@@ -251,12 +251,12 @@ public class CqlFhirParametersConverter {
     }
 
     public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
+        Map<String, Object> parameterMap = new HashMap<>();
         List<CqlParameterDefinition> cqlParameterDefinitions = this.toCqlParameterDefinitions(parameters);
         if (cqlParameterDefinitions == null || cqlParameterDefinitions.isEmpty()) {
-            return Collections.emptyMap();
+            return parameterMap;
         }
 
-        Map<String, Object> parameterMap = new HashMap<>();
         for (CqlParameterDefinition def : cqlParameterDefinitions) {
             parameterMap.put(def.getName(), def.getValue());
         }

@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Expression;
@@ -17,14 +18,14 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasCqfExpression {
-    protected String patientId;
+    protected IIdType subjectId;
     protected IBaseBundle bundle;
     protected IBaseParameters parameters;
     protected LibraryEngine libraryEngine;
 
     public ElementHasCqfExpression(
-            String patientId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-        this.patientId = patientId;
+            IIdType subjectId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+        this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
         this.libraryEngine = libraryEngine;
@@ -57,7 +58,7 @@ public class ElementHasCqfExpression {
 
     protected final List<IBase> getExpressionResults(Expression expression) {
         return libraryEngine.getExpressionResult(
-                patientId,
+                subjectId.getIdPart(),
                 expression.getExpression(),
                 expression.getLanguage(),
                 expression.getReference(),

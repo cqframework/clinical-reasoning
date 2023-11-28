@@ -177,7 +177,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         this.questionnaire = new Questionnaire();
         this.questionnaire.setId(new IdType(FHIRAllTypes.QUESTIONNAIRE.toCode(), planDefinition.getIdPart()));
         this.questionnaireItemGenerator =
-                QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle, libraryEngine);
+                QuestionnaireItemGenerator.of(repository, subjectId.getValue(), parameters, bundle, libraryEngine);
         this.inputParameterResolver = new InputParameterResolver(
                 repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
 
@@ -486,10 +486,10 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                             : SearchHelper.searchRepositoryByCanonical(repository, definition));
             result = this.activityDefinitionProcessor.apply(
                     activityDefinition,
-                    subjectId,
-                    encounterId,
-                    practitionerId,
-                    organizationId,
+                    subjectId.getValue(),
+                    encounterId == null ? null : encounterId.getValue(),
+                    practitionerId == null ? null : practitionerId.getValue(),
+                    organizationId == null ? null : organizationId.getValue(),
                     userType,
                     userLanguage,
                     userTaskContext,
@@ -632,7 +632,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                         valueSet -> additionalData.addEntry(new Bundle.BundleEntryComponent().setResource(valueSet)));
 
                 var populatedQuestionnaire = questionnaireProcessor.prePopulate(
-                        toPopulate, subjectId, this.parameters, additionalData, libraryEngine);
+                        toPopulate, subjectId.getValue(), this.parameters, additionalData, libraryEngine);
                 if (Boolean.TRUE.equals(containResources)) {
                     requestGroup.addContained(populatedQuestionnaire);
                 } else {
@@ -749,7 +749,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 List<IBase> result = null;
                 try {
                     result = libraryEngine.resolveExpression(
-                            subjectId,
+                            subjectId.getIdPart(),
                             new CqfExpression(
                                     dynamicValue.getLanguage(), dynamicValue.getExpression(), defaultLibraryUrl),
                             inputParams,
@@ -778,7 +778,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 IBase result = null;
                 try {
                     var results = libraryEngine.resolveExpression(
-                            subjectId,
+                            subjectId.getIdPart(),
                             new CqfExpression(condition.getLanguage(), condition.getExpression(), defaultLibraryUrl),
                             inputParams,
                             bundle,

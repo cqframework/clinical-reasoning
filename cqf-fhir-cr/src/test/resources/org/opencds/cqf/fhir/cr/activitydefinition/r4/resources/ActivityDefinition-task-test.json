@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "task-test",
+  "name": "Task_Test",
+  "title": "CreateTask",
+  "status": "draft",
+  "description": "Create the task.",
+  "kind": "Task"
+}

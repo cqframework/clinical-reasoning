@@ -15,6 +15,19 @@ public class Ids {
     private Ids() {}
 
     /**
+     * Ensures the id contains the resource type
+     *
+     * @param id the String representation of the id
+     * @param resourceType the type of the resource
+     * @return the id
+     */
+    public static String ensureIdType(String id, String resourceType) {
+        checkNotNull(id);
+        checkNotNull(resourceType);
+        return id.contains("/") ? id : String.format("%s/%s", resourceType, id);
+    }
+
+    /**
      * Creates the appropriate IIdType for a given ResourceTypeClass
      *
      * @param <ResourceType> an IBase type

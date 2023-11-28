@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.inputparameters;
 
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class InputParameterResolverFactory {
@@ -9,9 +10,9 @@ public class InputParameterResolverFactory {
     @SuppressWarnings("unchecked")
     public static <T extends IInputParameterResolver> T create(
             Repository repository,
-            String subjectId,
-            String encounterId,
-            String practitionerId,
+            IIdType subjectId,
+            IIdType encounterId,
+            IIdType practitionerId,
             IBaseParameters parameters,
             Boolean useServerData,
             IBaseBundle bundle) {

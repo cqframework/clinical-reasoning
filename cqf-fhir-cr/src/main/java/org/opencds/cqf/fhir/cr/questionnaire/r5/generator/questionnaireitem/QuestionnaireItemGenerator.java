@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Expression;
@@ -28,7 +29,7 @@ public class QuestionnaireItemGenerator {
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
     protected final Repository repository;
     protected final LibraryEngine libraryEngine;
-    protected final String patientId;
+    protected final IIdType subjectId;
     protected final IBaseBundle bundle;
     protected final IBaseParameters parameters;
     protected final QuestionnaireItemService questionnaireItemService;
@@ -38,17 +39,17 @@ public class QuestionnaireItemGenerator {
 
     public static QuestionnaireItemGenerator of(
             Repository repository,
-            String patientId,
+            IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
         QuestionnaireItemService questionnaireItemService = new QuestionnaireItemService();
         NestedQuestionnaireItemService nestedQuestionnaireItemService =
-                NestedQuestionnaireItemService.of(repository, patientId, parameters, bundle, libraryEngine);
+                NestedQuestionnaireItemService.of(repository, subjectId, parameters, bundle, libraryEngine);
         return new QuestionnaireItemGenerator(
                 repository,
                 libraryEngine,
-                patientId,
+                subjectId,
                 parameters,
                 bundle,
                 questionnaireItemService,
@@ -58,19 +59,19 @@ public class QuestionnaireItemGenerator {
     QuestionnaireItemGenerator(
             Repository repository,
             LibraryEngine libraryEngine,
-            String patientId,
+            IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             QuestionnaireItemService questionnaireItemService,
             NestedQuestionnaireItemService nestedQuestionnaireItemService) {
         this.repository = repository;
         this.libraryEngine = libraryEngine;
-        this.patientId = patientId;
+        this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
         this.questionnaireItemService = questionnaireItemService;
         this.nestedQuestionnaireItemService = nestedQuestionnaireItemService;
-        this.extensionResolver = new ExtensionResolver(patientId, parameters, bundle, libraryEngine);
+        this.extensionResolver = new ExtensionResolver(subjectId, parameters, bundle, libraryEngine);
     }
 
     public Questionnaire.QuestionnaireItemComponent generateItem(DataRequirement actionInput, int itemCount) {
@@ -100,7 +101,7 @@ public class QuestionnaireItemGenerator {
             if (extValue instanceof Expression) {
                 var expression = (Expression) extValue;
                 var results = libraryEngine.getExpressionResult(
-                        patientId,
+                        subjectId.getIdPart(),
                         expression.getExpression(),
                         expression.getLanguage(),
                         expression.getReference(),

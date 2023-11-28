@@ -159,7 +159,7 @@ public class ActivityDefinitionProcessor {
     }
 
     public <R extends IBaseResource> IBaseResource apply(
-            R activityDefinition,
+            IBaseResource activityDefinition,
             String subjectId,
             String encounterId,
             String practitionerId,

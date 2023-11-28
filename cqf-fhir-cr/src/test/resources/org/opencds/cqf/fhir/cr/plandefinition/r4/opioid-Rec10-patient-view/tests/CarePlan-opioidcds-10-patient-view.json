@@ -19,10 +19,10 @@
       "status": "draft",
       "intent": "proposal",
       "subject": {
-        "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+        "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
       },
       "encounter": {
-        "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+        "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
       },
       "action": [
         {
@@ -124,7 +124,7 @@
         ]
       },
       "subject": {
-        "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+        "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
       }
     },
     {
@@ -153,10 +153,10 @@
   "status": "draft",
   "intent": "proposal",
   "subject": {
-    "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+    "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
   },
   "encounter": {
-    "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+    "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
   },
   "activity": [
     {

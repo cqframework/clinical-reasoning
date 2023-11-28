@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Task;
@@ -13,7 +14,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Task resolve(String subjectId, String encounterId, String practitionerId, String organizationId) {
+    public Task resolve(IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
         var task = new Task();
         if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {
             var value = activityDefinition.getExtensionByUrl(TARGET_STATUS_URL).getValue();

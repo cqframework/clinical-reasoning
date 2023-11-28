@@ -9,7 +9,6 @@ public class ItemValueTransformer {
                     .getCoding()
                     .get(0);
         }
-
         return value;
     }
 

@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -14,11 +16,15 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class BaseQuestionnaireProcessor<T> {
     protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
+
+    public static final List<String> INPUT_EXTENSION_LIST =
+            Arrays.asList(Constants.CPG_INPUT_DESCRIPTION, Constants.CPG_FEATURE_EXPRESSION);
 
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;

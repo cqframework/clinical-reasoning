@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.generator.questionnaireitem;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.BaseQuestionnaireProcessor.INPUT_EXTENSION_LIST;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.r4.model.DataRequirement;
@@ -25,7 +27,7 @@ public class QuestionnaireItemService {
     protected List<Extension> copyExtensions(List<Extension> inputExtensions, List<Extension> profileExtensions) {
         var extensions = new ArrayList<Extension>();
         inputExtensions.forEach(ext -> {
-            if (ext.getUrl().equals(Constants.CPG_INPUT_DESCRIPTION)
+            if (INPUT_EXTENSION_LIST.contains(ext.getUrl())
                     && extensions.stream().noneMatch(e -> e.getUrl().equals(ext.getUrl()))) {
                 extensions.add(ext);
             }

@@ -46,8 +46,8 @@ public class R4MeasureProcessor {
     public R4MeasureProcessor(
             Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
         this.repository = Objects.requireNonNull(repository);
-        this.measureEvaluationOptions =
-                measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
+        this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
+                : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
     }
 
@@ -71,8 +71,7 @@ public class R4MeasureProcessor {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-        var subjects =
-                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
         return this.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
@@ -124,7 +123,8 @@ public class R4MeasureProcessor {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
             context.getState().setParameters(lib.getLibrary(), paramMap);
             // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // Note: this may not be the optimal method (e.g. libraries with the same
+            // parameter name, but different
             // values)
             if (lib.getLibrary().getIncludes() != null) {
                 lib.getLibrary()
@@ -177,9 +177,9 @@ public class R4MeasureProcessor {
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
         return new Interval(
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                DateHelper.resolveRequestDate(periodStart, true),
                 true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
+                DateHelper.resolveRequestDate(periodEnd, false),
                 true);
     }
 

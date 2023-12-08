@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.helper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Date;
 import org.junit.jupiter.api.Test;
 
 // TODO: These tests are only partially complete. We need to actually verify that resolved dates are
@@ -13,10 +12,10 @@ public class DateHelperTest {
     @Test
     public void testResolveRequestDateWithTime() throws Exception {
         String date = "2019-01-17T12:30:00";
-        Date resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
 
-        Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
     }
@@ -24,10 +23,10 @@ public class DateHelperTest {
     @Test
     public void testResolveRequestDateOffset() throws Exception {
         String date = "2019-01-01T22:00:00.0-06:00";
-        Date resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
 
-        Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
     }
@@ -35,10 +34,10 @@ public class DateHelperTest {
     @Test
     public void testResolveRequestDateWithZOffset() throws Exception {
         String date = "2017-01-01T00:00:00.000Z";
-        Date resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
 
-        Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
         assertEquals(resolvedDateStart, resolvedDateEnd);
     }
@@ -46,20 +45,20 @@ public class DateHelperTest {
     @Test
     public void testResolveRequestOnlyDate() throws Exception {
         String date = "2017-01-01";
-        Date resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
 
-        Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
     }
 
     @Test
     public void testResolveRequestOnlyYear() throws Exception {
         String date = "2017";
-        Date resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
 
-        Date resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertTrue(resolvedDateEnd != null);
     }
 }

@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -41,8 +40,8 @@ public class Dstu3MeasureProcessor {
     public Dstu3MeasureProcessor(
             Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
         this.repository = Objects.requireNonNull(repository);
-        this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
-                : MeasureEvaluationOptions.defaultOptions();
+        this.measureEvaluationOptions =
+                measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
     }
 
@@ -123,7 +122,8 @@ public class Dstu3MeasureProcessor {
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 
-        var subjects = subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects =
+                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
         Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure);
         return measureEvaluator.evaluate(evalType, subjects, measurementPeriod);

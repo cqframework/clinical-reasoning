@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -46,8 +45,8 @@ public class R4MeasureProcessor {
     public R4MeasureProcessor(
             Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
         this.repository = Objects.requireNonNull(repository);
-        this.measureEvaluationOptions = measureEvaluationOptions != null ? measureEvaluationOptions
-                : MeasureEvaluationOptions.defaultOptions();
+        this.measureEvaluationOptions =
+                measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
     }
 
@@ -71,7 +70,8 @@ public class R4MeasureProcessor {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-        var subjects = subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects =
+                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
 
         return this.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);

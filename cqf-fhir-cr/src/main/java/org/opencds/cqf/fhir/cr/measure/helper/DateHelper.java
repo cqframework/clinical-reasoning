@@ -6,15 +6,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.opencds.cqf.cql.engine.runtime.DateTime;
-import org.w3._1999.xhtml.Ins;
 
 /**
  * Helper class to resolve measurement period start and end dates. If a timezone
@@ -80,8 +76,7 @@ public class DateHelper {
         }
 
         // Set day (if defined, otherwise earliest if start, latest if end)
-        if (dateVals.size() > 2)
-            calendar.set(Calendar.DAY_OF_MONTH, dateVals.get(2));
+        if (dateVals.size() > 2) calendar.set(Calendar.DAY_OF_MONTH, dateVals.get(2));
         else {
             if (start) {
                 calendar.set(Calendar.DAY_OF_MONTH, 1);

@@ -2,42 +2,48 @@ package org.opencds.cqf.fhir.cr.measure.helper;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.opencds.cqf.cql.engine.runtime.DateTime;
 
 /**
- * Helper class to resolve measurement period start and end dates. If a timezone is specified in a
+ * Helper class to resolve measurement period start and end dates. If a timezone
+ * is specified in a
  * datetime, it's used. If not the timezone of the local system is used.
  */
 public class DateHelper {
-    public static Date resolveRequestDate(String date, boolean start) {
+    public static DateTime resolveRequestDate(String date, boolean start) {
         // ISO Instance Format
         if (date.contains("Z")) {
-            return Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date)));
+            var offset = Instant.parse(date).atOffset(ZoneOffset.UTC);
+            return new DateTime(offset);
         }
+
         // ISO Offset Format
         boolean isOffsetDateString = date.contains("T") && date.contains(".") && date.contains("-");
         if (isOffsetDateString) {
-            return Date.from(Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)));
+            var offset = OffsetDateTime.parse(date, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return new DateTime(offset);
         }
 
         // Local DateTime
         if (date.contains("T")) {
-            TemporalAccessor ta = DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse(date);
-            LocalDateTime ld = LocalDateTime.from(ta);
-            return Date.from(ld.atZone(ZoneId.systemDefault()).toInstant());
+            var offset = LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    .atZone(ZoneId.systemDefault())
+                    .toOffsetDateTime();
+            return new DateTime(offset);
         }
 
         return resolveDate(start, date);
     }
 
-    private static Date resolveDate(boolean start, String dateString) {
+    private static DateTime resolveDate(boolean start, String dateString) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
 
@@ -95,6 +101,8 @@ public class DateHelper {
             calendar.set(Calendar.MILLISECOND, 999);
         }
 
-        return Date.from(calendar.toInstant());
+        // TODO: Seems like we might want set the precision appropriately here?
+        var offset = calendar.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+        return new DateTime(offset);
     }
 }

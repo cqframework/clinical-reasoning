@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -59,7 +58,8 @@ public class Dstu3MeasureProcessor {
                 measure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
     }
 
-    // NOTE: Do not make a top-level function that takes a Measure resource. This ensures that
+    // NOTE: Do not make a top-level function that takes a Measure resource. This
+    // ensures that
     // the repositories are set up correctly.
     protected MeasureReport evaluateMeasure(
             Measure measure,
@@ -98,7 +98,8 @@ public class Dstu3MeasureProcessor {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
             context.getState().setParameters(lib.getLibrary(), paramMap);
             // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // Note: this may not be the optimal method (e.g. libraries with the same
+            // parameter name, but different
             // values)
             if (lib.getLibrary().getIncludes() != null) {
                 lib.getLibrary()
@@ -147,9 +148,9 @@ public class Dstu3MeasureProcessor {
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
         return new Interval(
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                DateHelper.resolveRequestDate(periodStart, true),
                 true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
+                DateHelper.resolveRequestDate(periodEnd, false),
                 true);
     }
 

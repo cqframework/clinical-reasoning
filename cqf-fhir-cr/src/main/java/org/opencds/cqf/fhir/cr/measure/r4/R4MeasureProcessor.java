@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -124,7 +123,8 @@ public class R4MeasureProcessor {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
             context.getState().setParameters(lib.getLibrary(), paramMap);
             // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // Note: this may not be the optimal method (e.g. libraries with the same
+            // parameter name, but different
             // values)
             if (lib.getLibrary().getIncludes() != null) {
                 lib.getLibrary()
@@ -177,9 +177,9 @@ public class R4MeasureProcessor {
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
         return new Interval(
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                DateHelper.resolveRequestDate(periodStart, true),
                 true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
+                DateHelper.resolveRequestDate(periodEnd, false),
                 true);
     }
 

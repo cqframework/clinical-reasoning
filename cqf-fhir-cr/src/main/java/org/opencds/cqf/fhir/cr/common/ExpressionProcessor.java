@@ -1,14 +1,15 @@
-package org.opencds.cqf.fhir.cr.questionnaire.populate;
+package org.opencds.cqf.fhir.cr.common;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cql.CqfExpression;
-import org.opencds.cqf.fhir.cr.questionnaire.common.PopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
@@ -20,29 +21,20 @@ public class ExpressionProcessor {
             "Error encountered evaluating expression (%s) for item (%s): %s";
 
     @SuppressWarnings("unchecked")
-    public List<IBase> getExpressionResult(PopulateRequest request, IBaseBackboneElement item)
+    public List<IBase> getExpressionResultForItem(IOperationRequest request, IBaseBackboneElement item)
             throws ResolveExpressionException {
         var expression = getInitialExpression(request, item);
         var itemLinkId = ((IPrimitiveType<String>) request.getModelResolver().resolvePath(item, "linkId")).getValue();
         return getExpressionResult(request, expression, itemLinkId);
     }
 
-    public List<IBase> getExpressionResult(PopulateRequest request, CqfExpression expression, String itemLinkId)
+    public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression, String itemLinkId)
             throws ResolveExpressionException {
         if (expression == null) {
             return new ArrayList<>();
         }
         try {
-            return request
-                    .getLibraryEngine()
-                    .resolveExpression(
-                            request.getSubjectId().getIdPart(),
-                            expression,
-                            request.getParameters(),
-                            request.getBundle())
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            return getExpressionResult(request, expression);
         } catch (Exception ex) {
             final String message =
                     String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
@@ -50,8 +42,21 @@ public class ExpressionProcessor {
         }
     }
 
-    public CqfExpression getCqfExpression(PopulateRequest request, IBaseBackboneElement element, String extensionUrl) {
-        var extension = element.getExtension().stream()
+    public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression) {
+        return request
+                .getLibraryEngine()
+                .resolveExpression(
+                        request.getSubjectId().getIdPart(),
+                        expression,
+                        request.getParameters(),
+                        request.getBundle())
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(IOperationRequest request, List<E> extensions, String extensionUrl) {
+        var extension = extensions.stream()
                 .filter(e -> e.getUrl().equals(extensionUrl))
                 .findFirst()
                 .orElse(null);
@@ -60,7 +65,7 @@ public class ExpressionProcessor {
         }
         switch (request.getFhirVersion()) {
             case DSTU3:
-                var languageExtension = element.getExtension().stream()
+                var languageExtension = extensions.stream()
                         .filter(e -> e.getUrl().equals(Constants.CQF_EXPRESSION_LANGUAGE))
                         .findFirst()
                         .orElse(null);
@@ -82,29 +87,13 @@ public class ExpressionProcessor {
         }
     }
 
-    protected CqfExpression getInitialExpression(PopulateRequest request, IBaseBackboneElement item) {
+    protected CqfExpression getInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
         if (!item.hasExtension()) {
             return null;
         }
-        var cqfExpression = getCqfExpression(request, item, Constants.CQF_EXPRESSION);
+        var cqfExpression = getCqfExpression(request, item.getExtension(), Constants.CQF_EXPRESSION);
         return cqfExpression != null
                 ? cqfExpression
-                : getCqfExpression(request, item, Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
-        // if (cqfExpression != null) {
-        //     return cqfExpression;
-        // }
-        // var extensions = item.getExtension();
-        // var cqfExpressionExt = extensions.stream().filter(e ->
-        // e.getUrl().equals(Constants.CQF_EXPRESSION)).findFirst().orElse(null);
-        // if (cqfExpressionExt != null) {
-        //     return getCqfExpression(request, cqfExpressionExt);
-        // }
-        // return getCqfExpression(request, item, Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
-        // var initialExpressionExt = extensions.stream().filter(e ->
-        // e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)).findFirst().orElse(null);
-        // if (initialExpressionExt != null) {
-        //     return getCqfExpression(request, cqfExpressionExt);
-        // }
-        // return null;
+                : getCqfExpression(request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
     }
 }

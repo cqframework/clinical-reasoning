@@ -18,7 +18,8 @@ public class EnrollmentRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var enrollmentRequest = new EnrollmentRequest();
 
-        return null;
+        return enrollmentRequest;
     }
 }

@@ -24,6 +24,14 @@
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
       "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
+      "valueExpression": {
+        "language": "text/cql.identifier",
+        "expression": "ClaimResource",
+        "reference": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+      }
     }
   ],
   "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim",

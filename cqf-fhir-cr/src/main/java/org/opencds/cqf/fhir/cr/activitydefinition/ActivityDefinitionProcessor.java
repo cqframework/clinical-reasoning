@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -13,20 +12,21 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.ResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
-@SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
+import ca.uhn.fhir.context.FhirContext;
+
 public class ActivityDefinitionProcessor {
     // private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
     protected final EvaluationSettings evaluationSettings;
+    protected final ResourceResolver resourceResolver;
     protected final IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected ExtensionResolver extensionResolver;
-    protected ResourceResolver resourceResolver;
-
+    
     public ActivityDefinitionProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault(), null);
     }
@@ -39,8 +39,8 @@ public class ActivityDefinitionProcessor {
             Repository repository,
             EvaluationSettings evaluationSettings,
             IRequestResolverFactory requestResolverFactory) {
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         this.requestResolverFactory =
                 requestResolverFactory == null ? getDefaultRequestResolverFactory() : requestResolverFactory;

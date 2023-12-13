@@ -17,7 +17,8 @@ public class ClaimResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var claim = new Claim();
 
-        return null;
+        return claim;
     }
 }

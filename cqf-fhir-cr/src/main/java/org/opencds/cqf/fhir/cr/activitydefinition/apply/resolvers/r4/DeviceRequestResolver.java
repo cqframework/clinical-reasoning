@@ -18,7 +18,8 @@ public class DeviceRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var deviceRequest = new DeviceRequest();
 
-        return null;
+        return deviceRequest;
     }
 }

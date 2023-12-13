@@ -18,7 +18,8 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
         if (activityDefinition == null) {
             return null;
         }
+        var immunizationRecommendation = new ImmunizationRecommendation();
 
-        return null;
+        return immunizationRecommendation;
     }
 }

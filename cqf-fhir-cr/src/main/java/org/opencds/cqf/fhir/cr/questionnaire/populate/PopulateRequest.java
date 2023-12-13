@@ -1,22 +1,19 @@
-package org.opencds.cqf.fhir.cr.questionnaire.common;
+package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 
-public class PopulateRequest {
+import ca.uhn.fhir.context.FhirVersionEnum;
+
+public class PopulateRequest implements IOperationRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
@@ -25,6 +22,7 @@ public class PopulateRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+    private IBaseOperationOutcome operationOutcome;
 
     public PopulateRequest(
             IBaseResource questionnaire,
@@ -47,59 +45,57 @@ public class PopulateRequest {
         return questionnaire;
     }
 
+    @Override
     public IIdType getSubjectId() {
         return subjectId;
     }
 
+    @Override
     public IBaseBundle getBundle() {
         return bundle;
     }
 
+    @Override
     public IBaseParameters getParameters() {
         return parameters;
     }
 
+    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }
 
+    @Override
     public ModelResolver getModelResolver() {
         return modelResolver;
     }
 
+    @Override
     public FhirVersionEnum getFhirVersion() {
         return fhirVersion;
     }
 
+    @Override
     public String getDefaultLibraryUrl() {
         return defaultLibraryUrl;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public IBaseOperationOutcome getOperationOutcome() {
+        return operationOutcome;
+    }
+
+    @Override
+    public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
+        this.operationOutcome = operationOutcome;
+    }
+
+    @SuppressWarnings("unchecked")
     protected final String resolveDefaultLibraryUrl() {
-        var pathResult = modelResolver.resolvePath(questionnaire, "extension");
-        var libraryExt = (pathResult instanceof List ? (List<?>) pathResult : new ArrayList<>())
-                .stream()
-                        .map(e -> (IBaseExtension) e)
+        var libraryExt = getExtensions(questionnaire).stream()
                         .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
                         .findFirst()
                         .orElse(null);
         return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
-    }
-
-    public List<IBaseBackboneElement> getItems(IBase base) {
-        return resolvePathList(base, "item").stream()
-                .map(i -> (IBaseBackboneElement) i)
-                .collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<IBase> resolvePathList(IBase base, String path) {
-        var pathResult = this.modelResolver.resolvePath(base, path);
-        return pathResult instanceof List ? (List<IBase>) pathResult : new ArrayList<>();
-    }
-
-    public IBase resolvePath(IBase base, String path) {
-        return (IBase) this.modelResolver.resolvePath(base, path);
     }
 }

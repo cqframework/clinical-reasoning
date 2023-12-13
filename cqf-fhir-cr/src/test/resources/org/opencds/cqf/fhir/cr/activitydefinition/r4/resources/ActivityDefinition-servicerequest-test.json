@@ -5,5 +5,14 @@
   "title": "CreateServiceRequest",
   "status": "draft",
   "description": "Create the service request.",
-  "kind": "ServiceRequest"
+  "kind": "ServiceRequest",
+  "intent": "proposal",
+  "code": {
+    "coding": [
+      {
+        "system": "http://test/fhir/system",
+        "code": "Test"
+      }
+    ]
+  }
 }

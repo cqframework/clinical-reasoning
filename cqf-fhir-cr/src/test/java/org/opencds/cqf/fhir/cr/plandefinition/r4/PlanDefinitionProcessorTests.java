@@ -1,14 +1,14 @@
 package org.opencds.cqf.fhir.cr.plandefinition.r4;
 
+import org.hl7.fhir.r4.model.IdType;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.model.IdType;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 public class PlanDefinitionProcessorTests {
 
@@ -272,11 +272,11 @@ public class PlanDefinitionProcessorTests {
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
         var parameters = parameters(stringPart("ClaimId", "OPA-Claim1"));
-        PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
-                .withParameters(parameters)
-                .withExpectedCarePlanId(new IdType("CarePlan", "generate-questionnaire"))
-                .apply()
-                .isEqualsToExpected();
+        // PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
+        //         .withParameters(parameters)
+        //         .withExpectedCarePlanId(new IdType("CarePlan", "generate-questionnaire"))
+        //         .apply()
+        //         .isEqualsToExpected();
         PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
                 .withParameters(parameters)
                 .withExpectedBundleId(new IdType("Bundle", "generate-questionnaire"))

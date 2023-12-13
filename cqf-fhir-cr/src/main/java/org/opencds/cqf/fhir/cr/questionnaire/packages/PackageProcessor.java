@@ -1,13 +1,15 @@
 package org.opencds.cqf.fhir.cr.questionnaire.packages;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
-public class PackageProcessor {
+import ca.uhn.fhir.context.FhirVersionEnum;
+
+public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
@@ -18,7 +20,17 @@ public class PackageProcessor {
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
     }
 
-    public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, boolean isPut) {
+    @Override
+    public IBaseBundle packageResource(IBaseResource resource) {
+        return packageResource(resource, "POST");
+    }
+
+    @Override
+    public IBaseBundle packageResource(IBaseResource resource, String method) {
+        return packageQuestionnaire(resource, method.equals("PUT"));
+    }
+
+    protected IBaseBundle packageQuestionnaire(IBaseResource questionnaire, boolean isPut) {
         switch (fhirVersion) {
             case DSTU3:
                 return packageDstu3(questionnaire, isPut);

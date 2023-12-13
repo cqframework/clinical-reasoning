@@ -2,59 +2,19 @@ library OutpatientPriorAuthorizationPrepopulation version '1.0.0'
 
 using FHIR version '4.0.1'
 
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-
-
-
-
-include
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-FHIRHelpers
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-version
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-'4.0.001'
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-called
-
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-
-FHIRHelpers
+include FHIRHelpers version '4.0.001' called FHIRHelpers
 
 // include FHIRCommon version '4.0.1' called FHIRCommon
 // include FHIRHelpers version '4.0.1' called FHIRHelpers
 // valueset "AAN MCI Encounters Outpt and Care Plan": 'https://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1040'
 
-/* parameter EncounterId String */
 
 
 
-
-
-parameter
-// valueset "AAN MCI Encounters Outpt and Care Plan": 'https://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1040'
+parameter ClaimId String default '14703'
 
 /* parameter EncounterId String */
 
-ClaimId String default '14703'
 
 context Patient
 

@@ -1,32 +1,26 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.build;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang3.SerializationUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.cr.questionnaire.common.PopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PopulateProcessor {
+public class PopulateProcessor implements IPopulateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(PopulateProcessor.class);
     private final ProcessItem processItem;
     private final ProcessItemWithExtension processItemWithExtension;
     private final ProcessResponseItem processResponseItem;
-    IBaseOperationOutcome operationOutcome;
 
     public PopulateProcessor() {
         this(new ProcessItem(), new ProcessItemWithExtension(), new ProcessResponseItem());
@@ -41,6 +35,7 @@ public class PopulateProcessor {
         this.processResponseItem = processResponseItem;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
         final String questionnaireId = request.getQuestionnaire().getIdElement().getIdPart() + "-"
@@ -63,6 +58,7 @@ public class PopulateProcessor {
         return (R) populatedQuestionnaire;
     }
 
+    @Override
     public IBaseResource populate(PopulateRequest request) {
         final IBaseResource response = createQuestionnaireResponse(request);
         response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-"
@@ -86,11 +82,11 @@ public class PopulateProcessor {
     }
 
     protected void resolveOperationOutcome(PopulateRequest request, IBaseResource resource) {
-        var pathResult = request.getModelResolver().resolvePath(operationOutcome, "issue");
+        var pathResult = request.getModelResolver().resolvePath(request.getOperationOutcome(), "issue");
         var issues = (pathResult instanceof List ? (List<?>) pathResult : null);
         if (issues != null && !issues.isEmpty()) {
-            operationOutcome.setId("populate-outcome-" + resource.getIdElement().getIdPart());
-            request.getModelResolver().setValue(resource, "contained", Collections.singletonList(operationOutcome));
+            request.getOperationOutcome().setId("populate-outcome-" + resource.getIdElement().getIdPart());
+            request.getModelResolver().setValue(resource, "contained", Collections.singletonList(request.getOperationOutcome()));
             request.getModelResolver()
                     .setValue(
                             resource,
@@ -98,16 +94,8 @@ public class PopulateProcessor {
                             Collections.singletonList(build(
                                     request.getFhirVersion(),
                                     crmiMessagesExtension(
-                                            operationOutcome.getIdElement().getIdPart()))));
+                                            request.getOperationOutcome().getIdElement().getIdPart()))));
         }
-    }
-
-    protected void logException(FhirVersionEnum fhirVersion, String exceptionMessage) {
-        logger.error(exceptionMessage);
-        if (operationOutcome == null) {
-            this.operationOutcome = newOperationOutcome(fhirVersion);
-        }
-        addExceptionToOperationOutcome(operationOutcome, exceptionMessage);
     }
 
     protected List<IBaseBackboneElement> processItems(PopulateRequest request, List<IBaseBackboneElement> items) {
@@ -142,7 +130,8 @@ public class PopulateProcessor {
             return processItemWithExtension.processItem(request, item);
         } catch (ResolveExpressionException e) {
             // would return empty list if exception thrown
-            logException(request.getFhirVersion(), e.getMessage());
+            logger.error(e.getMessage());
+            request.logException(e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -152,7 +141,8 @@ public class PopulateProcessor {
             return processItem.processItem(request, item);
         } catch (ResolveExpressionException e) {
             // would return just the item.copy if exception thrown
-            logException(request.getFhirVersion(), e.getMessage());
+            logger.error(e.getMessage());
+            request.logException(e.getMessage());
             // return questionnaireItem.copy();
             return item;
         }
@@ -188,7 +178,8 @@ public class PopulateProcessor {
         try {
             return processResponseItem.processItems(request, items);
         } catch (Exception e) {
-            logException(request.getFhirVersion(), e.getMessage());
+            logger.error(e.getMessage());
+            request.logException(e.getMessage());
             return new ArrayList<>();
         }
     }

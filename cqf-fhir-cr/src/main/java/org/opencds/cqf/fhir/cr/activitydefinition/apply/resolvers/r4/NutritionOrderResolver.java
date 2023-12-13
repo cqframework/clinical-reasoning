@@ -18,7 +18,8 @@ public class NutritionOrderResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var nutritionOrder = new NutritionOrder();
 
-        return null;
+        return nutritionOrder;
     }
 }

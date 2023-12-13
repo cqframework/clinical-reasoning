@@ -1,13 +1,14 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.opencds.cqf.fhir.cr.questionnaire.common.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ProcessResponseItem {
     public ProcessResponseItem() {}

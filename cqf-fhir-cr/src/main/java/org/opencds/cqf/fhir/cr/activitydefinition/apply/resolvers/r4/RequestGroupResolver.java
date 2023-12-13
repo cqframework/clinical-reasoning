@@ -18,7 +18,8 @@ public class RequestGroupResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var requestGroup = new RequestGroup();
 
-        return null;
+        return requestGroup;
     }
 }

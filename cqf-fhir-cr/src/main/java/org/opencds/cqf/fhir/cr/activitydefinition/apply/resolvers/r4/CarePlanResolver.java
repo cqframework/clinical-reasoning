@@ -17,7 +17,8 @@ public class CarePlanResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var carePlan = new CarePlan();
 
-        return null;
+        return carePlan;
     }
 }

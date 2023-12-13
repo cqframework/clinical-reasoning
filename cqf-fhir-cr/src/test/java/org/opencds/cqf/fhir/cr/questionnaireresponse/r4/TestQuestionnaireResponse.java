@@ -1,26 +1,28 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.json.JSONException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 
 public class TestQuestionnaireResponse {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
@@ -43,8 +45,8 @@ public class TestQuestionnaireResponse {
         return jsonParser.parseResource(open(asset));
     }
 
-    public static QuestionnaireResponseProcessor buildProcessor(Repository repository) {
-        return new QuestionnaireResponseProcessor(repository);
+    public static org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor buildProcessor(Repository repository) {
+        return new org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor(repository);
     }
 
     /** Fluent interface starts here **/
@@ -117,7 +119,7 @@ public class TestQuestionnaireResponse {
             }
             var libraryEngine = new LibraryEngine(repository, evaluationSettings);
             return new GeneratedBundle(
-                    (Bundle) buildProcessor(repository).extract(questionnaireResponse, null, null, libraryEngine),
+                    (Bundle) buildProcessor(repository).extract(Eithers.forRight(questionnaireResponse), null, null, libraryEngine),
                     expectedBundle);
         }
     }

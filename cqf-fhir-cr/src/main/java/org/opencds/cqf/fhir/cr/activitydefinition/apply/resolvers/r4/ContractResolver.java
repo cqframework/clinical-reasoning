@@ -17,7 +17,8 @@ public class ContractResolver extends BaseRequestResourceResolver {
         if (activityDefinition == null) {
             return null;
         }
+        var contract = new Contract();
 
-        return null;
+        return contract;
     }
 }

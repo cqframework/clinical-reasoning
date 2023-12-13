@@ -1,9 +1,5 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import java.lang.reflect.InvocationTargetException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -18,7 +14,6 @@ import org.hl7.fhir.r4.model.DeviceRequest;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.EnrollmentRequest;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.NutritionOrder;
@@ -32,12 +27,11 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.VisionPrescription;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.AppointmentResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.AppointmentResponseResolver;
@@ -59,56 +53,32 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.SupplyReque
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.TaskResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.VisionPrescriptionResolver;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+
+import ca.uhn.fhir.context.FhirContext;
 
 @TestInstance(Lifecycle.PER_CLASS)
-@Disabled
 public class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-    // private final IParser parser = fhirContext.newJsonParser();
+    private final Class<? extends IBaseResource> activityDefinitionClass = ActivityDefinition.class;
     private final IIdType subjectId = Ids.newId(Patient.class, "patient123");
     private final IIdType practitionerId = Ids.newId(Practitioner.class, "practitioner123");
     private final IIdType encounterId = Ids.newId(Encounter.class, "encounter123");
     private final IIdType organizationId = Ids.newId(Organization.class, "org123");
 
-    private Repository repository;
-
-    @BeforeAll
-    public void setup() {
-        repository = new IGFileStructureRepository(
-                this.fhirContext,
-                this.getClass()
-                                .getProtectionDomain()
-                                .getCodeSource()
-                                .getLocation()
-                                .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/r4",
-                IGLayoutMode.TYPE_PREFIX,
-                EncodingEnum.JSON);
-    }
-
     @SuppressWarnings("unchecked")
     private <R extends IBaseResource> R testResolver(
-            String testId, Class<? extends BaseRequestResourceResolver> clazz, Class<R> expectedClass) {
-        // String actual = null;
-        // String expected = null;
-        IBaseResource result = null;
-        var activityDefinition = repository.read(ActivityDefinition.class, new IdType("ActivityDefinition", testId));
-        try {
-            var resolver = clazz.getConstructor(ActivityDefinition.class).newInstance(activityDefinition);
-            result = resolver.resolve(subjectId, practitionerId, encounterId, organizationId);
-            // actual = parser.encodeResourceToString(result);
-            // expected = parser.encodeResourceToString(repository.read(expectedClass, new IdType(testId)));
-        } catch (DataFormatException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InstantiationException
-                | NoSuchMethodException
-                | SecurityException
-                | InvocationTargetException e) {
-        }
+            String testId, Class<? extends BaseRequestResourceResolver> resolverClass, Class<R> expectedClass) {
+        var result = new Given().repositoryFor(fhirContext, "r4")
+            .resolverClasses(resolverClass, activityDefinitionClass)
+            .activityDefinition(testId)
+            .when()
+            .subjectId(subjectId)
+            .encounterId(encounterId)
+            .practitionerId(practitionerId)
+            .organizationId(organizationId)
+            .resolve();
         Assertions.assertNotNull(result);
-        // Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(expectedClass, (Class<R>) result.getClass());
 
         return (R) result;
     }

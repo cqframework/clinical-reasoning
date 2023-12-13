@@ -1,9 +1,10 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.r5;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasDefaultValue {

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.dstu3;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
@@ -9,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -24,10 +25,14 @@ public class ElementProcessor implements IElementProcessor {
         elementHasDefaultValue = new ElementHasDefaultValue();
         elementHasCqfExpression = new ElementHasCqfExpression();
     }
-    
+
     @Override
-    public IBaseBackboneElement processElement(IOperationRequest request,
-            ICompositeType baseElement, String profileUrl, String childLinkId, IBaseResource caseFeature) {
+    public IBaseBackboneElement processElement(
+            IOperationRequest request,
+            ICompositeType baseElement,
+            String profileUrl,
+            String childLinkId,
+            IBaseResource caseFeature) {
         var element = (ElementDefinition) baseElement;
         final QuestionnaireItemType itemType = getItemType(element);
         final QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profileUrl, element, childLinkId);

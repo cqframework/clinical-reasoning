@@ -17,7 +17,7 @@
 //     private final ModelResolver modelResolver;
 //     private final FhirVersionEnum fhirVersion;
 //     private final String defaultLibraryUrl;
-    
+
 //     public GenerateRequest(
 //             IIdType subjectId,
 //             IBaseParameters parameters,

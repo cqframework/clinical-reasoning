@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
@@ -54,8 +55,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.TaskResolve
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.VisionPrescriptionResolver;
 import org.opencds.cqf.fhir.utility.Ids;
 
-import ca.uhn.fhir.context.FhirContext;
-
 @TestInstance(Lifecycle.PER_CLASS)
 public class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -68,15 +67,16 @@ public class RequestResourceResolverTests {
     @SuppressWarnings("unchecked")
     private <R extends IBaseResource> R testResolver(
             String testId, Class<? extends BaseRequestResourceResolver> resolverClass, Class<R> expectedClass) {
-        var result = new Given().repositoryFor(fhirContext, "r4")
-            .resolverClasses(resolverClass, activityDefinitionClass)
-            .activityDefinition(testId)
-            .when()
-            .subjectId(subjectId)
-            .encounterId(encounterId)
-            .practitionerId(practitionerId)
-            .organizationId(organizationId)
-            .resolve();
+        var result = new Given()
+                .repositoryFor(fhirContext, "r4")
+                .resolverClasses(resolverClass, activityDefinitionClass)
+                .activityDefinition(testId)
+                .when()
+                .subjectId(subjectId)
+                .encounterId(encounterId)
+                .practitionerId(practitionerId)
+                .organizationId(organizationId)
+                .resolve();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(expectedClass, (Class<R>) result.getClass());
 

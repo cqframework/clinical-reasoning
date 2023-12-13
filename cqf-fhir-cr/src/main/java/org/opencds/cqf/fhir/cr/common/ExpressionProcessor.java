@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -46,16 +45,14 @@ public class ExpressionProcessor {
         return request
                 .getLibraryEngine()
                 .resolveExpression(
-                        request.getSubjectId().getIdPart(),
-                        expression,
-                        request.getParameters(),
-                        request.getBundle())
+                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getBundle())
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(IOperationRequest request, List<E> extensions, String extensionUrl) {
+    public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(
+            IOperationRequest request, List<E> extensions, String extensionUrl) {
         var extension = extensions.stream()
                 .filter(e -> e.getUrl().equals(extensionUrl))
                 .findFirst()

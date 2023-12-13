@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.dstu3;
 
 import java.util.List;
-
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
@@ -61,7 +60,6 @@ public class QuestionnaireTypeIsChoice {
 
     protected ValueSet getValueSet(ElementDefinition element) {
         final String valueSetUrl = element.getBinding().getValueSet().primitiveValue();
-        return (ValueSet)
-                SearchHelper.searchRepositoryByCanonical(repository, new StringType().setValue(valueSetUrl));
+        return (ValueSet) SearchHelper.searchRepositoryByCanonical(repository, new StringType().setValue(valueSetUrl));
     }
 }

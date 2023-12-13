@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.r4;
 
 import java.util.List;
-
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ElementDefinition;

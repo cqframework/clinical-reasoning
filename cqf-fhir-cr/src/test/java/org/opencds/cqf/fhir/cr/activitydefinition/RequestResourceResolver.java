@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
@@ -7,8 +8,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResol
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class RequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
@@ -26,14 +25,13 @@ public class RequestResourceResolver {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = TestRepositoryFactory.createRepository(
-                    fhirContext,
-                    this.getClass(),
-                    CLASS_PATH + "/" + repositoryPath,
-                    IGLayoutMode.TYPE_PREFIX);
+                    fhirContext, this.getClass(), CLASS_PATH + "/" + repositoryPath, IGLayoutMode.TYPE_PREFIX);
             return this;
         }
 
-        public Given resolverClasses(Class<? extends BaseRequestResourceResolver> resolverClass, Class<? extends IBaseResource> activityDefinitionClass) {
+        public Given resolverClasses(
+                Class<? extends BaseRequestResourceResolver> resolverClass,
+                Class<? extends IBaseResource> activityDefinitionClass) {
             this.resolverClass = resolverClass;
             this.activityDefinitionClass = activityDefinitionClass;
             return this;
@@ -47,8 +45,7 @@ public class RequestResourceResolver {
         private BaseRequestResourceResolver buildResolver() {
             try {
                 var activityDefinition = repository.read(activityDefinitionClass, activityDefinitionId);
-                return resolverClass.getConstructor(activityDefinitionClass)
-                    .newInstance(activityDefinition);
+                return resolverClass.getConstructor(activityDefinitionClass).newInstance(activityDefinition);
             } catch (Exception e) {
                 return null;
             }

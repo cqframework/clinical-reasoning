@@ -199,7 +199,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
         extractQuestionnaireResponse();
 
-        this.request = new ApplyRequest(subjectId, parameters, bundle, libraryEngine, modelResolver, planDefinition.getStructureFhirVersionEnum());
+        this.request = new ApplyRequest(
+                subjectId,
+                parameters,
+                bundle,
+                libraryEngine,
+                modelResolver,
+                planDefinition.getStructureFhirVersionEnum());
 
         this.questionnaire = generateProcessor.generate(planDefinition.getIdPart());
         // this.questionnaire = new Questionnaire();
@@ -391,19 +397,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private void addQuestionnaireItemForInput(DataRequirement input) {
-        var profile = org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(repository, input.getProfile().get(0));
+        var profile = org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(
+                repository, input.getProfile().get(0));
         var item = (Questionnaire.QuestionnaireItemComponent) this.generateProcessor.generateItem(
-                request,
-                profile,
-                ((Questionnaire) this.questionnaire)
-                        .getItem()
-                        .size());
-        
+                request, profile, ((Questionnaire) this.questionnaire).getItem().size());
+
         // If input has text extension use it to override
         // resolve extensions or not?
 
-        ((Questionnaire) this.questionnaire)
-                .addItem(item);
+        ((Questionnaire) this.questionnaire).addItem(item);
     }
 
     private RequestGroupActionComponent resolveAction(

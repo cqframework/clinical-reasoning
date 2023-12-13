@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -24,7 +23,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 
 public class ObservationResolver {
-    public IBaseResource resolve(ExtractRequest request,
+    public IBaseResource resolve(
+            ExtractRequest request,
             IBaseBackboneElement baseAnswer,
             String linkId,
             IBaseReference subject,
@@ -42,7 +42,10 @@ public class ObservationResolver {
         qrCategoryCoding.setSystem("http://hl7.org/fhir/observation-category");
         obs.setCategory(Collections.singletonList(new CodeableConcept().addCoding(qrCategoryCoding)));
 
-        obs.setCode(new CodeableConcept().setCoding(questionnaireCodeMap.get(linkId).stream().map(c -> (Coding) c).collect(Collectors.toList())));
+        obs.setCode(new CodeableConcept()
+                .setCoding(questionnaireCodeMap.get(linkId).stream()
+                        .map(c -> (Coding) c)
+                        .collect(Collectors.toList())));
         obs.setSubject((Reference) subject);
         // obs.setFocus();
         // obs.setEncounter(questionnaireResponse.getEncounter());
@@ -70,7 +73,7 @@ public class ObservationResolver {
         obs.addRelated()
                 .setType(Observation.ObservationRelationshipType.DERIVEDFROM)
                 .setTarget(questionnaireResponseReference);
-        
+
         var linkIdExtension = new Extension();
         linkIdExtension.setUrl("http://hl7.org/fhir/uv/sdc/StructureDefinition/derivedFromLinkId");
         var innerLinkIdExtension = new Extension();

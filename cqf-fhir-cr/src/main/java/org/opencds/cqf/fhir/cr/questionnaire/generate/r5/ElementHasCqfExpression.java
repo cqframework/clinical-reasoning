@@ -1,7 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.r5;
 
-import java.util.List;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.DataType;
@@ -11,7 +12,6 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ElementHasCqfExpression {
@@ -21,9 +21,10 @@ public class ElementHasCqfExpression {
         expressionProcessor = new ExpressionProcessor();
     }
 
-    public QuestionnaireItemComponent addProperties(IOperationRequest request,
-            ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
-        final var expression = expressionProcessor.getCqfExpression(request, element.getExtension(), Constants.CQF_EXPRESSION);
+    public QuestionnaireItemComponent addProperties(
+            IOperationRequest request, ElementDefinition element, QuestionnaireItemComponent questionnaireItem) {
+        final var expression =
+                expressionProcessor.getCqfExpression(request, element.getExtension(), Constants.CQF_EXPRESSION);
         final List<IBase> results = expressionProcessor.getExpressionResult(request, expression);
         results.forEach(result -> {
             if (Resource.class.isAssignableFrom(result.getClass())) {

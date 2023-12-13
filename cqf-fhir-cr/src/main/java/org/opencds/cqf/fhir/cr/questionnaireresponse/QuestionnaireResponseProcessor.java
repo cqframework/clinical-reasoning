@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -22,8 +23,6 @@ import org.opencds.cqf.fhir.utility.monad.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
     protected final ResourceResolver resourceResolver;
@@ -42,17 +41,16 @@ public class QuestionnaireResponseProcessor {
     }
 
     public QuestionnaireResponseProcessor(
-            Repository repository,
-            EvaluationSettings evaluationSettings,
-            IExtractProcessor extractProcessor) {
+            Repository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.extractProcessor = extractProcessor != null ? extractProcessor : new ExtractProcessor(); // repository, modelResolver);
+        this.extractProcessor =
+                extractProcessor != null ? extractProcessor : new ExtractProcessor(); // repository, modelResolver);
     }
-    
+
     protected <R extends IBaseResource> R resolveQuestionnaireResponse(Either<IIdType, R> questionnaireResponse) {
         return (R) resourceResolver.resolve(questionnaireResponse);
     }
@@ -67,7 +65,13 @@ public class QuestionnaireResponseProcessor {
         } else {
             var canonical = (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
             try {
-                return SearchHelper.searchRepositoryByCanonical(repository, canonical, repository.fhirContext().getResourceDefinition("questionnaire").getImplementingClass());
+                return SearchHelper.searchRepositoryByCanonical(
+                        repository,
+                        canonical,
+                        repository
+                                .fhirContext()
+                                .getResourceDefinition("questionnaire")
+                                .getImplementingClass());
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 return null;
@@ -79,15 +83,25 @@ public class QuestionnaireResponseProcessor {
         return extract(resource, null, null);
     }
 
-    public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle) {
+    public <R extends IBaseResource> IBaseBundle extract(
+            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle) {
         return extract(resource, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
     }
 
-    public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+    public <R extends IBaseResource> IBaseBundle extract(
+            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
         var questionnaireResponse = resolveQuestionnaireResponse(resource);
         var questionnaire = resolveQuestionnaire(questionnaireResponse);
         var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
-        var request = new ExtractRequest(questionnaireResponse, questionnaire, subject == null ? null : subject.getReferenceElement(), parameters, bundle, libraryEngine, modelResolver, repository.fhirContext());
+        var request = new ExtractRequest(
+                questionnaireResponse,
+                questionnaire,
+                subject == null ? null : subject.getReferenceElement(),
+                parameters,
+                bundle,
+                libraryEngine,
+                modelResolver,
+                repository.fhirContext());
         return extractProcessor.extract(request);
     }
 }

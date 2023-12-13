@@ -1,8 +1,9 @@
 package org.opencds.cqf.fhir.utility;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.List;
 import java.util.Map;
-
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,19 +11,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-
 public class SearchHelper {
 
     private SearchHelper() {}
 
     @SuppressWarnings("unchecked")
     protected static Class<IBaseBundle> getBundleType(Repository repository) {
-        return (Class<IBaseBundle>) repository
-                .fhirContext()
-                .getResourceDefinition("Bundle")
-                .getImplementingClass();
+        return (Class<IBaseBundle>)
+                repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }
 
     public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
@@ -35,14 +31,16 @@ public class SearchHelper {
         return searchRepositoryByCanonical(repository, canonical, resourceType);
     }
 
-    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource searchRepositoryByCanonical(
-            Repository repository, CanonicalType canonical, Class<R> resourceType) {
+    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
+            IBaseResource searchRepositoryByCanonical(
+                    Repository repository, CanonicalType canonical, Class<R> resourceType) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
 
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(getBundleType(repository), resourceType, searchParams);
-        var result = getEntryFirstRep(searchResult, repository.fhirContext().getVersion().getVersion());
+        var result = getEntryFirstRep(
+                searchResult, repository.fhirContext().getVersion().getVersion());
         if (result == null) {
             throw new FHIRException(String.format(
                     "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));
@@ -62,10 +60,10 @@ public class SearchHelper {
             case R5:
                 var r5Entry = ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
                 return r5Entry != null && r5Entry.hasResource() ? r5Entry.getResource() : null;
-        
+
             default:
-                throw new IllegalArgumentException(String.format(
-                    "Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -106,15 +104,17 @@ public class SearchHelper {
                     getNextPageR5(repository, r5Bundle, r5Next.getUrl());
                 }
                 break;
-        
+
             default:
-                throw new IllegalArgumentException(String.format(
-                    "Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 
-    private static void getNextPageDstu3(Repository repository, org.hl7.fhir.dstu3.model.Bundle bundle, String nextUrl) {
-        var nextBundle = (org.hl7.fhir.dstu3.model.Bundle) repository.link(org.hl7.fhir.dstu3.model.Bundle.class, nextUrl);
+    private static void getNextPageDstu3(
+            Repository repository, org.hl7.fhir.dstu3.model.Bundle bundle, String nextUrl) {
+        var nextBundle =
+                (org.hl7.fhir.dstu3.model.Bundle) repository.link(org.hl7.fhir.dstu3.model.Bundle.class, nextUrl);
         nextBundle.getEntry().forEach(bundle::addEntry);
         var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);
         if (next != null) {

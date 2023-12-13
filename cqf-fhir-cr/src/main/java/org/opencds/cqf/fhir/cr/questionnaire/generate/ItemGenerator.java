@@ -1,11 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,8 +20,6 @@ import org.opencds.cqf.fhir.cr.questionnaire.generate.r4.ElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ItemGenerator {
     protected static final Logger logger = LoggerFactory.getLogger(ItemGenerator.class);
@@ -57,12 +56,13 @@ public class ItemGenerator {
             return createErrorItem(request, linkId, message);
         }
     }
-    
-    protected void processElements(IOperationRequest request, IBaseBackboneElement item, IBaseResource profile) {        
+
+    protected void processElements(IOperationRequest request, IBaseBackboneElement item, IBaseResource profile) {
         int childCount = request.getItems(item).size();
         var itemLinkId = request.resolvePathString(item, "linkId");
         var profileUrl = request.resolvePathString(profile, "url");
-        var featureExpression = expressionProcessor.getCqfExpression(request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
+        var featureExpression = expressionProcessor.getCqfExpression(
+                request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
         IBaseResource caseFeature = null;
         if (featureExpression != null) {
             try {
@@ -83,7 +83,12 @@ public class ItemGenerator {
         }
     }
 
-    protected IBaseBackboneElement processElement(IOperationRequest request, String profileUrl, ICompositeType element, String childLinkId, IBaseResource caseFeature) {
+    protected IBaseBackboneElement processElement(
+            IOperationRequest request,
+            String profileUrl,
+            ICompositeType element,
+            String childLinkId,
+            IBaseResource caseFeature) {
         try {
             return elementProcessor.processElement(request, element, profileUrl, childLinkId, caseFeature);
         } catch (Exception ex) {
@@ -94,10 +99,12 @@ public class ItemGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(IOperationRequest request, IBaseResource profile) {
+    protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
+            IOperationRequest request, IBaseResource profile) {
         var differential = request.resolvePath(profile, "differential");
-        final List<E> elements = request.resolvePathList(differential, "element")
-            .stream().map(e -> (E) e).collect(Collectors.toList());
+        final List<E> elements = request.resolvePathList(differential, "element").stream()
+                .map(e -> (E) e)
+                .collect(Collectors.toList());
         return elements.stream()
                 .filter(element -> getElementType(request, element) != null)
                 .collect(Collectors.toList());
@@ -112,7 +119,8 @@ public class ItemGenerator {
         return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
     }
 
-    public IBaseBackboneElement createQuestionnaireItem(IOperationRequest request, IBaseResource profile, String linkId) {
+    public IBaseBackboneElement createQuestionnaireItem(
+            IOperationRequest request, IBaseResource profile, String linkId) {
         var url = request.resolvePathString(profile, "url");
         var type = request.resolvePathString(profile, "type");
         final String definition = String.format("%s#%s", url, type);
@@ -136,7 +144,10 @@ public class ItemGenerator {
 
     @SuppressWarnings("unchecked")
     protected String getProfileText(IOperationRequest request, IBaseResource profile) {
-        var inputExt = request.getExtensions(profile).stream().filter(e -> e.getUrl().equals(Constants.CPG_INPUT_TEXT)).findFirst().orElse(null);
+        var inputExt = request.getExtensions(profile).stream()
+                .filter(e -> e.getUrl().equals(Constants.CPG_INPUT_TEXT))
+                .findFirst()
+                .orElse(null);
         if (inputExt != null) {
             return ((IPrimitiveType<String>) inputExt.getValue()).getValue();
         }
@@ -148,30 +159,41 @@ public class ItemGenerator {
         return url.substring(url.lastIndexOf("/") + 1);
     }
 
-    protected IBaseBackboneElement createQuestionnaireItemComponent(IOperationRequest request, String text, String linkId, String definition, Boolean isDisplay) {
+    protected IBaseBackboneElement createQuestionnaireItemComponent(
+            IOperationRequest request, String text, String linkId, String definition, Boolean isDisplay) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(isDisplay ? org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.DISPLAY : org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.GROUP)
+                        .setType(
+                                isDisplay
+                                        ? org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                                        : org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)
                         .setLinkId(linkId)
                         .setText(text);
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(isDisplay ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP)
+                        .setType(
+                                isDisplay
+                                        ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                                        : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)
                         .setLinkId(linkId)
                         .setText(text);
             case R5:
                 return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(isDisplay ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP)
+                        .setType(
+                                isDisplay
+                                        ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                                        : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)
                         .setLinkId(linkId)
                         .setText(text);
-        
+
             default:
                 throw new IllegalArgumentException(String.format(
-                    "Unsupported version of FHIR: %s", request.getFhirVersion().getFhirVersionString()));
+                        "Unsupported version of FHIR: %s",
+                        request.getFhirVersion().getFhirVersionString()));
         }
     }
 }

@@ -1,16 +1,16 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.build;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang3.SerializationUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
@@ -85,16 +85,19 @@ public class PopulateProcessor implements IPopulateProcessor {
         var pathResult = request.getModelResolver().resolvePath(request.getOperationOutcome(), "issue");
         var issues = (pathResult instanceof List ? (List<?>) pathResult : null);
         if (issues != null && !issues.isEmpty()) {
-            request.getOperationOutcome().setId("populate-outcome-" + resource.getIdElement().getIdPart());
-            request.getModelResolver().setValue(resource, "contained", Collections.singletonList(request.getOperationOutcome()));
+            request.getOperationOutcome()
+                    .setId("populate-outcome-" + resource.getIdElement().getIdPart());
+            request.getModelResolver()
+                    .setValue(resource, "contained", Collections.singletonList(request.getOperationOutcome()));
             request.getModelResolver()
                     .setValue(
                             resource,
                             "extension",
                             Collections.singletonList(build(
                                     request.getFhirVersion(),
-                                    crmiMessagesExtension(
-                                            request.getOperationOutcome().getIdElement().getIdPart()))));
+                                    crmiMessagesExtension(request.getOperationOutcome()
+                                            .getIdElement()
+                                            .getIdPart()))));
         }
     }
 

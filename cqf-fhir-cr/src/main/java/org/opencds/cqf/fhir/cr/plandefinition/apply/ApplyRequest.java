@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -7,8 +8,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ApplyRequest implements IOperationRequest {
     private final IIdType subjectId;
@@ -19,7 +18,8 @@ public class ApplyRequest implements IOperationRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
 
-    public ApplyRequest(IIdType subjectId,
+    public ApplyRequest(
+            IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,

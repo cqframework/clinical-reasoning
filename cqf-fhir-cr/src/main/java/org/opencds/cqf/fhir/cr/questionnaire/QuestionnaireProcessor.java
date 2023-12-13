@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,8 +25,6 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class QuestionnaireProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
@@ -65,7 +64,8 @@ public class QuestionnaireProcessor {
         this.resourceResolver = new ResourceResolver("Questionnaire", this.repository);
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.generateProcessor = generateProcessor != null ? generateProcessor : new GenerateProcessor(repository, modelResolver);
+        this.generateProcessor =
+                generateProcessor != null ? generateProcessor : new GenerateProcessor(repository, modelResolver);
         this.packageProcessor =
                 packageProcessor != null ? packageProcessor : new PackageProcessor(repository, modelResolver);
         this.populateProcessor = populateProcessor != null ? populateProcessor : new PopulateProcessor();

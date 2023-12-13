@@ -1,11 +1,14 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
+import static java.util.Objects.requireNonNull;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import static java.util.Objects.requireNonNull;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -27,10 +30,6 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public class PlanDefinitionProcessor {
@@ -81,7 +80,11 @@ public class PlanDefinitionProcessor {
         this(repository, evaluationSettings, null, null);
     }
 
-    public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings, IApplyProcessor applyProcessor, IPackageProcessor packageProcessor) {
+    public PlanDefinitionProcessor(
+            Repository repository,
+            EvaluationSettings evaluationSettings,
+            IApplyProcessor applyProcessor,
+            IPackageProcessor packageProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("PlanDefinition", this.repository);
@@ -90,7 +93,8 @@ public class PlanDefinitionProcessor {
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 repository.fhirContext().getVersion().getVersion());
         this.applyProcessor = applyProcessor; // == null ? new ApplyProcessor() : applyProcessor;
-        this.packageProcessor = packageProcessor == null ? new PackageProcessor(this.repository, modelResolver) : packageProcessor;
+        this.packageProcessor =
+                packageProcessor == null ? new PackageProcessor(this.repository, modelResolver) : packageProcessor;
     }
 
     public FhirContext fhirContext() {
@@ -123,7 +127,7 @@ public class PlanDefinitionProcessor {
         return packageProcessor.packageResource(resolvePlanDefinition(planDefinition), isPut ? "PUT" : "POST");
     }
 
-    public <C extends IPrimitiveType<String>, R extends  IBaseResource> IBaseResource apply(
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
             Either3<C, IIdType, R> planDefinition,
             String subject,
             String encounter,

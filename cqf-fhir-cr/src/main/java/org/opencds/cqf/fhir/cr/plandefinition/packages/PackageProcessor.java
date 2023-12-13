@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.cr.plandefinition.packages;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;
@@ -49,10 +48,13 @@ public class PackageProcessor implements IPackageProcessor {
         packageBundle.addEntry(org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(planDefinition, isPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
         var libraryCanonical = planDefinition.hasLibrary()
-                ? new org.hl7.fhir.dstu3.model.StringType(planDefinition.getLibrary().get(0).getReference())
+                ? new org.hl7.fhir.dstu3.model.StringType(
+                        planDefinition.getLibrary().get(0).getReference())
                 : null;
         if (libraryCanonical != null) {
-            var library = (org.hl7.fhir.dstu3.model.Library) org.opencds.cqf.fhir.utility.dstu3.SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
+            var library = (org.hl7.fhir.dstu3.model.Library)
+                    org.opencds.cqf.fhir.utility.dstu3.SearchHelper.searchRepositoryByCanonical(
+                            repository, libraryCanonical);
             if (library != null) {
                 packageBundle.addEntry(org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
@@ -77,7 +79,9 @@ public class PackageProcessor implements IPackageProcessor {
         var libraryCanonical =
                 planDefinition.hasLibrary() ? planDefinition.getLibrary().get(0) : null;
         if (libraryCanonical != null) {
-            var library = (org.hl7.fhir.r4.model.Library) org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
+            var library = (org.hl7.fhir.r4.model.Library)
+                    org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryByCanonical(
+                            repository, libraryCanonical);
             if (library != null) {
                 packageBundle.addEntry(org.opencds.cqf.fhir.utility.r4.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
@@ -102,7 +106,9 @@ public class PackageProcessor implements IPackageProcessor {
         var libraryCanonical =
                 planDefinition.hasLibrary() ? planDefinition.getLibrary().get(0) : null;
         if (libraryCanonical != null) {
-            var library = (org.hl7.fhir.r5.model.Library) org.opencds.cqf.fhir.utility.r5.SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
+            var library = (org.hl7.fhir.r5.model.Library)
+                    org.opencds.cqf.fhir.utility.r5.SearchHelper.searchRepositoryByCanonical(
+                            repository, libraryCanonical);
             if (library != null) {
                 packageBundle.addEntry(org.opencds.cqf.fhir.utility.r5.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {

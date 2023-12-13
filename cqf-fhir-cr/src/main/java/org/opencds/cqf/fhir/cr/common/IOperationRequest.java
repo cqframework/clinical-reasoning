@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
+import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -14,10 +17,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public interface IOperationRequest {
     IIdType getSubjectId();
@@ -35,7 +34,7 @@ public interface IOperationRequest {
     String getDefaultLibraryUrl();
 
     IBaseOperationOutcome getOperationOutcome();
-    
+
     void setOperationOutcome(IBaseOperationOutcome operationOutcome);
 
     default void logException(String exceptionMessage) {

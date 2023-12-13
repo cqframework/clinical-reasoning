@@ -1,19 +1,18 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.build;
+import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.build;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ProcessItem {
     final ExpressionProcessor expressionProcessor;

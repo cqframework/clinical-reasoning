@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -12,8 +12,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 
 public class ProcessDefinitionItem {
     protected static final Logger logger = LoggerFactory.getLogger(ProcessDefinitionItem.class);
@@ -27,10 +25,8 @@ public class ProcessDefinitionItem {
         this.expressionProcessor = expressionProcessor;
     }
 
-    public void processDefinitionItem(ExtractRequest request,
-            IBaseBackboneElement item,
-            List<IBaseResource> resources,
-            IBaseReference subject) {
+    public void processDefinitionItem(
+            ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
         // TODO: item extraction context
@@ -38,17 +34,22 @@ public class ProcessDefinitionItem {
         // // var itemExtractionContext = item.hasExtension(contextExtension)
         // //         ? item.getExtensionByUrl(contextExtension)
         // //         : questionnaireResponse.getExtensionByUrl(contextExtension);
-        // // var itemExtractionContext = request.getExtensions(item).stream().filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
-        // var itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(item), contextExtension);
+        // // var itemExtractionContext = request.getExtensions(item).stream().filter(e ->
+        // e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
+        // var itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(item),
+        // contextExtension);
         // if (itemExtractionContext == null) {
         //     // itemExtractionContext = request.getItemExtractionContext();
-        //     itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(request.getQuestionnaireResponse()), contextExtension);
+        //     itemExtractionContext = expressionProcessor.getCqfExpression(request,
+        // request.getExtensions(request.getQuestionnaireResponse()), contextExtension);
         //     if (itemExtractionContext == null) {
-        //         itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(request.getQuestionnaire()), contextExtension);
+        //         itemExtractionContext = expressionProcessor.getCqfExpression(request,
+        // request.getExtensions(request.getQuestionnaire()), contextExtension);
         //     }
         // }
         // if (itemExtractionContext != null) {
-        //     var context = expressionProcessor.getExpressionResult(request, itemExtractionContext, request.resolvePathString(item, "linkId").getValue());
+        //     var context = expressionProcessor.getExpressionResult(request, itemExtractionContext,
+        // request.resolvePathString(item, "linkId").getValue());
         //     if (context != null && !context.isEmpty()) {
         //         // TODO: edit context instead of creating new resources
         //     }
@@ -58,7 +59,8 @@ public class ProcessDefinitionItem {
         var resourceType = getDefinitionType(definition);
         var resource = (IBaseResource) newValue(request, resourceType);
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
-        resource.setId(new IdType(resourceType, request.getExtractId() + "-" + request.resolvePathString(item, "linkId")));
+        resource.setId(
+                new IdType(resourceType, request.getExtractId() + "-" + request.resolvePathString(item, "linkId")));
         resolveMeta(resource, definition);
         var subjectPath = getSubjectPath(resourceDefinition);
         if (subjectPath != null) {
@@ -83,9 +85,7 @@ public class ProcessDefinitionItem {
         if (dateAuthored != null) {
             var datePaths = getDatePaths(resourceDefinition);
             if (datePaths != null && !datePaths.isEmpty()) {
-                datePaths.forEach(datePath -> {
-
-                });
+                datePaths.forEach(datePath -> {});
             }
         }
         // var dateProperties = getDateProperties(resource);
@@ -123,7 +123,7 @@ public class ProcessDefinitionItem {
                 path = path.replace(resourceType + ".", "");
                 var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
                 var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-                //var answerValue = childItem.getAnswerFirstRep().getValue();
+                // var answerValue = childItem.getAnswerFirstRep().getValue();
                 if (answerValue != null) {
                     request.getModelResolver().setValue(resource, path, answerValue);
                 }
@@ -142,8 +142,9 @@ public class ProcessDefinitionItem {
     }
 
     private String getSubjectPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("subject") != null ? "subject" :
-            definition.getChildByName("patient") != null ? "patient" : null;
+        return definition.getChildByName("subject") != null
+                ? "subject"
+                : definition.getChildByName("patient") != null ? "patient" : null;
     }
 
     // private Property getSubjectProperty(ExtractRequest request, IBaseResource resource) {
@@ -156,8 +157,9 @@ public class ProcessDefinitionItem {
     // }
 
     private String getAuthorPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("recorder") != null ? "recorder" :
-            definition.getName().equals("Observation") ? "performer" : null;
+        return definition.getChildByName("recorder") != null
+                ? "recorder"
+                : definition.getName().equals("Observation") ? "performer" : null;
     }
 
     // private Property getAuthorProperty(Resource resource) {
@@ -199,7 +201,9 @@ public class ProcessDefinitionItem {
 
     private IBase newValue(ExtractRequest request, String type) {
         try {
-            return (IBase) Class.forName(String.format("org.hl7.fhir.%s.model.%s", request.getFhirVersion().toString().toLowerCase(), type))
+            return (IBase) Class.forName(String.format(
+                            "org.hl7.fhir.%s.model.%s",
+                            request.getFhirVersion().toString().toLowerCase(), type))
                     .getConstructor()
                     .newInstance();
         } catch (Exception e) {

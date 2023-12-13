@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This class provides a generic way to handle adding exceptions encountered during an operation to an OperationOutcome.

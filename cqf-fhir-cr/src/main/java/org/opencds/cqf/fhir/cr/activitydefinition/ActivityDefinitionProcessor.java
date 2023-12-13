@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -17,8 +18,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
-import ca.uhn.fhir.context.FhirContext;
-
 public class ActivityDefinitionProcessor {
     // private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
     protected final EvaluationSettings evaluationSettings;
@@ -26,7 +25,7 @@ public class ActivityDefinitionProcessor {
     protected final IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected ExtensionResolver extensionResolver;
-    
+
     public ActivityDefinitionProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault(), null);
     }

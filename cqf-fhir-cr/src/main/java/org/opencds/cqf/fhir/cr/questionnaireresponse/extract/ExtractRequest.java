@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -10,9 +12,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ExtractRequest implements IOperationRequest {
     private final IBaseResource questionnaireResponse;
@@ -61,11 +60,19 @@ public class ExtractRequest implements IOperationRequest {
     }
 
     public IBaseExtension<?, ?> getItemExtractionContext() {
-        var qrExt = getExtensions(questionnaireResponse).stream().filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
+        var qrExt = getExtensions(questionnaireResponse).stream()
+                .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT))
+                .findFirst()
+                .orElse(null);
         if (qrExt != null) {
             return qrExt;
         }
-        return questionnaire == null ? null : getExtensions(questionnaire).stream().filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
+        return questionnaire == null
+                ? null
+                : getExtensions(questionnaire).stream()
+                        .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT))
+                        .findFirst()
+                        .orElse(null);
     }
 
     public String getExtractId() {
@@ -119,5 +126,5 @@ public class ExtractRequest implements IOperationRequest {
     @Override
     public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
         this.operationOutcome = operationOutcome;
-    }    
+    }
 }

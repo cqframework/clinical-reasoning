@@ -1,13 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaire.packages;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;

@@ -2,16 +2,22 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.hl7.fhir.r4.model.IdType;
+import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.Given;
+import org.opencds.cqf.fhir.utility.Ids;
 
 public class QuestionnaireResponseProcessorTests {
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
+
     private void testExtract(String questionnaireResponse) {
-        TestQuestionnaireResponse.Assert.that(new IdType("QuestionnaireResponse", questionnaireResponse))
-                .withExpectedBundleId(new IdType("Bundle", "extract-" + questionnaireResponse))
+        new Given()
+                .repositoryFor(fhirContext, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponse)
                 .extract()
-                .isEqualsToExpected();
+                .isEqualsToExpected(Ids.newId(fhirContext, "Bundle", "extract-" + questionnaireResponse));
     }
 
     @Test
@@ -33,18 +39,22 @@ public class QuestionnaireResponseProcessorTests {
 
     @Test
     void testDefinitionBasedExtraction() {
-        TestQuestionnaireResponse.Assert.that(
-                        new IdType("QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1"))
-                .withExpectedBundleId(new IdType("Bundle", "extract-OutpatientPriorAuthorizationRequest-OPA-Patient1"))
+        var questionnaireResponseId = "OutpatientPriorAuthorizationRequest-OPA-Patient1";
+        new Given()
+                .repositoryFor(fhirContext, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
                 .extract()
                 .hasEntry(2);
     }
 
     @Test
     void testNestedDefinitionBaseExtraction() {
-        TestQuestionnaireResponse.Assert.that(
-                        new IdType("QuestionnaireResponse", "cc-screening-pathway-definition-answers"))
-                .withExpectedBundleId(new IdType("Bundle", "extract-cc-screening-pathway-definition-answers"))
+        var questionnaireResponseId = "cc-screening-pathway-definition-answers";
+        new Given()
+                .repositoryFor(fhirContext, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
                 .extract()
                 .hasEntry(3);
     }

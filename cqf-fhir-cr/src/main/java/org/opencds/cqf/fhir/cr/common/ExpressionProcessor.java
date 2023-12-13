@@ -22,7 +22,7 @@ public class ExpressionProcessor {
     @SuppressWarnings("unchecked")
     public List<IBase> getExpressionResultForItem(IOperationRequest request, IBaseBackboneElement item)
             throws ResolveExpressionException {
-        var expression = getInitialExpression(request, item);
+        var expression = getItemInitialExpression(request, item);
         var itemLinkId = ((IPrimitiveType<String>) request.getModelResolver().resolvePath(item, "linkId")).getValue();
         return getExpressionResult(request, expression, itemLinkId);
     }
@@ -66,8 +66,6 @@ public class ExpressionProcessor {
                         .filter(e -> e.getUrl().equals(Constants.CQF_EXPRESSION_LANGUAGE))
                         .findFirst()
                         .orElse(null);
-                // final IBaseExtension<?, ?> languageExtension = getExtensionByUrl(item,
-                // Constants.CQF_EXPRESSION_LANGUAGE);
                 return new CqfExpression(
                         languageExtension.getValue().toString(),
                         extension.getValue().toString(),
@@ -84,7 +82,7 @@ public class ExpressionProcessor {
         }
     }
 
-    protected CqfExpression getInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
+    protected CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
         if (!item.hasExtension()) {
             return null;
         }

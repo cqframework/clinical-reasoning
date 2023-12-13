@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -27,24 +29,32 @@ public class ProcessDefinitionItem {
 
     public void processDefinitionItem(
             ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject) {
+        processDefinitionItem(request, item, resources, subject, null);
+    }
+
+    public void processDefinitionItem(
+            ExtractRequest request,
+            IBaseBackboneElement item,
+            List<IBaseResource> resources,
+            IBaseReference subject,
+            IBaseExtension<?, ?> contextExtension) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
         // TODO: item extraction context
         // var contextExtension = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
-        // // var itemExtractionContext = item.hasExtension(contextExtension)
-        // //         ? item.getExtensionByUrl(contextExtension)
-        // //         : questionnaireResponse.getExtensionByUrl(contextExtension);
-        // // var itemExtractionContext = request.getExtensions(item).stream().filter(e ->
+        // var itemExtractionContext = item.hasExtension(contextExtension)
+        //         ? item.getExtensionByUrl(contextExtension)
+        //         : questionnaireResponse.getExtensionByUrl(contextExtension);
+        // var itemExtractionContext = request.getExtensions(item).stream().filter(e ->
         // e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
         // var itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(item),
         // contextExtension);
-        // if (itemExtractionContext == null) {
-        //     // itemExtractionContext = request.getItemExtractionContext();
-        //     itemExtractionContext = expressionProcessor.getCqfExpression(request,
-        // request.getExtensions(request.getQuestionnaireResponse()), contextExtension);
-        //     if (itemExtractionContext == null) {
-        //         itemExtractionContext = expressionProcessor.getCqfExpression(request,
-        // request.getExtensions(request.getQuestionnaire()), contextExtension);
+        // var itemExtractionContextExt = request.getItemExtractionContext();
+        // var itemExtractionContextExp = expressionProcessor.getCqfExpression(request,
+        //     request.getExtensions(request.getQuestionnaireResponse()), contextExtension);
+        // if (itemExtractionContextExp == null) {
+        //     itemExtractionContextExp = expressionProcessor.getCqfExpression(request,
+        //         request.getExtensions(request.getQuestionnaire()), contextExtension);
         //     }
         // }
         // if (itemExtractionContext != null) {
@@ -66,10 +76,6 @@ public class ProcessDefinitionItem {
         if (subjectPath != null) {
             request.getModelResolver().setValue(resource, subjectPath, subject);
         }
-        // var subjectProperty = getSubjectProperty(resource);
-        // if (subjectProperty != null) {
-        //     resource.setProperty(subjectProperty.getName(), subject);
-        // }
         var authorPath = getAuthorPath(resourceDefinition);
         if (authorPath != null) {
             var authorValue = request.resolvePath(request.getQuestionnaireResponse(), "author");
@@ -77,10 +83,6 @@ public class ProcessDefinitionItem {
                 request.getModelResolver().setValue(resource, authorPath, authorValue);
             }
         }
-        // var authorProperty = getAuthorProperty(resource);
-        // if (authorProperty != null && questionnaireResponse.hasAuthor()) {
-        //     resource.setProperty(authorProperty.getName(), questionnaireResponse.getAuthor());
-        // }
         var dateAuthored = request.resolvePath(request.getQuestionnaireResponse(), "authored");
         if (dateAuthored != null) {
             var datePaths = getDatePaths(resourceDefinition);
@@ -147,29 +149,11 @@ public class ProcessDefinitionItem {
                 : definition.getChildByName("patient") != null ? "patient" : null;
     }
 
-    // private Property getSubjectProperty(ExtractRequest request, IBaseResource resource) {
-    //     var property = resource.getNamedProperty("subject");
-    //     if (property == null) {
-    //         property = resource.getNamedProperty("patient");
-    //     }
-
-    //     return property;
-    // }
-
     private String getAuthorPath(BaseRuntimeElementDefinition<?> definition) {
         return definition.getChildByName("recorder") != null
                 ? "recorder"
                 : definition.getName().equals("Observation") ? "performer" : null;
     }
-
-    // private Property getAuthorProperty(Resource resource) {
-    //     var property = resource.getNamedProperty("recorder");
-    //     if (property == null && resource.fhirType().equals(FHIRAllTypes.OBSERVATION.toCode())) {
-    //         property = resource.getNamedProperty("performer");
-    //     }
-
-    //     return property;
-    // }
 
     private List<String> getDatePaths(BaseRuntimeElementDefinition<?> definition) {
         List<String> results = new ArrayList<>();
@@ -180,16 +164,6 @@ public class ProcessDefinitionItem {
 
         return results.stream().filter(p -> p != null).collect(Collectors.toList());
     }
-
-    // private List<Property> getDateProperties(Resource resource) {
-    //     List<Property> results = new ArrayList<>();
-    //     results.add(resource.getNamedProperty("onset"));
-    //     results.add(resource.getNamedProperty("issued"));
-    //     results.add(resource.getNamedProperty("effective"));
-    //     results.add(resource.getNamedProperty("recordDate"));
-
-    //     return results.stream().filter(p -> p != null).collect(Collectors.toList());
-    // }
 
     private void resolveMeta(IBaseResource resource, String definition) {
         var meta = resource.getMeta();
@@ -206,7 +180,13 @@ public class ProcessDefinitionItem {
                             request.getFhirVersion().toString().toLowerCase(), type))
                     .getConstructor()
                     .newInstance();
-        } catch (Exception e) {
+        } catch (ClassNotFoundException
+                | IllegalAccessException
+                | IllegalArgumentException
+                | InstantiationException
+                | NoSuchMethodException
+                | SecurityException
+                | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }

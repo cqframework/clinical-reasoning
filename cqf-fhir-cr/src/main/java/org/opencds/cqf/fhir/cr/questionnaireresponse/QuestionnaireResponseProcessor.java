@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -47,8 +48,11 @@ public class QuestionnaireResponseProcessor {
         this.resourceResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.extractProcessor =
-                extractProcessor != null ? extractProcessor : new ExtractProcessor(); // repository, modelResolver);
+        this.extractProcessor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
+    }
+
+    public FhirContext fhirContext() {
+        return repository.fhirContext();
     }
 
     protected <R extends IBaseResource> R resolveQuestionnaireResponse(Either<IIdType, R> questionnaireResponse) {
@@ -57,25 +61,26 @@ public class QuestionnaireResponseProcessor {
 
     @SuppressWarnings("unchecked")
     protected IBaseResource resolveQuestionnaire(IBaseResource questionnaireResponse) {
-        if (questionnaireResponse.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
-            // IPrimitiveType<String> canonical = null;
-            // var pathResult = modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-            // canonical = ((IBaseReference) pathResult).getReferenceElement()
-            return null;
-        } else {
-            var canonical = (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-            try {
-                return SearchHelper.searchRepositoryByCanonical(
-                        repository,
-                        canonical,
-                        repository
-                                .fhirContext()
-                                .getResourceDefinition("questionnaire")
-                                .getImplementingClass());
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                return null;
+        try {
+            IPrimitiveType<String> canonical;
+            if (questionnaireResponse.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
+                var pathResult = modelResolver.resolvePath(questionnaireResponse, "questionnaire");
+                canonical = pathResult == null ? null : ((IBaseReference) pathResult).getReferenceElement();
+            } else {
+                canonical = (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
             }
+            return canonical == null
+                    ? null
+                    : SearchHelper.searchRepositoryByCanonical(
+                            repository,
+                            canonical,
+                            repository
+                                    .fhirContext()
+                                    .getResourceDefinition("questionnaire")
+                                    .getImplementingClass());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return null;
         }
     }
 

@@ -2,14 +2,22 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.Given;
+import org.opencds.cqf.fhir.utility.Ids;
 
 public class QuestionnaireResponseProcessorTests {
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+
     private void testExtract(String questionnaireResponse) {
-        TestQuestionnaireResponse.Assert.that("tests/QuestionnaireResponse-" + questionnaireResponse + ".json")
+        new Given()
+                .repositoryFor(fhirContext, "dstu3")
+                .when()
+                .questionnaireResponseId(questionnaireResponse)
                 .extract()
-                .isEqualsTo("tests/Bundle-" + questionnaireResponse + ".json");
+                .isEqualsToExpected(Ids.newId(fhirContext, "Bundle", "extract-" + questionnaireResponse));
     }
 
     @Test

@@ -43,7 +43,7 @@ public class ExtractRequest implements IOperationRequest {
         this.modelResolver = modelResolver;
         this.fhirContext = fhirContext;
         this.fhirVersion = fhirContext.getVersion().getVersion();
-        this.questionnaire = questionnaire; // resolveQuestionnaire();
+        this.questionnaire = questionnaire;
         this.defaultLibraryUrl = "";
     }
 
@@ -51,9 +51,9 @@ public class ExtractRequest implements IOperationRequest {
         return questionnaireResponse;
     }
 
-    // private IBaseResource resolveQuestionnaire() {
-    //     return null;
-    // }
+    public Boolean hasQuestionnaire() {
+        return questionnaire != null;
+    }
 
     public IBaseResource getQuestionnaire() {
         return questionnaire;

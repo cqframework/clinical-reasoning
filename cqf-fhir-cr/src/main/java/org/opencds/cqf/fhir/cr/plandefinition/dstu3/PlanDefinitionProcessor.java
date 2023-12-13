@@ -56,11 +56,12 @@ import org.opencds.cqf.fhir.cr.inputparameters.dstu3.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.dstu3.generator.questionnaireitem.QuestionnaireItemGenerator;
-import org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.dstu3.ContainedHelper;
 import org.opencds.cqf.fhir.utility.dstu3.PackageHelper;
 import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +106,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             for (var questionnaireResponse : questionnaireResponses) {
                 try {
                     var extractBundle = (Bundle) questionnaireResponseProcessor.extract(
-                            questionnaireResponse, parameters, bundle, libraryEngine);
+                            Eithers.forRight(questionnaireResponse), parameters, bundle, libraryEngine);
                     extractedResources.add(questionnaireResponse);
                     for (var entry : extractBundle.getEntry()) {
                         ((Bundle) bundle).addEntry(entry);

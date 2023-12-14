@@ -9,7 +9,7 @@
   "library": [
     "http://test/fhir/Library/TestActivityDefinition|1.0.0"
   ],
-  "intent": "PROPOSAL",
+  "intent": "proposal",
   "kind": "MedicationRequest",
   "productCodeableConcept": {
     "coding": [

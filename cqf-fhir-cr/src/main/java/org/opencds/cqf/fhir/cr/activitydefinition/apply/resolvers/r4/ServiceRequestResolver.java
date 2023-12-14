@@ -43,10 +43,6 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
             serviceRequest.setRequester(new Reference(organizationId));
         }
 
-        if (activityDefinition.hasExtension()) {
-            serviceRequest.setExtension(activityDefinition.getExtension());
-        }
-
         // code can be set as a dynamicValue
         if (activityDefinition.hasCode()) {
             serviceRequest.setCode(activityDefinition.getCode());

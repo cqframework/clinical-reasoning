@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,6 +15,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
 
     public MedicationRequestResolver(ActivityDefinition activityDefinition) {
+        checkNotNull(activityDefinition);
         this.activityDefinition = activityDefinition;
     }
 

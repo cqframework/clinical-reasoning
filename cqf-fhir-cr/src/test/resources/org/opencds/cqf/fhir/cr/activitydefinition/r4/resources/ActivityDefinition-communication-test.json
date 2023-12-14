@@ -7,9 +7,23 @@
       "valueString": "Communication"
     }
   ],
+  "relatedArtifact": [
+    {
+      "url": "http://test.fhir.org/test-artifact",
+      "display": "Test Artifact"
+    }
+  ],
   "name": "Communication_Test",
   "title": "CreateCommunication",
   "status": "draft",
   "description": "Create the communication.",
-  "kind": "Task"
+  "kind": "Task",
+  "code": {
+    "coding": [
+      {
+        "system": "http://test.fhir.org",
+        "code": "Test"
+      }
+    ]
+  }
 }

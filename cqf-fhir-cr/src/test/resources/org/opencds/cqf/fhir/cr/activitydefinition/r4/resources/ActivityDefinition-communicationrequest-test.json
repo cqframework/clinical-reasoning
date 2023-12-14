@@ -5,5 +5,8 @@
   "title": "CreateCommunicationRequest",
   "status": "draft",
   "description": "Create the communication request.",
-  "kind": "CommunicationRequest"
+  "kind": "CommunicationRequest",
+  "code": {
+    "text": "Test"
+  }
 }

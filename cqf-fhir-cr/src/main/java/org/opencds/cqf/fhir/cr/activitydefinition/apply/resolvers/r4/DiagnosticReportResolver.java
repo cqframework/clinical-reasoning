@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -14,6 +16,7 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
 
     public DiagnosticReportResolver(ActivityDefinition activityDefinition) {
+        checkNotNull(activityDefinition);
         this.activityDefinition = activityDefinition;
     }
 

@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "medicationrequest-test",
-  "name": "MedicationRequest_Test",
-  "title": "CreateMedicationRequest",
-  "status": "draft",
-  "description": "Create the medication request.",
-  "kind": "MedicationRequest"
-}

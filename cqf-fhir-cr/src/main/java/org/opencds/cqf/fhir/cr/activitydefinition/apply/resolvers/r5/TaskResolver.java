@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.StringType;
@@ -10,6 +12,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
 
     public TaskResolver(ActivityDefinition activityDefinition) {
+        checkNotNull(activityDefinition);
         this.activityDefinition = activityDefinition;
     }
 
@@ -43,13 +46,10 @@ public class TaskResolver extends BaseRequestResourceResolver {
             task.setCode(activityDefinition.getCode());
         }
 
-        if (activityDefinition.hasExtension()) {
-            task.setExtension(activityDefinition.getExtension());
-        }
-
         if (activityDefinition.hasDescription()) {
             task.setDescription(activityDefinition.getDescription());
         }
+
         return task;
     }
 }

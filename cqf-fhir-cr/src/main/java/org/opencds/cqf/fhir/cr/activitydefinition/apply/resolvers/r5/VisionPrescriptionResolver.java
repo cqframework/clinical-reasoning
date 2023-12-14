@@ -1,21 +1,25 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
+import org.hl7.fhir.r5.model.VisionPrescription;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 
 public class VisionPrescriptionResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
 
     public VisionPrescriptionResolver(ActivityDefinition activityDefinition) {
+        checkNotNull(activityDefinition);
         this.activityDefinition = activityDefinition;
     }
 
     @Override
-    public IBaseResource resolve(
+    public VisionPrescription resolve(
             IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'resolve'");
+        var visionPrescription = new VisionPrescription();
+
+        return visionPrescription;
     }
 }

@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3.Procedur
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3.ReferralRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3.SupplyRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3.TaskResolver;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,13 @@ public class Dstu3ResolverFactory implements IRequestResolverFactory {
     @Override
     public BaseRequestResourceResolver create(IBaseResource baseActivityDefinition) {
         var activityDefinition = (ActivityDefinition) baseActivityDefinition;
-        var resourceType = ResourceType.fromCode(activityDefinition.getKind().toCode());
+        var kind = activityDefinition.hasExtension(Constants.CPG_ACTIVITY_KIND)
+                ? activityDefinition
+                        .getExtensionByUrl(Constants.CPG_ACTIVITY_KIND)
+                        .getValueAsPrimitive()
+                        .getValueAsString()
+                : activityDefinition.getKind().toCode();
+        var resourceType = ResourceType.fromCode(kind);
         switch (resourceType) {
                 /* Communication is not included in the list of RequestResourceTypes */
             case Communication:

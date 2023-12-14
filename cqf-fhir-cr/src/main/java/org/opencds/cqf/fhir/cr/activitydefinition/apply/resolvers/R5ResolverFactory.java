@@ -12,7 +12,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.CarePlanRes
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.ClaimResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.CommunicationRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.CommunicationResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.ContractResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.CoverageEligibilityRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.DeviceRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.DiagnosticReportResolver;
@@ -27,6 +26,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.SupplyReque
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.TaskResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.TransportResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5.VisionPrescriptionResolver;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,13 @@ public class R5ResolverFactory implements IRequestResolverFactory {
     @Override
     public BaseRequestResourceResolver create(IBaseResource baseActivityDefinition) {
         var activityDefinition = (ActivityDefinition) baseActivityDefinition;
-        var resourceType = ResourceType.fromCode(activityDefinition.getKind().toCode());
+        var kind = activityDefinition.hasExtension(Constants.CPG_ACTIVITY_KIND)
+                ? activityDefinition
+                        .getExtensionByUrl(Constants.CPG_ACTIVITY_KIND)
+                        .getValueAsPrimitive()
+                        .getValueAsString()
+                : activityDefinition.getKind().toCode();
+        var resourceType = ResourceType.fromCode(kind);
         switch (resourceType) {
             case Appointment:
                 return new AppointmentResolver(activityDefinition);
@@ -51,8 +57,6 @@ public class R5ResolverFactory implements IRequestResolverFactory {
                 return new CommunicationResolver(activityDefinition);
             case CommunicationRequest:
                 return new CommunicationRequestResolver(activityDefinition);
-            case Contract:
-                return new ContractResolver(activityDefinition);
             case CoverageEligibilityRequest:
                 return new CoverageEligibilityRequestResolver(activityDefinition);
             case DeviceRequest:

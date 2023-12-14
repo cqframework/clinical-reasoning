@@ -1,9 +1,15 @@
 {
   "resourceType": "ActivityDefinition",
   "id": "communication-test",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
+      "valueString": "Communication"
+    }
+  ],
   "name": "Communication_Test",
   "title": "CreateCommunication",
   "status": "draft",
   "description": "Create the communication.",
-  "kind": "Communication"
+  "kind": "Task"
 }

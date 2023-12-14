@@ -1,9 +1,11 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.r4;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AppointmentResponse;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -28,48 +30,24 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.VisionPrescription;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.AppointmentResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.AppointmentResponseResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CarePlanResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ClaimResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CommunicationRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CommunicationResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ContractResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.DeviceRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.DiagnosticReportResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.EnrollmentRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ImmunizationRecommendationResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.MedicationRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.NutritionOrderResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ProcedureResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.RequestGroupResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ServiceRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.SupplyRequestResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.TaskResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.VisionPrescriptionResolver;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private final Class<? extends IBaseResource> activityDefinitionClass = ActivityDefinition.class;
     private final IIdType subjectId = Ids.newId(Patient.class, "patient123");
     private final IIdType practitionerId = Ids.newId(Practitioner.class, "practitioner123");
     private final IIdType encounterId = Ids.newId(Encounter.class, "encounter123");
     private final IIdType organizationId = Ids.newId(Organization.class, "org123");
 
     @SuppressWarnings("unchecked")
-    private <R extends IBaseResource> R testResolver(
-            String testId, Class<? extends BaseRequestResourceResolver> resolverClass, Class<R> expectedClass) {
+    private <R extends IBaseResource> R testResolver(String testId, Class<R> expectedClass) {
         var result = new Given()
                 .repositoryFor(fhirContext, "r4")
-                .resolverClasses(resolverClass, activityDefinitionClass)
                 .activityDefinition(testId)
                 .when()
                 .subjectId(subjectId)
@@ -85,103 +63,103 @@ public class RequestResourceResolverTests {
 
     @Test
     public void testAppointmentResolver() {
-        testResolver("appointment-test", AppointmentResolver.class, Appointment.class);
+        testResolver("appointment-test", Appointment.class);
     }
 
     @Test
     public void testAppointmentResponseResolver() {
-        testResolver("appointmentresponse-test", AppointmentResponseResolver.class, AppointmentResponse.class);
+        testResolver("appointmentresponse-test", AppointmentResponse.class);
     }
 
     @Test
     public void testCarePlanResolver() {
-        testResolver("careplan-test", CarePlanResolver.class, CarePlan.class);
+        testResolver("careplan-test", CarePlan.class);
     }
 
     @Test
     public void testClaimResolver() {
-        testResolver("claim-test", ClaimResolver.class, Claim.class);
+        testResolver("claim-test", Claim.class);
     }
 
     @Test
     public void testCommunicationRequestResolver() {
-        testResolver("communicationrequest-test", CommunicationRequestResolver.class, CommunicationRequest.class);
+        testResolver("communicationrequest-test", CommunicationRequest.class);
     }
 
     @Test
-    @Disabled("Communication is not a valid value for ActivityDefinitionKind")
     public void testCommunicationResolver() {
-        testResolver("communication-test", CommunicationResolver.class, Communication.class);
+        testResolver("communication-test", Communication.class);
     }
 
     @Test
     public void testContractResolver() {
-        testResolver("contract-test", ContractResolver.class, Contract.class);
+        testResolver("contract-test", Contract.class);
     }
 
     @Test
     public void testDeviceRequestResolver() {
-        testResolver("devicerequest-test", DeviceRequestResolver.class, DeviceRequest.class);
+        testResolver("devicerequest-test", DeviceRequest.class);
     }
 
     @Test
-    @Disabled("DiagnosticReport is not a valid value for ActivityDefinitionKind")
     public void testDiagnosticReportResolver() {
-        testResolver("diagnosticreport-test", DiagnosticReportResolver.class, DiagnosticReport.class);
+        testResolver("diagnosticreport-test", DiagnosticReport.class);
     }
 
     @Test
     public void testEnrollmentRequestResolver() {
-        testResolver("enrollmentrequest-test", EnrollmentRequestResolver.class, EnrollmentRequest.class);
+        testResolver("enrollmentrequest-test", EnrollmentRequest.class);
     }
 
     @Test
     public void testImmunizationRecommendationResolver() {
-        testResolver(
-                "immunizationrecommendation-test",
-                ImmunizationRecommendationResolver.class,
-                ImmunizationRecommendation.class);
+        testResolver("immunizationrecommendation-test", ImmunizationRecommendation.class);
     }
 
     @Test
     public void testMedicationRequestResolver() {
-        testResolver("medicationrequest-test", MedicationRequestResolver.class, MedicationRequest.class);
+        testResolver("medicationrequest-test", MedicationRequest.class);
     }
 
     @Test
     public void testNutritionOrderResolver() {
-        testResolver("nutritionorder-test", NutritionOrderResolver.class, NutritionOrder.class);
+        testResolver("nutritionorder-test", NutritionOrder.class);
     }
 
     @Test
-    @Disabled("Procedure is not a valid value for ActivityDefinitionKind")
     public void testProcedureResolver() {
-        testResolver("procedure-test", ProcedureResolver.class, Procedure.class);
+        testResolver("procedure-test", Procedure.class);
     }
 
     @Test
-    @Disabled("RequestGroup is not a valid value for ActivityDefinitionKind")
     public void testRequestGroupResolver() {
-        testResolver("requestgroup-test", RequestGroupResolver.class, RequestGroup.class);
+        testResolver("requestgroup-test", RequestGroup.class);
     }
 
     @Test
     public void testServiceRequestResolver() {
-        testResolver("servicerequest-test", ServiceRequestResolver.class, ServiceRequest.class);
+        testResolver("servicerequest-test", ServiceRequest.class);
     }
 
     @Test
     public void testSupplyRequestResolver() {
-        testResolver("supplyrequest-test", SupplyRequestResolver.class, SupplyRequest.class);
+        testResolver("supplyrequest-test", SupplyRequest.class);
     }
 
     @Test
     public void testTaskResolver() {
-        testResolver("task-test", TaskResolver.class, Task.class);
+        testResolver("task-test", Task.class);
     }
 
     @Test
     public void testVisionPrescriptionResolver() {
-        testResolver("visionprescription-test", VisionPrescriptionResolver.class, VisionPrescription.class);
+        testResolver("visionprescription-test", VisionPrescription.class);
+    }
+
+    @Test
+    public void testUnsupported() {
+        assertThrows(FHIRException.class, () -> {
+            testResolver("unsupported-test", Task.class);
+        });
     }
 }

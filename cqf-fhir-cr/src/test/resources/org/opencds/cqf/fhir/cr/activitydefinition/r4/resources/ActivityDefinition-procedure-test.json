@@ -1,9 +1,15 @@
 {
   "resourceType": "ActivityDefinition",
   "id": "procedure-test",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
+      "valueString": "Procedure"
+    }
+  ],
   "name": "Procedure_Test",
   "title": "CreateProcedure",
   "status": "draft",
   "description": "Create the procedure.",
-  "kind": "Procedure"
+  "kind": "Task"
 }

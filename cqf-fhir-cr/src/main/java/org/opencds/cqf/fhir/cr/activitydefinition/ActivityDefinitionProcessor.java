@@ -41,23 +41,10 @@ public class ActivityDefinitionProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
-        this.requestResolverFactory =
-                requestResolverFactory == null ? getDefaultRequestResolverFactory() : requestResolverFactory;
-    }
-
-    private IRequestResolverFactory getDefaultRequestResolverFactory() {
-        var fhirVersion = repository.fhirContext().getVersion().getVersion();
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.Dstu3ResolverFactory();
-            case R4:
-                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R4ResolverFactory();
-            case R5:
-                return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R5ResolverFactory();
-            default:
-                throw new IllegalArgumentException(
-                        String.format("No default resolver factory exists for FHIR version: %s", fhirVersion));
-        }
+        this.requestResolverFactory = requestResolverFactory == null
+                ? IRequestResolverFactory.getDefault(
+                        repository.fhirContext().getVersion().getVersion())
+                : requestResolverFactory;
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

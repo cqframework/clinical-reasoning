@@ -15,18 +15,6 @@ public abstract class BaseRequestResourceResolver {
     public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
     public static final String MISSING_CODE_PROPERTY = "Missing required code property";
 
-    // protected String subjectId;
-    // protected String encounterId;
-    // protected String practitionerId;
-    // protected String organizationId;
-
-    // protected BaseRequestResourceResolver() {
-    //     // this.subjectId = subjectId;
-    //     // this.encounterId = encounterId;
-    //     // this.practitionerId = practitionerId;
-    //     // this.organizationId = organizationId;
-    // }
-
     public abstract IBaseResource resolve(
             IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId);
 }

@@ -1,9 +1,23 @@
 {
   "resourceType": "ActivityDefinition",
   "id": "diagnosticreport-test",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
+      "valueString": "DiagnosticReport"
+    }
+  ],
   "name": "DiagnosticReport_Test",
   "title": "CreateDiagnosticReport",
   "status": "draft",
   "description": "Create the diagnostic report.",
-  "kind": "DiagnosticReport"
+  "kind": "Task",
+  "code": {
+    "coding": [
+      {
+        "system": "http://test/fhir/system",
+        "code": "Test"
+      }
+    ]
+  }
 }

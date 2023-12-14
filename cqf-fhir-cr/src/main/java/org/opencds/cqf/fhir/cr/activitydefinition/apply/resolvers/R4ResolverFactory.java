@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ServiceRequ
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.SupplyRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.TaskResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.VisionPrescriptionResolver;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +36,16 @@ public class R4ResolverFactory implements IRequestResolverFactory {
     @Override
     public BaseRequestResourceResolver create(IBaseResource baseActivityDefinition) {
         var activityDefinition = (ActivityDefinition) baseActivityDefinition;
-        // TODO: Define extension to specify a custom ActivityDefinitionKind
-        var hasCustomActivity = false;
-        if (hasCustomActivity) {
+        if (activityDefinition.hasExtension(Constants.CPG_CUSTOM_ACTIVITY_KIND)) {
             return new CustomActivityResolver(activityDefinition);
         }
-        var resourceType = ResourceType.fromCode(activityDefinition.getKind().toCode());
+        var kind = activityDefinition.hasExtension(Constants.CPG_ACTIVITY_KIND)
+                ? activityDefinition
+                        .getExtensionByUrl(Constants.CPG_ACTIVITY_KIND)
+                        .getValueAsPrimitive()
+                        .getValueAsString()
+                : activityDefinition.getKind().toCode();
+        var resourceType = ResourceType.fromCode(kind);
         switch (resourceType) {
             case Appointment:
                 return new AppointmentResolver(activityDefinition);

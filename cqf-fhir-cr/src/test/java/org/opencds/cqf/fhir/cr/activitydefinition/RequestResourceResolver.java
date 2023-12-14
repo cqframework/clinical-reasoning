@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
@@ -13,42 +14,38 @@ public class RequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
 
     public static class Given {
+        private IRequestResolverFactory resolverFactory;
         private Repository repository;
-        private IIdType activityDefinitionId;
-        private Class<? extends IBaseResource> activityDefinitionClass;
-        private Class<? extends BaseRequestResourceResolver> resolverClass;
+        private String activityDefinitionId;
 
         public Given repository(Repository repository) {
             this.repository = repository;
+            this.resolverFactory = IRequestResolverFactory.getDefault(
+                    repository.fhirContext().getVersion().getVersion());
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = TestRepositoryFactory.createRepository(
                     fhirContext, this.getClass(), CLASS_PATH + "/" + repositoryPath, IGLayoutMode.TYPE_PREFIX);
-            return this;
-        }
-
-        public Given resolverClasses(
-                Class<? extends BaseRequestResourceResolver> resolverClass,
-                Class<? extends IBaseResource> activityDefinitionClass) {
-            this.resolverClass = resolverClass;
-            this.activityDefinitionClass = activityDefinitionClass;
+            this.resolverFactory =
+                    IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());
             return this;
         }
 
         public Given activityDefinition(String activityDefinitionId) {
-            this.activityDefinitionId = Ids.newId(activityDefinitionClass, activityDefinitionId);
+            this.activityDefinitionId = activityDefinitionId;
             return this;
         }
 
         private BaseRequestResourceResolver buildResolver() {
-            try {
-                var activityDefinition = repository.read(activityDefinitionClass, activityDefinitionId);
-                return resolverClass.getConstructor(activityDefinitionClass).newInstance(activityDefinition);
-            } catch (Exception e) {
-                return null;
-            }
+            var activityDefinitionClass = repository
+                    .fhirContext()
+                    .getResourceDefinition("ActivityDefinition")
+                    .getImplementingClass();
+            var activityDefinition =
+                    repository.read(activityDefinitionClass, Ids.newId(activityDefinitionClass, activityDefinitionId));
+            return resolverFactory.create(activityDefinition);
         }
 
         public When when() {

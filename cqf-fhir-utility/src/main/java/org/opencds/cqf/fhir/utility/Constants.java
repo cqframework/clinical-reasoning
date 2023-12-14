@@ -46,6 +46,11 @@ public class Constants {
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
     // public static final String CQF_QUESTIONNAIRE =
     // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
+
+    public static final String CPG_CUSTOM_ACTIVITY_KIND =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
+    public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
+
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     // This is only for dstu3 since the Expression type does not exist in that version
     public static final String CQF_EXPRESSION_LANGUAGE =

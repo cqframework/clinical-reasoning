@@ -1,15 +1,15 @@
 {
   "resourceType": "ActivityDefinition",
-  "id": "requestgroup-test",
+  "id": "unsupported-test",
   "extension": [
     {
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
-      "valueString": "RequestGroup"
+      "valueString": "PlanDefinition"
     }
   ],
-  "name": "RequestGroup_Test",
-  "title": "CreateRequestGroup",
+  "name": "Unsupported_Test",
+  "title": "CreateImpossibleTask",
   "status": "draft",
-  "description": "Create the request group.",
+  "description": "Create the impossible task.",
   "kind": "Task"
 }

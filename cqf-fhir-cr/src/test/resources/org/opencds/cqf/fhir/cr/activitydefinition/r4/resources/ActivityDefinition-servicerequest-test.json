@@ -14,5 +14,10 @@
         "code": "Test"
       }
     ]
-  }
+  },
+  "bodySite": [
+    {
+      "text": "body site test"
+    }
+  ]
 }

@@ -7,6 +7,12 @@
       "valueString": "DiagnosticReport"
     }
   ],
+  "relatedArtifact": [
+    {
+      "url": "http://test.fhir.org/test-artifact",
+      "display": "Test Artifact"
+    }
+  ],
   "name": "DiagnosticReport_Test",
   "title": "CreateDiagnosticReport",
   "status": "draft",

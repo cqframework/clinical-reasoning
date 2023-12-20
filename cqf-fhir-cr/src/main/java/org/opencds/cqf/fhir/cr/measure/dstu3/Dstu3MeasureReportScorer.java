@@ -26,8 +26,7 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
 
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReport.MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
-        return measureScoring
-                .entrySet().stream().findFirst().orElseThrow().getValue();
+        return measureScoring.entrySet().stream().findFirst().orElseThrow().getValue();
     }
 
     protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {

@@ -132,8 +132,8 @@ public class MeasureEvaluator {
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
-            measurementPeriod = (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd,
-                    this.context.getState());
+            measurementPeriod =
+                    (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
             this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
             return;
         }
@@ -156,8 +156,8 @@ public class MeasureEvaluator {
 
     protected Interval convertInterval(Interval interval, String targetType) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1,
-                sourceTypeQualified.length());
+        String sourceType =
+                sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
         if (sourceType.equals(targetType)) {
             return interval;
         }
@@ -256,8 +256,8 @@ public class MeasureEvaluator {
             if ((Boolean.TRUE.equals(result))) {
                 var ref = Libraries.resolveExpressionRef(
                         subjectType, this.context.getState().getCurrentLibrary());
-                Object booleanResult = this.context.getEvaluationVisitor().visitExpressionDef(ref,
-                        this.context.getState());
+                Object booleanResult =
+                        this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
                 clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
@@ -337,8 +337,8 @@ public class MeasureEvaluator {
 
     protected void evaluateProportion(GroupDef groupDef, String subjectType, String subjectId) {
         // Are they in the initial population?
-        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
-                groupDef.getSingle(INITIALPOPULATION), null);
+        boolean inInitialPopulation =
+                evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
         if (inInitialPopulation) {
             // Are they in the denominator?
             boolean inDenominator = evaluatePopulationMembership(
@@ -375,8 +375,8 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType, String subjectId) {
-        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
-                groupDef.getSingle(INITIALPOPULATION), null);
+        boolean inInitialPopulation =
+                evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?

@@ -18,24 +18,16 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
     @Override
     public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            // Dstu3 only has MeasureScoring defined on Measure level, retrieve first MeasureScoring defined
+            // Dstu3 only has MeasureScoring defined on Measure level, retrieve first
+            // MeasureScoring defined
             scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
         }
     }
 
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReport.MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
-        MeasureScoring measureScoringFromGroup = null;
-
-        // Dstu3 only has MeasureScoring defined on Measure level, retrieve first MeasureScoring defined
-        for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
-            measureScoringFromGroup = entry.getValue();
-            break;
-        }
-        if (measureScoringFromGroup == null) {
-            throw new IllegalStateException("No MeasureScoring value set");
-        }
-        return measureScoringFromGroup;
+        return measureScoring
+                .entrySet().stream().findFirst().orElseThrow().getValue();
     }
 
     protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {

@@ -32,11 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the core Measure evaluation logic that's defined in the Quality Measure
- * implementation guide and HQMF specifications. There are a number of model-independent concepts
- * such as "groups", "populations", and "stratifiers" that can be used across a number of different
- * data models including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be
- * model-independent so that it can be used in any Java-based implementation of Quality Measure
+ * This class implements the core Measure evaluation logic that's defined in the
+ * Quality Measure
+ * implementation guide and HQMF specifications. There are a number of
+ * model-independent concepts
+ * such as "groups", "populations", and "stratifiers" that can be used across a
+ * number of different
+ * data models including FHIR, QDM, and QICore. To the extent feasible, this
+ * class is intended to be
+ * model-independent so that it can be used in any Java-based implementation of
+ * Quality Measure
  * evaluation.
  *
  * @see <a href=
@@ -127,8 +132,8 @@ public class MeasureEvaluator {
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
-            measurementPeriod =
-                    (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
+            measurementPeriod = (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd,
+                    this.context.getState());
             this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
             return;
         }
@@ -151,8 +156,8 @@ public class MeasureEvaluator {
 
     protected Interval convertInterval(Interval interval, String targetType) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType =
-                sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1,
+                sourceTypeQualified.length());
         if (sourceType.equals(targetType)) {
             return interval;
         }
@@ -251,8 +256,8 @@ public class MeasureEvaluator {
             if ((Boolean.TRUE.equals(result))) {
                 var ref = Libraries.resolveExpressionRef(
                         subjectType, this.context.getState().getCurrentLibrary());
-                Object booleanResult =
-                        this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
+                Object booleanResult = this.context.getEvaluationVisitor().visitExpressionDef(ref,
+                        this.context.getState());
                 clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
@@ -332,8 +337,8 @@ public class MeasureEvaluator {
 
     protected void evaluateProportion(GroupDef groupDef, String subjectType, String subjectId) {
         // Are they in the initial population?
-        boolean inInitialPopulation =
-                evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
+                groupDef.getSingle(INITIALPOPULATION), null);
         if (inInitialPopulation) {
             // Are they in the denominator?
             boolean inDenominator = evaluatePopulationMembership(
@@ -370,8 +375,8 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(GroupDef groupDef, String subjectType, String subjectId) {
-        boolean inInitialPopulation =
-                evaluatePopulationMembership(subjectType, subjectId, groupDef.getSingle(INITIALPOPULATION), null);
+        boolean inInitialPopulation = evaluatePopulationMembership(subjectType, subjectId,
+                groupDef.getSingle(INITIALPOPULATION), null);
 
         if (inInitialPopulation) {
             // Are they in the MeasureType population?
@@ -400,7 +405,8 @@ public class MeasureEvaluator {
             Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
 
-        switch (measureScoring.get(groupDef)) {
+        var scoring = measureScoring.get(groupDef);
+        switch (scoring) {
             case PROPORTION:
             case RATIO:
                 evaluateProportion(groupDef, subjectType, subjectId);

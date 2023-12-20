@@ -21,12 +21,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             MeasureScoring measureScoringFromGroup = null;
             for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
-                if(entry.getKey().id().equals(mrgc.getId())){
+                if (entry.getKey().id().equals(mrgc.getId())) {
                     measureScoringFromGroup = entry.getValue();
                     break;
                 }
             }
-            if(measureScoringFromGroup == null){
+            if (measureScoringFromGroup == null) {
                 throw new IllegalStateException("No MeasureScoring value set");
             }
             scoreGroup(measureScoringFromGroup, mrgc);

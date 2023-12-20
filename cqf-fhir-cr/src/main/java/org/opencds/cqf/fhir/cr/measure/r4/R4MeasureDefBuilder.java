@@ -5,11 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -41,7 +39,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         this.enforceIds = enforceIds;
     }
 
-    public final String CQFM_SCORING_EXT_URL="http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
+    public final String CQFM_SCORING_EXT_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
 
     @Override
     public MeasureDef build(Measure measure) {
@@ -64,16 +62,17 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             checkId(group);
 
             // Group MeasureScoring
-            if(measureLevelMeasureScoring == null && group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null){
+            if (measureLevelMeasureScoring == null && group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null) {
                 throw new IllegalStateException("MeasureScoring must be specified on Group or Measure");
             }
             MeasureScoring groupMeasureScoringCode = null;
-            if(group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null){
-                CodeableConcept coding = (CodeableConcept) group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
+            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null) {
+                CodeableConcept coding = (CodeableConcept)
+                        group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
                 var code = coding.getCodingFirstRep().getCode();
                 groupMeasureScoringCode = getGroupMeasureScoring(code);
             }
-            if(group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null && measureLevelMeasureScoring != null){
+            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null && measureLevelMeasureScoring != null) {
                 groupMeasureScoringCode = measureLevelMeasureScoring;
             }
 
@@ -122,12 +121,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                groupMeasureScoring,
-                groups,
-                sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -159,11 +153,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private MeasureScoring getMeasureScoring(Measure measure){
+    private MeasureScoring getMeasureScoring(Measure measure) {
         return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
     }
 
-    private MeasureScoring getGroupMeasureScoring(String scoringCode){
+    private MeasureScoring getGroupMeasureScoring(String scoringCode) {
         return MeasureScoring.fromCode(scoringCode);
     }
 }

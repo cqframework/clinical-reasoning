@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private final boolean enforceIds;
+
     public Dstu3MeasureDefBuilder() {
         this(false);
     }
@@ -82,21 +83,16 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 stratifiers.add(stratifierDef);
             }
             var groupDef = new GroupDef(
-                group.getId(),
-                null, // No code on group in dstu3
-                stratifiers,
-                populations);
+                    group.getId(),
+                    null, // No code on group in dstu3
+                    stratifiers,
+                    populations);
             groups.add(groupDef);
             groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
 
         return new MeasureDef(
-            measure.getId(),
-            measure.getUrl(),
-            measure.getVersion(),
-            groupMeasureScoring,
-            groups,
-            sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -128,7 +124,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private MeasureScoring getMeasureScoring(Measure measure){
+    private MeasureScoring getMeasureScoring(Measure measure) {
         return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
     }
 }

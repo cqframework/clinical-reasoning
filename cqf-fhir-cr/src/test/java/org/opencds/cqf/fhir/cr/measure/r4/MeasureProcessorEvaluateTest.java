@@ -188,14 +188,14 @@ public class MeasureProcessorEvaluateTest {
     @Test
     void measure_eval_group_measurescorer() {
         var when = Measure.given()
-            .repositoryFor("DischargedonAntithromboticTherapyFHIR")
-            .when()
-            .measureId("DischargedonAntithromboticTherapyFHIR")
-            .subject(null)
-            .periodStart("2018-01-01")
-            .periodEnd("2030-12-31")
-            .reportType("summary")
-            .evaluate();
+                .repositoryFor("DischargedonAntithromboticTherapyFHIR")
+                .when()
+                .measureId("DischargedonAntithromboticTherapyFHIR")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("summary")
+                .evaluate();
         MeasureReport report = when.then().report();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());

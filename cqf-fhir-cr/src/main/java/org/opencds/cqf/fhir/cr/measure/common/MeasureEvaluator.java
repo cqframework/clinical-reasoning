@@ -400,7 +400,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-        Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
+            Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
 
         switch (measureScoring.get(groupDef)) {

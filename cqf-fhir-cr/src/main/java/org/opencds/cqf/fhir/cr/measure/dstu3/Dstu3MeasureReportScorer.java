@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
@@ -8,15 +9,19 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(MeasureScoring measureScoring, MeasureReport measureReport) {
+    public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+        // Dstu3 only has MeasureScoring defined on Measure level,
+        // use that for all groups
+        var scoring = measureScoring.entrySet().stream().findFirst().get().getValue();
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            scoreGroup(measureScoring, mrgc);
+            scoreGroup(scoring, mrgc);
         }
     }
 

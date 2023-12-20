@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,11 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the core Measure evaluation logic that's defined in the Quality Measure
- * implementation guide and HQMF specifications. There are a number of model-independent concepts
- * such as "groups", "populations", and "stratifiers" that can be used across a number of different
- * data models including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be
- * model-independent so that it can be used in any Java-based implementation of Quality Measure
+ * This class implements the core Measure evaluation logic that's defined in the
+ * Quality Measure
+ * implementation guide and HQMF specifications. There are a number of
+ * model-independent concepts
+ * such as "groups", "populations", and "stratifiers" that can be used across a
+ * number of different
+ * data models including FHIR, QDM, and QICore. To the extent feasible, this
+ * class is intended to be
+ * model-independent so that it can be used in any Java-based implementation of
+ * Quality Measure
  * evaluation.
  *
  * @see <a href=
@@ -209,10 +215,7 @@ public class MeasureEvaluator {
                 type.toCode(),
                 subjectIds.size());
 
-        MeasureScoring scoring = measureDef.scoring();
-        if (scoring == null) {
-            throw new RuntimeException("MeasureScoring type is required in order to calculate.");
-        }
+        Map<GroupDef, MeasureScoring> scoring = measureDef.scoring();
 
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
@@ -229,7 +232,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateSubject(
-            MeasureDef measureDef, MeasureScoring scoring, String subjectType, String subjectId) {
+            MeasureDef measureDef, Map<GroupDef, MeasureScoring> scoring, String subjectType, String subjectId) {
         evaluateSdes(subjectId, measureDef.sdes());
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(scoring, groupDef, subjectType, subjectId);
@@ -399,9 +402,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-            MeasureScoring measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
+            Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
-        switch (measureScoring) {
+
+        var scoring = measureScoring.get(groupDef);
+        switch (scoring) {
             case PROPORTION:
             case RATIO:
                 evaluateProportion(groupDef, subjectType, subjectId);

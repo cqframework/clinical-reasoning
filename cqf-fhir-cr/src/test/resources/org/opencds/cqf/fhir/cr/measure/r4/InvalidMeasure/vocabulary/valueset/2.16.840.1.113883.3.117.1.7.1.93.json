@@ -1,0 +1,650 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.117.1.7.1.93",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.93",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.113883.3.117.1.7.1.93"
+  } ],
+  "version": "20180208",
+  "name": "PatientRefusal",
+  "title": "Patient Refusal",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "expansion": {
+    "identifier": "20200507",
+    "timestamp": "2021-01-14T20:59:45-07:00",
+    "contains": [ {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "105480006",
+      "display": "Refusal of treatment by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182890002",
+      "display": "Patient requests alternative treatment (finding)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182895007",
+      "display": "Drug declined by patient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182896008",
+      "display": "Drug declined by patient - dislikes taste (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182897004",
+      "display": "Drug declined by patient - side effects (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182898009",
+      "display": "Drug declined by patient - inconvenient (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182900006",
+      "display": "Drug declined by patient - patient beliefs (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182901005",
+      "display": "Drug declined by patient - alternative therapy (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "182903008",
+      "display": "Drug declined by patient - reason unknown (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183944003",
+      "display": "Procedure refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183945002",
+      "display": "Procedure refused for religious reason (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183946001",
+      "display": "Procedure refused - uncooperative (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183947005",
+      "display": "Refused procedure - after thought (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "183948000",
+      "display": "Refused procedure - parent's wish (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "275936005",
+      "display": "Patient noncompliance - general (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "371138003",
+      "display": "Refusal of treatment by parents (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "406149000",
+      "display": "Medication refused (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "413312003",
+      "display": "Patient non-compliant - refused service (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "416432009",
+      "display": "Procedure not wanted (situation)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "443390004",
+      "display": "Refused (qualifier value)"
+    }, {
+      "system": "http://snomed.info/sct",
+      "version": "2019-09",
+      "code": "609589008",
+      "display": "Refused by parents of subject (qualifier value)"
+    } ]
+  }
+}

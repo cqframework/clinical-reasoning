@@ -29,31 +29,31 @@ public class R4CqlExecutionService {
     }
 
     public Parameters evaluate(
-            // RequestDetails requestDetails,
-            String subject,
-            String expression,
-            Parameters parameters,
-            List<Parameters> library,
-            BooleanType useServerData,
-            Bundle data,
-            List<Parameters> prefetchData,
-            Endpoint dataEndpoint,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            String content) {
+        // RequestDetails requestDetails,
+        String subject,
+        String expression,
+        Parameters parameters,
+        List<Parameters> library,
+        BooleanType useServerData,
+        Bundle data,
+        List<Parameters> prefetchData,
+        Endpoint dataEndpoint,
+        Endpoint contentEndpoint,
+        Endpoint terminologyEndpoint,
+        String content) {
 
         var baseCqlExecutionProcessor = new BaseCqlExecutionProcessor();
 
         if (prefetchData != null) {
             return parameters(part("invalid parameters", (OperationOutcome)
-                    baseCqlExecutionProcessor.createIssue("warning", "prefetchData is not yet supported", repository)));
+                baseCqlExecutionProcessor.createIssue("warning", "prefetchData is not yet supported", repository)));
         }
 
         if (expression == null && content == null) {
             return parameters(part("invalid parameters", (OperationOutcome) baseCqlExecutionProcessor.createIssue(
-                    "error",
-                    "The $cql operation requires the expression parameter and/or content parameter to exist",
-                    repository)));
+                "error",
+                "The $cql operation requires the expression parameter and/or content parameter to exist",
+                repository)));
         }
 
         try {
@@ -67,7 +67,7 @@ public class R4CqlExecutionService {
             if (StringUtils.isBlank(content)) {
 
                 return (Parameters) libraryEngine.evaluateExpression(
-                        expression, parameters == null ? new Parameters() : parameters, subject, libraries, data);
+                    expression, parameters == null ? new Parameters() : parameters, subject, libraries, data);
             }
 
             var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, null);
@@ -75,16 +75,16 @@ public class R4CqlExecutionService {
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 
             return (Parameters) libraryEngine.evaluate(
-                    libraryIdentifier,
-                    subject,
-                    parameters,
-                    data,
-                    expression == null ? null : Collections.singleton(expression));
+                libraryIdentifier,
+                subject,
+                parameters,
+                data,
+                expression == null ? null : Collections.singleton(expression));
 
         } catch (Exception e) {
             e.printStackTrace();
             return parameters(part("evaluation error", (OperationOutcome)
-                    baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));
+                baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));
         }
     }
 }

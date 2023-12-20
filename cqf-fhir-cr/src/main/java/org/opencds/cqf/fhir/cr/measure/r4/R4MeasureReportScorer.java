@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -9,15 +10,26 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(MeasureScoring measureScoring, MeasureReport measureReport) {
+    public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            scoreGroup(measureScoring, mrgc);
+            MeasureScoring measureScoringFromGroup = null;
+            for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
+                if(entry.getKey().id().equals(mrgc.getId())){
+                    measureScoringFromGroup = entry.getValue();
+                    break;
+                }
+            }
+            if(measureScoringFromGroup == null){
+                throw new IllegalStateException("No MeasureScoring value set");
+            }
+            scoreGroup(measureScoringFromGroup, mrgc);
         }
     }
 

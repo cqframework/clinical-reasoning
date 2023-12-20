@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
@@ -209,7 +210,7 @@ public class MeasureEvaluator {
                 type.toCode(),
                 subjectIds.size());
 
-        MeasureScoring scoring = measureDef.scoring();
+        Map<GroupDef, MeasureScoring> scoring = measureDef.scoring();
         if (scoring == null) {
             throw new RuntimeException("MeasureScoring type is required in order to calculate.");
         }
@@ -229,7 +230,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateSubject(
-            MeasureDef measureDef, MeasureScoring scoring, String subjectType, String subjectId) {
+            MeasureDef measureDef, Map<GroupDef, MeasureScoring> scoring, String subjectType, String subjectId) {
         evaluateSdes(subjectId, measureDef.sdes());
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(scoring, groupDef, subjectType, subjectId);
@@ -399,9 +400,10 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-            MeasureScoring measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
+        Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
-        switch (measureScoring) {
+
+        switch (measureScoring.get(groupDef)) {
             case PROPORTION:
             case RATIO:
                 evaluateProportion(groupDef, subjectType, subjectId);

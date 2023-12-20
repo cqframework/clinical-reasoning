@@ -181,4 +181,24 @@ public class MeasureProcessorEvaluateTest {
         // Run again to find any issues with caching
         when.then().report();
     }
+    /**
+     * test to validate that measure with MeasureScorer specified at the group level
+     * and nothing on measure-level MeasureScorer
+     */
+    @Test
+    void measure_eval_group_measurescorer() {
+        var when = Measure.given()
+            .repositoryFor("DischargedonAntithromboticTherapyFHIR")
+            .when()
+            .measureId("DischargedonAntithromboticTherapyFHIR")
+            .subject(null)
+            .periodStart("2018-01-01")
+            .periodEnd("2030-12-31")
+            .reportType("summary")
+            .evaluate();
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(1, report.getGroup().size());
+        assertEquals(3, report.getGroupFirstRep().getPopulation().get(0).getCount());
+    }
 }

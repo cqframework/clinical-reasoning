@@ -17,16 +17,12 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
 
     @Override
     public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+        // Dstu3 only has MeasureScoring defined on Measure level,
+        // use that for all groups
+        var scoring = measureScoring.entrySet().stream().findFirst().get().getValue();
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            // Dstu3 only has MeasureScoring defined on Measure level, retrieve first
-            // MeasureScoring defined
-            scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
+            scoreGroup(scoring, mrgc);
         }
-    }
-
-    protected MeasureScoring getGroupMeasureScoring(
-            MeasureReport.MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
-        return measureScoring.entrySet().stream().findFirst().get().getValue();
     }
 
     protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {

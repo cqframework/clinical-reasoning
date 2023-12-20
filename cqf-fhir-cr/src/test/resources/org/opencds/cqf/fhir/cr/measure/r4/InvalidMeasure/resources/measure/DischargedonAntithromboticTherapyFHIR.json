@@ -809,18 +809,6 @@
       "id": "64f0daaf56d636294b157ea1",
       "extension": [
         {
-          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring",
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
-                "code": "proportion",
-                "display": "Proportion"
-              }
-            ]
-          }
-        },
-        {
           "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
           "valueCode": "Encounter"
         },

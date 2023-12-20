@@ -54,6 +54,9 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Groups
         MeasureScoring groupMeasureScoringCode = getMeasureScoring(measure);
+        if (groupMeasureScoringCode == null) {
+            throw new IllegalStateException("MeasureScoring must be specified on Measure");
+        }
         List<GroupDef> groups = new ArrayList<>();
         Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {

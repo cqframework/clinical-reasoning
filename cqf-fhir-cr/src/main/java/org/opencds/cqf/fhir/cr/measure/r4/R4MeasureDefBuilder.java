@@ -69,8 +69,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null) {
                 CodeableConcept coding = (CodeableConcept)
                         group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
-                var code = coding.getCodingFirstRep().getCode();
-                groupMeasureScoringCode = getGroupMeasureScoring(code);
+                groupMeasureScoringCode =
+                        getGroupMeasureScoring(coding.getCodingFirstRep().getCode());
             }
             if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null && measureLevelMeasureScoring != null) {
                 groupMeasureScoringCode = measureLevelMeasureScoring;

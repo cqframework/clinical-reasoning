@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -200,5 +201,28 @@ public class MeasureProcessorEvaluateTest {
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(3, report.getGroupFirstRep().getPopulation().get(0).getCount());
+    }
+
+    @Test
+    void measure_eval_group_measurescorer_invalidMeasureScore() {
+        // Removed MeasureScorer from Measure, should trigger exception
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("DischargedonAntithromboticTherapyFHIR")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("summary")
+                .evaluate();
+
+        String errorMsg = "MeasureScoring must be specified on Group or Measure";
+        MeasureReport report = null;
+        try {
+            report = when.then().report();
+        } catch (RuntimeException e) {
+            assertTrue(e.getCause().toString().contains(errorMsg));
+        }
+        assertNull(report);
     }
 }

@@ -12,13 +12,13 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
     public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
+            // Dstu3 only has MeasureScoring defined on Measure level, retrieve first MeasureScoring defined
             scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
         }
     }
@@ -26,36 +26,11 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReport.MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
         MeasureScoring measureScoringFromGroup = null;
-        // cycle through available Group Definitions to retrieve appropriate MeasureScoring
+
+        // Dstu3 only has MeasureScoring defined on Measure level, retrieve first MeasureScoring defined
         for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
-            // Take only MeasureScoring available
-            if (measureScoring.size() == 1) {
-                measureScoringFromGroup = entry.getValue();
-                break;
-            }
-            // Match by group id if available
-            if (mrgc.getId() != null && entry.getKey().id() != null) {
-                if (entry.getKey().id().equals(mrgc.getId())) {
-                    measureScoringFromGroup = entry.getValue();
-                    break;
-                }
-            }
-            // Match by group's population id
-            if (mrgc.getPopulation().size() == entry.getKey().populations().size()) {
-                int i = 0;
-                for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
-                    for (PopulationDef popDefEntry : entry.getKey().populations()) {
-                        if (popId.getId().equals(popDefEntry.id())) {
-                            i++;
-                            break;
-                        }
-                    }
-                }
-                // Check all populations found a match
-                if (i == mrgc.getPopulation().size()) {
-                    measureScoringFromGroup = entry.getValue();
-                }
-            }
+            measureScoringFromGroup = entry.getValue();
+            break;
         }
         if (measureScoringFromGroup == null) {
             throw new IllegalStateException("No MeasureScoring value set");

@@ -211,9 +211,6 @@ public class MeasureEvaluator {
                 subjectIds.size());
 
         Map<GroupDef, MeasureScoring> scoring = measureDef.scoring();
-        if (scoring == null) {
-            throw new RuntimeException("MeasureScoring type is required in order to calculate.");
-        }
 
         for (String subjectId : subjectIds) {
             if (subjectId == null) {

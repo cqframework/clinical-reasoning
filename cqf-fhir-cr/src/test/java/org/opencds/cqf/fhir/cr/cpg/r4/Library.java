@@ -231,7 +231,7 @@ public class Library {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            Parameters report = null;
+            Parameters report;
             try {
                 report = this.operation.get();
             } catch (Exception e) {

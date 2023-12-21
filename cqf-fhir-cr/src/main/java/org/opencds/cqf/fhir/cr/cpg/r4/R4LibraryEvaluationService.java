@@ -64,7 +64,6 @@ public class R4LibraryEvaluationService {
         try {
             return (Parameters) libraryEngine.evaluate(libraryIdentifier, subject, parameters, data, expressionSet);
         } catch (Exception e) {
-            e.printStackTrace();
             return parameters(part("evaluation error", (OperationOutcome)
                     baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));
         }

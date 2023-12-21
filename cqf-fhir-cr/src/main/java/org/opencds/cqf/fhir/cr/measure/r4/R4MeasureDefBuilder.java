@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -37,6 +39,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         this.enforceIds = enforceIds;
     }
 
+    public final String CQFM_SCORING_EXT_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
+
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -51,9 +55,26 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // Groups
+        var measureLevelMeasureScoring = getMeasureScoring(measure);
         List<GroupDef> groups = new ArrayList<>();
+        Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
             checkId(group);
+
+            // Group MeasureScoring
+            if (measureLevelMeasureScoring == null && group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null) {
+                throw new IllegalStateException("MeasureScoring must be specified on Group or Measure");
+            }
+            MeasureScoring groupMeasureScoringCode = null;
+            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null) {
+                CodeableConcept coding = (CodeableConcept)
+                        group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
+                groupMeasureScoringCode =
+                        getGroupMeasureScoring(coding.getCodingFirstRep().getCode());
+            }
+            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null && measureLevelMeasureScoring != null) {
+                groupMeasureScoringCode = measureLevelMeasureScoring;
+            }
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -94,17 +115,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 stratifiers.add(stratifierDef);
             }
-
-            groups.add(new GroupDef(group.getId(), conceptToConceptDef(group.getCode()), stratifiers, populations));
+            var groupDef = new GroupDef(group.getId(), conceptToConceptDef(group.getCode()), stratifiers, populations);
+            groups.add(groupDef);
+            groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
 
         return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
-                sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -134,5 +151,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
+    }
+
+    private MeasureScoring getMeasureScoring(Measure measure) {
+        return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+    }
+
+    private MeasureScoring getGroupMeasureScoring(String scoringCode) {
+        return MeasureScoring.fromCode(scoringCode);
     }
 }

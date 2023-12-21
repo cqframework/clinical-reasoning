@@ -225,34 +225,34 @@ public class Library {
             return this;
         }
 
-        public Library.SelectedReport then() {
+        public Library.SelectedParameters then() {
             if (this.operation == null) {
                 throw new IllegalStateException(
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            Parameters report;
+            Parameters parameters;
             try {
-                report = this.operation.get();
+                parameters = this.operation.get();
             } catch (Exception e) {
                 throw new IllegalStateException("error when running 'then' and invoking the chosen operation", e);
             }
 
-            return new Library.SelectedReport(report);
+            return new Library.SelectedParameters(parameters);
         }
     }
 
-    public static class SelectedReport extends Library.Selected<Parameters, Void> {
-        public SelectedReport(Parameters report) {
-            super(report, null);
+    public static class SelectedParameters extends Library.Selected<Parameters, Void> {
+        public SelectedParameters(Parameters parameters) {
+            super(parameters, null);
         }
 
-        public Library.SelectedReport passes(Library.Validator<Parameters> reportValidator) {
-            reportValidator.validate(value());
+        public Library.SelectedParameters passes(Library.Validator<Parameters> parametersValidator) {
+            parametersValidator.validate(value());
             return this;
         }
 
-        public Parameters report() {
+        public Parameters parameters() {
             return this.value();
         }
     }

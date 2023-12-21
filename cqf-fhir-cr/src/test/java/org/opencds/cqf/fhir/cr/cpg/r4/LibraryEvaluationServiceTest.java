@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -23,7 +26,7 @@ public class LibraryEvaluationServiceTest {
                 .id(libId)
                 .parameters(params)
                 .evaluateLibrary();
-        var report = when.then().report();
+        var report = when.then().parameters();
         assertNotNull(report);
         assertTrue(report.hasParameter("Has Asthma Diagnosis"));
         assertTrue(((BooleanType) report.getParameter("Has Asthma Diagnosis").getValue()).booleanValue());
@@ -39,7 +42,7 @@ public class LibraryEvaluationServiceTest {
                 .id(libId)
                 .parameters(params)
                 .evaluateLibrary();
-        var report = when.then().report();
+        var report = when.then().parameters();
 
         assertNotNull(report);
         assertTrue(report.hasParameter("Initial Population"));
@@ -48,6 +51,26 @@ public class LibraryEvaluationServiceTest {
         assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
         assertTrue(report.hasParameter("Denominator"));
         assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
+    }
+
+    @Test
+    void libraryEvaluationService_SimpleLibraryExpression() {
+        List<String> expressionList = new ArrayList<>();
+        expressionList.add("Numerator");
+
+        var libId = new IdType("Library", "SimpleR4Library");
+        var when = Library.given()
+                .repositoryFor("libraryeval")
+                .when()
+                .id(libId)
+                .subject("Patient/SimplePatient")
+                .expressionList(expressionList)
+                .evaluateLibrary();
+        var report = when.then().parameters();
+
+        assertNotNull(report);
+        assertTrue(report.hasParameter("Numerator"));
+        assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
     }
 
     @Test
@@ -60,7 +83,7 @@ public class LibraryEvaluationServiceTest {
                 .id(libId)
                 .parameters(params)
                 .evaluateLibrary();
-        var report = when.then().report();
+        var report = when.then().parameters();
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("evaluation error", report.getParameterFirstRep().getName());
@@ -72,6 +95,24 @@ public class LibraryEvaluationServiceTest {
                         .getIssueFirstRep()
                         .getDetails()
                         .getText());
+    }
+
+    @Test
+    void libraryEvaluationService_ErrorPrefetchParam() {
+        Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));
+        var libId = new IdType("Library", "ErrorLibrary");
+        var when = Library.given()
+                .repositoryFor("libraryeval")
+                .when()
+                .id(libId)
+                .prefetchData(Collections.singletonList(params))
+                .evaluateLibrary();
+        var report = when.then().parameters();
+        assertTrue(report.hasParameter());
+        assertTrue(report.getParameterFirstRep().hasName());
+        assertEquals("invalid parameters", report.getParameterFirstRep().getName());
+        assertTrue(report.getParameterFirstRep().hasResource());
+        assertTrue(report.getParameterFirstRep().getResource() instanceof OperationOutcome);
     }
 
     // ToDo: bundle test

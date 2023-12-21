@@ -56,7 +56,6 @@ public class R4LibraryEvaluationService {
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);
 
-        evaluationSettings.getLibraryCache().remove(libraryIdentifier);
         Set<String> expressionSet = null;
         if (expression != null) {
             expressionSet = new HashSet<>(expression);

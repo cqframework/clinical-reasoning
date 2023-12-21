@@ -37,7 +37,7 @@ public class CqlEvaluationServiceTest {
                 .subject("Patient/SimplePatient")
                 .content(content)
                 .evaluateCql();
-        var results = when.then().report();
+        var results = when.then().parameters();
         assertTrue(results.hasParameter());
         assertEquals(3, results.getParameter().size());
     }
@@ -69,7 +69,7 @@ public class CqlEvaluationServiceTest {
                 .expression("Numerator")
                 .content(content)
                 .evaluateCql();
-        var results = when.then().report();
+        var results = when.then().parameters();
         assertFalse(results.isEmpty());
         assertEquals(1, results.getParameter().size());
         assertTrue(results.getParameter("Numerator").getValue() instanceof BooleanType);
@@ -84,7 +84,7 @@ public class CqlEvaluationServiceTest {
                 .when()
                 .expression("5*5")
                 .evaluateCql();
-        var results = when.then().report();
+        var results = when.then().parameters();
         assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
@@ -99,7 +99,7 @@ public class CqlEvaluationServiceTest {
                 .parameters(evaluationParams)
                 .expression("year from %inputDate before 2020")
                 .evaluateCql();
-        var results = when.then().report();
+        var results = when.then().parameters();
         assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
@@ -112,7 +112,7 @@ public class CqlEvaluationServiceTest {
                 .when()
                 .expression(expression)
                 .evaluateCql();
-        var report = when.then().report();
+        var report = when.then().parameters();
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("evaluation error", report.getParameterFirstRep().getName());

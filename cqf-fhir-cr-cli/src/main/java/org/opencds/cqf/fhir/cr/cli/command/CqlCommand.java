@@ -33,43 +33,49 @@ import picocli.CommandLine.Option;
 public class CqlCommand implements Callable<Integer> {
     private static final Logger logger = LoggerFactory.getLogger(CqlCommand.class);
 
-    @Option(names = { "-fv", "--fhir-version" }, required = true)
+    @Option(
+            names = {"-fv", "--fhir-version"},
+            required = true)
     public String fhirVersion;
 
-    @Option(names = { "-op", "--options-path" })
+    @Option(names = {"-op", "--options-path"})
     public String optionsPath;
 
     @ArgGroup(multiplicity = "0..1", exclusive = false)
     public NamespaceParameter namespace;
 
     static class NamespaceParameter {
-        @Option(names = { "-nn", "--namespace-name" })
+        @Option(names = {"-nn", "--namespace-name"})
         public String namespaceName;
 
-        @Option(names = { "-nu", "--namespace-uri" })
+        @Option(names = {"-nu", "--namespace-uri"})
         public String namespaceUri;
     }
 
-    @Option(names = { "-rd", "--root-dir" })
+    @Option(names = {"-rd", "--root-dir"})
     public String rootDir;
 
-    @Option(names = { "-ig", "--ig-path" })
+    @Option(names = {"-ig", "--ig-path"})
     public String igPath;
 
     @ArgGroup(multiplicity = "1..*", exclusive = false)
     List<LibraryParameter> libraries;
 
     static class LibraryParameter {
-        @Option(names = { "-lu", "--library-url" }, required = true)
+        @Option(
+                names = {"-lu", "--library-url"},
+                required = true)
         public String libraryUrl;
 
-        @Option(names = { "-ln", "--library-name" }, required = true)
+        @Option(
+                names = {"-ln", "--library-name"},
+                required = true)
         public String libraryName;
 
-        @Option(names = { "-lv", "--library-version" })
+        @Option(names = {"-lv", "--library-version"})
         public String libraryVersion;
 
-        @Option(names = { "-t", "--terminology-url" })
+        @Option(names = {"-t", "--terminology-url"})
         public String terminologyUrl;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
@@ -78,33 +84,33 @@ public class CqlCommand implements Callable<Integer> {
         @ArgGroup(multiplicity = "0..*", exclusive = false)
         public List<ParameterParameter> parameters;
 
-        @Option(names = { "-e", "--expression" })
+        @Option(names = {"-e", "--expression"})
         public String[] expression;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
         public ContextParameter context;
 
         static class ContextParameter {
-            @Option(names = { "-c", "--context" })
+            @Option(names = {"-c", "--context"})
             public String contextName;
 
-            @Option(names = { "-cv", "--context-value" })
+            @Option(names = {"-cv", "--context-value"})
             public String contextValue;
         }
 
         static class ModelParameter {
-            @Option(names = { "-m", "--model" })
+            @Option(names = {"-m", "--model"})
             public String modelName;
 
-            @Option(names = { "-mu", "--model-url" })
+            @Option(names = {"-mu", "--model-url"})
             public String modelUrl;
         }
 
         static class ParameterParameter {
-            @Option(names = { "-p", "--parameter" })
+            @Option(names = {"-p", "--parameter"})
             public String parameterName;
 
-            @Option(names = { "-pv", "--parameter-value" })
+            @Option(names = {"-pv", "--parameter-value"})
             public String parameterValue;
         }
     }
@@ -199,9 +205,9 @@ public class CqlCommand implements Callable<Integer> {
             IBaseResource resource = (IBaseResource) value;
             result = resource.fhirType()
                     + (resource.getIdElement() != null
-                            && resource.getIdElement().hasIdPart()
-                                    ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                                    : "");
+                                    && resource.getIdElement().hasIdPart()
+                            ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                            : "");
         } else if (value instanceof IBase) {
             result = ((IBase) value).fhirType();
         } else if (value instanceof IBaseDatatype) {

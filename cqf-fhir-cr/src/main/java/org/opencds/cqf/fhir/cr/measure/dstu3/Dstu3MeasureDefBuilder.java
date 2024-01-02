@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -51,7 +53,12 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // Groups
+        MeasureScoring groupMeasureScoringCode = getMeasureScoring(measure);
+        if (groupMeasureScoringCode == null) {
+            throw new IllegalStateException("MeasureScoring must be specified on Measure");
+        }
         List<GroupDef> groups = new ArrayList<>();
+        Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
             checkId(group);
 
@@ -78,21 +85,17 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 stratifiers.add(stratifierDef);
             }
-
-            groups.add(new GroupDef(
+            var groupDef = new GroupDef(
                     group.getId(),
                     null, // No code on group in dstu3
                     stratifiers,
-                    populations));
+                    populations);
+            groups.add(groupDef);
+            groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
 
         return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
-                sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -122,5 +125,9 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
+    }
+
+    private MeasureScoring getMeasureScoring(Measure measure) {
+        return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
     }
 }

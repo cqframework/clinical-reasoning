@@ -1,0 +1,21 @@
+{
+	"resourceType": "Library",
+	"id": "asthmatest",
+	"version": "1.0.0",
+	"name": "AsthmaTest",
+	"status": "draft",
+	"type": {
+		"coding": [
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/library-type",
+				"code": "logic-library"
+			}
+		]
+	},
+	"content": [
+		{
+			"contentType": "text/cql",
+			"url": "../../cql/asthmatest.cql"
+		}
+	]
+}

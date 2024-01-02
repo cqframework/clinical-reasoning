@@ -5,26 +5,26 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cql</artifactId>
-  <version>3.0.0-PRE14-SNAPSHOT</version>
+  <version>3.0.0-PRE15-SNAPSHOT</version>
   <name>FHIR Clinical Reasoning (CQL)</name>
   <description>Tools, utilities, code gen to support CQL in FHIR Clinical Reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE14-SNAPSHOT</version>
+    <version>3.0.0-PRE15-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE14-SNAPSHOT</version>
+      <version>3.0.0-PRE15-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-utility</artifactId>
-      <version>3.0.0-PRE14-SNAPSHOT</version>
+      <version>3.0.0-PRE15-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
@@ -53,13 +53,13 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.0.0-PRE14-SNAPSHOT</version>
+      <version>3.0.0-PRE15-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-jackson</artifactId>
-      <version>3.0.0-PRE14-SNAPSHOT</version>
+      <version>3.0.0-PRE15-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>

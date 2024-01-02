@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>docs</artifactId>
-  <version>3.0.0-PRE14-SNAPSHOT</version>
+  <version>3.0.0-PRE15-SNAPSHOT</version>
 
   <name>FHIR Clinical Reasoning (Documentation)</name>
   <description>Documentation website for FHIR Clinical Reasoning</description>
@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE14-SNAPSHOT</version>
+    <version>3.0.0-PRE15-SNAPSHOT</version>
   </parent>
 
   <dependencyManagement>
@@ -23,7 +23,7 @@
         <artifactId>cqf-fhir-bom</artifactId>
         <type>pom</type>
         <scope>import</scope>
-        <version>3.0.0-PRE14-SNAPSHOT</version>
+        <version>3.0.0-PRE15-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

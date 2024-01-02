@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.List;
+import java.util.Map;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class MeasureDef {
@@ -9,18 +10,23 @@ public class MeasureDef {
     private final String url;
     private final String version;
     private Interval defaultMeasurementPeriod;
-    private final MeasureScoring scoring;
+    private final Map<GroupDef, MeasureScoring> scoring;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
 
     public MeasureDef(
-            String id, String url, String version, MeasureScoring scoring, List<GroupDef> groups, List<SdeDef> sdes) {
+            String id,
+            String url,
+            String version,
+            Map<GroupDef, MeasureScoring> scoring,
+            List<GroupDef> groups,
+            List<SdeDef> sdes) {
         this.id = id;
         this.url = url;
         this.version = version;
-        this.scoring = scoring;
         this.groups = groups;
         this.sdes = sdes;
+        this.scoring = scoring;
     }
 
     public String id() {
@@ -33,10 +39,6 @@ public class MeasureDef {
 
     public String version() {
         return this.version;
-    }
-
-    public MeasureScoring scoring() {
-        return this.scoring;
     }
 
     public Interval getDefaultMeasurementPeriod() {
@@ -53,5 +55,9 @@ public class MeasureDef {
 
     public List<GroupDef> groups() {
         return this.groups;
+    }
+
+    public Map<GroupDef, MeasureScoring> scoring() {
+        return this.scoring;
     }
 }

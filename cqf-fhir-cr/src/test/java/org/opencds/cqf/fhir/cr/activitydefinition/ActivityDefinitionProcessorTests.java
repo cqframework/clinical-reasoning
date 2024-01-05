@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
@@ -139,5 +141,12 @@ public class ActivityDefinitionProcessorTests {
         Assertions.assertTrue(result instanceof org.hl7.fhir.r5.model.MedicationRequest);
         org.hl7.fhir.r5.model.MedicationRequest request = (org.hl7.fhir.r5.model.MedicationRequest) result;
         Assertions.assertTrue(request.getDoNotPerform());
+    }
+
+    @Test
+    public void testUnsupportedFhirVersion() throws IllegalArgumentException {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            IRequestResolverFactory.getDefault(FhirVersionEnum.R4B);
+        });
     }
 }

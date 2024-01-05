@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -11,6 +10,7 @@ import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.Enumerations.EventStatus;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class CommunicationResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -21,12 +21,11 @@ public class CommunicationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Communication resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public Communication resolve(IApplyOperationRequest request) {
         var communication = new Communication();
 
         communication.setStatus(EventStatus.UNKNOWN);
-        communication.setSubject(new Reference(subjectId));
+        communication.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasCode()) {
             communication.setReason(Collections.singletonList(new CodeableReference(activityDefinition.getCode())));

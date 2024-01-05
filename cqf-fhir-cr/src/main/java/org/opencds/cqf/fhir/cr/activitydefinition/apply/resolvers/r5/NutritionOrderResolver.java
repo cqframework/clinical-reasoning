@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.NutritionOrder;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class NutritionOrderResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,8 +16,7 @@ public class NutritionOrderResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public NutritionOrder resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public NutritionOrder resolve(IApplyOperationRequest request) {
         var nutritionOrder = new NutritionOrder();
 
         return nutritionOrder;

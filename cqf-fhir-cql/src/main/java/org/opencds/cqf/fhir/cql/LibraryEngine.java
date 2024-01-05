@@ -18,7 +18,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.slf4j.Logger;
@@ -42,6 +41,10 @@ public class LibraryEngine {
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         this.npmProcessor = npmProcessor;
+    }
+
+    public Repository getRepository() {
+        return repository;
     }
 
     private Pair<String, Object> buildContextParameter(String patientId) {
@@ -85,7 +88,7 @@ public class LibraryEngine {
             String patientId,
             List<Pair<String, String>> libraries,
             IBaseBundle bundle,
-            IBaseResource resourceParameter) {
+            IBase resourceParameter) {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
@@ -136,7 +139,7 @@ public class LibraryEngine {
             String libraryToBeEvaluated,
             IBaseParameters parameters,
             IBaseBundle bundle,
-            IBaseResource resourceParameter) {
+            IBase resourceParameter) {
         validateExpression(language, expression);
         List<IBase> results = null;
         IBaseParameters parametersResult;
@@ -240,7 +243,7 @@ public class LibraryEngine {
             CqfExpression expression,
             IBaseParameters params,
             IBaseBundle bundle,
-            IBaseResource resourceParameter) {
+            IBase resourceParameter) {
         var result = getExpressionResult(
                 patientId,
                 expression.getExpression(),

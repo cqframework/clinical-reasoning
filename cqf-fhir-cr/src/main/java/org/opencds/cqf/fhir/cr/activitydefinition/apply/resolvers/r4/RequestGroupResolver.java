@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class RequestGroupResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,8 +16,7 @@ public class RequestGroupResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public RequestGroup resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public RequestGroup resolve(IApplyOperationRequest request) {
         var requestGroup = new RequestGroup();
 
         return requestGroup;

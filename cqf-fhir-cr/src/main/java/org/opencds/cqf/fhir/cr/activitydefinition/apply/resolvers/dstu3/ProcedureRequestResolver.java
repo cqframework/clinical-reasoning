@@ -5,8 +5,8 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class ProcedureRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,24 +16,23 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ProcedureRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public ProcedureRequest resolve(IApplyOperationRequest request) {
         // status, intent, code, and subject are required
         var procedureRequest = new ProcedureRequest();
         procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.DRAFT);
         procedureRequest.setIntent(ProcedureRequest.ProcedureRequestIntent.PROPOSAL);
-        procedureRequest.setSubject(new Reference(subjectId));
+        procedureRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasUrl()) {
             procedureRequest.setDefinition(Collections.singletonList(new Reference(activityDefinition.getUrl())));
         }
 
-        if (practitionerId != null) {
-            procedureRequest.setRequester(
-                    new ProcedureRequest.ProcedureRequestRequesterComponent().setAgent(new Reference(practitionerId)));
-        } else if (organizationId != null) {
-            procedureRequest.setRequester(
-                    new ProcedureRequest.ProcedureRequestRequesterComponent().setAgent(new Reference(organizationId)));
+        if (request.hasPractitionerId()) {
+            procedureRequest.setRequester(new ProcedureRequest.ProcedureRequestRequesterComponent()
+                    .setAgent(new Reference(request.getPractitionerId())));
+        } else if (request.hasOrganizationId()) {
+            procedureRequest.setRequester(new ProcedureRequest.ProcedureRequestRequesterComponent()
+                    .setAgent(new Reference(request.getOrganizationId())));
         }
 
         // code can be set as a dynamicValue

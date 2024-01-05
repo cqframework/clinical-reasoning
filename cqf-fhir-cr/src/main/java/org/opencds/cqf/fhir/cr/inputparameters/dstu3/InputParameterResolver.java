@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
@@ -76,7 +77,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         return parameters;
     }
 
-    public Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
+    @Override
+    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input) {
+        var dataRequirements = input.stream().map(i -> (DataRequirement) i).collect(Collectors.toList());
         var params = parameters();
         if (parameters != null) {
             params.getParameter().addAll(parameters.getParameter());

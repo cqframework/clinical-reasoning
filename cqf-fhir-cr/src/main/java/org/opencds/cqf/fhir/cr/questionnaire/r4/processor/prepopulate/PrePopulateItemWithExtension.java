@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r4.processor.prepopulate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR4;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildR4;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import java.util.ArrayList;

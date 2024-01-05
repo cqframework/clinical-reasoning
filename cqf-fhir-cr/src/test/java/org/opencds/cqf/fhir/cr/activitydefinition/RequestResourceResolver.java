@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
@@ -38,29 +39,31 @@ public class RequestResourceResolver {
             return this;
         }
 
-        private BaseRequestResourceResolver buildResolver() {
+        private BaseRequestResourceResolver buildResolver(IBaseResource activityDefinition) {
+            return resolverFactory.create(activityDefinition);
+        }
+
+        public When when() {
             var activityDefinitionClass = repository
                     .fhirContext()
                     .getResourceDefinition("ActivityDefinition")
                     .getImplementingClass();
             var activityDefinition =
                     repository.read(activityDefinitionClass, Ids.newId(activityDefinitionClass, activityDefinitionId));
-            return resolverFactory.create(activityDefinition);
-        }
-
-        public When when() {
-            return new When(buildResolver());
+            return new When(activityDefinition, buildResolver(activityDefinition));
         }
     }
 
     public static class When {
+        private final IBaseResource activityDefinition;
         private final BaseRequestResourceResolver resolver;
         private IIdType subjectId;
         private IIdType encounterId;
         private IIdType practitionerId;
         private IIdType organizationId;
 
-        When(BaseRequestResourceResolver resolver) {
+        When(IBaseResource activityDefinition, BaseRequestResourceResolver resolver) {
+            this.activityDefinition = activityDefinition;
             this.resolver = resolver;
         }
 
@@ -85,7 +88,22 @@ public class RequestResourceResolver {
         }
 
         public IBaseResource resolve() {
-            return resolver.resolve(subjectId, encounterId, practitionerId, organizationId);
+            return resolver.resolve(new ApplyRequest(
+                    activityDefinition,
+                    subjectId,
+                    encounterId,
+                    practitionerId,
+                    organizationId,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null));
         }
     }
 }

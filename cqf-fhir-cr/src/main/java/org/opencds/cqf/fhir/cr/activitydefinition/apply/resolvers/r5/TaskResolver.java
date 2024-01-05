@@ -2,11 +2,11 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Task;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class TaskResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,7 +17,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Task resolve(IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public Task resolve(IApplyOperationRequest request) {
         var task = new Task();
         if (activityDefinition.hasExtension(TARGET_STATUS_URL)) {
             var value = activityDefinition.getExtensionByUrl(TARGET_STATUS_URL).getValue();

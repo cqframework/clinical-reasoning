@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class ServiceRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,8 +20,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ServiceRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public ServiceRequest resolve(IApplyOperationRequest request) {
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
@@ -30,17 +29,17 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
                         ? ServiceRequest.ServiceRequestIntent.fromCode(
                                 activityDefinition.getIntent().toCode())
                         : ServiceRequest.ServiceRequestIntent.ORDER);
-        serviceRequest.setSubject(new Reference(subjectId));
+        serviceRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasUrl()) {
             serviceRequest.setInstantiatesCanonical(
                     Collections.singletonList(new CanonicalType(activityDefinition.getUrl())));
         }
 
-        if (practitionerId != null) {
-            serviceRequest.setRequester(new Reference(practitionerId));
-        } else if (organizationId != null) {
-            serviceRequest.setRequester(new Reference(organizationId));
+        if (request.hasPractitionerId()) {
+            serviceRequest.setRequester(new Reference(request.getPractitionerId()));
+        } else if (request.hasOrganizationId()) {
+            serviceRequest.setRequester(new Reference(request.getOrganizationId()));
         }
 
         // code can be set as a dynamicValue

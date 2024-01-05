@@ -6,8 +6,8 @@ import org.hl7.fhir.dstu3.model.SupplyRequest;
 import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestOrderedItemComponent;
 import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestRequesterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class SupplyRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,16 +17,15 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public SupplyRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public SupplyRequest resolve(IApplyOperationRequest request) {
         var supplyRequest = new SupplyRequest();
 
-        if (practitionerId != null) {
-            supplyRequest.setRequester(new SupplyRequestRequesterComponent(new Reference(practitionerId)));
+        if (request.hasPractitionerId()) {
+            supplyRequest.setRequester(new SupplyRequestRequesterComponent(new Reference(request.getPractitionerId())));
         }
 
-        if (organizationId != null) {
-            supplyRequest.setRequester(new SupplyRequestRequesterComponent(new Reference(organizationId)));
+        if (request.hasOrganizationId()) {
+            supplyRequest.setRequester(new SupplyRequestRequesterComponent(new Reference(request.getOrganizationId())));
         }
 
         if (activityDefinition.hasCode()) {

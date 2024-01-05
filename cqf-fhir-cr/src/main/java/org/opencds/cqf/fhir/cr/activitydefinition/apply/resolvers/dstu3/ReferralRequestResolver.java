@@ -6,8 +6,8 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class ReferralRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,22 +17,23 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ReferralRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public ReferralRequest resolve(IApplyOperationRequest request) {
         // status, intent, code, and subject are required
         var referralRequest = new ReferralRequest();
         referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.DRAFT);
         referralRequest.setIntent(ReferralRequest.ReferralCategory.ORDER);
-        referralRequest.setSubject(new Reference(subjectId));
+        referralRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasUrl()) {
             referralRequest.setDefinition(Collections.singletonList(new Reference(activityDefinition.getUrl())));
         }
 
-        if (practitionerId != null) {
-            referralRequest.setRequester(new ReferralRequestRequesterComponent(new Reference(practitionerId)));
-        } else if (organizationId != null) {
-            referralRequest.setRequester(new ReferralRequestRequesterComponent(new Reference(organizationId)));
+        if (request.hasPractitionerId()) {
+            referralRequest.setRequester(
+                    new ReferralRequestRequesterComponent(new Reference(request.getPractitionerId())));
+        } else if (request.hasOrganizationId() != null) {
+            referralRequest.setRequester(
+                    new ReferralRequestRequesterComponent(new Reference(request.getOrganizationId())));
         }
 
         // code can be set as a dynamicValue

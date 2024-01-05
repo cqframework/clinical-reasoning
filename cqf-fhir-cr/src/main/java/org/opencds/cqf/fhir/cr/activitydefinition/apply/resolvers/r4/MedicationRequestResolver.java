@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class MedicationRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,8 +20,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public MedicationRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public MedicationRequest resolve(IApplyOperationRequest request) {
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.DRAFT);
@@ -30,7 +29,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
                         ? MedicationRequest.MedicationRequestIntent.fromCode(
                                 activityDefinition.getIntent().toCode())
                         : MedicationRequest.MedicationRequestIntent.ORDER);
-        medicationRequest.setSubject(new Reference(subjectId));
+        medicationRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasUrl()) {
             medicationRequest.setInstantiatesCanonical(

@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Claim;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class ClaimResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class ClaimResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Claim resolve(IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public Claim resolve(IApplyOperationRequest request) {
         var claim = new Claim();
 
         return claim;

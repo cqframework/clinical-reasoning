@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.build;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.build;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.prepopulateSubjectExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,8 +82,7 @@ public class PopulateProcessor implements IPopulateProcessor {
     }
 
     protected void resolveOperationOutcome(PopulateRequest request, IBaseResource resource) {
-        var pathResult = request.getModelResolver().resolvePath(request.getOperationOutcome(), "issue");
-        var issues = (pathResult instanceof List ? (List<?>) pathResult : null);
+        var issues = request.resolvePathList(request.getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
             request.getOperationOutcome()
                     .setId("populate-outcome-" + resource.getIdElement().getIdPart());

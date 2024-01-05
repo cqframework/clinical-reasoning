@@ -2,12 +2,12 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.CommunicationRequest;
 import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -18,19 +18,18 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public CommunicationRequest resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public CommunicationRequest resolve(IApplyOperationRequest request) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(RequestStatus.DRAFT);
-        communicationRequest.setSubject(new Reference(subjectId));
+        communicationRequest.setSubject(new Reference(request.getSubjectId()));
 
-        if (encounterId != null && !encounterId.isEmpty()) {
-            communicationRequest.setEncounter(new Reference(encounterId));
+        if (request.hasEncounterId()) {
+            communicationRequest.setEncounter(new Reference(request.getEncounterId()));
         }
 
-        if (practitionerId != null && !practitionerId.isEmpty()) {
-            communicationRequest.setRequester(new Reference(practitionerId));
+        if (request.hasPractitionerId()) {
+            communicationRequest.setRequester(new Reference(request.getPractitionerId()));
         }
 
         if (activityDefinition.hasDoNotPerform()) {

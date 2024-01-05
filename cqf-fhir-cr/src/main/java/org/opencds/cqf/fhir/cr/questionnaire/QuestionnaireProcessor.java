@@ -34,7 +34,6 @@ public class QuestionnaireProcessor {
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected Repository repository;
-    // protected LibraryEngine libraryEngine;
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
     protected IPopulateProcessor populateProcessor;
@@ -62,12 +61,12 @@ public class QuestionnaireProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("Questionnaire", this.repository);
-        this.fhirVersion = repository.fhirContext().getVersion().getVersion();
+        fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.generateProcessor =
-                generateProcessor != null ? generateProcessor : new GenerateProcessor(repository, modelResolver);
+                generateProcessor != null ? generateProcessor : new GenerateProcessor(this.repository, modelResolver);
         this.packageProcessor =
-                packageProcessor != null ? packageProcessor : new PackageProcessor(repository, modelResolver);
+                packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository, modelResolver);
         this.populateProcessor = populateProcessor != null ? populateProcessor : new PopulateProcessor();
     }
 

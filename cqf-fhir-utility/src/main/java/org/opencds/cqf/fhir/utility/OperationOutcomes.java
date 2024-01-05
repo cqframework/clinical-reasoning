@@ -10,6 +10,11 @@ public class OperationOutcomes {
 
     private OperationOutcomes() {}
 
+    /**
+     * Returns a new OperationOutcome resource for the given FHIR version
+     * @param fhirVersion
+     * @return
+     */
     public static IBaseOperationOutcome newOperationOutcome(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
@@ -24,6 +29,11 @@ public class OperationOutcomes {
         }
     }
 
+    /**
+     * Adds an issue to the OperationOutcome with a code of EXCEPTION, severity of ERROR.
+     * @param operationOutcome the OperationOutcome to add an issue to
+     * @param exceptionMessage the exception message for the issue
+     */
     public static void addExceptionToOperationOutcome(IBaseOperationOutcome operationOutcome, String exceptionMessage) {
         var fhirVersion = FhirVersions.forClass(operationOutcome.getClass());
         switch (fhirVersion) {

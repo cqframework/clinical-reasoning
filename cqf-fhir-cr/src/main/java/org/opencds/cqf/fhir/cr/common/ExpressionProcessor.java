@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
@@ -51,6 +52,16 @@ public class ExpressionProcessor {
                 .collect(Collectors.toList());
     }
 
+    public List<IBase> getExpressionResult(
+            IOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
+        return request
+                .getLibraryEngine()
+                .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getBundle())
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(
             IOperationRequest request, List<E> extensions, String extensionUrl) {
         var extension = extensions.stream()
@@ -71,11 +82,35 @@ public class ExpressionProcessor {
                         extension.getValue().toString(),
                         request.getDefaultLibraryUrl());
             case R4:
-                return new CqfExpression(
-                        (org.hl7.fhir.r4.model.Expression) extension.getValue(), request.getDefaultLibraryUrl(), null);
+                return CqfExpression.of(
+                        (org.hl7.fhir.r4.model.Expression) extension.getValue(), request.getDefaultLibraryUrl());
             case R5:
+                return CqfExpression.of(
+                        (org.hl7.fhir.r5.model.Expression) extension.getValue(), request.getDefaultLibraryUrl());
+
+            default:
+                return null;
+        }
+    }
+
+    public CqfExpression getCqfExpression(IOperationRequest request, IBaseBackboneElement element) {
+        if (element == null) {
+            return null;
+        }
+        switch (request.getFhirVersion()) {
+            case DSTU3:
                 return new CqfExpression(
-                        (org.hl7.fhir.r5.model.Expression) extension.getValue(), request.getDefaultLibraryUrl(), null);
+                        request.resolvePathString(element, "language"),
+                        request.resolvePathString(element, "expression"),
+                        request.getDefaultLibraryUrl());
+            case R4:
+                return CqfExpression.of(
+                        request.resolvePath(element, "expression", org.hl7.fhir.r4.model.Expression.class),
+                        request.getDefaultLibraryUrl());
+            case R5:
+                return CqfExpression.of(
+                        request.resolvePath(element, "expression", org.hl7.fhir.r5.model.Expression.class),
+                        request.getDefaultLibraryUrl());
 
             default:
                 return null;

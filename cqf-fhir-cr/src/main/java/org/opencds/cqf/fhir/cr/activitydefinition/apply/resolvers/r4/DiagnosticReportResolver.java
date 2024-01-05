@@ -5,12 +5,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
+import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
 
 public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -21,12 +21,11 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public DiagnosticReport resolve(
-            IIdType subjectId, IIdType encounterId, IIdType practitionerId, IIdType organizationId) {
+    public DiagnosticReport resolve(IApplyOperationRequest request) {
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
-        diagnosticReport.setSubject(new Reference(subjectId));
+        diagnosticReport.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasCode()) {
             diagnosticReport.setCode(activityDefinition.getCode());

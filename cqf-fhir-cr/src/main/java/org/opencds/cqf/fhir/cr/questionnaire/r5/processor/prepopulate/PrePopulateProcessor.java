@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r5.processor.prepopulate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR5;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.prepopulateSubjectExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildR5;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.prepopulateSubjectExtension;
 
 import java.util.ArrayList;
 import java.util.List;

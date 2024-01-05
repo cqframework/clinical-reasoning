@@ -1,135 +1,48 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Arrays;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
+import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
+import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ApplyProcessor {
+public class ApplyProcessor implements IApplyProcessor {
     private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
     protected static final List<String> EXCLUDED_EXTENSION_LIST =
             Arrays.asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
 
     protected final Repository repository;
-    protected final IBaseResource activityDefinition;
-    protected final ModelResolver modelResolver;
-    protected final FhirVersionEnum fhirVersion;
-    protected final LibraryEngine libraryEngine;
     protected final IRequestResolverFactory resolverFactory;
     protected final ExtensionProcessor extensionProcessor;
     protected final DynamicValueProcessor dynamicValueProcessor;
 
-    protected IIdType subjectId;
-    protected IIdType encounterId;
-    protected IIdType practitionerId;
-    protected IIdType organizationId;
-    protected IBaseParameters parameters;
-    protected Boolean useServerData;
-    protected IBaseBundle bundle;
-    protected String defaultLibraryUrl;
-    protected IInputParameterResolver inputParameterResolver;
-    protected IBaseOperationOutcome operationOutcome;
-
-    public ApplyProcessor(
-            Repository repository,
-            IBaseResource activityDefinition,
-            LibraryEngine libraryEngine,
-            IRequestResolverFactory resolverFactory) {
+    public ApplyProcessor(Repository repository, IRequestResolverFactory resolverFactory) {
         this.repository = repository;
-        this.activityDefinition = activityDefinition;
-        this.libraryEngine = libraryEngine;
         this.resolverFactory = resolverFactory;
-        fhirVersion = repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.extensionProcessor = new ExtensionProcessor(libraryEngine, modelResolver);
-        this.dynamicValueProcessor = new DynamicValueProcessor(libraryEngine, modelResolver, fhirVersion);
+        this.extensionProcessor = new ExtensionProcessor();
+        this.dynamicValueProcessor = new DynamicValueProcessor();
     }
 
-    public IBaseResource applyActivityDefinition(
-            String subject,
-            String encounter,
-            String practitioner,
-            String organization,
-            IBaseDatatype userType,
-            IBaseDatatype userLanguage,
-            IBaseDatatype userTaskContext,
-            IBaseDatatype setting,
-            IBaseDatatype settingContext,
-            IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
+    @Override
+    public IBaseResource apply(ApplyRequest request) {
         logger.info(
                 "Performing $apply operation on {}",
-                activityDefinition.getIdElement().getIdPart());
+                request.getActivityDefinition().getIdElement().getIdPart());
 
-        this.subjectId = Ids.newId(fhirVersion, Ids.ensureIdType(subject, "Patient"));
-        this.encounterId = encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter"));
-        this.practitionerId =
-                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner"));
-        this.organizationId =
-                organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization"));
-        this.parameters = parameters;
-        this.useServerData = useServerData;
-        this.bundle = bundle;
-        defaultLibraryUrl = getDefaultLibraryUrl();
-        inputParameterResolver = InputParameterResolverFactory.create(
-                repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
-
-        var resourceResolver = resolverFactory.create(activityDefinition);
-        var result = resourceResolver.resolve(subjectId, encounterId, practitionerId, organizationId);
-
-        resolveMeta(result);
-        resolveExtensions(result);
-        resolveDynamicValues(result);
+        var result = resolverFactory.create(request.getActivityDefinition()).resolve(request);
+        resolveMeta(request.getActivityDefinition(), result);
+        extensionProcessor.processExtensions(request, result, request.getActivityDefinition(), EXCLUDED_EXTENSION_LIST);
+        dynamicValueProcessor.processDynamicValues(request, result, request.getActivityDefinition());
 
         return result;
     }
 
-    protected String getDefaultLibraryUrl() {
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getReference()
-                        : null;
-            case R4:
-                return ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            case R5:
-                return ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            default:
-                return null;
-        }
-    }
-
-    protected void resolveMeta(IBaseResource resource) {
-        switch (fhirVersion) {
+    protected void resolveMeta(IBaseResource activityDefinition, IBaseResource resource) {
+        switch (repository.fhirContext().getVersion().getVersion()) {
             case DSTU3:
                 // Dstu3 does not have a profile property on ActivityDefinition so we are not resolving meta
                 break;
@@ -150,25 +63,5 @@ public class ApplyProcessor {
             default:
                 break;
         }
-    }
-
-    protected void resolveExtensions(IBaseResource resource) {
-        extensionProcessor.processExtensions(
-                subjectId,
-                bundle,
-                resource,
-                activityDefinition,
-                defaultLibraryUrl,
-                inputParameterResolver.getParameters());
-    }
-
-    protected void resolveDynamicValues(IBaseResource resource) {
-        dynamicValueProcessor.processDynamicValues(
-                subjectId,
-                bundle,
-                resource,
-                activityDefinition,
-                defaultLibraryUrl,
-                inputParameterResolver.getParameters());
     }
 }

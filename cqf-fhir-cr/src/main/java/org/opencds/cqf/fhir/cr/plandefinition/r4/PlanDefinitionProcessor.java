@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.r4;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -26,13 +25,11 @@ import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Goal;
 import org.hl7.fhir.r4.model.Goal.GoalLifecycleStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -200,12 +197,21 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         extractQuestionnaireResponse();
 
         this.request = new ApplyRequest(
+                planDefinition,
                 subjectId,
+                encounterId,
+                practitionerId,
+                organizationId,
+                userType,
+                userLanguage,
+                userTaskContext,
+                setting,
+                settingContext,
                 parameters,
+                useServerData,
                 bundle,
                 libraryEngine,
-                modelResolver,
-                planDefinition.getStructureFhirVersionEnum());
+                modelResolver);
 
         this.questionnaire = generateProcessor.generate(planDefinition.getIdPart());
         // this.questionnaire = new Questionnaire();
@@ -728,7 +734,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     private List<Bundle> getQuestionnairePackage(Extension prepopulateExtension) {
-        Bundle bundle = null;
+        Bundle qpBundle = null;
         // PlanDef action should provide endpoint for $questionnaire-for-order operation
         // as well as
         // the order id to pass
@@ -744,7 +750,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         if (prepopulateParameter == null) {
             throw new IllegalArgumentException(String.format("Parameter not found: %s ", parameterName));
         }
-        var orderId = prepopulateParameter.toString();
+        // var orderId = prepopulateParameter.toString();
 
         var questionnaireExtension =
                 prepopulateExtension.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE);
@@ -754,31 +760,31 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         }
 
         if (questionnaireExtension.getValue().hasType(FHIRAllTypes.CANONICAL.toCode())) {
-            var questionnaire = SearchHelper.searchRepositoryByCanonical(
+            var packageQuestionnaire = SearchHelper.searchRepositoryByCanonical(
                     repository, (CanonicalType) questionnaireExtension.getValue());
-            if (questionnaire != null) {
-                bundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(questionnaire));
+            if (packageQuestionnaire != null) {
+                qpBundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(packageQuestionnaire));
             }
         } else if (questionnaireExtension.getValue().hasType(FHIRAllTypes.URL.toCode())) {
             // Assuming package operation endpoint if the extension is using valueUrl
             // instead of
             // valueCanonical
-            bundle =
+            qpBundle =
                     callQuestionnairePackageOperation(((UrlType) questionnaireExtension.getValue()).getValueAsString());
         }
 
-        if (bundle == null) {
-            bundle = new Bundle();
+        if (qpBundle == null) {
+            qpBundle = new Bundle();
         }
 
-        return Collections.singletonList(bundle);
+        return Collections.singletonList(qpBundle);
     }
 
     private Bundle callQuestionnairePackageOperation(String url) {
-        String baseUrl = null;
-        String operation = null;
+        String baseUrl;
+        String operation;
         if (url.contains("$")) {
-            var urlSplit = url.split("$");
+            var urlSplit = url.split("\\$");
             baseUrl = urlSplit[0];
             operation = urlSplit[1];
         } else {
@@ -786,7 +792,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             operation = "questionnaire-package";
         }
 
-        Bundle bundle = null;
+        Bundle qpBundle = null;
         IGenericClient client = Clients.forUrl(repository.fhirContext(), baseUrl);
         // Clients.registerBasicAuth(client, user, password);
         try {
@@ -795,7 +801,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             // order and coverage resources are passed in
             Type order = null;
             Type coverage = null;
-            bundle = client.operation()
+            qpBundle = client.operation()
                     .onType(FHIRAllTypes.QUESTIONNAIRE.toCode())
                     .named('$' + operation)
                     .withParameters(
@@ -806,18 +812,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             logger.error("Error encountered calling $questionnaire-package operation: %s", e);
         }
 
-        return bundle;
-    }
-
-    private CqfExpression getCqfExpression(Expression expression, String defaultLibraryUrl, Extension altExtension) {
-        if (expression == null) {
-            return null;
-        }
-        Expression altExpression = null;
-        if (altExtension != null && altExtension.hasValue() && altExtension.getValue() instanceof Expression) {
-            altExpression = (Expression) altExtension.getValue();
-        }
-        return new CqfExpression(expression, defaultLibraryUrl, altExpression);
+        return qpBundle;
     }
 
     private void resolveDynamicValues(
@@ -836,10 +831,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 try {
                     var result = libraryEngine.resolveExpression(
                             subjectId.getIdPart(),
-                            getCqfExpression(
-                                    dynamicValue.getExpression(),
-                                    defaultLibraryUrl,
-                                    dynamicValue.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
+                            CqfExpression.of(dynamicValue.getExpression(), defaultLibraryUrl),
                             inputParams,
                             bundle,
                             requestGroup);
@@ -867,10 +859,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 try {
                     var results = libraryEngine.resolveExpression(
                             subjectId.getIdPart(),
-                            getCqfExpression(
-                                    condition.getExpression(),
-                                    defaultLibraryUrl,
-                                    condition.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)),
+                            CqfExpression.of(condition.getExpression(), defaultLibraryUrl),
                             inputParams,
                             bundle,
                             requestGroup);
@@ -909,7 +898,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return true;
     }
 
-    protected String resolveResourceName(CanonicalType canonical, MetadataResource resource) {
+    protected String resolveResourceName(CanonicalType canonical, DomainResource resource) {
         if (canonical.hasValue()) {
             var id = canonical.getValue();
             if (id.contains("/")) {

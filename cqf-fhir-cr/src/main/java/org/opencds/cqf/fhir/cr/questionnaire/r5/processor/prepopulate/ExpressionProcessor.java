@@ -56,7 +56,7 @@ public class ExpressionProcessor {
 
     CqfExpression getCqfExpression(Expression expression, Questionnaire questionnaire) {
         final String libraryUrl = getLibraryUrl(questionnaire);
-        return new CqfExpression(expression, libraryUrl, null);
+        return CqfExpression.of(expression, libraryUrl);
     }
 
     String getLibraryUrl(Questionnaire questionnaire) {

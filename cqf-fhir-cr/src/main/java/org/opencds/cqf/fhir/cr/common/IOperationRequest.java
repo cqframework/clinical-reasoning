@@ -49,6 +49,10 @@ public interface IOperationRequest {
         return resolvePathList(base, "extension").stream().map(e -> (E) e).collect(Collectors.toList());
     }
 
+    default Boolean hasExtension(IBase base, String url) {
+        return getExtensions(base).stream().anyMatch(e -> e.getUrl().equals(url));
+    }
+
     @SuppressWarnings("unchecked")
     default List<IBase> resolvePathList(IBase base, String path) {
         var pathResult = this.getModelResolver().resolvePath(base, path);
@@ -68,6 +72,11 @@ public interface IOperationRequest {
 
     default IBase resolvePath(IBase base, String path) {
         return (IBase) this.getModelResolver().resolvePath(base, path);
+    }
+
+    @SuppressWarnings("unchecked")
+    default <T extends IBase> T resolvePath(IBase base, String path, Class<T> clazz) {
+        return (T) resolvePath(base, path);
     }
 
     default List<IBaseBackboneElement> getItems(IBase base) {

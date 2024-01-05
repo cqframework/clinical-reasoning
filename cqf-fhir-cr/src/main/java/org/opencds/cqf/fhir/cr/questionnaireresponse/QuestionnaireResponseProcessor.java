@@ -46,7 +46,7 @@ public class QuestionnaireResponseProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
-        this.fhirVersion = repository.fhirContext().getVersion().getVersion();
+        this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.extractProcessor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
     }

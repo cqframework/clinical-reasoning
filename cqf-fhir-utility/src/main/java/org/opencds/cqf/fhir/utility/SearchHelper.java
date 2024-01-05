@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryFirstRep;
+
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,13 @@ public class SearchHelper {
                 repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }
 
+    /**
+     *
+     * @param <CanonicalType>
+     * @param repository
+     * @param canonical
+     * @return
+     */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
             Repository repository, CanonicalType canonical) {
         var resourceType = repository
@@ -31,6 +39,15 @@ public class SearchHelper {
         return searchRepositoryByCanonical(repository, canonical, resourceType);
     }
 
+    /**
+     * Searches the given Repository and returns the first entry found
+     * @param <CanonicalType> an IPrimitiveType<String> type
+     * @param <R> an IBaseResource type
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @param resourceType the class of the IBaseResource type
+     * @return
+     */
     public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
             IBaseResource searchRepositoryByCanonical(
                     Repository repository, CanonicalType canonical, Class<R> resourceType) {
@@ -39,8 +56,7 @@ public class SearchHelper {
 
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(getBundleType(repository), resourceType, searchParams);
-        var result = getEntryFirstRep(
-                searchResult, repository.fhirContext().getVersion().getVersion());
+        var result = getEntryFirstRep(searchResult);
         if (result == null) {
             throw new FHIRException(String.format(
                     "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));
@@ -49,24 +65,16 @@ public class SearchHelper {
         return result;
     }
 
-    protected static IBaseResource getEntryFirstRep(IBaseBundle bundle, FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case DSTU3:
-                var dstu3Entry = ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntryFirstRep();
-                return dstu3Entry != null && dstu3Entry.hasResource() ? dstu3Entry.getResource() : null;
-            case R4:
-                var r4Entry = ((org.hl7.fhir.r4.model.Bundle) bundle).getEntryFirstRep();
-                return r4Entry != null && r4Entry.hasResource() ? r4Entry.getResource() : null;
-            case R5:
-                var r5Entry = ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
-                return r5Entry != null && r5Entry.hasResource() ? r5Entry.getResource() : null;
-
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
-        }
-    }
-
+    /**
+     * Searches the given Repository and handles paging to return all resources found in the search
+     * @param <T> an IBaseResource type
+     * @param <R> an IBaseBundle type
+     * @param repository the repository to search
+     * @param resourceType the class of the resource being searched for
+     * @param searchParameters the search parameters
+     * @param headers the search headers
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
             Repository repository,

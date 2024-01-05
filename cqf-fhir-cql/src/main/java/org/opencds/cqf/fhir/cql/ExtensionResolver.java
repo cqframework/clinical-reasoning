@@ -8,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -31,7 +30,7 @@ public class ExtensionResolver {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <E extends IBaseExtension> void resolveExtensions(
-            IBaseResource resource, List<E> extensions, String defaultLibraryUrl) {
+            IBase resource, List<E> extensions, String defaultLibraryUrl) {
         for (var extension : extensions) {
             var nestedExtensions = extension.getExtension();
             if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
@@ -47,7 +46,7 @@ public class ExtensionResolver {
                     if (expressionExtensions != null && !expressionExtensions.isEmpty()) {
                         var expression = expressionExtensions.get(0).getValue();
                         if (expression != null) {
-                            var result = getExpressionResult(expression, defaultLibraryUrl, null, resource);
+                            var result = getExpressionResult(expression, defaultLibraryUrl, resource);
                             if (result != null) {
                                 extension.setValue(result);
                             }
@@ -58,16 +57,12 @@ public class ExtensionResolver {
         }
     }
 
-    protected IBaseDatatype getExpressionResult(
-            IBaseDatatype expression, String defaultLibraryUrl, IBaseDatatype altExpression, IBaseResource resource) {
+    protected IBaseDatatype getExpressionResult(IBaseDatatype expression, String defaultLibraryUrl, IBase resource) {
         List<IBase> result = null;
         if (expression instanceof org.hl7.fhir.r4.model.Expression) {
             result = libraryEngine.resolveExpression(
                     subjectId.getIdPart(),
-                    new CqfExpression(
-                            (org.hl7.fhir.r4.model.Expression) expression,
-                            defaultLibraryUrl,
-                            (org.hl7.fhir.r4.model.Expression) altExpression),
+                    CqfExpression.of((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl),
                     parameters,
                     bundle,
                     resource);
@@ -76,10 +71,7 @@ public class ExtensionResolver {
         if (expression instanceof org.hl7.fhir.r5.model.Expression) {
             result = libraryEngine.resolveExpression(
                     subjectId.getIdPart(),
-                    new CqfExpression(
-                            (org.hl7.fhir.r5.model.Expression) expression,
-                            defaultLibraryUrl,
-                            (org.hl7.fhir.r5.model.Expression) altExpression),
+                    CqfExpression.of((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl),
                     parameters,
                     bundle,
                     null);

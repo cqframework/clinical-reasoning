@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire.r5.processor;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.buildR5;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.crmiMessagesExtension;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildR5;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 
 import java.util.List;
 import java.util.Optional;

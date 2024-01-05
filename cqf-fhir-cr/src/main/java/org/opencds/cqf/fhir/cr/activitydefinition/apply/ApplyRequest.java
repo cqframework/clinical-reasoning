@@ -1,15 +1,11 @@
-package org.opencds.cqf.fhir.cr.plandefinition.apply;
+package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -18,7 +14,7 @@ import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 
 public class ApplyRequest implements IApplyOperationRequest {
-    private final IBaseResource planDefinition;
+    private final IBaseResource activityDefinition;
     private final IIdType subjectId;
     private final IIdType encounterId;
     private final IIdType practitionerId;
@@ -36,14 +32,10 @@ public class ApplyRequest implements IApplyOperationRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
     private final IInputParameterResolver inputParameterResolver;
-    private final Collection<IBaseResource> requestResources;
-    private final Collection<IBaseResource> extractedResources;
     private IBaseOperationOutcome operationOutcome;
-    private IBaseResource questionnaire;
-    private Boolean containResources;
 
     public ApplyRequest(
-            IBaseResource planDefinition,
+            IBaseResource activityDefinition,
             IIdType subjectId,
             IIdType encounterId,
             IIdType practitionerId,
@@ -58,7 +50,7 @@ public class ApplyRequest implements IApplyOperationRequest {
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
-        this.planDefinition = planDefinition;
+        this.activityDefinition = activityDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -73,7 +65,7 @@ public class ApplyRequest implements IApplyOperationRequest {
         this.bundle = bundle;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        fhirVersion = planDefinition.getStructureFhirVersionEnum();
+        fhirVersion = activityDefinition.getStructureFhirVersionEnum();
         defaultLibraryUrl = resolveDefaultLibraryUrl();
         inputParameterResolver = libraryEngine == null
                 ? null
@@ -85,32 +77,10 @@ public class ApplyRequest implements IApplyOperationRequest {
                         this.parameters,
                         this.useServerData,
                         this.bundle);
-        requestResources = new ArrayList<>();
-        extractedResources = new ArrayList<>();
-        containResources = false;
     }
 
-    public ApplyRequest copy(IBaseResource planDefinition) {
-        return new ApplyRequest(
-                planDefinition,
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                bundle,
-                libraryEngine,
-                modelResolver);
-    }
-
-    public IBaseResource getPlanDefinition() {
-        return planDefinition;
+    public IBaseResource getActivityDefinition() {
+        return activityDefinition;
     }
 
     @Override
@@ -206,22 +176,22 @@ public class ApplyRequest implements IApplyOperationRequest {
     protected final String resolveDefaultLibraryUrl() {
         switch (fhirVersion) {
             case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition)
+                return ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition)
                                 .getLibrary()
                                 .get(0)
                                 .getReference()
                         : null;
             case R4:
-                return ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition)
+                return ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition)
                                 .getLibrary()
                                 .get(0)
                                 .getValueAsString()
                         : null;
             case R5:
-                return ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition)
+                return ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition)
                                 .getLibrary()
                                 .get(0)
                                 .getValueAsString()
@@ -229,33 +199,5 @@ public class ApplyRequest implements IApplyOperationRequest {
             default:
                 return null;
         }
-    }
-
-    public void setQuestionnaire(IBaseResource questionnaire) {
-        this.questionnaire = questionnaire;
-    }
-
-    public IBaseResource getQuestionnaire() {
-        return this.questionnaire;
-    }
-
-    public void setContainResources(Boolean value) {
-        containResources = value;
-    }
-
-    public Boolean getContainResources() {
-        return containResources;
-    }
-
-    public Collection<IBaseResource> getRequestResources() {
-        return requestResources;
-    }
-
-    public Collection<IBaseResource> getExtractedResources() {
-        return extractedResources;
-    }
-
-    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input) {
-        return inputParameterResolver.resolveInputParameters(input);
     }
 }

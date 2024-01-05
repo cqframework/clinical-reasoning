@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -76,7 +77,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         return parameters;
     }
 
-    public Parameters resolveInputParameters(List<DataRequirement> dataRequirements) {
+    @Override
+    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input) {
+        var dataRequirements = input.stream().map(i -> (DataRequirement) i).collect(Collectors.toList());
         var params = parameters();
         if (parameters != null) {
             params.getParameter().addAll(parameters.getParameter());

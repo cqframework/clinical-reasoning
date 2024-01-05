@@ -1,6 +1,9 @@
 {
   "resourceType": "ActivityDefinition",
   "id": "medicationrequest-test",
+  "meta": {
+    "profile": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-medicationrequestactivity"
+  },
   "url": "http://test.fhir.org/ActivityDefinition/medicationrequest-test",
   "name": "MedicationRequest_Test",
   "title": "CreateMedicationRequest",
@@ -11,6 +14,7 @@
   ],
   "intent": "proposal",
   "kind": "MedicationRequest",
+  "profile": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-medicationrequest",
   "productCodeableConcept": {
     "coding": [
       {

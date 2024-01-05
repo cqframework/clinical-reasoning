@@ -123,10 +123,10 @@ public class ActivityDefinitionProcessorTests {
 
     @Test
     // @Disabled // Unable to load R5 packages and run CQL
-    public void testActivityDefinitionApply() throws FHIRException {
+    public void testActivityDefinitionApplyR5() throws FHIRException {
         var result = this.activityDefinitionProcessorR5.apply(
                 Eithers.forMiddle3(Ids.newId(
-                        activityDefinitionProcessorR5.fhirContext(), "ActivityDefinition", "activityDefinition-test")),
+                        activityDefinitionProcessorR5.fhirContext(), "ActivityDefinition", "medicationrequest-test")),
                 "patient-1",
                 null,
                 null,

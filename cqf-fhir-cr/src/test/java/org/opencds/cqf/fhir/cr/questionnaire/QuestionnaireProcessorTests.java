@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
@@ -192,5 +193,12 @@ public class QuestionnaireProcessorTests {
 
         assertFalse(bundle.getEntry().isEmpty());
         assertEquals(bundle.getEntry().size(), 11);
+    }
+
+    @Test
+    void testGenerateQuestionnaire() {
+        var questionnaire = given().repository(repositoryR4).when().thenGenerate("test");
+        assertNotNull(questionnaire);
+        assertEquals("test", questionnaire.getIdElement().getIdPart());
     }
 }

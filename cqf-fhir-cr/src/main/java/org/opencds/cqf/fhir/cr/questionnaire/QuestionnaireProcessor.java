@@ -25,6 +25,8 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 public class QuestionnaireProcessor {
+    protected static final String SUBJECT_TYPE = "Patient";
+
     protected final ResourceResolver resourceResolver;
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
@@ -33,12 +35,6 @@ public class QuestionnaireProcessor {
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
     protected IPopulateProcessor populateProcessor;
-
-    protected String patientId;
-    protected IBaseParameters parameters;
-    protected IBaseBundle bundle;
-    protected String libraryUrl;
-    protected static final String SUBJECT_TYPE = "Patient";
 
     public QuestionnaireProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault());
@@ -69,6 +65,21 @@ public class QuestionnaireProcessor {
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
             Either3<C, IIdType, R> questionnaire) {
         return (R) resourceResolver.resolve(questionnaire);
+    }
+
+    public PopulateRequest buildPopulateRequest(
+            IBaseResource questionnaire,
+            String subjectId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            LibraryEngine libraryEngine) {
+        return new PopulateRequest(
+                questionnaire,
+                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
+                parameters,
+                bundle,
+                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                modelResolver);
     }
 
     public IBaseResource generateQuestionnaire(String id) {
@@ -108,7 +119,7 @@ public class QuestionnaireProcessor {
                 patientId,
                 parameters,
                 bundle,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, evaluationSettings));
     }
 
     public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
@@ -126,14 +137,7 @@ public class QuestionnaireProcessor {
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        final PopulateRequest populateRequest = new PopulateRequest(
-                questionnaire,
-                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
-                parameters,
-                bundle,
-                libraryEngine,
-                modelResolver);
-        return prePopulate(populateRequest);
+        return prePopulate(buildPopulateRequest(questionnaire, subjectId, parameters, bundle, libraryEngine));
     }
 
     @SuppressWarnings("unchecked")
@@ -174,14 +178,7 @@ public class QuestionnaireProcessor {
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        final PopulateRequest populateRequest = new PopulateRequest(
-                questionnaire,
-                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
-                parameters,
-                bundle,
-                libraryEngine,
-                modelResolver);
-        return populate(populateRequest);
+        return populate(buildPopulateRequest(questionnaire, subjectId, parameters, bundle, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

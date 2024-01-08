@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.r4;
+package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,18 +17,15 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 
 public class QuestionnaireProcessorTests {
-    static final String QUESTIONNAIRE_RESPONSE_POPULATED = "questionnaire-response-populated.json";
-    static final String QUESTIONNAIRE_RESPONSE_POPULATED_NO_LIBRARY = "questionnaire-response-populated-noLibrary.json";
-    static final String QUESTIONNAIRE_INVALID_QUESTIONS = "questionnaire-invalid-questionnaire.json";
-    static final String QUESTIONNAIRE_ORDER_POPULATED = "OutpatientPriorAuthorizationRequest-OPA-Patient1";
-    static final String QUESTIONNAIRE_ORDER_POPULATED_NO_LIBRARY =
-            "OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1";
-
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
+    private final Repository repositoryDstu3 = TestRepositoryFactory.createRepository(
+            fhirContextDstu3, this.getClass(), CLASS_PATH + "/dstu3", IGLayoutMode.TYPE_PREFIX);
     private final Repository repositoryR4 = TestRepositoryFactory.createRepository(
             fhirContextR4, this.getClass(), CLASS_PATH + "/r4", IGLayoutMode.TYPE_PREFIX);
+    private final Repository repositoryR5 = TestRepositoryFactory.createRepository(
+            fhirContextR5, this.getClass(), CLASS_PATH + "/r4", IGLayoutMode.TYPE_PREFIX);
 
     @Test
     void testPrePopulate() {
@@ -121,10 +118,32 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testQuestionnairePackage() {
+    void testQuestionnairePackageDstu3() {
+        var bundle = (org.hl7.fhir.dstu3.model.Bundle) given().repository(repositoryDstu3)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenPackage();
+
+        assertEquals(bundle.getEntry().size(), 3);
+        assertEquals(bundle.getEntry().get(0).getResource().fhirType(), "Questionnaire");
+    }
+
+    @Test
+    void testQuestionnairePackageR4() {
         var bundle = (org.hl7.fhir.r4.model.Bundle) given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenPackage();
+
+        assertEquals(bundle.getEntry().size(), 3);
+        assertEquals(bundle.getEntry().get(0).getResource().fhirType(), "Questionnaire");
+    }
+
+    @Test
+    void testQuestionnairePackageR5() {
+        var bundle = (org.hl7.fhir.r5.model.Bundle) given().repository(repositoryR5)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenPackage();
 
         assertEquals(bundle.getEntry().size(), 3);

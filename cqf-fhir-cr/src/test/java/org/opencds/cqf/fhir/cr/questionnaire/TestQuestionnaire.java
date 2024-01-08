@@ -129,6 +129,10 @@ public class TestQuestionnaire {
         public IBaseBundle thenPackage() {
             return processor.packageQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire));
         }
+
+        public IBaseResource thenGenerate(String id) {
+            return processor.generateQuestionnaire(id);
+        }
     }
 
     public static class GeneratedQuestionnaire {

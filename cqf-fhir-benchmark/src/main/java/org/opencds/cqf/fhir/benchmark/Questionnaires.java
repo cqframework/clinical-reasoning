@@ -1,16 +1,13 @@
 package org.opencds.cqf.fhir.benchmark;
 
+import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.QuestionnaireProcessorTests;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire.QuestionnaireResult;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.When;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -28,16 +25,16 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @State(Scope.Benchmark)
 public class Questionnaires {
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
-    private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(
-            FHIR_CONTEXT, QuestionnaireProcessorTests.class, TestQuestionnaire.CLASS_PATH + "/pa-aslp");
 
-    private QuestionnaireResult result;
+    private When result;
 
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
-        this.result = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
-                .withRepository(REPOSITORY)
-                .withParameters(parameters(
+        this.result = given().repositoryFor(FHIR_CONTEXT, "r4/pa-aslp")
+                .when()
+                .questionnaireId(new IdType("Questionnaire", "ASLPA1"))
+                .subjectId("positive")
+                .parameters(parameters(
                         stringPart("Service Request Id", "SleepStudy"),
                         stringPart("Service Request Id", "SleepStudy2"),
                         stringPart("Coverage Id", "Coverage-positive")));
@@ -50,7 +47,7 @@ public class Questionnaires {
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize
         // away this call, which does nothing with the result of the evaluation
-        bh.consume(this.result.populate());
+        bh.consume(this.result.thenPopulate());
     }
 
     public static void main(String[] args) throws RunnerException {

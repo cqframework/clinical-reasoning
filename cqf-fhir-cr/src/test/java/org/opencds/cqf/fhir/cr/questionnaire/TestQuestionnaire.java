@@ -66,6 +66,7 @@ public class TestQuestionnaire {
         private String subjectId;
         private IBaseBundle bundle;
         private IBaseParameters parameters;
+        private Boolean isPut;
 
         When(Repository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
@@ -116,6 +117,11 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public When isPut(Boolean value) {
+            isPut = value;
+            return this;
+        }
+
         public GeneratedQuestionnaire thenPrepopulate() {
             var populateRequest = buildRequest();
             return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
@@ -127,7 +133,8 @@ public class TestQuestionnaire {
         }
 
         public IBaseBundle thenPackage() {
-            return processor.packageQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire));
+            var param = Eithers.for3(questionnaireUrl, questionnaireId, questionnaire);
+            return isPut == null ? processor.packageQuestionnaire(param) : processor.packageQuestionnaire(param, isPut);
         }
 
         public IBaseResource thenGenerate(String id) {

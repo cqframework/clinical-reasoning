@@ -25,7 +25,7 @@ public class QuestionnaireProcessorTests {
     private final Repository repositoryR4 = TestRepositoryFactory.createRepository(
             fhirContextR4, this.getClass(), CLASS_PATH + "/r4", IGLayoutMode.TYPE_PREFIX);
     private final Repository repositoryR5 = TestRepositoryFactory.createRepository(
-            fhirContextR5, this.getClass(), CLASS_PATH + "/r4", IGLayoutMode.TYPE_PREFIX);
+            fhirContextR5, this.getClass(), CLASS_PATH + "/r5", IGLayoutMode.TYPE_PREFIX);
 
     @Test
     void testPrePopulate() {
@@ -187,6 +187,7 @@ public class QuestionnaireProcessorTests {
         var bundle = (org.hl7.fhir.r4.model.Bundle) given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
+                .isPut(Boolean.TRUE)
                 .thenPackage();
 
         assertFalse(bundle.getEntry().isEmpty());

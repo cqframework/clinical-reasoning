@@ -23,12 +23,8 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QuestionnaireProcessor {
-    protected static final Logger logger = LoggerFactory.getLogger(BaseQuestionnaireProcessor.class);
-
     protected final ResourceResolver resourceResolver;
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;

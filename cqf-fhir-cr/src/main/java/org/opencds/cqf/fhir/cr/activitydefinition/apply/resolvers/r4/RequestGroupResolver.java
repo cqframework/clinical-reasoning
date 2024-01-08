@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class RequestGroupResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class RequestGroupResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public RequestGroup resolve(IApplyOperationRequest request) {
+    public RequestGroup resolve(IApplyRequest request) {
         var requestGroup = new RequestGroup();
 
         return requestGroup;

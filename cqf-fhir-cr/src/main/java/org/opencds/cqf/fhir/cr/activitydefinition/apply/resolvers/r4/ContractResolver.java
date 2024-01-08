@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Contract;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class ContractResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class ContractResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Contract resolve(IApplyOperationRequest request) {
+    public Contract resolve(IApplyRequest request) {
         var contract = new Contract();
 
         return contract;

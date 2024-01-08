@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.ImmunizationRecommendation;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class ImmunizationRecommendationResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
     }
 
     @Override
-    public ImmunizationRecommendation resolve(IApplyOperationRequest request) {
+    public ImmunizationRecommendation resolve(IApplyRequest request) {
         var immunizationRecommendation = new ImmunizationRecommendation();
 
         return immunizationRecommendation;

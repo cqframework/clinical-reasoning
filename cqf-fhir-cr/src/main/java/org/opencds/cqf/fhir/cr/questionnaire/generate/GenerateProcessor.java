@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class GenerateProcessor implements IGenerateProcessor {
     }
 
     @Override
-    public IBaseBackboneElement generateItem(IApplyOperationRequest request, IBaseResource profile, int itemCount) {
+    public IBaseBackboneElement generateItem(IApplyRequest request, IBaseResource profile, int itemCount) {
         // var generateRequest = new GenerateRequest(null, null, null, null, modelResolver);
         return itemGenerator.generate(request, profile, itemCount);
     }

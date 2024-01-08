@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -13,11 +13,13 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 
-public class ApplyRequest implements IApplyOperationRequest {
+import ca.uhn.fhir.context.FhirVersionEnum;
+
+public class ApplyRequest implements IApplyRequest {
     private final IBaseResource planDefinition;
     private final IIdType subjectId;
     private final IIdType encounterId;
@@ -235,6 +237,7 @@ public class ApplyRequest implements IApplyOperationRequest {
         this.questionnaire = questionnaire;
     }
 
+    @Override
     public IBaseResource getQuestionnaire() {
         return this.questionnaire;
     }

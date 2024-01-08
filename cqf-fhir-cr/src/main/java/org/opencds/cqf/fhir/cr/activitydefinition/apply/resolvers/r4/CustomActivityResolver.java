@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class CustomActivityResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,7 +17,7 @@ public class CustomActivityResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Task resolve(IApplyOperationRequest request) {
+    public Task resolve(IApplyRequest request) {
         // Do custom logic
 
         var task = new Task();

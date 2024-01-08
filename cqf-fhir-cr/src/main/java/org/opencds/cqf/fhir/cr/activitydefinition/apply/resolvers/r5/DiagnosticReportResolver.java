@@ -10,7 +10,7 @@ import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -21,7 +21,7 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public DiagnosticReport resolve(IApplyOperationRequest request) {
+    public DiagnosticReport resolve(IApplyRequest request) {
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);

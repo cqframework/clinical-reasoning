@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.RequestOrchestration;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class RequestOrchestrationResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class RequestOrchestrationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public RequestOrchestration resolve(IApplyOperationRequest request) {
+    public RequestOrchestration resolve(IApplyRequest request) {
         var requestOrchestration = new RequestOrchestration();
 
         return requestOrchestration;

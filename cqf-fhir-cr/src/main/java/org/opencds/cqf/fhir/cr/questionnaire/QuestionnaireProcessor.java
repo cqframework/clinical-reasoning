@@ -70,7 +70,7 @@ public class QuestionnaireProcessor {
         this.populateProcessor = populateProcessor != null ? populateProcessor : new PopulateProcessor();
     }
 
-    protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
             Either3<C, IIdType, R> questionnaire) {
         return (R) resourceResolver.resolve(questionnaire);
     }
@@ -124,7 +124,6 @@ public class QuestionnaireProcessor {
         return prePopulate(resolveQuestionnaire(questionnaire), patientId, parameters, bundle, libraryEngine);
     }
 
-    @SuppressWarnings("unchecked")
     public <R extends IBaseResource> R prePopulate(
             IBaseResource questionnaire,
             String subjectId,
@@ -138,7 +137,12 @@ public class QuestionnaireProcessor {
                 bundle,
                 libraryEngine,
                 modelResolver);
-        return (R) populateProcessor.prePopulate(populateRequest);
+        return prePopulate(populateRequest);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
+        return (R) populateProcessor.prePopulate(request);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(
@@ -181,6 +185,10 @@ public class QuestionnaireProcessor {
                 bundle,
                 libraryEngine,
                 modelResolver);
-        return populateProcessor.populate(populateRequest);
+        return populate(populateRequest);
+    }
+
+    public IBaseResource populate(PopulateRequest request) {
+        return populateProcessor.populate(request);
     }
 }

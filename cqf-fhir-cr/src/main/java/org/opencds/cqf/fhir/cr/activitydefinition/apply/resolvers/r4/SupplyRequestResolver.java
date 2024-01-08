@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SupplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class SupplyRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -18,7 +18,7 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public SupplyRequest resolve(IApplyOperationRequest request) {
+    public SupplyRequest resolve(IApplyRequest request) {
         var supplyRequest = new SupplyRequest();
 
         supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.DRAFT);

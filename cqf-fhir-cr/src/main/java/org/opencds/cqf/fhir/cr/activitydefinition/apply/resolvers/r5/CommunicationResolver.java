@@ -10,7 +10,7 @@ import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.Enumerations.EventStatus;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class CommunicationResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -21,7 +21,7 @@ public class CommunicationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Communication resolve(IApplyOperationRequest request) {
+    public Communication resolve(IApplyRequest request) {
         var communication = new Communication();
 
         communication.setStatus(EventStatus.UNKNOWN);

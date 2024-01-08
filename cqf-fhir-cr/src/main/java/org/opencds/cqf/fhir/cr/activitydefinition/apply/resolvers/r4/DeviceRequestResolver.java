@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.DeviceRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class DeviceRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class DeviceRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public DeviceRequest resolve(IApplyOperationRequest request) {
+    public DeviceRequest resolve(IApplyRequest request) {
         var deviceRequest = new DeviceRequest();
 
         return deviceRequest;

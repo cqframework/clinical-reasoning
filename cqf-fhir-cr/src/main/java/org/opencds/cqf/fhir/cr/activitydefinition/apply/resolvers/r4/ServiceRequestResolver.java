@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class ServiceRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,7 +20,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ServiceRequest resolve(IApplyOperationRequest request) {
+    public ServiceRequest resolve(IApplyRequest request) {
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);

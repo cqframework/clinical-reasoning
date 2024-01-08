@@ -7,7 +7,7 @@ import org.hl7.fhir.r5.model.CommunicationRequest;
 import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -18,7 +18,7 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public CommunicationRequest resolve(IApplyOperationRequest request) {
+    public CommunicationRequest resolve(IApplyRequest request) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(RequestStatus.DRAFT);

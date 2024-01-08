@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.opencds.cqf.fhir.cr.common.IOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 
 public class CodeMap {
     // this is based on "if a questionnaire.item has items then this item is a
@@ -23,7 +24,7 @@ public class CodeMap {
     }
 
     private static void processQuestionnaireItems(
-            IOperationRequest request, IBaseBackboneElement item, Map<String, List<IBaseCoding>> questionnaireCodeMap) {
+            IQuestionnaireRequest request, IBaseBackboneElement item, Map<String, List<IBaseCoding>> questionnaireCodeMap) {
         var childItems = request.getItems(item);
         if (!childItems.isEmpty()) {
             childItems.forEach(child -> processQuestionnaireItems(request, child, questionnaireCodeMap));

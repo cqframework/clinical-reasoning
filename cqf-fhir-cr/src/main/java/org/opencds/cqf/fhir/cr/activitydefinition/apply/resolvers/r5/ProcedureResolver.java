@@ -9,7 +9,7 @@ import org.hl7.fhir.r5.model.Enumerations.EventStatus;
 import org.hl7.fhir.r5.model.Procedure;
 import org.hl7.fhir.r5.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 
 public class ProcedureResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,7 +20,7 @@ public class ProcedureResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Procedure resolve(IApplyOperationRequest request) {
+    public Procedure resolve(IApplyRequest request) {
         var procedure = new Procedure();
 
         procedure.setStatus(EventStatus.UNKNOWN);

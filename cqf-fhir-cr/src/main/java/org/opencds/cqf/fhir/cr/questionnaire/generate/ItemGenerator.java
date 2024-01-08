@@ -13,7 +13,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
-import org.opencds.cqf.fhir.cr.common.IApplyOperationRequest;
+import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.r4.ElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -41,7 +41,7 @@ public class ItemGenerator {
         extensionProcessor = new ExtensionProcessor();
     }
 
-    public IBaseBackboneElement generate(IApplyOperationRequest request, IBaseResource profile, int itemCount) {
+    public IBaseBackboneElement generate(IApplyRequest request, IBaseResource profile, int itemCount) {
         checkNotNull(profile);
         final String linkId = String.valueOf(itemCount + 1);
         try {
@@ -56,7 +56,7 @@ public class ItemGenerator {
         }
     }
 
-    protected void processElements(IApplyOperationRequest request, IBaseBackboneElement item, IBaseResource profile) {
+    protected void processElements(IApplyRequest request, IBaseBackboneElement item, IBaseResource profile) {
         int childCount = request.getItems(item).size();
         var itemLinkId = request.resolvePathString(item, "linkId");
         var profileUrl = request.resolvePathString(profile, "url");
@@ -83,7 +83,7 @@ public class ItemGenerator {
     }
 
     protected IBaseBackboneElement processElement(
-            IApplyOperationRequest request,
+            IApplyRequest request,
             String profileUrl,
             ICompositeType element,
             String childLinkId,
@@ -99,7 +99,7 @@ public class ItemGenerator {
 
     @SuppressWarnings("unchecked")
     protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
-            IApplyOperationRequest request, IBaseResource profile) {
+            IApplyRequest request, IBaseResource profile) {
         var differential = request.resolvePath(profile, "differential");
         final List<E> elements = request.resolvePathList(differential, "element").stream()
                 .map(e -> (E) e)
@@ -109,17 +109,17 @@ public class ItemGenerator {
                 .collect(Collectors.toList());
     }
 
-    protected IBaseBackboneElement createErrorItem(IApplyOperationRequest request, String linkId, String errorMessage) {
+    protected IBaseBackboneElement createErrorItem(IApplyRequest request, String linkId, String errorMessage) {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
     }
 
-    protected String getElementType(IApplyOperationRequest request, ICompositeType element) {
+    protected String getElementType(IApplyRequest request, ICompositeType element) {
         var type = request.resolvePathList(element, "type");
         return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
     }
 
     public IBaseBackboneElement createQuestionnaireItem(
-            IApplyOperationRequest request, IBaseResource profile, String linkId) {
+            IApplyRequest request, IBaseResource profile, String linkId) {
         var url = request.resolvePathString(profile, "url");
         var type = request.resolvePathString(profile, "type");
         final String definition = String.format("%s#%s", url, type);
@@ -129,7 +129,7 @@ public class ItemGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    protected String getProfileText(IApplyOperationRequest request, IBaseResource profile) {
+    protected String getProfileText(IApplyRequest request, IBaseResource profile) {
         var inputExt = request.getExtensions(profile).stream()
                 .filter(e -> e.getUrl().equals(Constants.CPG_INPUT_TEXT))
                 .findFirst()
@@ -146,7 +146,7 @@ public class ItemGenerator {
     }
 
     protected IBaseBackboneElement createQuestionnaireItemComponent(
-            IApplyOperationRequest request, String text, String linkId, String definition, Boolean isDisplay) {
+            IApplyRequest request, String text, String linkId, String definition, Boolean isDisplay) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent()

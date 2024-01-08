@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.common;
 
-import ca.uhn.fhir.model.api.IElement;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
+
+import ca.uhn.fhir.model.api.IElement;
 
 public class ExtensionProcessor {
     public ExtensionProcessor() {}
@@ -18,7 +20,7 @@ public class ExtensionProcessor {
      * @param excludedExtList A list of extension URL's to excluded from the definition
      */
     public void processExtensions(
-            IApplyOperationRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
+            IApplyRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> !excludedExtList.contains(e.getUrl()))
                 .collect(Collectors.toList());
@@ -33,7 +35,7 @@ public class ExtensionProcessor {
      * @param extList A list of extension URL's to include from the definition
      */
     public void processExtensionsInList(
-            IApplyOperationRequest request, IBase resource, IElement definition, List<String> extList) {
+            IApplyRequest request, IBase resource, IElement definition, List<String> extList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> extList.contains(e.getUrl()))
                 .collect(Collectors.toList());
@@ -41,7 +43,7 @@ public class ExtensionProcessor {
     }
 
     private void processExtensions(
-            IApplyOperationRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
+            IApplyRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
         var extensionResolver = new ExtensionResolver(
                 request.getSubjectId(), request.getParameters(), request.getBundle(), request.getLibraryEngine());
         extensionResolver.resolveExtensions(resource, extensions, request.getDefaultLibraryUrl());

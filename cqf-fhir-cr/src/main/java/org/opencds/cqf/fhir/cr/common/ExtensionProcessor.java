@@ -1,13 +1,11 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import ca.uhn.fhir.model.api.IElement;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
-
-import ca.uhn.fhir.model.api.IElement;
 
 public class ExtensionProcessor {
     public ExtensionProcessor() {}
@@ -42,8 +40,7 @@ public class ExtensionProcessor {
         processExtensions(request, resource, extensions);
     }
 
-    private void processExtensions(
-            IApplyRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
+    private void processExtensions(IApplyRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
         var extensionResolver = new ExtensionResolver(
                 request.getSubjectId(), request.getParameters(), request.getBundle(), request.getLibraryEngine());
         extensionResolver.resolveExtensions(resource, extensions, request.getDefaultLibraryUrl());

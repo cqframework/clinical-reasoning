@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
+import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -14,10 +17,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
-import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public interface IOperationRequest {
     IIdType getSubjectId();
@@ -52,7 +51,10 @@ public interface IOperationRequest {
 
     @SuppressWarnings("unchecked")
     default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(IBase base, String url) {
-        return (E) getExtensions(base).stream().filter(e -> e.getUrl().equals(url)).findFirst().orElse(null);
+        return (E) getExtensions(base).stream()
+                .filter(e -> e.getUrl().equals(url))
+                .findFirst()
+                .orElse(null);
     }
 
     default Boolean hasExtension(IBase base, String url) {

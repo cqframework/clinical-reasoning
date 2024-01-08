@@ -1,11 +1,10 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.CqfExpression;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IElement;
 
 /**
  * This class provides processing for dynamicValues in PlanDefinition.action elements and ActivityDefinition resources.
@@ -15,37 +14,32 @@ public class DynamicValueProcessor {
 
     /**
      * Processes all dynamicValues on a definition element and sets the resulting values to the corresponding path on the resource passed in
-     * 
+     *
      * @param request the $apply request parameters
      * @param resource the resource to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      */
-    public void processDynamicValues(
-            IApplyRequest request, IBaseResource resource, IElement definitionElement) {
+    public void processDynamicValues(IApplyRequest request, IBaseResource resource, IElement definitionElement) {
         processDynamicValues(request, resource, definitionElement, null);
     }
 
     /**
      * Processes all dynamicValues on a definition element and sets the resulting values to the corresponding path on the resource or requestAction passed in
-     * 
+     *
      * @param request the $apply request parameters
      * @param resource the resource to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      * @param requestAction the action of the RequestOrchestration created from the definition action
      */
     public void processDynamicValues(
-            IApplyRequest request,
-            IBaseResource resource,
-            IElement definitionElement,
-            IElement requestAction) {
+            IApplyRequest request, IBaseResource resource, IElement definitionElement, IElement requestAction) {
         var dynamicValues = request.getDynamicValues(definitionElement);
         for (var dynamicValue : dynamicValues) {
             resolveDynamicValue(request, dynamicValue, resource, requestAction);
         }
     }
 
-    protected CqfExpression getDynamicValueExpression(
-            IApplyRequest request, IBaseBackboneElement dynamicValue) {
+    protected CqfExpression getDynamicValueExpression(IApplyRequest request, IBaseBackboneElement dynamicValue) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return new CqfExpression(
@@ -66,10 +60,7 @@ public class DynamicValueProcessor {
     }
 
     protected void resolveDynamicValue(
-            IApplyRequest request,
-            IBaseBackboneElement dynamicValue,
-            IBaseResource resource,
-            IElement requestAction) {
+            IApplyRequest request, IBaseBackboneElement dynamicValue, IBaseResource resource, IElement requestAction) {
         var path = request.resolvePathString(dynamicValue, "path");
         // Strip % so it is supported as defined in the spec
         path = path.replace("%", "");

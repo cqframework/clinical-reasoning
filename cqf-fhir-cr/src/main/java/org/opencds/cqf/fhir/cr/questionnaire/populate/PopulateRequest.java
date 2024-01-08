@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -8,11 +9,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.utility.Constants;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;

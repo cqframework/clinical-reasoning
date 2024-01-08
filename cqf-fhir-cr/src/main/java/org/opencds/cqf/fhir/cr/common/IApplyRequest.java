@@ -1,12 +1,10 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import ca.uhn.fhir.model.api.IElement;
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.model.api.IElement;
 
 public interface IApplyRequest extends IQuestionnaireRequest {
     IIdType getEncounterId();

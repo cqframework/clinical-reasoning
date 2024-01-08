@@ -118,8 +118,7 @@ public class ItemGenerator {
         return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
     }
 
-    public IBaseBackboneElement createQuestionnaireItem(
-            IApplyRequest request, IBaseResource profile, String linkId) {
+    public IBaseBackboneElement createQuestionnaireItem(IApplyRequest request, IBaseResource profile, String linkId) {
         var url = request.resolvePathString(profile, "url");
         var type = request.resolvePathString(profile, "type");
         final String definition = String.format("%s#%s", url, type);

@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -16,8 +16,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IApplyRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class ApplyRequest implements IApplyRequest {
     private final IBaseResource planDefinition;

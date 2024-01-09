@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire;
+package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,8 +25,6 @@ import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
-import org.opencds.cqf.fhir.cr.questionnaire.populate.ProcessItem;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,7 +162,7 @@ class ProcessItemTests {
         // validate
         assertTrue(actual.isEmpty());
         verify(expressionProcessorService).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
-        verify(expressionProcessorService, never()).getExpressionResult(prePopulateRequest, null, "linkId");
+        verify(expressionProcessorService, never()).getExpressionResultForItem(prePopulateRequest, null, "linkId");
     }
 
     @Test
@@ -183,13 +181,13 @@ class ProcessItemTests {
                 .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
         doReturn(expected)
                 .when(expressionProcessorService)
-                .getExpressionResult(prePopulateRequest, expression, "linkId");
+                .getExpressionResultForItem(prePopulateRequest, expression, "linkId");
         // execute
         final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaireItemComponent);
         // validate
         assertEquals(expected, actual);
         verify(expressionProcessorService).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
-        verify(expressionProcessorService).getExpressionResult(prePopulateRequest, expression, "linkId");
+        verify(expressionProcessorService).getExpressionResultForItem(prePopulateRequest, expression, "linkId");
     }
 
     private CqfExpression withExpression() {

@@ -60,7 +60,7 @@ public class ProcessItem {
         var expression = expressionProcessor.getItemInitialExpression(request, item);
         if (expression != null) {
             var itemLinkId = request.getItemLinkId(item);
-            return expressionProcessor.getExpressionResult(request, expression, itemLinkId);
+            return expressionProcessor.getExpressionResultForItem(request, expression, itemLinkId);
         }
         return new ArrayList<>();
     }

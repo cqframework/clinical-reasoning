@@ -145,7 +145,7 @@ public class ProcessAction {
         var input = request.resolvePathList(action, "input", ICompositeType.class);
         var inputParams = request.resolveInputParameters(input);
         for (var condition : conditions) {
-            var conditionExpression = expressionProcessor.getCqfExpression(request, condition);
+            var conditionExpression = expressionProcessor.getCqfExpressionForElement(request, condition);
             if (conditionExpression != null) {
                 IBase result = null;
                 try {

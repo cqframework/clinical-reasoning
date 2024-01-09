@@ -36,6 +36,10 @@ public class TestQuestionnaireResponse {
         return load(open(asset));
     }
 
+    public static Given given() {
+        return new Given();
+    }
+
     public static class Given {
         private Repository repository;
 

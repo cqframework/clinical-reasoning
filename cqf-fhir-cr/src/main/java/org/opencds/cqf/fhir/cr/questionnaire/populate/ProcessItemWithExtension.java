@@ -26,14 +26,13 @@ public class ProcessItemWithExtension {
         this.expressionProcessor = expressionProcessor;
     }
 
-    @SuppressWarnings("unchecked")
     List<IBaseBackboneElement> processItem(PopulateRequest request, IBaseBackboneElement item)
             throws ResolveExpressionException {
-        var itemLinkId = ((IPrimitiveType<String>) request.getModelResolver().resolvePath(item, "linkId")).getValue();
+        var itemLinkId = request.getItemLinkId(item);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         final List<IBase> populationContext =
-                expressionProcessor.getExpressionResult(request, contextExpression, itemLinkId);
+                expressionProcessor.getExpressionResultForItem(request, contextExpression, itemLinkId);
         return populationContext.stream()
                 .map(context -> processPopulationContext(request, item, context))
                 .collect(Collectors.toList());

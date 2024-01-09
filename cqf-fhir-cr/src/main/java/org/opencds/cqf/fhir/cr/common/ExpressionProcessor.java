@@ -19,8 +19,17 @@ public class ExpressionProcessor {
     protected static final String EXCEPTION_MESSAGE_TEMPLATE =
             "Error encountered evaluating expression (%s) for item (%s): %s";
 
-    public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression, String itemLinkId)
-            throws ResolveExpressionException {
+    /**
+     * Returns the results of a given CqfExpression for an item
+     *
+     * @param request operation request with parameters
+     * @param expression CqfExpression to evaluate
+     * @param itemLinkId link Id of the item
+     * @return
+     * @throws ResolveExpressionException
+     */
+    public List<IBase> getExpressionResultForItem(
+            IOperationRequest request, CqfExpression expression, String itemLinkId) throws ResolveExpressionException {
         if (expression == null) {
             return new ArrayList<>();
         }
@@ -33,6 +42,13 @@ public class ExpressionProcessor {
         }
     }
 
+    /**
+     * Returns the results of a given CqfExpression
+     *
+     * @param request operation request with parameters
+     * @param expression CqfExpression to evaluate
+     * @return
+     */
     public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression) {
         return request
                 .getLibraryEngine()
@@ -43,6 +59,14 @@ public class ExpressionProcessor {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the results of a given CqfExpression with overridden parameters
+     *
+     * @param request operation request with parameters
+     * @param expression CqfExpression to evaluate
+     * @param parameters the parameters to use in place of the request parameters
+     * @return
+     */
     public List<IBase> getExpressionResult(
             IOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
         return request
@@ -53,6 +77,15 @@ public class ExpressionProcessor {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns a CqfExpression from a list of extensions filtered by the given url.  This is done against a list of extensions to support the lack of an Expression type in Dstu3.
+     *
+     * @param <E> IBaseExtension<?, ?> type
+     * @param request operation request with parameters
+     * @param extensions list of extensions to pull the CqfExpression from
+     * @param extensionUrl the list of extensions will be filtered by this url
+     * @return
+     */
     public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(
             IOperationRequest request, List<E> extensions, String extensionUrl) {
         var extension = extensions.stream()
@@ -84,7 +117,14 @@ public class ExpressionProcessor {
         }
     }
 
-    public CqfExpression getCqfExpression(IOperationRequest request, IBaseBackboneElement element) {
+    /**
+     * Returns a CqfExpression from a given element that contains an Expression element.
+     *
+     * @param request operation request with parameters
+     * @param element the element to pull the Expression element from
+     * @return
+     */
+    public CqfExpression getCqfExpressionForElement(IOperationRequest request, IBaseBackboneElement element) {
         if (element == null) {
             return null;
         }
@@ -108,6 +148,14 @@ public class ExpressionProcessor {
         }
     }
 
+    /**
+     * Returns a CqfExpression for the initial expression of a given item with an SDC Initial Expression Extension
+     * "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression"
+     *
+     * @param request operation request with parameters
+     * @param item the item
+     * @return
+     */
     public CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
         if (!item.hasExtension()) {
             return null;

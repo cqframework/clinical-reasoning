@@ -58,14 +58,14 @@ public class ItemGenerator {
 
     protected void processElements(IApplyRequest request, IBaseBackboneElement item, IBaseResource profile) {
         int childCount = request.getItems(item).size();
-        var itemLinkId = request.resolvePathString(item, "linkId");
+        var itemLinkId = request.getItemLinkId(item);
         var profileUrl = request.resolvePathString(profile, "url");
         var featureExpression = expressionProcessor.getCqfExpression(
                 request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
         IBaseResource caseFeature = null;
         if (featureExpression != null) {
             try {
-                var results = expressionProcessor.getExpressionResult(request, featureExpression, itemLinkId);
+                var results = expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
                 var result = results == null || results.isEmpty() ? null : results.get(0);
                 if (result instanceof IBaseResource) {
                     caseFeature = (IBaseResource) result;

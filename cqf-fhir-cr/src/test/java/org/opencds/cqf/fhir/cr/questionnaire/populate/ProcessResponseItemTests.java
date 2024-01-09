@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire;
+package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -24,8 +24,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
-import org.opencds.cqf.fhir.cr.questionnaire.populate.ProcessResponseItem;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)

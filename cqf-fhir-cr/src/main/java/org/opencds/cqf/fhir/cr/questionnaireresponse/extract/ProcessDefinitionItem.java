@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,8 @@ public class ProcessDefinitionItem {
     }
 
     public void processDefinitionItem(
-            ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject) {
+            ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject)
+            throws ResolveExpressionException {
         processDefinitionItem(request, item, resources, subject, null);
     }
 
@@ -37,40 +41,29 @@ public class ProcessDefinitionItem {
             IBaseBackboneElement item,
             List<IBaseResource> resources,
             IBaseReference subject,
-            IBaseExtension<?, ?> contextExtension) {
+            IBaseExtension<?, ?> contextExtension)
+            throws ResolveExpressionException {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
-        // TODO: item extraction context
-        // var contextExtension = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
-        // var itemExtractionContext = item.hasExtension(contextExtension)
-        //         ? item.getExtensionByUrl(contextExtension)
-        //         : questionnaireResponse.getExtensionByUrl(contextExtension);
-        // var itemExtractionContext = request.getExtensions(item).stream().filter(e ->
-        // e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)).findFirst().orElse(null);
-        // var itemExtractionContext = expressionProcessor.getCqfExpression(request, request.getExtensions(item),
-        // contextExtension);
-        // var itemExtractionContextExt = request.getItemExtractionContext();
-        // var itemExtractionContextExp = expressionProcessor.getCqfExpression(request,
-        //     request.getExtensions(request.getQuestionnaireResponse()), contextExtension);
-        // if (itemExtractionContextExp == null) {
-        //     itemExtractionContextExp = expressionProcessor.getCqfExpression(request,
-        //         request.getExtensions(request.getQuestionnaire()), contextExtension);
-        //     }
-        // }
-        // if (itemExtractionContext != null) {
-        //     var context = expressionProcessor.getExpressionResult(request, itemExtractionContext,
-        // request.resolvePathString(item, "linkId").getValue());
-        //     if (context != null && !context.isEmpty()) {
-        //         // TODO: edit context instead of creating new resources
-        //     }
-        // }
+
+        var contextExtensionUrl = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
+        var itemExtractionContext = request.hasExtension(item, contextExtensionUrl)
+                ? expressionProcessor.getCqfExpression(request, request.getExtensions(item), contextExtensionUrl)
+                : expressionProcessor.getCqfExpression(
+                        request, request.getExtensions(request.getQuestionnaireResponse()), contextExtensionUrl);
+        if (itemExtractionContext != null) {
+            var context = expressionProcessor.getExpressionResultForItem(
+                    request, itemExtractionContext, request.getItemLinkId(item));
+            if (context != null && !context.isEmpty()) {
+                // TODO: edit context instead of creating new resources
+            }
+        }
 
         var definition = request.resolvePathString(item, "definition");
         var resourceType = getDefinitionType(definition);
         var resource = (IBaseResource) newValue(request, resourceType);
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
-        resource.setId(
-                new IdType(resourceType, request.getExtractId() + "-" + request.resolvePathString(item, "linkId")));
+        resource.setId(new IdType(resourceType, request.getExtractId() + "-" + request.getItemLinkId(item)));
         resolveMeta(resource, definition);
         var subjectPath = getSubjectPath(resourceDefinition);
         if (subjectPath != null) {
@@ -85,38 +78,36 @@ public class ProcessDefinitionItem {
         }
         var dateAuthored = request.resolvePath(request.getQuestionnaireResponse(), "authored");
         if (dateAuthored != null) {
-            var datePaths = getDatePaths(resourceDefinition);
-            if (datePaths != null && !datePaths.isEmpty()) {
-                datePaths.forEach(datePath -> {});
+            var dateDefs = getDateDefs(resourceDefinition);
+            if (dateDefs != null && !dateDefs.isEmpty()) {
+                dateDefs.forEach(dateDef -> {
+                    try {
+                        // dateDef.
+                        // request.getModelResolver().setValue(resource, dateDef.getElementName(), )
+                        // var propertyDef = request.getFhirContext()
+                        //         .getElementDefinition(
+                        //                 p.getTypeCode().contains("|")
+                        //                         ? p.getTypeCode().split("\\|")[0]
+                        //                         : p.getTypeCode());
+                        // if (propertyDef != null) {
+                        //     modelResolver.setValue(
+                        //             resource,
+                        //             datePath,
+                        //             propertyDef
+                        //                     .getImplementingClass()
+                        //                     .getConstructor(Date.class)
+                        //                     .newInstance(questionnaireResponse.getAuthored()));
+                        // }
+                    } catch (Exception ex) {
+                        var message = String.format(
+                                "Error encountered attempting to set property (%s) on resource type (%s): %s",
+                                dateDef.getElementName(), resource.fhirType(), ex.getMessage());
+                        logger.error(message);
+                        request.logException(message);
+                    }
+                });
             }
         }
-        // var dateProperties = getDateProperties(resource);
-        // if (dateProperties != null && !dateProperties.isEmpty() && questionnaireResponse.hasAuthored()) {
-        //     dateProperties.forEach(p -> {
-        //         try {
-        //             var propertyDef = fhirContext()
-        //                     .getElementDefinition(
-        //                             p.getTypeCode().contains("|")
-        //                                     ? p.getTypeCode().split("\\|")[0]
-        //                                     : p.getTypeCode());
-        //             if (propertyDef != null) {
-        //                 modelResolver.setValue(
-        //                         resource,
-        //                         p.getName(),
-        //                         propertyDef
-        //                                 .getImplementingClass()
-        //                                 .getConstructor(Date.class)
-        //                                 .newInstance(questionnaireResponse.getAuthored()));
-        //             }
-        //         } catch (Exception ex) {
-        //             var message = String.format(
-        //                     "Error encountered attempting to set property (%s) on resource type (%s): %s",
-        //                     p.getName(), resource.fhirType(), ex.getMessage());
-        //             logger.error(message);
-        //             request.logException(message);
-        //         }
-        //     });
-        // }
         request.getItems(item).forEach(childItem -> {
             var childDefinition = request.resolvePathString(childItem, "definition");
             if (childDefinition != null) {
@@ -125,7 +116,6 @@ public class ProcessDefinitionItem {
                 path = path.replace(resourceType + ".", "");
                 var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
                 var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-                // var answerValue = childItem.getAnswerFirstRep().getValue();
                 if (answerValue != null) {
                     request.getModelResolver().setValue(resource, path, answerValue);
                 }
@@ -155,12 +145,12 @@ public class ProcessDefinitionItem {
                 : definition.getName().equals("Observation") ? "performer" : null;
     }
 
-    private List<String> getDatePaths(BaseRuntimeElementDefinition<?> definition) {
-        List<String> results = new ArrayList<>();
-        results.add(definition.getChildByName("onset") != null ? "onset" : null);
-        results.add(definition.getChildByName("issued") != null ? "issued" : null);
-        results.add(definition.getChildByName("effective") != null ? "effective" : null);
-        results.add(definition.getChildByName("recordDate") != null ? "recordDate" : null);
+    private List<BaseRuntimeChildDefinition> getDateDefs(BaseRuntimeElementDefinition<?> definition) {
+        List<BaseRuntimeChildDefinition> results = new ArrayList<>();
+        results.add(definition.getChildByName("onset"));
+        results.add(definition.getChildByName("issued"));
+        results.add(definition.getChildByName("effective"));
+        results.add(definition.getChildByName("recordDate"));
 
         return results.stream().filter(p -> p != null).collect(Collectors.toList());
     }

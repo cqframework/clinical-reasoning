@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.cr.questionnaire.helpers.PopulateRequestHelpe
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,25 +35,54 @@ class PopulateProcessorTests {
     private final PopulateProcessor fixture = new PopulateProcessor();
 
     @Test
-    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFields() {
+    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsDstu3() {
         // setup
         final String questionnaireUrl = "original-questionnaire-url";
-        final String operationOutcomeId = "operation-outcome-id";
         final String prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
-        final Questionnaire originalQuestionnaire = new Questionnaire();
+        final var originalQuestionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
+        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
+        originalQuestionnaire.setUrl(questionnaireUrl);
+        final PopulateRequest request =
+                newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, originalQuestionnaire);
+        final var expectedResponses = getExpectedResponses(request);
+        final var expectedItems = getExpectedItems(request);
+        doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
+        doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
+        // execute
+        final IBaseResource actual = fixture.populate(request);
+        // validate
+        assertEquals(
+                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
+                actual.getIdElement().getIdPart());
+        assertContainedResources(request, actual, null, originalQuestionnaire);
+        assertEquals(
+                questionnaireUrl,
+                request.resolvePath(actual, "questionnaire", IBaseReference.class)
+                        .getReferenceElement()
+                        .getValue());
+        // assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
+        assertEquals(
+                "Patient/" + PATIENT_ID,
+                request.resolvePath(actual, "subject", IBaseReference.class)
+                        .getReferenceElement()
+                        .getValue());
+        assertEquals(expectedResponses, request.getItems(actual));
+        verify(fixture).processItems(request, Collections.EMPTY_LIST);
+        verify(fixture).processResponseItems(request, expectedItems);
+    }
+
+    @Test
+    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR4() {
+        // setup
+        final String questionnaireUrl = "original-questionnaire-url";
+        final String prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
+        final var originalQuestionnaire = new Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, originalQuestionnaire);
-        // final IBaseOperationOutcome operationOutcome = withOperationOutcome(operationOutcomeId);
-        // final IBaseResource prePopulatedQuestionnaire = withPrepopulatedQuestionnaire(null,
-        // prePopulatedQuestionnaireId);
-        final List<QuestionnaireResponseItemComponent> expectedResponses = List.of(
-                new QuestionnaireResponseItemComponent(),
-                new QuestionnaireResponseItemComponent(),
-                new QuestionnaireResponseItemComponent());
-        final List<QuestionnaireItemComponent> expectedItems = List.of(
-                new QuestionnaireItemComponent(), new QuestionnaireItemComponent(), new QuestionnaireItemComponent());
+        final var expectedResponses = getExpectedResponses(request);
+        final var expectedItems = getExpectedItems(request);
         doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
         doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
         // execute
@@ -74,16 +104,93 @@ class PopulateProcessorTests {
         verify(fixture).processResponseItems(request, expectedItems);
     }
 
+    @Test
+    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR5() {
+        // setup
+        final String questionnaireUrl = "original-questionnaire-url";
+        final String prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
+        final var originalQuestionnaire = new org.hl7.fhir.r5.model.Questionnaire();
+        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
+        originalQuestionnaire.setUrl(questionnaireUrl);
+        final PopulateRequest request =
+                newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, originalQuestionnaire);
+        final var expectedResponses = getExpectedResponses(request);
+        final var expectedItems = getExpectedItems(request);
+        doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
+        doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
+        // execute
+        final IBaseResource actual = fixture.populate(request);
+        // validate
+        assertEquals(
+                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
+                actual.getIdElement().getIdPart());
+        assertContainedResources(request, actual, null, originalQuestionnaire);
+        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
+        // assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
+        assertEquals(
+                "Patient/" + PATIENT_ID,
+                request.resolvePath(actual, "subject", IBaseReference.class)
+                        .getReferenceElement()
+                        .getValue());
+        assertEquals(expectedResponses, request.getItems(actual));
+        verify(fixture).processItems(request, Collections.EMPTY_LIST);
+        verify(fixture).processResponseItems(request, expectedItems);
+    }
+
+    private List<IBaseBackboneElement> getExpectedResponses(PopulateRequest request) {
+        switch (request.getFhirVersion()) {
+            case DSTU3:
+                return List.of(
+                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent());
+            case R4:
+                return List.of(
+                        new QuestionnaireResponseItemComponent(),
+                        new QuestionnaireResponseItemComponent(),
+                        new QuestionnaireResponseItemComponent());
+            case R5:
+                return List.of(
+                        new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                        new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                        new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent());
+
+            default:
+                return null;
+        }
+    }
+
+    private List<IBaseBackboneElement> getExpectedItems(PopulateRequest request) {
+        switch (request.getFhirVersion()) {
+            case DSTU3:
+                return List.of(
+                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent(),
+                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent(),
+                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent());
+            case R4:
+                return List.of(
+                        new QuestionnaireItemComponent(),
+                        new QuestionnaireItemComponent(),
+                        new QuestionnaireItemComponent());
+            case R5:
+                return List.of(
+                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent(),
+                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent(),
+                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent());
+
+            default:
+                return null;
+        }
+    }
+
     private void assertContainedResources(
             PopulateRequest request,
             IBaseResource actual,
             IBaseOperationOutcome expectedOperationOutcome,
             IBaseResource expectedQuestionnaire) {
-        final OperationOutcome operationOutcome =
-                (OperationOutcome) getContainedByResourceType(request, actual, "OperationOutcome");
+        final var operationOutcome = getContainedByResourceType(request, actual, "OperationOutcome");
         assertEquals(expectedOperationOutcome, operationOutcome);
-        final Questionnaire questionnaire =
-                (Questionnaire) getContainedByResourceType(request, actual, "Questionnaire");
+        final var questionnaire = getContainedByResourceType(request, actual, "Questionnaire");
         assertEquals(expectedQuestionnaire, questionnaire);
     }
 

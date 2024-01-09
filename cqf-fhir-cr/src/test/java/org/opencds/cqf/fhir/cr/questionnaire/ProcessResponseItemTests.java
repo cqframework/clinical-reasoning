@@ -161,7 +161,7 @@ public class ProcessResponseItemTests {
                 for (int i = 0; i < dstu3Item.getAnswer().size(); i++) {
                     final List<org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent>
                             answers = dstu3Item.getAnswer();
-                    assertEquals(expectedValues.get(i), answers.get(i));
+                    assertEquals(expectedValues.get(i), answers.get(i).getValue());
                 }
                 break;
             case R4:

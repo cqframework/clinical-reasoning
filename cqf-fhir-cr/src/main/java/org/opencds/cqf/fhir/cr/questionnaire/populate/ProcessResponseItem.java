@@ -38,7 +38,7 @@ public class ProcessResponseItem {
     public IBaseBackboneElement setAnswersForInitial(
             PopulateRequest request, IBaseBackboneElement item, IBaseBackboneElement responseItem) {
         if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
-            var dstu3Answer = request.resolvePath(item, "initial");
+            var dstu3Answer = createAnswer(FhirVersionEnum.DSTU3, request.resolvePath(item, "initial"));
             request.getModelResolver().setValue(responseItem, "answer", dstu3Answer);
         } else {
             var initial = request.resolvePathList(item, "initial").stream()

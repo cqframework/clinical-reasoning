@@ -25,10 +25,10 @@ public class ProcessItem {
         this.expressionProcessor = expressionProcessor;
     }
 
-    IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item)
+    public IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item)
             throws ResolveExpressionException {
-        final var populatedItem = SerializationUtils.clone(item);
-        final List<IBase> expressionResults = expressionProcessor.getExpressionResultForItem(request, item);
+        final var populatedItem = copyItem(item);
+        final List<IBase> expressionResults = getExpressionResults(request, item);
         if (!expressionResults.isEmpty()) {
             request.getModelResolver()
                     .setValue(
@@ -36,20 +36,37 @@ public class ProcessItem {
                             "extension",
                             Collections.singletonList(
                                     build(request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION)));
-            List<IBaseBackboneElement> initial = new ArrayList<>();
-            expressionResults.forEach(result -> {
-                initial.add(createInitial(request.getFhirVersion(), result));
-            });
-            request.getModelResolver().setValue(populatedItem, "initial", initial);
+            if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
+                request.getModelResolver()
+                        .setValue(populatedItem, "initial", transformValue((org.hl7.fhir.dstu3.model.Type)
+                                expressionResults.get(0)));
+            } else {
+                List<IBaseBackboneElement> initial = new ArrayList<>();
+                expressionResults.forEach(result -> {
+                    initial.add(createInitial(request.getFhirVersion(), result));
+                });
+                request.getModelResolver().setValue(populatedItem, "initial", initial);
+            }
         }
         return populatedItem;
     }
 
-    IBaseBackboneElement createInitial(FhirVersionEnum fhirVersion, IBase value) {
+    public IBaseBackboneElement copyItem(IBaseBackboneElement item) {
+        return SerializationUtils.clone(item);
+    }
+
+    public List<IBase> getExpressionResults(PopulateRequest request, IBaseBackboneElement item)
+            throws ResolveExpressionException {
+        var expression = expressionProcessor.getItemInitialExpression(request, item);
+        if (expression != null) {
+            var itemLinkId = request.getItemLinkId(item);
+            return expressionProcessor.getExpressionResult(request, expression, itemLinkId);
+        }
+        return new ArrayList<>();
+    }
+
+    public IBaseBackboneElement createInitial(FhirVersionEnum fhirVersion, IBase value) {
         switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent()
-                        .setValue(transformValue((org.hl7.fhir.dstu3.model.Type) value));
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent()
                         .setValue(transformValue((org.hl7.fhir.r4.model.Type) value));

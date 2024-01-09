@@ -8,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -19,14 +18,6 @@ public class ExpressionProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(ExpressionProcessor.class);
     protected static final String EXCEPTION_MESSAGE_TEMPLATE =
             "Error encountered evaluating expression (%s) for item (%s): %s";
-
-    @SuppressWarnings("unchecked")
-    public List<IBase> getExpressionResultForItem(IOperationRequest request, IBaseBackboneElement item)
-            throws ResolveExpressionException {
-        var expression = getItemInitialExpression(request, item);
-        var itemLinkId = ((IPrimitiveType<String>) request.getModelResolver().resolvePath(item, "linkId")).getValue();
-        return getExpressionResult(request, expression, itemLinkId);
-    }
 
     public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression, String itemLinkId)
             throws ResolveExpressionException {
@@ -117,7 +108,7 @@ public class ExpressionProcessor {
         }
     }
 
-    protected CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
+    public CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
         if (!item.hasExtension()) {
             return null;
         }

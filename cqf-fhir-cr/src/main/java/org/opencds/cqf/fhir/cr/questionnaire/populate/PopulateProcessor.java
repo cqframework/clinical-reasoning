@@ -64,7 +64,8 @@ public class PopulateProcessor implements IPopulateProcessor {
         response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-"
                 + request.getSubjectId().getIdPart());
         var items = request.getItems(request.getQuestionnaire());
-        var responseItems = processResponseItems(request, processItems(request, items));
+        var processedItems = processItems(request, items);
+        var responseItems = processResponseItems(request, processedItems);
         request.getModelResolver().setValue(response, "item", responseItems);
         resolveOperationOutcome(request, response);
         request.getModelResolver()
@@ -81,7 +82,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         return response;
     }
 
-    protected void resolveOperationOutcome(PopulateRequest request, IBaseResource resource) {
+    public void resolveOperationOutcome(PopulateRequest request, IBaseResource resource) {
         var issues = request.resolvePathList(request.getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
             request.getOperationOutcome()
@@ -100,7 +101,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         }
     }
 
-    protected List<IBaseBackboneElement> processItems(PopulateRequest request, List<IBaseBackboneElement> items) {
+    public List<IBaseBackboneElement> processItems(PopulateRequest request, List<IBaseBackboneElement> items) {
         final List<IBaseBackboneElement> populatedItems = new ArrayList<>();
         items.forEach(item -> {
             var populationContextExt = item.getExtension().stream()
@@ -175,10 +176,10 @@ public class PopulateProcessor implements IPopulateProcessor {
         }
     }
 
-    protected List<IBaseBackboneElement> processResponseItems(
-            PopulateRequest request, List<IBaseBackboneElement> items) {
+    public List<IBaseBackboneElement> processResponseItems(
+            PopulateRequest request, List<? extends IBaseBackboneElement> items) {
         try {
-            return processResponseItem.processItems(request, items);
+            return processResponseItem.processResponseItems(request, items);
         } catch (Exception e) {
             logger.error(e.getMessage());
             request.logException(e.getMessage());

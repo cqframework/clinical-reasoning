@@ -49,12 +49,12 @@ public interface IOperationRequest {
         return resolvePathList(base, "extension").stream().map(e -> (E) e).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(IBase base, String url) {
-        return (E) getExtensions(base).stream()
-                .filter(e -> e.getUrl().equals(url))
-                .findFirst()
-                .orElse(null);
+    default List<IBaseExtension<?, ?>> getExtensionsByUrl(IBase base, String url) {
+        return getExtensions(base).stream().filter(e -> e.getUrl().equals(url)).collect(Collectors.toList());
+    }
+
+    default IBaseExtension<?, ?> getExtensionByUrl(IBase base, String url) {
+        return getExtensionsByUrl(base, url).stream().findFirst().orElse(null);
     }
 
     default Boolean hasExtension(IBase base, String url) {

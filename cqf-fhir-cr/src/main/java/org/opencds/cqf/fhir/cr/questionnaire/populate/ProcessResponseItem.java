@@ -11,15 +11,16 @@ import org.opencds.cqf.fhir.utility.Constants;
 public class ProcessResponseItem {
     public ProcessResponseItem() {}
 
-    public List<IBaseBackboneElement> processItems(PopulateRequest request, List<IBaseBackboneElement> items) {
-        return items.stream().map(i -> processItem(request, i)).collect(Collectors.toList());
+    public List<IBaseBackboneElement> processResponseItems(
+            PopulateRequest request, List<? extends IBaseBackboneElement> items) {
+        return items.stream().map(i -> processResponseItem(request, i)).collect(Collectors.toList());
     }
 
-    protected IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item) {
+    public IBaseBackboneElement processResponseItem(PopulateRequest request, IBaseBackboneElement item) {
         var responseItem = createResponseItem(request.getFhirVersion(), item);
         var items = request.getItems(item);
         if (!items.isEmpty()) {
-            final List<IBaseBackboneElement> nestedResponseItems = processItems(request, items);
+            final List<IBaseBackboneElement> nestedResponseItems = processResponseItems(request, items);
             request.getModelResolver().setValue(responseItem, "item", nestedResponseItems);
         } else {
             var authorExt = item.getExtension().stream()
@@ -29,22 +30,27 @@ public class ProcessResponseItem {
             if (authorExt != null) {
                 request.getModelResolver().setValue(responseItem, "extension", Collections.singletonList(authorExt));
             }
-            var initial = request.resolvePathList(item, "initial").stream()
-                    .map(i -> (IBaseBackboneElement) i)
-                    .collect(Collectors.toList());
-            if (!initial.isEmpty()) {
-                responseItem = setAnswersForInitial(request, initial, responseItem);
-            }
+            responseItem = setAnswersForInitial(request, item, responseItem);
         }
         return responseItem;
     }
 
-    protected IBaseBackboneElement setAnswersForInitial(
-            PopulateRequest request, List<IBaseBackboneElement> initial, IBaseBackboneElement responseItem) {
-        initial.forEach(i -> {
-            final var answer = createAnswer(request.getFhirVersion(), request.resolvePath(i, "value"));
-            request.getModelResolver().setValue(responseItem, "answer", Collections.singletonList(answer));
-        });
+    public IBaseBackboneElement setAnswersForInitial(
+            PopulateRequest request, IBaseBackboneElement item, IBaseBackboneElement responseItem) {
+        if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
+            var dstu3Answer = request.resolvePath(item, "initial");
+            request.getModelResolver().setValue(responseItem, "answer", dstu3Answer);
+        } else {
+            var initial = request.resolvePathList(item, "initial").stream()
+                    .map(i -> (IBaseBackboneElement) i)
+                    .collect(Collectors.toList());
+            if (!initial.isEmpty()) {
+                initial.forEach(i -> {
+                    final var answer = createAnswer(request.getFhirVersion(), request.resolvePath(i, "value"));
+                    request.getModelResolver().setValue(responseItem, "answer", Collections.singletonList(answer));
+                });
+            }
+        }
         return responseItem;
     }
 

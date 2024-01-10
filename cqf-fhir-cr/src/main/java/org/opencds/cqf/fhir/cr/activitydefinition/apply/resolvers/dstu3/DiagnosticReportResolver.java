@@ -8,7 +8,7 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -18,7 +18,7 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public DiagnosticReport resolve(IApplyRequest request) {
+    public DiagnosticReport resolve(ICpgRequest request) {
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);

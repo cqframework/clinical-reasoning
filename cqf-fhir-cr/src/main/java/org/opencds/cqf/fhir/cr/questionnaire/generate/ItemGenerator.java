@@ -13,9 +13,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.cr.questionnaire.generate.r4.ElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +28,17 @@ public class ItemGenerator {
     public static final List<String> INPUT_EXTENSION_LIST =
             Arrays.asList(Constants.CPG_INPUT_DESCRIPTION, Constants.CPG_FEATURE_EXPRESSION);
 
-    // protected final Repository repository;
-    protected final ExpressionProcessor expressionProcessor;
     protected final IElementProcessor elementProcessor;
+    protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
 
     public ItemGenerator(Repository repository) {
-        // this.repository = repository;
+        elementProcessor = ElementProcessorFactory.create(repository);
         expressionProcessor = new ExpressionProcessor();
-        elementProcessor = new ElementProcessor(repository);
         extensionProcessor = new ExtensionProcessor();
     }
 
-    public IBaseBackboneElement generate(IApplyRequest request, IBaseResource profile, int itemCount) {
+    public IBaseBackboneElement generate(ICpgRequest request, IBaseResource profile, int itemCount) {
         checkNotNull(profile);
         final String linkId = String.valueOf(itemCount + 1);
         try {
@@ -56,7 +53,7 @@ public class ItemGenerator {
         }
     }
 
-    protected void processElements(IApplyRequest request, IBaseBackboneElement item, IBaseResource profile) {
+    protected void processElements(ICpgRequest request, IBaseBackboneElement item, IBaseResource profile) {
         int childCount = request.getItems(item).size();
         var itemLinkId = request.getItemLinkId(item);
         var profileUrl = request.resolvePathString(profile, "url");
@@ -83,7 +80,7 @@ public class ItemGenerator {
     }
 
     protected IBaseBackboneElement processElement(
-            IApplyRequest request,
+            ICpgRequest request,
             String profileUrl,
             ICompositeType element,
             String childLinkId,
@@ -99,7 +96,7 @@ public class ItemGenerator {
 
     @SuppressWarnings("unchecked")
     protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
-            IApplyRequest request, IBaseResource profile) {
+            ICpgRequest request, IBaseResource profile) {
         var differential = request.resolvePath(profile, "differential");
         final List<E> elements = request.resolvePathList(differential, "element").stream()
                 .map(e -> (E) e)
@@ -109,16 +106,16 @@ public class ItemGenerator {
                 .collect(Collectors.toList());
     }
 
-    protected IBaseBackboneElement createErrorItem(IApplyRequest request, String linkId, String errorMessage) {
+    protected IBaseBackboneElement createErrorItem(ICpgRequest request, String linkId, String errorMessage) {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
     }
 
-    protected String getElementType(IApplyRequest request, ICompositeType element) {
+    protected String getElementType(ICpgRequest request, ICompositeType element) {
         var type = request.resolvePathList(element, "type");
         return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
     }
 
-    public IBaseBackboneElement createQuestionnaireItem(IApplyRequest request, IBaseResource profile, String linkId) {
+    public IBaseBackboneElement createQuestionnaireItem(ICpgRequest request, IBaseResource profile, String linkId) {
         var url = request.resolvePathString(profile, "url");
         var type = request.resolvePathString(profile, "type");
         final String definition = String.format("%s#%s", url, type);
@@ -128,7 +125,7 @@ public class ItemGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    protected String getProfileText(IApplyRequest request, IBaseResource profile) {
+    protected String getProfileText(ICpgRequest request, IBaseResource profile) {
         var inputExt = request.getExtensions(profile).stream()
                 .filter(e -> e.getUrl().equals(Constants.CPG_INPUT_TEXT))
                 .findFirst()
@@ -145,7 +142,7 @@ public class ItemGenerator {
     }
 
     protected IBaseBackboneElement createQuestionnaireItemComponent(
-            IApplyRequest request, String text, String linkId, String definition, Boolean isDisplay) {
+            ICpgRequest request, String text, String linkId, String definition, Boolean isDisplay) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent()

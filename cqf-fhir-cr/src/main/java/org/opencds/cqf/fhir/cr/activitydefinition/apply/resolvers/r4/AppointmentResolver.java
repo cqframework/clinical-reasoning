@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.r4.model.Appointment.ParticipationStatus;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class AppointmentResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,7 +20,7 @@ public class AppointmentResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Appointment resolve(IApplyRequest request) {
+    public Appointment resolve(ICpgRequest request) {
         var appointment = new Appointment();
 
         appointment.setStatus(AppointmentStatus.PROPOSED);

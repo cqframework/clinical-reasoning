@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.NutritionOrder;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class NutritionOrderResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class NutritionOrderResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public NutritionOrder resolve(IApplyRequest request) {
+    public NutritionOrder resolve(ICpgRequest request) {
         var nutritionOrder = new NutritionOrder();
 
         return nutritionOrder;

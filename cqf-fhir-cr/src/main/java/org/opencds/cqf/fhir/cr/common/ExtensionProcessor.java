@@ -18,7 +18,7 @@ public class ExtensionProcessor {
      * @param excludedExtList A list of extension URL's to excluded from the definition
      */
     public void processExtensions(
-            IApplyRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
+            ICpgRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> !excludedExtList.contains(e.getUrl()))
                 .collect(Collectors.toList());
@@ -33,14 +33,17 @@ public class ExtensionProcessor {
      * @param extList A list of extension URL's to include from the definition
      */
     public void processExtensionsInList(
-            IApplyRequest request, IBase resource, IElement definition, List<String> extList) {
+            ICpgRequest request, IBase resource, IElement definition, List<String> extList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> extList.contains(e.getUrl()))
                 .collect(Collectors.toList());
         processExtensions(request, resource, extensions);
     }
 
-    private void processExtensions(IApplyRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
+    private void processExtensions(ICpgRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
+        if (extensions.isEmpty()) {
+            return;
+        }
         var extensionResolver = new ExtensionResolver(
                 request.getSubjectId(), request.getParameters(), request.getBundle(), request.getLibraryEngine());
         extensionResolver.resolveExtensions(resource, extensions, request.getDefaultLibraryUrl());

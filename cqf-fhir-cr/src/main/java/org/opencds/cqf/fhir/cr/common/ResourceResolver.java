@@ -49,7 +49,6 @@ public class ResourceResolver {
     }
 
     protected <C extends IPrimitiveType<String>> IBaseResource resolveByUrl(C url) {
-        // var parts = Canonicals.getParts(url);
         var result = this.repository.search(bundleClazz, clazz, Searches.byCanonical(url.getValue()));
         var iterator = new BundleMappingIterable<>(repository, result, p -> p.getResource()).iterator();
         return iterator.hasNext() ? iterator.next() : null;

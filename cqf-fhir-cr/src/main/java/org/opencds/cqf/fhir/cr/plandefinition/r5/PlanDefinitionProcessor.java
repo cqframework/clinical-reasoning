@@ -21,6 +21,7 @@ import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -59,8 +60,9 @@ import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.inputparameters.r5.InputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.BasePlanDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.Clients;
@@ -78,11 +80,13 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     private final ActivityDefinitionProcessor activityDefinitionProcessor;
     private final QuestionnaireProcessor questionnaireProcessor;
     private final QuestionnaireResponseProcessor questionnaireResponseProcessor;
+    private final GenerateProcessor generateProcessor;
     private ExtensionResolver extensionResolver;
     private InputParameterResolver inputParameterResolver;
-    private QuestionnaireItemGenerator questionnaireItemGenerator;
 
     protected OperationOutcome oc;
+
+    protected ApplyRequest request;
 
     public PlanDefinitionProcessor(Repository repository) {
         this(repository, EvaluationSettings.getDefault());
@@ -93,6 +97,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         this.activityDefinitionProcessor = new ActivityDefinitionProcessor(this.repository, evaluationSettings);
         this.questionnaireProcessor = new QuestionnaireProcessor(this.repository, evaluationSettings);
         this.questionnaireResponseProcessor = new QuestionnaireResponseProcessor(this.repository, evaluationSettings);
+        this.generateProcessor = new GenerateProcessor(repository);
     }
 
     @Override
@@ -180,10 +185,23 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
         extractQuestionnaireResponse();
 
-        this.questionnaire = new Questionnaire();
-        this.questionnaire.setId(new IdType(FHIRTypes.QUESTIONNAIRE.toCode(), planDefinition.getIdPart()));
-        this.questionnaireItemGenerator =
-                QuestionnaireItemGenerator.of(repository, subjectId, parameters, bundle, libraryEngine);
+        this.request = new ApplyRequest(
+                planDefinition,
+                subjectId,
+                encounterId,
+                practitionerId,
+                organizationId,
+                userType,
+                userLanguage,
+                userTaskContext,
+                setting,
+                settingContext,
+                parameters,
+                useServerData,
+                bundle,
+                libraryEngine,
+                modelResolver);
+        this.questionnaire = generateProcessor.generate(planDefinition.getIdPart());
         this.inputParameterResolver = new InputParameterResolver(
                 repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
         this.extensionResolver =
@@ -316,6 +334,18 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
         return myGoal;
     }
 
+    private void addQuestionnaireItemForInput(DataRequirement input) {
+        var profile = org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(
+                repository, input.getProfile().get(0));
+        var item = (Questionnaire.QuestionnaireItemComponent) this.generateProcessor.generateItem(
+                request, profile, ((Questionnaire) this.questionnaire).getItem().size());
+
+        // If input has text extension use it to override
+        // resolve extensions or not?
+
+        ((Questionnaire) this.questionnaire).addItem(item);
+    }
+
     private RequestOrchestrationActionComponent resolveAction(
             String defaultLibraryUrl,
             PlanDefinition planDefinition,
@@ -324,13 +354,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             PlanDefinition.PlanDefinitionActionComponent action) {
         if (planDefinition.hasExtension(Constants.CPG_QUESTIONNAIRE_GENERATE) && action.hasInput()) {
             for (var actionInput : action.getInput()) {
-                if (actionInput.hasRequirement()) {
-                    ((Questionnaire) this.questionnaire)
-                            .addItem(this.questionnaireItemGenerator.generateItem(
-                                    actionInput.getRequirement(),
-                                    ((Questionnaire) this.questionnaire)
-                                            .getItem()
-                                            .size()));
+                if (actionInput.getRequirement().hasProfile()) {
+                    addQuestionnaireItemForInput(actionInput.getRequirement());
                 }
             }
         }

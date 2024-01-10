@@ -9,11 +9,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 
-public class ApplyRequest implements IApplyRequest {
+public class ApplyRequest implements ICpgRequest {
     private final IBaseResource activityDefinition;
     private final IIdType subjectId;
     private final IIdType encounterId;

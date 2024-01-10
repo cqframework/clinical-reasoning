@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,5 +15,5 @@ public abstract class BaseRequestResourceResolver {
     public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
     public static final String MISSING_CODE_PROPERTY = "Missing required code property";
 
-    public abstract IBaseResource resolve(IApplyRequest request);
+    public abstract IBaseResource resolve(ICpgRequest request);
 }

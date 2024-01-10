@@ -12,7 +12,8 @@ public class BundleHelper {
 
     /**
      * Returns the first entry in a Bundle
-     * @param bundle
+     *
+     * @param bundle IBaseBundle type
      * @return
      */
     public static IBaseResource getEntryFirstRep(IBaseBundle bundle) {
@@ -36,7 +37,8 @@ public class BundleHelper {
 
     /**
      * Returns a list of resources from the Bundle entries
-     * @param bundle
+     *
+     * @param bundle IBaseBundle type
      * @return
      */
     public static List<IBaseResource> getEntryResources(IBaseBundle bundle) {
@@ -78,8 +80,9 @@ public class BundleHelper {
 
     /**
      * Returns the Resource for a given entry
-     * @param fhirVersion
-     * @param entry
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
      * @return
      */
     public static IBaseResource getEntryResource(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
@@ -99,7 +102,8 @@ public class BundleHelper {
 
     /**
      * Returns the list of entries from the Bundle
-     * @param bundle
+     *
+     * @param bundle IBaseBundle type
      * @return
      */
     public static List<? extends IBaseBackboneElement> getEntry(IBaseBundle bundle) {
@@ -119,11 +123,13 @@ public class BundleHelper {
     }
 
     /**
-     * Adds the entry to the Bundle
-     * @param bundle
-     * @param entry
+     * Adds the entry to the Bundle and returns the Bundle
+     *
+     * @param bundle IBaseBundle type
+     * @param entry IBaseBackboneElement type
+     * @return
      */
-    public static void addEntry(IBaseBundle bundle, IBaseBackboneElement entry) {
+    public static IBaseBundle addEntry(IBaseBundle bundle, IBaseBackboneElement entry) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
         switch (fhirVersion) {
             case DSTU3:
@@ -143,11 +149,24 @@ public class BundleHelper {
                 throw new IllegalArgumentException(
                         String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
+
+        return bundle;
     }
 
     /**
      * Returns a new Bundle for the given version of FHIR
-     * @param fhirVersion
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @return
+     */
+    public static IBaseBundle newBundle(FhirVersionEnum fhirVersion) {
+        return newBundle(fhirVersion, null, null);
+    }
+
+    /**
+     * Returns a new Bundle for the given version of FHIR
+     *
+     * @param fhirVersion FhirVersionEnum
      * @param id Id to set on the Bundle, will ignore if null
      * @param type The type of Bundle to return, defaults to COLLECTION
      * @return

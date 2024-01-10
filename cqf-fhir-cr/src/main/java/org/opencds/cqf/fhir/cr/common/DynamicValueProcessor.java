@@ -19,7 +19,7 @@ public class DynamicValueProcessor {
      * @param resource the resource to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      */
-    public void processDynamicValues(IApplyRequest request, IBaseResource resource, IElement definitionElement) {
+    public void processDynamicValues(ICpgRequest request, IBaseResource resource, IElement definitionElement) {
         processDynamicValues(request, resource, definitionElement, null);
     }
 
@@ -32,14 +32,14 @@ public class DynamicValueProcessor {
      * @param requestAction the action of the RequestOrchestration created from the definition action
      */
     public void processDynamicValues(
-            IApplyRequest request, IBaseResource resource, IElement definitionElement, IElement requestAction) {
+            ICpgRequest request, IBaseResource resource, IElement definitionElement, IElement requestAction) {
         var dynamicValues = request.getDynamicValues(definitionElement);
         for (var dynamicValue : dynamicValues) {
             resolveDynamicValue(request, dynamicValue, resource, requestAction);
         }
     }
 
-    protected CqfExpression getDynamicValueExpression(IApplyRequest request, IBaseBackboneElement dynamicValue) {
+    protected CqfExpression getDynamicValueExpression(ICpgRequest request, IBaseBackboneElement dynamicValue) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return new CqfExpression(
@@ -60,7 +60,7 @@ public class DynamicValueProcessor {
     }
 
     protected void resolveDynamicValue(
-            IApplyRequest request, IBaseBackboneElement dynamicValue, IBaseResource resource, IElement requestAction) {
+            ICpgRequest request, IBaseBackboneElement dynamicValue, IBaseResource resource, IElement requestAction) {
         var path = request.resolvePathString(dynamicValue, "path");
         // Strip % so it is supported as defined in the spec
         path = path.replace("%", "");

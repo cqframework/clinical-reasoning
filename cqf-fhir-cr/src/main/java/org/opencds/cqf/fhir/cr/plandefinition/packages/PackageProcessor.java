@@ -3,18 +3,15 @@ package org.opencds.cqf.fhir.cr.plandefinition.packages;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
 
-    public PackageProcessor(Repository repository, ModelResolver modelResolver) {
+    public PackageProcessor(Repository repository) {
         this.repository = repository;
-        this.modelResolver = modelResolver;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
     }
 

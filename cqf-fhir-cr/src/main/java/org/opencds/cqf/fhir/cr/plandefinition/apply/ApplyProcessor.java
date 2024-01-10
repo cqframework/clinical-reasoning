@@ -49,7 +49,7 @@ public class ApplyProcessor implements IApplyProcessor {
         this.repository = repository;
         this.modelResolver = modelResolver;
         extensionProcessor = new ExtensionProcessor();
-        generateProcessor = new GenerateProcessor(this.repository, this.modelResolver);
+        generateProcessor = new GenerateProcessor(this.repository);
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);

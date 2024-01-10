@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.VisionPrescription;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class VisionPrescriptionResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class VisionPrescriptionResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public VisionPrescription resolve(IApplyRequest request) {
+    public VisionPrescription resolve(ICpgRequest request) {
         var visionPrescription = new VisionPrescription();
 
         return visionPrescription;

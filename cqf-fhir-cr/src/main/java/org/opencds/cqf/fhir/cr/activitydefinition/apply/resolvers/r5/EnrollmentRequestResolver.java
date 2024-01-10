@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.EnrollmentRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class EnrollmentRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class EnrollmentRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public EnrollmentRequest resolve(IApplyRequest request) {
+    public EnrollmentRequest resolve(ICpgRequest request) {
         var enrollmentRequest = new EnrollmentRequest();
 
         return enrollmentRequest;

@@ -54,8 +54,7 @@ public class PlanDefinitionProcessor {
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.applyProcessor =
                 applyProcessor != null ? applyProcessor : new ApplyProcessor(this.repository, modelResolver);
-        this.packageProcessor =
-                packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository, modelResolver);
+        this.packageProcessor = packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository);
     }
 
     protected <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
@@ -186,10 +185,14 @@ public class PlanDefinitionProcessor {
                 bundle,
                 libraryEngine,
                 modelResolver);
+        return apply(request);
+    }
+
+    public IBaseResource apply(ApplyRequest request) {
         return applyProcessor.apply(request);
     }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource applyR5(
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle applyR5(
             Either3<C, IIdType, R> planDefinition,
             String subject,
             String encounter,
@@ -226,7 +229,7 @@ public class PlanDefinitionProcessor {
                 new LibraryEngine(repository, this.evaluationSettings));
     }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource applyR5(
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle applyR5(
             Either3<C, IIdType, R> planDefinition,
             String subject,
             String encounter,
@@ -260,6 +263,10 @@ public class PlanDefinitionProcessor {
                 bundle,
                 libraryEngine,
                 modelResolver);
+        return applyR5(request);
+    }
+
+    public IBaseBundle applyR5(ApplyRequest request) {
         return applyProcessor.applyR5(request);
     }
 }

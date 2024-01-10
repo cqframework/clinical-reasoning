@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class ElementProcessorFactory {
-    public IElementProcessor create(Repository repository) {
+    public static IElementProcessor create(Repository repository) {
         switch (repository.fhirContext().getVersion().getVersion()) {
             case DSTU3:
                 return new org.opencds.cqf.fhir.cr.questionnaire.generate.dstu3.ElementProcessor(repository);

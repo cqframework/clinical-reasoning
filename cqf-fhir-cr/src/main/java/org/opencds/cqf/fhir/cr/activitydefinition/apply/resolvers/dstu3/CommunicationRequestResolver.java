@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.model.CommunicationRequest.CommunicationRequestRequest
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -16,7 +16,7 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public CommunicationRequest resolve(IApplyRequest request) {
+    public CommunicationRequest resolve(ICpgRequest request) {
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.DRAFT);

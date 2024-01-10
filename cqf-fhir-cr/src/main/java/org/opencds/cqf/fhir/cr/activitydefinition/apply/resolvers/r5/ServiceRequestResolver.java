@@ -12,7 +12,7 @@ import org.hl7.fhir.r5.model.Enumerations.RequestStatus;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.ServiceRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class ServiceRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -23,7 +23,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ServiceRequest resolve(IApplyRequest request) {
+    public ServiceRequest resolve(ICpgRequest request) {
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(RequestStatus.DRAFT);

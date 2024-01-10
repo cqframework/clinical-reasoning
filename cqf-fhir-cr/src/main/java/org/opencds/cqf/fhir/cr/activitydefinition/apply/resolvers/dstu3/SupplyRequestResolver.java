@@ -7,7 +7,7 @@ import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestOrderedItemComponent;
 import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestRequesterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class SupplyRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,7 +17,7 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public SupplyRequest resolve(IApplyRequest request) {
+    public SupplyRequest resolve(ICpgRequest request) {
         var supplyRequest = new SupplyRequest();
 
         if (request.hasPractitionerId()) {

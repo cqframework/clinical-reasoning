@@ -3,45 +3,43 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.CommunicationRequest;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.json.JSONException;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/plandefinition/r4";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/plandefinition";
 
-    private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-    private static final IParser jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
     static {
@@ -67,237 +65,205 @@ public class PlanDefinition {
         return load(open(asset));
     }
 
-    public static IBaseResource parse(String asset) {
-        return jsonParser.parseResource(open(asset));
+    public static Given given() {
+        return new Given();
     }
 
-    public static PlanDefinitionProcessor buildProcessor(Repository repository) {
-        return new PlanDefinitionProcessor(repository, evaluationSettings);
-    }
+    public static class Given {
+        private Repository repository;
 
-    /** Fluent interface starts here **/
-    public static class Assert {
-        public static Apply that(String planDefinitionID, String patientID, String encounterID, String practitionerID) {
-            return new Apply(planDefinitionID, patientID, encounterID, practitionerID);
+        public Given repository(Repository repository) {
+            this.repository = repository;
+            return this;
+        }
+
+        public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
+            this.repository = TestRepositoryFactory.createRepository(
+                    fhirContext, this.getClass(), CLASS_PATH + "/" + repositoryPath, IGLayoutMode.TYPE_PREFIX);
+            return this;
+        }
+
+        public static PlanDefinitionProcessor buildProcessor(Repository repository) {
+            return new PlanDefinitionProcessor(repository, evaluationSettings);
+        }
+
+        public When when() {
+            return new When(repository, buildProcessor(repository));
         }
     }
 
-    public static class Apply {
-        private String planDefinitionID;
+    public static class When {
+        private final Repository repository;
+        private final PlanDefinitionProcessor processor;
+        private final IParser jsonParser;
 
-        private String patientID;
-        private String encounterID;
-        private String practitionerID;
+        private String planDefinitionId;
 
-        private Repository repository;
+        private String subjectId;
+        private String encounterId;
+        private String practitionerId;
+
         private Repository dataRepository;
         private Repository contentRepository;
         private Repository terminologyRepository;
-        private Bundle additionalData;
-        private IdType additionalDataId;
-        private Parameters parameters;
-        private IdType expectedBundleId;
-        private IdType expectedCarePlanId;
+        private IBaseBundle additionalData;
+        private IIdType additionalDataId;
+        private IBaseParameters parameters;
 
-        public Apply(String planDefinitionID, String patientID, String encounterID, String practitionerID) {
-            this.planDefinitionID = planDefinitionID;
-            this.patientID = patientID;
-            this.encounterID = encounterID;
-            this.practitionerID = practitionerID;
+        public When(Repository repository, PlanDefinitionProcessor processor) {
+            this.repository = repository;
+            this.processor = processor;
+            jsonParser = repository.fhirContext().newJsonParser();
         }
 
-        public Apply withData(String dataAssetName) {
-            dataRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
+        public When planDefinitionId(String id) {
+            planDefinitionId = id;
             return this;
         }
 
-        public Apply withContent(String dataAssetName) {
-            contentRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
-
+        public When subjectId(String id) {
+            subjectId = id;
             return this;
         }
 
-        public Apply withTerminology(String dataAssetName) {
-            terminologyRepository = new InMemoryFhirRepository(fhirContext, (Bundle) parse(dataAssetName));
+        public When encounterId(String id) {
+            encounterId = id;
+            return this;
+        }
 
+        public When practitionerId(String id) {
+            practitionerId = id;
+            return this;
+        }
+
+        public When data(String dataAssetName) {
+            dataRepository = new InMemoryFhirRepository(
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+            return this;
+        }
+
+        public When content(String dataAssetName) {
+            contentRepository = new InMemoryFhirRepository(
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+            return this;
+        }
+
+        public When terminology(String dataAssetName) {
+            terminologyRepository = new InMemoryFhirRepository(
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
             return this;
         }
 
         private void loadAdditionalData(IBaseResource resource) {
-            additionalData = resource.getIdElement().getResourceType().equals(FHIRAllTypes.BUNDLE.toCode())
-                    ? (Bundle) resource
-                    : new Bundle()
-                            .setType(BundleType.COLLECTION)
-                            .addEntry(new BundleEntryComponent().setResource((Resource) resource));
+            var fhirVersion = repository.fhirContext().getVersion().getVersion();
+            additionalData = resource.getIdElement().getResourceType().equals("Bundle")
+                    ? (IBaseBundle) resource
+                    : addEntry(newBundle(fhirVersion), newEntryWithResource(fhirVersion, resource));
         }
 
-        public Apply withAdditionalData(String dataAssetName) {
-            var data = parse(dataAssetName);
+        public When additionalData(String dataAssetName) {
+            var data = jsonParser.parseResource(open(dataAssetName));
             loadAdditionalData(data);
-
             return this;
         }
 
-        public Apply withAdditionalDataId(IdType id) {
+        public When additionalDataId(IIdType id) {
             additionalDataId = id;
-
             return this;
         }
 
-        public Apply withParameters(Parameters params) {
+        public When parameters(IBaseParameters params) {
             parameters = params;
-
             return this;
         }
 
-        public Apply withRepository(Repository repository) {
-            this.repository = repository;
-
-            return this;
-        }
-
-        public Apply withExpectedBundleId(IdType id) {
-            expectedBundleId = id;
-
-            return this;
-        }
-
-        public Apply withExpectedCarePlanId(IdType id) {
-            expectedCarePlanId = id;
-
-            return this;
-        }
-
-        private void buildRepository() {
-            if (repository != null) {
-                return;
-            }
-            var local = new IGFileStructureRepository(
-                    fhirContext,
-                    this.getClass()
-                                    .getProtectionDomain()
-                                    .getCodeSource()
-                                    .getLocation()
-                                    .getPath()
-                            + CLASS_PATH,
-                    IGLayoutMode.TYPE_PREFIX,
-                    EncodingEnum.JSON);
+        private Repository buildRepository() {
             if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
-                repository = local;
-                return;
+                return repository;
             }
 
             if (dataRepository == null) {
-                dataRepository = local;
+                dataRepository = repository;
             }
             if (contentRepository == null) {
-                contentRepository = local;
+                contentRepository = repository;
             }
             if (terminologyRepository == null) {
-                terminologyRepository = local;
+                terminologyRepository = repository;
             }
-
-            repository = Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
+            return Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
         }
 
-        public GeneratedBundle applyR5() {
-            buildRepository();
-            var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
-            Bundle expectedBundle = null;
-            if (expectedBundleId != null) {
-                try {
-                    expectedBundle = repository.read(Bundle.class, expectedBundleId);
-                } catch (Exception e) {
-                }
-            }
+        public GeneratedBundle thenApplyR5() {
+            var requestRepository = buildRepository();
+            var libraryEngine = new LibraryEngine(requestRepository, processor.evaluationSettings);
             if (additionalDataId != null) {
-                var resource = repository.read(
-                        fhirContext
-                                .getResourceDefinition(additionalDataId.getResourceType())
-                                .newInstance()
-                                .getClass(),
-                        additionalDataId);
-                loadAdditionalData(resource);
+                loadAdditionalData(readRepository(repository, additionalDataId));
             }
             return new GeneratedBundle(
-                    (Bundle) buildProcessor(repository)
-                            .applyR5(
-                                    Eithers.forMiddle3(new IdType("PlanDefinition", planDefinitionID)),
-                                    patientID,
-                                    encounterID,
-                                    practitionerID,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    parameters,
-                                    null,
-                                    additionalData,
-                                    null,
-                                    libraryEngine),
-                    expectedBundle);
+                    repository,
+                    processor.applyR5(
+                            Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                            subjectId,
+                            encounterId,
+                            practitionerId,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            parameters,
+                            null,
+                            additionalData,
+                            null,
+                            libraryEngine));
         }
 
-        public GeneratedCarePlan apply() {
-            buildRepository();
-            var libraryEngine = new LibraryEngine(this.repository, evaluationSettings);
-            CarePlan expectedCarePlan = null;
-            if (expectedCarePlanId != null) {
-                try {
-                    expectedCarePlan = repository.read(CarePlan.class, expectedCarePlanId);
-                } catch (Exception e) {
-                }
-            }
+        public GeneratedCarePlan thenApply() {
+            var requestRepository = buildRepository();
+            var libraryEngine = new LibraryEngine(requestRepository, processor.evaluationSettings);
             if (additionalDataId != null) {
-                var resource = repository.read(
-                        fhirContext
-                                .getResourceDefinition(additionalDataId.getResourceType())
-                                .newInstance()
-                                .getClass(),
-                        additionalDataId);
-                loadAdditionalData(resource);
+                loadAdditionalData(readRepository(repository, additionalDataId));
             }
             return new GeneratedCarePlan(
-                    (CarePlan) buildProcessor(repository)
-                            .apply(
-                                    Eithers.forMiddle3(new IdType("PlanDefinition", planDefinitionID)),
-                                    patientID,
-                                    encounterID,
-                                    practitionerID,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    parameters,
-                                    null,
-                                    additionalData,
-                                    null,
-                                    libraryEngine),
-                    expectedCarePlan);
+                    repository,
+                    processor.apply(
+                            Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                            subjectId,
+                            encounterId,
+                            practitionerId,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            parameters,
+                            null,
+                            additionalData,
+                            null,
+                            libraryEngine));
         }
 
-        public GeneratedPackage packagePlanDefinition() {
-            buildRepository();
-            return new GeneratedPackage(
-                    (Bundle) buildProcessor(repository)
-                            .packagePlanDefinition(
-                                    Eithers.forMiddle3(new IdType("PlanDefinition", planDefinitionID)), true),
-                    null);
+        public GeneratedPackage thenPackage() {
+            return new GeneratedPackage(processor.packagePlanDefinition(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)), true));
         }
     }
 
     public static class GeneratedBundle {
-        Bundle generatedBundle;
-        Bundle expectedBundle;
+        final Repository repository;
+        final IBaseBundle generatedBundle;
+        final IParser jsonParser;
+        final ModelResolver modelResolver;
 
-        public GeneratedBundle(Bundle generatedBundle, Bundle expectedBundle) {
+        public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
+            this.repository = repository;
             this.generatedBundle = generatedBundle;
-            this.expectedBundle = expectedBundle;
+            jsonParser = this.repository.fhirContext().newJsonParser();
+            modelResolver = FhirModelResolverCache.resolverForVersion(
+                    this.repository.fhirContext().getVersion().getVersion());
         }
 
         public void isEqualsTo(String expectedBundleAssetName) {
@@ -310,10 +276,10 @@ public class PlanDefinition {
             }
         }
 
-        public void isEqualsToExpected() {
+        public void isEqualsTo(IIdType expectedBundleId) {
             try {
                 JSONAssert.assertEquals(
-                        jsonParser.encodeResourceToString(expectedBundle),
+                        jsonParser.encodeResourceToString(readRepository(repository, expectedBundleId)),
                         jsonParser.encodeResourceToString(generatedBundle),
                         true);
             } catch (JSONException e) {
@@ -323,32 +289,36 @@ public class PlanDefinition {
         }
 
         public void hasEntry(int count) {
-            assertEquals(count, generatedBundle.getEntry().size());
+            assertEquals(count, getEntry(generatedBundle).size());
         }
 
         public void hasCommunicationRequestPayload() {
-            assertTrue(generatedBundle.getEntry().stream()
-                    .filter(e -> e.getResource().getResourceType().equals(ResourceType.CommunicationRequest))
-                    .map(e -> (CommunicationRequest) e.getResource())
-                    .allMatch(c -> c.hasPayload()));
+            assertTrue(getEntryResources(generatedBundle).stream()
+                    .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                    .allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
         }
 
+        @SuppressWarnings("unchecked")
         public void hasQuestionnaireOperationOutcome() {
-            assertTrue(generatedBundle.getEntry().stream()
-                    .map(e -> e.getResource())
-                    .anyMatch(r -> r.getResourceType().equals(ResourceType.Questionnaire)
-                            && ((Questionnaire) r).getContained().stream().anyMatch(c -> c.getResourceType()
-                                    .equals(ResourceType.OperationOutcome))));
+            assertTrue(getEntryResources(generatedBundle).stream()
+                    .anyMatch(r -> r.fhirType().equals("Questionnaire")
+                            && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
+                                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome"))));
         }
     }
 
     public static class GeneratedCarePlan {
-        CarePlan generatedCarePlan;
-        CarePlan expectedCarePlan;
+        final Repository repository;
+        final IBaseResource generatedCarePlan;
+        final IParser jsonParser;
+        final ModelResolver modelResolver;
 
-        public GeneratedCarePlan(CarePlan generatedCarePlan, CarePlan expectedCarePlan) {
+        public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlan) {
+            this.repository = repository;
             this.generatedCarePlan = generatedCarePlan;
-            this.expectedCarePlan = expectedCarePlan;
+            jsonParser = this.repository.fhirContext().newJsonParser();
+            modelResolver = FhirModelResolverCache.resolverForVersion(
+                    this.repository.fhirContext().getVersion().getVersion());
         }
 
         public void isEqualsTo(String expectedCarePlanAssetName) {
@@ -361,10 +331,10 @@ public class PlanDefinition {
             }
         }
 
-        public void isEqualsToExpected() {
+        public void isEqualsTo(IIdType expectedCarePlanId) {
             try {
                 JSONAssert.assertEquals(
-                        jsonParser.encodeResourceToString(expectedCarePlan),
+                        jsonParser.encodeResourceToString(readRepository(repository, expectedCarePlanId)),
                         jsonParser.encodeResourceToString(generatedCarePlan),
                         true);
             } catch (JSONException e) {
@@ -373,27 +343,28 @@ public class PlanDefinition {
             }
         }
 
+        @SuppressWarnings("unchecked")
         public void hasContained(int count) {
-            assertEquals(count, generatedCarePlan.getContained().size());
+            assertEquals(
+                    count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained")).size());
         }
 
+        @SuppressWarnings("unchecked")
         public void hasOperationOutcome() {
-            assertTrue(generatedCarePlan.getContained().stream()
-                    .anyMatch(r -> r.getResourceType().equals(ResourceType.OperationOutcome)));
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
+                    .stream().anyMatch(r -> r.fhirType().equals("OperationOutcome")));
         }
     }
 
     public static class GeneratedPackage {
-        Bundle generatedBundle;
-        Bundle expectedBundle;
+        IBaseBundle generatedBundle;
 
-        public GeneratedPackage(Bundle generatedBundle, Bundle expectedBundle) {
+        public GeneratedPackage(IBaseBundle generatedBundle) {
             this.generatedBundle = generatedBundle;
-            this.expectedBundle = expectedBundle;
         }
 
         public void hasEntry(int count) {
-            assertEquals(count, generatedBundle.getEntry().size());
+            assertEquals(count, getEntry(generatedBundle).size());
         }
     }
 }

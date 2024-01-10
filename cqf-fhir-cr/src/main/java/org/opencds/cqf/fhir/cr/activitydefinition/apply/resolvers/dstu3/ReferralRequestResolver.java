@@ -7,7 +7,7 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class ReferralRequestResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -17,7 +17,7 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public ReferralRequest resolve(IApplyRequest request) {
+    public ReferralRequest resolve(ICpgRequest request) {
         // status, intent, code, and subject are required
         var referralRequest = new ReferralRequest();
         referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.DRAFT);

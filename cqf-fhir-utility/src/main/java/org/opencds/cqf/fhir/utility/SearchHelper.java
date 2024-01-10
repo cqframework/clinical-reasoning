@@ -8,6 +8,7 @@ import java.util.Map;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -17,16 +18,34 @@ public class SearchHelper {
     private SearchHelper() {}
 
     @SuppressWarnings("unchecked")
-    protected static Class<IBaseBundle> getBundleType(Repository repository) {
+    protected static Class<IBaseBundle> getBundleClass(Repository repository) {
         return (Class<IBaseBundle>)
                 repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }
 
+    @SuppressWarnings("unchecked")
+    protected static Class<IBaseResource> getResourceClass(Repository repository, String resourceType) {
+        return (Class<IBaseResource>)
+                repository.fhirContext().getResourceDefinition(resourceType).getImplementingClass();
+    }
+
     /**
+     * Reads a resource from the repository
+     *
+     * @param repository the repository to search
+     * @param id IIdType of the resource
+     * @return
+     */
+    public static IBaseResource readRepository(Repository repository, IIdType id) {
+        return repository.read(getResourceClass(repository, id.getResourceType()), id);
+    }
+
+    /**
+     * Searches the given Repository and returns the first entry found
      *
      * @param <CanonicalType>
-     * @param repository
-     * @param canonical
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
      * @return
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
@@ -41,6 +60,7 @@ public class SearchHelper {
 
     /**
      * Searches the given Repository and returns the first entry found
+     *
      * @param <CanonicalType> an IPrimitiveType<String> type
      * @param <R> an IBaseResource type
      * @param repository the repository to search
@@ -55,7 +75,7 @@ public class SearchHelper {
         var version = Canonicals.getVersion(canonical);
 
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
-        var searchResult = repository.search(getBundleType(repository), resourceType, searchParams);
+        var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
         var result = getEntryFirstRep(searchResult);
         if (result == null) {
             throw new FHIRException(String.format(
@@ -67,6 +87,7 @@ public class SearchHelper {
 
     /**
      * Searches the given Repository and handles paging to return all resources found in the search
+     *
      * @param <T> an IBaseResource type
      * @param <R> an IBaseBundle type
      * @param repository the repository to search
@@ -81,7 +102,7 @@ public class SearchHelper {
             Class<T> resourceType,
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
-        var bundleClass = getBundleType(repository);
+        var bundleClass = getBundleClass(repository);
         var result = repository.search(bundleClass, resourceType, searchParameters, headers);
         handlePaging(repository, result);
 

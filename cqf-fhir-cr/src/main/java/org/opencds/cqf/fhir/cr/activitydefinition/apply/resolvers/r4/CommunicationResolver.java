@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.Communication.CommunicationStatus;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class CommunicationResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -20,7 +20,7 @@ public class CommunicationResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Communication resolve(IApplyRequest request) {
+    public Communication resolve(ICpgRequest request) {
         var communication = new Communication();
 
         communication.setStatus(CommunicationStatus.UNKNOWN);

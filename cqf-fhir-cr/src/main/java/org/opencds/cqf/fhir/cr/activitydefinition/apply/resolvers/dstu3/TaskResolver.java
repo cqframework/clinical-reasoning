@@ -4,7 +4,7 @@ import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
-import org.opencds.cqf.fhir.cr.common.IApplyRequest;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class TaskResolver extends BaseRequestResourceResolver {
     private final ActivityDefinition activityDefinition;
@@ -14,7 +14,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
     }
 
     @Override
-    public Task resolve(IApplyRequest request) {
+    public Task resolve(ICpgRequest request) {
         var task = new Task();
         if (activityDefinition.hasExtension()) {
             var value = activityDefinition

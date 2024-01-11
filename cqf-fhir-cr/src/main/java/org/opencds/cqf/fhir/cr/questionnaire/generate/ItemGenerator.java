@@ -33,7 +33,7 @@ public class ItemGenerator {
     protected final ExtensionProcessor extensionProcessor;
 
     public ItemGenerator(Repository repository) {
-        elementProcessor = ElementProcessorFactory.create(repository);
+        elementProcessor = IElementProcessor.createProcessor(repository);
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
     }

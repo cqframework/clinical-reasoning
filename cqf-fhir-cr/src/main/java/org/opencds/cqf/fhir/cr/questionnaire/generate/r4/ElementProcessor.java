@@ -11,6 +11,8 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCqfExpression;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasDefaultValue;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -40,9 +42,9 @@ public class ElementProcessor implements IElementProcessor {
             questionnaireTypeIsChoice.addProperties(element, item);
         }
         if (element.hasFixedOrPattern()) {
-            elementHasDefaultValue.addProperties(element.getFixedOrPattern(), item);
+            elementHasDefaultValue.addProperties(request, element.getFixedOrPattern(), item);
         } else if (element.hasDefaultValue()) {
-            elementHasDefaultValue.addProperties(element.getDefaultValue(), item);
+            elementHasDefaultValue.addProperties(request, element.getDefaultValue(), item);
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
             elementHasCqfExpression.addProperties(request, element, item);
         } else if (caseFeature != null) {

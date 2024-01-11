@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.build;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -34,8 +34,8 @@ public class ProcessItem {
                     .setValue(
                             populatedItem,
                             "extension",
-                            Collections.singletonList(
-                                    build(request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION)));
+                            Collections.singletonList(buildReferenceExt(
+                                    request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION)));
             if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
                 request.getModelResolver()
                         .setValue(populatedItem, "initial", transformValue((org.hl7.fhir.dstu3.model.Type)

@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.build;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.pertainToGoalExtension;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
@@ -174,7 +174,7 @@ public class ApplyProcessor implements IApplyProcessor {
                         .setValue(
                                 requestOrchestration,
                                 "extension",
-                                Collections.singletonList(build(
+                                Collections.singletonList(buildReferenceExt(
                                         request.getFhirVersion(),
                                         pertainToGoalExtension(
                                                 goal.getIdElement().getIdPart()))));
@@ -195,7 +195,7 @@ public class ApplyProcessor implements IApplyProcessor {
                     .setValue(
                             resource,
                             "extension",
-                            Collections.singletonList(build(
+                            Collections.singletonList(buildReferenceExt(
                                     request.getFhirVersion(),
                                     crmiMessagesExtension(request.getOperationOutcome()
                                             .getIdElement()

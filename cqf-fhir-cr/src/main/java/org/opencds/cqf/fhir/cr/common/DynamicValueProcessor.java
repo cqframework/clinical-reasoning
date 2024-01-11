@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.CqfExpression;
@@ -66,22 +68,11 @@ public class DynamicValueProcessor {
         path = path.replace("%", "");
         var cqfExpression = getDynamicValueExpression(request, dynamicValue);
         if (path != null && cqfExpression != null) {
-            var result = request.getLibraryEngine()
-                    .resolveExpression(
-                            request.getSubjectId().getIdPart(),
-                            cqfExpression,
-                            request.getParameters(),
-                            request.getBundle(),
-                            resource);
+            var result = getDynamicValueExpressionResult(request, cqfExpression, resource);
             if (result == null || result.isEmpty()) {
                 return;
             }
             var value = result.size() == 1 ? result.get(0) : result;
-            // if (result.size() > 1) {
-            //     throw new IllegalArgumentException(
-            //             String.format("Dynamic value resolution received multiple values for expression: %s",
-            // cqfExpression.getExpression()));
-            // }
             if (requiresRequestAction(path, resource)) {
                 if (requestAction == null) {
                     throw new IllegalArgumentException(String.format(
@@ -105,6 +96,17 @@ public class DynamicValueProcessor {
                 request.getModelResolver().setValue(resource, path, value);
             }
         }
+    }
+
+    protected List<IBase> getDynamicValueExpressionResult(
+            ICpgRequest request, CqfExpression cqfExpression, IBaseResource resource) {
+        return request.getLibraryEngine()
+                .resolveExpression(
+                        request.getSubjectId().getIdPart(),
+                        cqfExpression,
+                        request.getParameters(),
+                        request.getBundle(),
+                        resource);
     }
 
     private Boolean requiresRequestAction(String path, IBaseResource resource) {

@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.build;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.prepopulateSubjectExtension;
@@ -47,7 +47,7 @@ public class PopulateProcessor implements IPopulateProcessor {
                 .setValue(
                         populatedQuestionnaire,
                         "extension",
-                        Collections.singletonList(build(
+                        Collections.singletonList(buildReferenceExt(
                                 request.getFhirVersion(),
                                 prepopulateSubjectExtension(
                                         "Patient", request.getSubjectId().getIdPart()))));
@@ -74,7 +74,7 @@ public class PopulateProcessor implements IPopulateProcessor {
                 .setValue(
                         response,
                         "extension",
-                        Collections.singletonList(build(
+                        Collections.singletonList(buildReferenceExt(
                                 request.getFhirVersion(),
                                 dtrQuestionnaireResponseExtension(request.getQuestionnaire()
                                         .getIdElement()
@@ -93,7 +93,7 @@ public class PopulateProcessor implements IPopulateProcessor {
                     .setValue(
                             resource,
                             "extension",
-                            Collections.singletonList(build(
+                            Collections.singletonList(buildReferenceExt(
                                     request.getFhirVersion(),
                                     crmiMessagesExtension(request.getOperationOutcome()
                                             .getIdElement()

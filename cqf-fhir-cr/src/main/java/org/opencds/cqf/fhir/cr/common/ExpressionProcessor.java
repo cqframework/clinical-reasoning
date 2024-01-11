@@ -101,10 +101,18 @@ public class ExpressionProcessor {
                         .filter(e -> e.getUrl().equals(Constants.CQF_EXPRESSION_LANGUAGE))
                         .findFirst()
                         .orElse(null);
+                var libraryExtension = extensions.stream()
+                        .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
+                        .findFirst()
+                        .orElse(null);
                 return new CqfExpression(
-                        languageExtension.getValue().toString(),
+                        languageExtension == null
+                                ? null
+                                : languageExtension.getValue().toString(),
                         extension.getValue().toString(),
-                        request.getDefaultLibraryUrl());
+                        libraryExtension == null
+                                ? request.getDefaultLibraryUrl()
+                                : libraryExtension.getValue().toString());
             case R4:
                 return CqfExpression.of(
                         (org.hl7.fhir.r4.model.Expression) extension.getValue(), request.getDefaultLibraryUrl());

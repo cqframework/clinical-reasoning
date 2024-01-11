@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -122,9 +123,23 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaire thenPrepopulate() {
-            var populateRequest = buildRequest();
-            return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
+        public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
+            if (buildRequest) {
+                var populateRequest = buildRequest();
+                return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
+            } else {
+                return new GeneratedQuestionnaire(
+                        repository,
+                        null,
+                        processor.prePopulate(
+                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
+                                subjectId,
+                                parameters,
+                                bundle,
+                                null,
+                                null,
+                                null));
+            }
         }
 
         public GeneratedQuestionnaireResponse thenPopulate() {
@@ -164,15 +179,17 @@ public class TestQuestionnaire {
             this.repository = repository;
             this.request = request;
             this.questionnaire = questionnaire;
-            items = new ArrayList<>();
-            populateItems(request.getItems(questionnaire));
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            expectedQuestionnaireId = Ids.newId(
-                    questionnaire.getClass(),
-                    String.format(
-                            "%s-%s",
-                            request.getQuestionnaire().getIdElement().getIdPart(),
-                            request.getSubjectId().getIdPart()));
+            items = new ArrayList<>();
+            if (request != null) {
+                populateItems(request.getItems(questionnaire));
+                expectedQuestionnaireId = Ids.newId(
+                        questionnaire.getClass(),
+                        String.format(
+                                "%s-%s",
+                                request.getQuestionnaire().getIdElement().getIdPart(),
+                                request.getSubjectId().getIdPart()));
+            }
         }
 
         public void isEqualsToExpected(Class<? extends IBaseResource> resourceType) {
@@ -210,6 +227,11 @@ public class TestQuestionnaire {
             assertTrue(request.getContained(questionnaire).stream()
                     .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
 
+            return this;
+        }
+
+        public GeneratedQuestionnaire hasSomething() {
+            assertNotNull(questionnaire);
             return this;
         }
     }

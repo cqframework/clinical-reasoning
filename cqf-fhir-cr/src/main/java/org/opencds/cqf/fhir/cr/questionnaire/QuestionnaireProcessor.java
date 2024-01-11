@@ -110,7 +110,7 @@ public class QuestionnaireProcessor {
             LibraryEngine libraryEngine,
             String id) {
         var request = new GenerateRequest(
-                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
+                subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
                 bundle,
                 libraryEngine == null ? new LibraryEngine(repository, evaluationSettings) : libraryEngine,

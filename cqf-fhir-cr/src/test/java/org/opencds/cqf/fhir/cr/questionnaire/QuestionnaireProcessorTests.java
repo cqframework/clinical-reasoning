@@ -29,14 +29,39 @@ public class QuestionnaireProcessorTests {
             fhirContextR5, this.getClass(), CLASS_PATH + "/r5", IGLayoutMode.TYPE_PREFIX);
 
     @Test
-    void testPrePopulate() {
+    void testPrePopulateDstu3() {
+        given().repository(repositoryDstu3)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .subjectId("OPA-Patient1")
+                .parameters(org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
+                        org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+                .thenPrepopulate(true)
+                .isEqualsToExpected(org.hl7.fhir.dstu3.model.Questionnaire.class);
+    }
+
+    @Test
+    void testPrePopulateR4() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate()
+                .thenPrepopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
+    }
+
+    @Test
+    void testPrePopulateR5() {
+        // R5 CQL evaluation is failing with model errors from the engine
+        given().repository(repositoryR5)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .subjectId("OPA-Patient1")
+                .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
+                        org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+                .thenPrepopulate(true)
+                .hasErrors();
     }
 
     @Test
@@ -47,7 +72,7 @@ public class QuestionnaireProcessorTests {
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate()
+                .thenPrepopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
     }
 
@@ -59,7 +84,7 @@ public class QuestionnaireProcessorTests {
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate()
+                .thenPrepopulate(true)
                 .hasErrors();
     }
 
@@ -69,12 +94,12 @@ public class QuestionnaireProcessorTests {
             given().repository(repositoryR4)
                     .when()
                     .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"))
-                    .thenPrepopulate();
+                    .thenPrepopulate(true);
         });
     }
 
     @Test
-    void testPopulate() {
+    void testPopulateDstu3() {
         given().repository(repositoryDstu3)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -83,6 +108,10 @@ public class QuestionnaireProcessorTests {
                         org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
                 .thenPopulate()
                 .isEqualsToExpected(org.hl7.fhir.dstu3.model.QuestionnaireResponse.class);
+    }
+
+    @Test
+    void testPopulateR4() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -90,15 +119,19 @@ public class QuestionnaireProcessorTests {
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
                 .thenPopulate()
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
-        // R5 test is failing CQL evaluation with model errors from the engine
-        // given().repository(repositoryR5)
-        //         .when()
-        //         .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-        //         .subjectId("OPA-Patient1")
-        //
-        // .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-        //         .thenPopulate()
-        //         .isEqualsToExpected(org.hl7.fhir.r5.model.QuestionnaireResponse.class);
+    }
+
+    @Test
+    void testPopulateR5() {
+        // R5 CQL evaluation is failing with model errors from the engine
+        given().repository(repositoryR5)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .subjectId("OPA-Patient1")
+                .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
+                        org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+                .thenPopulate()
+                .hasErrors();
     }
 
     @Test
@@ -178,7 +211,7 @@ public class QuestionnaireProcessorTests {
                         stringPart("Service Request Id", "SleepStudy"),
                         stringPart("Service Request Id", "SleepStudy2"),
                         stringPart("Coverage Id", "Coverage-positive")))
-                .thenPrepopulate()
+                .thenPrepopulate(true)
                 .hasItems(13)
                 .itemHasInitial("1")
                 .itemHasInitial("2");

@@ -34,7 +34,7 @@ public class GenerateProcessor implements IGenerateProcessor {
 
     @Override
     public IBaseResource generate(ICpgRequest request, IBaseResource profile, String id) {
-        var questionnaire = generate(id);
+        var questionnaire = generate(id == null ? profile.getIdElement().getIdPart() : id);
         request.getModelResolver()
                 .setValue(questionnaire, "item", Collections.singletonList(generateItem(request, profile, 0)));
         return questionnaire;

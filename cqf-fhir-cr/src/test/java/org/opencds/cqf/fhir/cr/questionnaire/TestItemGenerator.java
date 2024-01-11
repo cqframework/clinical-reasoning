@@ -121,10 +121,14 @@ public class TestItemGenerator {
         }
 
         public GeneratedItem then() {
-            return new GeneratedItem(
-                    repository,
-                    processor.generateQuestionnaire(
-                            Eithers.for3(profileUrl, profileId, profile), subjectId, parameters, bundle, null, id));
+            IBaseResource result;
+            if (subjectId != null || parameters != null || bundle != null) {
+                result = processor.generateQuestionnaire(
+                        Eithers.for3(profileUrl, profileId, profile), subjectId, parameters, bundle, null, id);
+            } else {
+                result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile));
+            }
+            return new GeneratedItem(repository, result);
         }
     }
 
@@ -176,6 +180,11 @@ public class TestItemGenerator {
             var item = ((List<IBase>) modelResolver.resolvePath(questionnaire, "item")).get(0);
             var childItem = (List<IBase>) modelResolver.resolvePath(item, "item");
             assertTrue(childItem.stream().anyMatch(i -> modelResolver.resolvePath(i, "initial") != null));
+            return this;
+        }
+
+        public GeneratedItem hasId(String expectedId) {
+            assertEquals(expectedId, questionnaire.getIdElement().getIdPart());
             return this;
         }
     }

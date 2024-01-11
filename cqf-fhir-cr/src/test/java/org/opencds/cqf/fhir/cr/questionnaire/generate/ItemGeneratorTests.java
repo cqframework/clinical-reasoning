@@ -55,19 +55,19 @@ public class ItemGeneratorTests {
     void testSleepStudyOrderR4() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
-                .subjectId(SLEEP_STUDY_PATIENT)
                 .profileUrl(new CanonicalType(SLEEP_STUDY_PROFILE))
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(2)
+                .hasId("aslp-sleep-study-order");
     }
 
     @Test
     void testSleepStudyOrderR5() {
         given().repositoryFor(fhirContextR5, "r5/pa-aslp")
                 .when()
-                .subjectId(SLEEP_STUDY_PATIENT)
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(SLEEP_STUDY_PROFILE))
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(2)
+                .hasId("aslp-sleep-study-order");
     }
 }

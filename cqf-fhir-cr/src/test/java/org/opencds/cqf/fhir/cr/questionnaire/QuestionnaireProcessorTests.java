@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
@@ -54,14 +53,14 @@ public class QuestionnaireProcessorTests {
     @Test
     void testPrePopulateR5() {
         // R5 CQL evaluation is failing with model errors from the engine
+        // Using this to test building the request in the processor
         given().repository(repositoryR5)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
                 .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
                         org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(true)
-                .hasErrors();
+                .thenPrepopulate(false);
     }
 
     @Test
@@ -106,7 +105,7 @@ public class QuestionnaireProcessorTests {
                 .subjectId("OPA-Patient1")
                 .parameters(org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
                         org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate()
+                .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.dstu3.model.QuestionnaireResponse.class);
     }
 
@@ -117,21 +116,21 @@ public class QuestionnaireProcessorTests {
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate()
+                .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
     }
 
     @Test
     void testPopulateR5() {
         // R5 CQL evaluation is failing with model errors from the engine
+        // Using this to test building the request in the processor
         given().repository(repositoryR5)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
                 .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
                         org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate()
-                .hasErrors();
+                .thenPopulate(false);
     }
 
     @Test
@@ -142,7 +141,7 @@ public class QuestionnaireProcessorTests {
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate()
+                .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
     }
 
@@ -154,7 +153,7 @@ public class QuestionnaireProcessorTests {
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
                 .subjectId("OPA-Patient1")
                 .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate()
+                .thenPopulate(true)
                 .hasErrors();
     }
 
@@ -164,7 +163,7 @@ public class QuestionnaireProcessorTests {
             given().repository(repositoryR4)
                     .when()
                     .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"))
-                    .thenPopulate();
+                    .thenPopulate(true);
         });
     }
 
@@ -227,7 +226,7 @@ public class QuestionnaireProcessorTests {
                         stringPart("Service Request Id", "SleepStudy"),
                         stringPart("Service Request Id", "SleepStudy2"),
                         stringPart("Coverage Id", "Coverage-positive")))
-                .thenPopulate()
+                .thenPopulate(true)
                 .hasItems(13)
                 .itemHasAnswer("1")
                 .itemHasAnswer("2");
@@ -246,9 +245,5 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testGenerateQuestionnaire() {
-        var questionnaire = given().repository(repositoryR4).when().thenGenerate("test");
-        assertNotNull(questionnaire);
-        assertEquals("test", questionnaire.getIdElement().getIdPart());
-    }
+    void test() {}
 }

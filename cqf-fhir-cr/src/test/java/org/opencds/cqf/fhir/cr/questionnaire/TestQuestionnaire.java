@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -142,18 +141,29 @@ public class TestQuestionnaire {
             }
         }
 
-        public GeneratedQuestionnaireResponse thenPopulate() {
-            var populateRequest = buildRequest();
-            return new GeneratedQuestionnaireResponse(repository, populateRequest, processor.populate(populateRequest));
+        public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
+            if (buildRequest) {
+                var populateRequest = buildRequest();
+                return new GeneratedQuestionnaireResponse(
+                        repository, populateRequest, processor.populate(populateRequest));
+            } else {
+                return new GeneratedQuestionnaireResponse(
+                        repository,
+                        null,
+                        processor.populate(
+                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
+                                subjectId,
+                                parameters,
+                                bundle,
+                                null,
+                                null,
+                                null));
+            }
         }
 
         public IBaseBundle thenPackage() {
             var param = Eithers.for3(questionnaireUrl, questionnaireId, questionnaire);
             return isPut == null ? processor.packageQuestionnaire(param) : processor.packageQuestionnaire(param, isPut);
-        }
-
-        public IBaseResource thenGenerate(String id) {
-            return processor.generateQuestionnaire(id);
         }
     }
 
@@ -229,11 +239,6 @@ public class TestQuestionnaire {
 
             return this;
         }
-
-        public GeneratedQuestionnaire hasSomething() {
-            assertNotNull(questionnaire);
-            return this;
-        }
     }
 
     public static class GeneratedQuestionnaireResponse {
@@ -259,15 +264,17 @@ public class TestQuestionnaire {
             this.repository = repository;
             this.request = request;
             this.questionnaireResponse = questionnaireResponse;
-            items = new ArrayList<>();
-            populateItems(request.getItems(questionnaireResponse));
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            expectedId = Ids.newId(
-                    questionnaireResponse.getClass(),
-                    String.format(
-                            "%s-%s",
-                            request.getQuestionnaire().getIdElement().getIdPart(),
-                            request.getSubjectId().getIdPart()));
+            items = new ArrayList<>();
+            if (request != null) {
+                populateItems(request.getItems(questionnaireResponse));
+                expectedId = Ids.newId(
+                        questionnaireResponse.getClass(),
+                        String.format(
+                                "%s-%s",
+                                request.getQuestionnaire().getIdElement().getIdPart(),
+                                request.getSubjectId().getIdPart()));
+            }
         }
 
         public void isEqualsToExpected(Class<? extends IBaseResource> resourceType) {

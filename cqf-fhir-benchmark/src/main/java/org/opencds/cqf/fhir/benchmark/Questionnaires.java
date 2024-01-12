@@ -47,7 +47,7 @@ public class Questionnaires {
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize
         // away this call, which does nothing with the result of the evaluation
-        bh.consume(this.result.thenPopulate());
+        bh.consume(this.result.thenPopulate(true));
     }
 
     public static void main(String[] args) throws RunnerException {

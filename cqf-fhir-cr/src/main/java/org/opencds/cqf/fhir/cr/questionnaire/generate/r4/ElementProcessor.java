@@ -46,7 +46,7 @@ public class ElementProcessor implements IElementProcessor {
         } else if (element.hasDefaultValue()) {
             elementHasDefaultValue.addProperties(request, element.getDefaultValue(), item);
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
-            elementHasCqfExpression.addProperties(request, element, item);
+            elementHasCqfExpression.addProperties(request, request.getExtensions(element), item);
         } else if (caseFeature != null) {
             var path = element.getPath().split("\\.")[1].replace("[x]", "");
             var pathValue = request.resolvePath(caseFeature, path);

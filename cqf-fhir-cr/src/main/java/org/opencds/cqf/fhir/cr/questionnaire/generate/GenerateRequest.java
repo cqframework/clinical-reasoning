@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class GenerateRequest implements ICpgRequest {
@@ -19,6 +20,17 @@ public class GenerateRequest implements ICpgRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+
+    // test constructor
+    public GenerateRequest(FhirVersionEnum fhirVersion) {
+        this.subjectId = null;
+        this.parameters = null;
+        this.bundle = null;
+        this.libraryEngine = null;
+        this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+        this.fhirVersion = fhirVersion;
+        this.defaultLibraryUrl = null;
+    }
 
     public GenerateRequest(
             IIdType subjectId,

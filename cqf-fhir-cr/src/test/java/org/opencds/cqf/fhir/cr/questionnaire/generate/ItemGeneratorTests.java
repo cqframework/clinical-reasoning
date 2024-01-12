@@ -70,4 +70,9 @@ public class ItemGeneratorTests {
                 .hasItemCount(2)
                 .hasId("aslp-sleep-study-order");
     }
+
+    @Test
+    void testGenerateQuestionnaire() {
+        given().repositoryFor(fhirContextR4, "r4").when().id("test").then().hasId("test");
+    }
 }

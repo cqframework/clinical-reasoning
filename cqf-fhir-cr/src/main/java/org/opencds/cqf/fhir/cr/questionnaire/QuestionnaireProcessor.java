@@ -84,7 +84,7 @@ public class QuestionnaireProcessor {
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile, String id) {
-        return generateQuestionnaire(profile, null, null, null, null, id);
+        return generateQuestionnaire(profile, null, null, null, null, null, null, id);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(

@@ -125,8 +125,10 @@ public class TestItemGenerator {
             if (subjectId != null || parameters != null || bundle != null) {
                 result = processor.generateQuestionnaire(
                         Eithers.for3(profileUrl, profileId, profile), subjectId, parameters, bundle, null, id);
-            } else {
+            } else if (profileUrl != null || profileId != null || profile != null) {
                 result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile));
+            } else {
+                result = processor.generateQuestionnaire(id);
             }
             return new GeneratedItem(repository, result);
         }

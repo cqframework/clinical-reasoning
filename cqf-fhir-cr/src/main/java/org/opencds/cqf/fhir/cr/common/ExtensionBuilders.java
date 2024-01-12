@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -58,20 +57,6 @@ public class ExtensionBuilders {
                 return new org.hl7.fhir.r4.model.Reference(reference);
             case R5:
                 return new org.hl7.fhir.r5.model.Reference(reference);
-
-            default:
-                return null;
-        }
-    }
-
-    public static IBaseReference buildReference(FhirVersionEnum fhirVersion, IAnyResource resource) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Reference(resource);
-            case R4:
-                return new org.hl7.fhir.r4.model.Reference(resource);
-            case R5:
-                return new org.hl7.fhir.r5.model.Reference(resource);
 
             default:
                 return null;

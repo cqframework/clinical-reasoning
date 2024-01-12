@@ -3,8 +3,8 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.opencds.cqf.fhir.cr.questionnaire.helpers.PopulateRequestHelpers.PATIENT_ID;
-import static org.opencds.cqf.fhir.cr.questionnaire.helpers.PopulateRequestHelpers.newPopulateRequestForVersion;
+import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.PATIENT_ID;
+import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.opencds.cqf.fhir.cr.questionnaire.helpers.PopulateRequestHelpers.newPopulateRequestForVersion;
+import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;

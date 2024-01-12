@@ -56,6 +56,20 @@ public class MeasureScorerTest {
         assertTrue(measureReport.getGroup().get(2).getMeasureScore().getValue().doubleValue() > 0);
     }
 
+    @Test
+    public void testScore_error_noids() {
+        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
+        var measureScoringDef = getMeasureScoringDef(measureUrl);
+        var measureReport = getMyMeasureReport(measureUrl);
+
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+        try {
+            scorer.score(measureScoringDef, measureReport);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("No MeasureScoring value set"));
+        }
+    }
+
     public MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
         return measureReport.getGroup().stream()
                 .filter(g -> g.getId().equals(id))

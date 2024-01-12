@@ -167,7 +167,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = Repositories.proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return apply(
                 id,
                 canonical,
@@ -270,7 +270,7 @@ public abstract class BasePlanDefinitionProcessor<T> {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = Repositories.proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return applyR5(
                 id,
                 canonical,

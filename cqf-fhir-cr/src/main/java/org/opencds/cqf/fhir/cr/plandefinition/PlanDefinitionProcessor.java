@@ -114,7 +114,7 @@ public class PlanDefinitionProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = Repositories.proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return apply(
                 planDefinition,
                 subject,
@@ -210,7 +210,7 @@ public class PlanDefinitionProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = Repositories.proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return applyR5(
                 planDefinition,
                 subject,

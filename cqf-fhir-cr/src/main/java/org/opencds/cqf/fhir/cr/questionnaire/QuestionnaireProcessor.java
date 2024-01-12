@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -96,8 +97,7 @@ public class QuestionnaireProcessor {
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint,
             String id) {
-        repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(
-                repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return generateQuestionnaire(
                 profile, subjectId, parameters, bundle, new LibraryEngine(repository, evaluationSettings), id);
     }
@@ -163,14 +163,9 @@ public class QuestionnaireProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(
-                repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return prePopulate(
-                resolveQuestionnaire(questionnaire),
-                patientId,
-                parameters,
-                bundle,
-                new LibraryEngine(repository, evaluationSettings));
+                questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
     }
 
     public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
@@ -204,14 +199,9 @@ public class QuestionnaireProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(
-                repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return populate(
-                resolveQuestionnaire(questionnaire),
-                patientId,
-                parameters,
-                bundle,
-                new LibraryEngine(repository, this.evaluationSettings));
+                questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(

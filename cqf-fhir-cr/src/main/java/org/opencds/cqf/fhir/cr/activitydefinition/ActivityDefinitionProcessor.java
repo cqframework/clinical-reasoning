@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -106,9 +107,7 @@ public class ActivityDefinitionProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        this.repository = org.opencds.cqf.fhir.utility.repository.Repositories.proxy(
-                repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
+        repository = proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return apply(
                 activityDefinition,
                 subjectId,
@@ -123,7 +122,7 @@ public class ActivityDefinitionProcessor {
                 parameters,
                 useServerData,
                 bundle,
-                new LibraryEngine(this.repository, this.evaluationSettings));
+                new LibraryEngine(repository, evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

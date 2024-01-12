@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +17,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource planDefinition;
@@ -77,7 +78,7 @@ public class ApplyRequest implements ICpgRequest {
         defaultLibraryUrl = resolveDefaultLibraryUrl();
         inputParameterResolver = libraryEngine == null
                 ? null
-                : InputParameterResolverFactory.create(
+                : createResolver(
                         libraryEngine.getRepository(),
                         this.subjectId,
                         this.encounterId,

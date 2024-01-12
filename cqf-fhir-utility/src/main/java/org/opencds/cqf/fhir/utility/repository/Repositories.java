@@ -36,9 +36,13 @@ public class Repositories {
 
     public static Repository proxy(
             Repository localRepository,
+            Boolean useLocalData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
+        if (dataEndpoint == null && contentEndpoint == null && terminologyEndpoint == null) {
+            return localRepository;
+        }
         Repository data = dataEndpoint == null
                 ? null
                 : new RestRepository(getClient(localRepository.fhirContext(), dataEndpoint));
@@ -49,7 +53,7 @@ public class Repositories {
                 ? null
                 : new RestRepository(getClient(localRepository.fhirContext(), terminologyEndpoint));
 
-        return new ProxyRepository(localRepository, data, content, terminology);
+        return new ProxyRepository(localRepository, useLocalData, data, content, terminology);
     }
 
     public static ResourceMatcher getResourceMatcher(FhirContext context) {

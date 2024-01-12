@@ -28,11 +28,12 @@ public class ProxyRepository implements Repository {
     private Repository content;
     private Repository terminology;
 
-    public ProxyRepository(Repository local, Repository data, Repository content, Repository terminology) {
+    public ProxyRepository(
+            Repository local, Boolean useLocalData, Repository data, Repository content, Repository terminology) {
         checkNotNull(local);
 
         this.local = local;
-        this.data = data == null ? this.local : data;
+        this.data = data == null ? this.local : useLocalData ? new FederatedRepository(local, data) : data;
         this.content = content == null ? this.local : content;
         this.terminology = terminology == null ? this.local : terminology;
     }

@@ -58,7 +58,8 @@ public class R4CqlExecutionService {
 
         try {
             if (contentEndpoint != null) {
-                repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+                repository = Repositories.proxy(
+                        repository, useServerData.booleanValue(), dataEndpoint, contentEndpoint, terminologyEndpoint);
             }
             var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
 

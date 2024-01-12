@@ -11,7 +11,6 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.cr.inputparameters.InputParameterResolverFactory;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource activityDefinition;
@@ -69,7 +68,7 @@ public class ApplyRequest implements ICpgRequest {
         defaultLibraryUrl = resolveDefaultLibraryUrl();
         inputParameterResolver = libraryEngine == null
                 ? null
-                : InputParameterResolverFactory.create(
+                : IInputParameterResolver.createResolver(
                         libraryEngine.getRepository(),
                         this.subjectId,
                         this.encounterId,

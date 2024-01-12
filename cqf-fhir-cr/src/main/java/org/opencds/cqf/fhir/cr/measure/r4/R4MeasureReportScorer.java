@@ -41,14 +41,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     break;
                 }
             }
-            // Match by group's population id
-            if (mrgc.getPopulation().size() == entry.getKey().populations().size()) {
+            // Match by group's population id, if group-ids are not present
+            if ((mrgc.getPopulation().size() == entry.getKey().populations().size())
+                    && mrgc.getId() == null
+                    && entry.getKey().id() == null) {
                 int i = 0;
                 for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
                     for (PopulationDef popDefEntry : entry.getKey().populations()) {
-                        if (popId.getId().equals(popDefEntry.id())) {
-                            i++;
-                            break;
+                        if (popId.getId() != null && popDefEntry.id() != null) {
+                            if (popId.getId().equals(popDefEntry.id())) {
+                                i++;
+                                break;
+                            }
                         }
                     }
                 }

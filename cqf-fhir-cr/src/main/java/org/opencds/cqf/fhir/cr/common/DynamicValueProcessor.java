@@ -7,11 +7,15 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.CqfExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides processing for dynamicValues in PlanDefinition.action elements and ActivityDefinition resources.
  */
 public class DynamicValueProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(DynamicValueProcessor.class);
+
     public DynamicValueProcessor() {}
 
     /**
@@ -37,7 +41,15 @@ public class DynamicValueProcessor {
             ICpgRequest request, IBaseResource resource, IElement definitionElement, IElement requestAction) {
         var dynamicValues = request.getDynamicValues(definitionElement);
         for (var dynamicValue : dynamicValues) {
-            resolveDynamicValue(request, dynamicValue, resource, requestAction);
+            try {
+                resolveDynamicValue(request, dynamicValue, resource, requestAction);
+            } catch (Exception e) {
+                var message = String.format(
+                        "DynamicValue resolution for path %s encountered exception: %s",
+                        request.resolvePathString(dynamicValue, "path"), e.getMessage());
+                logger.error(message);
+                request.logException(message);
+            }
         }
     }
 

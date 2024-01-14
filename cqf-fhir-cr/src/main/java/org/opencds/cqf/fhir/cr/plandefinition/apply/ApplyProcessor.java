@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExten
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.pertainToGoalExtension;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
-import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
@@ -42,6 +41,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final ExtensionProcessor extensionProcessor;
     protected final GenerateProcessor generateProcessor;
     protected final QuestionnaireResponseProcessor extractProcessor;
+    protected final ProcessRequest processRequest;
     protected final ProcessGoal processGoal;
     protected final ProcessAction processAction;
 
@@ -51,6 +51,7 @@ public class ApplyProcessor implements IApplyProcessor {
         extensionProcessor = new ExtensionProcessor();
         generateProcessor = new GenerateProcessor(this.repository);
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
+        processRequest = new ProcessRequest();
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);
     }
@@ -79,7 +80,7 @@ public class ApplyProcessor implements IApplyProcessor {
         initApply(request);
         var requestOrchestration = applyPlanDefinition(request);
         resolveOperationOutcome(request, requestOrchestration);
-        var carePlan = generateCarePlan(request, requestOrchestration);
+        var carePlan = processRequest.generateCarePlan(request, requestOrchestration);
 
         return liftContainedResourcesToParent(request, carePlan);
     }
@@ -130,7 +131,9 @@ public class ApplyProcessor implements IApplyProcessor {
                     request.getExtractedResources().add(questionnaireResponse);
                     for (var entry : getEntry(extractBundle)) {
                         addEntry(request.getBundle(), entry);
-                        request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry));
+                        // Not adding extracted resources back into the response to reduce size of payload
+                        // $extract can be called on the QuestionnaireResponse if these are desired
+                        // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry));
                     }
                 } catch (Exception e) {
                     request.logException(String.format(
@@ -142,7 +145,7 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     public IBaseResource applyPlanDefinition(ApplyRequest request) {
-        var requestOrchestration = generateRequestOrchestration(request);
+        var requestOrchestration = processRequest.generateRequestOrchestration(request);
         extensionProcessor.processExtensions(
                 request, requestOrchestration, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
         processGoals(request, requestOrchestration);
@@ -177,7 +180,8 @@ public class ApplyProcessor implements IApplyProcessor {
                                 Collections.singletonList(buildReferenceExt(
                                         request.getFhirVersion(),
                                         pertainToGoalExtension(
-                                                goal.getIdElement().getIdPart()))));
+                                                goal.getIdElement().getValue()),
+                                        request.getContainResources())));
             }
             // Always add goals to the resource list so they can be added to the CarePlan if needed
             request.getRequestResources().add(goal);
@@ -199,19 +203,26 @@ public class ApplyProcessor implements IApplyProcessor {
                                     request.getFhirVersion(),
                                     crmiMessagesExtension(request.getOperationOutcome()
                                             .getIdElement()
-                                            .getIdPart()))));
+                                            .getIdPart()),
+                                    true)));
         }
     }
 
-    protected IBaseResource generateRequestOrchestration(ApplyRequest request) {
-        return null;
-    }
-
-    protected IBaseResource generateCarePlan(ApplyRequest request, IBaseResource requestOrchestration) {
-        return null;
-    }
-
     protected IBaseResource liftContainedResourcesToParent(ApplyRequest request, IBaseResource resource) {
+        switch (request.getFhirVersion()) {
+            case DSTU3:
+                return org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.dstu3.model.DomainResource) resource);
+            case R4:
+                return org.opencds.cqf.fhir.utility.r4.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.r4.model.DomainResource) resource);
+            case R5:
+                return org.opencds.cqf.fhir.utility.r5.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.r5.model.DomainResource) resource);
+
+            default:
+                break;
+        }
 
         return resource;
     }

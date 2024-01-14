@@ -50,7 +50,8 @@ public class PopulateProcessor implements IPopulateProcessor {
                         Collections.singletonList(buildReferenceExt(
                                 request.getFhirVersion(),
                                 prepopulateSubjectExtension(
-                                        "Patient", request.getSubjectId().getIdPart()))));
+                                        "Patient", request.getSubjectId().getIdPart()),
+                                false)));
         var items = request.getItems(request.getQuestionnaire());
         final List<IBaseBackboneElement> processedItems = processItems(request, items);
         request.getModelResolver().setValue(populatedQuestionnaire, "item", processedItems);
@@ -78,7 +79,8 @@ public class PopulateProcessor implements IPopulateProcessor {
                                 request.getFhirVersion(),
                                 dtrQuestionnaireResponseExtension(request.getQuestionnaire()
                                         .getIdElement()
-                                        .getIdPart()))));
+                                        .getIdPart()),
+                                true)));
         return response;
     }
 
@@ -97,7 +99,8 @@ public class PopulateProcessor implements IPopulateProcessor {
                                     request.getFhirVersion(),
                                     crmiMessagesExtension(request.getOperationOutcome()
                                             .getIdElement()
-                                            .getIdPart()))));
+                                            .getIdPart()),
+                                    true)));
         }
     }
 

@@ -1,0 +1,207 @@
+package org.opencds.cqf.fhir.cr.plandefinition.apply;
+
+import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
+import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Collections;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Ids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ProcessDefinition {
+    private static final Logger logger = LoggerFactory.getLogger(ProcessDefinition.class);
+
+    final Repository repository;
+    final ApplyProcessor applyProcessor;
+    final ActionResolver actionResolver;
+
+    public ProcessDefinition(Repository repository, ApplyProcessor applyProcessor) {
+        this.repository = repository;
+        this.applyProcessor = applyProcessor;
+        actionResolver = new ActionResolver();
+    }
+
+    public IBaseResource resolveDefinition(
+            ApplyRequest request,
+            IBaseResource requestOrchestration,
+            IBaseBackboneElement action,
+            IBaseBackboneElement requestAction) {
+        IBaseResource resource = null;
+        var definition = getDefinition(request, action);
+        if (isDefinitionCanonical(request, definition)) {
+            resource = resolveDefinition(request, definition);
+            if (resource != null) {
+                actionResolver.resolveAction(request, requestOrchestration, resource, action);
+                request.getModelResolver()
+                        .setValue(
+                                requestAction,
+                                "resource",
+                                buildReference(
+                                        request.getFhirVersion(),
+                                        resource.getIdElement().getValue(),
+                                        false));
+                if (Boolean.TRUE.equals(request.getContainResources())) {
+                    request.getModelResolver()
+                            .setValue(requestOrchestration, "contained", Collections.singletonList(resource));
+                } else {
+                    request.getRequestResources().add(resource);
+                }
+            }
+        } else if (isDefinitionUri(request, definition)) {
+            request.getModelResolver()
+                    .setValue(
+                            requestAction,
+                            "resource",
+                            buildReference(
+                                    request.getFhirVersion(),
+                                    ((IPrimitiveType<String>) definition).getValue(),
+                                    request.getContainResources()));
+        }
+        return resource;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IPrimitiveType<String> getDefinition(ApplyRequest request, IBaseBackboneElement action) {
+        return request.getFhirVersion().isOlderThan(FhirVersionEnum.R4)
+                ? request.resolvePath(request.resolvePath(action, "definition"), "reference", IPrimitiveType.class)
+                : request.resolvePath(action, "definition", IPrimitiveType.class);
+    }
+
+    protected IBaseResource resolveDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        logger.debug("Resolving definition {}", definition.getValue());
+
+        var resourceName = resolveResourceName(request, definition);
+        switch (FHIRTypes.fromCode(requireNonNull(resourceName))) {
+            case PLANDEFINITION:
+                return applyNestedPlanDefinition(request, definition);
+            case ACTIVITYDEFINITION:
+                return applyActivityDefinition(request, definition);
+            case QUESTIONNAIRE:
+                return applyQuestionnaireDefinition(request, definition);
+            default:
+                throw new FHIRException(String.format("Unknown action definition: %s", definition));
+        }
+    }
+
+    protected Boolean isDefinitionCanonical(ApplyRequest request, IBase definition) {
+        switch (request.getFhirVersion()) {
+            case DSTU3:
+                return definition != null;
+            case R4:
+                return definition instanceof org.hl7.fhir.r4.model.CanonicalType;
+            case R5:
+                return definition instanceof org.hl7.fhir.r5.model.CanonicalType;
+            default:
+                return Boolean.FALSE;
+        }
+    }
+
+    protected Boolean isDefinitionUri(ApplyRequest request, IBase definition) {
+        switch (request.getFhirVersion()) {
+            case R4:
+                return definition instanceof org.hl7.fhir.r4.model.UriType;
+            case R5:
+                return definition instanceof org.hl7.fhir.r5.model.UriType;
+            default:
+                return Boolean.FALSE;
+        }
+    }
+
+    protected IBaseResource applyQuestionnaireDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        IBaseResource result = null;
+        try {
+            var referenceToContained = definition.getValue().startsWith("#");
+            if (referenceToContained) {
+                result = resolveContained(request, definition.getValue());
+            } else {
+                result = searchRepositoryByCanonical(repository, definition);
+            }
+        } catch (Exception e) {
+            var message = String.format(
+                    "ERROR: Questionnaire %s could not be applied and threw exception %s",
+                    definition.getValue(), e.toString());
+            logger.error(message);
+            request.logException(message);
+        }
+        return result;
+    }
+
+    protected IBaseResource applyActivityDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        IBaseResource result = null;
+        try {
+            var referenceToContained = definition.getValue().startsWith("#");
+            var activityDefinition = (referenceToContained
+                    ? resolveContained(request, definition.getValue())
+                    : searchRepositoryByCanonical(repository, definition));
+            var activityDefParams = request.transformRequestParameters(activityDefinition);
+            result = repository.invoke(activityDefinition.getClass(), "$apply", activityDefParams, IBaseResource.class);
+            result.setId((IIdType)
+                    (referenceToContained
+                            ? Ids.newId(
+                                    request.getFhirVersion(),
+                                    result.fhirType(),
+                                    activityDefinition
+                                            .getIdElement()
+                                            .getIdPart()
+                                            .replaceFirst("#", ""))
+                            : activityDefinition.getIdElement().withResourceType(result.fhirType())));
+        } catch (Exception e) {
+            var message = String.format(
+                    "ERROR: ActivityDefinition %s could not be applied and threw exception %s",
+                    definition.getValue(), e.toString());
+            logger.error(message);
+            request.logException(message);
+        }
+        return result;
+    }
+
+    protected IBaseResource applyNestedPlanDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        try {
+            var referenceToContained = definition.getValue().startsWith("#");
+            var nextPlanDefinition = (referenceToContained
+                    ? resolveContained(request, definition.getValue())
+                    : searchRepositoryByCanonical(repository, definition));
+            var nestedRequest = request.copy(nextPlanDefinition);
+            return applyProcessor.applyPlanDefinition(nestedRequest);
+        } catch (Exception e) {
+            var message = String.format(
+                    "ERROR: PlanDefinition %s could not be applied and threw exception %s",
+                    definition.getValue(), e.toString());
+            logger.error(message);
+            request.logException(message);
+            return null;
+        }
+    }
+
+    protected String resolveResourceName(ApplyRequest request, IPrimitiveType<String> canonical) {
+        if (canonical.hasValue()) {
+            var id = canonical.getValue();
+            if (id.contains("/")) {
+                id = id.replace(id.substring(id.lastIndexOf("/")), "");
+                return id.contains("/") ? id.substring(id.lastIndexOf("/") + 1) : id;
+            } else if (id.startsWith("#")) {
+                return resolveContained(request, id).fhirType();
+            }
+            return null;
+        }
+        throw new FHIRException("CanonicalType must have a value for resource name extraction");
+    }
+
+    protected IBaseResource resolveContained(ApplyRequest request, String id) {
+        var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
+        var first = contained.stream()
+                .filter(r -> r.getIdElement().getIdPart().equals(id))
+                .findFirst();
+        return first.orElse(null);
+    }
+}

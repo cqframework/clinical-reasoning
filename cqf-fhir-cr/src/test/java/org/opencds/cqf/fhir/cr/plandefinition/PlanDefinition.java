@@ -24,17 +24,17 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.ActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -84,6 +84,10 @@ public class PlanDefinition {
         }
 
         public static PlanDefinitionProcessor buildProcessor(Repository repository) {
+            if (repository instanceof IGFileStructureRepository) {
+                ((IGFileStructureRepository) repository)
+                        .setActivityDefinitionProcessorFactory(new ActivityDefinitionProcessorFactory());
+            }
             return new PlanDefinitionProcessor(repository, evaluationSettings);
         }
 
@@ -102,7 +106,7 @@ public class PlanDefinition {
         private String subjectId;
         private String encounterId;
         private String practitionerId;
-
+        private Boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
         private Repository terminologyRepository;
@@ -133,6 +137,11 @@ public class PlanDefinition {
 
         public When practitionerId(String id) {
             practitionerId = id;
+            return this;
+        }
+
+        public When useServerData(Boolean value) {
+            useServerData = value;
             return this;
         }
 
@@ -177,26 +186,7 @@ public class PlanDefinition {
             return this;
         }
 
-        private Repository buildRepository() {
-            if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
-                return repository;
-            }
-
-            if (dataRepository == null) {
-                dataRepository = repository;
-            }
-            if (contentRepository == null) {
-                contentRepository = repository;
-            }
-            if (terminologyRepository == null) {
-                terminologyRepository = repository;
-            }
-            return Repositories.proxy(dataRepository, contentRepository, terminologyRepository);
-        }
-
         public GeneratedBundle thenApplyR5() {
-            var requestRepository = buildRepository();
-            var libraryEngine = new LibraryEngine(requestRepository, processor.evaluationSettings);
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
@@ -214,15 +204,15 @@ public class PlanDefinition {
                             null,
                             null,
                             parameters,
-                            null,
+                            useServerData,
                             additionalData,
                             null,
-                            libraryEngine));
+                            dataRepository,
+                            contentRepository,
+                            terminologyRepository));
         }
 
         public GeneratedCarePlan thenApply() {
-            var requestRepository = buildRepository();
-            var libraryEngine = new LibraryEngine(requestRepository, processor.evaluationSettings);
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
@@ -240,10 +230,12 @@ public class PlanDefinition {
                             null,
                             null,
                             parameters,
-                            null,
+                            useServerData,
                             additionalData,
                             null,
-                            libraryEngine));
+                            dataRepository,
+                            contentRepository,
+                            terminologyRepository));
         }
 
         public GeneratedPackage thenPackage() {
@@ -261,12 +253,12 @@ public class PlanDefinition {
         public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
             this.repository = repository;
             this.generatedBundle = generatedBundle;
-            jsonParser = this.repository.fhirContext().newJsonParser();
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
         }
 
-        public void isEqualsTo(String expectedBundleAssetName) {
+        public GeneratedBundle isEqualsTo(String expectedBundleAssetName) {
             try {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundle), true);
@@ -274,9 +266,10 @@ public class PlanDefinition {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
-        public void isEqualsTo(IIdType expectedBundleId) {
+        public GeneratedBundle isEqualsTo(IIdType expectedBundleId) {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedBundleId)),
@@ -286,24 +279,34 @@ public class PlanDefinition {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
-        public void hasEntry(int count) {
+        public GeneratedBundle hasEntry(int count) {
             assertEquals(count, getEntry(generatedBundle).size());
+            return this;
         }
 
-        public void hasCommunicationRequestPayload() {
+        public GeneratedBundle hasCommunicationRequestPayload() {
             assertTrue(getEntryResources(generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
                     .allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+            return this;
+        }
+
+        public GeneratedBundle hasQuestionnaire() {
+            assertTrue(getEntryResources(generatedBundle).stream()
+                    .anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            return this;
         }
 
         @SuppressWarnings("unchecked")
-        public void hasQuestionnaireOperationOutcome() {
+        public GeneratedBundle hasQuestionnaireOperationOutcome() {
             assertTrue(getEntryResources(generatedBundle).stream()
                     .anyMatch(r -> r.fhirType().equals("Questionnaire")
                             && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
                                     .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome"))));
+            return this;
         }
     }
 
@@ -316,12 +319,12 @@ public class PlanDefinition {
         public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlan) {
             this.repository = repository;
             this.generatedCarePlan = generatedCarePlan;
-            jsonParser = this.repository.fhirContext().newJsonParser();
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
         }
 
-        public void isEqualsTo(String expectedCarePlanAssetName) {
+        public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
                         load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(generatedCarePlan), true);
@@ -329,9 +332,10 @@ public class PlanDefinition {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
-        public void isEqualsTo(IIdType expectedCarePlanId) {
+        public GeneratedCarePlan isEqualsTo(IIdType expectedCarePlanId) {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedCarePlanId)),
@@ -341,18 +345,28 @@ public class PlanDefinition {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
         @SuppressWarnings("unchecked")
-        public void hasContained(int count) {
+        public GeneratedCarePlan hasContained(int count) {
             assertEquals(
                     count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained")).size());
+            return this;
         }
 
         @SuppressWarnings("unchecked")
-        public void hasOperationOutcome() {
+        public GeneratedCarePlan hasOperationOutcome() {
             assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
                     .stream().anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedCarePlan hasQuestionnaire() {
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
+                    .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            return this;
         }
     }
 
@@ -363,8 +377,9 @@ public class PlanDefinition {
             this.generatedBundle = generatedBundle;
         }
 
-        public void hasEntry(int count) {
+        public GeneratedPackage hasEntry(int count) {
             assertEquals(count, getEntry(generatedBundle).size());
+            return this;
         }
     }
 }

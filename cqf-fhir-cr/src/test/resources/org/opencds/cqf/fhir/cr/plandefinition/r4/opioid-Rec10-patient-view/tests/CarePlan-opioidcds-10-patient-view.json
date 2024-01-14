@@ -134,7 +134,7 @@
         {
           "severity": "error",
           "code": "exception",
-          "diagnostics": "DynamicValue expression Indicator encountered exception: Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation"
+          "diagnostics": "DynamicValue resolution for path action.extension encountered exception: Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation"
         }
       ]
     }

@@ -668,7 +668,7 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
             }
         }
 
-        task.addBasedOn(new Reference(requestGroup).setType(requestGroup.fhirType()));
+        task.addBasedOn(new Reference(requestGroup.getId()));
         task.setFor(requestGroup.getSubject());
 
         resolvePrepopulateAction(action, requestGroup, task);
@@ -821,8 +821,8 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                     resolveDynamicValue(result, dynamicValue.getPath(), requestAction, resource);
                 } catch (Exception e) {
                     var message = String.format(
-                            "DynamicValue expression %s encountered exception: %s",
-                            dynamicValue.getExpression().getExpression(), e.getMessage());
+                            "DynamicValue resolution for path %s encountered exception: %s",
+                            dynamicValue.getPath(), e.getMessage());
                     logger.error(message);
                     addOperationOutcomeIssue(message);
                 }

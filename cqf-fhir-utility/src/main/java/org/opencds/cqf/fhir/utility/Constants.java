@@ -91,4 +91,24 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter";
     public static final String SDC_QUESTIONNAIRE_SHORT_TEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText";
+
+    // $apply parameter names
+    public static final String APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition";
+    public static final String APPLY_PARAMETER_PLAN_DEFINITION = "planDefinition";
+    public static final String APPLY_PARAMETER_CANONICAL = "canonical";
+    public static final String APPLY_PARAMETER_SUBJECT = "subject";
+    public static final String APPLY_PARAMETER_ENCOUNTER = "encounter";
+    public static final String APPLY_PARAMETER_PRACTITIONER = "practitioner";
+    public static final String APPLY_PARAMETER_ORGANIZATION = "organization";
+    public static final String APPLY_PARAMETER_USER_TYPE = "userType";
+    public static final String APPLY_PARAMETER_USER_LANGUAGE = "userLanguage";
+    public static final String APPLY_PARAMETER_USER_TASK_CONTEXT = "userTaskContext";
+    public static final String APPLY_PARAMETER_SETTING = "setting";
+    public static final String APPLY_PARAMETER_SETTING_CONTEXT = "settingContext";
+    public static final String APPLY_PARAMETER_PARAMETERS = "parameters";
+    public static final String APPLY_PARAMETER_USE_SERVER_DATA = "useServerData";
+    public static final String APPLY_PARAMETER_DATA = "data";
+    public static final String APPLY_PARAMETER_DATA_ENDPOINT = "dataEndpoint";
+    public static final String APPLY_PARAMETER_CONTENT_ENDPOINT = "contentEndpoint";
+    public static final String APPLY_PARAMETER_TERMINOLOGY_ENDPOINT = "terminologyEndpoint";
 }

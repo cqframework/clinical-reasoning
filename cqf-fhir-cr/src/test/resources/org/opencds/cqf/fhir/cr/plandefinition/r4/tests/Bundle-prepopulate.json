@@ -839,8 +839,7 @@
         "instantiatesCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
         "basedOn": [
           {
-            "reference": "RequestGroup/prepopulate",
-            "type": "RequestGroup"
+            "reference": "RequestGroup/prepopulate"
           }
         ],
         "status": "draft",

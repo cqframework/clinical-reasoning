@@ -19,23 +19,24 @@ public class ExtensionBuilders {
     }
 
     public static SimpleEntry<String, String> crmiMessagesExtension(String operationOutcomeId) {
-        return new SimpleEntry<>(Constants.EXT_CRMI_MESSAGES, "#" + operationOutcomeId);
+        return new SimpleEntry<>(Constants.EXT_CRMI_MESSAGES, operationOutcomeId);
     }
 
     public static SimpleEntry<String, String> dtrQuestionnaireResponseExtension(String questionnaireId) {
-        return new SimpleEntry<>(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE, "#" + questionnaireId);
+        return new SimpleEntry<>(Constants.DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE, questionnaireId);
     }
 
     public static SimpleEntry<String, String> pertainToGoalExtension(String goalId) {
-        return new SimpleEntry<>(Constants.PERTAINS_TO_GOAL, "#" + goalId);
+        return new SimpleEntry<>(Constants.PERTAINS_TO_GOAL, goalId);
     }
 
     public static SimpleEntry<String, Boolean> sdcQuestionnaireHidden(Boolean value) {
         return new SimpleEntry<>(Constants.SDC_QUESTIONNAIRE_HIDDEN, value);
     }
 
-    public static IBaseExtension buildReferenceExt(FhirVersionEnum fhirVersion, SimpleEntry<String, String> entry) {
-        var value = buildReference(fhirVersion, entry.getValue());
+    public static IBaseExtension buildReferenceExt(
+            FhirVersionEnum fhirVersion, SimpleEntry<String, String> entry, Boolean isContained) {
+        var value = buildReference(fhirVersion, entry.getValue(), isContained);
         switch (fhirVersion) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), value);
@@ -49,7 +50,8 @@ public class ExtensionBuilders {
         }
     }
 
-    public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String reference) {
+    public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String id, Boolean isContained) {
+        var reference = isContained ? "#".concat(id) : id;
         switch (fhirVersion) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Reference(reference);

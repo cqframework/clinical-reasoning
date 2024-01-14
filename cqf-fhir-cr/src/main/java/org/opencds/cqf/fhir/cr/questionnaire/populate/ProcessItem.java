@@ -35,7 +35,7 @@ public class ProcessItem {
                             populatedItem,
                             "extension",
                             Collections.singletonList(buildReferenceExt(
-                                    request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION)));
+                                    request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION, false)));
             if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
                 request.getModelResolver()
                         .setValue(populatedItem, "initial", transformValue((org.hl7.fhir.dstu3.model.Type)

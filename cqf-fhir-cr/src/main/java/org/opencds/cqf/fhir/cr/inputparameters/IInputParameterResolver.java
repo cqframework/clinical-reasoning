@@ -10,7 +10,7 @@ import org.opencds.cqf.fhir.api.Repository;
 public interface IInputParameterResolver {
     public IBaseParameters getParameters();
 
-    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input);
+    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> dataRequirement);
 
     @SuppressWarnings("unchecked")
     public static <T extends IInputParameterResolver> T createResolver(

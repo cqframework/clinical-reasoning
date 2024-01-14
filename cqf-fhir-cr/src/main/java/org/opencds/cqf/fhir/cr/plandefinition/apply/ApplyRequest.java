@@ -1,6 +1,14 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_DATA;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ENCOUNTER;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ORGANIZATION;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PARAMETERS;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PLAN_DEFINITION;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PRACTITIONER;
+import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_SUBJECT;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
@@ -259,5 +267,48 @@ public class ApplyRequest implements ICpgRequest {
 
     public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input) {
         return inputParameterResolver.resolveInputParameters(input);
+    }
+
+    public IBaseParameters transformRequestParameters(IBaseResource resource) {
+        switch (fhirVersion) {
+            case R4:
+                return transformRequestParametersR4(resource);
+
+            default:
+                return null;
+        }
+    }
+
+    protected IBaseParameters transformRequestParametersR4(IBaseResource resource) {
+        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+                ? APPLY_PARAMETER_ACTIVITY_DEFINITION
+                : APPLY_PARAMETER_PLAN_DEFINITION;
+        var params = org.opencds.cqf.fhir.utility.r4.Parameters.parameters()
+                .addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                        resourceParameter, (org.hl7.fhir.r4.model.Resource) resource))
+                .addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                        APPLY_PARAMETER_SUBJECT, getSubjectId().getValue()));
+        if (hasEncounterId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                    APPLY_PARAMETER_ENCOUNTER, getEncounterId().getValue()));
+        }
+        if (hasPractitionerId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                    APPLY_PARAMETER_PRACTITIONER, getPractitionerId().getValue()));
+        }
+        if (hasOrganizationId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                    APPLY_PARAMETER_ORGANIZATION, getOrganizationId().getValue()));
+        }
+        if (getParameters() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                    APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.r4.model.Parameters) getParameters()));
+        }
+        if (getBundle() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r4.model.Resource) getBundle()));
+        }
+
+        return params;
     }
 }

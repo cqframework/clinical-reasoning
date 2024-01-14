@@ -1,30 +1,23 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
-import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IElement;
 import java.util.Collections;
 import java.util.Map;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.hl7.fhir.exceptions.FHIRException;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +25,7 @@ public class ProcessAction {
     private static final Logger logger = LoggerFactory.getLogger(ProcessAction.class);
 
     final Repository repository;
-    final ApplyProcessor applyProcessor;
+    final ProcessDefinition processDefinition;
     final GenerateProcessor generateProcessor;
     final ExtensionProcessor extensionProcessor;
     final ExpressionProcessor expressionProcessor;
@@ -40,24 +33,20 @@ public class ProcessAction {
 
     public ProcessAction(Repository repository, ApplyProcessor applyProcessor, GenerateProcessor generateProcessor) {
         this.repository = repository;
-        this.applyProcessor = applyProcessor;
         this.generateProcessor = generateProcessor;
+        this.processDefinition = new ProcessDefinition(repository, applyProcessor);
         extensionProcessor = new ExtensionProcessor();
         expressionProcessor = new ExpressionProcessor();
         dynamicValueProcessor = new DynamicValueProcessor();
     }
 
-    @SuppressWarnings("unchecked")
     public IBaseBackboneElement processAction(
             ApplyRequest request,
             IBaseResource requestOrchestration,
             Map<String, IBaseBackboneElement> metConditions,
             IBaseBackboneElement action) {
         if (request.hasExtension(request.getPlanDefinition(), Constants.CPG_QUESTIONNAIRE_GENERATE)) {
-            var actionInput = request.resolvePathList(action, "input", ICompositeType.class);
-            for (var input : actionInput) {
-                addQuestionnaireItemForInput(request, input);
-            }
+            addQuestionnaireItemForInput(request, action);
         }
 
         if (Boolean.TRUE.equals(meetsConditions(request, action, requestOrchestration))) {
@@ -74,8 +63,8 @@ public class ProcessAction {
             // }
             // }
             metConditions.put(request.resolvePathString(action, "id"), action);
-            var requestAction = createRequestAction(action);
-            extensionProcessor.processExtensions(request, requestAction, action, null);
+            var requestAction = generateRequestAction(request, action);
+            extensionProcessor.processExtensions(request, requestAction, action, Collections.EMPTY_LIST);
             var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
             for (var childAction : childActions) {
                 request.getModelResolver()
@@ -85,55 +74,47 @@ public class ProcessAction {
                                 Collections.singletonList(
                                         processAction(request, requestOrchestration, metConditions, childAction)));
             }
-            IBaseResource resource = null;
-            var definition = request.resolvePath(action, "definition", IPrimitiveType.class);
-            if (isDefinitionCanonical(request, definition)) {
-                resource = resolveDefinition(request, definition);
-                if (resource != null) {
-                    resolveAction(requestOrchestration, resource, action);
-                    request.getModelResolver()
-                            .setValue(
-                                    requestAction,
-                                    "resource",
-                                    buildReference(
-                                            request.getFhirVersion(),
-                                            resource.getIdElement().getIdPart()));
-                    if (Boolean.TRUE.equals(request.getContainResources())) {
-                        request.getModelResolver()
-                                .setValue(requestOrchestration, "contained", Collections.singletonList(resource));
-                    } else {
-                        request.getRequestResources().add(resource);
-                    }
-                }
-            } else if (isDefinitionUri(request, definition)) {
-                request.getModelResolver()
-                        .setValue(
-                                requestAction,
-                                "resource",
-                                buildReference(
-                                        request.getFhirVersion(), ((IPrimitiveType<String>) definition).getValue()));
-            }
+            var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
             dynamicValueProcessor.processDynamicValues(request, resource, action, requestAction);
+            return requestAction;
         }
 
         return null;
     }
 
     @SuppressWarnings("unchecked")
-    protected void addQuestionnaireItemForInput(ApplyRequest request, ICompositeType input) {
-        var profiles = request.resolvePathList(input, "profile", IPrimitiveType.class);
-        if (profiles.isEmpty()) {
-            return;
+    protected void addQuestionnaireItemForInput(ApplyRequest request, IBaseBackboneElement action) {
+        var actionInput = request.resolvePathList(action, "input", IElement.class);
+        for (var input : actionInput) {
+            var dataReqElement = getDataRequirementElement(request, input);
+            var profiles = request.resolvePathList(dataReqElement, "profile", IPrimitiveType.class);
+            if (profiles.isEmpty()) {
+                return;
+            }
+            var profile =
+                    org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(repository, profiles.get(0));
+            var item = this.generateProcessor.generateItem(
+                    request,
+                    profile,
+                    request.getItems(request.getQuestionnaire()).size());
+            // If input has text extension use it to override
+            // resolve extensions or not?
+            request.getModelResolver().setValue(request.getQuestionnaire(), "item", Collections.singletonList(item));
         }
+    }
 
-        var profile =
-                org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(repository, profiles.get(0));
-        var item = this.generateProcessor.generateItem(
-                request, profile, request.getItems(request.getQuestionnaire()).size());
+    protected ICompositeType getDataRequirementElement(ApplyRequest request, IElement input) {
+        return (ICompositeType)
+                (request.getFhirVersion().isEqualOrNewerThan(FhirVersionEnum.R5)
+                        ? request.resolvePath(input, "requirement")
+                        : input);
+    }
 
-        // If input has text extension use it to override
-        // resolve extensions or not?
-        request.getModelResolver().setValue(request.getQuestionnaire(), "item", Collections.singletonList(item));
+    protected IBaseParameters resolveInputParameters(ApplyRequest request, IBaseBackboneElement action) {
+        var actionInput = request.resolvePathList(action, "input", IElement.class);
+        return request.resolveInputParameters(actionInput.stream()
+                .map(input -> getDataRequirementElement(request, input))
+                .collect(Collectors.toList()));
     }
 
     protected Boolean meetsConditions(
@@ -142,8 +123,7 @@ public class ProcessAction {
         if (conditions.isEmpty()) {
             return true;
         }
-        var input = request.resolvePathList(action, "input", ICompositeType.class);
-        var inputParams = request.resolveInputParameters(input);
+        var inputParams = resolveInputParameters(request, action);
         for (var condition : conditions) {
             var conditionExpression = expressionProcessor.getCqfExpressionForElement(request, condition);
             if (conditionExpression != null) {
@@ -163,14 +143,14 @@ public class ProcessAction {
                     logger.warn("Condition expression {} returned null", conditionExpression.getExpression());
                     return false;
                 }
-                if (!(result instanceof BooleanType)) {
+                if (!(result instanceof IBaseBooleanDatatype)) {
                     logger.warn(
                             "The condition expression {} returned a non-boolean value: {}",
                             conditionExpression.getExpression(),
                             result.getClass().getSimpleName());
                     continue;
                 }
-                if (!((BooleanType) result).booleanValue()) {
+                if (!((IBaseBooleanDatatype) result).getValue()) {
                     logger.debug("The result of condition expression {} is false", conditionExpression.getExpression());
                     return false;
                 }
@@ -180,164 +160,139 @@ public class ProcessAction {
         return true;
     }
 
-    protected IBaseBackboneElement createRequestAction(IBaseBackboneElement action) {
-        // TODO:
-        return null;
-    }
-
-    protected Boolean isDefinitionCanonical(ApplyRequest request, IBase definition) {
+    protected IBaseBackboneElement generateRequestAction(ApplyRequest request, IBaseBackboneElement action) {
         switch (request.getFhirVersion()) {
             case DSTU3:
-                return Boolean.TRUE;
+                return generateRequestActionDstu3(request, action);
             case R4:
-                return definition instanceof org.hl7.fhir.r4.model.CanonicalType;
+                return generateRequestActionR4(request, action);
             case R5:
-                return definition instanceof org.hl7.fhir.r5.model.CanonicalType;
+                return generateRequestActionR5(request, action);
 
             default:
-                return Boolean.FALSE;
+                return null;
         }
     }
 
-    protected Boolean isDefinitionUri(ApplyRequest request, IBase definition) {
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return Boolean.FALSE;
-            case R4:
-                return definition instanceof org.hl7.fhir.r4.model.UriType;
-            case R5:
-                return definition instanceof org.hl7.fhir.r5.model.UriType;
+    protected IBaseBackboneElement generateRequestActionDstu3(ApplyRequest request, IBaseBackboneElement a) {
+        var action = (org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent) a;
+        var requestAction = new org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent()
+                .setTitle(action.getTitle())
+                .setDescription(action.getDescription())
+                .setTextEquivalent(action.getTextEquivalent())
+                .setCode(action.getCode())
+                .setDocumentation(action.getDocumentation())
+                .setTiming(action.getTiming())
+                .setType(action.getType());
+        requestAction.setId(action.getId());
 
-            default:
-                return Boolean.FALSE;
+        if (action.hasCondition()) {
+            action.getCondition()
+                    .forEach(c -> requestAction.addCondition(
+                            new org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionConditionComponent()
+                                    .setKind(org.hl7.fhir.dstu3.model.RequestGroup.ActionConditionKind.fromCode(
+                                            c.getKind().toCode()))
+                                    .setExpression(c.getExpression())));
         }
-    }
-
-    protected IBaseResource resolveDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
-        logger.debug("Resolving definition {}", definition.getValue());
-        var resourceName = resolveResourceName(request, definition);
-        switch (FHIRTypes.fromCode(requireNonNull(resourceName))) {
-            case PLANDEFINITION:
-                return applyNestedPlanDefinition(request, definition);
-            case ACTIVITYDEFINITION:
-                return applyActivityDefinition(request, definition);
-            case QUESTIONNAIRE:
-                return applyQuestionnaireDefinition(request, definition);
-            default:
-                throw new FHIRException(String.format("Unknown action definition: %s", definition));
+        if (action.hasRelatedAction()) {
+            action.getRelatedAction()
+                    .forEach(ra -> requestAction.addRelatedAction(
+                            new org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionRelatedActionComponent()
+                                    .setActionId(ra.getActionId())
+                                    .setRelationship(
+                                            org.hl7.fhir.dstu3.model.RequestGroup.ActionRelationshipType.fromCode(
+                                                    ra.getRelationship().toCode()))
+                                    .setOffset(ra.getOffset())));
         }
-    }
-
-    protected IBaseResource applyQuestionnaireDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
-        IBaseResource result = null;
-        try {
-            var referenceToContained = definition.getValue().startsWith("#");
-            if (referenceToContained) {
-                result = resolveContained(request, definition.getValue());
-            } else {
-                result = SearchHelper.searchRepositoryByCanonical(repository, definition);
-            }
-        } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: Questionnaire %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
-            logger.error(message);
-            request.logException(message);
+        if (action.hasSelectionBehavior()) {
+            requestAction.setSelectionBehavior(org.hl7.fhir.dstu3.model.RequestGroup.ActionSelectionBehavior.fromCode(
+                    action.getSelectionBehavior().toCode()));
         }
 
-        return result;
+        return requestAction;
     }
 
-    protected IBaseResource applyActivityDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
-        IBaseResource result = null;
-        try {
-            var referenceToContained = definition.getValue().startsWith("#");
-            var activityDefinition = (ActivityDefinition)
-                    (referenceToContained
-                            ? resolveContained(request, definition.getValue())
-                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
-            var params = parameters();
-            result = repository.invoke(ActivityDefinition.class, "$apply", params, IBaseResource.class);
-            // result = this.activityDefinitionProcessor.apply(
-            //         activityDefinition,
-            //         subjectId.getValue(),
-            //         encounterId == null ? null : encounterId.getValue(),
-            //         practitionerId == null ? null : practitionerId.getValue(),
-            //         organizationId == null ? null : organizationId.getValue(),
-            //         userType,
-            //         userLanguage,
-            //         userTaskContext,
-            //         setting,
-            //         settingContext,
-            //         parameters,
-            //         useServerData,
-            //         bundle,
-            //         libraryEngine);
-            result.setId((IIdType)
-                    (referenceToContained
-                            ? Ids.newId(
-                                    request.getFhirVersion(),
-                                    result.fhirType(),
-                                    activityDefinition.getIdPart().replaceFirst("#", ""))
-                            : activityDefinition.getIdElement().withResourceType(result.fhirType())));
-        } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: ActivityDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
-            logger.error(message);
-            request.logException(message);
+    protected IBaseBackboneElement generateRequestActionR4(ApplyRequest request, IBaseBackboneElement a) {
+        var action = (org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent) a;
+        var requestAction = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent()
+                .setTitle(action.getTitle())
+                .setDescription(action.getDescription())
+                .setTextEquivalent(action.getTextEquivalent())
+                .setCode(action.getCode())
+                .setDocumentation(action.getDocumentation())
+                .setTiming(action.getTiming())
+                .setType(action.getType());
+        requestAction.setId(action.getId());
+
+        if (action.hasCondition()) {
+            action.getCondition()
+                    .forEach(c -> requestAction.addCondition(
+                            new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionConditionComponent()
+                                    .setKind(org.hl7.fhir.r4.model.RequestGroup.ActionConditionKind.fromCode(
+                                            c.getKind().toCode()))
+                                    .setExpression(c.getExpression())));
+        }
+        if (action.hasPriority()) {
+            requestAction.setPriority(org.hl7.fhir.r4.model.RequestGroup.RequestPriority.fromCode(
+                    action.getPriority().toCode()));
+        }
+        if (action.hasRelatedAction()) {
+            action.getRelatedAction()
+                    .forEach(ra -> requestAction.addRelatedAction(
+                            new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionRelatedActionComponent()
+                                    .setActionId(ra.getActionId())
+                                    .setRelationship(org.hl7.fhir.r4.model.RequestGroup.ActionRelationshipType.fromCode(
+                                            ra.getRelationship().toCode()))
+                                    .setOffset(ra.getOffset())));
+        }
+        if (action.hasSelectionBehavior()) {
+            requestAction.setSelectionBehavior(org.hl7.fhir.r4.model.RequestGroup.ActionSelectionBehavior.fromCode(
+                    action.getSelectionBehavior().toCode()));
         }
 
-        return result;
+        return requestAction;
     }
 
-    protected IBaseResource applyNestedPlanDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
-        try {
-            var referenceToContained = definition.getValue().startsWith("#");
-            var nextPlanDefinition = (PlanDefinition)
-                    (referenceToContained
-                            ? resolveContained(request, definition.getValue())
-                            : SearchHelper.searchRepositoryByCanonical(repository, definition));
-            var nestedRequest = request.copy(nextPlanDefinition);
-            return applyProcessor.applyPlanDefinition(nestedRequest);
-        } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: PlanDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
-            logger.error(message);
-            request.logException(message);
-            return null;
+    protected IBaseBackboneElement generateRequestActionR5(ApplyRequest request, IBaseBackboneElement a) {
+        var action = (org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent) a;
+        var requestAction = new org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent()
+                .setTitle(action.getTitle())
+                .setDescription(action.getDescription())
+                .setTextEquivalent(action.getTextEquivalent())
+                .addCode(action.getCode())
+                .setDocumentation(action.getDocumentation())
+                .setTiming(action.getTiming())
+                .setType(action.getType());
+        requestAction.setId(action.getId());
+
+        if (action.hasCondition()) {
+            action.getCondition()
+                    .forEach(c -> requestAction.addCondition(
+                            new org.hl7.fhir.r5.model.RequestOrchestration
+                                            .RequestOrchestrationActionConditionComponent()
+                                    .setKind(org.hl7.fhir.r5.model.Enumerations.ActionConditionKind.fromCode(
+                                            c.getKind().toCode()))
+                                    .setExpression(c.getExpression())));
         }
-    }
-
-    protected String resolveResourceName(ApplyRequest request, IPrimitiveType<String> canonical) {
-        if (canonical.hasValue()) {
-            var id = canonical.getValue();
-            if (id.contains("/")) {
-                id = id.replace(id.substring(id.lastIndexOf("/")), "");
-                return id.contains("/") ? id.substring(id.lastIndexOf("/") + 1) : id;
-            } else if (id.startsWith("#")) {
-                return resolveContained(request, id).fhirType();
-            }
-            return null;
+        if (action.hasPriority()) {
+            requestAction.setPriority(org.hl7.fhir.r5.model.Enumerations.RequestPriority.fromCode(
+                    action.getPriority().toCode()));
+        }
+        if (action.hasRelatedAction()) {
+            action.getRelatedAction()
+                    .forEach(ra -> requestAction.addRelatedAction(
+                            new org.hl7.fhir.r5.model.RequestOrchestration
+                                            .RequestOrchestrationActionRelatedActionComponent()
+                                    .setTargetId(ra.getTargetId())
+                                    .setRelationship(org.hl7.fhir.r5.model.Enumerations.ActionRelationshipType.fromCode(
+                                            ra.getRelationship().toCode()))
+                                    .setOffset(ra.getOffset())));
+        }
+        if (action.hasSelectionBehavior()) {
+            requestAction.setSelectionBehavior(org.hl7.fhir.r5.model.Enumerations.ActionSelectionBehavior.fromCode(
+                    action.getSelectionBehavior().toCode()));
         }
 
-        throw new FHIRException("CanonicalType must have a value for resource name extraction");
-    }
-
-    protected IBaseResource resolveContained(ApplyRequest request, String id) {
-        var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
-        var first = contained.stream()
-                .filter(r -> r.getIdElement().getIdPart().equals(id))
-                .findFirst();
-        return first.orElse(null);
-    }
-
-    protected void resolveAction(
-            IBaseResource requestOrchestration, IBaseResource result, IBaseBackboneElement action) {
-        if ("Task".equals(result.fhirType())) {
-            // TODO: action resolvers, is Task the only one?
-            // resolveTask(requestOrchestration, result, action);
-        }
+        return requestAction;
     }
 }

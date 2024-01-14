@@ -78,8 +78,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
     }
 
     @Override
-    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> input) {
-        var dataRequirements = input.stream().map(i -> (DataRequirement) i).collect(Collectors.toList());
+    public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> dataRequirement) {
+        var dataRequirements =
+                dataRequirement.stream().map(i -> (DataRequirement) i).collect(Collectors.toList());
         var params = parameters();
         if (parameters != null) {
             params.getParameter().addAll(parameters.getParameter());

@@ -10,6 +10,8 @@ public class ResponseBundle {
         var newBundle = new org.hl7.fhir.dstu3.model.Bundle();
         newBundle.setId(Ids.ensureIdType(extractId, "Bundle"));
         newBundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+        // ensure entry array
+        newBundle.getEntry();
         resources.forEach(resource -> {
             var entryRequest = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent();
             entryRequest.setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT);
@@ -29,6 +31,8 @@ public class ResponseBundle {
         var newBundle = new org.hl7.fhir.r4.model.Bundle();
         newBundle.setId(Ids.ensureIdType(extractId, "Bundle"));
         newBundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        // ensure entry array
+        newBundle.getEntry();
         resources.forEach(resource -> {
             var entryRequest = new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent();
             entryRequest.setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT);
@@ -48,6 +52,8 @@ public class ResponseBundle {
         var newBundle = new org.hl7.fhir.r5.model.Bundle();
         newBundle.setId(Ids.ensureIdType(extractId, "Bundle"));
         newBundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.TRANSACTION);
+        // ensure entry array
+        newBundle.getEntry();
         resources.forEach(resource -> {
             var entryRequest = new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent();
             entryRequest.setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.PUT);

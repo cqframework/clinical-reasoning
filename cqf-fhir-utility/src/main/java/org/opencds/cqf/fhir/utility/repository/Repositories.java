@@ -21,7 +21,7 @@ public class Repositories {
         return new ProxyRepository(data, content, terminology);
     }
 
-    private static IGenericClient getClient(FhirContext fhirContext, IBaseResource endpoint) {
+    private static IGenericClient createClient(FhirContext fhirContext, IBaseResource endpoint) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 return Clients.forEndpoint(fhirContext, (org.hl7.fhir.dstu3.model.Endpoint) endpoint);
@@ -34,6 +34,10 @@ public class Repositories {
         }
     }
 
+    public static Repository createRestRepository(FhirContext fhirContext, IBaseResource endpoint) {
+        return endpoint == null ? null : new RestRepository(createClient(fhirContext, endpoint));
+    }
+
     public static Repository proxy(
             Repository localRepository,
             Boolean useLocalData,
@@ -43,17 +47,12 @@ public class Repositories {
         if (dataEndpoint == null && contentEndpoint == null && terminologyEndpoint == null) {
             return localRepository;
         }
-        Repository data = dataEndpoint == null
-                ? null
-                : new RestRepository(getClient(localRepository.fhirContext(), dataEndpoint));
-        Repository content = contentEndpoint == null
-                ? null
-                : new RestRepository(getClient(localRepository.fhirContext(), contentEndpoint));
-        Repository terminology = terminologyEndpoint == null
-                ? null
-                : new RestRepository(getClient(localRepository.fhirContext(), terminologyEndpoint));
-
-        return new ProxyRepository(localRepository, useLocalData, data, content, terminology);
+        return new ProxyRepository(
+                localRepository,
+                useLocalData,
+                createRestRepository(localRepository.fhirContext(), dataEndpoint),
+                createRestRepository(localRepository.fhirContext(), contentEndpoint),
+                createRestRepository(localRepository.fhirContext(), terminologyEndpoint));
     }
 
     public static ResourceMatcher getResourceMatcher(FhirContext context) {

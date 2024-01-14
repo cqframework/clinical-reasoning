@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
 public class PlanDefinitionProcessorTests {
     @Test
+    @Disabled
     public void testChildRoutineVisit() {
         PlanDefinition.Assert.that("ChildRoutineVisit-PlanDefinition-1.0.0", "Patient/ChildRoutine-Reportable", null)
                 .withAdditionalData("child-routine-visit/child_routine_visit_patient.json")

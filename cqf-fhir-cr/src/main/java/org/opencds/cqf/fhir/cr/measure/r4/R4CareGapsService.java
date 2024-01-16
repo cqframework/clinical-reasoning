@@ -190,7 +190,7 @@ public class R4CareGapsService {
         checkArgument(
                 !Strings.isNullOrEmpty(myCareGapsProperties.getCareGapsCompositionSectionAuthor()),
                 "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
-        checkNotNull(
+        checkArgument(
                 !Strings.isNullOrEmpty(myServerBase),
                 "The fhirBaseUrl setting is required for the $care-gaps operation.");
         Resource configuredReporter = addConfiguredResource(

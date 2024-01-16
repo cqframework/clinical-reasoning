@@ -15,45 +15,46 @@ import org.hl7.fhir.r5.model.DetectedIssue;
 
 public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResourceBuilder<DetectedIssueBuilder<T>, T> {
 
-    private String myStatus;
-    private CodeableConceptSettings myCode;
-    private String myPatient;
-    private List<String> myEvidenceDetail;
+    private String status;
+    private CodeableConceptSettings c;
+    private String patient;
+    private List<String> evidenceDetails;
 
-    public DetectedIssueBuilder(Class<T> theResourceClass) {
-        super(theResourceClass);
+    public DetectedIssueBuilder(Class<T> resourceClass) {
+        super(resourceClass);
     }
 
-    public DetectedIssueBuilder(Class<T> theResourceClass, String theId) {
-        super(theResourceClass, theId);
+    public DetectedIssueBuilder(Class<T> resourceClass, String id) {
+        super(resourceClass, id);
     }
 
-    public DetectedIssueBuilder(Class<T> theResourceClass, String theId, String theStatus, String theEvidenceDetail) {
-        super(theResourceClass, theId);
-        checkNotNull(theStatus, theEvidenceDetail);
+    public DetectedIssueBuilder(Class<T> resourceClass, String id, String status, String evidenceDetail) {
+        super(resourceClass, id);
+        checkNotNull(status);
+        checkNotNull(evidenceDetail);
 
-        myStatus = theStatus;
-        addEvidenceDetail(theEvidenceDetail);
+        this.status = status;
+        addEvidenceDetail(evidenceDetail);
     }
 
-    private void addEvidenceDetail(String theEvidenceDetail) {
-        if (myEvidenceDetail == null) {
-            myEvidenceDetail = new ArrayList<>();
+    private void addEvidenceDetail(String evidenceDetail) {
+        if (evidenceDetails == null) {
+            evidenceDetails = new ArrayList<>();
         }
 
-        myEvidenceDetail.add(theEvidenceDetail);
+        evidenceDetails.add(evidenceDetail);
     }
 
     private List<String> getEvidenceDetails() {
-        if (myEvidenceDetail == null) {
+        if (evidenceDetails == null) {
             return Collections.emptyList();
         }
 
-        return myEvidenceDetail;
+        return evidenceDetails;
     }
 
-    public DetectedIssueBuilder<T> withStatus(String theStatus) {
-        myStatus = theStatus;
+    public DetectedIssueBuilder<T> withStatus(String status) {
+        this.status = status;
 
         return this;
     }
@@ -61,55 +62,56 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
     public DetectedIssueBuilder<T> withCode(CodeableConceptSettings theCode) {
         checkNotNull(theCode);
 
-        myCode = theCode;
+        c = theCode;
 
         return this;
     }
 
     public DetectedIssueBuilder<T> withPatient(String thePatient) {
-        myPatient = ensurePatientReference(thePatient);
+        patient = ensurePatientReference(thePatient);
 
         return this;
     }
 
-    public DetectedIssueBuilder<T> withEvidenceDetail(String theEvidenceDetail) {
-        checkNotNull(theEvidenceDetail);
+    public DetectedIssueBuilder<T> withEvidenceDetail(String evidenceDetail) {
+        checkNotNull(evidenceDetail);
 
-        addEvidenceDetail(theEvidenceDetail);
+        addEvidenceDetail(evidenceDetail);
 
         return this;
     }
 
     @Override
     public T build() {
-        checkNotNull(myStatus, myEvidenceDetail);
-        checkArgument(!myEvidenceDetail.isEmpty());
+        checkNotNull(status);
+        checkNotNull(evidenceDetails);
+        checkArgument(!evidenceDetails.isEmpty());
 
         return super.build();
     }
 
     private CodingSettings getCodeSetting() {
-        return myCode.getCodingSettingsArray()[0];
+        return c.getCodingSettingsArray()[0];
     }
 
     @Override
-    protected void initializeDstu3(T theResource) {
-        super.initializeDstu3(theResource);
-        org.hl7.fhir.dstu3.model.DetectedIssue detectedIssue = (org.hl7.fhir.dstu3.model.DetectedIssue) theResource;
+    protected void initializeDstu3(T resource) {
+        super.initializeDstu3(resource);
+        org.hl7.fhir.dstu3.model.DetectedIssue detectedIssue = (org.hl7.fhir.dstu3.model.DetectedIssue) resource;
 
         detectedIssue
                 .setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
                         .setSystem(getIdentifier().getKey())
                         .setValue(getIdentifier().getValue()))
-                .setPatient(new org.hl7.fhir.dstu3.model.Reference(myPatient))
-                .setStatus(DetectedIssueStatus.valueOf(myStatus));
+                .setPatient(new org.hl7.fhir.dstu3.model.Reference(patient))
+                .setStatus(DetectedIssueStatus.valueOf(status));
         getEvidenceDetails().forEach(detectedIssue::setReference);
     }
 
     @Override
-    protected void initializeR4(T theResource) {
-        super.initializeR4(theResource);
-        org.hl7.fhir.r4.model.DetectedIssue detectedIssue = (org.hl7.fhir.r4.model.DetectedIssue) theResource;
+    protected void initializeR4(T resource) {
+        super.initializeR4(resource);
+        org.hl7.fhir.r4.model.DetectedIssue detectedIssue = (org.hl7.fhir.r4.model.DetectedIssue) resource;
 
         List<org.hl7.fhir.r4.model.Identifier> identifier = new ArrayList<>();
         identifier.add(new org.hl7.fhir.r4.model.Identifier()
@@ -118,8 +120,8 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
 
         detectedIssue
                 .setIdentifier(identifier)
-                .setPatient(new org.hl7.fhir.r4.model.Reference(myPatient))
-                .setStatus(org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueStatus.valueOf(myStatus))
+                .setPatient(new org.hl7.fhir.r4.model.Reference(patient))
+                .setStatus(org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueStatus.valueOf(status))
                 .setCode(new CodeableConcept()
                         .addCoding(new Coding()
                                 .setSystem(getCodeSetting().getSystem())
@@ -131,9 +133,9 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
     }
 
     @Override
-    protected void initializeR5(T theResource) {
-        super.initializeR5(theResource);
-        org.hl7.fhir.r5.model.DetectedIssue detectedIssue = (org.hl7.fhir.r5.model.DetectedIssue) theResource;
+    protected void initializeR5(T resource) {
+        super.initializeR5(resource);
+        org.hl7.fhir.r5.model.DetectedIssue detectedIssue = (org.hl7.fhir.r5.model.DetectedIssue) resource;
 
         List<org.hl7.fhir.r5.model.Identifier> identifier = new ArrayList<>();
         identifier.add(new org.hl7.fhir.r5.model.Identifier()
@@ -142,7 +144,7 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
 
         detectedIssue
                 .setIdentifier(identifier)
-                .setStatus(DetectedIssue.DetectedIssueStatus.valueOf(myStatus))
+                .setStatus(DetectedIssue.DetectedIssueStatus.valueOf(status))
                 .setCode(new org.hl7.fhir.r5.model.CodeableConcept()
                         .addCoding(new org.hl7.fhir.r5.model.Coding()
                                 .setSystem(getCodeSetting().getSystem())

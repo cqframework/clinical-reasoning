@@ -36,14 +36,8 @@ public class Reflections {
         checkNotNull(theChildName);
 
         FhirContext fhirContext = FhirContext.forCached(FhirVersions.forClass(theBaseTypeClass));
-        if (theBaseTypeClass.isInstance(IBaseResource.class)) {
-            Class<? extends IBaseResource> theIBaseResourceClass = theBaseTypeClass.asSubclass(IBaseResource.class);
-            RuntimeResourceDefinition resourceDefinition = fhirContext.getResourceDefinition(theIBaseResourceClass);
-            return resourceDefinition.getChildByName(theChildName).getAccessor();
-        } else {
-            BaseRuntimeElementDefinition<?> elementDefinition = fhirContext.getElementDefinition(theBaseTypeClass);
-            return elementDefinition.getChildByName(theChildName).getAccessor();
-        }
+        BaseRuntimeElementDefinition<?> elementDefinition = fhirContext.getElementDefinition(theBaseTypeClass);
+        return elementDefinition.getChildByName(theChildName).getAccessor();
     }
 
     /**

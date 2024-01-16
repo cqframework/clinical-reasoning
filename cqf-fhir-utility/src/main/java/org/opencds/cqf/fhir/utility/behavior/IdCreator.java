@@ -7,16 +7,16 @@ import org.opencds.cqf.fhir.utility.Ids;
 
 public interface IdCreator extends FhirContextUser {
 
-    default <T extends IIdType> T newId(String theResourceName, String theResourceId) {
-        checkNotNull(theResourceName);
-        checkNotNull(theResourceId);
+    default <T extends IIdType> T newId(String resourceName, String resourceId) {
+        checkNotNull(resourceName);
+        checkNotNull(resourceId);
 
-        return Ids.newId(getFhirContext(), theResourceName, theResourceId);
+        return Ids.newId(getFhirContext(), resourceName, resourceId);
     }
 
-    default <T extends IIdType> T newId(String theResourceId) {
-        checkNotNull(theResourceId);
+    default <T extends IIdType> T newId(String resourceId) {
+        checkNotNull(resourceId);
 
-        return Ids.newId(getFhirContext(), theResourceId);
+        return Ids.newId(getFhirContext(), resourceId);
     }
 }

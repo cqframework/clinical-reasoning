@@ -61,32 +61,32 @@ public class Versions {
      * version.
      *
      * @param <ResourceType> an IBaseResource type
-     * @param theResources a list of Resources to select from
-     * @param theVersion the version of the Resource to select
-     * @param theGetVersion a function to access version information for the ResourceType
-     * @return the Resource with a matching version, or the highest version otherwise.
+     * @param resources a list of Resources to select from
+     * @param version the version of the Resource to select
+     * @param getVersion a function to access version information for the ResourceType
+     * @return the Resource with a matching version, or the highest version orwise.
      */
     public static <ResourceType extends IBaseResource> ResourceType selectByVersion(
-            List<ResourceType> theResources, String theVersion, Function<ResourceType, String> theGetVersion) {
-        checkNotNull(theResources);
-        checkNotNull(theGetVersion);
+            List<ResourceType> resources, String version, Function<ResourceType, String> getVersion) {
+        checkNotNull(resources);
+        checkNotNull(getVersion);
 
         ResourceType library = null;
         ResourceType maxVersion = null;
-        for (ResourceType l : theResources) {
-            String currentVersion = theGetVersion.apply(l);
-            if (theVersion == null && currentVersion == null
-                    || theVersion != null && theVersion.equals(currentVersion)) {
+        for (ResourceType l : resources) {
+            String currentVersion = getVersion.apply(l);
+            if (version == null && currentVersion == null
+                    || version != null && version.equals(currentVersion)) {
                 library = l;
             }
 
-            if (maxVersion == null || compareVersions(currentVersion, theGetVersion.apply(maxVersion)) >= 0) {
+            if (maxVersion == null || compareVersions(currentVersion, getVersion.apply(maxVersion)) >= 0) {
                 maxVersion = l;
             }
         }
 
         // If we were not given a version, return the highest found
-        if ((theVersion == null || library == null) && maxVersion != null) {
+        if ((version == null || library == null) && maxVersion != null) {
             return maxVersion;
         }
 

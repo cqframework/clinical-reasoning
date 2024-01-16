@@ -112,7 +112,7 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private class Logger implements IWorkerContext.ILoggingService {
+    private static class Logger implements IWorkerContext.ILoggingService {
 
         private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);
 

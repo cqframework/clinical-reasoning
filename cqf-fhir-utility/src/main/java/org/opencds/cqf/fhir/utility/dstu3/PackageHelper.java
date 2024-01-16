@@ -179,8 +179,7 @@ public class PackageHelper {
                 try {
                     var canonical = artifact.getResource().getReference();
                     if (PACKABLE_RESOURCES.contains(Canonicals.getResourceType(canonical))) {
-                        var resource =
-                                SearchHelper.searchRepositoryByCanonical(repository, new StringType(canonical));
+                        var resource = SearchHelper.searchRepositoryByCanonical(repository, new StringType(canonical));
                         if (resource != null
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->

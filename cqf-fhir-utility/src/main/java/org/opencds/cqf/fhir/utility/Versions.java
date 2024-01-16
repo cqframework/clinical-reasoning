@@ -75,8 +75,7 @@ public class Versions {
         ResourceType maxVersion = null;
         for (ResourceType l : resources) {
             String currentVersion = getVersion.apply(l);
-            if (version == null && currentVersion == null
-                    || version != null && version.equals(currentVersion)) {
+            if (version == null && currentVersion == null || version != null && version.equals(currentVersion)) {
                 library = l;
             }
 

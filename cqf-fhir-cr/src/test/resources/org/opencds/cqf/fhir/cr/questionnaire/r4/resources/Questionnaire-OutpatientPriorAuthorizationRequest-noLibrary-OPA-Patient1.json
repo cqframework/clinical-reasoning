@@ -12,7 +12,7 @@
   "contained": [
     {
       "resourceType": "OperationOutcome",
-      "id": "populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
+      "id": "prepopulate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1",
       "issue": [
         {
           "severity": "error",
@@ -151,7 +151,7 @@
     {
       "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
       "valueReference": {
-        "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
+        "reference": "#prepopulate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
       }
     }
   ],

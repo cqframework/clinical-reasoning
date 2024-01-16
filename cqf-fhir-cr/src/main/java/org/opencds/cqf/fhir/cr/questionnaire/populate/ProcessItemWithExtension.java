@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,27 +53,24 @@ public class ProcessItemWithExtension {
     IBaseBackboneElement createNewQuestionnaireItemComponent(
             PopulateRequest request, IBaseBackboneElement item, IBase context) {
         final IBaseBackboneElement populatedItem = SerializationUtils.clone(item);
-        // request.getModelResolver().setValue(populatedItem, path, item);
         final String path = ((IPrimitiveType<String>) request.getModelResolver().resolvePath(item, "definition"))
                 .getValue()
                 .split("#")[1]
-                .split("\\.")[1];
+                .split("\\.")[1]
+                .replace("[x]", "");
         final var initialValue = request.getModelResolver().resolvePath(context, path);
-        // final Property initialProperty = ((Base) context).getNamedProperty(path);
-        // if (initialProperty.hasValues() && !initialProperty.isList()) {
         if (initialValue instanceof IBase) {
-            // final Type initialValue =
-            //         transformValue((Type) initialProperty.getValues().get(0));
-            // item.addExtension(buildR4(QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION));
-            // item.addInitial(new QuestionnaireItemInitialComponent().setValue(initialValue));
             request.getModelResolver()
                     .setValue(
                             populatedItem,
                             "initial",
                             Collections.singletonList(createInitial(request.getFhirVersion(), (IBase) initialValue)));
-            // item.addInitial(new QuestionnaireItemInitialComponent().setValue(initialValue));
         } else if (initialValue instanceof List) {
-            // TODO: handle lists
+            var initials = new ArrayList<>();
+            for (var value : (List<IBase>) initialValue) {
+                initials.add(createInitial(request.getFhirVersion(), (IBase) value));
+            }
+            request.getModelResolver().setValue(populatedItem, "initial", initials);
         }
         return populatedItem;
     }

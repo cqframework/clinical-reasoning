@@ -77,8 +77,9 @@ public class TestQuestionnaire {
             return repository.fhirContext();
         }
 
-        private PopulateRequest buildRequest() {
+        private PopulateRequest buildRequest(String operationName) {
             return new PopulateRequest(
+                    operationName,
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
                     parameters,
@@ -124,7 +125,7 @@ public class TestQuestionnaire {
 
         public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
             if (buildRequest) {
-                var populateRequest = buildRequest();
+                var populateRequest = buildRequest("prepopulate");
                 return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
             } else {
                 return new GeneratedQuestionnaire(
@@ -143,7 +144,7 @@ public class TestQuestionnaire {
 
         public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
             if (buildRequest) {
-                var populateRequest = buildRequest();
+                var populateRequest = buildRequest("populate");
                 return new GeneratedQuestionnaireResponse(
                         repository, populateRequest, processor.populate(populateRequest));
             } else {

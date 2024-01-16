@@ -25,13 +25,22 @@ public class RequestHelpers {
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 
-    public static PopulateRequest newPopulateRequestForVersion(FhirVersionEnum fhirVersion) {
-        return new PopulateRequest(fhirVersion);
+    public static PopulateRequest newPopulateRequestForVersion(FhirVersionEnum fhirVersion, String operationName) {
+        return new PopulateRequest(fhirVersion, operationName);
     }
 
     public static PopulateRequest newPopulateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource questionnaire) {
+        return newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire, "populate");
+    }
+
+    public static PopulateRequest newPopulateRequestForVersion(
+            FhirVersionEnum fhirVersion,
+            LibraryEngine libraryEngine,
+            IBaseResource questionnaire,
+            String operationName) {
         return new PopulateRequest(
+                operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,

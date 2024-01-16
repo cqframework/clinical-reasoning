@@ -1,15 +1,12 @@
 package org.opencds.cqf.fhir.benchmark;
 
+import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.concurrent.TimeUnit;
-import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition;
-import org.opencds.cqf.fhir.cr.plandefinition.r4.PlanDefinition.Apply;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.When;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -27,21 +24,17 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @State(Scope.Benchmark)
 public class PlanDefinitions {
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
-    private static final Repository REPOSITORY = TestRepositoryFactory.createRepository(
-            FHIR_CONTEXT, PlanDefinition.Assert.class, PlanDefinition.CLASS_PATH + "/anc-dak");
 
-    private Apply apply;
+    private When apply;
 
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
-        this.apply = PlanDefinition.Assert.that(
-                        "ANCDT17",
-                        "Patient/5946f880-b197-400b-9caa-a3c661d23041",
-                        "Encounter/helloworld-patient-1-encounter-1",
-                        null)
-                .withRepository(REPOSITORY)
-                .withParameters(parameters(part("encounter", "helloworld-patient-1-encounter-1")))
-                .withExpectedBundleId(new IdType("Bundle", "ANCDT17"));
+        this.apply = given().repositoryFor(FHIR_CONTEXT, "r4/anc-dak")
+                .when()
+                .planDefinitionId("ANCDT17")
+                .subjectId("Patient/5946f880-b197-400b-9caa-a3c661d23041")
+                .encounterId("Encounter/helloworld-patient-1-encounter-1")
+                .parameters(parameters(part("encounter", "helloworld-patient-1-encounter-1")));
     }
 
     @Benchmark
@@ -51,7 +44,7 @@ public class PlanDefinitions {
     public void test(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize
         // away this call, which does nothing with the result of the evaluation
-        bh.consume(this.apply.applyR5());
+        bh.consume(this.apply.thenApplyR5());
     }
 
     public static void main(String[] args) throws RunnerException {

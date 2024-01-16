@@ -49,6 +49,11 @@ public class GenerateRequest implements ICpgRequest {
     }
 
     @Override
+    public String getOperationName() {
+        return "questionnaire";
+    }
+
+    @Override
     public IIdType getSubjectId() {
         return subjectId;
     }

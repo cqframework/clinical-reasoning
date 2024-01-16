@@ -245,6 +245,11 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
+    public String getOperationName() {
+        return "apply";
+    }
+
+    @Override
     public IBaseResource getQuestionnaire() {
         return this.questionnaire;
     }
@@ -271,12 +276,49 @@ public class ApplyRequest implements ICpgRequest {
 
     public IBaseParameters transformRequestParameters(IBaseResource resource) {
         switch (fhirVersion) {
+            case DSTU3:
+                return transformRequestParametersDstu3(resource);
             case R4:
                 return transformRequestParametersR4(resource);
+            case R5:
+                return transformRequestParametersR5(resource);
 
             default:
                 return null;
         }
+    }
+
+    protected IBaseParameters transformRequestParametersDstu3(IBaseResource resource) {
+        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+                ? APPLY_PARAMETER_ACTIVITY_DEFINITION
+                : APPLY_PARAMETER_PLAN_DEFINITION;
+        var params = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters()
+                .addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                        resourceParameter, (org.hl7.fhir.dstu3.model.Resource) resource))
+                .addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                        APPLY_PARAMETER_SUBJECT, getSubjectId().getValue()));
+        if (hasEncounterId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                    APPLY_PARAMETER_ENCOUNTER, getEncounterId().getValue()));
+        }
+        if (hasPractitionerId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                    APPLY_PARAMETER_PRACTITIONER, getPractitionerId().getValue()));
+        }
+        if (hasOrganizationId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                    APPLY_PARAMETER_ORGANIZATION, getOrganizationId().getValue()));
+        }
+        if (getParameters() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                    APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.dstu3.model.Parameters) getParameters()));
+        }
+        if (getBundle() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.dstu3.model.Resource) getBundle()));
+        }
+
+        return params;
     }
 
     protected IBaseParameters transformRequestParametersR4(IBaseResource resource) {
@@ -307,6 +349,39 @@ public class ApplyRequest implements ICpgRequest {
         if (getBundle() != null) {
             params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
                     APPLY_PARAMETER_DATA, (org.hl7.fhir.r4.model.Resource) getBundle()));
+        }
+
+        return params;
+    }
+
+    protected IBaseParameters transformRequestParametersR5(IBaseResource resource) {
+        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+                ? APPLY_PARAMETER_ACTIVITY_DEFINITION
+                : APPLY_PARAMETER_PLAN_DEFINITION;
+        var params = org.opencds.cqf.fhir.utility.r5.Parameters.parameters()
+                .addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                        resourceParameter, (org.hl7.fhir.r5.model.Resource) resource))
+                .addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                        APPLY_PARAMETER_SUBJECT, getSubjectId().getValue()));
+        if (hasEncounterId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                    APPLY_PARAMETER_ENCOUNTER, getEncounterId().getValue()));
+        }
+        if (hasPractitionerId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                    APPLY_PARAMETER_PRACTITIONER, getPractitionerId().getValue()));
+        }
+        if (hasOrganizationId()) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                    APPLY_PARAMETER_ORGANIZATION, getOrganizationId().getValue()));
+        }
+        if (getParameters() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                    APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.r5.model.Parameters) getParameters()));
+        }
+        if (getBundle() != null) {
+            params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r5.model.Resource) getBundle()));
         }
 
         return params;

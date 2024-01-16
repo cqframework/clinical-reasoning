@@ -7,6 +7,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +35,15 @@ public class ApplyProcessor implements IApplyProcessor {
                 request.getActivityDefinition().getIdElement().getIdPart());
 
         var result = resolverFactory.create(request.getActivityDefinition()).resolve(request);
+        var id = Ids.newId(
+                request.getFhirVersion(),
+                result.fhirType(),
+                request.getActivityDefinition().getIdElement().getIdPart());
+        result.setId(id);
         resolveMeta(request.getActivityDefinition(), result);
         extensionProcessor.processExtensions(request, result, request.getActivityDefinition(), EXCLUDED_EXTENSION_LIST);
         dynamicValueProcessor.processDynamicValues(request, result, request.getActivityDefinition());
+        request.resolveOperationOutcome(result);
 
         return result;
     }

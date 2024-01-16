@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.dstu3;
 
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
+import org.hl7.fhir.dstu3.model.Task.TaskRequesterComponent;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
@@ -16,6 +18,16 @@ public class TaskResolver extends BaseRequestResourceResolver {
     @Override
     public Task resolve(ICpgRequest request) {
         var task = new Task();
+        task.setFor(new Reference(request.getSubjectId()));
+
+        if (request.hasEncounterId()) {
+            task.setContext(new Reference(request.getEncounterId()));
+        }
+
+        if (request.hasPractitionerId()) {
+            task.setRequester(new TaskRequesterComponent(new Reference(request.getPractitionerId())));
+        }
+
         if (activityDefinition.hasExtension()) {
             var value = activityDefinition
                     .getExtensionsByUrl(TARGET_STATUS_URL)

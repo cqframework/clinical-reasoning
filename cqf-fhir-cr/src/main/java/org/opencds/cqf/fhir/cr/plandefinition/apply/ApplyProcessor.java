@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.pertainToGoalExtension;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
@@ -79,7 +78,7 @@ public class ApplyProcessor implements IApplyProcessor {
         request.setContainResources(true);
         initApply(request);
         var requestOrchestration = applyPlanDefinition(request);
-        resolveOperationOutcome(request, requestOrchestration);
+        request.resolveOperationOutcome(requestOrchestration);
         var carePlan = processRequest.generateCarePlan(request, requestOrchestration);
 
         return liftContainedResourcesToParent(request, carePlan);
@@ -89,7 +88,7 @@ public class ApplyProcessor implements IApplyProcessor {
     public IBaseBundle applyR5(ApplyRequest request) {
         initApply(request);
         var requestOrchestration = applyPlanDefinition(request);
-        resolveOperationOutcome(request, requestOrchestration);
+        request.resolveOperationOutcome(requestOrchestration);
         var resultBundle = newBundle(
                 request.getFhirVersion(), requestOrchestration.getIdElement().getIdPart(), null);
         addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), requestOrchestration));
@@ -185,26 +184,6 @@ public class ApplyProcessor implements IApplyProcessor {
             }
             // Always add goals to the resource list so they can be added to the CarePlan if needed
             request.getRequestResources().add(goal);
-        }
-    }
-
-    protected void resolveOperationOutcome(ApplyRequest request, IBaseResource resource) {
-        var issues = request.resolvePathList(request.getOperationOutcome(), "issue");
-        if (issues != null && !issues.isEmpty()) {
-            request.getOperationOutcome()
-                    .setId("apply-outcome-" + resource.getIdElement().getIdPart());
-            request.getModelResolver()
-                    .setValue(resource, "contained", Collections.singletonList(request.getOperationOutcome()));
-            request.getModelResolver()
-                    .setValue(
-                            resource,
-                            "extension",
-                            Collections.singletonList(buildReferenceExt(
-                                    request.getFhirVersion(),
-                                    crmiMessagesExtension(request.getOperationOutcome()
-                                            .getIdElement()
-                                            .getIdPart()),
-                                    true)));
         }
     }
 

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class ProcessAction {
             // }
             metConditions.put(request.resolvePathString(action, "id"), action);
             var requestAction = generateRequestAction(request, action);
-            extensionProcessor.processExtensions(request, requestAction, action, Collections.EMPTY_LIST);
+            extensionProcessor.processExtensions(request, requestAction, action, new ArrayList<>());
             var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
             for (var childAction : childActions) {
                 request.getModelResolver()

@@ -14,6 +14,7 @@ import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateRequest implements IQuestionnaireRequest {
+    private final String operationName;
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
@@ -25,7 +26,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private IBaseOperationOutcome operationOutcome;
 
     // test constructor
-    public PopulateRequest(FhirVersionEnum fhirVersion) {
+    public PopulateRequest(FhirVersionEnum fhirVersion, String operationName) {
+        this.operationName = operationName;
         this.questionnaire = null;
         this.subjectId = null;
         this.parameters = null;
@@ -37,12 +39,14 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     public PopulateRequest(
+            String operationName,
             IBaseResource questionnaire,
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
         this.parameters = parameters;
@@ -51,6 +55,11 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.modelResolver = modelResolver;
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
+    }
+
+    @Override
+    public String getOperationName() {
+        return operationName;
     }
 
     @Override

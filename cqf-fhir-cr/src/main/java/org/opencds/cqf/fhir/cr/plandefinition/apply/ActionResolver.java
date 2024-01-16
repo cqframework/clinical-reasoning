@@ -34,7 +34,7 @@ public class ActionResolver {
                                 request.getFhirVersion(),
                                 requestGroup.getIdElement().getValue(),
                                 false)));
-        request.getModelResolver().setValue(task, "for", request.resolvePath(requestGroup, "subject"));
+        // request.getModelResolver().setValue(task, "for", request.resolvePath(requestGroup, "subject"));
 
         // if (action.hasRelatedAction()) {
         //     var relatedActions = action.getRelatedAction();

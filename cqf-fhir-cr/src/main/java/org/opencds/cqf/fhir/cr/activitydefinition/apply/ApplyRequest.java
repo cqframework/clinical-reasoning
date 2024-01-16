@@ -83,6 +83,11 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
+    public String getOperationName() {
+        return "apply";
+    }
+
+    @Override
     public IIdType getSubjectId() {
         return subjectId;
     }

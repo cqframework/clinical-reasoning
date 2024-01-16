@@ -84,6 +84,11 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
+    public String getOperationName() {
+        return "extract";
+    }
+
+    @Override
     public IIdType getSubjectId() {
         return subjectId;
     }

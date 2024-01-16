@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -78,7 +79,7 @@ public class QuestionnaireResponseProcessor {
                                     .fhirContext()
                                     .getResourceDefinition("questionnaire")
                                     .getImplementingClass());
-        } catch (Exception e) {
+        } catch (DataFormatException e) {
             logger.error(e.getMessage());
             return null;
         }

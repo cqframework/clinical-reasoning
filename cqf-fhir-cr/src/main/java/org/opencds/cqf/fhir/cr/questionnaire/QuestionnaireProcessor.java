@@ -141,12 +141,14 @@ public class QuestionnaireProcessor {
     }
 
     public PopulateRequest buildPopulateRequest(
+            String operationName,
             IBaseResource questionnaire,
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
         return new PopulateRequest(
+                operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
@@ -183,7 +185,8 @@ public class QuestionnaireProcessor {
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        return prePopulate(buildPopulateRequest(questionnaire, subjectId, parameters, bundle, libraryEngine));
+        return prePopulate(
+                buildPopulateRequest("prepopulate", questionnaire, subjectId, parameters, bundle, libraryEngine));
     }
 
     @SuppressWarnings("unchecked")
@@ -219,7 +222,7 @@ public class QuestionnaireProcessor {
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        return populate(buildPopulateRequest(questionnaire, subjectId, parameters, bundle, libraryEngine));
+        return populate(buildPopulateRequest("populate", questionnaire, subjectId, parameters, bundle, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.prepopulateSubjectExtension;
 
@@ -55,7 +54,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         var items = request.getItems(request.getQuestionnaire());
         final List<IBaseBackboneElement> processedItems = processItems(request, items);
         request.getModelResolver().setValue(populatedQuestionnaire, "item", processedItems);
-        resolveOperationOutcome(request, populatedQuestionnaire);
+        request.resolveOperationOutcome(populatedQuestionnaire);
         return (R) populatedQuestionnaire;
     }
 
@@ -68,7 +67,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         var processedItems = processItems(request, items);
         var responseItems = processResponseItems(request, processedItems);
         request.getModelResolver().setValue(response, "item", responseItems);
-        resolveOperationOutcome(request, response);
+        request.resolveOperationOutcome(response);
         request.getModelResolver()
                 .setValue(response, "contained", Collections.singletonList(request.getQuestionnaire()));
         request.getModelResolver()
@@ -82,26 +81,6 @@ public class PopulateProcessor implements IPopulateProcessor {
                                         .getIdPart()),
                                 true)));
         return response;
-    }
-
-    public void resolveOperationOutcome(PopulateRequest request, IBaseResource resource) {
-        var issues = request.resolvePathList(request.getOperationOutcome(), "issue");
-        if (issues != null && !issues.isEmpty()) {
-            request.getOperationOutcome()
-                    .setId("populate-outcome-" + resource.getIdElement().getIdPart());
-            request.getModelResolver()
-                    .setValue(resource, "contained", Collections.singletonList(request.getOperationOutcome()));
-            request.getModelResolver()
-                    .setValue(
-                            resource,
-                            "extension",
-                            Collections.singletonList(buildReferenceExt(
-                                    request.getFhirVersion(),
-                                    crmiMessagesExtension(request.getOperationOutcome()
-                                            .getIdElement()
-                                            .getIdPart()),
-                                    true)));
-        }
     }
 
     public List<IBaseBackboneElement> processItems(PopulateRequest request, List<IBaseBackboneElement> items) {

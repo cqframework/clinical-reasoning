@@ -141,7 +141,6 @@ public class OperationParametersParser {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> getParameterParts(IBaseParameters parameters) {
-        // throw new NotImplementedException("OperationParametersParser.getParameterParts is not implemented yet");
         requireNonNull(parameters, "parameters must not be null");
         var parametersAdapter = adapterFactory.createParameters(parameters);
         var parts = parametersAdapter.getParameter().stream()
@@ -166,19 +165,6 @@ public class OperationParametersParser {
                 }
             }
         }
-
-        // Map<String, Object> parameterParts = parts.stream().collect(Collectors.toMap(x -> x.getName(), x -> {
-        //     // This needs to work in order to support this
-        //     var part = x.getPart();
-
-        //     // Recursive parts
-        //     // Get all Resources mapped to Name
-        //     // Get all Datatypes mapped to Name
-
-        //     return part;
-        // }));
-
         return parameterParts;
-        // return Collections.emptyMap();
     }
 }

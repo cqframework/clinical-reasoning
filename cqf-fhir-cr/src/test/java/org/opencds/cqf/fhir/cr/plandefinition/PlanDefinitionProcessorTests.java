@@ -346,7 +346,7 @@ public class PlanDefinitionProcessorTests {
                 .content(content)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(2);
+                .hasEntry(3);
     }
 
     @Test

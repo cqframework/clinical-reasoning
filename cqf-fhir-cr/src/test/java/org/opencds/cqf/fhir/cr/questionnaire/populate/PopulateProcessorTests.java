@@ -208,7 +208,7 @@ class PopulateProcessorTests {
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute
-        fixture.resolveOperationOutcome(request, questionnaire);
+        request.resolveOperationOutcome(questionnaire);
         // validate
         assertContainedResources(request, questionnaire, operationOutcome, null);
     }
@@ -221,7 +221,7 @@ class PopulateProcessorTests {
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute
-        fixture.resolveOperationOutcome(request, questionnaire);
+        request.resolveOperationOutcome(questionnaire);
         // validate
         assertContainedResources(request, questionnaire, null, null);
     }

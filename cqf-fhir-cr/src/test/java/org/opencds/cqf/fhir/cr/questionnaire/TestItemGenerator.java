@@ -124,9 +124,18 @@ public class TestItemGenerator {
             IBaseResource result;
             if (subjectId != null || parameters != null || bundle != null) {
                 result = processor.generateQuestionnaire(
-                        Eithers.for3(profileUrl, profileId, profile), subjectId, parameters, bundle, null, id);
+                        Eithers.for3(profileUrl, profileId, profile),
+                        false,
+                        false,
+                        true,
+                        subjectId,
+                        parameters,
+                        bundle,
+                        null,
+                        id);
             } else if (profileUrl != null || profileId != null || profile != null) {
-                result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile));
+                result = processor.generateQuestionnaire(
+                        Eithers.for3(profileUrl, profileId, profile), false, false, true);
             } else {
                 result = processor.generateQuestionnaire(id);
             }

@@ -13,6 +13,9 @@ import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
 public class GenerateRequest implements ICpgRequest {
+    private final Boolean supportedOnly;
+    private final Boolean requiredOnly;
+    private final Boolean differentialOnly;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
     private final IBaseBundle bundle;
@@ -20,9 +23,13 @@ public class GenerateRequest implements ICpgRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+    private IBaseResource questionnaire;
 
     // test constructor
     public GenerateRequest(FhirVersionEnum fhirVersion) {
+        this.supportedOnly = false;
+        this.requiredOnly = false;
+        this.differentialOnly = true;
         this.subjectId = null;
         this.parameters = null;
         this.bundle = null;
@@ -33,11 +40,17 @@ public class GenerateRequest implements ICpgRequest {
     }
 
     public GenerateRequest(
+            Boolean supportedOnly,
+            Boolean requiredOnly,
+            Boolean differentialOnly,
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        this.supportedOnly = supportedOnly;
+        this.requiredOnly = requiredOnly;
+        this.differentialOnly = differentialOnly;
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
@@ -46,6 +59,10 @@ public class GenerateRequest implements ICpgRequest {
         this.fhirVersion =
                 libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         this.defaultLibraryUrl = "";
+    }
+
+    public void setQuestionnaire(IBaseResource questionnaire) {
+        this.questionnaire = questionnaire;
     }
 
     @Override
@@ -90,8 +107,7 @@ public class GenerateRequest implements ICpgRequest {
 
     @Override
     public IBaseResource getQuestionnaire() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getQuestionnaire'");
+        return questionnaire;
     }
 
     @Override

@@ -137,14 +137,21 @@ public class ProcessDefinition {
     }
 
     protected IBaseResource applyActivityDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        // Running into issues with invoking ActivityDefinition/$apply on a HapiFhirRepository that was created with
+        // RequestDetails from PlanDefinition/$apply
         IBaseResource result = null;
         try {
             var referenceToContained = definition.getValue().startsWith("#");
             var activityDefinition = (referenceToContained
                     ? resolveContained(request, definition.getValue())
                     : searchRepositoryByCanonical(repository, definition));
-            var activityDefParams = request.transformRequestParameters(activityDefinition);
-            result = repository.invoke(activityDefinition.getClass(), "$apply", activityDefParams, IBaseResource.class);
+            // var activityDefParams = request.transformRequestParameters(activityDefinition);
+            // Map<String, String> headers = new HashMap<>();
+            // headers.put("Content-Type", "application/json+fhir");
+            // result = repository.invoke(
+            //         activityDefinition.getClass(), "$apply", activityDefParams, IBaseResource.class, headers);
+            var activityRequest = request.toActivityRequest(activityDefinition);
+            result = applyProcessor.applyActivityDefinition(activityRequest);
             result.setId((IIdType)
                     (referenceToContained
                             ? Ids.newId(

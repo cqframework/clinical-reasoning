@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
@@ -31,6 +32,8 @@ public class PlanDefinitionProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected final IApplyProcessor applyProcessor;
     protected final IPackageProcessor packageProcessor;
+    protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
+    protected final IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
 
@@ -39,21 +42,33 @@ public class PlanDefinitionProcessor {
     }
 
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+        this(repository, evaluationSettings, null, null, null, null);
     }
 
     public PlanDefinitionProcessor(
             Repository repository,
             EvaluationSettings evaluationSettings,
             IApplyProcessor applyProcessor,
-            IPackageProcessor packageProcessor) {
+            IPackageProcessor packageProcessor,
+            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
+            IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.applyProcessor =
-                applyProcessor != null ? applyProcessor : new ApplyProcessor(this.repository, modelResolver);
         this.packageProcessor = packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository);
+        // These two classes will no longer be needed once we are able to call multiple operations against a
+        // HapiFhirRepository
+        this.requestResolverFactory = requestResolverFactory != null
+                ? requestResolverFactory
+                : IRequestResolverFactory.getDefault(fhirVersion);
+        this.activityProcessor = activityProcessor != null
+                ? activityProcessor
+                : new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
+                        this.repository, this.requestResolverFactory);
+        this.applyProcessor = applyProcessor != null
+                ? applyProcessor
+                : new ApplyProcessor(this.repository, modelResolver, this.activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(

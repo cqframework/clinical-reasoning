@@ -1,11 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.Collections;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +31,15 @@ public class GenerateProcessor implements IGenerateProcessor {
     }
 
     @Override
-    public IBaseResource generate(ICpgRequest request, IBaseResource profile, String id) {
-        var questionnaire = generate(id == null ? profile.getIdElement().getIdPart() : id);
-        request.getModelResolver()
-                .setValue(questionnaire, "item", Collections.singletonList(generateItem(request, profile, 0)));
-        return questionnaire;
+    public IBaseResource generate(GenerateRequest request, IBaseResource profile, String id) {
+        request.setQuestionnaire(generate(id == null ? profile.getIdElement().getIdPart() : id));
+        request.addQuestionnaireItem(generateItem(request, profile));
+        return request.getQuestionnaire();
     }
 
     @Override
-    public IBaseBackboneElement generateItem(ICpgRequest request, IBaseResource profile, int itemCount) {
-        return itemGenerator.generate(request, profile, itemCount);
+    public IBaseBackboneElement generateItem(GenerateRequest request, IBaseResource profile) {
+        return itemGenerator.generate(request, profile);
     }
 
     protected IBaseResource createQuestionnaire() {

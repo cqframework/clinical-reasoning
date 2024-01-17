@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
 import java.util.ArrayList;
@@ -92,15 +94,11 @@ public class ProcessAction {
             if (profiles.isEmpty()) {
                 return;
             }
-            var profile =
-                    org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical(repository, profiles.get(0));
-            var item = this.generateProcessor.generateItem(
-                    request,
-                    profile,
-                    request.getItems(request.getQuestionnaire()).size());
+            var profile = searchRepositoryByCanonical(repository, profiles.get(0));
+            var generateRequest = request.toGenerateRequest();
+            request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest, profile));
             // If input has text extension use it to override
             // resolve extensions or not?
-            request.getModelResolver().setValue(request.getQuestionnaire(), "item", Collections.singletonList(item));
         }
     }
 

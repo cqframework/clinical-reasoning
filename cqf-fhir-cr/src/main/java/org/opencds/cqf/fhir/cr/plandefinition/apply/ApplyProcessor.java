@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -43,10 +44,15 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final ProcessRequest processRequest;
     protected final ProcessGoal processGoal;
     protected final ProcessAction processAction;
+    protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
 
-    public ApplyProcessor(Repository repository, ModelResolver modelResolver) {
+    public ApplyProcessor(
+            Repository repository,
+            ModelResolver modelResolver,
+            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;
         this.modelResolver = modelResolver;
+        this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
         generateProcessor = new GenerateProcessor(this.repository);
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
@@ -164,6 +170,11 @@ public class ApplyProcessor implements IApplyProcessor {
                 : requestOrchestration;
     }
 
+    public IBaseResource applyActivityDefinition(
+            org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest request) {
+        return liftContainedResourcesToParent(request, activityProcessor.apply(request));
+    }
+
     protected void processGoals(ApplyRequest request, IBaseResource requestOrchestration) {
         var goals = request.resolvePathList(request.getPlanDefinition(), "goal", IBaseBackboneElement.class);
         for (int i = 0; i < goals.size(); i++) {
@@ -187,7 +198,7 @@ public class ApplyProcessor implements IApplyProcessor {
         }
     }
 
-    protected IBaseResource liftContainedResourcesToParent(ApplyRequest request, IBaseResource resource) {
+    protected IBaseResource liftContainedResourcesToParent(ICpgRequest request, IBaseResource resource) {
         switch (request.getFhirVersion()) {
             case DSTU3:
                 return org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(

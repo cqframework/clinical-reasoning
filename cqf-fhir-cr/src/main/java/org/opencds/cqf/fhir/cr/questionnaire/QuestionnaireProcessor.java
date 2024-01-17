@@ -80,16 +80,23 @@ public class QuestionnaireProcessor {
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile) {
-        return generateQuestionnaire(profile, null);
-    }
-
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile, String id) {
-        return generateQuestionnaire(profile, null, null, null, null, null, null, id);
+        return generateQuestionnaire(profile, false, false, false, null, null, null, null, null);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile,
+            Boolean supportedOnly,
+            Boolean requiredOnly,
+            Boolean differentialOnly) {
+        return generateQuestionnaire(
+                profile, supportedOnly, requiredOnly, differentialOnly, null, null, null, null, null);
+    }
+
+    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
+            Either3<CanonicalType, IIdType, IBaseResource> profile,
+            Boolean supportedOnly,
+            Boolean requiredOnly,
+            Boolean differentialOnly,
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -99,17 +106,31 @@ public class QuestionnaireProcessor {
             String id) {
         repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return generateQuestionnaire(
-                profile, subjectId, parameters, bundle, new LibraryEngine(repository, evaluationSettings), id);
+                profile,
+                supportedOnly,
+                requiredOnly,
+                differentialOnly,
+                subjectId,
+                parameters,
+                bundle,
+                new LibraryEngine(repository, evaluationSettings),
+                id);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile,
+            Boolean supportedOnly,
+            Boolean requiredOnly,
+            Boolean differentialOnly,
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             String id) {
         var request = new GenerateRequest(
+                supportedOnly,
+                requiredOnly,
+                differentialOnly,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
                 bundle,

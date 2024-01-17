@@ -25,6 +25,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource planDefinition;
@@ -116,6 +117,30 @@ public class ApplyRequest implements ICpgRequest {
                 bundle,
                 libraryEngine,
                 modelResolver);
+    }
+
+    public org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest toActivityRequest(
+            IBaseResource activityDefinition) {
+        return new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest(
+                activityDefinition,
+                subjectId,
+                encounterId,
+                practitionerId,
+                organizationId,
+                userType,
+                userLanguage,
+                userTaskContext,
+                setting,
+                settingContext,
+                parameters,
+                useServerData,
+                bundle,
+                libraryEngine,
+                modelResolver);
+    }
+
+    public GenerateRequest toGenerateRequest() {
+        return new GenerateRequest(false, false, true, subjectId, parameters, bundle, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {

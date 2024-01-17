@@ -56,8 +56,8 @@ public class ElementProcessor implements IElementProcessor {
                 item.setInitial(transformValue((Type) pathValue));
             }
         }
-        item.setRequired(element.hasMin() && element.getMin() == 1);
-        // set repeat based on? if expression result type is a list?
+        item.setRequired(element.hasMin() && element.getMin() > 0);
+        item.setRepeats(element.hasMax() && !element.getMax().equals("1"));
         // set enableWhen based on? use
         // http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression
         return item;
@@ -88,9 +88,12 @@ public class ElementProcessor implements IElementProcessor {
             return QuestionnaireItemType.CHOICE;
         }
         switch (elementType) {
+            case "code":
+            case "coding":
             case "CodeableConcept":
                 return QuestionnaireItemType.CHOICE;
             case "uri":
+            case "url":
                 return QuestionnaireItemType.URL;
             case "BackboneElement":
                 return QuestionnaireItemType.GROUP;
@@ -98,8 +101,15 @@ public class ElementProcessor implements IElementProcessor {
                 return QuestionnaireItemType.QUANTITY;
             case "Reference":
                 return QuestionnaireItemType.REFERENCE;
-            case "code":
+            case "oid":
+            case "uuid":
+            case "base64Binary":
                 return QuestionnaireItemType.STRING;
+            case "positiveInt":
+            case "unsignedInt":
+                return QuestionnaireItemType.INTEGER;
+            case "instant":
+                return QuestionnaireItemType.DATETIME;
             default:
                 return QuestionnaireItemType.fromCode(elementType);
         }

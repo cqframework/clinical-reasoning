@@ -52,7 +52,7 @@ public class QuestionnaireResponseProcessorTests {
     }
 
     @Test
-    void testNestedDefinitionBaseExtraction() {
+    void testNestedDefinitionBasedExtraction() {
         var questionnaireResponseId = "cc-screening-pathway-definition-answers";
         given().repositoryFor(fhirContextR4, "r4")
                 .when()

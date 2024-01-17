@@ -15,99 +15,98 @@ public class Canonicals {
      * Gets the Resource type component of a canonical url
      *
      * @param <CanonicalType> A CanonicalType
-     * @param theCanonicalType the canonical url to parse
+     * @param canonicalType the canonical url to parse
      * @return the Resource type, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getResourceType(
-            CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> String getResourceType(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getResourceType(theCanonicalType.getValue());
+        return getResourceType(canonicalType.getValue());
     }
 
     /**
      * Gets the ResourceType component of a canonical url
      *
-     * @param theCanonical the canonical url to parse
+     * @param canonical the canonical url to parse
      * @return the ResourceType, or null if one can not be parsed
      */
-    public static String getResourceType(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static String getResourceType(String canonical) {
+        checkNotNull(canonical);
 
-        if (!theCanonical.contains("/")) {
+        if (!canonical.contains("/")) {
             return null;
         }
 
-        theCanonical = theCanonical.replace(theCanonical.substring(theCanonical.lastIndexOf("/")), "");
-        return theCanonical.contains("/") ? theCanonical.substring(theCanonical.lastIndexOf("/") + 1) : theCanonical;
+        canonical = canonical.replace(canonical.substring(canonical.lastIndexOf("/")), "");
+        return canonical.contains("/") ? canonical.substring(canonical.lastIndexOf("/") + 1) : canonical;
     }
 
     /**
      * Gets the ID component of a canonical url. Does not include resource name if present in the url.
      *
      * @param <CanonicalType> A CanonicalType
-     * @param theCanonicalType the canonical url to parse
+     * @param canonicalType the canonical url to parse
      * @return the Id, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getIdPart(CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> String getIdPart(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getIdPart(theCanonicalType.getValue());
+        return getIdPart(canonicalType.getValue());
     }
 
     /**
      * Gets the ID component of a canonical url. Does not include resource name if present in the url.
      *
-     * @param theCanonical the canonical url to parse
+     * @param canonical the canonical url to parse
      * @return the Id, or null if one can not be parsed
      */
-    public static String getIdPart(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static String getIdPart(String canonical) {
+        checkNotNull(canonical);
 
-        if (!theCanonical.contains("/")) {
+        if (!canonical.contains("/")) {
             return null;
         }
 
-        int lastIndex = calculateLastIndex(theCanonical);
+        int lastIndex = calculateLastIndex(canonical);
 
-        return theCanonical.substring(theCanonical.lastIndexOf("/") + 1, lastIndex);
+        return canonical.substring(canonical.lastIndexOf("/") + 1, lastIndex);
     }
 
     /**
      * Gets the Version component of a canonical url
      *
      * @param <CanonicalType> A CanonicalType
-     * @param theCanonicalType the canonical url to parse
+     * @param canonicalType the canonical url to parse
      * @return the Version, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getVersion(CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> String getVersion(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getVersion(theCanonicalType.getValue());
+        return getVersion(canonicalType.getValue());
     }
 
     /**
      * Gets the Version component of a canonical url
      *
-     * @param theCanonical the canonical url to parse
+     * @param canonical the canonical url to parse
      * @return the Version, or null if one can not be parsed
      */
-    public static String getVersion(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static String getVersion(String canonical) {
+        checkNotNull(canonical);
 
-        if (!theCanonical.contains("|")) {
+        if (!canonical.contains("|")) {
             return null;
         }
 
-        int lastIndex = theCanonical.lastIndexOf("#");
+        int lastIndex = canonical.lastIndexOf("#");
         if (lastIndex == -1) {
-            lastIndex = theCanonical.length();
+            lastIndex = canonical.length();
         }
 
-        return theCanonical.substring(theCanonical.lastIndexOf("|") + 1, lastIndex);
+        return canonical.substring(canonical.lastIndexOf("|") + 1, lastIndex);
     }
 
     /**
@@ -115,47 +114,47 @@ public class Canonicals {
      * if present.
      *
      * @param <CanonicalType> A CanonicalType
-     * @param theCanonicalType the canonical url to parse
+     * @param canonicalType the canonical url to parse
      * @return the Url, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getUrl(CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> String getUrl(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getUrl(theCanonicalType.getValue());
+        return getUrl(canonicalType.getValue());
     }
 
     /**
      * Get the Url component of a canonical url. Includes the base url, the resource type, and the id
      * if present.
      *
-     * @param theCanonical the canonical url to parse
+     * @param canonical the canonical url to parse
      * @return the Url, or null if one can not be parsed
      */
-    public static String getUrl(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static String getUrl(String canonical) {
+        checkNotNull(canonical);
 
-        if (!theCanonical.contains("/")) {
+        if (!canonical.contains("/")) {
             return null;
         }
 
-        int lastIndex = calculateLastIndex(theCanonical);
+        int lastIndex = calculateLastIndex(canonical);
 
-        return theCanonical.substring(0, lastIndex);
+        return canonical.substring(0, lastIndex);
     }
 
     /**
      * Get the Url component for a set of canonical urls. Includes the base url, the resource type,
      * and the id if present.
      *
-     * @param theCanonicals the set of canonical urls to parse
+     * @param canonicals the set of canonical urls to parse
      * @return the set of Url and null (if one can not be parsed) values
      */
-    public static List<String> getUrls(List<String> theCanonicals) {
-        checkNotNull(theCanonicals);
+    public static List<String> getUrls(List<String> canonicals) {
+        checkNotNull(canonicals);
 
         List<String> result = new ArrayList<>();
-        theCanonicals.forEach(canonical -> result.add(getUrl(canonical)));
+        canonicals.forEach(canonical -> result.add(getUrl(canonical)));
 
         return result;
     }
@@ -164,56 +163,55 @@ public class Canonicals {
      * Gets the Fragment component of a canonical url.
      *
      * @param <CanonicalType> A CanonicalType
-     * @param theCanonicalType the canonical url to parse
+     * @param canonicalType the canonical url to parse
      * @return the Fragment, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getFragment(CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> String getFragment(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getFragment(theCanonicalType.getValue());
+        return getFragment(canonicalType.getValue());
     }
 
     /**
      * Gets the Fragment component of a canonical url.
      *
-     * @param theCanonical the canonical url to parse
+     * @param canonical the canonical url to parse
      * @return the Fragment, or null if one can not be parsed
      */
-    public static String getFragment(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static String getFragment(String canonical) {
+        checkNotNull(canonical);
 
-        if (!theCanonical.contains("#")) {
+        if (!canonical.contains("#")) {
             return null;
         }
 
-        return theCanonical.substring(theCanonical.lastIndexOf("#") + 1);
+        return canonical.substring(canonical.lastIndexOf("#") + 1);
     }
 
-    public static <CanonicalType extends IPrimitiveType<String>> CanonicalParts getParts(
-            CanonicalType theCanonicalType) {
-        checkNotNull(theCanonicalType);
-        checkArgument(theCanonicalType.hasValue());
+    public static <CanonicalType extends IPrimitiveType<String>> CanonicalParts getParts(CanonicalType canonicalType) {
+        checkNotNull(canonicalType);
+        checkArgument(canonicalType.hasValue());
 
-        return getParts(theCanonicalType.getValue());
+        return getParts(canonicalType.getValue());
     }
 
-    public static CanonicalParts getParts(String theCanonical) {
-        checkNotNull(theCanonical);
+    public static CanonicalParts getParts(String canonical) {
+        checkNotNull(canonical);
 
-        String url = getUrl(theCanonical);
-        String id = getIdPart(theCanonical);
-        String resourceType = getResourceType(theCanonical);
-        String version = getVersion(theCanonical);
-        String fragment = getFragment(theCanonical);
+        String url = getUrl(canonical);
+        String id = getIdPart(canonical);
+        String resourceType = getResourceType(canonical);
+        String version = getVersion(canonical);
+        String fragment = getFragment(canonical);
         return new CanonicalParts(url, id, resourceType, version, fragment);
     }
 
-    private static int calculateLastIndex(String theCanonical) {
-        int lastIndexOfBar = theCanonical.lastIndexOf("|");
-        int lastIndexOfHash = theCanonical.lastIndexOf("#");
+    private static int calculateLastIndex(String canonical) {
+        int lastIndexOfBar = canonical.lastIndexOf("|");
+        int lastIndexOfHash = canonical.lastIndexOf("#");
 
-        int lastIndex = theCanonical.length();
+        int lastIndex = canonical.length();
         int mul = lastIndexOfBar * lastIndexOfHash;
         if (mul > 1) {
             lastIndex = Math.min(lastIndexOfBar, lastIndexOfHash);

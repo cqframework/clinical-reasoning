@@ -67,8 +67,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <!-- <failOnWarning>true</failOnWarning> -->
+                        <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                            <arg>-XDcompilePolicy=simple</arg>
+                            <!-- TODO: Ramp up error prone checkts to include warnings as well -->
+                            <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
+                        </compilerArgs>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>info.picocli</groupId>
@@ -82,19 +88,6 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>compile</id>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                            <configuration>
-                                <compilerArgs>
-                                    <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
-                                </compilerArgs>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

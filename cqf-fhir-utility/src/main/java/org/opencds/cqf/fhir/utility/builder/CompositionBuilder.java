@@ -9,159 +9,166 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Enumerations.CompositionStatus;
 
-public class CompositionBuilder<T extends IDomainResource> extends DomainResourceBuilder<CompositionBuilder<T>, T> {
+public class CompositionBuilder<T extends IDomainResource> extends BaseDomainResourceBuilder<CompositionBuilder<T>, T> {
 
-    private String myStatus;
-    private String myTitle;
-    private CodeableConceptSettings myType;
-    private String mySubject;
-    private String myAuthor;
-    private String myCustodian;
+    private String status;
+    private String title;
+    private CodeableConceptSettings type;
+    private String subject;
+    private String author;
+    private String custodian;
 
-    private Date myDate = new Date();
+    private Date date = new Date();
 
-    public CompositionBuilder(Class<T> theResourceClass) {
-        super(theResourceClass);
+    public CompositionBuilder(Class<T> resourceClass) {
+        super(resourceClass);
     }
 
-    public CompositionBuilder(Class<T> theResourceClass, String theId) {
-        super(theResourceClass, theId);
+    public CompositionBuilder(Class<T> resourceClass, String id) {
+        super(resourceClass, id);
     }
 
     public CompositionBuilder(
-            Class<T> theResourceClass,
-            String theId,
-            CodeableConceptSettings theType,
-            String theStatus,
-            String theAuthor,
-            String theTitle) {
-        this(theResourceClass, theId);
-        checkNotNull(theType, theStatus, theAuthor, theTitle);
+            Class<T> resourceClass,
+            String id,
+            CodeableConceptSettings type,
+            String status,
+            String author,
+            String title) {
+        this(resourceClass, id);
+        checkNotNull(type);
+        checkNotNull(status);
+        checkNotNull(author);
+        checkNotNull(title);
 
-        myType = theType;
-        myStatus = theStatus;
-        myAuthor = theAuthor;
-        myTitle = theTitle;
+        this.type = type;
+        this.status = status;
+        this.author = author;
+        this.title = title;
     }
 
-    public CompositionBuilder<T> withStatus(String theStatus) {
-        checkNotNull(theStatus);
+    public CompositionBuilder<T> withStatus(String status) {
+        checkNotNull(status);
 
-        myStatus = theStatus;
+        this.status = status;
 
         return this;
     }
 
-    public CompositionBuilder<T> withTitle(String theTitle) {
-        checkNotNull(theTitle);
+    public CompositionBuilder<T> withTitle(String title) {
+        checkNotNull(title);
 
-        myTitle = theTitle;
-
-        return this;
-    }
-
-    public CompositionBuilder<T> withType(CodeableConceptSettings theType) {
-        checkNotNull(theType);
-
-        myType = theType;
+        this.title = title;
 
         return this;
     }
 
-    public CompositionBuilder<T> withDate(Date theDate) {
-        checkNotNull(theDate);
+    public CompositionBuilder<T> withType(CodeableConceptSettings type) {
+        checkNotNull(type);
 
-        myDate = theDate;
-
-        return this;
-    }
-
-    public CompositionBuilder<T> withSubject(String theSubject) {
-        mySubject = ensurePatientReference(theSubject);
+        this.type = type;
 
         return this;
     }
 
-    public CompositionBuilder<T> withAuthor(String theAuthor) {
-        checkNotNull(theAuthor);
-        checkArgument(theAuthor.startsWith("Practitioner")
-                || theAuthor.startsWith("PractitionerRole")
-                || theAuthor.startsWith("Device")
-                || theAuthor.startsWith("Patient")
-                || theAuthor.startsWith("RelatedPerson")
-                || theAuthor.startsWith("Organization"));
-        myAuthor = theAuthor;
+    public CompositionBuilder<T> withDate(Date date) {
+        checkNotNull(date);
+
+        this.date = date;
 
         return this;
     }
 
-    public CompositionBuilder<T> withCustodian(String theCustodian) {
-        myCustodian = ensureOrganizationReference(theCustodian);
+    public CompositionBuilder<T> withSubject(String subject) {
+        this.subject = ensurePatientReference(subject);
+
+        return this;
+    }
+
+    public CompositionBuilder<T> withAuthor(String author) {
+        checkNotNull(author);
+        checkArgument(author.startsWith("Practitioner")
+                || author.startsWith("PractitionerRole")
+                || author.startsWith("Device")
+                || author.startsWith("Patient")
+                || author.startsWith("RelatedPerson")
+                || author.startsWith("Organization"));
+        this.author = author;
+
+        return this;
+    }
+
+    public CompositionBuilder<T> withCustodian(String custodian) {
+        this.custodian = ensureOrganizationReference(custodian);
 
         return this;
     }
 
     @Override
     public T build() {
-        checkNotNull(myType, myStatus, myAuthor, myTitle);
-        checkArgument(!myType.getCodingSettings().isEmpty()
-                && myType.getCodingSettings().size() == 1);
+        checkNotNull(type);
+        checkNotNull(status);
+        checkNotNull(author);
+        checkNotNull(title);
+
+        checkArgument(
+                !type.getCodingSettings().isEmpty() && type.getCodingSettings().size() == 1);
 
         return super.build();
     }
 
     private CodingSettings getTypeSetting() {
-        return myType.getCodingSettingsArray()[0];
+        return type.getCodingSettingsArray()[0];
     }
 
     @Override
-    protected void initializeDstu3(T theResource) {
-        super.initializeDstu3(theResource);
-        org.hl7.fhir.dstu3.model.Composition composition = (org.hl7.fhir.dstu3.model.Composition) theResource;
+    protected void initializeDstu3(T resource) {
+        super.initializeDstu3(resource);
+        org.hl7.fhir.dstu3.model.Composition composition = (org.hl7.fhir.dstu3.model.Composition) resource;
 
         composition
-                .setDate(myDate)
+                .setDate(date)
                 .setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
                         .setSystem(getIdentifier().getKey())
                         .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.dstu3.model.Composition.CompositionStatus.valueOf(myStatus))
-                .setSubject(new org.hl7.fhir.dstu3.model.Reference(mySubject))
-                .setTitle(myTitle)
+                .setStatus(org.hl7.fhir.dstu3.model.Composition.CompositionStatus.valueOf(status))
+                .setSubject(new org.hl7.fhir.dstu3.model.Reference(subject))
+                .setTitle(title)
                 .setType(new org.hl7.fhir.dstu3.model.CodeableConcept()
                         .addCoding(new org.hl7.fhir.dstu3.model.Coding()
                                 .setSystem(getTypeSetting().getSystem())
                                 .setCode(getTypeSetting().getCode())
                                 .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.dstu3.model.Reference(myAuthor))
-                .setCustodian(new org.hl7.fhir.dstu3.model.Reference(myCustodian));
+                .addAuthor(new org.hl7.fhir.dstu3.model.Reference(author))
+                .setCustodian(new org.hl7.fhir.dstu3.model.Reference(custodian));
     }
 
     @Override
-    protected void initializeR4(T theResource) {
-        super.initializeR4(theResource);
-        org.hl7.fhir.r4.model.Composition composition = (org.hl7.fhir.r4.model.Composition) theResource;
+    protected void initializeR4(T resource) {
+        super.initializeR4(resource);
+        org.hl7.fhir.r4.model.Composition composition = (org.hl7.fhir.r4.model.Composition) resource;
 
         composition
-                .setDate(myDate)
+                .setDate(date)
                 .setIdentifier(new org.hl7.fhir.r4.model.Identifier()
                         .setSystem(getIdentifier().getKey())
                         .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.r4.model.Composition.CompositionStatus.valueOf(myStatus))
-                .setSubject(new org.hl7.fhir.r4.model.Reference(mySubject))
-                .setTitle(myTitle)
+                .setStatus(org.hl7.fhir.r4.model.Composition.CompositionStatus.valueOf(status))
+                .setSubject(new org.hl7.fhir.r4.model.Reference(subject))
+                .setTitle(title)
                 .setType(new org.hl7.fhir.r4.model.CodeableConcept()
                         .addCoding(new org.hl7.fhir.r4.model.Coding()
                                 .setSystem(getTypeSetting().getSystem())
                                 .setCode(getTypeSetting().getCode())
                                 .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.r4.model.Reference(myAuthor))
-                .setCustodian(new org.hl7.fhir.r4.model.Reference(myCustodian));
+                .addAuthor(new org.hl7.fhir.r4.model.Reference(author))
+                .setCustodian(new org.hl7.fhir.r4.model.Reference(custodian));
     }
 
     @Override
-    protected void initializeR5(T theResource) {
-        super.initializeR5(theResource);
-        org.hl7.fhir.r5.model.Composition composition = (org.hl7.fhir.r5.model.Composition) theResource;
+    protected void initializeR5(T resource) {
+        super.initializeR5(resource);
+        org.hl7.fhir.r5.model.Composition composition = (org.hl7.fhir.r5.model.Composition) resource;
         List<org.hl7.fhir.r5.model.Identifier> r5Identifiers = new ArrayList<>();
         org.hl7.fhir.r5.model.Identifier r5Identifier = new org.hl7.fhir.r5.model.Identifier();
         r5Identifier
@@ -169,20 +176,20 @@ public class CompositionBuilder<T extends IDomainResource> extends DomainResourc
                 .setValue(getIdentifier().getValue());
         r5Identifiers.add(r5Identifier);
         List<org.hl7.fhir.r5.model.Reference> r5References = new ArrayList<>();
-        org.hl7.fhir.r5.model.Reference r5Reference = new org.hl7.fhir.r5.model.Reference(mySubject);
+        org.hl7.fhir.r5.model.Reference r5Reference = new org.hl7.fhir.r5.model.Reference(subject);
         r5References.add(r5Reference);
         composition
-                .setDate(myDate)
+                .setDate(date)
                 .setIdentifier(r5Identifiers)
-                .setStatus(CompositionStatus.valueOf(myStatus))
+                .setStatus(CompositionStatus.valueOf(status))
                 .setSubject(r5References)
-                .setTitle(myTitle)
+                .setTitle(title)
                 .setType(new org.hl7.fhir.r5.model.CodeableConcept()
                         .addCoding(new org.hl7.fhir.r5.model.Coding()
                                 .setSystem(getTypeSetting().getSystem())
                                 .setCode(getTypeSetting().getCode())
                                 .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.r5.model.Reference(myAuthor))
-                .setCustodian(new org.hl7.fhir.r5.model.Reference(myCustodian));
+                .addAuthor(new org.hl7.fhir.r5.model.Reference(author))
+                .setCustodian(new org.hl7.fhir.r5.model.Reference(custodian));
     }
 }

@@ -360,6 +360,7 @@
                     </dependencies>
                     <executions>
                         <execution>
+                            <phase>validate</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -388,11 +389,12 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <!-- <failOnWarning>true</failOnWarning> -->
+                        <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-XDcompilePolicy=simple</arg>
-                            <arg>-Xplugin:ErrorProne</arg>
+                            <!-- TODO: Ramp up error prone checkts to include warnings as well -->
+                            <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
                         </compilerArgs>
                         <annotationProcessorPaths>
                             <path>

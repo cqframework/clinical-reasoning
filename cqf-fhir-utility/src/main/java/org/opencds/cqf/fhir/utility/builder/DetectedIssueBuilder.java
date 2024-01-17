@@ -13,7 +13,8 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueEvidenceComponent;
 import org.hl7.fhir.r5.model.DetectedIssue;
 
-public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResourceBuilder<DetectedIssueBuilder<T>, T> {
+public class DetectedIssueBuilder<T extends IDomainResource>
+        extends BaseDomainResourceBuilder<DetectedIssueBuilder<T>, T> {
 
     private String status;
     private CodeableConceptSettings c;
@@ -59,16 +60,16 @@ public class DetectedIssueBuilder<T extends IDomainResource> extends DomainResou
         return this;
     }
 
-    public DetectedIssueBuilder<T> withCode(CodeableConceptSettings theCode) {
-        checkNotNull(theCode);
+    public DetectedIssueBuilder<T> withCode(CodeableConceptSettings code) {
+        checkNotNull(code);
 
-        c = theCode;
+        c = code;
 
         return this;
     }
 
-    public DetectedIssueBuilder<T> withPatient(String thePatient) {
-        patient = ensurePatientReference(thePatient);
+    public DetectedIssueBuilder<T> withPatient(String patient) {
+        this.patient = ensurePatientReference(patient);
 
         return this;
     }

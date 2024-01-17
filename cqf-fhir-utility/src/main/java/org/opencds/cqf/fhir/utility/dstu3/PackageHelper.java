@@ -173,8 +173,8 @@ public class PackageHelper {
     }
 
     public static void addRelatedArtifacts(
-            Bundle bundle, List<RelatedArtifact> theArtifacts, Repository repository, boolean isPut) {
-        for (var artifact : theArtifacts) {
+            Bundle bundle, List<RelatedArtifact> artifacts, Repository repository, boolean isPut) {
+        for (var artifact : artifacts) {
             if (artifact.getType().equals(RelatedArtifactType.DEPENDSON) && artifact.hasResource()) {
                 try {
                     var canonical = artifact.getResource().getReference();

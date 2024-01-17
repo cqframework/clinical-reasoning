@@ -36,29 +36,29 @@ public class Parameters {
     /**
      * Method to create parameters for r5
      *
-     * @param theId IdType of measure
+     * @param id IdType of measure
      * @param parts Parameter r5 components
      * @return parameters
      */
     public static org.hl7.fhir.r5.model.Parameters parameters(
-            IdType theId, org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(theId);
+            IdType id, org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent... parts) {
+        checkNotNull(id);
         org.hl7.fhir.r5.model.Parameters p = parameters(parts);
-        p.setId(theId);
+        p.setId(id);
         return p;
     }
 
     /**
      * Method to create a parameter for r5
      *
-     * @param theIdPart String representing the Id of measure
+     * @param idPart String representing the Id of measure
      * @param parts Parameter r5 components
      * @return parameters
      */
     public static org.hl7.fhir.r5.model.Parameters parameters(
-            String theIdPart, org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(theIdPart);
-        return parameters((IdType) Ids.newId(org.hl7.fhir.r5.model.Parameters.class, theIdPart), parts);
+            String idPart, org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent... parts) {
+        checkNotNull(idPart);
+        return parameters((IdType) Ids.newId(org.hl7.fhir.r5.model.Parameters.class, idPart), parts);
     }
 
     /**

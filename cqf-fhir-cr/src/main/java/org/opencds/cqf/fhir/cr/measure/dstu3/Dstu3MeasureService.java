@@ -31,9 +31,9 @@ public class Dstu3MeasureService {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
-    public Dstu3MeasureService(Repository theRepository, MeasureEvaluationOptions theMeasureEvaluationOptions) {
-        repository = theRepository;
-        measureEvaluationOptions = theMeasureEvaluationOptions;
+    public Dstu3MeasureService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+        this.repository = repository;
+        this.measureEvaluationOptions = measureEvaluationOptions;
     }
 
     public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
@@ -80,49 +80,43 @@ public class Dstu3MeasureService {
      * Reasoning Module</a>. This implementation aims to be compatible with the CQF
      * IG.
      *
-     * @param theId                  the Id of the Measure to evaluate
-     * @param thePeriodStart         The start of the reporting period
-     * @param thePeriodEnd           The end of the reporting period
-     * @param theReportType          The type of MeasureReport to generate
-     * @param thePractitioner        the practitioner to use for the evaluation
-     * @param theLastReceivedOn      the date the results of this measure were last
+     * @param id                  the Id of the Measure to evaluate
+     * @param periodStart         The start of the reporting period
+     * @param periodEnd           The end of the reporting period
+     * @param reportType          The type of MeasureReport to generate
+     * @param practitioner        the practitioner to use for the evaluation
+     * @param lastReceivedOn      the date the results of this measure were last
      *                               received.
-     * @param theProductLine         the productLine (e.g. Medicare, Medicaid, etc) to use
+     * @param productLine         the productLine (e.g. Medicare, Medicaid, etc) to use
      *                               for the evaluation. This is a non-standard parameter.
-     * @param theAdditionalData      the data bundle containing additional data
-     * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
+     * @param additionalData      the data bundle containing additional data
+     * @param terminologyEndpoint the endpoint of terminology services for your measure valuesets
      * @return the calculated MeasureReport
      */
     public MeasureReport evaluateMeasure(
-            IdType theId,
-            String thePeriodStart,
-            String thePeriodEnd,
-            String theReportType,
-            String theSubject,
-            String thePractitioner,
-            String theLastReceivedOn,
-            String theProductLine,
-            Bundle theAdditionalData,
+            IdType id,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            String subject,
+            String practitioner,
+            String lastReceivedOn,
+            String productLine,
+            Bundle additionalData,
             Parameters parameters,
-            Endpoint theTerminologyEndpoint) {
+            Endpoint terminologyEndpoint) {
 
         ensureSupplementalDataElementSearchParameter();
 
         var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
 
         MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-                theId,
-                thePeriodStart,
-                thePeriodEnd,
-                theReportType,
-                Collections.singletonList(theSubject),
-                theAdditionalData,
-                parameters);
+                id, periodStart, periodEnd, reportType, Collections.singletonList(subject), additionalData, parameters);
 
-        if (theProductLine != null) {
+        if (productLine != null) {
             Extension ext = new Extension();
             ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
-            ext.setValue(new StringType(theProductLine));
+            ext.setValue(new StringType(productLine));
             report.addExtension(ext);
         }
 

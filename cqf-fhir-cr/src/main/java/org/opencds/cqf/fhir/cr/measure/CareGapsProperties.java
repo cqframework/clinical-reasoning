@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure;
 
 public class CareGapsProperties {
-    private boolean myThreadedCareGapsEnabled = true;
+    private boolean threadedCareGapsEnabled = true;
     /**
      * Implements the reporter element of the
      * <a href= "https://www.hl7.org/fhir/measurereport.html">MeasureReport</a> FHIR Resource. This is
@@ -10,7 +10,7 @@ public class CareGapsProperties {
      * profile found in the <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci
      * DEQM FHIR Implementation Guide</a>.
      **/
-    private String myCareGapsReporter;
+    private String careGapsReporter;
     /**
      * Implements the author element of the
      * <a href= "http://www.hl7.org/fhir/composition.html">Composition</a> FHIR Resource. This is
@@ -19,44 +19,39 @@ public class CareGapsProperties {
      * profile found in the <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci
      * DEQM FHIR Implementation Guide</a>.
      **/
-    private String myFhirBaseUrl;
+    private String fhirBaseUrl;
 
-    private String myCareGapsCompositionSectionAuthor;
+    private String careGapsCompositionSectionAuthor;
 
-    // care gaps
-    public boolean getThreadedCareGapsEnabled() {
-        return myThreadedCareGapsEnabled;
-    }
-
-    public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
-        myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
+    public void setThreadedCareGapsEnabled(boolean threadedCareGapsEnabled) {
+        this.threadedCareGapsEnabled = threadedCareGapsEnabled;
     }
 
     public boolean isThreadedCareGapsEnabled() {
-        return myThreadedCareGapsEnabled;
+        return threadedCareGapsEnabled;
     }
 
     public String getMyFhirBaseUrl() {
-        return myFhirBaseUrl;
+        return fhirBaseUrl;
     }
 
-    public void setMyFhirBaseUrl(String theFhirBaseUrl) {
-        myFhirBaseUrl = theFhirBaseUrl;
+    public void setMyFhirBaseUrl(String fhirBaseUrl) {
+        this.fhirBaseUrl = fhirBaseUrl;
     }
 
     public String getCareGapsReporter() {
-        return myCareGapsReporter;
+        return careGapsReporter;
     }
 
-    public void setCareGapsReporter(String theCareGapsReporter) {
-        myCareGapsReporter = theCareGapsReporter;
+    public void setCareGapsReporter(String careGapsReporter) {
+        this.careGapsReporter = careGapsReporter;
     }
 
     public String getCareGapsCompositionSectionAuthor() {
-        return myCareGapsCompositionSectionAuthor;
+        return careGapsCompositionSectionAuthor;
     }
 
-    public void setCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {
-        myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
+    public void setCareGapsCompositionSectionAuthor(String careGapsCompositionSectionAuthor) {
+        this.careGapsCompositionSectionAuthor = careGapsCompositionSectionAuthor;
     }
 }

@@ -345,6 +345,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <?m2e execute onConfiguration,onIncremental?>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.3.1</version>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.fhir</groupId>
@@ -66,28 +67,60 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <failOnWarning>true</failOnWarning>
-                        <showWarnings>true</showWarnings>
-                        <compilerArgs>
-                            <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
-                            <arg>-XDcompilePolicy=simple</arg>
-                            <!-- TODO: Ramp up error prone checkts to include warnings as well -->
-                            <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
-                        </compilerArgs>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>info.picocli</groupId>
-                                <artifactId>picocli-codegen</artifactId>
-                                <version>${picocli.version}</version>
-                            </path>
-                            <path>
-                                <groupId>com.google.errorprone</groupId>
-                                <artifactId>error_prone_core</artifactId>
-                                <version>2.24.1</version>
-                            </path>
-                        </annotationProcessorPaths>
-                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>compile</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <failOnWarning>true</failOnWarning>
+                                <showWarnings>true</showWarnings>
+                                <compilerArgs>
+                                    <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                                    <arg>-XDcompilePolicy=simple</arg>
+                                    <!-- TODO: Ramp up error prone checkts to include warnings as
+                                    well -->
+                                    <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
+                                </compilerArgs>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>info.picocli</groupId>
+                                        <artifactId>picocli-codegen</artifactId>
+                                        <version>${picocli.version}</version>
+                                    </path>
+                                    <path>
+                                        <groupId>com.google.errorprone</groupId>
+                                        <artifactId>error_prone_core</artifactId>
+                                        <version>2.24.1</version>
+                                    </path>
+                                </annotationProcessorPaths>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test-compile</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <failOnWarning>true</failOnWarning>
+                                <showWarnings>true</showWarnings>
+                                <compilerArgs>
+                                    <arg>-XDcompilePolicy=simple</arg>
+                                    <!-- TODO: Ramp up error prone checkts to include warnings as
+                                    well -->
+                                    <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
+                                </compilerArgs>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>com.google.errorprone</groupId>
+                                        <artifactId>error_prone_core</artifactId>
+                                        <version>2.24.1</version>
+                                    </path>
+                                </annotationProcessorPaths>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -116,7 +149,9 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!--This is not a library module, it's a CLI app, so we don't need to be compliant with Android here -->
+                <!--This
+                is not a library module, it's a CLI app, so we don't need to be compliant with
+                Android here -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>animal-sniffer-maven-plugin</artifactId>

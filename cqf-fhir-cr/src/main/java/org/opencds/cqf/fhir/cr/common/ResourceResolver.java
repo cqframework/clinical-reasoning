@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class ResourceResolver {
-    final String INVALID_RESOURCE_TYPE = "The resource passed in was not a valid instance of %s.class";
+    final String invalidResourceType = "The resource passed in was not a valid instance of %s.class";
     final String resourceType;
     final Repository repository;
     final Class<? extends IBaseResource> clazz;
@@ -65,7 +65,7 @@ public class ResourceResolver {
 
         requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(INVALID_RESOURCE_TYPE, resourceType))
+        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
                 .orElse(null);
     }
 
@@ -75,7 +75,7 @@ public class ResourceResolver {
 
         requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(INVALID_RESOURCE_TYPE, resourceType))
+        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
                 .orElse(null);
     }
 }

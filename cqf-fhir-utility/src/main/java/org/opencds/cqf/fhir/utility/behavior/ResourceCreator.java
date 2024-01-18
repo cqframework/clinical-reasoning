@@ -9,39 +9,39 @@ import org.opencds.cqf.fhir.utility.Ids;
 
 public interface ResourceCreator extends FhirContextUser {
     @SuppressWarnings("unchecked")
-    default <T extends IBaseResource, I extends IIdType> T newResource(I theId) {
-        checkNotNull(theId, "theId is required");
-        checkArgument(theId.getResourceType() != null, "theId must have a resourceType");
+    default <T extends IBaseResource, I extends IIdType> T newResource(I id) {
+        checkNotNull(id, "id is required");
+        checkArgument(id.getResourceType() != null, "id must have a resourceType");
 
         IBaseResource newResource = this.getFhirContext()
-                .getResourceDefinition(theId.getResourceType())
+                .getResourceDefinition(id.getResourceType())
                 .newInstance();
-        newResource.setId(theId);
+        newResource.setId(id);
         return (T) newResource;
     }
 
-    default <T extends IBaseResource> T newResource(Class<T> theResourceClass, String theIdPart) {
-        checkNotNull(theResourceClass);
-        checkNotNull(theIdPart);
+    default <T extends IBaseResource> T newResource(Class<T> resourceClass, String idPart) {
+        checkNotNull(resourceClass);
+        checkNotNull(idPart);
 
-        T newResource = newResource(theResourceClass);
-        IIdType id = Ids.newId(getFhirContext(), newResource.fhirType(), theIdPart);
+        T newResource = newResource(resourceClass);
+        IIdType id = Ids.newId(getFhirContext(), newResource.fhirType(), idPart);
         newResource.setId(id);
 
         return newResource;
     }
 
     @SuppressWarnings("unchecked")
-    default <T extends IBaseResource> T newResource(Class<T> theResourceClass) {
-        checkNotNull(theResourceClass);
+    default <T extends IBaseResource> T newResource(Class<T> resourceClass) {
+        checkNotNull(resourceClass);
 
-        return (T) this.getFhirContext().getResourceDefinition(theResourceClass).newInstance();
+        return (T) this.getFhirContext().getResourceDefinition(resourceClass).newInstance();
     }
 
     @SuppressWarnings("unchecked")
-    default <T extends IBaseResource> T newResource(String theResourceType) {
-        checkNotNull(theResourceType);
+    default <T extends IBaseResource> T newResource(String resourceType) {
+        checkNotNull(resourceType);
 
-        return (T) this.getFhirContext().getResourceDefinition(theResourceType).newInstance();
+        return (T) this.getFhirContext().getResourceDefinition(resourceType).newInstance();
     }
 }

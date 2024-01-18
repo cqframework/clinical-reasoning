@@ -372,7 +372,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected Reference getEvaluatedResourceReference(String id) {
-        return this.getEvaluatedResourceReferences().computeIfAbsent(id, Reference::new);
+        return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {

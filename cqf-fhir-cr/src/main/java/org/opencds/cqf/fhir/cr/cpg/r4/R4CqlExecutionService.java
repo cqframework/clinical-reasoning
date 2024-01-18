@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.cpg.BaseCqlExecutionProcessor;
+import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4CqlExecutionService {
@@ -42,7 +42,7 @@ public class R4CqlExecutionService {
             Endpoint terminologyEndpoint,
             String content) {
 
-        var baseCqlExecutionProcessor = new BaseCqlExecutionProcessor();
+        var baseCqlExecutionProcessor = new CqlExecutionProcessor();
 
         if (prefetchData != null) {
             return parameters(part("invalid parameters", (OperationOutcome)

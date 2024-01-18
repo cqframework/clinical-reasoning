@@ -7,27 +7,27 @@ public enum CareGapsStatusCode {
     CLOSED_GAP("closed-gap"),
     NOT_APPLICABLE("not-applicable");
 
-    private final String myValue;
+    private final String value;
 
-    CareGapsStatusCode(final String theValue) {
-        myValue = theValue;
+    CareGapsStatusCode(final String value) {
+        this.value = value;
     }
 
     @Override
     public String toString() {
-        return myValue;
+        return value;
     }
 
     public String toDisplayString() {
-        if (myValue.equals("open-gap")) {
+        if (value.equals("open-gap")) {
             return "Open Gap";
         }
 
-        if (myValue.equals("closed-gap")) {
+        if (value.equals("closed-gap")) {
             return "Closed Gap";
         }
 
-        if (myValue.equals("not-applicable")) {
+        if (value.equals("not-applicable")) {
             return "Not Applicable";
         }
 

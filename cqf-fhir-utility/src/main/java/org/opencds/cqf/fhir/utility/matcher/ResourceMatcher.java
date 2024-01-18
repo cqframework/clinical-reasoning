@@ -51,13 +51,13 @@ public interface ResourceMatcher {
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            SPPathKey other = (SPPathKey) obj;
+            SPPathKey or = (SPPathKey) obj;
             if (resourceType == null) {
-                if (other.resourceType != null) return false;
-            } else if (!resourceType.equals(other.resourceType)) return false;
+                if (or.resourceType != null) return false;
+            } else if (!resourceType.equals(or.resourceType)) return false;
             if (resourcePath == null) {
-                if (other.resourcePath != null) return false;
-            } else if (!resourcePath.equals(other.resourcePath)) return false;
+                if (or.resourcePath != null) return false;
+            } else if (!resourcePath.equals(or.resourcePath)) return false;
             return true;
         }
     }
@@ -247,11 +247,11 @@ public interface ResourceMatcher {
                 + pathResult.getClass().getSimpleName());
     }
 
-    default boolean matchesDateBounds(DateRangeParam theResourceRange, DateRangeParam theParamRange) {
-        Date resourceLowerBound = theResourceRange.getLowerBoundAsInstant();
-        Date resourceUpperBound = theResourceRange.getUpperBoundAsInstant();
-        Date paramLowerBound = theParamRange.getLowerBoundAsInstant();
-        Date paramUpperBound = theParamRange.getUpperBoundAsInstant();
+    default boolean matchesDateBounds(DateRangeParam resourceRange, DateRangeParam paramRange) {
+        Date resourceLowerBound = resourceRange.getLowerBoundAsInstant();
+        Date resourceUpperBound = resourceRange.getUpperBoundAsInstant();
+        Date paramLowerBound = paramRange.getLowerBoundAsInstant();
+        Date paramUpperBound = paramRange.getUpperBoundAsInstant();
         if (paramLowerBound == null && paramUpperBound == null) {
             return false;
         } else {

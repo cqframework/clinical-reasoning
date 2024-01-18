@@ -15,10 +15,10 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 
-public class LibraryEngineTests {
+class LibraryEngineTests {
 
     @Test
-    public void testFhirPath() {
+    void testFhirPath() {
         var patientId = "Patient/Patient1";
         var repository = TestRepositoryFactory.createRepository(FhirContext.forR4Cached(), this.getClass());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());

@@ -6,14 +6,14 @@ public class CodingSettings {
     private String code;
     private String display;
 
-    public CodingSettings(String theSystem, String theCode) {
-        this(theSystem, theCode, null);
+    public CodingSettings(String system, String code) {
+        this(system, code, null);
     }
 
-    public CodingSettings(String theSystem, String theCode, String theDisplay) {
-        this.system = theSystem;
-        this.code = theCode;
-        this.display = theDisplay;
+    public CodingSettings(String system, String code, String display) {
+        this.system = system;
+        this.code = code;
+        this.display = display;
     }
 
     public String getSystem() {

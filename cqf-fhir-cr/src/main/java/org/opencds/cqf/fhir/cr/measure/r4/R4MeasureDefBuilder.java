@@ -39,7 +39,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         this.enforceIds = enforceIds;
     }
 
-    public final String CQFM_SCORING_EXT_URL = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
+    public static final String CQFM_SCORING_EXT_URL =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
 
     @Override
     public MeasureDef build(Measure measure) {

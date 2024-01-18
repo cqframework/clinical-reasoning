@@ -14,9 +14,9 @@ import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
-public class ClientsTest {
+class ClientsTest {
     @Test
-    public void testCreateClient() {
+    void testCreateClient() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
 
         assertNotNull(client);
@@ -24,7 +24,7 @@ public class ClientsTest {
     }
 
     @Test
-    public void testRegisterAuth() {
+    void testRegisterAuth() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         Clients.registerBasicAuth(client, "user", "password");
 
@@ -35,7 +35,7 @@ public class ClientsTest {
     }
 
     @Test
-    public void testRegisterHeaders() {
+    void testRegisterHeaders() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         Clients.registerHeaders(client, "Basic: XYZ123");
 
@@ -46,7 +46,7 @@ public class ClientsTest {
     }
 
     @Test
-    public void testRejectInvalidHeaders() {
+    void testRejectInvalidHeaders() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         assertThrows(IllegalArgumentException.class, () -> {
             Clients.registerHeaders(client, "BasicXYZ123");
@@ -54,7 +54,7 @@ public class ClientsTest {
     }
 
     @Test
-    public void testClientForEndpoint() {
+    void testClientForEndpoint() {
         Endpoint endpoint = new Endpoint();
         endpoint.setAddress("http://test.com");
 

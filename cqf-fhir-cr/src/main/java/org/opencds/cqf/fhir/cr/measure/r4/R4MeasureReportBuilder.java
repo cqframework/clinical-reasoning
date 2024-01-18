@@ -125,12 +125,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         public Reference addSupplementalDataReference(String id) {
             validateReference(id);
-            return this.supplementalDataReferences().computeIfAbsent(id, Reference::new);
+            return this.supplementalDataReferences().computeIfAbsent(id, x -> new Reference(id));
         }
 
         public Reference addEvaluatedResourceReference(String id) {
             validateReference(id);
-            return this.evaluatedResourceReferences().computeIfAbsent(id, Reference::new);
+            return this.evaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
         }
 
         public boolean hasEvaluatedResource(String id) {

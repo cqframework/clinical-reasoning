@@ -110,15 +110,13 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return members;
     }
 
-    public void addPractitionerSubjectIds(String thePractitioner, Repository repository, List<String> patients) {
+    public void addPractitionerSubjectIds(String practitioner, Repository repository, List<String> patients) {
         Map<String, List<IQueryParameterType>> map = new HashMap<>();
 
         map.put(
                 "general-practitioner",
                 Collections.singletonList(new ReferenceParam(
-                        thePractitioner.startsWith("Practitioner/")
-                                ? thePractitioner
-                                : "Practitioner/" + thePractitioner)));
+                        practitioner.startsWith("Practitioner/") ? practitioner : "Practitioner/" + practitioner)));
 
         var bundle = repository.search(Bundle.class, Patient.class, map);
         var iterator = new BundleIterator<>(repository, bundle);

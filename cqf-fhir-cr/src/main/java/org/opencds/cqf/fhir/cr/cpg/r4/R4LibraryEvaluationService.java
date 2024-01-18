@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.cpg.BaseCqlExecutionProcessor;
+import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4LibraryEvaluationService {
@@ -30,7 +30,7 @@ public class R4LibraryEvaluationService {
     }
 
     public Parameters evaluate(
-            IdType theId,
+            IdType id,
             String subject,
             List<String> expression,
             Parameters parameters,
@@ -40,7 +40,7 @@ public class R4LibraryEvaluationService {
             Endpoint contentEndpoint,
             Endpoint terminologyEndpoint) {
 
-        var baseCqlExecutionProcessor = new BaseCqlExecutionProcessor();
+        var baseCqlExecutionProcessor = new CqlExecutionProcessor();
 
         if (prefetchData != null) {
             return parameters(part("invalid parameters", (OperationOutcome)
@@ -51,7 +51,7 @@ public class R4LibraryEvaluationService {
             repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
-        var library = repository.read(Library.class, theId);
+        var library = repository.read(Library.class, id);
         var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, data);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);

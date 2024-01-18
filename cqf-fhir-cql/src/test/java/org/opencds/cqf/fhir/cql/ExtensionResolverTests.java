@@ -16,14 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-public class ExtensionResolverTests {
+class ExtensionResolverTests {
     private final String EXTENSION_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale";
     private final Expression expression =
             new Expression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
     private final Extension expressionExtension = new Extension(Constants.CQF_EXPRESSION, expression);
 
     @Test
-    public void testExtensionResolution() {
+    void testExtensionResolution() {
         var patientId = "Patient/Patient1";
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());

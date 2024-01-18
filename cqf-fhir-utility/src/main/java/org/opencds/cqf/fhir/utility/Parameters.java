@@ -40,17 +40,17 @@ public class Parameters {
     }
 
     /**
-     * Creates the appropriate parameters for a given FhirContext, IIDType, Ibase Parts
+     * Creates the appropriate parameters for a given FhirContext, IIDType, IBase Parts
      *
-     * @param theId an IIdType type
+     * @param id an IIdType type
      * @param fhirContext the FhirContext for fhir API
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameters
      */
-    public static IBaseParameters newParameters(FhirContext fhirContext, IIdType theId, IBase... parts) {
-        checkNotNull(theId);
+    public static IBaseParameters newParameters(FhirContext fhirContext, IIdType id, IBase... parts) {
+        checkNotNull(id);
         IBaseParameters newParameters = ParametersUtil.newInstance(fhirContext);
-        newParameters.setId(theId);
+        newParameters.setId(id);
         BaseRuntimeChildDefinition.IMutator mutator =
                 getParameterChild(fhirContext).getMutator();
         for (IBase part : parts) {
@@ -60,23 +60,23 @@ public class Parameters {
     }
 
     /**
-     * Creates the appropriate parameters for a given FhirContext, ID String, Ibase Parts
+     * Creates the appropriate parameters for a given FhirContext, ID String, IBase Parts
      *
-     * @param theId String represetnation of the ID to generate
+     * @param id String representation of the ID to generate
      * @param fhirContext the FhirContext for fhir API
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameters
      */
-    public static IBaseParameters newParameters(FhirContext fhirContext, String theId, IBase... parts) {
-        checkNotNull(theId);
-        IIdType id = (IIdType)
+    public static IBaseParameters newParameters(FhirContext fhirContext, String id, IBase... parts) {
+        checkNotNull(id);
+        IIdType newId = (IIdType)
                 Objects.requireNonNull(fhirContext.getElementDefinition("id")).newInstance();
-        id.setValue(theId);
-        return newParameters(fhirContext, id, parts);
+        newId.setValue(id);
+        return newParameters(fhirContext, newId, parts);
     }
 
     /**
-     * Creates the appropriate parameters for a given FhirContext and Ibase Parts
+     * Creates the appropriate parameters for a given FhirContext and IBase Parts
      *
      * @param fhirContext the FhirContext for fhir API
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
@@ -93,7 +93,7 @@ public class Parameters {
     }
 
     /**
-     * Creates new Ibase parts given FhirContext, part name to get, other Ibase Parts
+     * Creates new IBase parts given FhirContext, part name to get, other IBase Parts
      *
      * @param fhirContext the FhirContext for fhir API
      * @param name String representation of parts to add to parameters
@@ -117,8 +117,8 @@ public class Parameters {
     }
 
     /**
-     * Creates new Ibase parts given FhirContext, fhir element type, part name to get, Object
-     * instance, other Ibase Parts
+     * Creates new IBase parts given FhirContext, fhir element type, part name to get, Object
+     * instance, other IBase Parts
      *
      * @param fhirContext the FhirContext for fhir AP
      * @param type Element definition type I
@@ -138,8 +138,8 @@ public class Parameters {
     }
 
     /**
-     * Creates new Ibase parts given FhirContext, fhir element type, part name to get, Object
-     * instance, other Ibase Parts
+     * Creates new IBase parts given FhirContext, fhir element type, part name to get, Object
+     * instance, other IBase Parts
      *
      * @param fhirContext the FhirContext for fhir AP
      * @param typeName String representation of FhirElement definition type I
@@ -158,8 +158,8 @@ public class Parameters {
     }
 
     /**
-     * Creates new Ibase parts given FhirContext, fhir element type, part name to get, Object
-     * instance, other Ibase Parts
+     * Creates new IBase parts given FhirContext, fhir element type, part name to get, Object
+     * instance, other IBase Parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parts to add to parameters
@@ -175,7 +175,7 @@ public class Parameters {
     }
 
     /**
-     * method get string named parameter using fhircontext, Parameters, and name
+     * method get string named parameter using FhirContext, Parameters, and name
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -190,7 +190,7 @@ public class Parameters {
     }
 
     /**
-     * method get string named part from parameters using fhircontext, Parameters, and name
+     * method get string named part from parameters using FhirContext, Parameters, and name
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -204,13 +204,13 @@ public class Parameters {
     }
 
     /**
-     * method create base64binary part from parameters using fhircontext, Parameter name, value of
+     * method create base64binary part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value Name of part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new base64 binary part
      */
     public static IBase newBase64BinaryPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -218,13 +218,13 @@ public class Parameters {
     }
 
     /**
-     * method create boolean part from parameters using fhircontext, Parameter name, value of
+     * method create boolean part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new boolean part
      */
     public static IBase newBooleanPart(FhirContext fhirContext, String name, boolean value, IBase... parts) {
@@ -232,13 +232,13 @@ public class Parameters {
     }
 
     /**
-     * method create canonical part from parameters using fhircontext, Parameter name, value of
+     * method create canonical part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new canonical part
      */
     public static IBase newCanonicalPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -246,13 +246,13 @@ public class Parameters {
     }
 
     /**
-     * method create code part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create code part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new code part
      */
     public static IBase newCodePart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -260,13 +260,13 @@ public class Parameters {
     }
 
     /**
-     * method create date part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create date part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new date part
      */
     public static IBase newDatePart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -274,13 +274,13 @@ public class Parameters {
     }
 
     /**
-     * method create datetime part from parameters using fhircontext, Parameter name, value of
+     * method create datetime part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new datetime part
      */
     public static IBase newDateTimePart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -288,13 +288,13 @@ public class Parameters {
     }
 
     /**
-     * method create decimal part from parameters using fhircontext, Parameter name, value of
+     * method create decimal part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new decimal part
      */
     public static IBase newDecimalPart(FhirContext fhirContext, String name, double value, IBase... parts) {
@@ -302,13 +302,13 @@ public class Parameters {
     }
 
     /**
-     * method create ID part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create ID part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new ID part
      */
     public static IBase newIdPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -316,13 +316,13 @@ public class Parameters {
     }
 
     /**
-     * method create instant part from parameters using fhircontext, Parameter name, value of
+     * method create instant part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new instant part
      */
     public static IBase newInstantPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -330,13 +330,13 @@ public class Parameters {
     }
 
     /**
-     * method create integer part from parameters using fhircontext, Parameter name, value of
+     * method create integer part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new integer part
      */
     public static IBase newIntegerPart(FhirContext fhirContext, String name, int value, IBase... parts) {
@@ -344,13 +344,13 @@ public class Parameters {
     }
 
     /**
-     * method create integer base 64 part from parameters using fhircontext, Parameter name, value of
+     * method create integer base 64 part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new base64 integer part
      */
     public static IBase newInteger64Part(FhirContext fhirContext, String name, long value, IBase... parts) {
@@ -358,13 +358,13 @@ public class Parameters {
     }
 
     /**
-     * method create markdown part from parameters using fhircontext, Parameter name, value of
+     * method create markdown part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new markdown part
      */
     public static IBase newMarkdownPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -372,13 +372,13 @@ public class Parameters {
     }
 
     /**
-     * method create OID part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create OID part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new OID part
      */
     public static IBase newOidPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -386,13 +386,13 @@ public class Parameters {
     }
 
     /**
-     * method create postive int part from parameters using fhircontext, Parameter name, value of
+     * method create positive int part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new positive int part
      */
     public static IBase newPositiveIntPart(FhirContext fhirContext, String name, int value, IBase... parts) {
@@ -400,13 +400,13 @@ public class Parameters {
     }
 
     /**
-     * method create string part from parameters using fhircontext, Parameter name, value of
+     * method create string part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new string part
      */
     public static IBase newStringPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -414,13 +414,13 @@ public class Parameters {
     }
 
     /**
-     * method create time part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create time part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new time part
      */
     public static IBase newTimePart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -428,13 +428,13 @@ public class Parameters {
     }
 
     /**
-     * method create unsigned int part from parameters using fhircontext, Parameter name, value of
+     * method create unsigned int part from parameters using FhirContext, Parameter name, value of
      * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new unsigned int part
      */
     public static IBase newUnsignedIntPart(FhirContext fhirContext, String name, int value, IBase... parts) {
@@ -442,13 +442,13 @@ public class Parameters {
     }
 
     /**
-     * method create uri part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create uri part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new uri part
      */
     public static IBase newUriPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -456,13 +456,13 @@ public class Parameters {
     }
 
     /**
-     * method create url part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create url part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new url part
      */
     public static IBase newUrlPart(FhirContext fhirContext, String name, String value, IBase... parts) {
@@ -470,13 +470,13 @@ public class Parameters {
     }
 
     /**
-     * method create uuid part from parameters using fhircontext, Parameter name, value of parameter,
+     * method create uuid part from parameters using FhirContext, Parameter name, value of parameter,
      * parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
      * @param value part value
-     * @param parts Ibase type parameter parts
+     * @param parts IBase type parameter parts
      * @return new uuid part
      */
     public static IBase newUuidPart(FhirContext fhirContext, String name, String value, IBase... parts) {

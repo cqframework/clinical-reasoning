@@ -35,29 +35,29 @@ public class Parameters {
     /**
      * Method to create parameters for fhir r4
      *
-     * @param theId IdType of measure
+     * @param id IdType of measure
      * @param parts Parameter r4 components
      * @return parameters
      */
     public static org.hl7.fhir.r4.model.Parameters parameters(
-            IdType theId, org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(theId);
+            IdType id, org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent... parts) {
+        checkNotNull(id);
         org.hl7.fhir.r4.model.Parameters p = parameters(parts);
-        p.setId(theId);
+        p.setId(id);
         return p;
     }
 
     /**
      * Method to create parameters for fhir r4 model via submission of IdPart
      *
-     * @param theIdPart String representation of the Id used to create IDtype
+     * @param idPart String representation of the Id used to create IDtype
      * @param parts Parameter r4 components
      * @return parameters
      */
     public static org.hl7.fhir.r4.model.Parameters parameters(
-            String theIdPart, org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(theIdPart);
-        return parameters((IdType) Ids.newId(org.hl7.fhir.r4.model.Parameters.class, theIdPart), parts);
+            String idPart, org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent... parts) {
+        checkNotNull(idPart);
+        return parameters((IdType) Ids.newId(org.hl7.fhir.r4.model.Parameters.class, idPart), parts);
     }
 
     /**

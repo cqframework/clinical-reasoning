@@ -14,14 +14,13 @@ public interface ResourceLoader {
 
     Class<?> getRelativeClass();
 
-    default Object loadBundle(FhirContext context, String theLocation) {
-        IBaseBundle resource = (IBaseBundle) readResource(context, theLocation);
-        return resource;
+    default IBaseBundle loadBundle(FhirContext context, String location) {
+        return (IBaseBundle) readResource(context, location);
     }
 
-    default IBaseResource readResource(FhirContext context, String theLocation) {
-        String resourceString = stringFromResource(theLocation);
-        if (theLocation.endsWith("json")) {
+    default IBaseResource readResource(FhirContext context, String location) {
+        String resourceString = stringFromResource(location);
+        if (location.endsWith("json")) {
             return parseResource(context, "json", resourceString);
         } else {
             return parseResource(context, "xml", resourceString);
@@ -45,9 +44,9 @@ public interface ResourceLoader {
         return parser.parseResource(resourceString);
     }
 
-    default IBaseResource loadResource(FhirContext context, String theLocation) {
-        String resourceString = stringFromResource(theLocation);
-        if (theLocation.endsWith("json")) {
+    default IBaseResource loadResource(FhirContext context, String location) {
+        String resourceString = stringFromResource(location);
+        if (location.endsWith("json")) {
             return loadResource(context, "json", resourceString);
         } else {
             return loadResource(context, "xml", resourceString);
@@ -55,24 +54,23 @@ public interface ResourceLoader {
     }
 
     default IBaseResource loadResource(FhirContext context, String encoding, String resourceString) {
-        IBaseResource resource = parseResource(context, encoding, resourceString);
-        return resource;
+        return parseResource(context, encoding, resourceString);
     }
 
     @SuppressWarnings("java:S112")
-    default String stringFromResource(String theLocation) {
+    default String stringFromResource(String location) {
         InputStream is = null;
         try {
-            File f = new File(theLocation);
+            File f = new File(location);
             if (f.isFile()) {
-                // if (theLocation.startsWith(File.separator)) {
-                is = new FileInputStream(theLocation);
+                // if (location.startsWith(File.separator)) {
+                is = new FileInputStream(location);
             } else {
-                is = getRelativeClass().getResourceAsStream(theLocation);
+                is = getRelativeClass().getResourceAsStream(location);
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
+            throw new RuntimeException(String.format("Error loading resource from %s", location), e);
         }
     }
 }

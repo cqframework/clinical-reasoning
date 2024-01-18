@@ -13,13 +13,13 @@ public class FhirVersions {
      * Returns a FhirVersionEnum for a given BaseType
      *
      * @param <BaseType> an IBase type
-     * @param theBaseTypeClass the class of the resource to get the version for
-     * @return the FhirVersionEnum corresponding to the theBaseTypeClass
+     * @param baseTypeClass the class of the resource to get the version for
+     * @return the FhirVersionEnum corresponding to the baseTypeClass
      */
-    public static <BaseType extends IBase> FhirVersionEnum forClass(final Class<? extends BaseType> theBaseTypeClass) {
-        checkNotNull(theBaseTypeClass);
+    public static <BaseType extends IBase> FhirVersionEnum forClass(final Class<? extends BaseType> baseTypeClass) {
+        checkNotNull(baseTypeClass);
 
-        String packageName = theBaseTypeClass.getPackage().getName();
+        String packageName = baseTypeClass.getPackage().getName();
         if (packageName.contains("r5")) {
             return FhirVersionEnum.R5;
         } else if (packageName.contains("r4")) {
@@ -34,7 +34,7 @@ public class FhirVersions {
             return FhirVersionEnum.DSTU2;
         } else {
             throw new IllegalArgumentException(String.format(
-                    "Unable to determine FHIR version for IBaseResource type: %s", theBaseTypeClass.getName()));
+                    "Unable to determine FHIR version for IBaseResource type: %s", baseTypeClass.getName()));
         }
     }
 }

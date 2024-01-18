@@ -19,17 +19,17 @@ public class Ids {
      *
      * @param <ResourceType> an IBase type
      * @param <IdType> an IIdType type
-     * @param theResourceTypeClass the type of the Resource to create an Id for
-     * @param theId the String representation of the Id to generate
+     * @param resourceTypeClass the type of the Resource to create an Id for
+     * @param id the String representation of the Id to generate
      * @return the id
      */
     public static <ResourceType extends IBaseResource, IdType extends IIdType> IdType newId(
-            Class<? extends ResourceType> theResourceTypeClass, String theId) {
-        checkNotNull(theResourceTypeClass);
-        checkNotNull(theId);
+            Class<? extends ResourceType> resourceTypeClass, String id) {
+        checkNotNull(resourceTypeClass);
+        checkNotNull(id);
 
-        FhirVersionEnum versionEnum = FhirVersions.forClass(theResourceTypeClass);
-        return newId(versionEnum, theResourceTypeClass.getSimpleName(), theId);
+        FhirVersionEnum versionEnum = FhirVersions.forClass(resourceTypeClass);
+        return newId(versionEnum, resourceTypeClass.getSimpleName(), id);
     }
 
     /**
@@ -37,36 +37,36 @@ public class Ids {
      *
      * @param <BaseType> an IBase type
      * @param <IdType> an IIdType type
-     * @param theBaseTypeClass the BaseTypeClass to use for for determining the FHIR Version
-     * @param theResourceName the type of the Resource to create an Id for
-     * @param theId the String representation of the Id to generate
+     * @param baseTypeClass the BaseTypeClass to use for for determining the FHIR Version
+     * @param resourceName the type of the Resource to create an Id for
+     * @param id the String representation of the Id to generate
      * @return the id
      */
     public static <BaseType extends IBase, IdType extends IIdType> IdType newId(
-            Class<? extends BaseType> theBaseTypeClass, String theResourceName, String theId) {
-        checkNotNull(theBaseTypeClass);
-        checkNotNull(theResourceName);
-        checkNotNull(theId);
+            Class<? extends BaseType> baseTypeClass, String resourceName, String id) {
+        checkNotNull(baseTypeClass);
+        checkNotNull(resourceName);
+        checkNotNull(id);
 
-        FhirVersionEnum versionEnum = FhirVersions.forClass(theBaseTypeClass);
-        return newId(versionEnum, theResourceName, theId);
+        FhirVersionEnum versionEnum = FhirVersions.forClass(baseTypeClass);
+        return newId(versionEnum, resourceName, id);
     }
 
     /**
      * Creates a new random Id of the appropriate IIdType for a given FhirContext
      *
      * @param <IdType> an IIdType type
-     * @param theFhirContext the FhirContext to use for Id generation
-     * @param theResourceType the type of the Resource to create an Id for
+     * @param fhirContext the FhirContext to use for Id generation
+     * @param resourceType the type of the Resource to create an Id for
      * @return the id
      */
-    public static <IdType extends IIdType> IdType newRandomId(FhirContext theFhirContext, String theResourceType) {
-        checkNotNull(theFhirContext);
-        checkNotNull(theResourceType);
+    public static <IdType extends IIdType> IdType newRandomId(FhirContext fhirContext, String resourceType) {
+        checkNotNull(fhirContext);
+        checkNotNull(resourceType);
 
         return newId(
-                theFhirContext.getVersion().getVersion(),
-                theResourceType,
+                fhirContext.getVersion().getVersion(),
+                resourceType,
                 UUID.randomUUID().toString());
     }
 
@@ -74,51 +74,50 @@ public class Ids {
      * Creates the appropriate IIdType for a given FhirContext
      *
      * @param <IdType> an IIdType type
-     * @param theFhirContext the FhirContext to use for Id generation
-     * @param theResourceType the type of the Resource to create an Id for
-     * @param theId the String representation of the Id to generate
+     * @param fhirContext the FhirContext to use for Id generation
+     * @param resourceType the type of the Resource to create an Id for
+     * @param id the String representation of the Id to generate
      * @return the id
      */
-    public static <IdType extends IIdType> IdType newId(
-            FhirContext theFhirContext, String theResourceType, String theId) {
-        checkNotNull(theFhirContext);
-        checkNotNull(theResourceType);
-        checkNotNull(theId);
+    public static <IdType extends IIdType> IdType newId(FhirContext fhirContext, String resourceType, String id) {
+        checkNotNull(fhirContext);
+        checkNotNull(resourceType);
+        checkNotNull(id);
 
-        return newId(theFhirContext.getVersion().getVersion(), theResourceType, theId);
+        return newId(fhirContext.getVersion().getVersion(), resourceType, id);
     }
 
     /**
      * Creates the appropriate IIdType for a given FhirVersionEnum
      *
      * @param <IdType> an IIdType type
-     * @param theFhirVersionEnum the FHIR version to generate an Id for
-     * @param theResourceType the type of the Resource to create an Id for
-     * @param theIdPart the String representation of the Id to generate
+     * @param fhirVersionEnum the FHIR version to generate an Id for
+     * @param resourceType the type of the Resource to create an Id for
+     * @param idPart the String representation of the Id to generate
      * @return the id
      */
     public static <IdType extends IIdType> IdType newId(
-            FhirVersionEnum theFhirVersionEnum, String theResourceType, String theIdPart) {
-        checkNotNull(theFhirVersionEnum);
-        checkNotNull(theResourceType);
-        checkNotNull(theIdPart);
+            FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
+        checkNotNull(fhirVersionEnum);
+        checkNotNull(resourceType);
+        checkNotNull(idPart);
 
-        return newId(theFhirVersionEnum, theResourceType + "/" + theIdPart);
+        return newId(fhirVersionEnum, resourceType + "/" + idPart);
     }
 
     /**
      * Creates the appropriate IIdType for a given FhirContext
      *
      * @param <IdType> an IIdType type
-     * @param theFhirContext the FhirContext to use for Id generation
-     * @param theId the String representation of the Id to generate
+     * @param fhirContext the FhirContext to use for Id generation
+     * @param id the String representation of the Id to generate
      * @return the id
      */
-    public static <IdType extends IIdType> IdType newId(FhirContext theFhirContext, String theId) {
-        checkNotNull(theFhirContext);
-        checkNotNull(theId);
+    public static <IdType extends IIdType> IdType newId(FhirContext fhirContext, String id) {
+        checkNotNull(fhirContext);
+        checkNotNull(id);
 
-        return newId(theFhirContext.getVersion().getVersion(), theId);
+        return newId(fhirContext.getVersion().getVersion(), id);
     }
 
     /**
@@ -191,33 +190,33 @@ public class Ids {
      * Creates the appropriate IIdType for a given FhirVersionEnum
      *
      * @param <IdType> an IIdType type
-     * @param theFhirVersionEnum the FHIR version to generate an Id for
-     * @param theId the String representation of the Id to generate
+     * @param fhirVersionEnum the FHIR version to generate an Id for
+     * @param id the String representation of the Id to generate
      * @return the id
      */
     @SuppressWarnings("unchecked")
-    public static <IdType extends IIdType> IdType newId(FhirVersionEnum theFhirVersionEnum, String theId) {
-        checkNotNull(theFhirVersionEnum);
-        checkNotNull(theId);
+    public static <IdType extends IIdType> IdType newId(FhirVersionEnum fhirVersionEnum, String id) {
+        checkNotNull(fhirVersionEnum);
+        checkNotNull(id);
 
-        switch (theFhirVersionEnum) {
+        switch (fhirVersionEnum) {
             case DSTU2:
-                return (IdType) new ca.uhn.fhir.model.primitive.IdDt(theId);
+                return (IdType) new ca.uhn.fhir.model.primitive.IdDt(id);
             case DSTU2_1:
-                return (IdType) new org.hl7.fhir.dstu2016may.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.dstu2016may.model.IdType(id);
             case DSTU2_HL7ORG:
-                return (IdType) new org.hl7.fhir.dstu2.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.dstu2.model.IdType(id);
             case DSTU3:
-                return (IdType) new org.hl7.fhir.dstu3.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.dstu3.model.IdType(id);
             case R4:
-                return (IdType) new org.hl7.fhir.r4.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.r4.model.IdType(id);
             case R4B:
-                return (IdType) new org.hl7.fhir.r4b.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.r4b.model.IdType(id);
             case R5:
-                return (IdType) new org.hl7.fhir.r5.model.IdType(theId);
+                return (IdType) new org.hl7.fhir.r5.model.IdType(id);
             default:
                 throw new IllegalArgumentException(String.format(
-                        "newId does not support FHIR version %s", theFhirVersionEnum.getFhirVersionString()));
+                        "newId does not support FHIR version %s", fhirVersionEnum.getFhirVersionString()));
         }
     }
 }

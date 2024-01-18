@@ -21,24 +21,24 @@ import java.util.Objects;
  * {@link ca.uhn.fhir.rest.gclient.IClientExecutable#withAdditionalHeader(String, String)}
  */
 public class AdditionalRequestHeadersInterceptor {
-    private final Map<String, List<String>> myAdditionalHttpHeaders;
+    private final Map<String, List<String>> additionalHttpHeaders;
 
     /**
      * Constructor
      */
     public AdditionalRequestHeadersInterceptor() {
-        myAdditionalHttpHeaders = new HashMap<>();
+        additionalHttpHeaders = new HashMap<>();
     }
 
     /**
      * Constructor
      *
-     * @param theHeaders The additional headers to add to every request
+     * @param headers The additional headers to add to every request
      */
-    public AdditionalRequestHeadersInterceptor(Map<String, List<String>> theHeaders) {
+    public AdditionalRequestHeadersInterceptor(Map<String, List<String>> headers) {
         this();
-        if (theHeaders != null) {
-            myAdditionalHttpHeaders.putAll(theHeaders);
+        if (headers != null) {
+            additionalHttpHeaders.putAll(headers);
         }
     }
 
@@ -80,20 +80,20 @@ public class AdditionalRequestHeadersInterceptor {
      * @return the list of values for the header
      */
     private List<String> getHeaderValues(String headerName) {
-        return myAdditionalHttpHeaders.computeIfAbsent(headerName, x -> new ArrayList<>());
+        return additionalHttpHeaders.computeIfAbsent(headerName, x -> new ArrayList<>());
     }
 
     /**
      * Adds the additional header values to the HTTP request.
      *
-     * @param theRequest the HTTP request
+     * @param request the HTTP request
      */
     @Hook(Pointcut.CLIENT_REQUEST)
-    public void interceptRequest(IHttpRequest theRequest) {
-        for (Map.Entry<String, List<String>> header : myAdditionalHttpHeaders.entrySet()) {
+    public void interceptRequest(IHttpRequest request) {
+        for (Map.Entry<String, List<String>> header : additionalHttpHeaders.entrySet()) {
             for (String headerValue : header.getValue()) {
                 if (headerValue != null) {
-                    theRequest.addHeader(header.getKey(), headerValue);
+                    request.addHeader(header.getKey(), headerValue);
                 }
             }
         }

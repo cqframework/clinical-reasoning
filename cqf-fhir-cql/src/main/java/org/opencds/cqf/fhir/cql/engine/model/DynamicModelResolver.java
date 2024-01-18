@@ -251,9 +251,9 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     }
 
     @SuppressWarnings("unchecked")
-    static <E extends IBaseEnumFactory<?>> E toEnumFactory(Class<?> theEnumerationType) {
+    static <E extends IBaseEnumFactory<?>> E toEnumFactory(Class<?> enumerationType) {
         Class<?> clazz;
-        String className = theEnumerationType.getName() + "EnumFactory";
+        String className = enumerationType.getName() + "EnumFactory";
         E retVal;
         try {
             clazz = Class.forName(className);

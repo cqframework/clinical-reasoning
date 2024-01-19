@@ -38,7 +38,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected ExtensionResolver extensionResolver;
 
     public ActivityDefinitionProcessor(Repository repository) {
-        this(repository, EvaluationSettings.getDefault(), null, null);
+        this(repository, EvaluationSettings.getDefault());
     }
 
     public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {

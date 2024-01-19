@@ -82,7 +82,7 @@ public class ActivityDefinitionProcessorTests {
                         activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "activityDefinition-test")),
                 "patient-1",
                 null,
-                null,
+                "practitioner-1",
                 null,
                 null,
                 null,

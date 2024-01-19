@@ -90,7 +90,9 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 null,
                 true,
                 null,
-                new LibraryEngine(this.repository, this.evaluationSettings));
+                (IBaseResource) null,
+                null,
+                null);
     }
 
     @Override

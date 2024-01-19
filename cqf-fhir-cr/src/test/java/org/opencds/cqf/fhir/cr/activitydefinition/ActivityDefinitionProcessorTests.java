@@ -81,9 +81,9 @@ public class ActivityDefinitionProcessorTests {
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "activityDefinition-test")),
                 "patient-1",
-                null,
+                "encounter-1",
                 "practitioner-1",
-                null,
+                "organization-1",
                 null,
                 null,
                 null,

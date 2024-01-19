@@ -256,6 +256,7 @@ public class QuestionnaireProcessorTests {
                 .populateProcessor(new PopulateProcessor())
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .isPut(Boolean.FALSE)
                 .thenPackage();
         assertNotNull(bundle);
     }

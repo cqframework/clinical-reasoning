@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -80,36 +81,57 @@ public class QuestionnaireProcessor {
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile) {
-        return generateQuestionnaire(profile, false, false, false, null, null, null, null, null);
+        return generateQuestionnaire(profile, false, true, null, null, null, null, null);
+    }
+
+    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
+            Either3<CanonicalType, IIdType, IBaseResource> profile, Boolean supportedOnly, Boolean requiredOnly) {
+        return generateQuestionnaire(profile, supportedOnly, requiredOnly, null, null, null, null, null);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
-            Boolean differentialOnly) {
-        return generateQuestionnaire(
-                profile, supportedOnly, requiredOnly, differentialOnly, null, null, null, null, null);
-    }
-
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
-            Boolean differentialOnly,
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint,
             String id) {
-        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return generateQuestionnaire(
                 profile,
                 supportedOnly,
                 requiredOnly,
-                differentialOnly,
+                subjectId,
+                parameters,
+                bundle,
+                useServerData,
+                createRestRepository(repository.fhirContext(), dataEndpoint),
+                createRestRepository(repository.fhirContext(), contentEndpoint),
+                createRestRepository(repository.fhirContext(), terminologyEndpoint),
+                id);
+    }
+
+    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
+            Either3<CanonicalType, IIdType, IBaseResource> profile,
+            Boolean supportedOnly,
+            Boolean requiredOnly,
+            String subjectId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            Boolean useServerData,
+            Repository dataRepository,
+            Repository contentRepository,
+            Repository terminologyRepository,
+            String id) {
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        return generateQuestionnaire(
+                profile,
+                supportedOnly,
+                requiredOnly,
                 subjectId,
                 parameters,
                 bundle,
@@ -121,7 +143,6 @@ public class QuestionnaireProcessor {
             Either3<CanonicalType, IIdType, IBaseResource> profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
-            Boolean differentialOnly,
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -130,7 +151,6 @@ public class QuestionnaireProcessor {
         var request = new GenerateRequest(
                 supportedOnly,
                 requiredOnly,
-                differentialOnly,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
                 bundle,
@@ -183,10 +203,31 @@ public class QuestionnaireProcessor {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        return prePopulate(
+                questionnaire,
+                patientId,
+                parameters,
+                bundle,
+                useServerData,
+                createRestRepository(repository.fhirContext(), dataEndpoint),
+                createRestRepository(repository.fhirContext(), contentEndpoint),
+                createRestRepository(repository.fhirContext(), terminologyEndpoint));
+    }
+
+    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            Boolean useServerData,
+            Repository dataRepository,
+            Repository contentRepository,
+            Repository terminologyRepository) {
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return prePopulate(
                 questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
     }
@@ -220,10 +261,31 @@ public class QuestionnaireProcessor {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        return populate(
+                questionnaire,
+                patientId,
+                parameters,
+                bundle,
+                useServerData,
+                createRestRepository(repository.fhirContext(), dataEndpoint),
+                createRestRepository(repository.fhirContext(), contentEndpoint),
+                createRestRepository(repository.fhirContext(), terminologyEndpoint));
+    }
+
+    public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(
+            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            Boolean useServerData,
+            Repository dataRepository,
+            Repository contentRepository,
+            Repository terminologyRepository) {
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return populate(
                 questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
     }

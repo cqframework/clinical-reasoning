@@ -15,21 +15,19 @@ import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 public class GenerateRequest implements ICpgRequest {
     private final Boolean supportedOnly;
     private final Boolean requiredOnly;
-    private final Boolean differentialOnly;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
     private final IBaseBundle bundle;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
+    private String defaultLibraryUrl;
     private IBaseResource questionnaire;
 
     // test constructor
     public GenerateRequest(FhirVersionEnum fhirVersion) {
         this.supportedOnly = false;
         this.requiredOnly = false;
-        this.differentialOnly = true;
         this.subjectId = null;
         this.parameters = null;
         this.bundle = null;
@@ -42,7 +40,6 @@ public class GenerateRequest implements ICpgRequest {
     public GenerateRequest(
             Boolean supportedOnly,
             Boolean requiredOnly,
-            Boolean differentialOnly,
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -50,7 +47,6 @@ public class GenerateRequest implements ICpgRequest {
             ModelResolver modelResolver) {
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;
-        this.differentialOnly = differentialOnly;
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
@@ -63,6 +59,19 @@ public class GenerateRequest implements ICpgRequest {
 
     public void setQuestionnaire(IBaseResource questionnaire) {
         this.questionnaire = questionnaire;
+    }
+
+    public Boolean getSupportedOnly() {
+        return supportedOnly;
+    }
+
+    public Boolean getRequiredOnly() {
+        return requiredOnly;
+    }
+
+    public GenerateRequest setDefaultLibraryUrl(String url) {
+        defaultLibraryUrl = url;
+        return this;
     }
 
     @Override

@@ -136,8 +136,6 @@ public class TestQuestionnaire {
                                 subjectId,
                                 parameters,
                                 bundle,
-                                null,
-                                null,
                                 null));
             }
         }
@@ -156,8 +154,6 @@ public class TestQuestionnaire {
                                 subjectId,
                                 parameters,
                                 bundle,
-                                null,
-                                null,
                                 null));
             }
         }

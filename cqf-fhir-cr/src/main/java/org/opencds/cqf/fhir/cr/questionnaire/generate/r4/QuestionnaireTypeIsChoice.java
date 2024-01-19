@@ -24,11 +24,15 @@ public class QuestionnaireTypeIsChoice {
 
     public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent item) {
         final ValueSet valueSet = getValueSet(element);
+        // if (valueSet != null) {
         if (valueSet.hasExpansion()) {
             addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
         } else {
             addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
         }
+        // } else {
+        //     //Is it possible to get the binding without the value set?
+        // }
         return item;
     }
 
@@ -59,8 +63,13 @@ public class QuestionnaireTypeIsChoice {
     }
 
     protected ValueSet getValueSet(ElementDefinition element) {
+        // try {
         final String valueSetUrl = element.getBinding().getValueSet();
         return (ValueSet)
                 SearchHelper.searchRepositoryByCanonical(repository, new CanonicalType().setValue(valueSetUrl));
+        // } catch (Exception e) {
+        //     logger.error(e.getMessage());
+        //     return null;
+        // }
     }
 }

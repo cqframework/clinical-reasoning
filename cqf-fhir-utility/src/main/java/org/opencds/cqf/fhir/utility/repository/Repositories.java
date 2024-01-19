@@ -55,6 +55,23 @@ public class Repositories {
                 createRestRepository(localRepository.fhirContext(), terminologyEndpoint));
     }
 
+    public static Repository proxy(
+            Repository localRepository,
+            Boolean useServerData,
+            Repository dataRepository,
+            Repository contentRepository,
+            Repository terminologyRepository) {
+        if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
+            return localRepository;
+        }
+        return new ProxyRepository(
+                localRepository,
+                useServerData == null ? Boolean.TRUE : useServerData,
+                dataRepository,
+                contentRepository,
+                terminologyRepository);
+    }
+
     public static ResourceMatcher getResourceMatcher(FhirContext context) {
         var fhirVersion = context.getVersion().getVersion();
         switch (fhirVersion) {

@@ -19,7 +19,6 @@ public class RequestHelpers {
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
         return new GenerateRequest(
                 false,
-                false,
                 true,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -110,7 +111,43 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        repository = proxy(repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        return apply(
+                activityDefinition,
+                subjectId,
+                encounterId,
+                practitionerId,
+                organizationId,
+                userType,
+                userLanguage,
+                userTaskContext,
+                setting,
+                settingContext,
+                parameters,
+                useServerData,
+                bundle,
+                createRestRepository(repository.fhirContext(), dataEndpoint),
+                createRestRepository(repository.fhirContext(), contentEndpoint),
+                createRestRepository(repository.fhirContext(), terminologyEndpoint));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
+            Either3<C, IIdType, R> activityDefinition,
+            String subjectId,
+            String encounterId,
+            String practitionerId,
+            String organizationId,
+            IBaseDatatype userType,
+            IBaseDatatype userLanguage,
+            IBaseDatatype userTaskContext,
+            IBaseDatatype setting,
+            IBaseDatatype settingContext,
+            IBaseParameters parameters,
+            Boolean useServerData,
+            IBaseBundle bundle,
+            Repository dataRepository,
+            Repository contentRepository,
+            Repository terminologyRepository) {
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return apply(
                 activityDefinition,
                 subjectId,
@@ -143,40 +180,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             Boolean useServerData,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
-        return apply(
-                resolveActivityDefinition(activityDefinition),
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                bundle,
-                libraryEngine);
-    }
-
-    public <R extends IBaseResource> IBaseResource apply(
-            IBaseResource activityDefinition,
-            String subjectId,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
-            IBaseDatatype userType,
-            IBaseDatatype userLanguage,
-            IBaseDatatype userTaskContext,
-            IBaseDatatype setting,
-            IBaseDatatype settingContext,
-            IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
-            LibraryEngine libraryEngine) {
         final ApplyRequest request = new ApplyRequest(
-                activityDefinition,
+                resolveActivityDefinition(activityDefinition),
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, "Patient")),
                 encounterId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounterId, "Encounter")),
                 practitionerId == null

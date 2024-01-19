@@ -126,7 +126,6 @@ public class TestItemGenerator {
                 result = processor.generateQuestionnaire(
                         Eithers.for3(profileUrl, profileId, profile),
                         false,
-                        false,
                         true,
                         subjectId,
                         parameters,
@@ -134,8 +133,7 @@ public class TestItemGenerator {
                         null,
                         id);
             } else if (profileUrl != null || profileId != null || profile != null) {
-                result = processor.generateQuestionnaire(
-                        Eithers.for3(profileUrl, profileId, profile), false, false, true);
+                result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile), false, true);
             } else {
                 result = processor.generateQuestionnaire(id);
             }
@@ -152,7 +150,7 @@ public class TestItemGenerator {
         public GeneratedItem(Repository repository, IBaseResource questionnaire) {
             this.repository = repository;
             this.questionnaire = questionnaire;
-            jsonParser = this.repository.fhirContext().newJsonParser();
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
         }

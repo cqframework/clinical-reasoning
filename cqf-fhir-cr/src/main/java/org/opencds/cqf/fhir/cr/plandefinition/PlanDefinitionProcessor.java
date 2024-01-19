@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -24,7 +25,6 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.packages.PackageProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
 public class PlanDefinitionProcessor {
@@ -115,18 +115,6 @@ public class PlanDefinitionProcessor {
                 modelResolver);
     }
 
-    protected void setupRepository(
-            Boolean useServerData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
-        var useLocalData = useServerData == null ? Boolean.TRUE : useServerData;
-        if (dataRepository != null || contentRepository != null || terminologyRepository != null) {
-            repository = new ProxyRepository(
-                    repository, useLocalData, dataRepository, contentRepository, terminologyRepository);
-        }
-    }
-
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
             Either3<C, IIdType, R> planDefinition,
             String subject,
@@ -212,7 +200,7 @@ public class PlanDefinitionProcessor {
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
-        setupRepository(useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return apply(
                 planDefinition,
                 subject,
@@ -345,7 +333,7 @@ public class PlanDefinitionProcessor {
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
-        setupRepository(useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return applyR5(
                 planDefinition,
                 subject,

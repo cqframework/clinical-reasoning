@@ -13,7 +13,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ClaimResolv
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CommunicationRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CommunicationResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.ContractResolver;
-import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.CustomActivityResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.DeviceRequestResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.DiagnosticReportResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r4.EnrollmentRequestResolver;
@@ -36,9 +35,9 @@ public class R4ResolverFactory implements IRequestResolverFactory {
     @Override
     public BaseRequestResourceResolver create(IBaseResource baseActivityDefinition) {
         var activityDefinition = (ActivityDefinition) baseActivityDefinition;
-        if (activityDefinition.hasExtension(Constants.CPG_CUSTOM_ACTIVITY_KIND)) {
-            return new CustomActivityResolver(activityDefinition);
-        }
+        // if (activityDefinition.hasExtension(Constants.CPG_CUSTOM_ACTIVITY_KIND)) {
+        //     return new CustomActivityResolver(activityDefinition);
+        // }
         var kind = activityDefinition.hasExtension(Constants.CPG_ACTIVITY_KIND)
                 ? activityDefinition
                         .getExtensionByUrl(Constants.CPG_ACTIVITY_KIND)

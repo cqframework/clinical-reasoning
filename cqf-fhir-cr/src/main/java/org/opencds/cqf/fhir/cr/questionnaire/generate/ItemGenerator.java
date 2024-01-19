@@ -2,11 +2,13 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -21,17 +23,21 @@ import org.slf4j.LoggerFactory;
 public class ItemGenerator {
     protected static final Logger logger = LoggerFactory.getLogger(ItemGenerator.class);
     protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
+    protected static final String NO_BASE_DEFINITION_ERROR =
+            "An error occurred search for base definition with url (%s): %s";
     protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
 
     public static final List<String> INPUT_EXTENSION_LIST =
             Arrays.asList(Constants.CPG_INPUT_DESCRIPTION, Constants.CPG_FEATURE_EXPRESSION);
 
+    protected final Repository repository;
     protected final IElementProcessor elementProcessor;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
 
     public ItemGenerator(Repository repository) {
+        this.repository = repository;
         elementProcessor = IElementProcessor.createProcessor(repository);
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
@@ -97,14 +103,75 @@ public class ItemGenerator {
     @SuppressWarnings("unchecked")
     protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
             GenerateRequest request, IBaseResource profile) {
+        List<E> elements = new ArrayList<>();
         var differential = request.resolvePath(profile, "differential");
-        final List<E> elements = request.resolvePathList(differential, "element").stream()
+        elements.addAll(request.resolvePathList(differential, "element").stream()
                 .map(e -> (E) e)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        // var snapshot = getProfileSnapshot(request, profile);
+        // if (snapshot != null) {
+        //     if (request.getRequiredOnly()) {
+        //         // only top level required elements and any required elements under them
+        //         elements.addAll(request.resolvePathList(snapshot, "element").stream()
+        //                 .filter(e -> {
+        //                     var path = request.resolvePathString(e, "path");
+        //                     var min = request.resolvePath(e, "min", IPrimitiveType.class);
+        //                     return min == null ? false : (Integer) min.getValue() > 0;
+        //                 })
+        //                 .map(e -> (E) e)
+        //                 .collect(Collectors.toList()));
+        //     } else {
+        //         elements.addAll(request.resolvePathList(snapshot, "element").stream()
+        //                 .map(e -> (E) e)
+        //                 .collect(Collectors.toList()));
+        //     }
+        // }
+        if (request.getSupportedOnly()) {
+            elements = elements.stream()
+                    .filter(e -> {
+                        var mustSupport = Boolean.FALSE;
+                        var mustSupportElement = request.resolvePath(e, "mustSupport", IBaseBooleanDatatype.class);
+                        if (mustSupportElement != null) {
+                            mustSupport = mustSupportElement.getValue();
+                        }
+                        return mustSupport;
+                    })
+                    .collect(Collectors.toList());
+        }
         return elements.stream()
                 .filter(element -> getElementType(request, element) != null)
                 .collect(Collectors.toList());
     }
+
+    // protected IBase getProfileSnapshot(GenerateRequest request, IBaseResource profile) {
+    //     var snapshot = request.resolvePath(profile, "snapshot");
+    //     if (snapshot == null) {
+    //         // Grab the snapshot from the baseDefinition
+    //         var baseUrl = request.resolvePath(profile, "baseDefinition", IPrimitiveType.class);
+    //         if (baseUrl != null) {
+    //             IBaseResource baseProfile = null;
+    //             try {
+    //                 baseProfile = searchRepositoryByCanonical(repository, baseUrl);
+    //             } catch (Exception e) {
+    //                 logger.error(NO_BASE_DEFINITION_ERROR, baseUrl.getValueAsString(), e);
+    //             }
+    //             if (baseProfile != null) {
+    //                 snapshot = request.resolvePath(baseProfile, "snapshot");
+    //             }
+    //         }
+    //     }
+    //     if (snapshot == null) {
+    //         // Grab the snapshot from the type definition
+    //         // Dstu3 is a code, should still cast to IPrimitiveType<String>?
+    //         var type = request.resolvePathString(profile, "type");
+    //         var definition = repository.fhirContext().getResourceDefinition(request.getFhirVersion(), type);
+    //         var typeProfile = definition == null ? null : definition.toProfile(null);
+    //         if (typeProfile != null) {
+    //             snapshot = request.resolvePath(typeProfile, "snapshot");
+    //         }
+    //     }
+    //     return snapshot;
+    // }
 
     protected IBaseBackboneElement createErrorItem(GenerateRequest request, String linkId, String errorMessage) {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);

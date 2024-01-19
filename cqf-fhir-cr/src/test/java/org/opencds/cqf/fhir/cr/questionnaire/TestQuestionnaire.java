@@ -136,6 +136,9 @@ public class TestQuestionnaire {
                                 subjectId,
                                 parameters,
                                 bundle,
+                                true,
+                                (IBaseResource) null,
+                                null,
                                 null));
             }
         }
@@ -154,6 +157,9 @@ public class TestQuestionnaire {
                                 subjectId,
                                 parameters,
                                 bundle,
+                                true,
+                                (IBaseResource) null,
+                                null,
                                 null));
             }
         }

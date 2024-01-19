@@ -81,12 +81,13 @@ public class QuestionnaireProcessor {
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile) {
-        return generateQuestionnaire(profile, false, true, null, null, null, null, null);
+        return generateQuestionnaire(profile, false, true);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
             Either3<CanonicalType, IIdType, IBaseResource> profile, Boolean supportedOnly, Boolean requiredOnly) {
-        return generateQuestionnaire(profile, supportedOnly, requiredOnly, null, null, null, null, null);
+        return generateQuestionnaire(
+                profile, supportedOnly, requiredOnly, null, null, null, null, (IBaseResource) null, null, null, null);
     }
 
     public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(

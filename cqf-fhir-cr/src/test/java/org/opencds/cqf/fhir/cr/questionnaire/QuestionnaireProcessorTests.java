@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
@@ -12,6 +13,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.packages.PackageProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
@@ -245,5 +249,14 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void test() {}
+    void testProcessors() {
+        var bundle = given().repository(repositoryR4)
+                .generateProcessor(new GenerateProcessor(repositoryR4))
+                .packageProcessor(new PackageProcessor(repositoryR4))
+                .populateProcessor(new PopulateProcessor())
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenPackage();
+        assertNotNull(bundle);
+    }
 }

@@ -18,7 +18,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -36,6 +40,10 @@ public class TestQuestionnaire {
 
     public static class Given {
         private Repository repository;
+        private EvaluationSettings evaluationSettings;
+        private IGenerateProcessor generateProcessor;
+        private IPackageProcessor packageProcessor;
+        private IPopulateProcessor populateProcessor;
 
         public Given repository(Repository repository) {
             this.repository = repository;
@@ -48,8 +56,33 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public static QuestionnaireProcessor buildProcessor(Repository repository) {
-            return new QuestionnaireProcessor(repository);
+        public Given evaluationSettings(EvaluationSettings evaluationSettings) {
+            this.evaluationSettings = evaluationSettings;
+            return this;
+        }
+
+        public Given generateProcessor(IGenerateProcessor generateProcessor) {
+            this.generateProcessor = generateProcessor;
+            return this;
+        }
+
+        public Given packageProcessor(IPackageProcessor packageProcessor) {
+            this.packageProcessor = packageProcessor;
+            return this;
+        }
+
+        public Given populateProcessor(IPopulateProcessor populateProcessor) {
+            this.populateProcessor = populateProcessor;
+            return this;
+        }
+
+        public QuestionnaireProcessor buildProcessor(Repository repository) {
+            return new QuestionnaireProcessor(
+                    repository,
+                    evaluationSettings != null ? evaluationSettings : EvaluationSettings.getDefault(),
+                    generateProcessor,
+                    packageProcessor,
+                    populateProcessor);
         }
 
         public When when() {

@@ -4,7 +4,7 @@
 set -euxo pipefail
 bash -n "$0"
 
-CMD="mvn verify -T 4 -B -V"
+CMD="./mvnw verify -T 4 -B -V"
 
 if [[ ! -z "$TRAVIS_TAG" ]]
 then

@@ -82,14 +82,14 @@ define "Encounter With Age Range and Without VTE Diagnosis or Obstetrical Condit
     )
     intersect "Admission Without VTE or Obstetrical Conditions"
 
-  define "Admission Without VTE or Obstetrical Conditions":
-	  	Global."Inpatient Encounter" InpatientEncounter
-		    where not (exists (Global.EncounterDiagnosis(InpatientEncounter)) EncounterDiagnosis
-              where (EncounterDiagnosis.code in "Obstetrics"
-								or EncounterDiagnosis.code in "Venous Thromboembolism"
-								or EncounterDiagnosis.code in "Obstetrics VTE"
-			         )
-        )
+define "Admission Without VTE or Obstetrical Conditions":
+    Global."Inpatient Encounter" InpatientEncounter
+        where not (exists (Global.EncounterDiagnosis(InpatientEncounter)) EncounterDiagnosis
+            where (EncounterDiagnosis.code in "Obstetrics"
+                            or EncounterDiagnosis.code in "Venous Thromboembolism"
+                            or EncounterDiagnosis.code in "Obstetrics VTE"
+                    )
+    )
 
 define "Denominator":
       "Initial Population"

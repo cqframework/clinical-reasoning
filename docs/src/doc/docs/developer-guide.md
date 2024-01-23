@@ -23,7 +23,7 @@ See the [Java Guidance](#java-guidance) section for more detailed information.
 
 ### Getting Started
 
-Java 11+ is required to build and run this project. You can build the project with `mvn package`.
+Java 11+ is required to build and run this project. You can build the project with `mvnw package`.
 
 ### Licensing
 

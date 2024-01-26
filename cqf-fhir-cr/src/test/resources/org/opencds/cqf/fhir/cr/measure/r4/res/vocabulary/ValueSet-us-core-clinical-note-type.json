@@ -1,0 +1,42 @@
+{
+  "resourceType": "ValueSet",
+  "id": "us-core-clinical-note-type",
+  "url": "http://hl7.org/fhir/us/core/ValueSet/us-core-clinical-note-type",
+  "version": "3.1.0",
+  "name": "USCoreClinicalNoteType",
+  "title": "US Core Clinical Note Type",
+  "status": "active",
+  "date": "2019-05-21T00:00:00+10:00",
+  "publisher": "HL7 US Realm Steering Committee",
+  "contact": [ {
+    "telecom": [ {
+      "system": "other",
+      "value": "http://hl7.org/fhir"
+    } ]
+  } ],
+  "description": "The US Core Clinical Note Type Value Set is a 'starter set' of types supported for fetching and storing clinical notes.",
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US",
+      "display": "United States of America"
+    } ]
+  } ],
+  "copyright": " This content LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use",
+  "compose": {
+    "include": [ {
+      "system": "http://loinc.org",
+      "concept": [ {
+        "code": "18842-5"
+      }, {
+        "code": "11488-4"
+      }, {
+        "code": "34117-2"
+      }, {
+        "code": "11506-3"
+      }, {
+        "code": "28570-0"
+      } ]
+    } ]
+  }
+}

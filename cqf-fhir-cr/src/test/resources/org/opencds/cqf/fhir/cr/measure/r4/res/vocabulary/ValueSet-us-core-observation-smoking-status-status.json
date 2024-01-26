@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "us-core-observation-smoking-status-status",
+  "url": "http://hl7.org/fhir/us/core/ValueSet/us-core-observation-smoking-status-status",
+  "version": "3.1.0",
+  "name": "USCoreObservationSmokingStatusStatus",
+  "title": "US Core Status for Smoking Status Observation",
+  "status": "active",
+  "date": "2019-05-21T00:00:00+10:00",
+  "publisher": "HL7 US Realm Steering Committee",
+  "contact": [ {
+    "telecom": [ {
+      "system": "other",
+      "value": "http://hl7.org/fhir"
+    } ]
+  } ],
+  "description": "Codes providing the status of an observation for smoking status. Constrained to `final`and `entered-in-error`.",
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US",
+      "display": "United States of America"
+    } ]
+  } ],
+  "compose": {
+    "include": [ {
+      "system": "http://hl7.org/fhir/observation-status",
+      "concept": [ {
+        "code": "final"
+      }, {
+        "code": "entered-in-error"
+      } ]
+    } ]
+  }
+}

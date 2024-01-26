@@ -1,0 +1,31 @@
+{
+  "resourceType": "ValueSet",
+  "id": "omb-ethnicity-category",
+  "url": "http://hl7.org/fhir/us/core/ValueSet/omb-ethnicity-category",
+  "version": "3.1.0",
+  "name": "OmbEthnicityCategories",
+  "title": "OMB Ethnicity Categories",
+  "status": "active",
+  "date": "2019-05-21T00:00:00+10:00",
+  "publisher": "HL7 US Realm Steering Committee",
+  "description": "The codes for the ethnicity categories - 'Hispanic or Latino' and 'Non Hispanic or Latino' - as defined by the [OMB Standards for Maintaining, Collecting, and Presenting Federal Data on Race and Ethnicity, Statistical Policy Directive No. 15, as revised, October 30, 1997](https://www.whitehouse.gov/omb/fedreg_1997standards).",
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US",
+      "display": "United States of America"
+    } ]
+  } ],
+  "compose": {
+    "include": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "concept": [ {
+        "code": "2135-2",
+        "display": "Hispanic or Latino"
+      }, {
+        "code": "2186-5",
+        "display": "Non Hispanic or Latino"
+      } ]
+    } ]
+  }
+}

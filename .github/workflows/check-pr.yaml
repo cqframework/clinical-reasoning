@@ -1,6 +1,9 @@
 name: Check PR
 on: pull_request
 
+permissions:
+    checks: write
+
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -10,18 +13,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 11
+            distribution: 'temurin'
+            java-version: '21'
+            cache: 'maven'
       - name: Compile
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 compile
-      - name: Compile tests
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots -T 4 test-compile
+        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Tests and additional checks
-        run: mvn --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: Publish test report
         uses: mikepenz/action-junit-report@v3
         if: success() || failure() # always run even if the previous step fails
         with:
-          report_paths: '**/junitreports/TEST-*.xml'
+          report_paths: "**/target/surefire-reports/TEST-*.xml"
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

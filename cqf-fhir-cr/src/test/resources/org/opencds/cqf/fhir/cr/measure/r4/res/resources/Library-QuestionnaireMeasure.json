@@ -1,0 +1,23 @@
+{
+  "resourceType": "Library",
+  "id": "QuestionnaireMeasure",
+  "url": "http://somewhere.org/fhir/uv/mycontentig/Library/QuestionnaireMeasure",
+  "version": "0.1.0",
+  "name": "QuestionnaireMeasure",
+  "title": "Measure calculating scores from multiple questionnaires example",
+  "status": "draft",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "subjectCodeableConcept": {
+    "coding": [ {
+      "system": "hl7.org/fhir/resource-types",
+      "code": "Patient"
+    } ]
+  },
+  "description": "Example library illustrating basic CQL constructs"
+}

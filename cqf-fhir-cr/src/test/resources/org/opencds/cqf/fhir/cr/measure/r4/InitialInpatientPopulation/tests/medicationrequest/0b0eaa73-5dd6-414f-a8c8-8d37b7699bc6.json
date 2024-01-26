@@ -1,0 +1,31 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "0b0eaa73-5dd6-414f-a8c8-8d37b7699bc6",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-22T16:57:00.797+00:00",
+    "source": "#BlYf5MaAdE9uC4EO",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest" ]
+  },
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "code": "25789",
+      "display": "glimepiride"
+    } ],
+    "text": "glimepiride"
+  },
+  "subject": {
+    "reference": "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47"
+  },
+  "encounter": {
+    "reference": "Encounter/87d2fa02-ffda-4b0e-9a24-9c1917f80809"
+  },
+  "authoredOn": "2022-01-02T01:00:00-05:00",
+  "requester": {
+    "reference": "Practitioner/553aaf8e-0d47-4386-bbef-d84c4b2fcee4",
+    "display": "Dr. Kathrine376 Leffler128"
+  }
+}

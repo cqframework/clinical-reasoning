@@ -1,0 +1,13 @@
+{
+  "resourceType": "Location",
+  "id": "measure-strat2-EXM111-Location",
+  "status": "active",
+  "name": "Sam Chindi's House of Shamans",
+  "type": [ {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "4525004",
+      "display": "Emergency department patient visit (procedure)"
+    } ]
+  } ]
+}

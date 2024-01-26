@@ -1,0 +1,103 @@
+{
+  "resourceType": "Measure",
+  "id": "EXM105FHIR3Sample",
+  "meta": {
+    "versionId": "5",
+    "lastUpdated": "2019-12-04T17:52:12.092-07:00",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "boolean"
+  } ],
+  "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/measure-EXM105-FHIR3-8.0.000",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+    "value": "105"
+  } ],
+  "version": "8.0.000",
+  "name": "EXM105",
+  "title": "Discharged on Statin Medication",
+  "status": "draft",
+  "experimental": true,
+  "publisher": "The Joint Commission",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "http://www.ncqa.org/"
+    } ]
+  } ],
+  "description": "Ischemic stroke patients who are prescribed or continuing to take statin medication at hospital discharge",
+  "useContext": [ {
+    "code": {
+      "code": "program"
+    },
+    "valueCodeableConcept": {
+      "text": "eligible-provider"
+    }
+  } ],
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US"
+    } ]
+  } ],
+  "purpose": "Ischemic stroke patients who are prescribed or continuing to take statin medication at hospital discharge",
+  "copyright": "Measure specifications are in the Public Domain. LOINC(R) is a registered trademark of the Regenstrief Institute. This material contains SNOMED Clinical Terms(R) (SNOMED CT(C)) copyright 2004-2017 International Health Terminology Standards Development Organization. All rights reserved.",
+  "approvalDate": "2016-01-01",
+  "lastReviewDate": "2019-08-19",
+  "effectivePeriod": {
+    "start": "2019-01-01",
+    "end": "2019-12-31"
+  },
+  "topic": [ {
+    "coding": [ {
+      "code": "57024-2"
+    } ]
+  } ],
+  "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
+  "scoring": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/measure-scoring",
+      "code": "proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/measure-type",
+      "code": "process"
+    } ]
+  } ],
+  "rateAggregation": "none",
+  "rationale": "There is an extensive and consistent body of evidence supporting the use of statins for secondary prevention in patients with clinically evident atherosclerotic cardiovascular disease (ASCVD), which includes individuals with ischemic stroke due to large artery atherosclerosis, individuals with ischemic stroke due to intrinsic small vessel disease, and individuals with ischemic stroke not directly due to atherosclerosis but with clinically evident atherosclerotic disease in an uninvolved cerebral or noncerebral bed.  Both women and men with clinical ASCVD are at increased risk for recurrent ASCVD and ASCVD death.  High-intensity statin therapy should be initiated or continued as first-line therapy in women and men less than or equal to 75 years of age who have clinical ASCVD, unless contraindicated. In patients with clinical ASCVD and a contraindication to high-intensity statin therapy, moderate-intensity therapy should be considered as an alternative if it can be tolerated.  In individuals greater than 75 years of age, the potential for ASCVD risk reduction benefits, adverse effects, drug-drug interactions, and patient preferences should be considered, and statin therapy individualized based on these considerations (Stone, 2013).",
+  "clinicalRecommendationStatement": "For patients with stroke of atherosclerotic origin, intensive lipid lowering therapy with statins should be initiated",
+  "guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.",
+  "group": [ {
+    "population": [ {
+      "code": {
+        "coding": [ {
+          "code": "initial-population"
+        } ]
+      }
+    }, {
+      "code": {
+        "coding": [ {
+          "code": "numerator"
+        } ]
+      }
+    }, {
+      "code": {
+        "coding": [ {
+          "code": "denominator"
+        } ]
+      }
+    }, {
+      "code": {
+        "coding": [ {
+          "code": "denominator-exclusion"
+        } ]
+      }
+    } ]
+  } ]
+}

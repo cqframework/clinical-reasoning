@@ -1,0 +1,21 @@
+{
+  "resourceType": "Library",
+  "id": "dependency-example",
+  "url": "http://somewhere.org/fhir/uv/mycontentig/Library/DependencyExample",
+  "version": "0.1.0",
+  "name": "DependencyExample",
+  "title": "Dependency Example",
+  "status": "draft",
+  "experimental": true,
+  "subjectCodeableConcept": {
+    "coding": [ {
+      "system": "hl7.org/fhir/resource-types",
+      "code": "Patient"
+    } ]
+  },
+  "description": "Example library illustrating reference to dependencies in dependent implementation guides",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../cql/DependencyExample.cql"
+  } ]
+}

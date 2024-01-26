@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>docs</artifactId>
-  <version>3.0.0-PRE3-SNAPSHOT</version>
+  <version>3.0.0-PRE15</version>
 
   <name>FHIR Clinical Reasoning (Documentation)</name>
   <description>Documentation website for FHIR Clinical Reasoning</description>
@@ -13,8 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE3-SNAPSHOT</version>
-    <relativePath>../cqf-fhir/pom.xml</relativePath>
+    <version>3.0.0-PRE15</version>
   </parent>
 
   <dependencyManagement>
@@ -24,7 +23,7 @@
         <artifactId>cqf-fhir-bom</artifactId>
         <type>pom</type>
         <scope>import</scope>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -37,22 +36,6 @@
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-cql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-dstu3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-r4</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-cql-r5</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-elm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
@@ -71,8 +54,8 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>3.0.0-M1</version>
         <configuration>
           <skip>true</skip>
         </configuration>

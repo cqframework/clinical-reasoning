@@ -1,0 +1,25 @@
+{
+  "resourceType": "Condition",
+  "id": "denomexcl1-EXM347-Condition",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  },
+  "verificationStatus": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+      "code": "confirmed",
+      "display": "Confirmed"
+    } ]
+  },
+  "code": {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "307140009",
+      "display": "Acute non-Q wave infarction (disorder)"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl1-EXM347"
+  },
+  "onsetDateTime": "2019-01-01T08:30:00"
+}

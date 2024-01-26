@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "group": "none",
+      "label": "java (format) Apply formating to project",
+      "command": [
+        "./mvnw spotless:apply"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "group": "none",
+      "label": "java (format) Apply formating to active file",
+      "command": [
+        "./mvnw spotless:apply -DspotlessFiles=${file}"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

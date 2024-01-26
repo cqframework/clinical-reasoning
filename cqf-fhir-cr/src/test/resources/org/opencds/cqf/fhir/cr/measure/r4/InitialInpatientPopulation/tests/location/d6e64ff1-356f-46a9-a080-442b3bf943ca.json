@@ -1,0 +1,17 @@
+{
+  "resourceType": "Location",
+  "id": "d6e64ff1-356f-46a9-a080-442b3bf943ca",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-22T16:57:01.120+00:00",
+    "source": "#BlYf5MaAdE9uC4EO"
+  },
+  "extension": [ {
+    "url": "http://hapifhir.io/fhir/StructureDefinition/resource-placeholder",
+    "valueBoolean": true
+  } ],
+  "identifier": [ {
+    "system": "https://github.com/synthetichealth/synthea",
+    "value": "8d8755c5-10c5-39f5-90ae-37b018c57a14"
+  } ]
+}

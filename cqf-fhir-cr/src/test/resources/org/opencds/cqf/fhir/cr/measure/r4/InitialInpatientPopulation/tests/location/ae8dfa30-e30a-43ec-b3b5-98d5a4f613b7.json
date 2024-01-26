@@ -1,0 +1,38 @@
+{
+  "resourceType": "Location",
+  "id": "ae8dfa30-e30a-43ec-b3b5-98d5a4f613b7",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2022-02-17T19:32:48.176+00:00",
+    "source": "#S216uUb4V5AnlPhW",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location" ]
+  },
+  "identifier": [ {
+    "system": "https://github.com/synthetichealth/synthea",
+    "value": "4284938a-e33b-353b-b785-12d6cdb6f357"
+  } ],
+  "status": "active",
+  "name": "NASHOBA VALLEY MEDICAL CENTER",
+  "telecom": [ {
+    "system": "phone",
+    "value": "9787849000"
+  } ],
+  "address": {
+    "line": [ "200 GROTON ROAD" ],
+    "city": "AYER",
+    "state": "MA",
+    "postalCode": "01432",
+    "country": "US"
+  },
+  "position": {
+    "longitude": -71.58484399999998,
+    "latitude": 42.562221
+  },
+  "managingOrganization": {
+    "identifier": {
+      "system": "https://github.com/synthetichealth/synthea",
+      "value": "ac8356a5-78f8-3a63-8a1e-59e832fd54e7"
+    },
+    "display": "NASHOBA VALLEY MEDICAL CENTER"
+  }
+}

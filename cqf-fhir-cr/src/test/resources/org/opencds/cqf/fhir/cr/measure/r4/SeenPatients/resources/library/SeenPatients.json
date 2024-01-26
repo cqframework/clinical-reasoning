@@ -1,0 +1,20 @@
+{
+  "resourceType": "Library",
+  "id": "SeenPatients",
+  "url": "http://hl7.org/fhir/us/chronic-ds/Library/SeenPatients",
+  "version": "0.1.0",
+  "name": "SeenPatients",
+  "title": "Seen Patients",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/codesystem-library-type.html",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SeenPatients.cql"
+  } ]
+}

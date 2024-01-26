@@ -1,0 +1,27 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "denomexcl2-EXM347-2",
+  "status": "completed",
+  "intent": "order",
+  "category": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+      "code": "discharge",
+      "display": "Discharge"
+    } ]
+  } ],
+  "medicationCodeableConcept": {
+    "coding": [ {
+      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "code": "1944264",
+      "display": "simvastatin 8 MG/ML Oral Suspension"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/denomexcl2-EXM347"
+  },
+  "encounter": {
+    "reference": "Encounter/denomexcl2-EXM347-1"
+  },
+  "authoredOn": "2019-06-01T08:30:00"
+}

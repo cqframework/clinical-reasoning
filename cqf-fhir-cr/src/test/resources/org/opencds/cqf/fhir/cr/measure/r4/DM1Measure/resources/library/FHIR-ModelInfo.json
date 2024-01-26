@@ -1,0 +1,23 @@
+{
+  "resourceType": "Library",
+  "id": "FHIR-ModelInfo",
+  "url": "http://hl7.org/fhir/Library/FHIR-ModelInfo",
+  "version": "1.0.1",
+  "name": "FHIR",
+  "title": "FHIR Model Definition",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "model-definition"
+    } ]
+  },
+  "date": "2019-08-08",
+  "publisher": "Health Level 7 International - Clinical Quality Information Work Group",
+  "description": "Model definition for the FHIR R4 (v4.0.1) Model",
+  "content": [ {
+    "contentType": "application/xml",
+    "url": "https://raw.githubusercontent.com/cqframework/clinical_quality_language/master/Src/java/quick/src/main/resources/org/hl7/fhir/fhir-modelinfo-4.0.1.xml"
+  } ]
+}

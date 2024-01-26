@@ -1,7 +1,0 @@
-{
-  "resourceType": "ValueSet",
-  "id": "value-set-four",
-  "url": "http://localhost/fhir/ValueSet/value-set-four",
-  "name": "ValueSetFour",
-  "title": "ValueSetFour"
-}

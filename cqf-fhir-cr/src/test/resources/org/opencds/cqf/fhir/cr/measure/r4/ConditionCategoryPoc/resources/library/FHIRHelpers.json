@@ -1,0 +1,11 @@
+{
+  "resourceType": "Library",
+  "id": "FHIRHelpers",
+  "url": "http://hl7.org/fhir/Library/FHIRHelpers",
+  "version": "4.0.001",
+  "name": "FHIRHelpers",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/FHIRHelpers.cql"
+  } ]
+}

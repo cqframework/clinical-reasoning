@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-bom</artifactId>
-  <version>3.0.0-PRE3-SNAPSHOT</version>
+  <version>3.0.0-PRE15</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning (Bill Of Materials)</name>
   <description>This bom can be used to simplify dependency management when using this project</description>
@@ -13,8 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE3-SNAPSHOT</version>
-    <relativePath>../cqf-fhir/pom.xml</relativePath>
+    <version>3.0.0-PRE15</version>
   </parent>
 
   <dependencyManagement>
@@ -22,64 +21,44 @@
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-api</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-test</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-utility</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cql</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-dstu3</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-r4</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cql-r5</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-elm</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-jackson</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-jaxb</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr</artifactId>
-        <version>${project.version}</version>
+        <version>3.0.0-PRE15</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
-        <artifactId>cqf-fhir-cdshooks</artifactId>
-        <version>${project.version}</version>
+        <artifactId>cqf-fhir-cr-cli</artifactId>
+        <version>3.0.0-PRE15</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

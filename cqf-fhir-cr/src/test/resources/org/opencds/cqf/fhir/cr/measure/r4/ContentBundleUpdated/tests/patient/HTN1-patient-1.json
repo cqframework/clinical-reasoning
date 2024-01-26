@@ -1,0 +1,55 @@
+{
+  "resourceType": "Patient",
+  "id": "HTN1-patient-1",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient", "http://hl7.org/fhir/us/core/StructureDefinition/qi-core-patient" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+    "extension": [ {
+      "url": "ombCategory",
+      "valueCoding": {
+        "system": "urn:oid:2.16.840.1.113883.6.238",
+        "code": "2028-9",
+        "display": "Asian"
+      }
+    }, {
+      "url": "text",
+      "valueString": "Asian"
+    } ]
+  }, {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+    "extension": [ {
+      "url": "ombCategory",
+      "valueCoding": {
+        "system": "urn:oid:2.16.840.1.113883.6.238",
+        "code": "2135-2",
+        "display": "Hispanic or Latino"
+      }
+    }, {
+      "url": "text",
+      "valueString": "Hispanic or Latino"
+    } ]
+  } ],
+  "identifier": [ {
+    "system": "http://cds.optum.com/deqm",
+    "value": "urn:uuid:c9f86feb-73d0-4100-bbe1-a9f5d8fbd999"
+  }, {
+    "use": "usual",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "MR",
+        "display": "Medical Record Number"
+      } ]
+    },
+    "system": "http://hospital.smarthealthit.org",
+    "value": "123456789"
+  } ],
+  "name": [ {
+    "family": "Hypertesla",
+    "given": [ "John" ]
+  } ],
+  "gender": "male",
+  "birthDate": "1965-01-01"
+}

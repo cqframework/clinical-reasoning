@@ -1,0 +1,34 @@
+{
+  "resourceType": "ValueSet",
+  "id": "us-core-diagnosticreport-category",
+  "url": "http://hl7.org/fhir/us/core/ValueSet/us-core-diagnosticreport-category",
+  "version": "3.1.0",
+  "name": "USCoreDiagnosticReportCategory",
+  "title": "US Core DiagnosticReport Category",
+  "status": "active",
+  "date": "2019-05-21T00:00:00+10:00",
+  "description": "The US Core Diagnostic Report Category Value Set is a 'starter set' of categories supported for fetching and Diagnostic Reports and notes.",
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "code": "US",
+      "display": "United States of America"
+    } ]
+  } ],
+  "copyright": " This content LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use",
+  "compose": {
+    "include": [ {
+      "system": "http://loinc.org",
+      "concept": [ {
+        "code": "LP29684-5",
+        "display": "Radiology"
+      }, {
+        "code": "LP29708-2",
+        "display": "Cardiology"
+      }, {
+        "code": "LP7839-6",
+        "display": "Pathology"
+      } ]
+    } ]
+  }
+}

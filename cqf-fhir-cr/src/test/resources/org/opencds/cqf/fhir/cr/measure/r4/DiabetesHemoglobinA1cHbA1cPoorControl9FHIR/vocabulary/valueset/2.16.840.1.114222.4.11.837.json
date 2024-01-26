@@ -1,0 +1,43 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.837",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+    "valueMarkdown": "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present."
+  } ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+  "identifier": [ {
+    "system": "urn:ietf:rfc:3986",
+    "value": "2.16.840.1.114222.4.11.837"
+  } ],
+  "version": "20121025",
+  "name": "Ethnicity",
+  "title": "Ethnicity",
+  "status": "active",
+  "experimental": false,
+  "publisher": "NLM",
+  "compose": {
+    "include": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+      "concept": [ {
+        "code": "2135-2",
+        "display": "Hispanic or Latino"
+      }, {
+        "code": "2186-5",
+        "display": "Not Hispanic or Latino"
+      } ]
+    } ]
+  },
+  "expansion": {
+    "timestamp": "2021-08-11T18:13:40-06:00",
+    "contains": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+      "code": "2135-2",
+      "display": "Hispanic or Latino"
+    }, {
+      "system": "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC",
+      "code": "2186-5",
+      "display": "Not Hispanic or Latino"
+    } ]
+  }
+}

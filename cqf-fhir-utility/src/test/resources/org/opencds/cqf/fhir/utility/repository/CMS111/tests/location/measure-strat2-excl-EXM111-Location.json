@@ -1,0 +1,13 @@
+{
+  "resourceType": "Location",
+  "id": "measure-strat2-excl-EXM111-Location",
+  "status": "active",
+  "name": "DeChelley Spider Woman Clinic",
+  "type": [ {
+    "coding": [ {
+      "system": "http://snomed.info/sct",
+      "code": "4525004",
+      "display": "Emergency department patient visit (procedure)"
+    } ]
+  } ]
+}

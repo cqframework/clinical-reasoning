@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "ANCStratifiers",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/ANCStratifiers",
+  "name": "ANCStratifiers",
+  "title": "ANC Stratifiers",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ANCStratifiers.cql"
+    }
+  ]
+}

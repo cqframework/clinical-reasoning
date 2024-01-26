@@ -40,19 +40,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class PlanDefinition {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/plandefinition";
 
-    private static final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
-
-    static {
-        evaluationSettings
-                .getRetrieveSettings()
-                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
-                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-
-        evaluationSettings
-                .getTerminologySettings()
-                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
-    }
-
     private static InputStream open(String asset) {
         return PlanDefinition.class.getResourceAsStream(asset);
     }
@@ -71,6 +58,7 @@ public class PlanDefinition {
 
     public static class Given {
         private Repository repository;
+        private EvaluationSettings evaluationSettings;
 
         public Given repository(Repository repository) {
             this.repository = repository;
@@ -83,10 +71,26 @@ public class PlanDefinition {
             return this;
         }
 
-        public static PlanDefinitionProcessor buildProcessor(Repository repository) {
+        public Given evaluationSettings(EvaluationSettings evaluationSettings) {
+            this.evaluationSettings = evaluationSettings;
+            return this;
+        }
+
+        public PlanDefinitionProcessor buildProcessor(Repository repository) {
             if (repository instanceof IGFileStructureRepository) {
                 ((IGFileStructureRepository) repository)
                         .setActivityDefinitionProcessorFactory(new ActivityDefinitionProcessorFactory());
+            }
+            if (evaluationSettings == null) {
+                evaluationSettings = EvaluationSettings.getDefault();
+                evaluationSettings
+                        .getRetrieveSettings()
+                        .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                        .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+                evaluationSettings
+                        .getTerminologySettings()
+                        .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             return new PlanDefinitionProcessor(repository, evaluationSettings);
         }
@@ -186,30 +190,32 @@ public class PlanDefinition {
             return this;
         }
 
-        public GeneratedBundle thenApplyR5() {
+        public IBaseBundle applyR5() {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
-            return new GeneratedBundle(
-                    repository,
-                    processor.applyR5(
-                            Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
-                            subjectId,
-                            encounterId,
-                            practitionerId,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            parameters,
-                            useServerData,
-                            additionalData,
-                            null,
-                            dataRepository,
-                            contentRepository,
-                            terminologyRepository));
+            return processor.applyR5(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                    subjectId,
+                    encounterId,
+                    practitionerId,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    parameters,
+                    useServerData,
+                    additionalData,
+                    null,
+                    dataRepository,
+                    contentRepository,
+                    terminologyRepository);
+        }
+
+        public GeneratedBundle thenApplyR5() {
+            return new GeneratedBundle(repository, applyR5());
         }
 
         public GeneratedCarePlan thenApply() {

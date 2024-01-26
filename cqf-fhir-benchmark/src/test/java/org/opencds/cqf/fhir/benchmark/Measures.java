@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-import org.hl7.fhir.r4.model.Bundle;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.cr.measure.r4.MeasureProcessorEvaluateTest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -23,47 +23,48 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State(Scope.Benchmark)
-public class MeasuresAdditionalData {
+public class Measures {
     private When when;
 
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
-
-        Bundle additionalData = (Bundle) FhirContext.forR4Cached()
-                .newJsonParser()
-                .parseResource(
-                        MeasureProcessorEvaluateTest.class.getResourceAsStream("CaseRepresentation101/generated.json"));
+        evaluationOptions
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+        evaluationOptions
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
         this.when = Measure.given()
                 .repositoryFor("CaseRepresentation101")
                 .evaluationOptions(evaluationOptions)
                 .when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
+                .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
                 .periodStart("2022-01-01")
-                .periodEnd("2022-01-31")
-                .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
-                .additionalData(additionalData)
+                .periodEnd("2022-06-29")
+                .reportType("subject")
                 .evaluate();
     }
 
     @Benchmark
     @Fork(warmups = 1, value = 1)
-    @Measurement(iterations = 10, timeUnit = TimeUnit.SECONDS)
+    @Measurement(iterations = 2, timeUnit = TimeUnit.SECONDS)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void test(Blackhole bh) throws Exception {
+    public void testEvaluate(Blackhole bh) throws Exception {
         // The Blackhole ensures that the compiler doesn't optimize
         // away this call, which does nothing with the result of the evaluation
-
-        bh.consume(when.then().report());
+        bh.consume(this.when.then().report());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(MeasuresAdditionalData.class.getSimpleName())
-                .build();
+        Options opt =
+                new OptionsBuilder().include(Measures.class.getSimpleName()).build();
         new Runner(opt).run();
     }
 }

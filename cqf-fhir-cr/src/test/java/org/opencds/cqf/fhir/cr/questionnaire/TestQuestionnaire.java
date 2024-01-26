@@ -20,6 +20,9 @@ import org.json.JSONException;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -77,12 +80,19 @@ public class TestQuestionnaire {
         }
 
         public QuestionnaireProcessor buildProcessor(Repository repository) {
+            if (evaluationSettings == null) {
+                evaluationSettings = EvaluationSettings.getDefault();
+                evaluationSettings
+                        .getRetrieveSettings()
+                        .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                        .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+
+                evaluationSettings
+                        .getTerminologySettings()
+                        .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+            }
             return new QuestionnaireProcessor(
-                    repository,
-                    evaluationSettings != null ? evaluationSettings : EvaluationSettings.getDefault(),
-                    generateProcessor,
-                    packageProcessor,
-                    populateProcessor);
+                    repository, evaluationSettings, generateProcessor, packageProcessor, populateProcessor);
         }
 
         public When when() {
@@ -176,24 +186,25 @@ public class TestQuestionnaire {
             }
         }
 
+        public IBaseResource runPopulate() {
+            return processor.populate(
+                    Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
+                    subjectId,
+                    parameters,
+                    bundle,
+                    true,
+                    (IBaseResource) null,
+                    null,
+                    null);
+        }
+
         public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
             if (buildRequest) {
                 var populateRequest = buildRequest("populate");
                 return new GeneratedQuestionnaireResponse(
                         repository, populateRequest, processor.populate(populateRequest));
             } else {
-                return new GeneratedQuestionnaireResponse(
-                        repository,
-                        null,
-                        processor.populate(
-                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
-                                subjectId,
-                                parameters,
-                                bundle,
-                                true,
-                                (IBaseResource) null,
-                                null,
-                                null));
+                return new GeneratedQuestionnaireResponse(repository, null, runPopulate());
             }
         }
 

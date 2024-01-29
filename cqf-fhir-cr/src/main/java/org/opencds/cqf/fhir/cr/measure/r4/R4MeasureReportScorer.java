@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.util.Map;
 import java.util.Optional;
-
-import org.checkerframework.checker.units.qual.m;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -29,7 +27,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
         if (measureScoring == null || measureScoring.isEmpty()) {
-            throw new IllegalStateException("Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+            throw new IllegalStateException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
         }
 
         if (measureScoring.size() == 1) {

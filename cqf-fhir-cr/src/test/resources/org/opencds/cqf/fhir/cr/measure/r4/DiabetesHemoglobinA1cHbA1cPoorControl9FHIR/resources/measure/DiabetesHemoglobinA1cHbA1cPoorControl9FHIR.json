@@ -123,6 +123,7 @@
       }
     } ],
     "stratifier": [ {
+      "id": "stratifier-ethnicity",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -137,6 +138,7 @@
         "expression": "SDE Ethnicity"
       }
     }, {
+     "id": "stratifier-payer",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
@@ -151,6 +153,7 @@
         "expression": "SDE Payer"
       }
     }, {
+      "id": "stratifier-race",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -165,6 +168,7 @@
         "expression": "SDE Race"
       }
     }, {
+      "id": "stratifier-sex",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -179,6 +183,7 @@
         "expression": "SDE Sex"
       }
     }, {
+     "id": "stratifier-age-group",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -193,6 +198,7 @@
         "expression": "SDE Age Group"
       }
     }, {
+      "id": "stratifier-food-insecurity-risk-status",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",

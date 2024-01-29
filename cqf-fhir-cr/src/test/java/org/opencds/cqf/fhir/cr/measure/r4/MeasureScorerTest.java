@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -63,11 +64,10 @@ public class MeasureScorerTest {
         var measureReport = getMyMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        try {
-            scorer.score(measureScoringDef, measureReport);
-        } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().contains("No MeasureScoring value set"));
-        }
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> scorer.score(measureScoringDef, measureReport),
+                "No MeasureScoring value set");
     }
 
     public MeasureReportGroupComponent group(MeasureReport measureReport, String id) {

@@ -50,11 +50,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
             // Ids are not required on groups in r4
-            //checkId(group);
+            // checkId(group);
 
             // Group MeasureScoring
             if (measureLevelMeasureScoring == null && group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null) {
-                throw new IllegalStateException("MeasureScoring must be specified on Group or Measure");
+                throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
             }
             MeasureScoring groupMeasureScoringCode = null;
             if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null) {

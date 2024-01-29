@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -217,12 +217,6 @@ public class MeasureProcessorEvaluateTest {
                 .evaluate();
 
         String errorMsg = "MeasureScoring must be specified on Group or Measure";
-        MeasureReport report = null;
-        try {
-            report = when.then().report();
-        } catch (RuntimeException e) {
-            assertTrue(e.getCause().toString().contains(errorMsg));
-        }
-        assertNull(report);
+        assertThrows(IllegalArgumentException.class, () -> when.then(), errorMsg);
     }
 }

@@ -623,6 +623,7 @@
   } ],
   "group": [ {
     "population": [ {
+      "id": "initial-population",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",

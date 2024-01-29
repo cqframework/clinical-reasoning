@@ -26,17 +26,6 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private final boolean enforceIds;
-
-    public Dstu3MeasureDefBuilder() {
-        this(false);
-    }
-
-    public Dstu3MeasureDefBuilder(boolean enforceIds) {
-        this.enforceIds = enforceIds;
-    }
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -116,13 +105,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
+        if (e.getId() == null || StringUtils.isBlank(e.getId())) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
+        if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
     }

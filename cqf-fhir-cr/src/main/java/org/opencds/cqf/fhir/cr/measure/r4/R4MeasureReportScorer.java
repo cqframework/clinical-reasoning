@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.util.Map;
 import java.util.Optional;
+
+import org.checkerframework.checker.units.qual.m;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -26,14 +28,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
+        if (measureScoring == null || measureScoring.isEmpty()) {
+            throw new IllegalStateException("Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+        }
+
+        if (measureScoring.size() == 1) {
+            return measureScoring.values().iterator().next();
+        }
+
         MeasureScoring measureScoringFromGroup = null;
         // cycle through available Group Definitions to retrieve appropriate MeasureScoring
         for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
             // Take only MeasureScoring available
-            if (measureScoring.size() == 1) {
-                measureScoringFromGroup = entry.getValue();
-                break;
-            }
             // Match by group id if available
             if (mrgc.getId() != null && entry.getKey().id() != null) {
                 if (entry.getKey().id().equals(mrgc.getId())) {
@@ -41,18 +47,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     break;
                 }
             }
-            // Match by group's population id, if group-ids are not present
-            if ((mrgc.getPopulation().size() == entry.getKey().populations().size())
-                    && mrgc.getId() == null
-                    && entry.getKey().id() == null) {
+            // Match by group's population id
+            if (mrgc.getPopulation().size() == entry.getKey().populations().size()) {
                 int i = 0;
                 for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
                     for (PopulationDef popDefEntry : entry.getKey().populations()) {
-                        if (popId.getId() != null && popDefEntry.id() != null) {
-                            if (popId.getId().equals(popDefEntry.id())) {
-                                i++;
-                                break;
-                            }
+                        if (popId.getId().equals(popDefEntry.id())) {
+                            i++;
+                            break;
                         }
                     }
                 }

@@ -45,6 +45,15 @@ class MeasureScorerTest {
     }
 
     @Test
+    void scorerThrowsIfNoScoringSupplied() {
+        var mr = new MeasureReport();
+        mr.addGroup();
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+
+        assertThrows(IllegalArgumentException.class, () -> scorer.score(null, mr));
+    }
+
+    @Test
     void testScore_populationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);

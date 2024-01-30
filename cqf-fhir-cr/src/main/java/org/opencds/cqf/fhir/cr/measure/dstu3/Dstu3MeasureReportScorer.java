@@ -22,7 +22,12 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
             return;
         }
 
-        var scoring = measureScoring.entrySet().stream().findFirst().get().getValue();
+        if (measureScoring == null || measureScoring.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+        }
+
+        var scoring = measureScoring.values().iterator().next();
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             scoreGroup(scoring, mrgc);
         }

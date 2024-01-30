@@ -19,6 +19,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Override
     public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+        // No groups to score, nothing to do.
+        if (measureReport.getGroup().isEmpty()) {
+            return;
+        }
+
+        if (measureScoring == null || measureScoring.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+        }
+
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
         }
@@ -26,11 +36,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
-        if (measureScoring == null || measureScoring.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
-        }
-
         if (measureScoring.size() == 1) {
             return measureScoring.values().iterator().next();
         }

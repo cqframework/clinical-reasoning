@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
@@ -279,9 +278,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    @Disabled // Disabling this test for now.  This implementation of getting the prepopulate call included has never
-    // been used and is likely to change
-    void testQuestionnairePrepopulate() {
+    void testQuestionnaireTask() {
         var planDefinitionID = "prepopulate";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
@@ -291,39 +288,8 @@ public class PlanDefinitionProcessorTests {
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
                 .parameters(parameters)
-                .thenApply()
-                .isEqualsTo(new org.hl7.fhir.r4.model.IdType("CarePlan", "prepopulate"));
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .parameters(parameters)
                 .thenApplyR5()
                 .isEqualsTo(new org.hl7.fhir.r4.model.IdType("Bundle", "prepopulate"));
-    }
-
-    @Test
-    @Disabled // Disabling this test for now.  This implementation of getting the prepopulate call included has never
-    // been used and is likely to change
-    void testQuestionnairePrepopulate_NoLibrary() {
-        var planDefinitionID = "prepopulate-noLibrary";
-        var patientID = "OPA-Patient1";
-        var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .parameters(parameters)
-                .thenApply()
-                .hasOperationOutcome();
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .parameters(parameters)
-                .thenApplyR5()
-                .hasQuestionnaireOperationOutcome();
     }
 
     @Test

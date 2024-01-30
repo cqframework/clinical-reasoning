@@ -46,6 +46,7 @@
   },
   "action": [
     {
+      "id": "send-discharge-message",
       "title": "Send message with discharge instructions",
       "code": [
         {

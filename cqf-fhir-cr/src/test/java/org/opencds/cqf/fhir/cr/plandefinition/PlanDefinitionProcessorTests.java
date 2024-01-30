@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -37,10 +36,17 @@ public class PlanDefinitionProcessorTests {
         var repository = TestRepositoryFactory.createRepository(
                 fhirContextR5, PlanDefinition.class, CLASS_PATH + "/r5", IGLayoutMode.TYPE_PREFIX);
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
-        var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
+        var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
+                repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
         var packageProcessor = new PackageProcessor(repository);
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
-        var processor = new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault(), new ApplyProcessor(repository, modelResolver, activityProcessor), packageProcessor, activityProcessor, requestResolverFactory);
+        var processor = new PlanDefinitionProcessor(
+                repository,
+                EvaluationSettings.getDefault(),
+                new ApplyProcessor(repository, modelResolver, activityProcessor),
+                packageProcessor,
+                activityProcessor,
+                requestResolverFactory);
         assertNotNull(processor.evaluationSettings());
         var result = processor.apply(
                 Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", "DischargeInstructionsPlan")),

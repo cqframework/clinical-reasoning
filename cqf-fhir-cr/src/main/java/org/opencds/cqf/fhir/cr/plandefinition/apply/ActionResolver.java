@@ -32,8 +32,7 @@ public class ActionResolver {
                         "basedOn",
                         Collections.singletonList(buildReference(
                                 request.getFhirVersion(),
-                                requestGroup.getIdElement().getValue(),
-                                false)));
+                                requestGroup.getIdElement().getValue())));
         // request.getModelResolver().setValue(task, "for", request.resolvePath(requestGroup, "subject"));
 
         // if (action.hasRelatedAction()) {

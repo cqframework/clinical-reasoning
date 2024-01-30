@@ -40,7 +40,7 @@ public class ElementHasCqfExpression {
 
     protected void addResourceValue(
             IOperationRequest request, IAnyResource resource, IBaseBackboneElement questionnaireItem) {
-        final var reference = buildReference(request.getFhirVersion(), resource.getId(), false);
+        final var reference = buildReference(request.getFhirVersion(), resource.getId());
         var initial = createInitial(request, reference);
         request.getModelResolver().setValue(questionnaireItem, "initial", initial);
     }

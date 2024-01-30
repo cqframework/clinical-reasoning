@@ -54,8 +54,7 @@ public class ProcessDefinition {
                                 "resource",
                                 buildReference(
                                         request.getFhirVersion(),
-                                        resource.getIdElement().getValue(),
-                                        false));
+                                        resource.getIdElement().getValue()));
                 if (Boolean.TRUE.equals(request.getContainResources())) {
                     request.getModelResolver()
                             .setValue(requestOrchestration, "contained", Collections.singletonList(resource));
@@ -68,10 +67,7 @@ public class ProcessDefinition {
                     .setValue(
                             requestAction,
                             "resource",
-                            buildReference(
-                                    request.getFhirVersion(),
-                                    ((IPrimitiveType<String>) definition).getValue(),
-                                    request.getContainResources()));
+                            buildReference(request.getFhirVersion(), ((IPrimitiveType<String>) definition).getValue()));
         }
         return resource;
     }

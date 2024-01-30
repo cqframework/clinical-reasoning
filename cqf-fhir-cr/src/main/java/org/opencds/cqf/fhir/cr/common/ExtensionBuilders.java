@@ -50,6 +50,10 @@ public class ExtensionBuilders {
         }
     }
 
+    public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String id) {
+        return buildReference(fhirVersion, id, false);
+    }
+
     public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String id, Boolean isContained) {
         var reference = isContained ? "#".concat(id) : id;
         switch (fhirVersion) {

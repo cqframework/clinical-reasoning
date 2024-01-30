@@ -37,8 +37,8 @@ public class MeasureProcessorEvaluateTest {
                 .then()
                 .report();
 
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-06-29");
+        assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
+        assertEquals("2022-06-29", formatter.format(report.getPeriod().getEnd()));
     }
 
     @Test
@@ -58,8 +58,8 @@ public class MeasureProcessorEvaluateTest {
                 .hasMeasureVersion("0.000.01")
                 .report();
 
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-01-31");
+        assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
+        assertEquals("2022-01-31", formatter.format(report.getPeriod().getEnd()));
     }
 
     @Test

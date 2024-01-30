@@ -26,6 +26,8 @@ public class ProcessDefinition {
     final ActionResolver actionResolver;
 
     public ProcessDefinition(Repository repository, ApplyProcessor applyProcessor) {
+        requireNonNull(repository);
+        requireNonNull(applyProcessor);
         this.repository = repository;
         this.applyProcessor = applyProcessor;
         actionResolver = new ActionResolver();
@@ -36,6 +38,10 @@ public class ProcessDefinition {
             IBaseResource requestOrchestration,
             IBaseBackboneElement action,
             IBaseBackboneElement requestAction) {
+        requireNonNull(request);
+        requireNonNull(requestOrchestration);
+        requireNonNull(action);
+        requireNonNull(requestAction);
         IBaseResource resource = null;
         var definition = getDefinition(request, action);
         if (isDefinitionCanonical(request, definition)) {
@@ -72,12 +78,15 @@ public class ProcessDefinition {
 
     @SuppressWarnings("unchecked")
     protected IPrimitiveType<String> getDefinition(ApplyRequest request, IBaseBackboneElement action) {
+        requireNonNull(request);
+        requireNonNull(action);
         return request.getFhirVersion().isOlderThan(FhirVersionEnum.R4)
                 ? request.resolvePath(request.resolvePath(action, "definition"), "reference", IPrimitiveType.class)
                 : request.resolvePath(action, "definition", IPrimitiveType.class);
     }
 
     protected IBaseResource resolveDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        requireNonNull(definition);
         logger.debug("Resolving definition {}", definition.getValue());
 
         var resourceName = resolveResourceName(request, definition);
@@ -89,24 +98,24 @@ public class ProcessDefinition {
             case QUESTIONNAIRE:
                 return applyQuestionnaireDefinition(request, definition);
             default:
-                throw new FHIRException(String.format("Unknown action definition: %s", definition));
+                throw new FHIRException(String.format("Unknown action definition: %s", definition.getValue()));
         }
     }
 
     protected Boolean isDefinitionCanonical(ApplyRequest request, IBase definition) {
+        requireNonNull(request);
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return definition != null;
             case R4:
                 return definition instanceof org.hl7.fhir.r4.model.CanonicalType;
             case R5:
                 return definition instanceof org.hl7.fhir.r5.model.CanonicalType;
             default:
-                return Boolean.FALSE;
+                return definition != null;
         }
     }
 
     protected Boolean isDefinitionUri(ApplyRequest request, IBase definition) {
+        requireNonNull(request);
         switch (request.getFhirVersion()) {
             case R4:
                 return definition instanceof org.hl7.fhir.r4.model.UriType;
@@ -118,13 +127,14 @@ public class ProcessDefinition {
     }
 
     protected IBaseResource applyQuestionnaireDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        requireNonNull(definition);
         IBaseResource result = null;
         try {
             var referenceToContained = definition.getValue().startsWith("#");
             if (referenceToContained) {
                 result = resolveContained(request, definition.getValue());
             } else {
-                result = searchRepositoryByCanonical(repository, definition);
+                result = resolveRepository(definition);
             }
         } catch (Exception e) {
             var message = String.format(
@@ -137,6 +147,7 @@ public class ProcessDefinition {
     }
 
     protected IBaseResource applyActivityDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        requireNonNull(definition);
         // Running into issues with invoking ActivityDefinition/$apply on a HapiFhirRepository that was created with
         // RequestDetails from PlanDefinition/$apply
         IBaseResource result = null;
@@ -144,7 +155,7 @@ public class ProcessDefinition {
             var referenceToContained = definition.getValue().startsWith("#");
             var activityDefinition = (referenceToContained
                     ? resolveContained(request, definition.getValue())
-                    : searchRepositoryByCanonical(repository, definition));
+                    : resolveRepository(definition));
             // var activityDefParams = request.transformRequestParameters(activityDefinition);
             // Map<String, String> headers = new HashMap<>();
             // headers.put("Content-Type", "application/json+fhir");
@@ -173,11 +184,12 @@ public class ProcessDefinition {
     }
 
     protected IBaseResource applyNestedPlanDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
+        requireNonNull(definition);
         try {
             var referenceToContained = definition.getValue().startsWith("#");
             var nextPlanDefinition = (referenceToContained
                     ? resolveContained(request, definition.getValue())
-                    : searchRepositoryByCanonical(repository, definition));
+                    : resolveRepository(definition));
             var nestedRequest = request.copy(nextPlanDefinition);
             var result = applyProcessor.applyPlanDefinition(nestedRequest);
             request.getRequestResources().addAll(nestedRequest.getRequestResources());
@@ -194,7 +206,12 @@ public class ProcessDefinition {
         }
     }
 
+    protected IBaseResource resolveRepository(IPrimitiveType<String> definition) {
+        return searchRepositoryByCanonical(repository, definition);
+    }
+
     protected String resolveResourceName(ApplyRequest request, IPrimitiveType<String> canonical) {
+        requireNonNull(canonical);
         if (canonical.hasValue()) {
             var id = canonical.getValue();
             if (id.contains("/")) {
@@ -209,6 +226,7 @@ public class ProcessDefinition {
     }
 
     protected IBaseResource resolveContained(ApplyRequest request, String id) {
+        requireNonNull(id);
         var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
         var first = contained.stream()
                 .filter(r -> r.getIdElement().getIdPart().equals(id))

@@ -77,6 +77,11 @@ public class PlanDefinitionProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
+            Either3<C, IIdType, R> planDefinition) {
+        return packageProcessor.packageResource(resolvePlanDefinition(planDefinition));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
             Either3<C, IIdType, R> planDefinition, boolean isPut) {
         return packageProcessor.packageResource(resolvePlanDefinition(planDefinition), isPut ? "PUT" : "POST");
     }

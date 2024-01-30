@@ -246,7 +246,7 @@ public class PlanDefinition {
 
         public GeneratedPackage thenPackage() {
             return new GeneratedPackage(processor.packagePlanDefinition(
-                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)), true));
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))));
         }
     }
 

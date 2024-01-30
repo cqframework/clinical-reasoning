@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
-class MeasureProcessorEvaluateTest {
+public class MeasureProcessorEvaluateTest {
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 

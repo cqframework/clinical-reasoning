@@ -40,7 +40,7 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
     private final Boolean useServerData;
-    private final IBaseBundle bundle;
+    private IBaseBundle bundle;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -51,31 +51,6 @@ public class ApplyRequest implements ICpgRequest {
     private IBaseOperationOutcome operationOutcome;
     private IBaseResource questionnaire;
     private Boolean containResources;
-
-    // // test constructor
-    // public ApplyRequest(FhirVersionEnum fhirVersion) {
-    //     this.planDefinition = null;
-    //     this.subjectId = null;
-    //     this.encounterId = null;
-    //     this.practitionerId = null;
-    //     this.organizationId = null;
-    //     this.userType = null;
-    //     this.userLanguage = null;
-    //     this.userTaskContext = null;
-    //     this.setting = null;
-    //     this.settingContext = null;
-    //     this.parameters = null;
-    //     this.useServerData = null;
-    //     this.bundle = null;
-    //     this.libraryEngine = null;
-    //     this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-    //     this.fhirVersion = fhirVersion;
-    //     defaultLibraryUrl = null;
-    //     inputParameterResolver = null;
-    //     requestResources = new ArrayList<>();
-    //     extractedResources = new ArrayList<>();
-    //     containResources = false;
-    // }
 
     public ApplyRequest(
             IBaseResource planDefinition,
@@ -153,18 +128,18 @@ public class ApplyRequest implements ICpgRequest {
             IBaseResource activityDefinition) {
         return new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest(
                 activityDefinition,
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                bundle,
+                getSubjectId(),
+                getEncounterId(),
+                getPractitionerId(),
+                getOrganizationId(),
+                getUserType(),
+                getUserLanguage(),
+                getUserTaskContext(),
+                getSetting(),
+                getSettingContext(),
+                getParameters(),
+                getUseServerData(),
+                getBundle(),
                 libraryEngine,
                 modelResolver);
     }
@@ -268,39 +243,6 @@ public class ApplyRequest implements ICpgRequest {
         this.operationOutcome = operationOutcome;
     }
 
-    protected final String resolveDefaultLibraryUrl() {
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getReference()
-                        : null;
-            case R4:
-                return ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            case R5:
-                return ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            default:
-                return null;
-        }
-    }
-
-    public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
-        this.questionnaire = questionnaire;
-        return this;
-    }
-
     @Override
     public String getOperationName() {
         return "apply";
@@ -309,6 +251,16 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public IBaseResource getQuestionnaire() {
         return this.questionnaire;
+    }
+
+    public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
+        this.questionnaire = questionnaire;
+        return this;
+    }
+
+    public ApplyRequest setBundle(IBaseBundle bundle) {
+        this.bundle = bundle;
+        return this;
     }
 
     public void setContainResources(Boolean value) {
@@ -442,5 +394,33 @@ public class ApplyRequest implements ICpgRequest {
         }
 
         return params;
+    }
+
+    protected final String resolveDefaultLibraryUrl() {
+        switch (fhirVersion) {
+            case DSTU3:
+                return ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getReference()
+                        : null;
+            case R4:
+                return ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getValueAsString()
+                        : null;
+            case R5:
+                return ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition).hasLibrary()
+                        ? ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition)
+                                .getLibrary()
+                                .get(0)
+                                .getValueAsString()
+                        : null;
+            default:
+                return null;
+        }
     }
 }

@@ -52,6 +52,31 @@ public class ApplyRequest implements ICpgRequest {
     private IBaseResource questionnaire;
     private Boolean containResources;
 
+    // // test constructor
+    // public ApplyRequest(FhirVersionEnum fhirVersion) {
+    //     this.planDefinition = null;
+    //     this.subjectId = null;
+    //     this.encounterId = null;
+    //     this.practitionerId = null;
+    //     this.organizationId = null;
+    //     this.userType = null;
+    //     this.userLanguage = null;
+    //     this.userTaskContext = null;
+    //     this.setting = null;
+    //     this.settingContext = null;
+    //     this.parameters = null;
+    //     this.useServerData = null;
+    //     this.bundle = null;
+    //     this.libraryEngine = null;
+    //     this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+    //     this.fhirVersion = fhirVersion;
+    //     defaultLibraryUrl = null;
+    //     inputParameterResolver = null;
+    //     requestResources = new ArrayList<>();
+    //     extractedResources = new ArrayList<>();
+    //     containResources = false;
+    // }
+
     public ApplyRequest(
             IBaseResource planDefinition,
             IIdType subjectId,
@@ -67,6 +92,7 @@ public class ApplyRequest implements ICpgRequest {
             Boolean useServerData,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
+            IInputParameterResolver inputParameterResolver,
             ModelResolver modelResolver) {
         this.planDefinition = planDefinition;
         this.subjectId = subjectId;
@@ -84,17 +110,19 @@ public class ApplyRequest implements ICpgRequest {
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion = planDefinition.getStructureFhirVersionEnum();
+        this.inputParameterResolver = inputParameterResolver != null
+                ? inputParameterResolver
+                : this.libraryEngine == null
+                        ? null
+                        : createResolver(
+                                libraryEngine.getRepository(),
+                                this.subjectId,
+                                this.encounterId,
+                                this.practitionerId,
+                                this.parameters,
+                                this.useServerData,
+                                this.bundle);
         defaultLibraryUrl = resolveDefaultLibraryUrl();
-        inputParameterResolver = libraryEngine == null
-                ? null
-                : createResolver(
-                        libraryEngine.getRepository(),
-                        this.subjectId,
-                        this.encounterId,
-                        this.practitionerId,
-                        this.parameters,
-                        this.useServerData,
-                        this.bundle);
         requestResources = new ArrayList<>();
         extractedResources = new ArrayList<>();
         containResources = false;
@@ -102,21 +130,23 @@ public class ApplyRequest implements ICpgRequest {
 
     public ApplyRequest copy(IBaseResource planDefinition) {
         return new ApplyRequest(
-                planDefinition,
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                bundle,
-                libraryEngine,
-                modelResolver);
+                        planDefinition,
+                        subjectId,
+                        encounterId,
+                        practitionerId,
+                        organizationId,
+                        userType,
+                        userLanguage,
+                        userTaskContext,
+                        setting,
+                        settingContext,
+                        parameters,
+                        useServerData,
+                        bundle,
+                        libraryEngine,
+                        inputParameterResolver,
+                        modelResolver)
+                .setQuestionnaire(questionnaire);
     }
 
     public org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest toActivityRequest(
@@ -266,8 +296,9 @@ public class ApplyRequest implements ICpgRequest {
         }
     }
 
-    public void setQuestionnaire(IBaseResource questionnaire) {
+    public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
         this.questionnaire = questionnaire;
+        return this;
     }
 
     @Override

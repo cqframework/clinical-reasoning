@@ -44,11 +44,11 @@ public class BenchmarksIT {
     @Disabled("Test fails during package due to test-jar not working as expected ")
     public void benchmark() throws Exception {
         Options opt = new OptionsBuilder()
-                .include(Questionnaires.class.getSimpleName())
-                .include(Measures.class.getSimpleName())
-                .include(MeasuresAdditionalData.class.getSimpleName())
+                // .include(Questionnaires.class.getSimpleName())
+                // .include(Measures.class.getSimpleName())
+                // .include(MeasuresAdditionalData.class.getSimpleName())
                 .include(PlanDefinitions.class.getSimpleName())
-                .include(TerminologyProviders.class.getSimpleName())
+                // .include(TerminologyProviders.class.getSimpleName())
                 .build();
         Collection<RunResult> runResults = new Runner(opt).run();
         assertFalse(runResults.isEmpty());

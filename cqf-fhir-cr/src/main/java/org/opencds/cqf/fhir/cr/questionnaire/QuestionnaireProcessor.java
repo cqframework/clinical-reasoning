@@ -65,13 +65,13 @@ public class QuestionnaireProcessor {
         this.populateProcessor = populateProcessor != null ? populateProcessor : new PopulateProcessor();
     }
 
-    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
-            Either3<CanonicalType, IIdType, R> questionnaire) {
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
+            Either3<C, IIdType, R> questionnaire) {
         return (R) questionnaireResolver.resolve(questionnaire);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R resolveStructureDefinition(
-            Either3<CanonicalType, IIdType, R> structureDef) {
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveStructureDefinition(
+            Either3<C, IIdType, R> structureDef) {
         return (R) structureDefResolver.resolve(structureDef);
     }
 
@@ -79,19 +79,19 @@ public class QuestionnaireProcessor {
         return generateProcessor.generate(id);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile) {
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile) {
         return generateQuestionnaire(profile, false, true);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile, Boolean supportedOnly, Boolean requiredOnly) {
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile, Boolean supportedOnly, Boolean requiredOnly) {
         return generateQuestionnaire(
                 profile, supportedOnly, requiredOnly, null, null, null, null, (IBaseResource) null, null, null, null);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
             String subjectId,
@@ -116,8 +116,8 @@ public class QuestionnaireProcessor {
                 id);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
             String subjectId,
@@ -140,8 +140,8 @@ public class QuestionnaireProcessor {
                 id);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource generateQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> profile,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
             String subjectId,
@@ -164,8 +164,8 @@ public class QuestionnaireProcessor {
         return generateProcessor.generate(request, profile, id);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire) {
+    public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
+            Either3<C, IIdType, IBaseResource> questionnaire) {
         return packageQuestionnaire(resolveQuestionnaire(questionnaire));
     }
 
@@ -173,8 +173,8 @@ public class QuestionnaireProcessor {
         return packageProcessor.packageResource(questionnaire);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire, boolean isPut) {
+    public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
+            Either3<C, IIdType, IBaseResource> questionnaire, boolean isPut) {
         return packageQuestionnaire(resolveQuestionnaire(questionnaire), isPut);
     }
 
@@ -199,8 +199,8 @@ public class QuestionnaireProcessor {
                 modelResolver);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -219,8 +219,8 @@ public class QuestionnaireProcessor {
                 createRestRepository(repository.fhirContext(), terminologyEndpoint));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -233,8 +233,8 @@ public class QuestionnaireProcessor {
                 questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -257,8 +257,8 @@ public class QuestionnaireProcessor {
         return (R) populateProcessor.prePopulate(request);
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -277,8 +277,8 @@ public class QuestionnaireProcessor {
                 createRestRepository(repository.fhirContext(), terminologyEndpoint));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
@@ -291,8 +291,8 @@ public class QuestionnaireProcessor {
                 questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
     }
 
-    public <CanonicalType extends IPrimitiveType<String>> IBaseResource populate(
-            Either3<CanonicalType, IIdType, IBaseResource> questionnaire,
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
+            Either3<C, IIdType, R> questionnaire,
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,

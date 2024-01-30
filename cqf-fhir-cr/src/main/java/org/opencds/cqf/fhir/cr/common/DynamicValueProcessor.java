@@ -26,23 +26,29 @@ public class DynamicValueProcessor {
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      */
     public void processDynamicValues(ICpgRequest request, IBaseResource resource, IElement definitionElement) {
-        processDynamicValues(request, resource, definitionElement, null);
+        var context = definitionElement instanceof IBaseResource ? (IBaseResource) definitionElement : resource;
+        processDynamicValues(request, context, resource, definitionElement, null);
     }
 
     /**
      * Processes all dynamicValues on a definition element and sets the resulting values to the corresponding path on the resource or requestAction passed in
      *
      * @param request the $apply request parameters
+     * @param context the original resource the dynamicValue is from
      * @param resource the resource to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      * @param requestAction the action of the RequestOrchestration created from the definition action
      */
     public void processDynamicValues(
-            ICpgRequest request, IBaseResource resource, IElement definitionElement, IElement requestAction) {
+            ICpgRequest request,
+            IBaseResource context,
+            IBaseResource resource,
+            IElement definitionElement,
+            IElement requestAction) {
         var dynamicValues = request.getDynamicValues(definitionElement);
         for (var dynamicValue : dynamicValues) {
             try {
-                resolveDynamicValue(request, dynamicValue, resource, requestAction);
+                resolveDynamicValue(request, dynamicValue, context, resource, requestAction);
             } catch (Exception e) {
                 var message = String.format(
                         "DynamicValue resolution for path %s encountered exception: %s",
@@ -74,13 +80,17 @@ public class DynamicValueProcessor {
     }
 
     protected void resolveDynamicValue(
-            ICpgRequest request, IBaseBackboneElement dynamicValue, IBaseResource resource, IElement requestAction) {
+            ICpgRequest request,
+            IBaseBackboneElement dynamicValue,
+            IBaseResource context,
+            IBaseResource resource,
+            IElement requestAction) {
         var path = request.resolvePathString(dynamicValue, "path");
         // Strip % so it is supported as defined in the spec
         path = path.replace("%", "");
         var cqfExpression = getDynamicValueExpression(request, dynamicValue);
         if (path != null && cqfExpression != null) {
-            var result = getDynamicValueExpressionResult(request, cqfExpression, resource);
+            var result = getDynamicValueExpressionResult(request, cqfExpression, context, resource);
             if (result == null || result.isEmpty()) {
                 return;
             }
@@ -111,13 +121,14 @@ public class DynamicValueProcessor {
     }
 
     protected List<IBase> getDynamicValueExpressionResult(
-            ICpgRequest request, CqfExpression cqfExpression, IBaseResource resource) {
+            ICpgRequest request, CqfExpression cqfExpression, IBaseResource context, IBaseResource resource) {
         return request.getLibraryEngine()
                 .resolveExpression(
                         request.getSubjectId().getIdPart(),
                         cqfExpression,
                         request.getParameters(),
                         request.getBundle(),
+                        context,
                         resource);
     }
 

@@ -26,8 +26,11 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApplyProcessor implements IApplyProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
     protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays.asList(
             Constants.CPG_KNOWLEDGE_CAPABILITY,
             Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL,
@@ -150,6 +153,10 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     public IBaseResource applyPlanDefinition(ApplyRequest request) {
+        logger.info(
+                "Performing $apply operation on PlanDefinition/{}",
+                request.getPlanDefinition().getIdElement().getIdPart());
+
         var requestOrchestration = processRequest.generateRequestOrchestration(request);
         extensionProcessor.processExtensions(
                 request, requestOrchestration, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);

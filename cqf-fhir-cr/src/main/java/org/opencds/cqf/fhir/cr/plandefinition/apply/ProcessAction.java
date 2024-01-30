@@ -78,7 +78,8 @@ public class ProcessAction {
                                         processAction(request, requestOrchestration, metConditions, childAction)));
             }
             var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
-            dynamicValueProcessor.processDynamicValues(request, resource, action, requestAction);
+            dynamicValueProcessor.processDynamicValues(
+                    request, request.getPlanDefinition(), resource, action, requestAction);
             return requestAction;
         }
 
@@ -87,18 +88,24 @@ public class ProcessAction {
 
     @SuppressWarnings("unchecked")
     protected void addQuestionnaireItemForInput(ApplyRequest request, IBaseBackboneElement action) {
-        var actionInput = request.resolvePathList(action, "input", IElement.class);
-        for (var input : actionInput) {
-            var dataReqElement = getDataRequirementElement(request, input);
-            var profiles = request.resolvePathList(dataReqElement, "profile", IPrimitiveType.class);
-            if (profiles.isEmpty()) {
-                return;
+        try {
+            var actionInput = request.resolvePathList(action, "input", IElement.class);
+            for (var input : actionInput) {
+                var dataReqElement = getDataRequirementElement(request, input);
+                var profiles = request.resolvePathList(dataReqElement, "profile", IPrimitiveType.class);
+                if (profiles.isEmpty()) {
+                    return;
+                }
+                var profile = searchRepositoryByCanonical(repository, profiles.get(0));
+                var generateRequest = request.toGenerateRequest();
+                request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest, profile));
+                // If input has text extension use it to override
+                // resolve extensions or not?
             }
-            var profile = searchRepositoryByCanonical(repository, profiles.get(0));
-            var generateRequest = request.toGenerateRequest();
-            request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest, profile));
-            // If input has text extension use it to override
-            // resolve extensions or not?
+        } catch (Exception e) {
+            var message = String.format(
+                    "An error occurred while generating Questionnaire items for action input: %s", e.getMessage());
+            request.logException(message);
         }
     }
 

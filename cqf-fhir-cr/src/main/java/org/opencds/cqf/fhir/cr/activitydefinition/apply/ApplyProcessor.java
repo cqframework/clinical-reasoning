@@ -31,7 +31,7 @@ public class ApplyProcessor implements IApplyProcessor {
     @Override
     public IBaseResource apply(ApplyRequest request) {
         logger.info(
-                "Performing $apply operation on {}",
+                "Performing $apply operation on ActivityDefinition/{}",
                 request.getActivityDefinition().getIdElement().getIdPart());
 
         var result = resolverFactory.create(request.getActivityDefinition()).resolve(request);

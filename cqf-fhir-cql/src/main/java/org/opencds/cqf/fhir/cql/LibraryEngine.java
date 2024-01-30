@@ -88,16 +88,26 @@ public class LibraryEngine {
             String patientId,
             List<Pair<String, String>> libraries,
             IBaseBundle bundle,
+            IBase contextParameter,
             IBase resourceParameter) {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
-        if (resourceParameter != null) {
+        if (contextParameter != null) {
+            var contextType = contextParameter.getClass().getSimpleName();
+            cqlParameters.add(new CqlParameterDefinition("%fhirpathcontext", contextType, false, contextParameter));
+            var resourceType = resourceParameter == null
+                    ? contextType
+                    : resourceParameter.getClass().getSimpleName();
             cqlParameters.add(new CqlParameterDefinition(
-                    resourceParameter.fhirType(),
-                    resourceParameter.getClass().getSimpleName(),
-                    false,
-                    resourceParameter));
+                    "%resource",
+                    resourceType, false, resourceParameter == null ? contextParameter : resourceParameter));
+        }
+        // There is currently a bug in the CQL compiler that causes the FHIRPath %context variable to fail.
+        // This bit of hackery finds any uses of %context in the expression being evaluated and switches it to
+        // fhirpathcontext to allow for successful evaluation.
+        if (expression.contains("%context")) {
+            expression = expression.replace("%context", "%fhirpathcontext");
         }
         var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
 
@@ -113,8 +123,9 @@ public class LibraryEngine {
             providers.registerProvider(source);
         }
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        if (resourceParameter != null) {
-            evaluationParameters.put(resourceParameter.fhirType(), resourceParameter);
+        if (contextParameter != null) {
+            evaluationParameters.put("%fhirpathcontext", contextParameter);
+            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
         }
         var id = new VersionedIdentifier().withId("expression").withVersion("1.0.0");
         var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
@@ -129,7 +140,8 @@ public class LibraryEngine {
             String libraryToBeEvaluated,
             IBaseParameters parameters,
             IBaseBundle bundle) {
-        return getExpressionResult(subjectId, expression, language, libraryToBeEvaluated, parameters, bundle, null);
+        return getExpressionResult(
+                subjectId, expression, language, libraryToBeEvaluated, parameters, bundle, null, null);
     }
 
     public List<IBase> getExpressionResult(
@@ -139,6 +151,7 @@ public class LibraryEngine {
             String libraryToBeEvaluated,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            IBase contextParameter,
             IBase resourceParameter) {
         validateExpression(language, expression);
         List<IBase> results = null;
@@ -148,8 +161,8 @@ public class LibraryEngine {
             case "text/cql.expression":
             case "text/cql-expression":
             case "text/fhirpath":
-                parametersResult =
-                        this.evaluateExpression(expression, parameters, subjectId, null, bundle, resourceParameter);
+                parametersResult = this.evaluateExpression(
+                        expression, parameters, subjectId, null, bundle, contextParameter, resourceParameter);
                 // The expression is assumed to be the parameter component name
                 // The expression evaluator creates a library with a single expression defined as "return"
                 results = resolveParameterValues(
@@ -235,7 +248,7 @@ public class LibraryEngine {
 
     public List<IBase> resolveExpression(
             String patientId, CqfExpression expression, IBaseParameters params, IBaseBundle bundle) {
-        return resolveExpression(patientId, expression, params, bundle, null);
+        return resolveExpression(patientId, expression, params, bundle, null, null);
     }
 
     public List<IBase> resolveExpression(
@@ -243,6 +256,7 @@ public class LibraryEngine {
             CqfExpression expression,
             IBaseParameters params,
             IBaseBundle bundle,
+            IBase contextParameter,
             IBase resourceParameter) {
         var result = getExpressionResult(
                 patientId,
@@ -251,6 +265,7 @@ public class LibraryEngine {
                 expression.getLibraryUrl(),
                 params,
                 bundle,
+                contextParameter,
                 resourceParameter);
         if (result == null && expression.getAltExpression() != null) {
             result = getExpressionResult(
@@ -260,6 +275,7 @@ public class LibraryEngine {
                     expression.getAltLibraryUrl(),
                     params,
                     bundle,
+                    contextParameter,
                     resourceParameter);
         }
 

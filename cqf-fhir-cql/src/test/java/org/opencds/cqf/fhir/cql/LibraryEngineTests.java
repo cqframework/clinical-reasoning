@@ -31,14 +31,14 @@ class LibraryEngineTests {
                 "'Greeting: Hello! ' + %subject.name.given.first() + ' Message: Test message Practitioner: ' + %practitioner.name.given.first()",
                 null);
 
-        var result = libraryEngine.resolveExpression(patientId, expression, params, null, null);
+        var result = libraryEngine.resolveExpression(patientId, expression, params, null, null, null);
         assertEquals(
                 "Greeting: Hello! Alice Message: Test message Practitioner: Michael",
                 ((StringType) result.get(0)).getValue());
 
         var expression2 = new CqfExpression(
                 "text/fhirpath", "'Provide discharge instructions for ' + %subject.name.given.first()", null);
-        var result2 = libraryEngine.resolveExpression(patientId, expression2, params, null, null);
+        var result2 = libraryEngine.resolveExpression(patientId, expression2, params, null, null, null);
         assertEquals("Provide discharge instructions for Alice", ((StringType) result2.get(0)).getValue());
     }
 
@@ -51,11 +51,11 @@ class LibraryEngineTests {
         var params = parameters();
         params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
         params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
-        var expression = new CqfExpression("text/fhirpath", "Task.code", null);
+        var expression = new CqfExpression("text/fhirpath", "%resource.code", null);
 
         var task = new Task().setCode(new CodeableConcept(new Coding("test-system", "test-code", null)));
 
-        var result = libraryEngine.resolveExpression(patientId, expression, params, null, task);
+        var result = libraryEngine.resolveExpression(patientId, expression, params, null, task, null);
         assertEquals(
                 "test-system",
                 ((CodeableConcept) result.get(0)).getCodingFirstRep().getSystem());

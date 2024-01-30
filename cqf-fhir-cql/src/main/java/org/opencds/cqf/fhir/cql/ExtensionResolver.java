@@ -65,7 +65,8 @@ public class ExtensionResolver {
                     CqfExpression.of((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl),
                     parameters,
                     bundle,
-                    resource);
+                    resource,
+                    null);
         }
 
         if (expression instanceof org.hl7.fhir.r5.model.Expression) {
@@ -74,6 +75,7 @@ public class ExtensionResolver {
                     CqfExpression.of((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl),
                     parameters,
                     bundle,
+                    resource,
                     null);
         }
 

@@ -179,7 +179,11 @@ public class ProcessDefinition {
                     ? resolveContained(request, definition.getValue())
                     : searchRepositoryByCanonical(repository, definition));
             var nestedRequest = request.copy(nextPlanDefinition);
-            return applyProcessor.applyPlanDefinition(nestedRequest);
+            var result = applyProcessor.applyPlanDefinition(nestedRequest);
+            request.getRequestResources().addAll(nestedRequest.getRequestResources());
+            request.getExtractedResources().addAll(nestedRequest.getExtractedResources());
+            request.setQuestionnaire(nestedRequest.getQuestionnaire());
+            return result;
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: PlanDefinition %s could not be applied and threw exception %s",

@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
-import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 public class TestRepositoryFactory {
     private TestRepositoryFactory() {
@@ -30,12 +30,12 @@ public class TestRepositoryFactory {
             Class<?> clazz,
             String path,
             IGLayoutMode layoutMode,
-            IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
+            IRepositoryOperationProvider operationProvider) {
         return new IGFileStructureRepository(
                 fhirContext,
                 clazz.getProtectionDomain().getCodeSource().getLocation().getPath() + path,
                 layoutMode,
                 EncodingEnum.JSON,
-                activityDefinitionProcessorFactory);
+                operationProvider);
     }
 }

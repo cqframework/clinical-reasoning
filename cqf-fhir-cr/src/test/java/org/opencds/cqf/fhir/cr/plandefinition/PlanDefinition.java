@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cr.ActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -79,7 +79,7 @@ public class PlanDefinition {
         public PlanDefinitionProcessor buildProcessor(Repository repository) {
             if (repository instanceof IGFileStructureRepository) {
                 ((IGFileStructureRepository) repository)
-                        .setActivityDefinitionProcessorFactory(new ActivityDefinitionProcessorFactory());
+                        .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();

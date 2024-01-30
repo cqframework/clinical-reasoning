@@ -112,6 +112,7 @@ public class PlanDefinitionProcessor {
                 useServerData,
                 bundle,
                 libraryEngine,
+                null,
                 modelResolver);
     }
 

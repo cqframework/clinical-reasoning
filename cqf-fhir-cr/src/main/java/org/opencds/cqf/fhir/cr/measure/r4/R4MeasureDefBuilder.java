@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +30,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-    public static final String CQFM_SCORING_EXT_URL =
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -52,19 +51,20 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             // Ids are not required on groups in r4
             // checkId(group);
 
-            // Group MeasureScoring
-            if (measureLevelMeasureScoring == null && group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null) {
-                throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
-            }
-            MeasureScoring groupMeasureScoringCode = null;
-            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null) {
+            // Use the measure level scoring as the default
+            var groupMeasureScoringCode = measureLevelMeasureScoring;
+
+            // But override measure level scoring if group scoring is present
+            var scoringExtension = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
+            if (scoringExtension != null) {
                 CodeableConcept coding = (CodeableConcept)
                         group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
                 groupMeasureScoringCode =
-                        getGroupMeasureScoring(coding.getCodingFirstRep().getCode());
+                        MeasureScoring.fromCode(coding.getCodingFirstRep().getCode());
             }
-            if (group.getExtensionByUrl(CQFM_SCORING_EXT_URL) == null && measureLevelMeasureScoring != null) {
-                groupMeasureScoringCode = measureLevelMeasureScoring;
+
+            if (groupMeasureScoringCode == null) {
+                throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
             }
 
             // Populations
@@ -146,9 +146,5 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private MeasureScoring getMeasureScoring(Measure measure) {
         return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
-    }
-
-    private MeasureScoring getGroupMeasureScoring(String scoringCode) {
-        return MeasureScoring.fromCode(scoringCode);
     }
 }

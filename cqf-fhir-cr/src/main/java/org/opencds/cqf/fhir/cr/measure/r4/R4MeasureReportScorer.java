@@ -27,7 +27,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
         if (measureScoring == null || measureScoring.isEmpty()) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
         }
 
@@ -64,7 +64,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             }
         }
         if (measureScoringFromGroup == null) {
-            throw new IllegalStateException("No MeasureScoring value set");
+            throw new IllegalArgumentException("No MeasureScoring value set");
         }
         return measureScoringFromGroup;
     }

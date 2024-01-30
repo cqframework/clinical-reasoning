@@ -1,0 +1,7 @@
+{
+    "id": "LibraryUnavailable",
+    "resourceType" : "Measure",
+    "library": [
+        "http://example.com/Library/Unavailable"
+      ]
+}

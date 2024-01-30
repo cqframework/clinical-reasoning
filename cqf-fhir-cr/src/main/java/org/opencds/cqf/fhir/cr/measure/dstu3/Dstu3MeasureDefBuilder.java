@@ -43,7 +43,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Groups
         MeasureScoring groupMeasureScoringCode = getMeasureScoring(measure);
-        if (groupMeasureScoringCode == null) {
+
+        // The group size check here is to ensure that there's parity in the behavior of builder
+        // between DSTU3 and R4. In R4, scoring can be on the group level so if we have an
+        // empty measure we simply generate an empty MeasureReport.
+        // This might not be the best behavior, but we want to ensure that the behavior is the same
+        // between versions
+        if (!measure.getGroup().isEmpty() && groupMeasureScoringCode == null) {
             throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
         }
         List<GroupDef> groups = new ArrayList<>();

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,14 +19,14 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
-public class MeasureProcessorEvaluateTest {
+class MeasureProcessorEvaluateTest {
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     protected static Given given = Measure.given().repositoryFor("CaseRepresentation101");
 
     @Test
-    public void measure_eval() {
+    void measure_eval() {
         var report = given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
                 .periodStart("2022-01-01")
@@ -41,7 +42,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    public void measure_eval_with_additional_data() {
+    void measure_eval_with_additional_data() {
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()
                 .parseResource(
@@ -115,7 +116,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    public void test_with_custom_options() {
+    void test_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions
@@ -147,7 +148,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    public void test_additional_data_with_custom_options() {
+    void test_additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions
@@ -217,6 +218,52 @@ public class MeasureProcessorEvaluateTest {
                 .evaluate();
 
         String errorMsg = "MeasureScoring must be specified on Group or Measure";
-        assertThrows(IllegalArgumentException.class, () -> when.then(), errorMsg);
+        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        assertEquals(errorMsg, e.getMessage());
+    }
+
+    @Test
+    void evaluateThrowsErrorWithEmptyMeasure() {
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("Empty")
+                .evaluate();
+        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        assertTrue(e.getMessage().contains("does not have a primary library"));
+    }
+
+    @Test
+    void evaluateThrowsErrorWhenLibraryUnavailable() {
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("LibraryUnavailable")
+                .evaluate();
+        assertThrows(ResourceNotFoundException.class, () -> when.then());
+    }
+
+    @Test
+    void evaluateThrowsErrorWhenLibraryIsMissingContent() {
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("LibraryMissingContent")
+                .evaluate();
+        var e = assertThrows(IllegalStateException.class, () -> when.then());
+        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
+    }
+
+    @Test
+    void evaluateSucceedsWithMinimalMeasure() {
+        var when = Measure.given()
+                .repositoryFor("MinimalMeasure")
+                .when()
+                .measureId("Minimal")
+                .evaluate();
+
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(0, report.getGroup().size());
     }
 }

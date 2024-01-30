@@ -17,13 +17,13 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
-public class MeasureScorerTest {
+class MeasureScorerTest {
 
     List<Measure> myMeasures = getMyMeasures();
     List<MeasureReport> myMeasureReports = getMyMeasureReports();
 
     @Test
-    public void testScore_groupIdMultiRateMeasure() {
+    void testScore_groupIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -45,7 +45,7 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_populationIdMultiRate() {
+    void testScore_populationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -58,19 +58,17 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_error_noids() {
+    void testScore_error_noids() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> scorer.score(measureScoringDef, measureReport),
-                "No MeasureScoring value set");
+        var e = assertThrows(IllegalArgumentException.class, () -> scorer.score(measureScoringDef, measureReport));
+        assertEquals("No MeasureScoring value set", e.getMessage());
     }
 
-    public MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
+    MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
         return measureReport.getGroup().stream()
                 .filter(g -> g.getId().equals(id))
                 .findFirst()

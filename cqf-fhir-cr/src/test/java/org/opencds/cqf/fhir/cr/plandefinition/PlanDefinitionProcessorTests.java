@@ -35,15 +35,15 @@ public class PlanDefinitionProcessorTests {
         var patientID = "Patient/ChildRoutine-Reportable";
         var data = "r4/child-routine-visit/child_routine_visit_patient.json";
         var content = "r4/child-routine-visit/child_routine_visit_plan_definition.json";
-        // given().repositoryFor(fhirContextR4, "r4")
-        //         .when()
-        //         .planDefinitionId(planDefinitionID)
-        //         .subjectId(patientID)
-        //         .data(data)
-        //         .content(content)
-        //         .terminology(content)
-        //         .thenApply()
-        //         .isEqualsTo("r4/child-routine-visit/child_routine_visit_careplan.json");
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .data(data)
+                .content(content)
+                .terminology(content)
+                .thenApply()
+                .isEqualsTo("r4/child-routine-visit/child_routine_visit_careplan.json");
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
@@ -406,6 +406,12 @@ public class PlanDefinitionProcessorTests {
                 .planDefinitionId("generate-questionnaire")
                 .thenPackage()
                 .hasEntry(8);
+
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .planDefinitionId("DischargeInstructionsPlan")
+                .thenPackage()
+                .hasEntry(1);
     }
 
     @Test
@@ -415,6 +421,12 @@ public class PlanDefinitionProcessorTests {
                 .planDefinitionId("ASLPA1")
                 .thenPackage()
                 .hasEntry(20);
+
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId("DischargeInstructionsPlan")
+                .thenPackage()
+                .hasEntry(1);
     }
 
     @Test
@@ -424,5 +436,11 @@ public class PlanDefinitionProcessorTests {
                 .planDefinitionId("generate-questionnaire")
                 .thenPackage()
                 .hasEntry(8);
+
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .planDefinitionId("DischargeInstructionsPlan")
+                .thenPackage()
+                .hasEntry(1);
     }
 }

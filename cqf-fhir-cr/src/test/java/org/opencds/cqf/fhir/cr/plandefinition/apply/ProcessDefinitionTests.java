@@ -77,7 +77,7 @@ public class ProcessDefinitionTests {
     @Test
     void applyQuestionnaireDefinitionShouldReturnContainedQuestionnaire() {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
-        var definition = new CanonicalType("#" + QUESTIONNAIRE);
+        var definition = new CanonicalType("#Questionnaire/test");
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
         doReturn(expectedQuestionnaire).when(fixture).resolveContained(request, definition.getValue());
         var result = fixture.applyQuestionnaireDefinition(request, definition);

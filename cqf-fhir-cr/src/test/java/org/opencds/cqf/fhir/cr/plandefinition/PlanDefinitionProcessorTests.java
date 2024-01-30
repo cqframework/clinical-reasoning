@@ -1,16 +1,60 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
+import org.opencds.cqf.fhir.cr.plandefinition.packages.PackageProcessor;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 
 public class PlanDefinitionProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
+
+    @Test
+    void testDefaultSettings() {
+        var repository = TestRepositoryFactory.createRepository(
+                fhirContextR4, PlanDefinition.class, CLASS_PATH + "/r4", IGLayoutMode.TYPE_PREFIX);
+        var processor = new PlanDefinitionProcessor(repository);
+        assertNotNull(processor.evaluationSettings());
+    }
+
+    @Test
+    void testProcessor() {
+        var repository = TestRepositoryFactory.createRepository(
+                fhirContextR5, PlanDefinition.class, CLASS_PATH + "/r5", IGLayoutMode.TYPE_PREFIX);
+        var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
+        var packageProcessor = new PackageProcessor(repository);
+        var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
+        var processor = new PlanDefinitionProcessor(repository, EvaluationSettings.getDefault(), new ApplyProcessor(repository, modelResolver, activityProcessor), packageProcessor, activityProcessor, requestResolverFactory);
+        assertNotNull(processor.evaluationSettings());
+        var result = processor.apply(
+                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", "DischargeInstructionsPlan")),
+                "Patient1",
+                "Encounter1",
+                "Practitioner1",
+                "Organization1",
+                null,
+                null,
+                null,
+                null,
+                null);
+        assertNotNull(result);
+    }
 
     @Test
     void testChildRoutineVisitDstu3() {
@@ -425,6 +469,7 @@ public class PlanDefinitionProcessorTests {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId("DischargeInstructionsPlan")
+                .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(1);
     }
@@ -440,6 +485,7 @@ public class PlanDefinitionProcessorTests {
         given().repositoryFor(fhirContextR5, "r5")
                 .when()
                 .planDefinitionId("DischargeInstructionsPlan")
+                .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(1);
     }

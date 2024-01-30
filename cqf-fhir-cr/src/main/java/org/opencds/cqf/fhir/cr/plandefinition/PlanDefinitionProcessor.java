@@ -71,6 +71,10 @@ public class PlanDefinitionProcessor {
                 : new ApplyProcessor(this.repository, modelResolver, this.activityProcessor);
     }
 
+    public EvaluationSettings evaluationSettings() {
+        return evaluationSettings;
+    }
+
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
             Either3<C, IIdType, R> planDefinition) {
         return new ResourceResolver("PlanDefinition", repository).resolve(planDefinition);

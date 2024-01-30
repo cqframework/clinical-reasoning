@@ -110,6 +110,7 @@ public class PlanDefinition {
         private String subjectId;
         private String encounterId;
         private String practitionerId;
+        private String organizationId;
         private Boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
@@ -117,6 +118,7 @@ public class PlanDefinition {
         private IBaseBundle additionalData;
         private IIdType additionalDataId;
         private IBaseParameters parameters;
+        private Boolean isPackagePut;
 
         public When(Repository repository, PlanDefinitionProcessor processor) {
             this.repository = repository;
@@ -141,6 +143,11 @@ public class PlanDefinition {
 
         public When practitionerId(String id) {
             practitionerId = id;
+            return this;
+        }
+
+        public When organizationId(String id) {
+            organizationId = id;
             return this;
         }
 
@@ -190,6 +197,11 @@ public class PlanDefinition {
             return this;
         }
 
+        public When isPut(Boolean value) {
+            isPackagePut = value;
+            return this;
+        }
+
         public IBaseBundle applyR5() {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
@@ -199,7 +211,7 @@ public class PlanDefinition {
                     subjectId,
                     encounterId,
                     practitionerId,
-                    null,
+                    organizationId,
                     null,
                     null,
                     null,
@@ -229,7 +241,7 @@ public class PlanDefinition {
                             subjectId,
                             encounterId,
                             practitionerId,
-                            null,
+                            organizationId,
                             null,
                             null,
                             null,
@@ -245,8 +257,14 @@ public class PlanDefinition {
         }
 
         public GeneratedPackage thenPackage() {
-            return new GeneratedPackage(processor.packagePlanDefinition(
-                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))));
+            if (isPackagePut == null) {
+                return new GeneratedPackage(processor.packagePlanDefinition(
+                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))));
+            } else {
+                return new GeneratedPackage(processor.packagePlanDefinition(
+                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                        isPackagePut));
+            }
         }
     }
 

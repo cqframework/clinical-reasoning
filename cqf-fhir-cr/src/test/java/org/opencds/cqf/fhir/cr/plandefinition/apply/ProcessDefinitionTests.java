@@ -63,12 +63,12 @@ public class ProcessDefinitionTests {
     }
 
     @Test
-    void applyQuestionnaireDefinitionShouldReturnQuestionnaire() {
+    void resolveDefinitionShouldReturnQuestionnaire() {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
         var definition = new CanonicalType(QUESTIONNAIRE);
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
         doReturn(expectedQuestionnaire).when(fixture).resolveRepository(definition);
-        var result = fixture.applyQuestionnaireDefinition(request, definition);
+        var result = fixture.resolveDefinition(request, definition);
         assertEquals(expectedQuestionnaire, result);
         var oc = request.getOperationOutcome();
         assertNull(oc);

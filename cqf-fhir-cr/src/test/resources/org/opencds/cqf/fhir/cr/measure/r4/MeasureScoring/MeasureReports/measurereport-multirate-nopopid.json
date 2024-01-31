@@ -19,6 +19,7 @@
   "group": [ {
     "id": "DataCompleteness",
     "population": [ {
+      "id": "initial-population",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -28,6 +29,7 @@
       },
       "count": 1
     }, {
+      "id": "denominator",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -37,6 +39,7 @@
       },
       "count": 1
     }, {
+      "id": "numerator",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -59,6 +62,7 @@
   }, {
     "id": "PerformanceRate",
     "population": [ {
+      "id": "initial-population-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -68,6 +72,7 @@
       },
       "count": 1
     }, {
+      "id": "denominator-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -77,6 +82,7 @@
       },
       "count": 1
     }, {
+      "id": "numerator-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",

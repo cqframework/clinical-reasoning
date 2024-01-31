@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
@@ -84,13 +86,20 @@ public class Dstu3MeasureProcessor {
 
         var library = this.repository.read(Library.class, reference.getReferenceElement());
 
+        var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
         var context = Engines.forRepositoryAndSettings(
                 this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
 
-        var lib = context.getEnvironment()
-                .getLibraryManager()
-                .resolveLibrary(
-                        new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion()));
+        CompiledLibrary lib;
+        try {
+            lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
+        } catch (CqlIncludeException e) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library has CQL/ELM content embedded.",
+                            id.getId()),
+                    e);
+        }
 
         context.getState().init(lib.getLibrary());
 

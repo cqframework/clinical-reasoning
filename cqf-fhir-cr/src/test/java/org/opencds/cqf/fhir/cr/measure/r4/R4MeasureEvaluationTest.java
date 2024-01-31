@@ -434,18 +434,21 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private void addPopulation(Measure measure, MeasurePopulationType measurePopulationType, String expression) {
         MeasureGroupPopulationComponent mgpc = measure.getGroupFirstRep().addPopulation();
+        mgpc.setId(measurePopulationType.toCode());
         mgpc.getCode().getCodingFirstRep().setCode(measurePopulationType.toCode());
         mgpc.getCriteria().setExpression(expression);
     }
 
     private void addSDEComponent(Measure measure) {
         MeasureSupplementalDataComponent sde = measure.getSupplementalDataFirstRep();
+        sde.setId("sde-race");
         sde.getCode().setText("sde-race");
         sde.getCriteria().setLanguage("text/cql").setExpression("SDE Race");
     }
 
     private Measure measure(String scoring) {
         Measure measure = new Measure();
+        measure.setId(scoring);
         measure.setName("Test");
         measure.setVersion("1.0.0");
         measure.setUrl("http://test.com/fhir/Measure/Test");

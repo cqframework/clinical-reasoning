@@ -291,7 +291,7 @@ public class MeasureEvaluator {
                     "Measure observation %s does not reference a function definition", criteriaExpression));
         }
 
-        Object result = null;
+        Object result;
         context.getState().pushWindow();
         try {
             context.getState()
@@ -375,14 +375,14 @@ public class MeasureEvaluator {
                 }
                 // I & D & !E & !(X & !N) => inTotalDenominator
                 // denom-exclusion already considered in inDenominator
-                if(inInitialPopulation && inDenominator && !(inException && !inNumerator)){
+                if (inInitialPopulation && inDenominator && !(inException && !inNumerator)) {
                     PopulationDef totalDenominator = groupDef.getSingle(TOTALDENOMINATOR);
                     totalDenominator.addSubject(subjectId);
                 }
 
                 // N & !NE => inTotalNumerator
                 // num-exclusion already considered in inNumerator
-                if(inNumerator){
+                if (inNumerator) {
                     PopulationDef totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
                     totalNumerator.addSubject(subjectId);
                 }

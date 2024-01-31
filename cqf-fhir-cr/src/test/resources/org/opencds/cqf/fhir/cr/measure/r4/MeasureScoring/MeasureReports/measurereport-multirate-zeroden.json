@@ -2,7 +2,7 @@
   "resourceType": "MeasureReport",
   "status": "complete",
   "type": "summary",
-  "measure": "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid",
+  "measure": "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden",
   "date": "2024-01-09T13:25:56-07:00",
   "period": {
     "start": "2023-01-01T00:00:00-07:00",
@@ -26,7 +26,7 @@
           "display": "Initial Population"
         } ]
       },
-      "count": 1
+      "count": 0
     }, {
       "code": {
         "coding": [ {
@@ -35,7 +35,7 @@
           "display": "Denominator"
         } ]
       },
-      "count": 1
+      "count": 0
     }, {
       "code": {
         "coding": [ {
@@ -44,56 +44,16 @@
           "display": "Numerator"
         } ]
       },
-      "count": 1
+      "count": 0
     } ],
     "extension":[
       {
         "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-        "valueString":"1"
+        "valueString":"0"
       },
       {
         "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-        "valueString":"1"
-      }
-    ]
-  }, {
-    "id": "PerformanceRate",
-    "population": [ {
-      "code": {
-        "coding": [ {
-          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-          "code": "initial-population",
-          "display": "Initial Population"
-        } ]
-      },
-      "count": 1
-    }, {
-      "code": {
-        "coding": [ {
-          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-          "code": "denominator",
-          "display": "Denominator"
-        } ]
-      },
-      "count": 1
-    }, {
-      "code": {
-        "coding": [ {
-          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-          "code": "numerator",
-          "display": "Numerator"
-        } ]
-      },
-      "count": 1
-    } ],
-    "extension":[
-      {
-        "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-        "valueString":"1"
-      },
-      {
-        "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-        "valueString":"1"
+        "valueString":"0"
       }
     ]
   } ]

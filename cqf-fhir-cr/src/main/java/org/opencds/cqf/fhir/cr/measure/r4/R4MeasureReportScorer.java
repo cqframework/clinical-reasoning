@@ -1,22 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
+
 import java.util.Map;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 /**
  * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
@@ -96,7 +93,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL), getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
+                Double score = this.calcProportionScore(
+                        getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
+                        getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
                 if (score != null) {
                     mrgc.setMeasureScore(new Quantity(score));
                 }
@@ -115,7 +114,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case PROPORTION:
             case RATIO:
                 Double score = this.calcProportionScore(
-                    getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL), getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL));
+                        getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL),
+                        getStratumPopulationCount(stratum, EXT_TOTAL_DENOMINATOR_URL));
                 if (score != null) {
                     stratum.setMeasureScore(new Quantity(score));
                 }
@@ -124,22 +124,20 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
         }
     }
+
     protected Integer getGroupExtensionCount(MeasureReportGroupComponent mrgc, String extUrl) {
         var ext = mrgc.getExtension().stream()
-            .filter(x -> x.getUrl().equals(extUrl))
-            .findFirst();
-        if (ext.isPresent()) {
-            return Integer.valueOf(ext.get().getValue().toString());
-        }
-
-        return null;
+                .filter(x -> x.getUrl().equals(extUrl))
+                .findFirst();
+        return ext.map(extension -> Integer.valueOf(extension.getValue().toString()))
+                .orElse(null);
     }
 
     protected Integer getStratumPopulationCount(StratifierGroupComponent sgc, String extUrl) {
         var pop = sgc.getExtension();
-        var ext = pop.stream().filter(x -> x.getUrl().equals(extUrl))
-                .findFirst().orElse(null);
-        if (ext!=null) {
+        var ext =
+                pop.stream().filter(x -> x.getUrl().equals(extUrl)).findFirst().orElse(null);
+        if (ext != null) {
             return Integer.valueOf(ext.getValue().toString());
         }
         return null;

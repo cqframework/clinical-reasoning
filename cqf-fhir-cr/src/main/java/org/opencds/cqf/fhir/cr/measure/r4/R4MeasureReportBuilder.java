@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -200,7 +201,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             // If it's a contained reference, must be just the Guid and nothing else
-            if (reference.startsWith("#") && reference.indexOf("/") != -1) {
+            if (reference.startsWith("#") && reference.contains("/")) {
                 throw new IllegalArgumentException();
             }
 
@@ -295,15 +296,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var reportGroup = report.addGroup();
             buildGroup(bc, measureGroup, reportGroup, defGroup);
         }
-
     }
 
-    private PopulationDef getReportPopulation(GroupDef reportGroup, MeasurePopulationType measurePopType){
+    private PopulationDef getReportPopulation(GroupDef reportGroup, MeasurePopulationType measurePopType) {
         var populations = reportGroup.populations();
         return populations.stream()
-            .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
-            .findAny()
-            .orElse(null);
+                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
+                .findAny()
+                .orElse(null);
     }
 
     protected void buildGroup(
@@ -312,9 +312,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
 
-        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR & TOTAL-DENOMINATOR), and will not be added to group populations.
+        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
+        // TOTAL-DENOMINATOR), and will not be added to group populations.
         // Subtracting '2' from groupDef to balance with Measure defined Groups
-        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size()-2)) {
+        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - 2)) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
@@ -335,9 +336,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             var measurePop = measureGroup.getPopulation().get(i);
             PopulationDef defPop = null;
-            for(int x = 0; x < groupDef.populations().size(); x++){
+            for (int x = 0; x < groupDef.populations().size(); x++) {
                 var groupDefPop = groupDef.populations().get(x);
-                if(groupDefPop.code().first().code().equals(measurePop.getCode().getCodingFirstRep().getCode())){
+                if (groupDefPop
+                        .code()
+                        .first()
+                        .code()
+                        .equals(measurePop.getCode().getCodingFirstRep().getCode())) {
                     defPop = groupDefPop;
                     break;
                 }
@@ -347,8 +352,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add extension to group for totalDenominator and totalNumerator
-        reportGroup.addExtension().setUrl(EXT_TOTAL_DENOMINATOR_URL).setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR).getSubjects().size())));
-        reportGroup.addExtension().setUrl(EXT_TOTAL_NUMERATOR_URL).setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR).getSubjects().size())));
+        reportGroup
+                .addExtension()
+                .setUrl(EXT_TOTAL_DENOMINATOR_URL)
+                .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
+                        .getSubjects()
+                        .size())));
+        reportGroup
+                .addExtension()
+                .setUrl(EXT_TOTAL_NUMERATOR_URL)
+                .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
+                        .getSubjects()
+                        .size())));
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             var groupStrat = measureGroup.getStratifier().get(i);
@@ -356,11 +371,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var defStrat = groupDef.stratifiers().get(i);
             buildStratifier(bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
         }
-        // add extension to stratifier for totalDenominator and totalNumerator
-        //reportGroup.getStratifier().get(0).addExtension().setUrl(EXT_TOTAL_DENOMINATOR_URL).setValue(new StringType());
-        //reportGroup.addExtension().setUrl(EXT_TOTAL_DENOMINATOR_URL).setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR).getSubjects().size())));
-        //reportGroup.addExtension().setUrl(EXT_TOTAL_NUMERATOR_URL).setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR).getSubjects().size())));
-
     }
 
     protected void buildStratifier(
@@ -413,16 +423,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             buildStratumPopulation(bc, stratumPopulation, subjectIds, mgpc);
         }
 
-        //add totalDenominator and totalNumerator extensions
+        // add totalDenominator and totalNumerator extensions
         buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
         buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
     }
-    protected void buildStratumExtPopulation(GroupDef groupDef, MeasurePopulationType measurePopulationType, List<String> subjectIds,StratifierGroupComponent stratum, String extUrl){
+
+    protected void buildStratumExtPopulation(
+            GroupDef groupDef,
+            MeasurePopulationType measurePopulationType,
+            List<String> subjectIds,
+            StratifierGroupComponent stratum,
+            String extUrl) {
         var subjectPop = getReportPopulation(groupDef, measurePopulationType).getSubjects();
 
-        int count = 0;
+        int count;
         if (subjectPop == null) {
-            count = 0;
             return;
         }
         Set<String> intersection = new HashSet<>(subjectIds);
@@ -430,6 +445,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         count = intersection.size();
         stratum.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
+
     protected void buildStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
@@ -492,16 +508,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior
-        switch (bc.report().getType()) {
-            case SUBJECTLIST:
-                if (!populationSet.isEmpty()) {
-                    ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
-                    bc.addContained(subjectList);
-                    reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
-                }
-                break;
-            default:
-                break;
+        if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST) {
+            if (!populationSet.isEmpty()) {
+                ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
+                bc.addContained(subjectList);
+                reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
+            }
         }
 
         // Population Type behavior
@@ -600,7 +612,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
-            Resource obs = null;
+            Resource obs;
             if (!(accumulator.getKey().getValue() instanceof Resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
                 String valueKey = accumulator.getKey().getKey();

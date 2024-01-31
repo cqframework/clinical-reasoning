@@ -50,12 +50,12 @@ public enum MeasurePopulationType {
             "Defines the individual observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population"),
 
     TOTALDENOMINATOR(
-        "total-denominator",
+            "total-denominator",
             "Total Denominator",
             "The calculated denominator value used to calculate the measure score from Denominator, Denominator-Exclusion, Denominator-Exception and Numerator values"),
 
     TOTALNUMERATOR(
-        "total-numerator",
+            "total-numerator",
             "Total Numerator",
             "The calculated numerator value used to calculate the measure score from Numerator and Numerator-Exclusion values");
     private String code;

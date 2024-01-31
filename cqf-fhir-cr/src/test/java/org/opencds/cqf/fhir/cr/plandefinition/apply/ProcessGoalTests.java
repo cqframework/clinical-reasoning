@@ -7,14 +7,9 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestFo
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 public class ProcessGoalTests {
-    @Spy
-    ProcessGoal fixture;
+    ProcessGoal fixture = new ProcessGoal();
 
     @Test
     void unsupportedVersionShouldReturnNull() {

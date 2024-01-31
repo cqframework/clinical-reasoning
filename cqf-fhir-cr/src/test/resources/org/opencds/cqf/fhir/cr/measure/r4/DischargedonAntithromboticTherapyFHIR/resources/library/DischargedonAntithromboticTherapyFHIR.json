@@ -8,7 +8,7 @@
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
   },
   "language": "en",
-  "url": "http://ecqi.healthit.gov/ecqms/Library/DischargedonAntithromboticTherapyFHIR",
+  "url": "https://madie.cms.gov/Library/DischargedonAntithromboticTherapyFHIR",
   "version": "1.0.001",
   "name": "DischargedonAntithromboticTherapyFHIR",
   "status": "active",

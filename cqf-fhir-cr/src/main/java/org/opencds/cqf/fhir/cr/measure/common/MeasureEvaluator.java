@@ -116,17 +116,17 @@ public class MeasureEvaluator {
 
     protected void setMeasurementPeriod(Interval measurementPeriod) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef();
-        if (measurementPeriod == null && pd.getDefault() == null) {
-            logger.warn(
-                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                    this.measurementPeriodParameterName);
-            return;
-        }
-
         if (pd == null) {
             logger.warn(
                     "Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
             this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        if (measurementPeriod == null && pd.getDefault() == null) {
+            logger.warn(
+                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
+                    this.measurementPeriodParameterName);
             return;
         }
 

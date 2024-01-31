@@ -172,14 +172,7 @@ public class Measure {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            MeasureReport report = null;
-            try {
-                report = this.operation.get();
-            } catch (Exception e) {
-                throw new IllegalStateException("error when running 'then' and invoking the chosen operation", e);
-            }
-
-            return new SelectedReport(report);
+            return new SelectedReport(this.operation.get());
         }
     }
 

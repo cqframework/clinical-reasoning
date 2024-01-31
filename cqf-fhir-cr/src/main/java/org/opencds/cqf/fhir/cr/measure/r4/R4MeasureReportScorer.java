@@ -19,6 +19,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Override
     public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+        // No groups to score, nothing to do.
+        if (measureReport.getGroup().isEmpty()) {
+            return;
+        }
+
+        if (measureScoring == null || measureScoring.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+        }
+
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
         }
@@ -26,14 +36,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected MeasureScoring getGroupMeasureScoring(
             MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
+        if (measureScoring.size() == 1) {
+            return measureScoring.values().iterator().next();
+        }
+
         MeasureScoring measureScoringFromGroup = null;
         // cycle through available Group Definitions to retrieve appropriate MeasureScoring
         for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
             // Take only MeasureScoring available
-            if (measureScoring.size() == 1) {
-                measureScoringFromGroup = entry.getValue();
-                break;
-            }
             // Match by group id if available
             if (mrgc.getId() != null && entry.getKey().id() != null) {
                 if (entry.getKey().id().equals(mrgc.getId())) {
@@ -41,18 +51,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     break;
                 }
             }
-            // Match by group's population id, if group-ids are not present
-            if ((mrgc.getPopulation().size() == entry.getKey().populations().size())
-                    && mrgc.getId() == null
-                    && entry.getKey().id() == null) {
+            // Match by group's population id
+            if (mrgc.getPopulation().size() == entry.getKey().populations().size()) {
                 int i = 0;
                 for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
                     for (PopulationDef popDefEntry : entry.getKey().populations()) {
-                        if (popId.getId() != null && popDefEntry.id() != null) {
-                            if (popId.getId().equals(popDefEntry.id())) {
-                                i++;
-                                break;
-                            }
+                        if (popId.getId().equals(popDefEntry.id())) {
+                            i++;
+                            break;
                         }
                     }
                 }
@@ -63,7 +69,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             }
         }
         if (measureScoringFromGroup == null) {
-            throw new IllegalStateException("No MeasureScoring value set");
+            throw new IllegalArgumentException("No MeasureScoring value set");
         }
         return measureScoringFromGroup;
     }

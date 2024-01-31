@@ -7,6 +7,8 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class ProcessRequest {
+    public ProcessRequest() {}
+
     public IBaseResource generateRequestOrchestration(ApplyRequest request) {
         switch (request.getFhirVersion()) {
             case DSTU3:
@@ -124,23 +126,17 @@ public class ProcessRequest {
     }
 
     public IBaseResource generateCarePlan(ApplyRequest request, IBaseResource requestOrchestration) {
-        IBaseResource carePlan;
         switch (request.getFhirVersion()) {
             case DSTU3:
-                carePlan = generateCarePlanDstu3(request, requestOrchestration);
-                break;
+                return generateCarePlanDstu3(request, requestOrchestration);
             case R4:
-                carePlan = generateCarePlanR4(request, requestOrchestration);
-                break;
+                return generateCarePlanR4(request, requestOrchestration);
             case R5:
-                carePlan = generateCarePlanR5(request, requestOrchestration);
-                break;
+                return generateCarePlanR5(request, requestOrchestration);
 
             default:
-                carePlan = null;
-                break;
+                return null;
         }
-        return carePlan;
     }
 
     protected IBaseResource generateCarePlanDstu3(ApplyRequest request, IBaseResource ro) {
@@ -190,8 +186,9 @@ public class ProcessRequest {
             carePlan.addContained((org.hl7.fhir.dstu3.model.Resource) resource);
         }
 
-        if (((org.hl7.fhir.dstu3.model.Questionnaire) request.getQuestionnaire()).hasItem()) {
-            carePlan.addContained((org.hl7.fhir.dstu3.model.Resource) request.getQuestionnaire());
+        var questionnaire = (org.hl7.fhir.dstu3.model.Questionnaire) request.getQuestionnaire();
+        if (questionnaire != null && questionnaire.hasItem()) {
+            carePlan.addContained(questionnaire);
         }
 
         return carePlan;
@@ -243,8 +240,9 @@ public class ProcessRequest {
             carePlan.addContained((org.hl7.fhir.r4.model.Resource) resource);
         }
 
-        if (((org.hl7.fhir.r4.model.Questionnaire) request.getQuestionnaire()).hasItem()) {
-            carePlan.addContained((org.hl7.fhir.r4.model.Resource) request.getQuestionnaire());
+        var questionnaire = (org.hl7.fhir.r4.model.Questionnaire) request.getQuestionnaire();
+        if (questionnaire != null && questionnaire.hasItem()) {
+            carePlan.addContained(questionnaire);
         }
 
         return carePlan;
@@ -296,8 +294,9 @@ public class ProcessRequest {
             carePlan.addContained((org.hl7.fhir.r5.model.Resource) resource);
         }
 
-        if (((org.hl7.fhir.r5.model.Questionnaire) request.getQuestionnaire()).hasItem()) {
-            carePlan.addContained((org.hl7.fhir.r5.model.Resource) request.getQuestionnaire());
+        var questionnaire = (org.hl7.fhir.r5.model.Questionnaire) request.getQuestionnaire();
+        if (questionnaire != null && questionnaire.hasItem()) {
+            carePlan.addContained(questionnaire);
         }
 
         return carePlan;

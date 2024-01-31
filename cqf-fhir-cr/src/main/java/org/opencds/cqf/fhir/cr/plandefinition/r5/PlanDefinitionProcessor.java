@@ -127,24 +127,24 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     @Override
-    public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition, boolean theIsPut) {
+    public Bundle packagePlanDefinition(PlanDefinition planDefinition, boolean isPut) {
         var bundle = new Bundle();
         bundle.setType(BundleType.TRANSACTION);
-        bundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
+        bundle.addEntry(PackageHelper.createEntry(planDefinition, isPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
         var libraryCanonical =
-                thePlanDefinition.hasLibrary() ? thePlanDefinition.getLibrary().get(0) : null;
+                planDefinition.hasLibrary() ? planDefinition.getLibrary().get(0) : null;
         if (libraryCanonical != null) {
             var library = (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
             if (library != null) {
-                bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
+                bundle.addEntry(PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, isPut);
                 }
             }
         }
-        if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+        if (planDefinition.hasRelatedArtifact()) {
+            PackageHelper.addRelatedArtifacts(bundle, planDefinition.getRelatedArtifact(), repository, isPut);
         }
 
         return bundle;
@@ -152,15 +152,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     @Override
     public <C extends IPrimitiveType<String>> PlanDefinition resolvePlanDefinition(
-            IIdType theId, C theCanonical, IBaseResource thePlanDefinition) {
-        var basePlanDefinition = thePlanDefinition;
+            IIdType id, C canonical, IBaseResource planDefinition) {
+        var basePlanDefinition = planDefinition;
         if (basePlanDefinition == null) {
-            basePlanDefinition = theId != null
-                    ? this.repository.read(PlanDefinition.class, theId)
-                    : SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
+            basePlanDefinition = id != null
+                    ? this.repository.read(PlanDefinition.class, id)
+                    : SearchHelper.searchRepositoryByCanonical(repository, canonical);
         }
 
-        requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
+        requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + id);
 
         return castOrThrow(
                         basePlanDefinition,
@@ -291,26 +291,26 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
                 .setDiagnostics(issue);
     }
 
-    private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goal) {
-        var myGoal = new Goal();
-        myGoal.setCategory(Collections.singletonList(goal.getCategory()));
-        myGoal.setDescription(goal.getDescription());
-        myGoal.setPriority(goal.getPriority());
-        myGoal.setStart(goal.getStart());
-        myGoal.setLifecycleStatus(GoalLifecycleStatus.PROPOSED);
-        myGoal.setSubject(new Reference(subjectId));
+    private Goal convertGoal(PlanDefinition.PlanDefinitionGoalComponent goalComponent) {
+        var goal = new Goal();
+        goal.setCategory(Collections.singletonList(goalComponent.getCategory()));
+        goal.setDescription(goalComponent.getDescription());
+        goal.setPriority(goalComponent.getPriority());
+        goal.setStart(goalComponent.getStart());
+        goal.setLifecycleStatus(GoalLifecycleStatus.PROPOSED);
+        goal.setSubject(new Reference(subjectId));
 
-        myGoal.setTarget(goal.getTarget().stream()
-                .map(target -> {
-                    Goal.GoalTargetComponent myTarget = new Goal.GoalTargetComponent();
-                    myTarget.setDetail(target.getDetail());
-                    myTarget.setMeasure(target.getMeasure());
-                    myTarget.setDue(target.getDue());
-                    myTarget.setExtension(target.getExtension());
-                    return myTarget;
+        goal.setTarget(goalComponent.getTarget().stream()
+                .map(t -> {
+                    Goal.GoalTargetComponent target = new Goal.GoalTargetComponent();
+                    target.setDetail(t.getDetail());
+                    target.setMeasure(t.getMeasure());
+                    target.setDue(t.getDue());
+                    target.setExtension(t.getExtension());
+                    return target;
                 })
                 .collect(Collectors.toList()));
-        return myGoal;
+        return goal;
     }
 
     private RequestOrchestrationActionComponent resolveAction(

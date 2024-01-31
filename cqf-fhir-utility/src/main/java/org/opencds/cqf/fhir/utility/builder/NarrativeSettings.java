@@ -5,13 +5,13 @@ public class NarrativeSettings {
     private String text;
     private String status = "generated";
 
-    public NarrativeSettings(String theText) {
-        this.text = theText;
+    public NarrativeSettings(String text) {
+        this.text = text;
     }
 
-    public NarrativeSettings(String theText, String theStatus) {
-        this.text = theText;
-        this.status = theStatus;
+    public NarrativeSettings(String text, String status) {
+        this.text = text;
+        this.status = status;
     }
 
     public String getText() {

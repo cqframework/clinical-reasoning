@@ -120,25 +120,25 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
     }
 
     @Override
-    public Bundle packagePlanDefinition(PlanDefinition thePlanDefinition, boolean theIsPut) {
+    public Bundle packagePlanDefinition(PlanDefinition planDefinition, boolean isPut) {
         var bundle = new Bundle();
         bundle.setType(BundleType.TRANSACTION);
-        bundle.addEntry(PackageHelper.createEntry(thePlanDefinition, theIsPut));
+        bundle.addEntry(PackageHelper.createEntry(planDefinition, isPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
-        var libraryCanonical = thePlanDefinition.hasLibrary()
-                ? new StringType(thePlanDefinition.getLibrary().get(0).getReference())
+        var libraryCanonical = planDefinition.hasLibrary()
+                ? new StringType(planDefinition.getLibrary().get(0).getReference())
                 : null;
         if (libraryCanonical != null) {
             var library = (Library) SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical);
             if (library != null) {
-                bundle.addEntry(PackageHelper.createEntry(library, theIsPut));
+                bundle.addEntry(PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
-                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, theIsPut);
+                    PackageHelper.addRelatedArtifacts(bundle, library.getRelatedArtifact(), repository, isPut);
                 }
             }
         }
-        if (thePlanDefinition.hasRelatedArtifact()) {
-            PackageHelper.addRelatedArtifacts(bundle, thePlanDefinition.getRelatedArtifact(), repository, theIsPut);
+        if (planDefinition.hasRelatedArtifact()) {
+            PackageHelper.addRelatedArtifacts(bundle, planDefinition.getRelatedArtifact(), repository, isPut);
         }
 
         return bundle;
@@ -146,15 +146,15 @@ public class PlanDefinitionProcessor extends BasePlanDefinitionProcessor<PlanDef
 
     @Override
     public <C extends IPrimitiveType<String>> PlanDefinition resolvePlanDefinition(
-            IIdType theId, C theCanonical, IBaseResource thePlanDefinition) {
-        var basePlanDefinition = thePlanDefinition;
+            IIdType id, C canonical, IBaseResource planDefinition) {
+        var basePlanDefinition = planDefinition;
         if (basePlanDefinition == null) {
-            basePlanDefinition = theId != null
-                    ? this.repository.read(PlanDefinition.class, theId)
-                    : SearchHelper.searchRepositoryByCanonical(repository, theCanonical);
+            basePlanDefinition = id != null
+                    ? this.repository.read(PlanDefinition.class, id)
+                    : SearchHelper.searchRepositoryByCanonical(repository, canonical);
         }
 
-        requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + theId);
+        requireNonNull(basePlanDefinition, "Couldn't find PlanDefinition " + id);
 
         return castOrThrow(
                         basePlanDefinition,

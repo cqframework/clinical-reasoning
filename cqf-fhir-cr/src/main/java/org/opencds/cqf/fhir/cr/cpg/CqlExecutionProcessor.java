@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
-public class BaseCqlExecutionProcessor {
+public class CqlExecutionProcessor {
 
     public List<Pair<String, String>> resolveIncludedLibraries(List<?> includedLibraries) {
         if (includedLibraries != null) {

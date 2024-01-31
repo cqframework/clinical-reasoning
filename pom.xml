@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE15-SNAPSHOT</version>
+    <version>3.0.0-PRE15</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -19,13 +20,15 @@
 
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.5.1</cql.version>
+        <cql.version>3.6.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>5.3.23</spring.version>
         <fhir-core.version>6.1.2.2</fhir-core.version>
-        <hapi.version>6.10.0</hapi.version>
+        <hapi.version>6.10.2</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>32.1.2-jre</guava.version>
+        <error-prone.version>2.24.1</error-prone.version>
+        <checkstyle.version>10.12.7</checkstyle.version>
     </properties>
 
     <licenses>
@@ -83,7 +86,8 @@
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
 
-        <!-- TODO: See if we can retire this once we have all the mapping/adapters/runtimes in a consistent state -->
+        <!-- TODO: See if we can retire this once we have all the mapping/adapters/runtimes in a
+        consistent state -->
         <module>cqf-fhir-cr-spring</module>
 
         <!-- These don't publish a module, but ensures documentation snippets build correctly -->
@@ -343,6 +347,31 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <?m2e execute onConfiguration,onIncremental?>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <excludeGeneratedSources>true</excludeGeneratedSources>
+                        <configLocation>config/checkstyle.xml</configLocation>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.1.1</version>
@@ -366,6 +395,18 @@
                     <configuration>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-XDcompilePolicy=simple</arg>
+                            <!-- TODO: Ramp up error prone checkts to include warnings as well -->
+                            <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
+                        </compilerArgs>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>com.google.errorprone</groupId>
+                                <artifactId>error_prone_core</artifactId>
+                                <version>${error-prone.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -534,6 +575,10 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

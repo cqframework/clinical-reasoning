@@ -7,14 +7,14 @@ public class CodeableConceptSettings {
 
     private Set<CodingSettings> codingSettings = new HashSet<>();
 
-    public CodeableConceptSettings add(String theSystem, String theCode) {
-        add(theSystem, theCode, null);
+    public CodeableConceptSettings add(String system, String code) {
+        add(system, code, null);
 
         return this;
     }
 
-    public CodeableConceptSettings add(String theSystem, String theCode, String theDisplay) {
-        codingSettings.add(new CodingSettings(theSystem, theCode, theDisplay));
+    public CodeableConceptSettings add(String system, String code, String display) {
+        codingSettings.add(new CodingSettings(system, code, display));
 
         return this;
     }

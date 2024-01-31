@@ -5,119 +5,77 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.opencds.cqf.fhir.utility.FhirVersions;
-import org.opencds.cqf.fhir.utility.Resources;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 
-public abstract class BackboneElementBuilder<
-        SELF extends BackboneElementBuilder<SELF, T>, T extends IBaseBackboneElement> {
+public abstract class BaseDomainResourceBuilder<SELF, T extends IDomainResource> extends BaseResourceBuilder<SELF, T> {
 
-    private final Class<T> myResourceClass;
+    private List<Pair<String, CodeableConceptSettings>> extension;
+    private List<Pair<String, CodeableConceptSettings>> modifierExtension;
 
-    private String myId = UUID.randomUUID().toString();
-
-    private List<Pair<String, CodeableConceptSettings>> myExtension;
-    private List<Pair<String, CodeableConceptSettings>> myModifierExtension;
-
-    protected BackboneElementBuilder(Class<T> theResourceClass) {
-        checkNotNull(theResourceClass);
-        myResourceClass = theResourceClass;
+    protected BaseDomainResourceBuilder(Class<T> resourceClass) {
+        super(resourceClass);
     }
 
-    protected BackboneElementBuilder(Class<T> theResourceClass, String theId) {
-        this(theResourceClass);
-        checkNotNull(theId);
-
-        myId = theId;
+    protected BaseDomainResourceBuilder(Class<T> resourceClass, String id) {
+        super(resourceClass, id);
     }
 
-    public T build() {
-        T backboneElement = Resources.newBackboneElement(myResourceClass);
-
-        switch (FhirVersions.forClass(myResourceClass)) {
-            case DSTU3:
-                initializeDstu3(backboneElement);
-                break;
-            case R4:
-                initializeR4(backboneElement);
-                break;
-            case R5:
-                initializeR5(backboneElement);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format(
-                        "ResourceBuilder.initializeResource does not support FHIR version %s",
-                        FhirVersions.forClass(myResourceClass).getFhirVersionString()));
+    private void addExtension(Pair<String, CodeableConceptSettings> extension) {
+        if (this.extension == null) {
+            this.extension = new ArrayList<>();
         }
-
-        return backboneElement;
-    }
-
-    private void addExtension(Pair<String, CodeableConceptSettings> theExtension) {
-        if (myExtension == null) {
-            myExtension = new ArrayList<>();
-        }
-        myExtension.add(theExtension);
+        this.extension.add(extension);
     }
 
     private List<Pair<String, CodeableConceptSettings>> getExtensions() {
-        if (myExtension == null) {
+        if (extension == null) {
             return Collections.emptyList();
         }
-        return myExtension;
+        return extension;
     }
 
-    protected String getId() {
-        return myId;
-    }
-
-    private void addModifierExtension(Pair<String, CodeableConceptSettings> theModifierExtension) {
-        if (myModifierExtension == null) {
-            myModifierExtension = new ArrayList<>();
+    private void addModifierExtension(Pair<String, CodeableConceptSettings> modifierExtension) {
+        if (this.modifierExtension == null) {
+            this.modifierExtension = new ArrayList<>();
         }
-        myModifierExtension.add(theModifierExtension);
+        this.modifierExtension.add(modifierExtension);
     }
 
     private List<Pair<String, CodeableConceptSettings>> getModifierExtensions() {
-        if (myModifierExtension == null) {
+        if (modifierExtension == null) {
             return Collections.emptyList();
         }
-        return myModifierExtension;
+        return modifierExtension;
     }
 
-    public SELF withId(String theId) {
-        checkNotNull(theId);
+    public SELF withExtension(Pair<String, CodeableConceptSettings> extension) {
+        checkNotNull(extension);
 
-        myId = theId;
+        addExtension(extension);
 
         return self();
     }
 
-    public SELF withExtension(Pair<String, CodeableConceptSettings> theExtension) {
-        checkNotNull(theExtension);
+    public SELF withModifierExtension(Pair<String, CodeableConceptSettings> modifierExtension) {
+        checkNotNull(modifierExtension);
 
-        addExtension(theExtension);
-
-        return self();
-    }
-
-    public SELF withModifierExtension(Pair<String, CodeableConceptSettings> theModifierExtension) {
-        checkNotNull(theModifierExtension);
-
-        addModifierExtension(theModifierExtension);
+        addModifierExtension(modifierExtension);
 
         return self();
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     protected SELF self() {
         return (SELF) this;
     }
 
-    protected void initializeDstu3(T theResource) {
+    @Override
+    protected void initializeDstu3(T resource) {
+        super.initializeDstu3(resource);
+
         getExtensions().forEach(extensionSetting -> extensionSetting
                 .getValue()
                 .getCodingSettings()
@@ -128,7 +86,7 @@ public abstract class BackboneElementBuilder<
                                             .setSystem(coding.getSystem())
                                             .setCode(coding.getCode())
                                             .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addExtension();
+                    IBaseExtension<?, ?> extension = resource.addExtension();
                     extension.setUrl(extensionSetting.getKey());
                     extension.setValue(codeableConcept);
                 }));
@@ -143,13 +101,16 @@ public abstract class BackboneElementBuilder<
                                             .setSystem(coding.getSystem())
                                             .setCode(coding.getCode())
                                             .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
+                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
                     modifierExtension.setUrl(extensionSetting.getKey());
                     modifierExtension.setValue(codeableConcept);
                 }));
     }
 
-    protected void initializeR4(T theResource) {
+    @Override
+    protected void initializeR4(T resource) {
+        super.initializeR4(resource);
+
         getExtensions().forEach(extensionSetting -> extensionSetting
                 .getValue()
                 .getCodingSettings()
@@ -159,7 +120,7 @@ public abstract class BackboneElementBuilder<
                                     .setSystem(coding.getSystem())
                                     .setCode(coding.getCode())
                                     .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addExtension();
+                    IBaseExtension<?, ?> extension = resource.addExtension();
                     extension.setUrl(extensionSetting.getKey());
                     extension.setValue(codeableConcept);
                 }));
@@ -173,13 +134,16 @@ public abstract class BackboneElementBuilder<
                                     .setSystem(coding.getSystem())
                                     .setCode(coding.getCode())
                                     .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
+                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
                     modifierExtension.setUrl(extensionSetting.getKey());
                     modifierExtension.setValue(codeableConcept);
                 }));
     }
 
-    protected void initializeR5(T theResource) {
+    @Override
+    protected void initializeR5(T resource) {
+        super.initializeR5(resource);
+
         getExtensions().forEach(extensionSetting -> extensionSetting
                 .getValue()
                 .getCodingSettings()
@@ -189,7 +153,7 @@ public abstract class BackboneElementBuilder<
                                     .setSystem(coding.getSystem())
                                     .setCode(coding.getCode())
                                     .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = theResource.addExtension();
+                    IBaseExtension<?, ?> extension = resource.addExtension();
                     extension.setUrl(extensionSetting.getKey());
                     extension.setValue(codeableConcept);
                 }));
@@ -203,7 +167,7 @@ public abstract class BackboneElementBuilder<
                                     .setSystem(coding.getSystem())
                                     .setCode(coding.getCode())
                                     .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = theResource.addModifierExtension();
+                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
                     modifierExtension.setUrl(extensionSetting.getKey());
                     modifierExtension.setValue(codeableConcept);
                 }));

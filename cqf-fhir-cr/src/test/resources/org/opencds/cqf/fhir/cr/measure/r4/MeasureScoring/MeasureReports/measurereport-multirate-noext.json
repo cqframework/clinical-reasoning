@@ -19,6 +19,7 @@
   "group": [ {
     "id": "PerformanceRate",
     "population": [ {
+      "id": "performancerate-ip",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -28,6 +29,7 @@
       },
       "count": 0
     }, {
+      "id": "performancerate-den",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -37,6 +39,7 @@
       },
       "count": 0
     }, {
+      "id": "performancerate-num",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",

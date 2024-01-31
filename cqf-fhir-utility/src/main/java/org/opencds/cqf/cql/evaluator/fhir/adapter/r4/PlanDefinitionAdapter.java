@@ -1,19 +1,20 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.r4;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
-import java.util.ArrayList;
-import java.util.List;
+import org.opencds.cqf.fhir.api.Repository;
 
 class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.PlanDefinitionAdapter {
 
   private PlanDefinition planDefinition;
 
-  public PlanDefinitionAdapter(IBaseResource planDefinition) {
+  public PlanDefinitionAdapter(PlanDefinition planDefinition) {
     super(planDefinition);
 
     if (!planDefinition.fhirType().equals("PlanDefinition")) {
@@ -21,11 +22,11 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
           "resource passed as planDefinition argument is not a PlanDefinition resource");
     }
 
-    this.planDefinition = (PlanDefinition) planDefinition;
+    this.planDefinition = planDefinition;
   }
 
-  public void accept(KnowledgeArtifactVisitor visitor) {
-    visitor.visit(this);
+  public void accept(KnowledgeArtifactVisitor visitor, Repository theRepository) {
+    visitor.visit(this, theRepository);
   }
 
   protected PlanDefinition getPlanDefinition() {
@@ -76,38 +77,42 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
   public void setVersion(String version) {
     this.getPlanDefinition().setVersion(version);
   }
-
   @Override
   public List<DependencyInfo> getDependencies() {
     List<DependencyInfo> references = new ArrayList<>();
-
-    /*
-      relatedArtifact[].resource
-      library[]
-      action[]..trigger[].dataRequirement[].profile[]
-      action[]..trigger[].dataRequirement[].codeFilter[].valueSet
-      action[]..condition[].expression.reference
-      action[]..input[].profile[]
-      action[]..input[].codeFilter[].valueSet
-      action[]..output[].profile[]
-      action[]..output[].codeFilter[].valueSet
-      action[]..definitionCanonical
-      action[]..dynamicValue[].expression.reference
-      extension[cpg-partOf]
-     */
-
-    // relatedArtifact[].resource
-    references.addAll(getRelatedArtifactReferences(this.planDefinition, this.planDefinition.getRelatedArtifact()));
-
-    // library[]
-    List<CanonicalType> libraries = this.planDefinition.getLibrary();
-    for (CanonicalType ct : libraries) {
-      DependencyInfo dependency = new DependencyInfo(this.planDefinition.getUrl(), ct.getValue());
-      references.add(dependency);
-    }
-
-    // TODO: Complete retrieval from other elements. Ideally use $data-requirements code
-
     return references;
   }
+  // @Override
+  // public List<DependencyInfo> getDependencies() {
+  //   List<DependencyInfo> references = new ArrayList<>();
+
+  //   /*
+  //     relatedArtifact[].resource
+  //     library[]
+  //     action[]..trigger[].dataRequirement[].profile[]
+  //     action[]..trigger[].dataRequirement[].codeFilter[].valueSet
+  //     action[]..condition[].expression.reference
+  //     action[]..input[].profile[]
+  //     action[]..input[].codeFilter[].valueSet
+  //     action[]..output[].profile[]
+  //     action[]..output[].codeFilter[].valueSet
+  //     action[]..definitionCanonical
+  //     action[]..dynamicValue[].expression.reference
+  //     extension[cpg-partOf]
+  //    */
+
+  //   // relatedArtifact[].resource
+  //   references.addAll(getRelatedArtifactReferences(this.planDefinition, this.planDefinition.getRelatedArtifact()));
+
+  //   // library[]
+  //   List<CanonicalType> libraries = this.planDefinition.getLibrary();
+  //   for (CanonicalType ct : libraries) {
+  //     DependencyInfo dependency = new DependencyInfo(this.planDefinition.getUrl(), ct.getValue());
+  //     references.add(dependency);
+  //   }
+
+  //   // TODO: Complete retrieval from other elements. Ideally use $data-requirements code
+
+  //   return references;
+  // }
 }

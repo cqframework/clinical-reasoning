@@ -39,4 +39,5 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
   ICompositeType addContent();
 
   List<DependencyInfo> getDependencies();
+  List<DependencyInfo> getComponents();
 }

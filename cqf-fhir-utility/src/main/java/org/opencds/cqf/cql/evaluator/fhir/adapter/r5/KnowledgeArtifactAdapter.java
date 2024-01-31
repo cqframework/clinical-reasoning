@@ -7,10 +7,10 @@ import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter {
-
-  KnowledgeArtifactAdapter(IBaseResource resource) {
-    super(resource);
+public class KnowledgeArtifactAdapter {
+  private MetadataResource myResource;
+  KnowledgeArtifactAdapter(MetadataResource theResource) {
+    this.myResource = theResource;
   }
 
   protected List<DependencyInfo> getRelatedArtifactReferences(MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {

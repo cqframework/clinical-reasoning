@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.AdapterFactory;
 import org.testng.annotations.Test;
 

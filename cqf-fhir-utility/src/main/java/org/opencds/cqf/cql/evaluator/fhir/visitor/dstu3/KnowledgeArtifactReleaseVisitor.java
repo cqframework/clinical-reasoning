@@ -1,16 +1,18 @@
 package org.opencds.cqf.cql.evaluator.fhir.visitor.dstu3;
 
-import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ValueSetAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.api.Repository;
+
 import java.util.List;
 
 
 public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
 
-  public void visit(LibraryAdapter library) {
+  public void visit(LibraryAdapter library, Repository theRepository) {
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
       // what is dependency, where did it originate? potentially the package?
 
@@ -28,14 +30,14 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
   }
 
-  public void visit(PlanDefinitionAdapter planDefinition) {
+  public void visit(PlanDefinitionAdapter planDefinition, Repository theRepository) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
     }
   }
 
-  public void visit(ValueSetAdapter valueSet) {
+  public void visit(ValueSetAdapter valueSet, Repository theRepository) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));

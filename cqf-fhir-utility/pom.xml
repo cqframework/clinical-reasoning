@@ -22,6 +22,12 @@
       <version>3.0.0-PRE15</version>
     </dependency>
     <dependency>
+      <groupId>org.opencds.cqf.fhir</groupId>
+      <artifactId>cqf-fhir-test</artifactId>
+      <version>3.0.0-PRE15</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-base</artifactId>
     </dependency>

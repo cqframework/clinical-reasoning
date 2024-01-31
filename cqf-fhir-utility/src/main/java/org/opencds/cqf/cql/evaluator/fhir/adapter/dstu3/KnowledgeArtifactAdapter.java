@@ -7,12 +7,16 @@ import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KnowledgeArtifactAdapter extends org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.ResourceAdapter {
-
-  KnowledgeArtifactAdapter(IBaseResource resource) {
-    super(resource);
+public class KnowledgeArtifactAdapter 
+// extends org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.ResourceAdapter
+ {
+    private MetadataResource myResource;
+  KnowledgeArtifactAdapter(MetadataResource theResource) {
+    this.myResource = theResource;
   }
-
+  protected MetadataResource getResource() {
+    return this.myResource;
+  }
   protected List<DependencyInfo> getRelatedArtifactReferences(MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {
     List<DependencyInfo> references = new ArrayList<>();
 

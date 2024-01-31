@@ -1,20 +1,21 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.KnowledgeArtifactAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
-import java.util.ArrayList;
-import java.util.List;
+import org.opencds.cqf.fhir.api.Repository;
 
 class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.PlanDefinitionAdapter {
 
   private PlanDefinition planDefinition;
 
-  public PlanDefinitionAdapter(IBaseResource planDefinition) {
+  public PlanDefinitionAdapter(PlanDefinition planDefinition) {
     super(planDefinition);
 
     if (!planDefinition.fhirType().equals("PlanDefinition")) {
@@ -22,11 +23,11 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
           "resource passed as planDefinition argument is not a PlanDefinition resource");
     }
 
-    this.planDefinition = (PlanDefinition) planDefinition;
+    this.planDefinition = planDefinition;
   }
 
-  public void accept(KnowledgeArtifactVisitor visitor) {
-    visitor.visit(this);
+  public void accept(KnowledgeArtifactVisitor visitor, Repository theRepository) {
+    visitor.visit(this, theRepository);
   }
 
   protected PlanDefinition getPlanDefinition() {

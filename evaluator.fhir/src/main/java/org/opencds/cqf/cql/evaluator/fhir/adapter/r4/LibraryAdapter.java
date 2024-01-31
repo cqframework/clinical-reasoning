@@ -11,8 +11,11 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.api.Repository;
 
 class LibraryAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter {
 
@@ -29,8 +32,8 @@ class LibraryAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf
     this.library = (Library) library;
   }
 
-  public void accept(KnowledgeArtifactVisitor visitor) {
-    visitor.visit(this);
+  public void accept(KnowledgeArtifactVisitor visitor, Repository theRepository) {
+    visitor.visit(this, theRepository);
   }
 
   protected Library getLibrary() {
@@ -107,31 +110,24 @@ class LibraryAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf
   @Override
   public List<DependencyInfo> getDependencies() {
     List<DependencyInfo> references = new ArrayList<>();
+    String referenceSource = this.library.getUrl();
+    if (this.library.getVersion() != null && !this.getVersion().isEmpty()) {
+      referenceSource = referenceSource + "|" + this.library.getVersion();
+    }
+    
+    // https://build.fhir.org/ig/HL7/crmi-ig/distribution.html#package-and-data-requirements
+    // shouldTraceDependency extension?
 
     // relatedArtifact[].resource
     references.addAll(getRelatedArtifactReferences(this.library, this.library.getRelatedArtifact()));
-
-    // dataRequirement
+    
     List<DataRequirement> dataRequirements = this.library.getDataRequirement();
     for (DataRequirement dr : dataRequirements) {
       // dataRequirement.profile[]
       List<CanonicalType> profiles = dr.getProfile();
       for (CanonicalType ct : profiles) {
         if (ct.hasValue()) {
-          String referenceSource = this.library.getUrl();
-          if (this.library.getVersion() != null && !this.getVersion().isEmpty()) {
-            referenceSource = referenceSource + "|" + this.library.getVersion();
-          }
-
-          DependencyInfo dependency = new DependencyInfo(referenceSource, ct.getValue());
-          references.add(dependency);
-//					Bundle referencedResourceBundle = searchResourceByUrl(ct.getValue(), fhirDal);
-//					MetadataResource referencedResource = KnowledgeArtifactAdapter.findLatestVersion(referencedResourceBundle);
-//					if (referencedResource == null) {
-//						throw new ResourceNotFoundException(String.format("Resource for Canonical '%s' not found.", ct.getValue()));
-//					} else {
-//						resources.addAll(internalPackage(referencedResource, fhirDal));
-//					}
+          references.add(new DependencyInfo(referenceSource, ct.getValue()));
         }
       }
 
@@ -139,23 +135,24 @@ class LibraryAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf
       List<DataRequirement.DataRequirementCodeFilterComponent> codeFilters = dr.getCodeFilter();
       for (DataRequirement.DataRequirementCodeFilterComponent cf : codeFilters) {
         if (cf.hasValueSet()) {
-          String referenceSource = this.library.getUrl();
-          if (this.library.getVersion() != null && !this.getVersion().isEmpty()) {
-            referenceSource = referenceSource + "|" + this.library.getVersion();
-          }
-
           DependencyInfo dependency = new DependencyInfo(referenceSource, cf.getValueSet());
           references.add(dependency);
-//					Bundle referencedResourceBundle = searchResourceByUrl(cf.getValueSet(), fhirDal);
-//					MetadataResource referencedResource = KnowledgeArtifactAdapter.findLatestVersion(referencedResourceBundle);
-//					if (referencedResource == null) {
-//						throw new ResourceNotFoundException(String.format("Resource for Canonical '%s' not found.", cf.getValueSet()));
-//					} else {
-//						resources.addAll(internalPackage(referencedResource, fhirDal));
-//					}
         }
       }
     }
     return references;
+  }
+  
+  @Override
+  public List<DependencyInfo> getComponents() {
+    List<DependencyInfo> references = new ArrayList<>();
+    List<RelatedArtifact> composedOf = this.library.getRelatedArtifact().stream().filter(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF).collect(Collectors.toList());
+    references.addAll(this.getRelatedArtifactReferences(library, composedOf));
+    return references;
+  }
+
+  @Override
+  public List<RelatedArtifact> getRelatedArtifact(){
+    return this.library.getRelatedArtifact();
   }
 }

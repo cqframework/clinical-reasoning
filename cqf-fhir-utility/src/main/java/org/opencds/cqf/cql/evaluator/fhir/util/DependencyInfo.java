@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.evaluator.fhir.util;
 
 public class DependencyInfo {
-
   // TODO: Need for figuring out how to determine which package the dependency is in.
   private String referenceSource;
   private String reference;

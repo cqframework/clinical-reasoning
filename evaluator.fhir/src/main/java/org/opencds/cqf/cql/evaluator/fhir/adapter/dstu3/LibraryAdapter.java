@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.opencds.cqf.cql.evaluator.fhir.adapter.dstu3.KnowledgeArtifactAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.api.Repository;
 
 class LibraryAdapter extends KnowledgeArtifactAdapter
     implements org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter {
@@ -31,8 +31,8 @@ class LibraryAdapter extends KnowledgeArtifactAdapter
     this.library = (Library) library;
   }
 
-  public void accept(KnowledgeArtifactVisitor visitor) {
-    visitor.visit(this);
+  public void accept(KnowledgeArtifactVisitor visitor, Repository theRepository) {
+    visitor.visit(this, theRepository);
   }
 
   protected Library getLibrary() {
@@ -145,5 +145,8 @@ class LibraryAdapter extends KnowledgeArtifactAdapter
       }
     }
     return references;
+  }
+  public List<DependencyInfo> getComponents(){
+    return new ArrayList<>();
   }
 }

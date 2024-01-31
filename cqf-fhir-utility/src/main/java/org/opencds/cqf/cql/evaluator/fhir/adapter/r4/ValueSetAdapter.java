@@ -1,5 +1,8 @@
 package org.opencds.cqf.cql.evaluator.fhir.adapter.r4;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -7,14 +10,13 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.cql.evaluator.fhir.visitor.KnowledgeArtifactVisitor;
-import java.util.ArrayList;
-import java.util.List;
+import org.opencds.cqf.fhir.api.Repository;
 
 class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.cql.evaluator.fhir.adapter.ValueSetAdapter {
 
   private ValueSet valueSet;
 
-  public ValueSetAdapter(IBaseResource valueSet) {
+  public ValueSetAdapter(ValueSet valueSet) {
     super(valueSet);
 
     if (!valueSet.fhirType().equals("ValueSet")) {
@@ -22,11 +24,11 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
           "resource passed as valueSet argument is not a ValueSet resource");
     }
 
-    this.valueSet = (ValueSet) valueSet;
+    this.valueSet = valueSet;
   }
 
-  public void accept(KnowledgeArtifactVisitor visitor) {
-    visitor.visit(this);
+  public void accept(KnowledgeArtifactVisitor visitor, Repository theRepository) {
+    visitor.visit(this, theRepository);
   }
 
   protected ValueSet getValueSet() {

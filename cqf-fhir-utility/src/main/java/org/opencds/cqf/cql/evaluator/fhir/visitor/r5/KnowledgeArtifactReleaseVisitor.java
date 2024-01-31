@@ -1,6 +1,6 @@
 package org.opencds.cqf.cql.evaluator.fhir.visitor.r5;
 
-import org.opencds.cqf.cql.evaluator.fhir.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.ValueSetAdapter;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;

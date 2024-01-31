@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
@@ -89,6 +93,26 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         populationType,
                         pop.getCriteria().getExpression()));
             }
+            // total Denominator/Numerator Def Builder
+            // validate population is not in Def
+            if(checkPopulationForCode(populations, TOTALDENOMINATOR) == null){
+                // add to definition
+                populations.add(new PopulationDef(
+                    "totalDenominator",
+                    totalConceptDefCreator(TOTALDENOMINATOR),
+                    TOTALDENOMINATOR,
+                    null
+                ));
+            }
+            if(checkPopulationForCode(populations, TOTALNUMERATOR) == null){
+                // add to definition
+                populations.add(new PopulationDef(
+                    "totalNumerator",
+                    totalConceptDefCreator(TOTALNUMERATOR),
+                    TOTALNUMERATOR,
+                    null
+                ));
+            }
 
             // Stratifiers
             List<StratifierDef> stratifiers = new ArrayList<>();
@@ -115,6 +139,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 stratifiers.add(stratifierDef);
             }
+
             var groupDef = new GroupDef(group.getId(), conceptToConceptDef(group.getCode()), stratifiers, populations);
             groups.add(groupDef);
             groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
@@ -122,6 +147,21 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         return new MeasureDef(
                 measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
+    }
+    private PopulationDef checkPopulationForCode(List<PopulationDef> populations, MeasurePopulationType measurePopType){
+        return populations.stream()
+            .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
+            .findAny()
+            .orElse(null);
+    }
+    private StratifierComponentDef checkStratForCode(List<StratifierComponentDef> components, MeasurePopulationType measurePopType){
+        return components.stream()
+            .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
+            .findAny()
+            .orElse(null);
+    }
+    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType){
+        return new ConceptDef(Collections.singletonList(new CodeDef(measurePopulationType.getSystem(),measurePopulationType.toCode())), null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

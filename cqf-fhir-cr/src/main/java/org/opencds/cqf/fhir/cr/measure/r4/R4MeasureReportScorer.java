@@ -15,6 +15,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
+
 /**
  * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
  * according to the values populated.</p>
@@ -93,7 +96,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(getGroupTotalNumerator(mrgc), getGroupTotalDenominator(mrgc));
+                Double score = this.calcProportionScore(getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL), getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
                 if (score != null) {
                     mrgc.setMeasureScore(new Quantity(score));
                 }
@@ -112,7 +115,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case PROPORTION:
             case RATIO:
                 Double score = this.calcProportionScore(
-                        getStratumGroupTotalNumerator(stratum), getStratumGroupTotalDenominator(stratum));
+                    getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL), getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL));
                 if (score != null) {
                     stratum.setMeasureScore(new Quantity(score));
                 }
@@ -121,65 +124,25 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
         }
     }
-
-    protected Integer getPopulationCount(MeasureReportGroupComponent mrgc, MeasurePopulationType populationType) {
-        Optional<MeasureReportGroupPopulationComponent> pop = mrgc.getPopulation().stream()
-                .filter(x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode()))
-                .findFirst();
-        if (pop.isPresent()) {
-            return pop.get().getCount();
+    protected Integer getGroupExtensionCount(MeasureReportGroupComponent mrgc, String extUrl) {
+        var ext = mrgc.getExtension().stream()
+            .filter(x -> x.getUrl().equals(extUrl))
+            .findFirst();
+        if (ext.isPresent()) {
+            return Integer.valueOf(ext.get().getValue().toString());
         }
 
         return null;
     }
 
-    protected Integer getPopulationCount(StratifierGroupComponent sgc, MeasurePopulationType populationType) {
-        Optional<StratifierGroupPopulationComponent> pop = sgc.getPopulation().stream()
-                .filter(x -> x.getCode().getCodingFirstRep().getCode().equals(populationType.toCode()))
-                .findFirst();
-        if (pop.isPresent()) {
-            return pop.get().getCount();
+    protected Integer getStratumPopulationCount(StratifierGroupComponent sgc, String extUrl) {
+        var pop = sgc.getExtension();
+        var ext = pop.stream().filter(x -> x.getUrl().equals(extUrl))
+                .findFirst().orElse(null);
+        if (ext!=null) {
+            return Integer.valueOf(ext.getValue().toString());
         }
-
         return null;
-    }
-
-    protected Integer getGroupTotalDenominator(MeasureReportGroupComponent mrgc) {
-        var den = getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOR);
-        if (getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOREXCEPTION) != null) {
-            den = den - getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOREXCEPTION);
-        }
-        if (getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOREXCLUSION) != null) {
-            den = den - getPopulationCount(mrgc, MeasurePopulationType.DENOMINATOREXCLUSION);
-        }
-        return den;
-    }
-
-    protected Integer getStratumGroupTotalDenominator(StratifierGroupComponent sgc) {
-        var den = getPopulationCount(sgc, MeasurePopulationType.DENOMINATOR);
-        if (getPopulationCount(sgc, MeasurePopulationType.DENOMINATOREXCEPTION) != null) {
-            den = den - getPopulationCount(sgc, MeasurePopulationType.DENOMINATOREXCEPTION);
-        }
-        if (getPopulationCount(sgc, MeasurePopulationType.DENOMINATOREXCLUSION) != null) {
-            den = den - getPopulationCount(sgc, MeasurePopulationType.DENOMINATOREXCLUSION);
-        }
-        return den;
-    }
-
-    protected Integer getStratumGroupTotalNumerator(StratifierGroupComponent sgc) {
-        var num = getPopulationCount(sgc, MeasurePopulationType.NUMERATOR);
-        if (getPopulationCount(sgc, MeasurePopulationType.NUMERATOREXCLUSION) != null) {
-            num = num - getPopulationCount(sgc, MeasurePopulationType.NUMERATOREXCLUSION);
-        }
-        return num;
-    }
-
-    protected Integer getGroupTotalNumerator(MeasureReportGroupComponent mrgc) {
-        var num = getPopulationCount(mrgc, MeasurePopulationType.NUMERATOR);
-        if (getPopulationCount(mrgc, MeasurePopulationType.NUMERATOREXCLUSION) != null) {
-            num = num - getPopulationCount(mrgc, MeasurePopulationType.NUMERATOREXCLUSION);
-        }
-        return num;
     }
 
     protected void scoreStratifier(

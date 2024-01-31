@@ -151,10 +151,10 @@ public class ProcessAction {
                 }
                 if (!(result instanceof IBaseBooleanDatatype)) {
                     logger.warn(
-                            "The condition expression {} returned a non-boolean value: {}",
+                            "Condition expression {} returned a non-boolean value: {}",
                             conditionExpression.getExpression(),
                             result.getClass().getSimpleName());
-                    continue;
+                    return false;
                 }
                 if (!((IBaseBooleanDatatype) result).getValue()) {
                     logger.debug("The result of condition expression {} is false", conditionExpression.getExpression());

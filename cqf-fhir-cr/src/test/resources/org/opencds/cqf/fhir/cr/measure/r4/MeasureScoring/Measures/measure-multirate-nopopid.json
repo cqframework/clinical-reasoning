@@ -69,7 +69,6 @@
     } ]
   },
   "group": [ {
-    "id": "DataCompleteness",
     "population": [ {
       "id": "initial-population",
       "code": {
@@ -124,7 +123,6 @@
       }
     } ]
   }, {
-    "id": "PerformanceRate",
     "population": [ {
       "id": "initial-population-2",
       "code": {

@@ -23,7 +23,7 @@ class MeasureScorerTest {
     List<MeasureReport> myMeasureReports = getMyMeasureReports();
 
     @Test
-    void testScore_groupIdMultiRateMeasure() {
+    void testScore_onlyPopulationIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -31,17 +31,9 @@ class MeasureScorerTest {
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
         assertEquals(
-                group(measureReport, "DataCompleteness")
-                        .getMeasureScore()
-                        .getValue()
-                        .toString(),
-                "1.0");
+                measureReport.getGroup().get(0).getMeasureScore().getValue().toString(), "1.0");
         assertEquals(
-                group(measureReport, "PerformanceRate")
-                        .getMeasureScore()
-                        .getValue()
-                        .toString(),
-                "1.0");
+                measureReport.getGroup().get(1).getMeasureScore().getValue().toString(), "1.0");
     }
 
     @Test

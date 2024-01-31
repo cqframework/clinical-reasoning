@@ -17,7 +17,6 @@
     } ]
   },
   "group": [ {
-    "id": "DataCompleteness",
     "population": [ {
       "id": "initial-population",
       "code": {
@@ -38,7 +37,18 @@
         } ]
       },
       "count": 1
-    }, {
+    },{
+      "id": "denominator-exclusion",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exclusion",
+          "display": "Denominator Exclusion"
+        } ]
+      },
+      "count": 0
+    },
+      {
       "id": "numerator",
       "code": {
         "coding": [ {
@@ -60,7 +70,6 @@
       }
     ]
   }, {
-    "id": "PerformanceRate",
     "population": [ {
       "id": "initial-population-2",
       "code": {

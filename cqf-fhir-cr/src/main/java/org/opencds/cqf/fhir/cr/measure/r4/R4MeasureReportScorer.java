@@ -72,10 +72,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     break;
                 }
             }
-            // Match by group's population id
-            if (mrgc.getPopulation().size() == entry.getKey().populations().size()) {
+            // Match by group's population id, subtract off totalNum and totalDen from population size
+            if (mrgc.getPopulation().size() == (entry.getKey().populations().size() - 2)) {
                 int i = 0;
+                // measureReportGroupPopulation
                 for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
+                    // get populations from groupDef
                     for (PopulationDef popDefEntry : entry.getKey().populations()) {
                         if (popId.getId().equals(popDefEntry.id())) {
                             i++;

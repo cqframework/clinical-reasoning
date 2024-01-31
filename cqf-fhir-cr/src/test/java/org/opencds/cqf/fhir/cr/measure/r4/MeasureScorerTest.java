@@ -74,8 +74,8 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_zeroDenominator() {
-        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
+    void testScore_error_noIds() {
+        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
@@ -84,8 +84,8 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_error_noids() {
-        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
+    void testScore_zeroDenominator() {
+        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
 

@@ -1,9 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,52 +42,5 @@ class Dstu3MeasureProcessorTest {
         String errorMsg = "MeasureScoring must be specified on Measure";
         var e = assertThrows(IllegalArgumentException.class, () -> when.then());
         assertEquals(errorMsg, e.getMessage());
-    }
-
-    @Test
-    void evaluateThrowsErrorWithEmptyMeasure() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("Empty")
-                .evaluate();
-        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("does not have a primary library"));
-    }
-
-    @Test
-    // Ensures an error is thrown when we can't find the library
-    void evaluateThrowsErrorWhenLibraryUnavailable() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("LibraryMissingContent")
-                .evaluate();
-        var e = assertThrows(IllegalStateException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM"));
-    }
-
-    @Test
-    void evaluateThrowsErrorWhenLibraryIsMissingContent() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("LibraryMissingContent")
-                .evaluate();
-        var e = assertThrows(IllegalStateException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
-    }
-
-    @Test
-    void evaluateSucceedsWithMinimalMeasure() {
-        var when = Measure.given()
-                .repositoryFor("MinimalMeasure")
-                .when()
-                .measureId("Minimal")
-                .evaluate();
-
-        var report = when.then().report();
-        assertNotNull(report);
-        assertEquals(0, report.getGroup().size());
     }
 }

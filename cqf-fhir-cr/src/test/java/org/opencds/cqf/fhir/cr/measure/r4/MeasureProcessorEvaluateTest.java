@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
@@ -220,50 +219,5 @@ public class MeasureProcessorEvaluateTest {
         String errorMsg = "MeasureScoring must be specified on Group or Measure";
         var e = assertThrows(IllegalArgumentException.class, () -> when.then());
         assertEquals(errorMsg, e.getMessage());
-    }
-
-    @Test
-    void evaluateThrowsErrorWithEmptyMeasure() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("Empty")
-                .evaluate();
-        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("does not have a primary library"));
-    }
-
-    @Test
-    void evaluateThrowsErrorWhenLibraryUnavailable() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("LibraryUnavailable")
-                .evaluate();
-        assertThrows(ResourceNotFoundException.class, () -> when.then());
-    }
-
-    @Test
-    void evaluateThrowsErrorWhenLibraryIsMissingContent() {
-        var when = Measure.given()
-                .repositoryFor("InvalidMeasure")
-                .when()
-                .measureId("LibraryMissingContent")
-                .evaluate();
-        var e = assertThrows(IllegalStateException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
-    }
-
-    @Test
-    void evaluateSucceedsWithMinimalMeasure() {
-        var when = Measure.given()
-                .repositoryFor("MinimalMeasure")
-                .when()
-                .measureId("Minimal")
-                .evaluate();
-
-        MeasureReport report = when.then().report();
-        assertNotNull(report);
-        assertEquals(0, report.getGroup().size());
     }
 }

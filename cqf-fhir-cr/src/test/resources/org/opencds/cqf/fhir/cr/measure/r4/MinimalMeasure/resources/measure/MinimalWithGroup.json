@@ -1,0 +1,18 @@
+{
+    "id": "MinimalWithGroup",
+    "resourceType": "Measure",
+    "library": [
+        "http://example.com/Library/MinimalWithGroup"
+    ],
+    "scoring": {
+        "coding": [
+            {
+                "system": "http://hl7.org/fhir/measure-scoring",
+                "code": "proportion"
+            }
+        ]
+    },
+    "group": [
+        {}
+    ]
+}

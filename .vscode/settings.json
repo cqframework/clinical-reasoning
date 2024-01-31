@@ -64,6 +64,8 @@
         "SEARCHSET",
         "sgpc",
         "Sonarlint",
+        "Stratifier",
+        "stratifiers",
         "SUBJECTLIST",
         "testng",
         "unsignedint",

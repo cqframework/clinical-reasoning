@@ -30,17 +30,6 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private final boolean enforceIds;
-
-    public Dstu3MeasureDefBuilder() {
-        this(false);
-    }
-
-    public Dstu3MeasureDefBuilder(boolean enforceIds) {
-        this.enforceIds = enforceIds;
-    }
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -58,13 +47,20 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Groups
         MeasureScoring groupMeasureScoringCode = getMeasureScoring(measure);
-        if (groupMeasureScoringCode == null) {
-            throw new IllegalStateException("MeasureScoring must be specified on Measure");
+
+        // The group size check here is to ensure that there's parity in the behavior of builder
+        // between DSTU3 and R4. In R4, scoring can be on the group level so if we have an
+        // empty measure we simply generate an empty MeasureReport.
+        // This might not be the best behavior, but we want to ensure that the behavior is the same
+        // between versions
+        if (!measure.getGroup().isEmpty() && groupMeasureScoringCode == null) {
+            throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
         }
         List<GroupDef> groups = new ArrayList<>();
         Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            checkId(group);
+            // Ids are not required on groups in dstu3
+            // checkId(group);
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -147,13 +143,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
+        if (e.getId() == null || StringUtils.isBlank(e.getId())) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
+        if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
     }

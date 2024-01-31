@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
-public class MeasureScorerTest {
+class MeasureScorerTest {
 
     List<Measure> myMeasures = getMyMeasures();
     List<MeasureReport> myMeasureReports = getMyMeasureReports();
 
     @Test
-    public void testScore_groupIdMultiRateMeasure() {
+    void testScore_groupIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -44,7 +45,16 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_populationIdMultiRate() {
+    void scorerThrowsIfNoScoringSupplied() {
+        var mr = new MeasureReport();
+        mr.addGroup();
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+
+        assertThrows(IllegalArgumentException.class, () -> scorer.score(null, mr));
+    }
+
+    @Test
+    void testScore_populationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -64,8 +74,18 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_zeroDenominator() {
+    void testScore_zeroDenominator() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
+        var measureScoringDef = getMeasureScoringDef(measureUrl);
+        var measureReport = getMyMeasureReport(measureUrl);
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+        var e = assertThrows(IllegalArgumentException.class, () -> scorer.score(measureScoringDef, measureReport));
+        assertEquals("No MeasureScoring value set", e.getMessage());
+    }
+
+    @Test
+    void testScore_error_noids() {
+        var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
 
@@ -76,7 +96,7 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_noExtension() {
+    void testScore_noExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -88,7 +108,7 @@ public class MeasureScorerTest {
     }
 
     @Test
-    public void testScore_groupIdMultiStratum() {
+    void testScore_groupIdMultiStratum() {
         var measureUrl =
                 "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
@@ -128,7 +148,7 @@ public class MeasureScorerTest {
                         .toString());
     }
 
-    public MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
+    MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
         return measureReport.getGroup().stream()
                 .filter(g -> g.getId().equals(id))
                 .findFirst()

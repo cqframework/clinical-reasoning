@@ -71,6 +71,7 @@
   "group": [ {
     "id": "DataCompleteness",
     "population": [ {
+      "id": "initial-population",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -83,6 +84,7 @@
         "expression": "Initial Population"
       }
     }, {
+      "id": "denominator",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -95,6 +97,7 @@
         "expression": "Denominator 1"
       }
     }, {
+      "id": "denominator-exclusion",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -107,6 +110,7 @@
         "expression": "Denominator Exclusion"
       }
     }, {
+      "id": "numerator",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -122,6 +126,7 @@
   }, {
     "id": "PerformanceRate",
     "population": [ {
+      "id": "initial-population-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -134,6 +139,7 @@
         "expression": "Initial Population"
       }
     }, {
+      "id": "denominator-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -146,6 +152,7 @@
         "expression": "Denominator 2"
       }
     }, {
+      "id": "numerator-2",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",

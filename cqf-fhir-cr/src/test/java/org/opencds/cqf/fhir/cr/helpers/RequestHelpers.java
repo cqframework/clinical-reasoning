@@ -76,6 +76,25 @@ public class RequestHelpers {
         } catch (Exception e) {
             // TODO: handle exception
         }
+        IBaseDatatype userLanguage;
+        switch (fhirVersion) {
+            case DSTU3:
+                userLanguage = new org.hl7.fhir.dstu3.model.CodeableConcept(
+                        new org.hl7.fhir.dstu3.model.Coding("test", "test", "test"));
+                break;
+            case R4:
+                userLanguage = new org.hl7.fhir.r4.model.CodeableConcept(
+                        new org.hl7.fhir.r4.model.Coding("test", "test", "test"));
+                break;
+            case R5:
+                userLanguage = new org.hl7.fhir.r5.model.CodeableConcept(
+                        new org.hl7.fhir.r5.model.Coding("test", "test", "test"));
+                break;
+
+            default:
+                userLanguage = null;
+                break;
+        }
         return new ApplyRequest(
                 planDefinition,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
@@ -83,7 +102,7 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Practitioner")),
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Organization")),
                 null,
-                null,
+                userLanguage,
                 null,
                 null,
                 null,

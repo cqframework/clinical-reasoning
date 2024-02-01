@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.r4;
 
+import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
+
 import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
@@ -10,7 +12,6 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +25,15 @@ public class QuestionnaireTypeIsChoice {
 
     public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent item) {
         final ValueSet valueSet = getValueSet(element);
-        // if (valueSet != null) {
-        if (valueSet.hasExpansion()) {
-            addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
+        if (valueSet != null) {
+            if (valueSet.hasExpansion()) {
+                addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
+            } else {
+                addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+            }
         } else {
-            addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+            // Is it possible to get the binding without the value set?
         }
-        // } else {
-        //     //Is it possible to get the binding without the value set?
-        // }
         return item;
     }
 
@@ -63,13 +64,15 @@ public class QuestionnaireTypeIsChoice {
     }
 
     protected ValueSet getValueSet(ElementDefinition element) {
-        // try {
-        final String valueSetUrl = element.getBinding().getValueSet();
-        return (ValueSet)
-                SearchHelper.searchRepositoryByCanonical(repository, new CanonicalType().setValue(valueSetUrl));
-        // } catch (Exception e) {
-        //     logger.error(e.getMessage());
-        //     return null;
-        // }
+        if (element.hasBinding()) {
+            try {
+                final var valueSetUrl =
+                        new CanonicalType().setValue(element.getBinding().getValueSet());
+                return (ValueSet) searchRepositoryByCanonical(repository, valueSetUrl);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+        }
+        return null;
     }
 }

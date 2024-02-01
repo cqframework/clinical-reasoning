@@ -126,7 +126,7 @@
         "resourceType": "ServiceRequest",
         "id": "opioidcds-urine-screening-request",
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request"
+          "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request|2022.1.0"
         ],
         "status": "draft",
         "intent": "order",
@@ -142,6 +142,9 @@
         },
         "subject": {
           "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
+        },
+        "encounter": {
+          "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
         }
       }
     }

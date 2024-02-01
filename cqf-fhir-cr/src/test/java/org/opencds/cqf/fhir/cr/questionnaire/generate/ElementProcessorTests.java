@@ -22,15 +22,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 public class ElementProcessorTests {
+    private final FhirContext fhirContextDstu2 = FhirContext.forDstu2Cached();
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR4B = FhirContext.forR4BCached();
 
     @Mock
     Repository repository;
+
+    @Mock
+    LibraryEngine libraryEngine;
 
     @Mock
     ExpressionProcessor expressionProcessor;
@@ -43,7 +49,9 @@ public class ElementProcessorTests {
 
     @Test
     void createInitialShouldReturnNullForUnsupportedVersion() {
-        var request = newGenerateRequestForVersion(FhirVersionEnum.DSTU2);
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(fhirContextDstu2).when(repository).fhirContext();
+        var request = newGenerateRequestForVersion(FhirVersionEnum.DSTU2, libraryEngine);
         var initial = createInitial(request, new BooleanType(true));
         assertNull(initial);
     }
@@ -51,7 +59,9 @@ public class ElementProcessorTests {
     @Test
     @SuppressWarnings("unchecked")
     void testElementWithCqfExpressionWithResourceResult() {
-        var request = newGenerateRequestForVersion(FhirVersionEnum.R4);
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(fhirContextR4).when(repository).fhirContext();
+        var request = newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var cqfExpression = new CqfExpression();
         var expectedResource = new Patient().setId("test");
         var item = new QuestionnaireItemComponent().setLinkId("test").setType(QuestionnaireItemType.REFERENCE);

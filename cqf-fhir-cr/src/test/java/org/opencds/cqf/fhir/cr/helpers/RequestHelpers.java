@@ -114,10 +114,6 @@ public class RequestHelpers {
                 modelResolver);
     }
 
-    public static GenerateRequest newGenerateRequestForVersion(FhirVersionEnum fhirVersion) {
-        return new GenerateRequest(fhirVersion);
-    }
-
     public static GenerateRequest newGenerateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
         return new GenerateRequest(

@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.model.api.IElement;
-import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -40,9 +39,5 @@ public interface ICpgRequest extends IQuestionnaireRequest {
 
     default List<IBaseBackboneElement> getDynamicValues(IElement element) {
         return resolvePathList(element, "dynamicValue", IBaseBackboneElement.class);
-    }
-
-    default void addQuestionnaireItem(IBaseBackboneElement item) {
-        getModelResolver().setValue(getQuestionnaire(), "item", Collections.singletonList(item));
     }
 }

@@ -106,11 +106,13 @@
   ],
   "group": [
     {
+      "id": "group-1",
       "identifier": {
         "value": "group-1"
       },
       "population": [
         {
+          "id": "initial-population",
           "identifier": {
             "value": "initial-population"
           },
@@ -124,6 +126,7 @@
           "criteria": "Initial Population"
         },
         {
+          "id": "numerator",
           "identifier": {
             "value": "numerator"
           },
@@ -137,6 +140,7 @@
           "criteria": "Numerator"
         },
         {
+          "id": "denominator",
           "identifier": {
             "value": "denominator"
           },
@@ -150,6 +154,7 @@
           "criteria": "Denominator"
         },
         {
+         "id": "denominator-exclusion",
           "identifier": {
             "value": "denominator-exclusion"
           },

@@ -361,6 +361,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private Measure measure(String scoring) {
         Measure measure = new Measure();
+        measure.setId(scoring);
         measure.setName("Test");
         measure.setVersion("1.0.0");
         measure.setUrl("http://test.com/fhir/Measure/Test");

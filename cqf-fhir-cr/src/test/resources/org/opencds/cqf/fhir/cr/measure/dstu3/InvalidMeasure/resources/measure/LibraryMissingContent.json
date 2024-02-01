@@ -1,0 +1,9 @@
+{
+    "id": "LibraryMissingContent",
+    "resourceType": "Measure",
+    "library": [
+        {
+            "reference": "Library/MissingContent"
+        }
+    ]
+}

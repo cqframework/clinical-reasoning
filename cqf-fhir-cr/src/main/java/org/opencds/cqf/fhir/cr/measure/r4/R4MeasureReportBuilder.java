@@ -64,6 +64,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -352,19 +353,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add extension to group for totalDenominator and totalNumerator
-        reportGroup
-                .addExtension()
-                .setUrl(EXT_TOTAL_DENOMINATOR_URL)
-                .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
-                        .getSubjects()
-                        .size())));
-        reportGroup
-                .addExtension()
-                .setUrl(EXT_TOTAL_NUMERATOR_URL)
-                .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
-                        .getSubjects()
-                        .size())));
-
+        if (bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.PROPORTION)
+                || bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.RATIO)) {
+            reportGroup
+                    .addExtension()
+                    .setUrl(EXT_TOTAL_DENOMINATOR_URL)
+                    .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
+                            .getSubjects()
+                            .size())));
+            reportGroup
+                    .addExtension()
+                    .setUrl(EXT_TOTAL_NUMERATOR_URL)
+                    .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
+                            .getSubjects()
+                            .size())));
+        }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             var groupStrat = measureGroup.getStratifier().get(i);
             var reportStrat = reportGroup.addStratifier();

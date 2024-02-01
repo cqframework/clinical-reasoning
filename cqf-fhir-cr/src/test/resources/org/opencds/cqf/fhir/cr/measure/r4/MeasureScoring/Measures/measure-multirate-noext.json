@@ -1,7 +1,7 @@
 {
   "resourceType": "Measure",
   "id": "multirate-groupid",
-  "url": "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid",
+  "url": "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext",
   "name": "multirate-groupid",
   "status": "active",
   "experimental": true,
@@ -69,8 +69,9 @@
     } ]
   },
   "group": [ {
+    "id": "DataCompleteness",
     "population": [ {
-      "id": "initial-population",
+      "id": "datacompleteness-ip",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -83,7 +84,7 @@
         "expression": "Initial Population"
       }
     }, {
-      "id": "denominator",
+      "id": "datacompleteness-den",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -96,7 +97,7 @@
         "expression": "Denominator 1"
       }
     }, {
-      "id": "denominator-exclusion",
+      "id": "datacompleteness-den-exclusion",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -109,7 +110,7 @@
         "expression": "Denominator Exclusion"
       }
     }, {
-      "id": "numerator",
+      "id": "datacompleteness-num",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -123,8 +124,9 @@
       }
     } ]
   }, {
+    "id": "PerformanceRate",
     "population": [ {
-      "id": "initial-population-2",
+      "id": "performancerate-ip",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -137,7 +139,7 @@
         "expression": "Initial Population"
       }
     }, {
-      "id": "denominator-2",
+      "id": "performancerate-den",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",
@@ -150,7 +152,7 @@
         "expression": "Denominator 2"
       }
     }, {
-      "id": "numerator-2",
+      "id": "performancerate-num",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/measure-population",

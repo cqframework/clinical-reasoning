@@ -9,6 +9,8 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -289,7 +291,7 @@ public class MeasureEvaluator {
                     "Measure observation %s does not reference a function definition", criteriaExpression));
         }
 
-        Object result = null;
+        Object result;
         context.getState().pushWindow();
         try {
             context.getState()
@@ -345,6 +347,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(DENOMINATOR), groupDef.getSingle(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
+                boolean inException = false;
                 // Are they in the numerator?
                 boolean inNumerator = evaluatePopulationMembership(
                         subjectType, subjectId, groupDef.getSingle(NUMERATOR), groupDef.getSingle(NUMERATOREXCLUSION));
@@ -354,7 +357,7 @@ public class MeasureEvaluator {
 
                     PopulationDef denominatorException = groupDef.getSingle(DENOMINATOREXCEPTION);
                     PopulationDef denominator = groupDef.getSingle(DENOMINATOR);
-                    boolean inException = false;
+
                     for (Object resource : evaluatePopulationCriteria(
                             subjectType,
                             subjectId,
@@ -369,6 +372,19 @@ public class MeasureEvaluator {
                         denominatorException.addSubject(subjectId);
                         denominator.removeSubject(subjectId);
                     }
+                }
+                // I & D & !E & !(X & !N) => inTotalDenominator
+                // denom-exclusion already considered in inDenominator
+                if (inInitialPopulation && inDenominator && !(inException && !inNumerator)) {
+                    PopulationDef totalDenominator = groupDef.getSingle(TOTALDENOMINATOR);
+                    totalDenominator.addSubject(subjectId);
+                }
+
+                // N & !NE => inTotalNumerator
+                // num-exclusion already considered in inNumerator
+                if (inNumerator) {
+                    PopulationDef totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
+                    totalNumerator.addSubject(subjectId);
                 }
             }
         }

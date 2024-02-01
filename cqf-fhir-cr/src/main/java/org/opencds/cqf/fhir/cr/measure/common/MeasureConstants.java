@@ -28,4 +28,8 @@ public class MeasureConstants {
     public static final String FHIR_MODEL_URI = "http://hl7.org/fhir";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+    public static final String EXT_TOTAL_DENOMINATOR_URL =
+            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership";
+    public static final String EXT_TOTAL_NUMERATOR_URL =
+            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership";
 }

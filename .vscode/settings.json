@@ -11,6 +11,7 @@
         "clinicalreasoning",
         "Codeable",
         "CODEABLECONCEPT",
+        "CODESYSTEM",
         "codesystems",
         "Configurer",
         "connectathon",
@@ -70,7 +71,8 @@
         "testng",
         "unsignedint",
         "Unvalidated",
-        "uscore"
+        "uscore",
+        "VALUESET"
     ],
     "cSpell.enabledLanguageIds": [
         "java",

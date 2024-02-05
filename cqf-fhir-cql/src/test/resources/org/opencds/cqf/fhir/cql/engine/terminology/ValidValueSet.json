@@ -1,0 +1,21 @@
+{
+    "resourceType": "ValueSet",
+    "id": "ValidValueSet",
+    "url": "http://example.com/ValueSet/ValidValueSet",
+    "expansion": {
+        "contains": [
+            {
+                "system": "http://example.com/CodeSystem/Codes",
+                "code": "123"
+            },
+            {
+                "system": "http://example.com/CodeSystem/Codes",
+                "code": "456"
+            },
+            {
+                "system": "http://example.com/CodeSystem/Codes",
+                "code": "789"
+            }
+        ]
+    }
+}

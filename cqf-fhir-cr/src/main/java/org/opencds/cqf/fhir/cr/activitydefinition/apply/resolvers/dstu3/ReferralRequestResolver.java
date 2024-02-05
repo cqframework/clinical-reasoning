@@ -18,6 +18,7 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public ReferralRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var referralRequest = new ReferralRequest();
         referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.DRAFT);
@@ -36,11 +37,10 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
                     new ReferralRequestRequesterComponent(new Reference(request.getOrganizationId())));
         }
 
-        // code can be set as a dynamicValue
         if (activityDefinition.hasCode()) {
             referralRequest.setServiceRequested(Collections.singletonList(activityDefinition.getCode()));
-        } else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
-            throw new FHIRException("Missing required code property");
+        } else if (!activityDefinition.hasDynamicValue()) {
+            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "ReferralRequest"));
         }
 
         return referralRequest;

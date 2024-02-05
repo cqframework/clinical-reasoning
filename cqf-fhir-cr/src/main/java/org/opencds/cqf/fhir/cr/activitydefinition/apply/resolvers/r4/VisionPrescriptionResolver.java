@@ -17,6 +17,7 @@ public class VisionPrescriptionResolver extends BaseRequestResourceResolver {
 
     @Override
     public VisionPrescription resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var visionPrescription = new VisionPrescription();
 
         return visionPrescription;

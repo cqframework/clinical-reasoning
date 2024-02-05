@@ -17,6 +17,7 @@ public class CoverageEligibilityRequestResolver extends BaseRequestResourceResol
 
     @Override
     public CoverageEligibilityRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var coverageEligibilityRequest = new CoverageEligibilityRequest();
 
         return coverageEligibilityRequest;

@@ -19,6 +19,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
 
     @Override
     public Task resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var task = new Task();
         task.setFor(new Reference(request.getSubjectId()));
 

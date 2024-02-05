@@ -17,6 +17,7 @@ public class ClaimResolver extends BaseRequestResourceResolver {
 
     @Override
     public Claim resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var claim = new Claim();
 
         return claim;

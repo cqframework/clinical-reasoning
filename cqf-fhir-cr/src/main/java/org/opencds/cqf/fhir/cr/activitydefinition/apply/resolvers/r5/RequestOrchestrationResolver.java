@@ -17,6 +17,7 @@ public class RequestOrchestrationResolver extends BaseRequestResourceResolver {
 
     @Override
     public RequestOrchestration resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var requestOrchestration = new RequestOrchestration();
 
         return requestOrchestration;

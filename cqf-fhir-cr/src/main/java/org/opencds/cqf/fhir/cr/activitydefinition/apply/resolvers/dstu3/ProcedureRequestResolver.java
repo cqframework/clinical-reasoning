@@ -17,6 +17,7 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public ProcedureRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var procedureRequest = new ProcedureRequest();
         procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.DRAFT);
@@ -38,7 +39,7 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
         // code can be set as a dynamicValue
         if (activityDefinition.hasCode()) {
             procedureRequest.setCode(activityDefinition.getCode());
-        } else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
+        } else if (!activityDefinition.hasDynamicValue()) {
             throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "Procedure"));
         }
 

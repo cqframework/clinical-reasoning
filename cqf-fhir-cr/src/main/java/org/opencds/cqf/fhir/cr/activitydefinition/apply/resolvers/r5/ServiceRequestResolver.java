@@ -24,6 +24,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public ServiceRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
         serviceRequest.setStatus(RequestStatus.DRAFT);
@@ -51,9 +52,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasCode()) {
             serviceRequest.setCode(new CodeableReference(activityDefinition.getCode()));
-        }
-        // code can be set as a dynamicValue
-        else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
+        } else if (!activityDefinition.hasDynamicValue()) {
             throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "ServiceRequest"));
         }
 

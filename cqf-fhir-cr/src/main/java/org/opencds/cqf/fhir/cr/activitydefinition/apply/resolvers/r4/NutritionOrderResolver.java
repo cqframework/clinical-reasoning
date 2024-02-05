@@ -17,6 +17,7 @@ public class NutritionOrderResolver extends BaseRequestResourceResolver {
 
     @Override
     public NutritionOrder resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var nutritionOrder = new NutritionOrder();
 
         return nutritionOrder;

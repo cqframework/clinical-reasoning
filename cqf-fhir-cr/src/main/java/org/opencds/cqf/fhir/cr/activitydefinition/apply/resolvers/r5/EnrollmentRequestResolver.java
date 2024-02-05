@@ -17,6 +17,7 @@ public class EnrollmentRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public EnrollmentRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var enrollmentRequest = new EnrollmentRequest();
 
         return enrollmentRequest;

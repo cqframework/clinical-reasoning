@@ -23,6 +23,7 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
 
     @Override
     public ImmunizationRecommendation resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var immunizationRecommendation = new ImmunizationRecommendation();
 
         immunizationRecommendation.setPatient(new Reference(request.getSubjectId()));
@@ -34,7 +35,7 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
                             "http://terminology.hl7.org/CodeSystem/immunization-recommendation-status",
                             "due",
                             "Due"))));
-        } else {
+        } else if (!activityDefinition.hasDynamicValue()) {
             throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "ImmunizationRecommendation"));
         }
 

@@ -21,6 +21,7 @@ public class AppointmentResolver extends BaseRequestResourceResolver {
 
     @Override
     public Appointment resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var appointment = new Appointment();
 
         appointment.setStatus(AppointmentStatus.PROPOSED);

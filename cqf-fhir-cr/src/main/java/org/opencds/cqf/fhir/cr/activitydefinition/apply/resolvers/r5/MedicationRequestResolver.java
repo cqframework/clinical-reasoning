@@ -21,6 +21,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public MedicationRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
         medicationRequest.setStatus(MedicationrequestStatus.DRAFT);
@@ -35,7 +36,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
             medicationRequest.setMedication(new CodeableReference(activityDefinition.getProductCodeableConcept()));
         } else if (activityDefinition.hasProductReference()) {
             medicationRequest.setMedication(new CodeableReference(activityDefinition.getProductReference()));
-        } else {
+        } else if (!activityDefinition.hasDynamicValue()) {
             throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "MedicationRequest"));
         }
 

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.CodeableReference;
 import org.hl7.fhir.r5.model.Reference;
@@ -20,6 +19,7 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public SupplyRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var supplyRequest = new SupplyRequest();
 
         supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.DRAFT);
@@ -34,8 +34,6 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasQuantity()) {
             supplyRequest.setQuantity(activityDefinition.getQuantity());
-        } else {
-            throw new FHIRException("Missing required orderedItem.quantity property");
         }
 
         if (activityDefinition.hasCode()) {

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseRequestResourceResolver {
     protected static final Logger logger = LoggerFactory.getLogger(BaseRequestResourceResolver.class);
+    public static final String RESOLVE_MESSAGE = "Resolving {} to {}";
     public static final String TARGET_STATUS_URL = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
     public static final String MISSING_CODE_PROPERTY = "Missing required ActivityDefinition.code property for %s";
     public static final String MISSING_PRODUCT_PROPERTY = "Missing required ActivityDefinition.product property for %s";

@@ -20,6 +20,7 @@ public class ProcedureResolver extends BaseRequestResourceResolver {
 
     @Override
     public Procedure resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var procedure = new Procedure();
 
         procedure.setStatus(Procedure.ProcedureStatus.UNKNOWN);

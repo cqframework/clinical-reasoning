@@ -17,6 +17,7 @@ public class TransportResolver extends BaseRequestResourceResolver {
 
     @Override
     public Transport resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var transport = new Transport();
 
         return transport;

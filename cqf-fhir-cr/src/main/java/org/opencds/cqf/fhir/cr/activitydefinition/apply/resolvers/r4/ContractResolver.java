@@ -17,6 +17,7 @@ public class ContractResolver extends BaseRequestResourceResolver {
 
     @Override
     public Contract resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var contract = new Contract();
 
         return contract;

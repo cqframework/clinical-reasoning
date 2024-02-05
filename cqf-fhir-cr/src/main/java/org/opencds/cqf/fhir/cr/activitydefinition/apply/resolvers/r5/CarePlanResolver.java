@@ -17,6 +17,7 @@ public class CarePlanResolver extends BaseRequestResourceResolver {
 
     @Override
     public CarePlan resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var carePlan = new CarePlan();
 
         return carePlan;

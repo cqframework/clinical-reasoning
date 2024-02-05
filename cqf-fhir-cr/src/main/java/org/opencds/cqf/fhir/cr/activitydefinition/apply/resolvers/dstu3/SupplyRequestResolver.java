@@ -5,7 +5,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SupplyRequest;
 import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestOrderedItemComponent;
 import org.hl7.fhir.dstu3.model.SupplyRequest.SupplyRequestRequesterComponent;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
@@ -18,6 +17,7 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public SupplyRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var supplyRequest = new SupplyRequest();
 
         if (request.hasPractitionerId()) {
@@ -29,9 +29,6 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
         }
 
         if (activityDefinition.hasCode()) {
-            if (!activityDefinition.hasQuantity()) {
-                throw new FHIRException("Missing required orderedItem.quantity property");
-            }
             supplyRequest.setOrderedItem(new SupplyRequestOrderedItemComponent(activityDefinition.getQuantity())
                     .setItem(activityDefinition.getCode()));
         }

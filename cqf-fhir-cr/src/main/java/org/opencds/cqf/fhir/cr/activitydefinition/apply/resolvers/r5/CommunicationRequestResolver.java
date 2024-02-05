@@ -19,6 +19,7 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public CommunicationRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var communicationRequest = new CommunicationRequest();
 
         communicationRequest.setStatus(RequestStatus.DRAFT);

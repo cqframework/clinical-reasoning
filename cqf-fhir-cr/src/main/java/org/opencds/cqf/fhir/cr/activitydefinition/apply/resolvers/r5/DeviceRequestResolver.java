@@ -17,6 +17,7 @@ public class DeviceRequestResolver extends BaseRequestResourceResolver {
 
     @Override
     public DeviceRequest resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var deviceRequest = new DeviceRequest();
 
         return deviceRequest;

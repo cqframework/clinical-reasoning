@@ -19,6 +19,7 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
 
     @Override
     public DiagnosticReport resolve(ICpgRequest request) {
+        logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var diagnosticReport = new DiagnosticReport();
 
         diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.UNKNOWN);
@@ -26,8 +27,8 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasCode()) {
             diagnosticReport.setCode(activityDefinition.getCode());
-        } else {
-            throw new FHIRException("Missing required ActivityDefinition.code property for DiagnosticReport");
+        } else if (!activityDefinition.hasDynamicValue()) {
+            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "DiagnosticReport"));
         }
 
         if (activityDefinition.hasRelatedArtifact()) {

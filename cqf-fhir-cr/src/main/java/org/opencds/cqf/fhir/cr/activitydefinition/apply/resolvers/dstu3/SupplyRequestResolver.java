@@ -36,18 +36,6 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
                     .setItem(activityDefinition.getCode()));
         }
 
-        if (activityDefinition.hasProduct()) {
-            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasDosage()) {
-            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasBodySite()) {
-            throw new FHIRException(BODYSITE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
         return supplyRequest;
     }
 }

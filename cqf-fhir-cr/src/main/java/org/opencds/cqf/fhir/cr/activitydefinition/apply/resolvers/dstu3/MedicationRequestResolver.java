@@ -29,23 +29,11 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasProduct()) {
             medicationRequest.setMedication(activityDefinition.getProduct());
         } else {
-            throw new FHIRException(MISSING_CODE_PROPERTY);
+            throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "MedicationRequest"));
         }
 
         if (activityDefinition.hasDosage()) {
             medicationRequest.setDosageInstruction(activityDefinition.getDosage());
-        }
-
-        if (activityDefinition.hasBodySite()) {
-            throw new FHIRException(BODYSITE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasCode()) {
-            throw new FHIRException(CODE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasQuantity()) {
-            throw new FHIRException(QUANTITY_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return medicationRequest;

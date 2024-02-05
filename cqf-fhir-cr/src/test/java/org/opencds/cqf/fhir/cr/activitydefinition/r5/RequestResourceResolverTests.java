@@ -114,7 +114,10 @@ public class RequestResourceResolverTests {
 
     @Test
     public void testImmunizationRecommendationResolver() {
-        testResolver("immunizationrecommendation-test", ImmunizationRecommendation.class);
+        assertThrows(FHIRException.class, () -> {
+            testResolver("immunizationrecommendation-test", ImmunizationRecommendation.class);
+        });
+        testResolver("RecommendImmunizationActivity", ImmunizationRecommendation.class);
     }
 
     @Test

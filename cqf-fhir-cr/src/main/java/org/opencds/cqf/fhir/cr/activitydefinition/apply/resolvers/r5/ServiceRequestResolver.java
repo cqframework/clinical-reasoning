@@ -54,7 +54,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
         }
         // code can be set as a dynamicValue
         else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(MISSING_CODE_PROPERTY);
+            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "ServiceRequest"));
         }
 
         if (activityDefinition.hasBodySite()) {
@@ -63,14 +63,6 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasDoNotPerform()) {
             serviceRequest.setDoNotPerform(activityDefinition.getDoNotPerform());
-        }
-
-        if (activityDefinition.hasProduct()) {
-            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasDosage()) {
-            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return serviceRequest;

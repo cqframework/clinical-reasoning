@@ -39,19 +39,11 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasCode()) {
             procedureRequest.setCode(activityDefinition.getCode());
         } else if (!activityDefinition.hasCode() && !activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(MISSING_CODE_PROPERTY);
+            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "Procedure"));
         }
 
         if (activityDefinition.hasBodySite()) {
             procedureRequest.setBodySite(activityDefinition.getBodySite());
-        }
-
-        if (activityDefinition.hasProduct()) {
-            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasDosage()) {
-            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
         }
 
         return procedureRequest;

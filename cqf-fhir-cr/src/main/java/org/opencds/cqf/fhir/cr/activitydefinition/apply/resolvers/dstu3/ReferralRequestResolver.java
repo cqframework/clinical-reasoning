@@ -43,18 +43,6 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
             throw new FHIRException("Missing required code property");
         }
 
-        if (activityDefinition.hasBodySite()) {
-            throw new FHIRException(BODYSITE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasProduct()) {
-            throw new FHIRException(PRODUCT_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
-        if (activityDefinition.hasDosage()) {
-            throw new FHIRException(DOSAGE_ERROR_PREAMBLE + activityDefinition.getKind());
-        }
-
         return referralRequest;
     }
 }

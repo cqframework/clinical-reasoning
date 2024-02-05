@@ -8,12 +8,8 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseRequestResourceResolver {
     protected static final Logger logger = LoggerFactory.getLogger(BaseRequestResourceResolver.class);
     public static final String TARGET_STATUS_URL = "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus";
-    public static final String PRODUCT_ERROR_PREAMBLE = "Product does not map to ";
-    public static final String DOSAGE_ERROR_PREAMBLE = "Dosage does not map to ";
-    public static final String BODYSITE_ERROR_PREAMBLE = "BodySite does not map to ";
-    public static final String CODE_ERROR_PREAMBLE = "Code does not map to ";
-    public static final String QUANTITY_ERROR_PREAMBLE = "Quantity does not map to ";
-    public static final String MISSING_CODE_PROPERTY = "Missing required code property";
+    public static final String MISSING_CODE_PROPERTY = "Missing required ActivityDefinition.code property for %s";
+    public static final String MISSING_PRODUCT_PROPERTY = "Missing required ActivityDefinition.product property for %s";
 
     public abstract IBaseResource resolve(ICpgRequest request);
 }

@@ -7,12 +7,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
@@ -37,8 +39,12 @@ public class ItemGenerator {
     protected final ExtensionProcessor extensionProcessor;
 
     public ItemGenerator(Repository repository) {
+        this(repository, IElementProcessor.createProcessor(repository));
+    }
+
+    public ItemGenerator(Repository repository, IElementProcessor elementProcessor) {
         this.repository = repository;
-        elementProcessor = IElementProcessor.createProcessor(repository);
+        this.elementProcessor = elementProcessor;
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
     }
@@ -49,7 +55,7 @@ public class ItemGenerator {
                 String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
         try {
             var questionnaireItem = createQuestionnaireItem(request, profile, linkId);
-            extensionProcessor.processExtensionsInList(request, questionnaireItem, profile, INPUT_EXTENSION_LIST);
+            processExtensions(request, questionnaireItem, profile);
             processElements(request, questionnaireItem, profile);
             return questionnaireItem;
         } catch (Exception ex) {
@@ -59,16 +65,31 @@ public class ItemGenerator {
         }
     }
 
+    protected void processExtensions(
+            GenerateRequest request, IBaseBackboneElement questionnaireItem, IBaseResource profile) {
+        extensionProcessor.processExtensionsInList(request, questionnaireItem, profile, INPUT_EXTENSION_LIST);
+    }
+
+    protected CqfExpression getFeatureExpression(GenerateRequest request, IBaseResource profile) {
+        return expressionProcessor.getCqfExpression(
+                request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
+    }
+
+    protected List<IBase> getFeatureExpressionResults(
+            GenerateRequest request, CqfExpression featureExpression, String itemLinkId)
+            throws ResolveExpressionException {
+        return expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
+    }
+
     protected void processElements(GenerateRequest request, IBaseBackboneElement item, IBaseResource profile) {
         int childCount = request.getItems(item).size();
         var itemLinkId = request.getItemLinkId(item);
         var profileUrl = request.resolvePathString(profile, "url");
-        var featureExpression = expressionProcessor.getCqfExpression(
-                request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
+        var featureExpression = getFeatureExpression(request, profile);
         IBaseResource caseFeature = null;
         if (featureExpression != null) {
             try {
-                var results = expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
+                var results = getFeatureExpressionResults(request, featureExpression, itemLinkId);
                 var result = results == null || results.isEmpty() ? null : results.get(0);
                 if (result instanceof IBaseResource) {
                     caseFeature = (IBaseResource) result;
@@ -240,9 +261,7 @@ public class ItemGenerator {
                         .setText(text);
 
             default:
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported version of FHIR: %s",
-                        request.getFhirVersion().getFhirVersionString()));
+                return null;
         }
     }
 }

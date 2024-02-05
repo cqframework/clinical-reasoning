@@ -11,12 +11,34 @@ public class BundleHelper {
     private BundleHelper() {}
 
     /**
-     * Returns the first entry in a Bundle
+     * Returns the resource of the first entry in a Bundle
      *
      * @param bundle IBaseBundle type
      * @return
      */
-    public static IBaseResource getEntryFirstRep(IBaseBundle bundle) {
+    public static IBaseBackboneElement getEntryFirstRep(IBaseBundle bundle) {
+        var fhirVersion = bundle.getStructureFhirVersionEnum();
+        switch (fhirVersion) {
+            case DSTU3:
+                return ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntryFirstRep();
+            case R4:
+                return ((org.hl7.fhir.r4.model.Bundle) bundle).getEntryFirstRep();
+            case R5:
+                return ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Returns the resource of the first entry in a Bundle
+     *
+     * @param bundle IBaseBundle type
+     * @return
+     */
+    public static IBaseResource getEntryResourceFirstRep(IBaseBundle bundle) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
         switch (fhirVersion) {
             case DSTU3:

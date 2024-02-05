@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.utility;
 
-import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryFirstRep;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.List;
@@ -76,7 +76,7 @@ public class SearchHelper {
 
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
-        var result = getEntryFirstRep(searchResult);
+        var result = getEntryResourceFirstRep(searchResult);
         if (result == null) {
             throw new FHIRException(String.format(
                     "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));

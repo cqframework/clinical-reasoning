@@ -83,13 +83,13 @@ public class ElementProcessor implements IElementProcessor {
 
     public QuestionnaireItemType parseItemType(String elementType, Boolean hasBinding) {
         if (Boolean.TRUE.equals(hasBinding)) {
-            return QuestionnaireItemType.GROUP;
+            return QuestionnaireItemType.QUESTION;
         }
         switch (elementType) {
             case "code":
             case "coding":
             case "CodeableConcept":
-                return QuestionnaireItemType.GROUP;
+                return QuestionnaireItemType.QUESTION;
             case "uri":
             case "url":
             case "canonical":

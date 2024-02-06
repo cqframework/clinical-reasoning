@@ -1828,6 +1828,16 @@
   "differential": {
     "element": [
       {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "label": "Patient Name",
+        "type": [
+          {
+            "code": "HumanName"
+          }
+        ]
+      },
+      {
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
@@ -1954,7 +1964,12 @@
         "path": "Patient.identifier",
         "sliceName": "MedicareID",
         "min": 1,
-        "max": "1"
+        "max": "1",
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ]
       },
       {
         "id": "Patient.identifier:MedicareID.system",
@@ -1966,7 +1981,7 @@
             "code": "uri"
           }
         ],
-        "fixedUri": "http://medicare.org"
+        "fixedUri": "urn:oid:1.2.36.146.595.217.0.1"
       },
       {
         "extension": [

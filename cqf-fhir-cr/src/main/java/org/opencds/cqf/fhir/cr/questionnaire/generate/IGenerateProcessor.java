@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface IGenerateProcessor {
     IBaseResource generate(String id);
 
-    IBaseResource generate(GenerateRequest request, IBaseResource profile, String id);
+    IBaseResource generate(GenerateRequest request, String id);
 
-    IBaseBackboneElement generateItem(GenerateRequest request, IBaseResource profile);
+    IBaseBackboneElement generateItem(GenerateRequest request);
 }

@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate.r4;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -10,9 +12,9 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasDefaultValue;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -29,15 +31,13 @@ public class ElementProcessor implements IElementProcessor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public IBaseBackboneElement processElement(
-            IOperationRequest request,
-            ICompositeType baseElement,
-            String profileUrl,
-            String childLinkId,
-            IBaseResource caseFeature) {
+            GenerateRequest request, ICompositeType baseElement, String childLinkId, IBaseResource caseFeature) {
         var element = (ElementDefinition) baseElement;
         final QuestionnaireItemType itemType = getItemType(element);
-        final QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profileUrl, element, childLinkId);
+        final QuestionnaireItemComponent item =
+                initializeQuestionnaireItem(itemType, request.getProfileUrl(), element, childLinkId);
         if (itemType == QuestionnaireItemType.CHOICE) {
             questionnaireTypeIsChoice.addProperties(element, item);
         }
@@ -49,9 +49,13 @@ public class ElementProcessor implements IElementProcessor {
             elementHasCqfExpression.addProperties(request, request.getExtensions(element), item);
         } else if (caseFeature != null) {
             var path = element.getPath().split("\\.")[1].replace("[x]", "");
-            var pathValue = request.resolvePath(caseFeature, path);
+            var pathValue = request.getModelResolver().resolvePath(caseFeature, path);
             if (pathValue instanceof Type) {
                 item.addInitial().setValue(transformValue((Type) pathValue));
+            } else if (pathValue instanceof List) {
+                for (var value : (List<IBase>) pathValue) {
+                    item.addInitial().setValue(transformValue((Type) value));
+                }
             }
         }
         item.setRequired(element.hasMin() && element.getMin() > 0);
@@ -73,10 +77,11 @@ public class ElementProcessor implements IElementProcessor {
 
     public QuestionnaireItemType getItemType(ElementDefinition element) {
         final String elementType = element.getType().get(0).getCode();
-        final QuestionnaireItemType itemType = parseItemType(elementType, element.hasBinding());
-        if (itemType == null) {
-            final String message = String.format(ITEM_TYPE_ERROR, element.getId());
-            throw new IllegalArgumentException(message);
+        QuestionnaireItemType itemType = null;
+        try {
+            itemType = parseItemType(elementType, element.hasBinding());
+        } catch (Exception e) {
+            itemType = QuestionnaireItemType.GROUP;
         }
         return itemType;
     }
@@ -94,8 +99,6 @@ public class ElementProcessor implements IElementProcessor {
             case "url":
             case "canonical":
                 return QuestionnaireItemType.URL;
-            case "BackboneElement":
-                return QuestionnaireItemType.GROUP;
             case "Quantity":
                 return QuestionnaireItemType.QUANTITY;
             case "Reference":

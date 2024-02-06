@@ -10,9 +10,9 @@ import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasDefaultValue;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IElementProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
@@ -30,14 +30,11 @@ public class ElementProcessor implements IElementProcessor {
 
     @Override
     public IBaseBackboneElement processElement(
-            IOperationRequest request,
-            ICompositeType baseElement,
-            String profileUrl,
-            String childLinkId,
-            IBaseResource caseFeature) {
+            GenerateRequest request, ICompositeType baseElement, String childLinkId, IBaseResource caseFeature) {
         var element = (ElementDefinition) baseElement;
         final QuestionnaireItemType itemType = getItemType(element);
-        final QuestionnaireItemComponent item = initializeQuestionnaireItem(itemType, profileUrl, element, childLinkId);
+        final QuestionnaireItemComponent item =
+                initializeQuestionnaireItem(itemType, request.getProfileUrl(), element, childLinkId);
         if (itemType == QuestionnaireItemType.GROUP) {
             questionnaireTypeIsChoice.addProperties(element, item);
         }

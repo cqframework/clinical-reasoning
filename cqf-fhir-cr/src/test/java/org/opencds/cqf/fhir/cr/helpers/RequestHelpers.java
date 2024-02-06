@@ -20,6 +20,8 @@ public class RequestHelpers {
     public static final String ORGANIZATION_ID = "organizationId";
     public static final String PLANDEFINITION_ID = "planDefinitionId";
     public static final String PLANDEFINITION_URL = "http://test.fhir.org/fhir/PlanDefinition/";
+    public static final String PROFILE_ID = "profileId";
+    public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
     // public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion) {
     //     return new ApplyRequest(fhirVersion);
@@ -116,7 +118,23 @@ public class RequestHelpers {
 
     public static GenerateRequest newGenerateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+        IBaseResource profile = null;
+        try {
+            var fhirContext = FhirContext.forCached(fhirVersion);
+            profile = fhirContext
+                    .getResourceDefinition("StructureDefinition")
+                    .newInstance()
+                    .setId(PROFILE_ID);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        return newGenerateRequestForVersion(fhirVersion, libraryEngine, profile);
+    }
+
+    public static GenerateRequest newGenerateRequestForVersion(
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource profile) {
         return new GenerateRequest(
+                profile,
                 false,
                 true,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),

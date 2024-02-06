@@ -150,6 +150,7 @@ public class QuestionnaireProcessor {
             LibraryEngine libraryEngine,
             String id) {
         var request = new GenerateRequest(
+                resolveStructureDefinition(profile),
                 supportedOnly,
                 requiredOnly,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
@@ -157,11 +158,11 @@ public class QuestionnaireProcessor {
                 bundle,
                 libraryEngine == null ? new LibraryEngine(repository, evaluationSettings) : libraryEngine,
                 modelResolver);
-        return generateQuestionnaire(request, resolveStructureDefinition(profile), id);
+        return generateQuestionnaire(request, id);
     }
 
-    public IBaseResource generateQuestionnaire(GenerateRequest request, IBaseResource profile, String id) {
-        return generateProcessor.generate(request, profile, id);
+    public IBaseResource generateQuestionnaire(GenerateRequest request, String id) {
+        return generateProcessor.generate(request, id);
     }
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(

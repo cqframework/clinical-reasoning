@@ -12,9 +12,13 @@ public class ItemValueTransformer {
         return value;
     }
 
+    @SuppressWarnings("rawtypes")
     public static org.hl7.fhir.r4.model.Type transformValue(org.hl7.fhir.r4.model.Type value) {
         if (value instanceof org.hl7.fhir.r4.model.CodeableConcept) {
             return ((org.hl7.fhir.r4.model.CodeableConcept) value).getCoding().get(0);
+        }
+        if (value instanceof org.hl7.fhir.r4.model.Enumeration) {
+            return new org.hl7.fhir.r4.model.StringType(((org.hl7.fhir.r4.model.Enumeration) value).getCode());
         }
         return value;
     }

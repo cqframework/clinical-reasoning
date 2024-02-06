@@ -51,26 +51,27 @@ public class ItemGeneratorTests {
     ItemGenerator fixture;
 
     @Test
-    void processElementsShouldCatchAndNotFailOnFeatureExpressionException() throws ResolveExpressionException {
+    void generateShouldCatchAndNotFailOnFeatureExpressionException() throws ResolveExpressionException {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(fhirContextR4).when(repository).fhirContext();
-        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var profile = new StructureDefinition();
+        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
         var groupItem = new QuestionnaireItemComponent();
+        doReturn(groupItem).when(fixture).createQuestionnaireItem(request, null);
         var cqfExpression = new CqfExpression();
-        doReturn(cqfExpression).when(fixture).getFeatureExpression(request, profile);
+        doReturn(cqfExpression).when(fixture).getFeatureExpression(request);
         var resultException = new ResolveExpressionException("Expression exception");
         doThrow(resultException).when(fixture).getFeatureExpressionResults(request, cqfExpression, null);
-        fixture.processElements(request, groupItem, profile);
+        fixture.generate(request);
     }
 
     @Test
     void generateShouldReturnErrorItemOnException() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(fhirContextR4).when(repository).fhirContext();
-        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var profile = new StructureDefinition();
-        var result = (QuestionnaireItemComponent) fixture.generate(request, profile);
+        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
+        var result = (QuestionnaireItemComponent) fixture.generate(request);
         assertNotNull(result);
         assertEquals("DISPLAY", result.getType().name());
         assertTrue(result.getText().contains("An error occurred during item creation: "));
@@ -85,7 +86,7 @@ public class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new StringType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(6)
+                .hasItemCount(4)
                 .itemHasInitialValue();
     }
 
@@ -96,7 +97,7 @@ public class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(6)
+                .hasItemCount(4)
                 .itemHasInitialValue();
     }
 
@@ -107,7 +108,7 @@ public class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(6)
+                .hasItemCount(4)
                 .itemHasInitialValue();
     }
 

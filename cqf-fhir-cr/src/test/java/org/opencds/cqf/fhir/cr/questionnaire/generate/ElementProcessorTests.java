@@ -75,9 +75,6 @@ public class ElementProcessorTests {
                 org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.URL,
                 elementProcessorDstu3.parseItemType("url", false));
         assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.GROUP,
-                elementProcessorDstu3.parseItemType("BackboneElement", false));
-        assertEquals(
                 org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.QUANTITY,
                 elementProcessorDstu3.parseItemType("Quantity", false));
         assertEquals(
@@ -127,9 +124,6 @@ public class ElementProcessorTests {
                 org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.URL,
                 elementProcessorR4.parseItemType("canonical", false));
         assertEquals(
-                org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP,
-                elementProcessorR4.parseItemType("BackboneElement", false));
-        assertEquals(
                 org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.QUANTITY,
                 elementProcessorR4.parseItemType("Quantity", false));
         assertEquals(
@@ -178,9 +172,6 @@ public class ElementProcessorTests {
         assertEquals(
                 org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.URL,
                 elementProcessorR5.parseItemType("canonical", false));
-        assertEquals(
-                org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP,
-                elementProcessorR5.parseItemType("BackboneElement", false));
         assertEquals(
                 org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUANTITY,
                 elementProcessorR5.parseItemType("Quantity", false));

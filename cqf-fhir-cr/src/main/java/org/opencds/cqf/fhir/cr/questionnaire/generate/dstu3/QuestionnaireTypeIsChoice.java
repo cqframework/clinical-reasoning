@@ -63,9 +63,9 @@ public class QuestionnaireTypeIsChoice {
     protected ValueSet getValueSet(ElementDefinition element) {
         if (element.hasBinding()) {
             try {
-                final String valueSetUrl = element.getBinding().getValueSet().primitiveValue();
-                return (ValueSet)
-                        SearchHelper.searchRepositoryByCanonical(repository, new StringType().setValue(valueSetUrl));
+                final var valueSetUrl = new StringType()
+                        .setValue(element.getBinding().getValueSet().primitiveValue());
+                return (ValueSet) SearchHelper.searchRepositoryByCanonical(repository, valueSetUrl);
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }

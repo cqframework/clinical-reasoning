@@ -24,10 +24,12 @@ public class QuestionnaireTypeIsChoice {
 
     public QuestionnaireItemComponent addProperties(ElementDefinition element, QuestionnaireItemComponent item) {
         final ValueSet valueSet = getValueSet(element);
-        if (valueSet.hasExpansion()) {
-            addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
-        } else {
-            addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+        if (valueSet != null) {
+            if (valueSet.hasExpansion()) {
+                addAnswerOptionsForValueSetWithExpansionComponent(valueSet, item);
+            } else {
+                addAnswerOptionsForValueSetWithComposeComponent(valueSet, item);
+            }
         }
         return item;
     }
@@ -61,9 +63,9 @@ public class QuestionnaireTypeIsChoice {
     protected ValueSet getValueSet(ElementDefinition element) {
         if (element.hasBinding()) {
             try {
-                final String valueSetUrl = element.getBinding().getValueSet();
-                return (ValueSet)
-                        SearchHelper.searchRepositoryByCanonical(repository, new CanonicalType().setValue(valueSetUrl));
+                final var valueSetUrl =
+                        new CanonicalType().setValue(element.getBinding().getValueSet());
+                return (ValueSet) SearchHelper.searchRepositoryByCanonical(repository, valueSetUrl);
             } catch (Exception e) {
                 logger.error(e.getMessage());
             }

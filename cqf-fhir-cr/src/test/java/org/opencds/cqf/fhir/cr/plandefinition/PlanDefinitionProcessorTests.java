@@ -383,6 +383,22 @@ public class PlanDefinitionProcessorTests {
 
     @Test
     void testGenerateQuestionnaireR4() {
+        var planDefinitionID = "generate-questionnaire";
+        var patientID = "OPA-Patient1";
+        var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
+                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("ClaimId", "OPA-Claim1"));
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .parameters(parameters)
+                .thenApplyR5()
+                .hasEntry(3)
+                .hasQuestionnaire();
+    }
+
+    @Test
+    void testGenerateQuestionnaireSleepStudy() {
         var planDefinitionID = "ASLPA1";
         var patientID = "positive";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(

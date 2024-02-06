@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -19,10 +21,15 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
+    private final IBaseResource profile;
+    private final String profileUrl;
     private String defaultLibraryUrl;
     private IBaseResource questionnaire;
+    private List<? extends ICompositeType> differentialElements;
+    private List<? extends ICompositeType> snapshotElements;
 
     public GenerateRequest(
+            IBaseResource profile,
             Boolean supportedOnly,
             Boolean requiredOnly,
             IIdType subjectId,
@@ -30,6 +37,7 @@ public class GenerateRequest implements IQuestionnaireRequest {
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        this.profile = profile;
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;
         this.subjectId = subjectId;
@@ -37,9 +45,36 @@ public class GenerateRequest implements IQuestionnaireRequest {
         this.bundle = bundle;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.fhirVersion =
-                libraryEngine.getRepository().fhirContext().getVersion().getVersion();
-        this.defaultLibraryUrl = "";
+        fhirVersion =
+                this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
+        defaultLibraryUrl = "";
+        profileUrl = resolvePathString(this.profile, "url");
+    }
+
+    public IBaseResource getProfile() {
+        return profile;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    public <E extends ICompositeType> void setDifferentialElements(List<E> elements) {
+        differentialElements = elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E extends ICompositeType> List<E> getDifferentialElements() {
+        return (List<E>) differentialElements;
+    }
+
+    public <E extends ICompositeType> void setSnapshotElements(List<E> elements) {
+        snapshotElements = elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E extends ICompositeType> List<E> getSnapshotElements() {
+        return (List<E>) snapshotElements;
     }
 
     public void setQuestionnaire(IBaseResource questionnaire) {

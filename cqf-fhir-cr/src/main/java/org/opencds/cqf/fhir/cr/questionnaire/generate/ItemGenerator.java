@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +8,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -25,8 +24,6 @@ import org.slf4j.LoggerFactory;
 public class ItemGenerator {
     protected static final Logger logger = LoggerFactory.getLogger(ItemGenerator.class);
     protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
-    protected static final String NO_BASE_DEFINITION_ERROR =
-            "An error occurred search for base definition with url (%s): %s";
     protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
 
@@ -49,14 +46,16 @@ public class ItemGenerator {
         extensionProcessor = new ExtensionProcessor();
     }
 
-    public IBaseBackboneElement generate(GenerateRequest request, IBaseResource profile) {
-        checkNotNull(profile);
+    public IBaseBackboneElement generate(GenerateRequest request) {
         final String linkId =
                 String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
         try {
-            var questionnaireItem = createQuestionnaireItem(request, profile, linkId);
-            processExtensions(request, questionnaireItem, profile);
-            processElements(request, questionnaireItem, profile);
+            var questionnaireItem = createQuestionnaireItem(request, linkId);
+            processExtensions(request, questionnaireItem);
+            int childCount = request.getItems(questionnaireItem).size();
+            var caseFeature = getCaseFeature(request, linkId);
+            var parentElements = getElementsWithNonNullElementType(request, null, null);
+            processElements(request, questionnaireItem, parentElements, childCount, linkId, caseFeature);
             return questionnaireItem;
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
@@ -65,28 +64,14 @@ public class ItemGenerator {
         }
     }
 
-    protected void processExtensions(
-            GenerateRequest request, IBaseBackboneElement questionnaireItem, IBaseResource profile) {
-        extensionProcessor.processExtensionsInList(request, questionnaireItem, profile, INPUT_EXTENSION_LIST);
+    protected void processExtensions(GenerateRequest request, IBaseBackboneElement questionnaireItem) {
+        extensionProcessor.processExtensionsInList(
+                request, questionnaireItem, request.getProfile(), INPUT_EXTENSION_LIST);
     }
 
-    protected CqfExpression getFeatureExpression(GenerateRequest request, IBaseResource profile) {
-        return expressionProcessor.getCqfExpression(
-                request, request.getExtensions(profile), Constants.CPG_FEATURE_EXPRESSION);
-    }
-
-    protected List<IBase> getFeatureExpressionResults(
-            GenerateRequest request, CqfExpression featureExpression, String itemLinkId)
-            throws ResolveExpressionException {
-        return expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
-    }
-
-    protected void processElements(GenerateRequest request, IBaseBackboneElement item, IBaseResource profile) {
-        int childCount = request.getItems(item).size();
-        var itemLinkId = request.getItemLinkId(item);
-        var profileUrl = request.resolvePathString(profile, "url");
-        var featureExpression = getFeatureExpression(request, profile);
+    protected IBaseResource getCaseFeature(GenerateRequest request, String itemLinkId) {
         IBaseResource caseFeature = null;
+        var featureExpression = getFeatureExpression(request);
         if (featureExpression != null) {
             try {
                 var results = getFeatureExpressionResults(request, featureExpression, itemLinkId);
@@ -98,22 +83,52 @@ public class ItemGenerator {
                 logger.error(e.getMessage());
             }
         }
-        for (var element : getElementsWithNonNullElementType(request, profile)) {
+        return caseFeature;
+    }
+
+    protected CqfExpression getFeatureExpression(GenerateRequest request) {
+        return expressionProcessor.getCqfExpression(
+                request, request.getExtensions(request.getProfile()), Constants.CPG_FEATURE_EXPRESSION);
+    }
+
+    protected List<IBase> getFeatureExpressionResults(
+            GenerateRequest request, CqfExpression featureExpression, String itemLinkId)
+            throws ResolveExpressionException {
+        return expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
+    }
+
+    protected <E extends ICompositeType> void processElements(
+            GenerateRequest request,
+            IBaseBackboneElement item,
+            List<E> elements,
+            int childCount,
+            String itemLinkId,
+            IBaseResource caseFeature) {
+        for (var element : elements) {
             childCount++;
             var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
-            var childItem = processElement(request, profileUrl, element, childLinkId, caseFeature);
-            request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
+            var childItem = processElement(request, element, childLinkId, caseFeature);
+            if (request.resolvePath(childItem, "type", IBaseEnumeration.class)
+                    .getValueAsString()
+                    .equals("group")) {
+                var childElements = getElementsWithNonNullElementType(
+                        request,
+                        request.resolvePathString(element, "path"),
+                        request.resolvePathString(element, "sliceName"));
+                if (!childElements.isEmpty()) {
+                    processElements(request, childItem, childElements, 0, childLinkId, caseFeature);
+                    request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
+                }
+            } else {
+                request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
+            }
         }
     }
 
     protected IBaseBackboneElement processElement(
-            GenerateRequest request,
-            String profileUrl,
-            ICompositeType element,
-            String childLinkId,
-            IBaseResource caseFeature) {
+            GenerateRequest request, ICompositeType element, String childLinkId, IBaseResource caseFeature) {
         try {
-            return elementProcessor.processElement(request, element, profileUrl, childLinkId, caseFeature);
+            return elementProcessor.processElement(request, element, childLinkId, caseFeature);
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
             logger.warn(message);
@@ -123,76 +138,53 @@ public class ItemGenerator {
 
     @SuppressWarnings("unchecked")
     protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
-            GenerateRequest request, IBaseResource profile) {
+            GenerateRequest request, String parentPath, String sliceName) {
         List<E> elements = new ArrayList<>();
-        var differential = request.resolvePath(profile, "differential");
-        elements.addAll(request.resolvePathList(differential, "element").stream()
-                .map(e -> (E) e)
-                .collect(Collectors.toList()));
-        // var snapshot = getProfileSnapshot(request, profile);
-        // if (snapshot != null) {
-        //     if (request.getRequiredOnly()) {
-        //         // only top level required elements and any required elements under them
-        //         elements.addAll(request.resolvePathList(snapshot, "element").stream()
-        //                 .filter(e -> {
-        //                     var path = request.resolvePathString(e, "path");
-        //                     var min = request.resolvePath(e, "min", IPrimitiveType.class);
-        //                     return min == null ? false : (Integer) min.getValue() > 0;
-        //                 })
-        //                 .map(e -> (E) e)
-        //                 .collect(Collectors.toList()));
-        //     } else {
-        //         elements.addAll(request.resolvePathList(snapshot, "element").stream()
-        //                 .map(e -> (E) e)
-        //                 .collect(Collectors.toList()));
-        //     }
-        // }
-        if (request.getSupportedOnly()) {
-            elements = elements.stream()
-                    .filter(e -> {
-                        var mustSupport = Boolean.FALSE;
-                        var mustSupportElement = request.resolvePath(e, "mustSupport", IBaseBooleanDatatype.class);
-                        if (mustSupportElement != null) {
-                            mustSupport = mustSupportElement.getValue();
-                        }
-                        return mustSupport;
-                    })
-                    .collect(Collectors.toList());
+        if (request.getDifferentialElements() != null) {
+            elements.addAll(request.getDifferentialElements().stream()
+                    .filter(e -> filterElement(request, e, parentPath, sliceName, false))
+                    .map(e -> (E) e)
+                    .collect(Collectors.toList()));
+        }
+        if (request.getSnapshotElements() != null) {
+            elements.addAll(request.getSnapshotElements().stream()
+                    .filter(e -> filterElement(request, e, parentPath, sliceName, request.getRequiredOnly()))
+                    .map(e -> (E) e)
+                    .collect(Collectors.toList()));
         }
         return elements.stream()
                 .filter(element -> getElementType(request, element) != null)
                 .collect(Collectors.toList());
     }
 
-    // protected IBase getProfileSnapshot(GenerateRequest request, IBaseResource profile) {
-    //     var snapshot = request.resolvePath(profile, "snapshot");
-    //     if (snapshot == null) {
-    //         // Grab the snapshot from the baseDefinition
-    //         var baseUrl = request.resolvePath(profile, "baseDefinition", IPrimitiveType.class);
-    //         if (baseUrl != null) {
-    //             IBaseResource baseProfile = null;
-    //             try {
-    //                 baseProfile = searchRepositoryByCanonical(repository, baseUrl);
-    //             } catch (Exception e) {
-    //                 logger.error(NO_BASE_DEFINITION_ERROR, baseUrl.getValueAsString(), e);
-    //             }
-    //             if (baseProfile != null) {
-    //                 snapshot = request.resolvePath(baseProfile, "snapshot");
-    //             }
-    //         }
-    //     }
-    //     if (snapshot == null) {
-    //         // Grab the snapshot from the type definition
-    //         // Dstu3 is a code, should still cast to IPrimitiveType<String>?
-    //         var type = request.resolvePathString(profile, "type");
-    //         var definition = repository.fhirContext().getResourceDefinition(request.getFhirVersion(), type);
-    //         var typeProfile = definition == null ? null : definition.toProfile(null);
-    //         if (typeProfile != null) {
-    //             snapshot = request.resolvePath(typeProfile, "snapshot");
-    //         }
-    //     }
-    //     return snapshot;
-    // }
+    protected <E extends ICompositeType> Boolean filterElement(
+            GenerateRequest request, E e, String parentPath, String sliceName, Boolean requiredOnly) {
+        var path = request.resolvePathString(e, "path");
+        if (parentPath == null) {
+            var pathSplit = path.split("\\.");
+            if (pathSplit.length > 2) {
+                return false;
+            }
+        } else if (!path.contains(parentPath + ".")) {
+            return false;
+        }
+        if (sliceName != null && !request.resolvePathString(e, "id").contains(sliceName)) {
+            return false;
+        }
+        if (requiredOnly) {
+            var min = request.resolvePath(e, "min", IPrimitiveType.class);
+            if (min == null || (Integer) min.getValue() == 0) {
+                return false;
+            }
+        }
+        if (request.getSupportedOnly()) {
+            var mustSupportElement = request.resolvePath(e, "mustSupport", IBaseBooleanDatatype.class);
+            if (mustSupportElement == null || mustSupportElement.getValue().equals(Boolean.FALSE)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     protected IBaseBackboneElement createErrorItem(GenerateRequest request, String linkId, String errorMessage) {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
@@ -203,29 +195,29 @@ public class ItemGenerator {
         return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
     }
 
-    public IBaseBackboneElement createQuestionnaireItem(GenerateRequest request, IBaseResource profile, String linkId) {
-        var url = request.resolvePathString(profile, "url");
-        var type = request.resolvePathString(profile, "type");
+    public IBaseBackboneElement createQuestionnaireItem(GenerateRequest request, String linkId) {
+        var url = request.resolvePathString(request.getProfile(), "url");
+        var type = request.resolvePathString(request.getProfile(), "type");
         final String definition = String.format("%s#%s", url, type);
-        String text = getProfileText(request, profile);
+        String text = getProfileText(request);
         var item = createQuestionnaireItemComponent(request, text, linkId, definition, false);
         return item;
     }
 
     @SuppressWarnings("unchecked")
-    protected String getProfileText(GenerateRequest request, IBaseResource profile) {
-        var inputExt = request.getExtensions(profile).stream()
+    protected String getProfileText(GenerateRequest request) {
+        var inputExt = request.getExtensions(request.getProfile()).stream()
                 .filter(e -> e.getUrl().equals(Constants.CPG_INPUT_TEXT))
                 .findFirst()
                 .orElse(null);
         if (inputExt != null) {
             return ((IPrimitiveType<String>) inputExt.getValue()).getValue();
         }
-        var title = request.resolvePathString(profile, "title");
+        var title = request.resolvePathString(request.getProfile(), "title");
         if (title != null) {
             return title;
         }
-        var url = request.resolvePathString(profile, "url");
+        var url = request.resolvePathString(request.getProfile(), "url");
         return url.substring(url.lastIndexOf("/") + 1);
     }
 

@@ -97,8 +97,8 @@ public class ProcessAction {
                     return;
                 }
                 var profile = searchRepositoryByCanonical(repository, profiles.get(0));
-                var generateRequest = request.toGenerateRequest();
-                request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest, profile));
+                var generateRequest = request.toGenerateRequest(profile);
+                request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest));
                 // If input has text extension use it to override
                 // resolve extensions or not?
             }

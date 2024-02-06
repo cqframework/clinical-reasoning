@@ -12,11 +12,7 @@ import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 
 public interface IElementProcessor {
     IBaseBackboneElement processElement(
-            IOperationRequest request,
-            ICompositeType element,
-            String profileUrl,
-            String childLinkId,
-            IBaseResource caseFeature);
+            GenerateRequest request, ICompositeType element, String childLinkId, IBaseResource caseFeature);
 
     public static IElementProcessor createProcessor(Repository repository) {
         switch (repository.fhirContext().getVersion().getVersion()) {

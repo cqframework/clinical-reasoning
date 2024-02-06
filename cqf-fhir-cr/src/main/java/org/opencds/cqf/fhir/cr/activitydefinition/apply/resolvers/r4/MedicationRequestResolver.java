@@ -34,7 +34,18 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasUrl()) {
             medicationRequest.setInstantiatesCanonical(
-                    Collections.singletonList(new CanonicalType(activityDefinition.getUrl())));
+                    Collections.singletonList(new CanonicalType(activityDefinition.getUrl()
+                            + (activityDefinition.hasVersion()
+                                    ? String.format("|%s", activityDefinition.getVersion())
+                                    : ""))));
+        }
+
+        if (request.hasEncounterId()) {
+            medicationRequest.setEncounter(new Reference(request.getEncounterId()));
+        }
+
+        if (request.hasPractitionerId()) {
+            medicationRequest.setRequester(new Reference(request.getPractitionerId()));
         }
 
         if (activityDefinition.hasProduct()) {

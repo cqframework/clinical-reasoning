@@ -35,9 +35,11 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
         serviceRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (activityDefinition.hasUrl()) {
-            var url = activityDefinition.getUrl();
-            url = activityDefinition.hasVersion() ? String.format("%s|%s", url, activityDefinition.getVersion()) : url;
-            serviceRequest.setInstantiatesCanonical(Collections.singletonList(new CanonicalType(url)));
+            serviceRequest.setInstantiatesCanonical(
+                    Collections.singletonList(new CanonicalType(activityDefinition.getUrl()
+                            + (activityDefinition.hasVersion()
+                                    ? String.format("|%s", activityDefinition.getVersion())
+                                    : ""))));
         }
 
         if (request.hasEncounterId()) {

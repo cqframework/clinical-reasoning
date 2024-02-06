@@ -32,6 +32,14 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
                         : MedicationRequest.MedicationRequestIntent.ORDER);
         medicationRequest.setSubject(new Reference(request.getSubjectId()));
 
+        if (request.hasEncounterId()) {
+            medicationRequest.setEncounter(new Reference(request.getEncounterId()));
+        }
+
+        if (request.hasPractitionerId()) {
+            medicationRequest.setRequester(new Reference(request.getPractitionerId()));
+        }
+
         if (activityDefinition.hasProductCodeableConcept()) {
             medicationRequest.setMedication(new CodeableReference(activityDefinition.getProductCodeableConcept()));
         } else if (activityDefinition.hasProductReference()) {

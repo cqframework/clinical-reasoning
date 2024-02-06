@@ -77,8 +77,9 @@ public class GenerateRequest implements IQuestionnaireRequest {
         return (List<E>) snapshotElements;
     }
 
-    public void setQuestionnaire(IBaseResource questionnaire) {
+    public GenerateRequest setQuestionnaire(IBaseResource questionnaire) {
         this.questionnaire = questionnaire;
+        return this;
     }
 
     public Boolean getSupportedOnly() {

@@ -112,8 +112,8 @@ public class RequestHelpers {
                 true,
                 null,
                 libraryEngine,
-                inputParameterResolver,
-                modelResolver);
+                modelResolver,
+                inputParameterResolver);
     }
 
     public static GenerateRequest newGenerateRequestForVersion(

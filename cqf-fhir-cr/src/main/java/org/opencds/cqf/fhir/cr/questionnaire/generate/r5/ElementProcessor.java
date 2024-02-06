@@ -10,6 +10,7 @@ import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCaseFeature;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasDefaultValue;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
@@ -21,11 +22,13 @@ public class ElementProcessor implements IElementProcessor {
     protected final QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
     protected final ElementHasDefaultValue elementHasDefaultValue;
     protected final ElementHasCqfExpression elementHasCqfExpression;
+    protected final ElementHasCaseFeature elementHasCaseFeature;
 
     public ElementProcessor(Repository repository) {
         questionnaireTypeIsChoice = new QuestionnaireTypeIsChoice(repository);
         elementHasDefaultValue = new ElementHasDefaultValue();
         elementHasCqfExpression = new ElementHasCqfExpression();
+        elementHasCaseFeature = new ElementHasCaseFeature();
     }
 
     @Override
@@ -45,8 +48,7 @@ public class ElementProcessor implements IElementProcessor {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
             elementHasCqfExpression.addProperties(request, request.getExtensions(element), item);
         } else if (caseFeature != null) {
-            var path = element.getPath().split("\\.")[1].replace("[x]", "");
-            var pathValue = request.resolvePath(caseFeature, path);
+            var pathValue = elementHasCaseFeature.getPathValue(request, caseFeature, element);
             if (pathValue instanceof DataType) {
                 item.addInitial().setValue(transformValue((DataType) pathValue));
             }

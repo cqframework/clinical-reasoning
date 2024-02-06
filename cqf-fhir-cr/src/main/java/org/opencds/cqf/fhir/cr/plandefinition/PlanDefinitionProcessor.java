@@ -121,8 +121,8 @@ public class PlanDefinitionProcessor {
                 useServerData,
                 bundle,
                 libraryEngine,
-                null,
-                modelResolver);
+                modelResolver,
+                null);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate.r4;
 
 import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -12,6 +10,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCaseFeature;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasCqfExpression;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.ElementHasDefaultValue;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
@@ -23,15 +22,16 @@ public class ElementProcessor implements IElementProcessor {
     protected final QuestionnaireTypeIsChoice questionnaireTypeIsChoice;
     protected final ElementHasDefaultValue elementHasDefaultValue;
     protected final ElementHasCqfExpression elementHasCqfExpression;
+    protected final ElementHasCaseFeature elementHasCaseFeature;
 
     public ElementProcessor(Repository repository) {
         questionnaireTypeIsChoice = new QuestionnaireTypeIsChoice(repository);
         elementHasDefaultValue = new ElementHasDefaultValue();
         elementHasCqfExpression = new ElementHasCqfExpression();
+        elementHasCaseFeature = new ElementHasCaseFeature();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public IBaseBackboneElement processElement(
             GenerateRequest request, ICompositeType baseElement, String childLinkId, IBaseResource caseFeature) {
         var element = (ElementDefinition) baseElement;
@@ -48,14 +48,9 @@ public class ElementProcessor implements IElementProcessor {
         } else if (element.hasExtension(Constants.CQF_EXPRESSION)) {
             elementHasCqfExpression.addProperties(request, request.getExtensions(element), item);
         } else if (caseFeature != null) {
-            var path = element.getPath().split("\\.")[1].replace("[x]", "");
-            var pathValue = request.getModelResolver().resolvePath(caseFeature, path);
+            var pathValue = elementHasCaseFeature.getPathValue(request, caseFeature, element);
             if (pathValue instanceof Type) {
                 item.addInitial().setValue(transformValue((Type) pathValue));
-            } else if (pathValue instanceof List) {
-                for (var value : (List<IBase>) pathValue) {
-                    item.addInitial().setValue(transformValue((Type) value));
-                }
             }
         }
         item.setRequired(element.hasMin() && element.getMin() > 0);

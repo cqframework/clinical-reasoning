@@ -67,8 +67,8 @@ public class ApplyRequest implements ICpgRequest {
             Boolean useServerData,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
-            IInputParameterResolver inputParameterResolver,
-            ModelResolver modelResolver) {
+            ModelResolver modelResolver,
+            IInputParameterResolver inputParameterResolver) {
         this.planDefinition = planDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -119,8 +119,8 @@ public class ApplyRequest implements ICpgRequest {
                         useServerData,
                         bundle,
                         libraryEngine,
-                        inputParameterResolver,
-                        modelResolver)
+                        modelResolver,
+                        inputParameterResolver)
                 .setQuestionnaire(questionnaire);
     }
 

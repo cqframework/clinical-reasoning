@@ -24,19 +24,21 @@ public class BenchmarksIT {
     // Check your results against your own personal reference scores.
     private static final Map<String, Double> REFERENCE_SCORES = Map.of(
             "testApply", 300.0, // ops/second
+            "testApplyWithGenerate", 300.0, // ops/second
             "testEvaluate", 800.0, // ops/second
             "testEvaluateAdditionalData", .35, // ops/second
             "testPopulate", 530.0, // ops/second
             "testLarge", 4_000_000.0, // ops/second
             "testSmall", 7_000_000.0); // ops/second
 
-    private static final Map<String, Double> BAR_REFERENCE_SCORES = Map.of(
-            "testApply", 200.0, // ops/second
-            "testEvaluate", 675.0, // ops/second
-            "testEvaluateAdditionalData", .11, // ops/second
-            "testPopulate", 80.0, // ops/second
-            "testLarge", 4_900_000.0, // ops/second
-            "testSmall", 9_000_000.0); // ops/second
+    // private static final Map<String, Double> BAR_REFERENCE_SCORES = Map.of(
+    //         "testApply", 200.0, // ops/second
+    //         "testApplyWithGenerate", 350.0, // ops/second
+    //         "testEvaluate", 675.0, // ops/second
+    //         "testEvaluateAdditionalData", .11, // ops/second
+    //         "testPopulate", 80.0, // ops/second
+    //         "testLarge", 4_900_000.0, // ops/second
+    //         "testSmall", 9_000_000.0); // ops/second
 
     private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 
@@ -44,17 +46,18 @@ public class BenchmarksIT {
     @Disabled("Test fails during package due to test-jar not working as expected ")
     public void benchmark() throws Exception {
         Options opt = new OptionsBuilder()
-                // .include(Questionnaires.class.getSimpleName())
-                // .include(Measures.class.getSimpleName())
-                // .include(MeasuresAdditionalData.class.getSimpleName())
+                .include(Questionnaires.class.getSimpleName())
+                .include(Measures.class.getSimpleName())
+                .include(MeasuresAdditionalData.class.getSimpleName())
                 .include(PlanDefinitions.class.getSimpleName())
-                // .include(TerminologyProviders.class.getSimpleName())
+                .include(PlanDefinitionsWithGenerate.class.getSimpleName())
+                .include(TerminologyProviders.class.getSimpleName())
                 .build();
         Collection<RunResult> runResults = new Runner(opt).run();
         assertFalse(runResults.isEmpty());
         for (RunResult runResult : runResults) {
             var referenceScore =
-                    BAR_REFERENCE_SCORES.get(runResult.getPrimaryResult().getLabel());
+                    REFERENCE_SCORES.get(runResult.getPrimaryResult().getLabel());
             assertNotNull(referenceScore);
             assertDeviationWithin(runResult, referenceScore, SCORE_DEVIATION);
         }

@@ -38,7 +38,7 @@ public class ElementProcessor implements IElementProcessor {
         final QuestionnaireItemType itemType = getItemType(element);
         final QuestionnaireItemComponent item =
                 initializeQuestionnaireItem(itemType, request.getProfileUrl(), element, childLinkId);
-        if (itemType == QuestionnaireItemType.GROUP) {
+        if (itemType == QuestionnaireItemType.QUESTION) {
             questionnaireTypeIsChoice.addProperties(element, item);
         }
         if (element.hasFixedOrPattern()) {

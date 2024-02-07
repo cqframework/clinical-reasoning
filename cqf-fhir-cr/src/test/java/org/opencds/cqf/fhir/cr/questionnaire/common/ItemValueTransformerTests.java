@@ -13,6 +13,14 @@ public class ItemValueTransformerTests {
         var code = new org.hl7.fhir.dstu3.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValue(code);
         assertEquals(coding, transformValue);
+
+        var enumeration =
+                new org.hl7.fhir.dstu3.model.Enumeration<>(new org.hl7.fhir.dstu3.model.Patient.LinkTypeEnumFactory());
+        enumeration.setValue(org.hl7.fhir.dstu3.model.Patient.LinkType.REFER);
+        var transformEnum = transformValue(enumeration);
+        var expected = org.hl7.fhir.dstu3.model.Patient.LinkType.REFER.toCode();
+        var actual = ((org.hl7.fhir.dstu3.model.StringType) transformEnum).getValue();
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -21,6 +29,14 @@ public class ItemValueTransformerTests {
         var code = new org.hl7.fhir.r4.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValue(code);
         assertEquals(coding, transformValue);
+
+        var enumeration =
+                new org.hl7.fhir.r4.model.Enumeration<>(new org.hl7.fhir.r4.model.Patient.LinkTypeEnumFactory());
+        enumeration.setValue(org.hl7.fhir.r4.model.Patient.LinkType.REFER);
+        var transformEnum = transformValue(enumeration);
+        var expected = org.hl7.fhir.r4.model.Patient.LinkType.REFER.toCode();
+        var actual = ((org.hl7.fhir.r4.model.StringType) transformEnum).getValue();
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -29,5 +45,13 @@ public class ItemValueTransformerTests {
         var code = new org.hl7.fhir.r5.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValue(code);
         assertEquals(coding, transformValue);
+
+        var enumeration =
+                new org.hl7.fhir.r5.model.Enumeration<>(new org.hl7.fhir.r5.model.Patient.LinkTypeEnumFactory());
+        enumeration.setValue(org.hl7.fhir.r5.model.Patient.LinkType.REFER);
+        var transformEnum = transformValue(enumeration);
+        var expected = org.hl7.fhir.r5.model.Patient.LinkType.REFER.toCode();
+        var actual = ((org.hl7.fhir.r5.model.StringType) transformEnum).getValue();
+        assertEquals(expected, actual);
     }
 }

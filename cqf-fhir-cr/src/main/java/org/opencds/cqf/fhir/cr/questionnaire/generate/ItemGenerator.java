@@ -140,26 +140,39 @@ public class ItemGenerator {
     protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
             GenerateRequest request, String parentPath, String sliceName) {
         List<E> elements = new ArrayList<>();
+        // Add all elements from the differential
         if (request.getDifferentialElements() != null) {
             elements.addAll(request.getDifferentialElements().stream()
-                    .filter(e -> filterElement(request, e, parentPath, sliceName, false))
                     .map(e -> (E) e)
+                    .filter(e -> filterElement(request, e, null, parentPath, sliceName, false))
                     .collect(Collectors.toList()));
         }
+        // Add elements from the snapshot that were not in the differential
         if (request.getSnapshotElements() != null) {
             elements.addAll(request.getSnapshotElements().stream()
-                    .filter(e -> filterElement(request, e, parentPath, sliceName, request.getRequiredOnly()))
                     .map(e -> (E) e)
+                    .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getRequiredOnly()))
                     .collect(Collectors.toList()));
         }
+        // Filter out elements for which a type cannot be derived
         return elements.stream()
                 .filter(element -> getElementType(request, element) != null)
                 .collect(Collectors.toList());
     }
 
     protected <E extends ICompositeType> Boolean filterElement(
-            GenerateRequest request, E e, String parentPath, String sliceName, Boolean requiredOnly) {
-        var path = request.resolvePathString(e, "path");
+            GenerateRequest request,
+            E element,
+            List<E> existingElements,
+            String parentPath,
+            String sliceName,
+            Boolean requiredOnly) {
+        var path = request.resolvePathString(element, "path");
+        if (existingElements != null && !existingElements.isEmpty()) {
+            if (existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")))) {
+                return false;
+            }
+        }
         if (parentPath == null) {
             var pathSplit = path.split("\\.");
             if (pathSplit.length > 2) {
@@ -168,17 +181,17 @@ public class ItemGenerator {
         } else if (!path.contains(parentPath + ".")) {
             return false;
         }
-        if (sliceName != null && !request.resolvePathString(e, "id").contains(sliceName)) {
+        if (sliceName != null && !request.resolvePathString(element, "id").contains(sliceName)) {
             return false;
         }
         if (requiredOnly) {
-            var min = request.resolvePath(e, "min", IPrimitiveType.class);
+            var min = request.resolvePath(element, "min", IPrimitiveType.class);
             if (min == null || (Integer) min.getValue() == 0) {
                 return false;
             }
         }
         if (request.getSupportedOnly()) {
-            var mustSupportElement = request.resolvePath(e, "mustSupport", IBaseBooleanDatatype.class);
+            var mustSupportElement = request.resolvePath(element, "mustSupport", IBaseBooleanDatatype.class);
             if (mustSupportElement == null || mustSupportElement.getValue().equals(Boolean.FALSE)) {
                 return false;
             }

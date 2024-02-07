@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class GenerateProcessor implements IGenerateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(GenerateProcessor.class);
     protected static final String NO_BASE_DEFINITION_ERROR =
-            "An error occurred search for base definition with url (%s): %s";
+            "An error occurred searching for base definition with url (%s): %s";
     protected final Repository repository;
     protected final FhirVersionEnum fhirVersion;
     protected final ItemGenerator itemGenerator;
@@ -76,7 +76,7 @@ public class GenerateProcessor implements IGenerateProcessor {
                 try {
                     baseProfile = searchRepositoryByCanonical(repository, baseUrl);
                 } catch (Exception e) {
-                    logger.error(NO_BASE_DEFINITION_ERROR, baseUrl.getValueAsString(), e);
+                    logger.debug(NO_BASE_DEFINITION_ERROR, baseUrl.getValueAsString(), e);
                 }
                 if (baseProfile != null) {
                     snapshot = request.resolvePath(baseProfile, "snapshot");

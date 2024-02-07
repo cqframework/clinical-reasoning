@@ -6296,7 +6296,7 @@
         "path": "Claim.status",
         "type": [
           {
-            "code": "string"
+            "code": "code"
           }
         ],
         "fixedString": "active"

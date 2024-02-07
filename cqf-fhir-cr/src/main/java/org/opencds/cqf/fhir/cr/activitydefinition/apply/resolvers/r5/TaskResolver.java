@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.r5;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.utility.Constants.REQUEST_DO_NOT_PERFORM;
 
 import org.hl7.fhir.r5.model.ActivityDefinition;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Task;
@@ -61,6 +63,11 @@ public class TaskResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasDescription()) {
             task.setDescription(activityDefinition.getDescription());
+        }
+
+        if (activityDefinition.hasDoNotPerform()) {
+            task.addModifierExtension(
+                    new Extension(REQUEST_DO_NOT_PERFORM).setValue(activityDefinition.getDoNotPerformElement()));
         }
 
         return task;

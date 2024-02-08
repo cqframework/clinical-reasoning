@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 
 public class LibraryVersionSelector {
 
@@ -24,14 +24,14 @@ public class LibraryVersionSelector {
 
         String targetVersion = libraryIdentifier.getVersion();
 
-        List<LibraryAdapter> adapters = libraries.stream()
+        List<IBaseLibraryAdapter> adapters = libraries.stream()
                 .map(x -> this.adapterFactory.createLibrary(x))
                 .collect(Collectors.toList());
 
-        LibraryAdapter library = null;
-        LibraryAdapter maxLibrary = null;
+        IBaseLibraryAdapter library = null;
+        IBaseLibraryAdapter maxLibrary = null;
 
-        for (LibraryAdapter l : adapters) {
+        for (IBaseLibraryAdapter l : adapters) {
 
             if (!l.getName().equals(libraryIdentifier.getId())) {
                 continue;

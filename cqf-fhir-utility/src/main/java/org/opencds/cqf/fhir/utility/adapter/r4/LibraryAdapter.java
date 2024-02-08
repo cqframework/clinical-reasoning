@@ -1,14 +1,25 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.LibraryAdapter {
+class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter {
 
     private Library library;
 
@@ -27,7 +38,7 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     }
 
     @Override
-    public IBaseResource get() {
+    public Library get() {
         return this.library;
     }
 
@@ -77,19 +88,39 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     }
 
     @Override
-    public List<ICompositeType> getContent() {
+    public List<Attachment> getContent() {
         return this.getLibrary().getContent().stream().collect(Collectors.toList());
     }
 
     @Override
-    public void setContent(List<ICompositeType> attachments) {
+    public <T extends ICompositeType> void setContent(List<T> attachments) {
         List<Attachment> castAttachments =
                 attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
         this.getLibrary().setContent(castAttachments);
     }
 
     @Override
-    public ICompositeType addContent() {
+    public Attachment addContent() {
         return this.getLibrary().addContent();
     }
+
+    public List<DependencyInfo> getDependencies() {
+        return new ArrayList<DependencyInfo>();
+    }
+    public List<DependencyInfo> getComponents() {
+        return new ArrayList<DependencyInfo>();
+    }
+
+    public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+    return visitor.visit(this, theRepository, theParameters);
+  }
+  public Date getApprovalDate() {
+    return this.getLibrary().getApprovalDate();
+  }
+  public Period getEffectivePeriod(){
+    return this.getLibrary().getEffectivePeriod();
+  }
+  public List<RelatedArtifact> getRelatedArtifact() {
+    return this.getLibrary().getRelatedArtifact();
+  }
 }

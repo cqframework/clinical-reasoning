@@ -173,13 +173,18 @@ public class ItemGenerator {
                 return false;
             }
         }
+        var pathSplit = path.split("\\.");
         if (parentPath == null) {
-            var pathSplit = path.split("\\.");
+            // grab only top level elements
             if (pathSplit.length > 2) {
                 return false;
             }
-        } else if (!path.contains(parentPath + ".")) {
-            return false;
+        } else {
+            // grab only the next level of elements
+            var splitLength = parentPath.split("\\.").length + 1;
+            if (pathSplit.length > splitLength || !path.contains(parentPath + ".")) {
+                return false;
+            }
         }
         if (sliceName != null && !request.resolvePathString(element, "id").contains(sliceName)) {
             return false;

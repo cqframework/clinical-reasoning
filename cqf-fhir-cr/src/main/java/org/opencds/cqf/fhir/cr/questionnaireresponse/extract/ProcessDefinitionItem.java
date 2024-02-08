@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
@@ -76,28 +78,17 @@ public class ProcessDefinitionItem {
                 request.getModelResolver().setValue(resource, authorPath, authorValue);
             }
         }
-        var dateAuthored = request.resolvePath(request.getQuestionnaireResponse(), "authored");
+        var dateAuthored = request.resolvePath(request.getQuestionnaireResponse(), "authored", IPrimitiveType.class);
         if (dateAuthored != null) {
             var dateDefs = getDateDefs(resourceDefinition);
             if (dateDefs != null && !dateDefs.isEmpty()) {
                 dateDefs.forEach(dateDef -> {
                     try {
-                        // dateDef.
-                        // request.getModelResolver().setValue(resource, dateDef.getElementName(), )
-                        // var propertyDef = request.getFhirContext()
-                        //         .getElementDefinition(
-                        //                 p.getTypeCode().contains("|")
-                        //                         ? p.getTypeCode().split("\\|")[0]
-                        //                         : p.getTypeCode());
-                        // if (propertyDef != null) {
-                        //     modelResolver.setValue(
-                        //             resource,
-                        //             datePath,
-                        //             propertyDef
-                        //                     .getImplementingClass()
-                        //                     .getConstructor(Date.class)
-                        //                     .newInstance(questionnaireResponse.getAuthored()));
-                        // }
+                        var authoredValue = dateDef.getDatatype()
+                                .getConstructor(String.class)
+                                .newInstance(dateAuthored.getValueAsString());
+
+                        request.getModelResolver().setValue(resource, dateDef.getElementName(), authoredValue);
                     } catch (Exception ex) {
                         var message = String.format(
                                 "Error encountered attempting to set property (%s) on resource type (%s): %s",
@@ -145,14 +136,17 @@ public class ProcessDefinitionItem {
                 : definition.getName().equals("Observation") ? "performer" : null;
     }
 
-    private List<BaseRuntimeChildDefinition> getDateDefs(BaseRuntimeElementDefinition<?> definition) {
+    private List<BaseRuntimeChildDatatypeDefinition> getDateDefs(BaseRuntimeElementDefinition<?> definition) {
         List<BaseRuntimeChildDefinition> results = new ArrayList<>();
         results.add(definition.getChildByName("onset"));
         results.add(definition.getChildByName("issued"));
         results.add(definition.getChildByName("effective"));
         results.add(definition.getChildByName("recordDate"));
 
-        return results.stream().filter(p -> p != null).collect(Collectors.toList());
+        return results.stream()
+                .filter(d -> d instanceof BaseRuntimeChildDatatypeDefinition)
+                .map(d -> (BaseRuntimeChildDatatypeDefinition) d)
+                .collect(Collectors.toList());
     }
 
     private void resolveMeta(IBaseResource resource, String definition) {

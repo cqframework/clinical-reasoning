@@ -1,13 +1,16 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
@@ -33,7 +36,6 @@ public class IGFileStructureRepositoryDirectoryTest {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         ResourceDirectoryCopier.copyFromJar(IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
-
         repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
@@ -109,5 +111,58 @@ public class IGFileStructureRepositoryDirectoryTest {
                 Searches.byUrl("example.com/ValueSet/456"));
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());
+    }
+
+    @Test
+    void createAndDeleteLibrary() {
+        var lib = new Library();
+        lib.setId("new-library");
+        var o = repository.create(lib);
+        var created = repository.read(Library.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+
+        repository.delete(Library.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+    }
+
+    @Test
+    void createAndDeletePatient() {
+        var p = new Patient();
+        p.setId("new-patient");
+        var o = repository.create(p);
+        var created = repository.read(Patient.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("tests/patient/new-patient.json")));
+
+        repository.delete(Patient.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("resources/library/new-patient.json")));
+    }
+
+    @Test
+    void createAndDeleteValueSet() {
+        var v = new ValueSet();
+        v.setId("new-valueset");
+        var o = repository.create(v);
+        var created = repository.read(ValueSet.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+
+        repository.delete(ValueSet.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+    }
+
+    @Test
+    void updatePatient() {
+        var id = Ids.newId(Patient.class, "ABC");
+        var p = repository.read(Patient.class, id);
+        assertFalse(p.hasActive());
+
+        p.setActive(true);
+        repository.update(p);
+
+        var updated = repository.read(Patient.class, id);
+        assertTrue(updated.hasActive());
+        assertTrue(updated.getActive());
     }
 }

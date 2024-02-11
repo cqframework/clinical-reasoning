@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,6 +42,14 @@ import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
  * standard IG layout.
  */
 public class IGFileStructureRepository implements Repository {
+
+    // Potential metadata fields:
+    // file dateTime
+    // file extension (json, xml, rdf)
+    // pretty print
+    // resource type in file name
+    // directory structure for data vs content vs terminology
+    // directory structure for resource type (or lack thereof)
 
     private final FhirContext fhirContext;
     private final String root;
@@ -129,11 +138,11 @@ public class IGFileStructureRepository implements Repository {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends IBaseResource, I extends IIdType> T readLocation(Class<T> resourceClass, String location) {
+    protected IBaseResource readLocation(String location) {
 
-        return (T) this.resourceCache.computeIfAbsent(location, l -> {
+        return this.resourceCache.computeIfAbsent(location, l -> {
             try {
-                var x = parser.parseResource(resourceClass, new FileInputStream(l));
+                var x = parser.parseResource(new FileInputStream(l));
                 return handleLibrary(x, l);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
@@ -143,7 +152,7 @@ public class IGFileStructureRepository implements Repository {
 
     @SuppressWarnings("unchecked")
     protected <T extends IBaseResource> T handleLibrary(T resource, String location) {
-        if (resource.fhirType().equals("Library")) {
+        if (resource.fhirType() != null && resource.fhirType().equals("Library")) {
             String cqlLocation;
             switch (fhirContext.getVersion().getVersion()) {
                 case DSTU3:
@@ -186,7 +195,7 @@ public class IGFileStructureRepository implements Repository {
 
     protected <T extends IBaseResource> MethodOutcome writeLocation(T resource, String location) {
         try (var os = new FileOutputStream(location)) {
-            String result = parser.encodeResourceToString(resource);
+            String result = parser.setPrettyPrint(true).encodeResourceToString(resource);
             os.write(result.getBytes());
             this.resourceCache.put(location, resource);
         } catch (IOException e) {
@@ -213,10 +222,12 @@ public class IGFileStructureRepository implements Repository {
                     || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
                             && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
                 try {
-                    var r = this.readLocation(resourceClass, file.getPath());
-                    if (r.fhirType().equals(resourceClass.getSimpleName())) {
-                        resources.put(r.getIdElement().toUnqualifiedVersionless(), r);
+                    var r = this.readLocation(file.getPath());
+                    if (!r.fhirType().equals(resourceClass.getSimpleName())) {
+                        continue;
                     }
+
+                    resources.put(r.getIdElement().toUnqualifiedVersionless(), resourceClass.cast(r));
                 } catch (RuntimeException e) {
                     // intentionally empty
                 }
@@ -238,9 +249,9 @@ public class IGFileStructureRepository implements Repository {
         requireNonNull(id, "id can not be null");
 
         var location = this.locationForResource(resourceType, id);
-        T r = null;
+        IBaseResource r = null;
         try {
-            r = readLocation(resourceType, location);
+            r = readLocation(location);
         } catch (RuntimeException e) {
             if (e.getCause() instanceof FileNotFoundException) {
                 throw new ResourceNotFoundException(id);
@@ -248,22 +259,34 @@ public class IGFileStructureRepository implements Repository {
         }
 
         if (r == null) {
-            throw new ResourceNotFoundException(id);
+            throw new ResourceNotFoundException(String.format("Expected to find a resource with id: %s at location: %s. Found empty or invalid content instead.", id.toUnqualifiedVersionless(), location));
         }
 
-        if (r.getIdElement() == null) {
+        if (r.getIdElement() == null || !r.getIdElement().hasIdPart()) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found resource without an id instead.",
                     id.toUnqualifiedVersionless(), location));
         }
 
-        if (!r.getIdElement().toUnqualifiedVersionless().equals(id.toUnqualifiedVersionless())) {
+        if (!r.fhirType().equals(resourceType.getSimpleName())) {
             throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at location: %s. Found resource with an id %s instead.",
-                    id.toUnqualifiedVersionless(), location, r.getIdElement().toUnqualifiedVersionless()));
+                    "Expected to find a resource with type: %s at location: %s. Found resource with type %s instead.",
+                    resourceType.getSimpleName(), location, r.fhirType()));
         }
 
-        return r;
+        if (!r.getIdElement().getIdPart().equals(id.getIdPart())) {
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with id: %s at location: %s. Found resource with an id %s instead.",
+                    id.getIdPart(), location, r.getIdElement().getIdPart()));
+        }
+
+        if(id.hasVersionIdPart() && r.getIdElement().hasVersionIdPart() && !r.getIdElement().getVersionIdPart().equals(id.getVersionIdPart())) {
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with version: %s at location: %s. Found resource with version %s instead.",
+                    id.getVersionIdPart(), location, r.getIdElement().getVersionIdPart()));
+        }
+
+        return resourceType.cast(r);
     }
 
     @Override
@@ -300,7 +323,10 @@ public class IGFileStructureRepository implements Repository {
         var location = this.locationForResource(resourceType, id);
 
         try {
-            new File(location).delete();
+            var deleted = java.nio.file.Files.deleteIfExists(new File(location).toPath());
+            if (!deleted) {
+                throw new ResourceNotFoundException(id);
+            }
         } catch (Exception e) {
             throw new UnclassifiedServerFailureException(500, String.format("Couldn't delete %s", location));
         }

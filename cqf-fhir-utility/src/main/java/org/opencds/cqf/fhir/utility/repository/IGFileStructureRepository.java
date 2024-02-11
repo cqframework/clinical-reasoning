@@ -136,14 +136,12 @@ public class IGFileStructureRepository implements Repository {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected IBaseResource readLocation(String location) {
-
         return this.resourceCache.computeIfAbsent(location, l -> {
-            try {
-                var x = parser.parseResource(new FileInputStream(l));
+            try (var is = new FileInputStream(l)) {
+                var x = parser.parseResource(is);
                 return handleLibrary(x, l);
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -209,7 +207,7 @@ public class IGFileStructureRepository implements Repository {
         var location = this.directoryForResource(resourceClass);
         var resources = new HashMap<IIdType, T>();
         var inputDir = new File(location);
-        if (!inputDir.isDirectory()) {
+        if (!inputDir.exists()) {
             return resources;
         }
 
@@ -222,11 +220,8 @@ public class IGFileStructureRepository implements Repository {
                             && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
                 try {
                     var r = this.readLocation(file.getPath());
-                    if (!r.fhirType().equals(resourceClass.getSimpleName())) {
-                        continue;
-                    }
-
-                    resources.put(r.getIdElement().toUnqualifiedVersionless(), resourceClass.cast(r));
+                    T t = validateResource(resourceClass, r, file.getPath(), r.getIdElement());
+                    resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
                 } catch (RuntimeException e) {
                     // intentionally empty
                 }
@@ -257,6 +252,20 @@ public class IGFileStructureRepository implements Repository {
             }
         }
 
+        return validateResource(resourceType, r, location, id);
+    }
+
+    @Override
+    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
+        requireNonNull(resource, "resource can not be null");
+        requireNonNull(resource.getIdElement(), "resource id can not be null");
+
+        var location = this.locationForResource(resource.getClass(), resource.getIdElement());
+        return writeLocation(resource, location);
+    }
+
+    private <T extends IBaseResource> T validateResource(
+            Class<T> resourceType, IBaseResource r, String location, IIdType id) {
         if (r == null) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found empty or invalid content instead.",
@@ -290,15 +299,6 @@ public class IGFileStructureRepository implements Repository {
         }
 
         return resourceType.cast(r);
-    }
-
-    @Override
-    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        requireNonNull(resource, "resource can not be null");
-        requireNonNull(resource.getIdElement(), "resource id can not be null");
-
-        var location = this.locationForResource(resource.getClass(), resource.getIdElement());
-        return writeLocation(resource, location);
     }
 
     @Override

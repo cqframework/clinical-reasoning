@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -167,5 +168,12 @@ public class IGFileStructureRepositoryDirectoryTest {
     void deleteNonExistentPatient() {
         var id = Ids.newId(Patient.class, "DoesNotExist");
         assertThrows(ResourceNotFoundException.class, () -> repository.delete(Patient.class, id));
+    }
+
+    @Test
+    void searchNonExistentType() {
+        var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        assertNotNull(results);
+        assertEquals(0, results.getEntry().size());
     }
 }

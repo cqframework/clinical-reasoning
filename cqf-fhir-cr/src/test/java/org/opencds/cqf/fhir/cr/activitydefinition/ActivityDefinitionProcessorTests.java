@@ -24,7 +24,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -43,8 +43,9 @@ public class ActivityDefinitionProcessorTests {
                                 .getCodeSource()
                                 .getLocation()
                                 .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version,
-                IGLayoutMode.TYPE_PREFIX,
-                EncodingEnum.JSON);
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY,
+                EncodingEnum.JSON,
+                null);
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

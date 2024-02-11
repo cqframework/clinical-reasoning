@@ -5,6 +5,6 @@
     "url": "http://example.com/Library/Test",
     "content": {
         "contentType": "text/cql",
-        "url": "../cql/Example.cql"
+        "url": "../../cql/Example.cql"
     }
 }

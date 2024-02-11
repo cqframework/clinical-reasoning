@@ -54,7 +54,7 @@ public class IGFileStructureRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final IGLayoutMode layoutMode;
+    private final RepositoryConfig repositoryConfig;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -90,26 +90,26 @@ public class IGFileStructureRepository implements Repository {
     }
 
     public IGFileStructureRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, root, IGLayoutMode.DIRECTORY, EncodingEnum.JSON);
+        this(fhirContext, root, RepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, EncodingEnum.JSON, null);
     }
 
-    public IGFileStructureRepository(
-            FhirContext fhirContext, String root, IGLayoutMode layoutMode, EncodingEnum encodingEnum) {
-        this(fhirContext, root, layoutMode, encodingEnum, null);
+    private static String ensureTrailingSlash(String path) {
+        return path.endsWith(File.separator) ? path : path + File.separator;
     }
 
     public IGFileStructureRepository(
             FhirContext fhirContext,
             String root,
-            IGLayoutMode layoutMode,
+            RepositoryConfig repositoryConfig,
             EncodingEnum encodingEnum,
             IRepositoryOperationProvider operationProvider) {
-        this.fhirContext = fhirContext;
-        this.root = root;
-        this.layoutMode = layoutMode;
-        this.encodingEnum = encodingEnum;
-        this.parser = parserForEncoding(this.fhirContext, this.encodingEnum);
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.root = ensureTrailingSlash(requireNonNull(root, "root can not be null"));
+        this.repositoryConfig = requireNonNull(repositoryConfig, "repositoryConfig is required");
+        this.encodingEnum = requireNonNull(encodingEnum, "encodingEnum can not be null");
+        this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
+        this.operationProvider = operationProvider;
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
@@ -121,35 +121,40 @@ public class IGFileStructureRepository implements Repository {
     }
 
     protected <T extends IBaseResource, I extends IIdType> String locationForResource(Class<T> resourceType, I id) {
-        var directory = directoryForType(resourceType);
-        return directory + "/" + fileNameForLayoutAndEncoding(resourceType.getSimpleName(), id.getIdPart());
+        var directory = directoryForResource(resourceType);
+        return directory + fileNameForResource(resourceType.getSimpleName(), id.getIdPart());
     }
 
-    protected String fileNameForLayoutAndEncoding(String resourceType, String resourceId) {
+    protected String fileNameForResource(String resourceType, String resourceId) {
         var name = resourceId + fileExtensions.get(this.encodingEnum);
-        if (layoutMode == IGLayoutMode.DIRECTORY) {
-            // TODO: case sensitivity!!
-            return resourceType.toLowerCase() + "/" + name;
-        } else {
-            return resourceType + "-" + name;
+        switch (repositoryConfig.filenameMode()) {
+            case ID_ONLY:
+                return name;
+            case TYPE_AND_ID:
+                // TODO: Case sensitivity?
+                return resourceType + "-" + name;
+            default:
+                throw new IllegalArgumentException("unsupported filename mode: " + repositoryConfig.filenameMode());
         }
     }
 
-    protected <T extends IBaseResource> String directoryForType(Class<T> resourceType) {
+    protected <T extends IBaseResource> String directoryForCategory(Class<T> resourceType) {
+        if (this.repositoryConfig.categoryLayout() == ResourceCategoryLayoutMode.FLAT) {
+            return this.root;
+        }
+
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var directory = categoryDirectories.get(category);
-
-        // TODO: what the heck is the path separator?
-        return (root.endsWith("/") ? root : root + "/") + directory;
+        return root + directory + File.separator;
     }
 
     protected <T extends IBaseResource> String directoryForResource(Class<T> resourceType) {
-        var directory = directoryForType(resourceType);
-        if (layoutMode == IGLayoutMode.DIRECTORY) {
-            return directory + "/" + resourceType.getSimpleName().toLowerCase();
-        } else {
+        var directory = directoryForCategory(resourceType);
+        if (this.repositoryConfig.typeLayout() == ResourceTypeLayoutMode.FLAT) {
             return directory;
         }
+
+        return directory + resourceType.getSimpleName().toLowerCase() + File.separator;
     }
 
     protected IBaseResource readLocation(String location) {
@@ -228,20 +233,23 @@ public class IGFileStructureRepository implements Repository {
             return resources;
         }
 
-        FilenameFilter resourceFileFilter =
-                (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        FilenameFilter resourceFileFilter;
+        var filenameMode = this.repositoryConfig.filenameMode();
+        if (filenameMode.equals(ResourceFilenameMode.ID_ONLY)) {
+            resourceFileFilter = (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        } else {
+            resourceFileFilter = (dir, name) ->
+                    name.toLowerCase().startsWith(resourceClass.getSimpleName().toLowerCase() + "-")
+                            && name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        }
 
         for (var file : inputDir.listFiles(resourceFileFilter)) {
-            if ((this.layoutMode.equals(IGLayoutMode.DIRECTORY))
-                    || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
-                            && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
-                try {
-                    var r = this.readLocation(file.getPath());
-                    T t = validateResource(resourceClass, r, r.getIdElement(), file.getPath());
-                    resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
-                } catch (RuntimeException e) {
-                    // intentionally empty
-                }
+            try {
+                var r = this.readLocation(file.getPath());
+                T t = validateResource(resourceClass, r, r.getIdElement(), file.getPath());
+                resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
+            } catch (RuntimeException e) {
+                // intentionally empty
             }
         }
 

@@ -44,7 +44,7 @@ class PopulateProcessorTests {
                 newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
         final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
+        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
         doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
         // execute
         final IBaseResource actual = fixture.populate(request);
@@ -65,7 +65,7 @@ class PopulateProcessorTests {
                         .getReferenceElement()
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.EMPTY_LIST);
+        verify(fixture).processItems(request, Collections.emptyList());
         verify(fixture).processResponseItems(request, expectedItems);
     }
 
@@ -81,7 +81,7 @@ class PopulateProcessorTests {
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
         final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
+        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
         doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
         // execute
         final IBaseResource actual = fixture.populate(request);
@@ -98,7 +98,7 @@ class PopulateProcessorTests {
                         .getReferenceElement()
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.EMPTY_LIST);
+        verify(fixture).processItems(request, Collections.emptyList());
         verify(fixture).processResponseItems(request, expectedItems);
     }
 
@@ -114,7 +114,7 @@ class PopulateProcessorTests {
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
         final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.EMPTY_LIST);
+        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
         doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
         // execute
         final IBaseResource actual = fixture.populate(request);
@@ -131,7 +131,7 @@ class PopulateProcessorTests {
                         .getReferenceElement()
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.EMPTY_LIST);
+        verify(fixture).processItems(request, Collections.emptyList());
         verify(fixture).processResponseItems(request, expectedItems);
     }
 

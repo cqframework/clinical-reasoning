@@ -162,4 +162,10 @@ public class IGFileStructureRepositoryDirectoryTest {
         assertTrue(updated.hasActive());
         assertTrue(updated.getActive());
     }
+
+    @Test
+    void deleteNonExistentPatient() {
+        var id = Ids.newId(Patient.class, "DoesNotExist");
+        assertThrows(ResourceNotFoundException.class, () -> repository.delete(Patient.class, id));
+    }
 }

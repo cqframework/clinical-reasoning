@@ -330,7 +330,7 @@ public class IGFileStructureRepository implements Repository {
             if (!deleted) {
                 throw new ResourceNotFoundException(id);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new UnclassifiedServerFailureException(500, String.format("Couldn't delete %s", location));
         }
 

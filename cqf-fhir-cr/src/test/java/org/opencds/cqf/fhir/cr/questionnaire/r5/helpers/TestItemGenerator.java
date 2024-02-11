@@ -26,7 +26,9 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.r5.generator.questionnaireitem.QuestionnaireItemGenerator;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceCategoryMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceFilenameMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestItemGenerator {
@@ -116,7 +118,9 @@ public class TestItemGenerator {
                                     .getCodeSource()
                                     .getLocation()
                                     .getPath() + "org/opencds/cqf/fhir/cr/questionnaire/r5",
-                    IGLayoutMode.TYPE_PREFIX,
+                    ResourceTypeMode.FLAT,
+                    ResourceCategoryMode.FLAT,
+                    ResourceFilenameMode.ID_ONLY,
                     EncodingEnum.JSON);
         }
 

@@ -26,9 +26,11 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.repository.ResourceCategoryMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceFilenameMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -146,7 +148,9 @@ public class PlanDefinition {
                                     .getCodeSource()
                                     .getLocation()
                                     .getPath() + "org/opencds/cqf/fhir/cr/plandefinition/r4",
-                    IGLayoutMode.TYPE_PREFIX,
+                    ResourceTypeMode.FLAT,
+                    ResourceCategoryMode.FLAT,
+                    ResourceFilenameMode.TYPE_AND_ID,
                     EncodingEnum.JSON);
             if (dataRepository == null) {
                 dataRepository = local;

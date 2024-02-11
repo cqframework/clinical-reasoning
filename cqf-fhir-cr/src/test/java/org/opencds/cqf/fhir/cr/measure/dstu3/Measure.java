@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/dstu3";
@@ -81,7 +81,7 @@ public class Measure {
                     FhirContext.forDstu3Cached(),
                     this.getClass(),
                     CLASS_PATH + "/" + repositoryPath,
-                    IGLayoutMode.DIRECTORY);
+                    ResourceTypeMode.DIRECTORY_PER_TYPE);
             return this;
         }
 

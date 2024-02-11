@@ -13,7 +13,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceCategoryMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceFilenameMode;
+import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -31,7 +33,9 @@ public class ActivityDefinitionProcessorTests {
                                 .getCodeSource()
                                 .getLocation()
                                 .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/r5",
-                IGLayoutMode.TYPE_PREFIX,
+                ResourceTypeMode.FLAT,
+                ResourceCategoryMode.FLAT,
+                ResourceFilenameMode.ID_ONLY,
                 EncodingEnum.JSON);
         activityDefinitionProcessor = new ActivityDefinitionProcessor(repository);
     }

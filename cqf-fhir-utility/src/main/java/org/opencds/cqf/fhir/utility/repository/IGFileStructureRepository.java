@@ -52,7 +52,9 @@ public class IGFileStructureRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final IGLayoutMode layoutMode;
+    private final ResourceTypeMode layoutMode;
+    private final ResourceCategoryMode categoryMode;
+    private final ResourceFilenameMode filenameMode;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -87,15 +89,32 @@ public class IGFileStructureRepository implements Repository {
     }
 
     public IGFileStructureRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, root, IGLayoutMode.DIRECTORY, EncodingEnum.JSON);
+        this(
+                fhirContext,
+                root,
+                ResourceTypeMode.DIRECTORY_PER_TYPE,
+                ResourceCategoryMode.DIRECTORY_PER_CATEGORY,
+                ResourceFilenameMode.ID_ONLY,
+                EncodingEnum.JSON);
+    }
+
+    private static String ensureTrailingSlash(String path) {
+        return path.endsWith(File.separator) ? path : path + File.separator;
     }
 
     public IGFileStructureRepository(
-            FhirContext fhirContext, String root, IGLayoutMode layoutMode, EncodingEnum encodingEnum) {
-        this.fhirContext = fhirContext;
-        this.root = root;
-        this.layoutMode = layoutMode;
-        this.encodingEnum = encodingEnum;
+            FhirContext fhirContext,
+            String root,
+            ResourceTypeMode layoutMode,
+            ResourceCategoryMode categoryMode,
+            ResourceFilenameMode filenameMode,
+            EncodingEnum encodingEnum) {
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
+        this.root = ensureTrailingSlash(requireNonNull(root, "root can not be null"));
+        this.layoutMode = requireNonNull(layoutMode, "layout mode is required");
+        this.categoryMode = requireNonNull(categoryMode, "category mode is required");
+        this.filenameMode = requireNonNull(filenameMode, "filename mode is required");
+        this.encodingEnum = requireNonNull(encodingEnum, "encodingEnum can not be null");
         this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
     }
@@ -105,35 +124,40 @@ public class IGFileStructureRepository implements Repository {
     }
 
     protected <T extends IBaseResource, I extends IIdType> String locationForResource(Class<T> resourceType, I id) {
-        var directory = directoryForType(resourceType);
-        return directory + "/" + fileNameForLayoutAndEncoding(resourceType.getSimpleName(), id.getIdPart());
+        var directory = directoryForResource(resourceType);
+        return directory + fileNameForResource(resourceType.getSimpleName(), id.getIdPart());
     }
 
-    protected String fileNameForLayoutAndEncoding(String resourceType, String resourceId) {
+    protected String fileNameForResource(String resourceType, String resourceId) {
         var name = resourceId + fileExtensions.get(this.encodingEnum);
-        if (layoutMode == IGLayoutMode.DIRECTORY) {
-            // TODO: case sensitivity!!
-            return resourceType.toLowerCase() + "/" + name;
-        } else {
-            return resourceType + "-" + name;
+        switch (filenameMode) {
+            case ID_ONLY:
+                return name;
+            case TYPE_AND_ID:
+                // TODO: Case sensitivity?
+                return resourceType + "-" + name;
+            default:
+                throw new IllegalArgumentException("unsupported filename mode: " + filenameMode);
         }
     }
 
-    protected <T extends IBaseResource> String directoryForType(Class<T> resourceType) {
+    protected <T extends IBaseResource> String directoryForCategory(Class<T> resourceType) {
+        if (this.categoryMode == ResourceCategoryMode.FLAT) {
+            return this.root;
+        }
+
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var directory = categoryDirectories.get(category);
-
-        // TODO: what the heck is the path separator?
-        return (root.endsWith("/") ? root : root + "/") + directory;
+        return root + directory + File.separator;
     }
 
     protected <T extends IBaseResource> String directoryForResource(Class<T> resourceType) {
-        var directory = directoryForType(resourceType);
-        if (layoutMode == IGLayoutMode.DIRECTORY) {
-            return directory + "/" + resourceType.getSimpleName().toLowerCase();
-        } else {
+        var directory = directoryForCategory(resourceType);
+        if (layoutMode == ResourceTypeMode.FLAT) {
             return directory;
         }
+
+        return directory + resourceType.getSimpleName().toLowerCase() + File.separator;
     }
 
     protected IBaseResource readLocation(String location) {
@@ -215,8 +239,8 @@ public class IGFileStructureRepository implements Repository {
                 (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
 
         for (var file : inputDir.listFiles(resourceFileFilter)) {
-            if ((this.layoutMode.equals(IGLayoutMode.DIRECTORY))
-                    || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
+            if ((this.layoutMode.equals(ResourceTypeMode.DIRECTORY_PER_TYPE))
+                    || (this.layoutMode.equals(ResourceTypeMode.FLAT)
                             && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
                 try {
                     var r = this.readLocation(file.getPath());

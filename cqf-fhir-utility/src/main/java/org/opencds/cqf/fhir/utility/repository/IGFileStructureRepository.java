@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -200,19 +201,24 @@ public class IGFileStructureRepository implements Repository {
         var location = this.directoryForResource(resourceClass);
         var resources = new HashMap<IIdType, T>();
         var inputDir = new File(location);
-        if (inputDir.isDirectory()) {
-            for (var file : inputDir.listFiles()) {
-                if ((this.layoutMode.equals(IGLayoutMode.DIRECTORY))
-                        || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
-                                && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
-                    try {
-                        var r = this.readLocation(resourceClass, file.getPath());
-                        if (r.fhirType().equals(resourceClass.getSimpleName())) {
-                            resources.put(r.getIdElement().toUnqualifiedVersionless(), r);
-                        }
-                    } catch (RuntimeException e) {
-                        // intentionally empty
+        if (!inputDir.isDirectory()) {
+            return resources;
+        }
+
+        FilenameFilter resourceFileFilter =
+                (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+
+        for (var file : inputDir.listFiles(resourceFileFilter)) {
+            if ((this.layoutMode.equals(IGLayoutMode.DIRECTORY))
+                    || (this.layoutMode.equals(IGLayoutMode.TYPE_PREFIX)
+                            && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
+                try {
+                    var r = this.readLocation(resourceClass, file.getPath());
+                    if (r.fhirType().equals(resourceClass.getSimpleName())) {
+                        resources.put(r.getIdElement().toUnqualifiedVersionless(), r);
                     }
+                } catch (RuntimeException e) {
+                    // intentionally empty
                 }
             }
         }
@@ -328,7 +334,8 @@ public class IGFileStructureRepository implements Repository {
             for (var idQuery : idQueries) {
                 var idToken = (TokenParam) idQuery;
                 // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
+                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids
+                // types
                 var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
                 var r = resourceIdMap.get(id);
                 if (r != null) {

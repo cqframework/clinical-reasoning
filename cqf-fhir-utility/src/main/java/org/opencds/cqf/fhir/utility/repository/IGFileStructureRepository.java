@@ -220,7 +220,7 @@ public class IGFileStructureRepository implements Repository {
                             && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
                 try {
                     var r = this.readLocation(file.getPath());
-                    T t = validateResource(resourceClass, r, file.getPath(), r.getIdElement());
+                    T t = validateResource(resourceClass, r, r.getIdElement(), file.getPath());
                     resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
                 } catch (RuntimeException e) {
                     // intentionally empty
@@ -252,7 +252,7 @@ public class IGFileStructureRepository implements Repository {
             }
         }
 
-        return validateResource(resourceType, r, location, id);
+        return validateResource(resourceType, r, id, location);
     }
 
     @Override
@@ -265,14 +265,14 @@ public class IGFileStructureRepository implements Repository {
     }
 
     private <T extends IBaseResource> T validateResource(
-            Class<T> resourceType, IBaseResource r, String location, IIdType id) {
+            Class<T> resourceType, IBaseResource r, IIdType id, String location) {
         if (r == null) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found empty or invalid content instead.",
                     id.toUnqualifiedVersionless(), location));
         }
 
-        if (r.getIdElement() == null || !r.getIdElement().hasIdPart()) {
+        if (!r.getIdElement().hasIdPart()) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found resource without an id instead.",
                     id.toUnqualifiedVersionless(), location));

@@ -149,7 +149,7 @@ public class IGFileStructureRepository implements Repository {
 
     @SuppressWarnings("unchecked")
     protected <T extends IBaseResource> T handleLibrary(T resource, String location) {
-        if (resource.fhirType() != null && resource.fhirType().equals("Library")) {
+        if ("Library".equals(resource.fhirType())) {
             String cqlLocation;
             switch (fhirContext.getVersion().getVersion()) {
                 case DSTU3:
@@ -272,27 +272,26 @@ public class IGFileStructureRepository implements Repository {
                     id.toUnqualifiedVersionless(), location));
         }
 
+        if (!resourceType.getSimpleName().equals(r.fhirType())) {
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with type: %s at location: %s. Found resource with type %s instead.",
+                    resourceType.getSimpleName(), location, r.fhirType()));
+        }
+
         if (!r.getIdElement().hasIdPart()) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found resource without an id instead.",
                     id.toUnqualifiedVersionless(), location));
         }
 
-        if (!r.fhirType().equals(resourceType.getSimpleName())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with type: %s at location: %s. Found resource with type %s instead.",
-                    resourceType.getSimpleName(), location, r.fhirType()));
-        }
-
-        if (!r.getIdElement().getIdPart().equals(id.getIdPart())) {
+        if (!id.getIdPart().equals(r.getIdElement().getIdPart())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at location: %s. Found resource with an id %s instead.",
                     id.getIdPart(), location, r.getIdElement().getIdPart()));
         }
 
         if (id.hasVersionIdPart()
-                && r.getIdElement().hasVersionIdPart()
-                && !r.getIdElement().getVersionIdPart().equals(id.getVersionIdPart())) {
+                && !id.getVersionIdPart().equals(r.getIdElement().getVersionIdPart())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with version: %s at location: %s. Found resource with version %s instead.",
                     id.getVersionIdPart(), location, r.getIdElement().getVersionIdPart()));

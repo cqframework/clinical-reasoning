@@ -35,7 +35,8 @@ public class IGFileStructureRepositoryDirectoryTest {
     public static void setup() throws URISyntaxException, IOException, InterruptedException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        ResourceDirectoryCopier.copyFromJar(IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
+        ResourceDirectoryCopier.copyFromJar(
+                IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
         repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
@@ -63,8 +64,7 @@ public class IGFileStructureRepositoryDirectoryTest {
 
     @Test
     void searchLibraryWithFilter() {
-        var libs = repository.search(
-                Bundle.class, Library.class, Searches.byUrl("http://example.com/Library/Test"));
+        var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/Library/Test"));
 
         assertNotNull(libs);
         assertEquals(1, libs.getEntry().size());
@@ -105,10 +105,7 @@ public class IGFileStructureRepositoryDirectoryTest {
 
     @Test
     void searchValueSet() {
-        var sets = repository.search(
-                Bundle.class,
-                ValueSet.class,
-                Searches.byUrl("example.com/ValueSet/456"));
+        var sets = repository.search(Bundle.class, ValueSet.class, Searches.byUrl("example.com/ValueSet/456"));
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());
     }

@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -259,7 +258,9 @@ public class IGFileStructureRepository implements Repository {
         }
 
         if (r == null) {
-            throw new ResourceNotFoundException(String.format("Expected to find a resource with id: %s at location: %s. Found empty or invalid content instead.", id.toUnqualifiedVersionless(), location));
+            throw new ResourceNotFoundException(String.format(
+                    "Expected to find a resource with id: %s at location: %s. Found empty or invalid content instead.",
+                    id.toUnqualifiedVersionless(), location));
         }
 
         if (r.getIdElement() == null || !r.getIdElement().hasIdPart()) {
@@ -280,7 +281,9 @@ public class IGFileStructureRepository implements Repository {
                     id.getIdPart(), location, r.getIdElement().getIdPart()));
         }
 
-        if(id.hasVersionIdPart() && r.getIdElement().hasVersionIdPart() && !r.getIdElement().getVersionIdPart().equals(id.getVersionIdPart())) {
+        if (id.hasVersionIdPart()
+                && r.getIdElement().hasVersionIdPart()
+                && !r.getIdElement().getVersionIdPart().equals(id.getVersionIdPart())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with version: %s at location: %s. Found resource with version %s instead.",
                     id.getVersionIdPart(), location, r.getIdElement().getVersionIdPart()));

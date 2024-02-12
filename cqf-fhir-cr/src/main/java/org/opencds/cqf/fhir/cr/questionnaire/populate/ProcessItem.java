@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 
 public class ProcessItem {
     final ExpressionProcessor expressionProcessor;
@@ -38,7 +38,7 @@ public class ProcessItem {
                                     request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION, false)));
             if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
                 request.getModelResolver()
-                        .setValue(populatedItem, "initial", transformValue((org.hl7.fhir.dstu3.model.Type)
+                        .setValue(populatedItem, "initial", transformValueToItem((org.hl7.fhir.dstu3.model.Type)
                                 expressionResults.get(0)));
             } else {
                 List<IBaseBackboneElement> initial = new ArrayList<>();
@@ -69,10 +69,10 @@ public class ProcessItem {
         switch (fhirVersion) {
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent()
-                        .setValue(transformValue((org.hl7.fhir.r4.model.Type) value));
+                        .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value));
             case R5:
                 return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemInitialComponent()
-                        .setValue(transformValue((org.hl7.fhir.r5.model.DataType) value));
+                        .setValue(transformValueToItem((org.hl7.fhir.r5.model.DataType) value));
 
             default:
                 return null;

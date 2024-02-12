@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.questionnaire.common;
+package org.opencds.cqf.fhir.cr.common;
 
 @SuppressWarnings("serial")
 public class ResolveExpressionException extends Exception {

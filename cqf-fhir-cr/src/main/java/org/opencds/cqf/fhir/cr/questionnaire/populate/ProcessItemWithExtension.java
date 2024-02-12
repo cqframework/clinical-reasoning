@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class ProcessItemWithExtension {
@@ -85,13 +85,13 @@ public class ProcessItemWithExtension {
         switch (fhirVersion) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent()
-                        .setValue(transformValue((org.hl7.fhir.dstu3.model.Type) value));
+                        .setValue(transformValueToItem((org.hl7.fhir.dstu3.model.Type) value));
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent()
-                        .setValue(transformValue((org.hl7.fhir.r4.model.Type) value));
+                        .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value));
             case R5:
                 return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemInitialComponent()
-                        .setValue(transformValue((org.hl7.fhir.r5.model.DataType) value));
+                        .setValue(transformValueToItem((org.hl7.fhir.r5.model.DataType) value));
 
             default:
                 return null;

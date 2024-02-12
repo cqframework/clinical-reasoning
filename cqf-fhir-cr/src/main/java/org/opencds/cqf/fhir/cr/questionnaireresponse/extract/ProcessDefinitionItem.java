@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToResource;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.common.ResolveExpressionException;
+import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +111,14 @@ public class ProcessDefinitionItem {
                 var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
                 var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
                 if (answerValue != null) {
+                    var pathDefinition = resourceDefinition.getChildByName(path);
+                    if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
+                        // Check if answer type matches path types available and transform if necessary
+                        var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
+                        if (!choices.contains(answerValue.getClass())) {
+                            answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                        }
+                    }
                     request.getModelResolver().setValue(resource, path, answerValue);
                 }
             }

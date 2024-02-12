@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import java.util.Collections;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -30,15 +30,15 @@ public interface IElementProcessor {
     public static Object createInitial(IOperationRequest request, IBaseDatatype value) {
         switch (request.getFhirVersion()) {
             case DSTU3:
-                return transformValue((org.hl7.fhir.dstu3.model.Type) value);
+                return transformValueToItem((org.hl7.fhir.dstu3.model.Type) value);
             case R4:
                 return Collections.singletonList(
                         new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent()
-                                .setValue(transformValue((org.hl7.fhir.r4.model.Type) value)));
+                                .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value)));
             case R5:
                 return Collections.singletonList(
                         new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemInitialComponent()
-                                .setValue(transformValue((org.hl7.fhir.r5.model.DataType) value)));
+                                .setValue(transformValueToItem((org.hl7.fhir.r5.model.DataType) value)));
             default:
                 return null;
         }

@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.dstu3;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
@@ -52,7 +52,7 @@ public class ElementProcessor implements IElementProcessor {
         } else if (caseFeature != null) {
             var pathValue = elementHasCaseFeature.getPathValue(request, caseFeature, element);
             if (pathValue instanceof Type) {
-                item.setInitial(transformValue((Type) pathValue));
+                item.setInitial(transformValueToItem((Type) pathValue));
             }
         }
         item.setRequired(element.hasMin() && element.getMin() > 0);

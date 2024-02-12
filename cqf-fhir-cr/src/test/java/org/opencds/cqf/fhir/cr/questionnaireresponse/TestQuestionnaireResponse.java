@@ -105,15 +105,16 @@ public class TestQuestionnaireResponse {
                     repository.fhirContext().getVersion().getVersion());
         }
 
-        public void isEqualsTo(String expectedBundleAssetName) {
+        public Extract isEqualsTo(String expectedBundleAssetName) {
             try {
                 JSONAssert.assertEquals(load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
             } catch (JSONException | IOException e) {
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
-        public void isEqualsToExpected(IIdType expectedBundleId) {
+        public Extract isEqualsToExpected(IIdType expectedBundleId) {
             var expectedBundle = repository.read(bundle.getClass(), expectedBundleId);
             try {
                 JSONAssert.assertEquals(
@@ -123,11 +124,17 @@ public class TestQuestionnaireResponse {
             } catch (JSONException e) {
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
+            return this;
         }
 
-        public void hasEntry(int count) {
+        public Extract hasEntry(int count) {
             var entry = (List<?>) modelResolver.resolvePath(bundle, "entry");
             assertEquals(count, entry.size());
+            return this;
+        }
+
+        public IBaseBundle getBundle() {
+            return bundle;
         }
     }
 }

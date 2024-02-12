@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.given;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class QuestionnaireResponseProcessorTests {
@@ -59,5 +62,21 @@ public class QuestionnaireResponseProcessorTests {
                 .questionnaireResponseId(questionnaireResponseId)
                 .extract()
                 .hasEntry(3);
+    }
+
+    @Test
+    void testTherapyMonitoringRecommendation() {
+        var questionnaireResponseId = "TherapyMonitoringRecommendation";
+        var result = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2)
+                .getBundle();
+        var resources = BundleHelper.getEntryResources(result);
+        var obs1 = (Observation) resources.get(0);
+        var obs2 = (Observation) resources.get(1);
+        assertTrue(obs1.hasValueCodeableConcept());
+        assertTrue(obs2.hasValueDateTimeType());
     }
 }

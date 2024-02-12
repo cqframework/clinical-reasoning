@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate.r5;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.common.ItemValueTransformer.transformValue;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,7 +50,7 @@ public class ElementProcessor implements IElementProcessor {
         } else if (caseFeature != null) {
             var pathValue = elementHasCaseFeature.getPathValue(request, caseFeature, element);
             if (pathValue instanceof DataType) {
-                item.addInitial().setValue(transformValue((DataType) pathValue));
+                item.addInitial().setValue(transformValueToItem((DataType) pathValue));
             }
         }
         item.setRequired(element.hasMin() && element.getMin() > 0);

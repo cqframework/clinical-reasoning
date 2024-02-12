@@ -65,7 +65,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
             task.setDescription(activityDefinition.getDescription());
         }
 
-        if (activityDefinition.hasDoNotPerform()) {
+        if (activityDefinition.getDoNotPerform()) {
             task.addModifierExtension(
                     new Extension(REQUEST_DO_NOT_PERFORM).setValue(activityDefinition.getDoNotPerformElement()));
         }

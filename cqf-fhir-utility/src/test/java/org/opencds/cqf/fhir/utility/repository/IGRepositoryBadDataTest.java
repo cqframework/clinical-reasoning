@@ -8,12 +8,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Ids;
 
 public class IGRepositoryBadDataTest {
 
@@ -30,45 +34,20 @@ public class IGRepositoryBadDataTest {
         repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
-    @Test
-    void readInvalidContentThrowsException() {
-        var id = Ids.newId(Patient.class, "InvalidContent");
+    @ParameterizedTest
+    @MethodSource("invalidContentTestData")
+    void readInvalidContentThrowsException(IIdType id, String errorMessage) {
         var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found empty or invalid content"));
+        assertTrue(e.getMessage().contains(errorMessage));
     }
 
-    @Test
-    void readMissingIdThrowsException() {
-        var id = Ids.newId(Patient.class, "MissingId");
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found resource without an id"));
-    }
-
-    @Test
-    void readNoContentThrowsException() {
-        var id = Ids.newId(Patient.class, "NoContent");
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found empty or invalid content"));
-    }
-
-    @Test
-    void readWrongIdThrowsException() {
-        var id = Ids.newId(Patient.class, "WrongId");
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found resource with an id DoesntMatchFilename"));
-    }
-
-    @Test
-    void readWrongResourceTypeThrowsException() {
-        var id = Ids.newId(Patient.class, "WrongResourceType");
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found resource with type Encounter"));
-    }
-
-    @Test
-    void readWrongVersionThrowsException() {
-        var id = Ids.newId(Patient.class, "WrongVersion").withVersion("1");
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains("Found resource with version 2"));
+    private static Stream<Arguments> invalidContentTestData() {
+        return Stream.of(
+                Arguments.of(new IdType("Patient/InvalidContent"), "Found empty or invalid content"),
+                Arguments.of(new IdType("Patient/MissingId"), "Found resource without an id"),
+                Arguments.of(new IdType("Patient/NoContent"), "Found empty or invalid content"),
+                Arguments.of(new IdType("Patient/WrongId"), "Found resource with an id DoesntMatchFilename"),
+                Arguments.of(new IdType("Patient/WrongResourceType"), "Found resource with type Encounter"),
+                Arguments.of(new IdType("Patient/WrongVersion").withVersion("1"), "Found resource with version 2"));
     }
 }

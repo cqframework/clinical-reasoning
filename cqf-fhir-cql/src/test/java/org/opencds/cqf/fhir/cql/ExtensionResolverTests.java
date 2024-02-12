@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class ExtensionResolverTests {
@@ -24,9 +25,9 @@ class ExtensionResolverTests {
 
     @Test
     void testExtensionResolution() {
-        var patientId = "Patient/Patient1";
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
+        var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), "Patient/Patient1");
 
         var params = parameters();
         params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
@@ -34,8 +35,8 @@ class ExtensionResolverTests {
         var extensionValue = new MarkdownType();
         extensionValue.addExtension(expressionExtension);
         var extensions = Collections.singletonList(new Extension(EXTENSION_URL, extensionValue));
-        var extensionResolver = new ExtensionResolver(patientId, params, null, libraryEngine);
-        extensionResolver.resolveExtensions(extensions, null);
+        var extensionResolver = new ExtensionResolver(subjectId, params, null, libraryEngine);
+        extensionResolver.resolveExtensions(null, extensions, null);
         assertEquals("Alice", extensions.get(0).getValueAsPrimitive().getValueAsString());
     }
 }

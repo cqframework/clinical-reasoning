@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,10 @@ public class LibraryEngine {
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         this.npmProcessor = npmProcessor;
+    }
+
+    public Repository getRepository() {
+        return repository;
     }
 
     private Pair<String, Object> buildContextParameter(String patientId) {
@@ -82,10 +87,28 @@ public class LibraryEngine {
             IBaseParameters parameters,
             String patientId,
             List<Pair<String, String>> libraries,
-            IBaseBundle bundle) {
+            IBaseBundle bundle,
+            IBase contextParameter,
+            IBase resourceParameter) {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
+        if (contextParameter != null) {
+            var contextType = contextParameter.getClass().getSimpleName();
+            cqlParameters.add(new CqlParameterDefinition("%fhirpathcontext", contextType, false, contextParameter));
+            var resourceType = resourceParameter == null
+                    ? contextType
+                    : resourceParameter.getClass().getSimpleName();
+            cqlParameters.add(new CqlParameterDefinition(
+                    "%resource",
+                    resourceType, false, resourceParameter == null ? contextParameter : resourceParameter));
+        }
+        // There is currently a bug in the CQL compiler that causes the FHIRPath %context variable to fail.
+        // This bit of hackery finds any uses of %context in the expression being evaluated and switches it to
+        // fhirpathcontext to allow for successful evaluation.
+        if (expression.contains("%context")) {
+            expression = expression.replace("%context", "%fhirpathcontext");
+        }
         var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
 
         Set<String> expressions = new HashSet<>();
@@ -100,6 +123,10 @@ public class LibraryEngine {
             providers.registerProvider(source);
         }
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+        if (contextParameter != null) {
+            evaluationParameters.put("%fhirpathcontext", contextParameter);
+            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
+        }
         var id = new VersionedIdentifier().withId("expression").withVersion("1.0.0");
         var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
 
@@ -113,6 +140,19 @@ public class LibraryEngine {
             String libraryToBeEvaluated,
             IBaseParameters parameters,
             IBaseBundle bundle) {
+        return getExpressionResult(
+                subjectId, expression, language, libraryToBeEvaluated, parameters, bundle, null, null);
+    }
+
+    public List<IBase> getExpressionResult(
+            String subjectId,
+            String expression,
+            String language,
+            String libraryToBeEvaluated,
+            IBaseParameters parameters,
+            IBaseBundle bundle,
+            IBase contextParameter,
+            IBase resourceParameter) {
         validateExpression(language, expression);
         List<IBase> results = null;
         IBaseParameters parametersResult;
@@ -121,7 +161,8 @@ public class LibraryEngine {
             case "text/cql.expression":
             case "text/cql-expression":
             case "text/fhirpath":
-                parametersResult = this.evaluateExpression(expression, parameters, subjectId, null, bundle);
+                parametersResult = this.evaluateExpression(
+                        expression, parameters, subjectId, null, bundle, contextParameter, resourceParameter);
                 // The expression is assumed to be the parameter component name
                 // The expression evaluator creates a library with a single expression defined as "return"
                 results = resolveParameterValues(
@@ -207,13 +248,25 @@ public class LibraryEngine {
 
     public List<IBase> resolveExpression(
             String patientId, CqfExpression expression, IBaseParameters params, IBaseBundle bundle) {
+        return resolveExpression(patientId, expression, params, bundle, null, null);
+    }
+
+    public List<IBase> resolveExpression(
+            String patientId,
+            CqfExpression expression,
+            IBaseParameters params,
+            IBaseBundle bundle,
+            IBase contextParameter,
+            IBase resourceParameter) {
         var result = getExpressionResult(
                 patientId,
                 expression.getExpression(),
                 expression.getLanguage(),
                 expression.getLibraryUrl(),
                 params,
-                bundle);
+                bundle,
+                contextParameter,
+                resourceParameter);
         if (result == null && expression.getAltExpression() != null) {
             result = getExpressionResult(
                     patientId,
@@ -221,7 +274,9 @@ public class LibraryEngine {
                     expression.getAltLanguage(),
                     expression.getAltLibraryUrl(),
                     params,
-                    bundle);
+                    bundle,
+                    contextParameter,
+                    resourceParameter);
         }
 
         return result;

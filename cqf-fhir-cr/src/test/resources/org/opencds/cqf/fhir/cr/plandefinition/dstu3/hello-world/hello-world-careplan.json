@@ -13,10 +13,10 @@
       "status": "draft",
       "intent": "proposal",
       "subject": {
-        "reference": "helloworld-patient-1"
+        "reference": "Patient/helloworld-patient-1"
       },
       "context": {
-        "reference": "helloworld-patient-1-encounter-1"
+        "reference": "Encounter/helloworld-patient-1-encounter-1"
       },
       "action": [
         {
@@ -40,10 +40,10 @@
   "status": "draft",
   "intent": "proposal",
   "subject": {
-    "reference": "helloworld-patient-1"
+    "reference": "Patient/helloworld-patient-1"
   },
   "context": {
-    "reference": "helloworld-patient-1-encounter-1"
+    "reference": "Encounter/helloworld-patient-1-encounter-1"
   },
   "activity": [
     {

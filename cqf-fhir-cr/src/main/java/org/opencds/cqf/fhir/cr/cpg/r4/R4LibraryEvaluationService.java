@@ -48,7 +48,7 @@ public class R4LibraryEvaluationService {
         }
 
         if (contentEndpoint != null) {
-            repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+            repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);

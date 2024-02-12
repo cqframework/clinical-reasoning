@@ -1,0 +1,15 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "requestorchestration-test",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
+      "valueString": "RequestOrchestration"
+    }
+  ],
+  "name": "RequestOrchestration_Test",
+  "title": "CreateRequestOrchestration",
+  "status": "draft",
+  "description": "Create the request orchestration.",
+  "kind": "Task"
+}

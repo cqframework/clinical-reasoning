@@ -6,6 +6,12 @@
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
     ]
   },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
+      "valueBoolean": true
+    }
+  ],
   "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one",
   "version": "1.0.0",
   "type": {
@@ -47,6 +53,24 @@
   "purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
   "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
   "copyright": "© CDC 2016+.",
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "resource": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending"
+    }
+  ],
   "library": [
     "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
   ],
@@ -57,10 +81,12 @@
       "description": "",
       "input": [
         {
-          "type": "Organization",
-          "profile": [
-            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization"
-          ]
+          "requirement": {
+            "type": "Organization",
+            "profile": [
+              "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization"
+            ]
+          }
         }
       ]
     },
@@ -69,10 +95,12 @@
       "description": "",
       "input": [
         {
-          "type": "Patient",
-          "profile": [
-            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient"
-          ]
+          "requirement": {
+            "type": "Patient",
+            "profile": [
+              "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient"
+            ]
+          }
         }
       ]
     },
@@ -81,10 +109,12 @@
       "description": "",
       "input": [
         {
-          "type": "Practitioner",
-          "profile": [
-            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating"
-          ]
+          "requirement": {
+            "type": "Practitioner",
+            "profile": [
+              "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating"
+            ]
+          }
         }
       ]
     },
@@ -93,10 +123,12 @@
       "description": "",
       "input": [
         {
-          "type": "Practitioner",
-          "profile": [
-            "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending"
-          ]
+          "requirement": {
+            "type": "Practitioner",
+            "profile": [
+              "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending"
+            ]
+          }
         }
       ]
     }

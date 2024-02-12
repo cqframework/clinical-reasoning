@@ -11,7 +11,7 @@
       "status": "draft",
       "intent": "proposal",
       "subject": {
-        "reference": "OPA-Patient1"
+        "reference": "Patient/OPA-Patient1"
       },
       "action": [
         {
@@ -831,8 +831,7 @@
       "instantiatesCanonical": "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/complete-questionnaire",
       "basedOn": [
         {
-          "reference": "#RequestGroup/prepopulate",
-          "type": "RequestGroup"
+          "reference": "RequestGroup/prepopulate"
         }
       ],
       "status": "draft",
@@ -842,7 +841,7 @@
         "reference": "Questionnaire/OutpatientPriorAuthorizationRequest-OPA-Patient1"
       },
       "for": {
-        "reference": "OPA-Patient1"
+        "reference": "Patient/OPA-Patient1"
       }
     }
   ],
@@ -852,7 +851,7 @@
   "status": "draft",
   "intent": "proposal",
   "subject": {
-    "reference": "OPA-Patient1"
+    "reference": "Patient/OPA-Patient1"
   },
   "activity": [
     {

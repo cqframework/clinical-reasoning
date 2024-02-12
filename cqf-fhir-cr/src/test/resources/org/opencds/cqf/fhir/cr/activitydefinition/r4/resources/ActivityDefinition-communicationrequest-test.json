@@ -1,0 +1,12 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "communicationrequest-test",
+  "name": "CommunicationRequest_Test",
+  "title": "CreateCommunicationRequest",
+  "status": "draft",
+  "description": "Create the communication request.",
+  "kind": "CommunicationRequest",
+  "code": {
+    "text": "Test"
+  }
+}

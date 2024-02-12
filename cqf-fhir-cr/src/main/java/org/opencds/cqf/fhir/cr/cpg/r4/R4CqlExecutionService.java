@@ -58,7 +58,8 @@ public class R4CqlExecutionService {
 
         try {
             if (contentEndpoint != null) {
-                repository = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+                repository = Repositories.proxy(
+                        repository, useServerData.booleanValue(), dataEndpoint, contentEndpoint, terminologyEndpoint);
             }
             var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
 
@@ -67,7 +68,13 @@ public class R4CqlExecutionService {
             if (StringUtils.isBlank(content)) {
 
                 return (Parameters) libraryEngine.evaluateExpression(
-                        expression, parameters == null ? new Parameters() : parameters, subject, libraries, data);
+                        expression,
+                        parameters == null ? new Parameters() : parameters,
+                        subject,
+                        libraries,
+                        data,
+                        null,
+                        null);
             }
 
             var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, null);

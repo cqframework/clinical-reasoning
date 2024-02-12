@@ -139,6 +139,16 @@
       ],
       "input": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
+              "valueExpression": {
+                "language": "text/cql.identifier",
+                "expression": "Sleep Study",
+                "reference": "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
+              }
+            }
+          ],
           "type": "ServiceRequest",
           "profile": [
             "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order"

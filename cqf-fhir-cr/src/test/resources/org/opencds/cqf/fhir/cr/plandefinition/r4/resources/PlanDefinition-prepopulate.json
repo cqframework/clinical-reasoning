@@ -60,6 +60,7 @@
   ],
   "action": [
     {
+      "id": "task-complete-questionnaire",
       "extension": [
         {
           "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate",

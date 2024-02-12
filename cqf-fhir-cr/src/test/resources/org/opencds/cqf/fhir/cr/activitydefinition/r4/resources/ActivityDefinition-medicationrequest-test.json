@@ -1,0 +1,37 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "medicationrequest-test",
+  "url": "http://test.fhir.org/ActivityDefinition/medicationrequest-test",
+  "name": "MedicationRequest_Test",
+  "title": "CreateMedicationRequest",
+  "status": "draft",
+  "description": "Create the medication request.",
+  "library": [
+    "http://test/fhir/Library/TestActivityDefinition|1.0.0"
+  ],
+  "intent": "proposal",
+  "kind": "MedicationRequest",
+  "productCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://test/fhir/System",
+        "code": "productCode"
+      }
+    ]
+  },
+  "doNotPerform": false,
+  "dosage": [
+    {
+      "text": "Test dosage"
+    }
+  ],
+  "dynamicValue": [
+    {
+      "path": "doNotPerform",
+      "expression": {
+        "language": "text/cql.identifier",
+        "expression": "ActiveProcedureStatus"
+      }
+    }
+  ]
+}

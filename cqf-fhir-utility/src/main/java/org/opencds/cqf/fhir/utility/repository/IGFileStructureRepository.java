@@ -31,9 +31,11 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
+import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
  * This class implements the Repository interface on onto a directory structure
@@ -56,6 +58,7 @@ public class IGFileStructureRepository implements Repository {
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
+    private IRepositoryOperationProvider operationProvider;
 
     private final Map<String, IBaseResource> resourceCache = new HashMap<>();
 
@@ -92,12 +95,25 @@ public class IGFileStructureRepository implements Repository {
 
     public IGFileStructureRepository(
             FhirContext fhirContext, String root, IGLayoutMode layoutMode, EncodingEnum encodingEnum) {
+        this(fhirContext, root, layoutMode, encodingEnum, null);
+    }
+
+    public IGFileStructureRepository(
+            FhirContext fhirContext,
+            String root,
+            IGLayoutMode layoutMode,
+            EncodingEnum encodingEnum,
+            IRepositoryOperationProvider operationProvider) {
         this.fhirContext = fhirContext;
         this.root = root;
         this.layoutMode = layoutMode;
         this.encodingEnum = encodingEnum;
-        this.parser = parserForEncoding(fhirContext, encodingEnum);
+        this.parser = parserForEncoding(this.fhirContext, this.encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
+    }
+
+    public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
+        this.operationProvider = operationProvider;
     }
 
     public void clearCache() {
@@ -180,6 +196,7 @@ public class IGFileStructureRepository implements Repository {
         return resource;
     }
 
+    @SuppressWarnings("null")
     protected String getCqlContent(String rootPath, String relativePath) {
         var p = Paths.get(rootPath).getParent().resolve(relativePath).normalize();
         try {
@@ -429,8 +446,7 @@ public class IGFileStructureRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+        return invokeOperation(null, resourceType.getSimpleName(), name, parameters, headers);
     }
 
     @Override
@@ -443,8 +459,7 @@ public class IGFileStructureRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+        return invokeOperation(id, id.getResourceType(), name, parameters, headers);
     }
 
     @Override
@@ -452,6 +467,18 @@ public class IGFileStructureRepository implements Repository {
             I id, String name, P parameters, Map<String, String> headers) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+    }
+
+    protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeOperation(
+            IIdType id,
+            String resourceType,
+            String operationName,
+            IBaseParameters parameters,
+            Map<String, String> headers) {
+        if (operationProvider == null) {
+            throw new IllegalArgumentException("No operation provider found.  Unable to invoke operations.");
+        }
+        return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
     }
 
     @Override

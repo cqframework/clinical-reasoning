@@ -34,9 +34,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.ResourceCategoryMode;
-import org.opencds.cqf.fhir.utility.repository.ResourceFilenameMode;
-import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
+import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
@@ -131,9 +129,7 @@ public class TestQuestionnaire {
                                         .getLocation()
                                         .getPath()
                                 + CLASS_PATH,
-                        ResourceTypeMode.FLAT,
-                        ResourceCategoryMode.FLAT,
-                        ResourceFilenameMode.ID_ONLY,
+                        RepositoryConfig.WITH_CATEGORY_DIRECTORY,
                         EncodingEnum.JSON);
             }
 

@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
 
 public class PlanDefinitionProcessorTests {
 
@@ -60,7 +61,10 @@ public class PlanDefinitionProcessorTests {
         var patientID = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterID = "Encounter/helloworld-patient-1-encounter-1";
         var repository = TestRepositoryFactory.createRepository(
-                fhirContext, this.getClass(), "org/opencds/cqf/fhir/cr/plandefinition/r4/anc-dak");
+                fhirContext,
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/plandefinition/r4/anc-dak",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         var parameters = parameters(part("encounter", "helloworld-patient-1-encounter-1"));
         PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
                 .withRepository(repository)
@@ -141,7 +145,10 @@ public class PlanDefinitionProcessorTests {
         var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
 
         var repository = TestRepositoryFactory.createRepository(
-                fhirContext, this.getClass(), "org/opencds/cqf/fhir/cr/plandefinition/r4/opioid-Rec10-patient-view");
+                fhirContext,
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/plandefinition/r4/opioid-Rec10-patient-view",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         PlanDefinition.Assert.that(planDefinitionID, patientID, encounterID, null)
                 .withRepository(repository)
                 .withExpectedCarePlanId(new IdType("CarePlan", "opioidcds-10-patient-view"))
@@ -293,7 +300,10 @@ public class PlanDefinitionProcessorTests {
                 stringPart("Service Request Id", "SleepStudy2"),
                 stringPart("Coverage Id", "Coverage-positive"));
         var repository = TestRepositoryFactory.createRepository(
-                fhirContext, this.getClass(), "org/opencds/cqf/fhir/cr/plandefinition/r4/pa-aslp");
+                fhirContext,
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/plandefinition/r4/pa-aslp",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         PlanDefinition.Assert.that(planDefinitionID, patientID, null, null)
                 .withParameters(parameters)
                 .withRepository(repository)
@@ -305,7 +315,10 @@ public class PlanDefinitionProcessorTests {
     public void testPackageASLPA1() {
         var planDefinitionID = "ASLPA1";
         var repository = TestRepositoryFactory.createRepository(
-                fhirContext, this.getClass(), "org/opencds/cqf/fhir/cr/plandefinition/r4/pa-aslp");
+                fhirContext,
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/plandefinition/r4/pa-aslp",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         PlanDefinition.Assert.that(planDefinitionID, null, null, null)
                 .withRepository(repository)
                 .packagePlanDefinition()

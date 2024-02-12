@@ -33,9 +33,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.opencds.cqf.fhir.utility.repository.ResourceCategoryMode;
-import org.opencds.cqf.fhir.utility.repository.ResourceFilenameMode;
-import org.opencds.cqf.fhir.utility.repository.ResourceTypeMode;
+import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -182,9 +180,7 @@ public class PlanDefinition {
                                     .getLocation()
                                     .getPath()
                             + CLASS_PATH,
-                    ResourceTypeMode.FLAT,
-                    ResourceCategoryMode.FLAT,
-                    ResourceFilenameMode.TYPE_AND_ID,
+                    RepositoryConfig.WITH_CATEGORY_DIRECTORY,
                     EncodingEnum.JSON);
             if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
                 repository = local;

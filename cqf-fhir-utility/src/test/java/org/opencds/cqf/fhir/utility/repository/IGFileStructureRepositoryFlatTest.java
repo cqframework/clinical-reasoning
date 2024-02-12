@@ -40,12 +40,7 @@ public class IGFileStructureRepositoryFlatTest {
         ResourceDirectoryCopier.copyFromJar(IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/flat", tempDir);
         var flatRoot = tempDir.resolve("resources");
         repository = new IGFileStructureRepository(
-                FhirContext.forR4Cached(),
-                flatRoot.toString(),
-                ResourceTypeMode.FLAT,
-                ResourceCategoryMode.FLAT,
-                ResourceFilenameMode.TYPE_AND_ID,
-                EncodingEnum.JSON);
+                FhirContext.forR4Cached(), flatRoot.toString(), RepositoryConfig.FLAT, EncodingEnum.JSON);
     }
 
     @Test

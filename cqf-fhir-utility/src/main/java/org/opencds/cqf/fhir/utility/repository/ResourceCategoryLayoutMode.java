@@ -5,7 +5,7 @@ package org.opencds.cqf.fhir.utility.repository;
  *
  * Resource categories are defined by the ResourceCategory enum.
  */
-public enum ResourceCategoryMode {
+enum ResourceCategoryLayoutMode {
     DIRECTORY_PER_CATEGORY,
     FLAT
 }

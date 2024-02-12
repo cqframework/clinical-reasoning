@@ -52,9 +52,7 @@ public class IGFileStructureRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final ResourceTypeMode layoutMode;
-    private final ResourceCategoryMode categoryMode;
-    private final ResourceFilenameMode filenameMode;
+    private final RepositoryConfig repositoryConfig;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -89,13 +87,7 @@ public class IGFileStructureRepository implements Repository {
     }
 
     public IGFileStructureRepository(FhirContext fhirContext, String root) {
-        this(
-                fhirContext,
-                root,
-                ResourceTypeMode.DIRECTORY_PER_TYPE,
-                ResourceCategoryMode.DIRECTORY_PER_CATEGORY,
-                ResourceFilenameMode.ID_ONLY,
-                EncodingEnum.JSON);
+        this(fhirContext, root, RepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, EncodingEnum.JSON);
     }
 
     private static String ensureTrailingSlash(String path) {
@@ -103,17 +95,10 @@ public class IGFileStructureRepository implements Repository {
     }
 
     public IGFileStructureRepository(
-            FhirContext fhirContext,
-            String root,
-            ResourceTypeMode layoutMode,
-            ResourceCategoryMode categoryMode,
-            ResourceFilenameMode filenameMode,
-            EncodingEnum encodingEnum) {
+            FhirContext fhirContext, String root, RepositoryConfig repositoryConfig, EncodingEnum encodingEnum) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.root = ensureTrailingSlash(requireNonNull(root, "root can not be null"));
-        this.layoutMode = requireNonNull(layoutMode, "layout mode is required");
-        this.categoryMode = requireNonNull(categoryMode, "category mode is required");
-        this.filenameMode = requireNonNull(filenameMode, "filename mode is required");
+        this.repositoryConfig = requireNonNull(repositoryConfig, "repositoryConfig is required");
         this.encodingEnum = requireNonNull(encodingEnum, "encodingEnum can not be null");
         this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
@@ -130,19 +115,19 @@ public class IGFileStructureRepository implements Repository {
 
     protected String fileNameForResource(String resourceType, String resourceId) {
         var name = resourceId + fileExtensions.get(this.encodingEnum);
-        switch (filenameMode) {
+        switch (repositoryConfig.filenameMode()) {
             case ID_ONLY:
                 return name;
             case TYPE_AND_ID:
                 // TODO: Case sensitivity?
                 return resourceType + "-" + name;
             default:
-                throw new IllegalArgumentException("unsupported filename mode: " + filenameMode);
+                throw new IllegalArgumentException("unsupported filename mode: " + repositoryConfig.filenameMode());
         }
     }
 
     protected <T extends IBaseResource> String directoryForCategory(Class<T> resourceType) {
-        if (this.categoryMode == ResourceCategoryMode.FLAT) {
+        if (this.repositoryConfig.categoryLayout() == ResourceCategoryLayoutMode.FLAT) {
             return this.root;
         }
 
@@ -153,7 +138,7 @@ public class IGFileStructureRepository implements Repository {
 
     protected <T extends IBaseResource> String directoryForResource(Class<T> resourceType) {
         var directory = directoryForCategory(resourceType);
-        if (layoutMode == ResourceTypeMode.FLAT) {
+        if (this.repositoryConfig.typeLayout() == ResourceTypeLayoutMode.FLAT) {
             return directory;
         }
 
@@ -235,20 +220,23 @@ public class IGFileStructureRepository implements Repository {
             return resources;
         }
 
-        FilenameFilter resourceFileFilter =
-                (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        FilenameFilter resourceFileFilter;
+        var filenameMode = this.repositoryConfig.filenameMode();
+        if (filenameMode.equals(ResourceFilenameMode.ID_ONLY)) {
+            resourceFileFilter = (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        } else {
+            resourceFileFilter = (dir, name) ->
+                    name.toLowerCase().startsWith(resourceClass.getSimpleName().toLowerCase() + "-")
+                            && name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        }
 
         for (var file : inputDir.listFiles(resourceFileFilter)) {
-            if ((this.layoutMode.equals(ResourceTypeMode.DIRECTORY_PER_TYPE))
-                    || (this.layoutMode.equals(ResourceTypeMode.FLAT)
-                            && file.getName().startsWith(resourceClass.getSimpleName() + "-"))) {
-                try {
-                    var r = this.readLocation(file.getPath());
-                    T t = validateResource(resourceClass, r, r.getIdElement(), file.getPath());
-                    resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
-                } catch (RuntimeException e) {
-                    // intentionally empty
-                }
+            try {
+                var r = this.readLocation(file.getPath());
+                T t = validateResource(resourceClass, r, r.getIdElement(), file.getPath());
+                resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
+            } catch (RuntimeException e) {
+                // intentionally empty
             }
         }
 

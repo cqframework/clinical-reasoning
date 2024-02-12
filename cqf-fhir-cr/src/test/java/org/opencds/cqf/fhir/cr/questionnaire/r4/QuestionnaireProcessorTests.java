@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.questionnaire.r4.helpers.TestQuestionnaire;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
+import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
 
 public class QuestionnaireProcessorTests {
     static final String QUESTIONNAIRE_RESPONSE_POPULATED = "questionnaire-response-populated.json";
@@ -117,7 +118,10 @@ public class QuestionnaireProcessorTests {
     @Test
     void testPA_ASLP_PrePopulate() {
         var repository = TestRepositoryFactory.createRepository(
-                FhirContext.forR4Cached(), this.getClass(), "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp");
+                FhirContext.forR4Cached(),
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
                 .withRepository(repository)
                 .withParameters(parameters(
@@ -133,7 +137,10 @@ public class QuestionnaireProcessorTests {
     @Test
     void testPA_ASLP_Populate() {
         var repository = TestRepositoryFactory.createRepository(
-                FhirContext.forR4Cached(), this.getClass(), "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp");
+                FhirContext.forR4Cached(),
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), "positive")
                 .withRepository(repository)
                 .withParameters(parameters(
@@ -149,7 +156,10 @@ public class QuestionnaireProcessorTests {
     @Test
     void testPA_ASLP_Package() {
         var repository = TestRepositoryFactory.createRepository(
-                FhirContext.forR4Cached(), this.getClass(), "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp");
+                FhirContext.forR4Cached(),
+                this.getClass(),
+                "org/opencds/cqf/fhir/cr/questionnaire/r4/pa-aslp",
+                RepositoryConfig.WITH_CATEGORY_DIRECTORY);
         var generatedPackage = TestQuestionnaire.Assert.that(new IdType("Questionnaire", "ASLPA1"), null)
                 .withRepository(repository)
                 .questionnairePackage();

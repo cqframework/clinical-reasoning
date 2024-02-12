@@ -40,12 +40,7 @@ public class IGFileStructureRepositoryPrefixTest {
         ResourceDirectoryCopier.copyFromJar(
                 IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/prefixed", tempDir);
         repository = new IGFileStructureRepository(
-                FhirContext.forR4Cached(),
-                tempDir.toString(),
-                ResourceTypeMode.DIRECTORY_PER_TYPE,
-                ResourceCategoryMode.DIRECTORY_PER_CATEGORY,
-                ResourceFilenameMode.TYPE_AND_ID,
-                EncodingEnum.JSON);
+                FhirContext.forR4Cached(), tempDir.toString(), RepositoryConfig.FULL_REDUNDANT, EncodingEnum.JSON);
     }
 
     @Test

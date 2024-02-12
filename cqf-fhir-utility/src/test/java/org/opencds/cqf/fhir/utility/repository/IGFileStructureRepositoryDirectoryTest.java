@@ -1,17 +1,22 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,69 +36,68 @@ public class IGFileStructureRepositoryDirectoryTest {
     public static void setup() throws URISyntaxException, IOException, InterruptedException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        ResourceDirectoryCopier.copyFromJar(IGFileStructureRepositoryDirectoryTest.class, "CMS111", tempDir);
-
+        ResourceDirectoryCopier.copyFromJar(
+                IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
         repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @Test
-    public void readLibrary() {
-        var id = Ids.newId(Library.class, "CMS111");
+    void readLibrary() {
+        var id = Ids.newId(Library.class, "123");
         var lib = repository.read(Library.class, id);
         assertNotNull(lib);
         assertEquals(id.getIdPart(), lib.getIdElement().getIdPart());
     }
 
     @Test
-    public void readLibraryNotExists() {
+    void readLibraryNotExists() {
         var id = Ids.newId(Library.class, "DoesNotExist");
         assertThrows(ResourceNotFoundException.class, () -> repository.read(Library.class, id));
     }
 
     @Test
-    public void searchLibrary() {
+    void searchLibrary() {
         var libs = repository.search(Bundle.class, Library.class, Searches.ALL);
 
         assertNotNull(libs);
-        assertEquals(4, libs.getEntry().size());
+        assertEquals(2, libs.getEntry().size());
     }
 
     @Test
-    public void searchLibraryWithFilter() {
-        var libs = repository.search(
-                Bundle.class, Library.class, Searches.byUrl("http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers"));
+    void searchLibraryWithFilter() {
+        var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/Library/Test"));
 
         assertNotNull(libs);
         assertEquals(1, libs.getEntry().size());
     }
 
     @Test
-    public void searchLibraryNotExists() {
+    void searchLibraryNotExists() {
         var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("not-exists"));
         assertNotNull(libs);
         assertEquals(0, libs.getEntry().size());
     }
 
     @Test
-    public void readCondition() {
-        var id = Ids.newId(Condition.class, "measure-strat2-excl-EXM111-condition");
-        var cond = repository.read(Condition.class, id);
+    void readPatient() {
+        var id = Ids.newId(Patient.class, "ABC");
+        var cond = repository.read(Patient.class, id);
 
         assertNotNull(cond);
         assertEquals(id.getIdPart(), cond.getIdElement().getIdPart());
     }
 
     @Test
-    public void searchCondition() {
+    void searchCondition() {
         var cons = repository.search(
-                Bundle.class, Condition.class, Searches.byCodeAndSystem("111475002", "http://snomed.info/sct"));
+                Bundle.class, Condition.class, Searches.byCodeAndSystem("12345", "example.com/codesystem"));
         assertNotNull(cons);
         assertEquals(2, cons.getEntry().size());
     }
 
     @Test
-    public void readValueSet() {
-        var id = Ids.newId(ValueSet.class, "2.16.840.1.113762.1.4.1");
+    void readValueSet() {
+        var id = Ids.newId(ValueSet.class, "456");
         var vs = repository.read(ValueSet.class, id);
 
         assertNotNull(vs);
@@ -101,12 +105,75 @@ public class IGFileStructureRepositoryDirectoryTest {
     }
 
     @Test
-    public void searchValueSet() {
-        var sets = repository.search(
-                Bundle.class,
-                ValueSet.class,
-                Searches.byUrl("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.126"));
+    void searchValueSet() {
+        var sets = repository.search(Bundle.class, ValueSet.class, Searches.byUrl("example.com/ValueSet/456"));
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());
+    }
+
+    @Test
+    void createAndDeleteLibrary() {
+        var lib = new Library();
+        lib.setId("new-library");
+        var o = repository.create(lib);
+        var created = repository.read(Library.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+
+        repository.delete(Library.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+    }
+
+    @Test
+    void createAndDeletePatient() {
+        var p = new Patient();
+        p.setId("new-patient");
+        var o = repository.create(p);
+        var created = repository.read(Patient.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("tests/patient/new-patient.json")));
+
+        repository.delete(Patient.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("resources/library/new-patient.json")));
+    }
+
+    @Test
+    void createAndDeleteValueSet() {
+        var v = new ValueSet();
+        v.setId("new-valueset");
+        var o = repository.create(v);
+        var created = repository.read(ValueSet.class, o.getId());
+        assertNotNull(created);
+        assertTrue(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+
+        repository.delete(ValueSet.class, created.getIdElement());
+        assertFalse(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+    }
+
+    @Test
+    void updatePatient() {
+        var id = Ids.newId(Patient.class, "ABC");
+        var p = repository.read(Patient.class, id);
+        assertFalse(p.hasActive());
+
+        p.setActive(true);
+        repository.update(p);
+
+        var updated = repository.read(Patient.class, id);
+        assertTrue(updated.hasActive());
+        assertTrue(updated.getActive());
+    }
+
+    @Test
+    void deleteNonExistentPatient() {
+        var id = Ids.newId(Patient.class, "DoesNotExist");
+        assertThrows(ResourceNotFoundException.class, () -> repository.delete(Patient.class, id));
+    }
+
+    @Test
+    void searchNonExistentType() {
+        var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        assertNotNull(results);
+        assertEquals(0, results.getEntry().size());
     }
 }

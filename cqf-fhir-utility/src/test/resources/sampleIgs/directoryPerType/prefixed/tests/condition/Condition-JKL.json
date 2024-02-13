@@ -1,0 +1,12 @@
+{
+    "resourceType": "Condition",
+    "id": "JKL",
+    "code": {
+        "coding": [
+            {
+                "system": "example.com/codesystem",
+                "code": "000000"
+            }
+        ]
+    }
+}

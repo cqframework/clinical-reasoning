@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,9 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.repository.ResourceDirectoryCopier;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IGFileStructureRepositoryDirectoryTest {
+public class IGRepositoryDirectoryTest {
 
     private static Repository repository;
 
@@ -37,8 +38,8 @@ public class IGFileStructureRepositoryDirectoryTest {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         ResourceDirectoryCopier.copyFromJar(
-                IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
-        repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
+                IGRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
+        repository = new IGRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @Test
@@ -118,10 +119,12 @@ public class IGFileStructureRepositoryDirectoryTest {
         var o = repository.create(lib);
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
-        assertTrue(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+
+        var loc = tempDir.resolve("resources/library/new-library.json");
+        assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
-        assertFalse(Files.exists(tempDir.resolve("resources/library/new-library.json")));
+        assertFalse(Files.exists(loc));
     }
 
     @Test
@@ -131,10 +134,12 @@ public class IGFileStructureRepositoryDirectoryTest {
         var o = repository.create(p);
         var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
-        assertTrue(Files.exists(tempDir.resolve("tests/patient/new-patient.json")));
+
+        var loc = tempDir.resolve("tests/patient/new-patient.json");
+        assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement());
-        assertFalse(Files.exists(tempDir.resolve("resources/library/new-patient.json")));
+        assertFalse(Files.exists(loc));
     }
 
     @Test
@@ -144,10 +149,12 @@ public class IGFileStructureRepositoryDirectoryTest {
         var o = repository.create(v);
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
-        assertTrue(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+
+        var loc = tempDir.resolve("vocabulary/valueset/new-valueset.json");
+        assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());
-        assertFalse(Files.exists(tempDir.resolve("vocabulary/valueset/new-valueset.json")));
+        assertFalse(Files.exists(loc));
     }
 
     @Test

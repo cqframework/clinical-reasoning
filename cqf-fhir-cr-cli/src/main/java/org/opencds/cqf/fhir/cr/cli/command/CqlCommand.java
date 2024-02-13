@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -21,8 +20,7 @@ import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -167,7 +165,7 @@ public class CqlCommand implements Callable<Integer> {
 
         var evaluationSettings = EvaluationSettings.getDefault();
         evaluationSettings.setCqlOptions(cqlOptions);
-        var repository = new IGFileStructureRepository(fhirContext, rootDir, IGLayoutMode.DIRECTORY, EncodingEnum.JSON);
+        var repository = new IGRepository(fhirContext, rootDir);
         var engine = Engines.forRepositoryAndSettings(
                 evaluationSettings, repository, null, new NpmProcessor(igContext), true);
 

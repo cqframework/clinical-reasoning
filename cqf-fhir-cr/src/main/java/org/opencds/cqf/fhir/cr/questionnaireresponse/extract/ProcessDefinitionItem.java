@@ -4,8 +4,10 @@ import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValue
 
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,13 +113,16 @@ public class ProcessDefinitionItem {
                 var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
                 var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
                 if (answerValue != null) {
-                    var pathDefinition = resourceDefinition.getChildByName(path);
+                    // Check if answer type matches path types available and transform if necessary
+                    var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
                     if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
-                        // Check if answer type matches path types available and transform if necessary
                         var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
                         if (!choices.contains(answerValue.getClass())) {
                             answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
                         }
+                    } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
+                            && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
+                        answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
                     }
                     request.getModelResolver().setValue(resource, path, answerValue);
                 }

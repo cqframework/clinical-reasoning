@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository.ig;
 
 import com.google.common.collect.Sets;
 import java.util.Set;

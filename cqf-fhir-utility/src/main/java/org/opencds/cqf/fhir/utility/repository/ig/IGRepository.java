@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,14 +35,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
  * This class implements the Repository interface on onto a directory structure
- * that matches the
- * standard IG layout.
+ * that matches some common IG layouts.
  */
-public class IGFileStructureRepository implements Repository {
+public class IGRepository implements Repository {
 
     // Potential metadata fields:
     // file dateTime
@@ -54,7 +54,7 @@ public class IGFileStructureRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final RepositoryConfig repositoryConfig;
+    private final IGRepositoryConfig repositoryConfig;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -62,14 +62,14 @@ public class IGFileStructureRepository implements Repository {
 
     private final Map<String, IBaseResource> resourceCache = new HashMap<>();
 
-    private static final Map<ResourceCategory, String> categoryDirectories = new ImmutableMap.Builder<
+    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<
                     ResourceCategory, String>()
             .put(ResourceCategory.CONTENT, "resources")
             .put(ResourceCategory.DATA, "tests")
             .put(ResourceCategory.TERMINOLOGY, "vocabulary")
             .build();
 
-    private static final Map<EncodingEnum, String> fileExtensions = new ImmutableMap.Builder<EncodingEnum, String>()
+    static final Map<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableMap.Builder<EncodingEnum, String>()
             .put(EncodingEnum.JSON, ".json")
             .put(EncodingEnum.XML, ".xml")
             .put(EncodingEnum.RDF, ".rdf")
@@ -89,18 +89,18 @@ public class IGFileStructureRepository implements Repository {
         }
     }
 
-    public IGFileStructureRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, root, RepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, EncodingEnum.JSON, null);
+    public IGRepository(FhirContext fhirContext, String root) {
+        this(fhirContext, root, IGRepositoryConfig.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
     }
 
     private static String ensureTrailingSlash(String path) {
         return path.endsWith(File.separator) ? path : path + File.separator;
     }
 
-    public IGFileStructureRepository(
+    public IGRepository(
             FhirContext fhirContext,
             String root,
-            RepositoryConfig repositoryConfig,
+            IGRepositoryConfig repositoryConfig,
             EncodingEnum encodingEnum,
             IRepositoryOperationProvider operationProvider) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
@@ -126,7 +126,7 @@ public class IGFileStructureRepository implements Repository {
     }
 
     protected String fileNameForResource(String resourceType, String resourceId) {
-        var name = resourceId + fileExtensions.get(this.encodingEnum);
+        var name = resourceId + FILE_EXTENSIONS.get(this.encodingEnum);
         switch (repositoryConfig.filenameMode()) {
             case ID_ONLY:
                 return name;
@@ -139,18 +139,18 @@ public class IGFileStructureRepository implements Repository {
     }
 
     protected <T extends IBaseResource> String directoryForCategory(Class<T> resourceType) {
-        if (this.repositoryConfig.categoryLayout() == ResourceCategoryLayoutMode.FLAT) {
+        if (this.repositoryConfig.categoryLayout() == CategoryLayout.FLAT) {
             return this.root;
         }
 
         var category = ResourceCategory.forType(resourceType.getSimpleName());
-        var directory = categoryDirectories.get(category);
+        var directory = CATEGORY_DIRECTORIES.get(category);
         return root + directory + File.separator;
     }
 
     protected <T extends IBaseResource> String directoryForResource(Class<T> resourceType) {
         var directory = directoryForCategory(resourceType);
-        if (this.repositoryConfig.typeLayout() == ResourceTypeLayoutMode.FLAT) {
+        if (this.repositoryConfig.typeLayout() == FhirTypeLayout.FLAT) {
             return directory;
         }
 
@@ -235,12 +235,12 @@ public class IGFileStructureRepository implements Repository {
 
         FilenameFilter resourceFileFilter;
         var filenameMode = this.repositoryConfig.filenameMode();
-        if (filenameMode.equals(ResourceFilenameMode.ID_ONLY)) {
-            resourceFileFilter = (dir, name) -> name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+        if (filenameMode.equals(FilenameMode.ID_ONLY)) {
+            resourceFileFilter = (dir, name) -> name.toLowerCase().endsWith(FILE_EXTENSIONS.get(this.encodingEnum));
         } else {
             resourceFileFilter = (dir, name) ->
                     name.toLowerCase().startsWith(resourceClass.getSimpleName().toLowerCase() + "-")
-                            && name.toLowerCase().endsWith(fileExtensions.get(this.encodingEnum));
+                            && name.toLowerCase().endsWith(FILE_EXTENSIONS.get(this.encodingEnum));
         }
 
         for (var file : inputDir.listFiles(resourceFileFilter)) {

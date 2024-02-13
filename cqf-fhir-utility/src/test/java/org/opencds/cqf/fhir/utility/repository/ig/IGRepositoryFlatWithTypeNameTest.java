@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.repository.ResourceDirectoryCopier;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IGFileStructureRepositoryFlatTest {
+public class IGRepositoryFlatWithTypeNameTest {
 
     private static Repository repository;
 
@@ -37,10 +38,14 @@ public class IGFileStructureRepositoryFlatTest {
     public static void setup() throws URISyntaxException, IOException, InterruptedException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        ResourceDirectoryCopier.copyFromJar(IGFileStructureRepositoryDirectoryTest.class, "/sampleIgs/flat", tempDir);
+        ResourceDirectoryCopier.copyFromJar(IGRepositoryDirectoryTest.class, "/sampleIgs/flatWithTypeNames", tempDir);
         var flatRoot = tempDir.resolve("resources");
-        repository = new IGFileStructureRepository(
-                FhirContext.forR4Cached(), flatRoot.toString(), RepositoryConfig.FLAT, EncodingEnum.JSON, null);
+        repository = new IGRepository(
+                FhirContext.forR4Cached(),
+                flatRoot.toString(),
+                IGRepositoryConfig.FLAT_WITH_TYPE_NAMES,
+                EncodingEnum.JSON,
+                null);
     }
 
     @Test

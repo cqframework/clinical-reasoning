@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.ResourceDirectoryCopier;
 
 public class IGRepositoryBadDataTest {
 
@@ -31,7 +32,7 @@ public class IGRepositoryBadDataTest {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         ResourceDirectoryCopier.copyFromJar(IGRepositoryBadDataTest.class, "/sampleIgs/badData", tempDir);
-        repository = new IGFileStructureRepository(FhirContext.forR4Cached(), tempDir.toString());
+        repository = new IGRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @ParameterizedTest

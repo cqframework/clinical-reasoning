@@ -7,7 +7,7 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -46,7 +46,7 @@ public class TerminologyProviders {
                 FhirContext.forR4Cached(),
                 Measure.class,
                 Measure.CLASS_PATH + "/CaseRepresentation101",
-                RepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES);
+                IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES);
         this.terminologyProvider = new RepositoryTerminologyProvider(repository);
     }
 

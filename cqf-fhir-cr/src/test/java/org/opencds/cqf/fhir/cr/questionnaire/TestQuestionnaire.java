@@ -31,7 +31,7 @@ import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
@@ -58,7 +58,7 @@ public class TestQuestionnaire {
                     fhirContext,
                     this.getClass(),
                     CLASS_PATH + "/" + repositoryPath,
-                    RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
             return this;
         }
 

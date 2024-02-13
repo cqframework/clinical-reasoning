@@ -24,7 +24,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestItemGenerator {
@@ -59,7 +59,7 @@ public class TestItemGenerator {
                     fhirContext,
                     this.getClass(),
                     CLASS_PATH + "/" + repositoryPath,
-                    RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
             return this;
         }
 

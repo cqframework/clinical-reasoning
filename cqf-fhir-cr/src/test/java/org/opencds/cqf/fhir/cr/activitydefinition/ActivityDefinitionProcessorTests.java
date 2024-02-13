@@ -23,8 +23,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -36,14 +36,14 @@ public class ActivityDefinitionProcessorTests {
     private ActivityDefinitionProcessor activityDefinitionProcessorR5;
 
     private Repository createRepository(FhirContext fhirContext, String version) {
-        return new IGFileStructureRepository(
+        return new IGRepository(
                 fhirContext,
                 this.getClass()
                                 .getProtectionDomain()
                                 .getCodeSource()
                                 .getLocation()
                                 .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version,
-                RepositoryConfig.WITH_CATEGORY_DIRECTORY,
+                IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES,
                 EncodingEnum.JSON,
                 null);
     }

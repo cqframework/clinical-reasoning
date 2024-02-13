@@ -18,18 +18,27 @@ import org.opencds.cqf.fhir.cr.questionnaire.packages.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 
 public class QuestionnaireProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
     private final Repository repositoryDstu3 = TestRepositoryFactory.createRepository(
-            fhirContextDstu3, this.getClass(), CLASS_PATH + "/dstu3", RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+            fhirContextDstu3,
+            this.getClass(),
+            CLASS_PATH + "/dstu3",
+            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
     private final Repository repositoryR4 = TestRepositoryFactory.createRepository(
-            fhirContextR4, this.getClass(), CLASS_PATH + "/r4", RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+            fhirContextR4,
+            this.getClass(),
+            CLASS_PATH + "/r4",
+            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
     private final Repository repositoryR5 = TestRepositoryFactory.createRepository(
-            fhirContextR5, this.getClass(), CLASS_PATH + "/r5", RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+            fhirContextR5,
+            this.getClass(),
+            CLASS_PATH + "/r5",
+            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
 
     @Test
     void testPrePopulateDstu3() {

@@ -32,9 +32,9 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.RepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -70,7 +70,7 @@ public class PlanDefinition {
                     fhirContext,
                     this.getClass(),
                     CLASS_PATH + "/" + repositoryPath,
-                    RepositoryConfig.WITH_CATEGORY_DIRECTORY);
+                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
             return this;
         }
 
@@ -80,8 +80,8 @@ public class PlanDefinition {
         }
 
         public PlanDefinitionProcessor buildProcessor(Repository repository) {
-            if (repository instanceof IGFileStructureRepository) {
-                ((IGFileStructureRepository) repository)
+            if (repository instanceof IGRepository) {
+                ((IGRepository) repository)
                         .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {

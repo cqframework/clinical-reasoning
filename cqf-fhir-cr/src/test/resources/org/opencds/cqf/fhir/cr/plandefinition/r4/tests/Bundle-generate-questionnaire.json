@@ -13,7 +13,7 @@
         "status": "draft",
         "intent": "proposal",
         "subject": {
-          "reference": "OPA-Patient1"
+          "reference": "Patient/OPA-Patient1"
         },
         "action": [
           {
@@ -44,7 +44,7 @@
         "status": "draft",
         "intent": "proposal",
         "subject": {
-          "reference": "OPA-Patient1"
+          "reference": "Patient/OPA-Patient1"
         },
         "action": [
           {
@@ -68,6 +68,16 @@
         "id": "generate-questionnaire",
         "item": [
           {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
+                "valueExpression": {
+                  "language": "text/cql.identifier",
+                  "expression": "ClaimResource",
+                  "reference": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+                }
+              }
+            ],
             "linkId": "1",
             "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim#Claim",
             "text": "Prior Auth Claim",
@@ -78,7 +88,12 @@
                 "definition": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim#Claim.id",
                 "text": "Claim Id",
                 "type": "string",
-                "required": false
+                "required": false,
+                "initial": [
+                  {
+                    "valueUri": "Claim/OPA-Claim1"
+                  }
+                ]
               },
               {
                 "extension": [

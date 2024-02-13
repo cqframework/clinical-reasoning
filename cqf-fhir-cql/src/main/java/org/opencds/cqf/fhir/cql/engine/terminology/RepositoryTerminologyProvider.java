@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -144,6 +145,10 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     // It's not possible to run expansion filters without the support of a terminology server.
     private List<Code> tryExpand(ValueSetInfo valueSet) {
         var codes = performExpansion(valueSet);
+        // Filter out invalid codes that are missing a code or system
+        codes = codes.stream()
+                .filter(x -> x.getCode() != null && x.getSystem() != null)
+                .collect(Collectors.toList());
         Collections.sort(codes, CODE_COMPARATOR);
         return codes;
     }
@@ -249,6 +254,11 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     // occur in. This function first performs a binary search to find a matching element
     // and then iterates backwards and forwards from there to get the set of candidate codes
     private Range getSearchRange(Code code, List<Code> expansion) {
+        // Can't match on a null code
+        if (code.getCode() == null) {
+            return Range.EMPTY;
+        }
+
         int index = Collections.binarySearch(expansion, code, CODE_COMPARATOR);
 
         if (index < 0) {

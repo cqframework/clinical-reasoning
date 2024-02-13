@@ -1,0 +1,49 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "TherapyMonitoringRecommendation",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/Patient1"
+  },
+  "authored": "2024-01-22T11:45:33+11:00",
+  "questionnaire": "http://example.org/Questionnaire/TherapyMonitoringRecommendationQuestionnaire",
+  "item": [
+    {
+      "linkId": "1",
+      "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation",
+      "text": "ActiveTherapyFeature",
+      "item": [
+        {
+          "linkId": "1.1",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.value[x]",
+          "text": "Observation.value[x]",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "on-methotrexate",
+                "system": "http://example.org/CodeSystem/therapy-cs"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "2",
+      "definition": "http://example.org/StructureDefinition/LastCbcPanelReportDateFeature#Observation",
+      "text": "LastCbcPanelReportDateFeature",
+      "item": [
+        {
+          "linkId": "2.1",
+          "definition": "http://example.org/StructureDefinition/LastCbcPanelReportDateFeature#Observation.value[x]",
+          "text": "Observation.value[x]",
+          "answer": [
+            {
+              "valueDateTime": "2024-01-22T11:45:33+11:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

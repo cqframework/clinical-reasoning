@@ -1,11 +1,27 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface AdapterFactory {
+
+    public static AdapterFactory forFhirVersion(FhirVersionEnum fhirVersion) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+            case R4:
+                return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
+            case R5:
+                return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported FHIR version: %s", fhirVersion.toString()));
+        }
+    }
 
     /**
      * Creates an adapter that exposes common resource operations across multiple versions of FHIR

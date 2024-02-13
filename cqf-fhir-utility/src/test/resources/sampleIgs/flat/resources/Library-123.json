@@ -1,0 +1,9 @@
+{
+    "resourceType": "Library",
+    "id": "123",
+    "name": "Test",
+    "content": {
+        "contentType": "text/cql",
+        "url": "../cql/Test.cql"
+    }
+}

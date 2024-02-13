@@ -1,14 +1,6 @@
 {
   "resourceType": "Questionnaire",
   "id": "OutpatientPriorAuthorizationRequest",
-  "meta": {
-    "versionId": "2",
-    "lastUpdated": "2022-11-21T17:34:01.764+00:00",
-    "source": "#Szj0RYKKLb3zYK89",
-    "profile": [
-      "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaire-r4"
-    ]
-  },
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",

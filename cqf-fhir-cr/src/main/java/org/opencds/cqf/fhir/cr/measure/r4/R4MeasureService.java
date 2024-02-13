@@ -60,7 +60,7 @@ public class R4MeasureService {
             String productLine,
             String practitioner) {
 
-        var repo = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());
 
         ensureSupplementalDataElementSearchParameter();

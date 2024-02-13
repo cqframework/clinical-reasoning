@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
-import jakarta.annotation.Nonnull;
+import org.opencds.cqf.fhir.utility.Constants;
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
@@ -15,37 +15,43 @@ public class CqfExpression {
     private String altExpression;
     private String altLibraryUrl;
 
+    public static CqfExpression of(org.hl7.fhir.r4.model.Expression expression, String defaultLibraryUrl) {
+        if (expression == null) {
+            return null;
+        }
+        var altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT);
+        var altExpression =
+                altExpressionExt == null ? null : (org.hl7.fhir.r4.model.Expression) altExpressionExt.getValue();
+        return new CqfExpression(
+                expression.getLanguage(),
+                expression.getExpression(),
+                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+                altExpression != null ? altExpression.getLanguage() : null,
+                altExpression != null ? altExpression.getExpression() : null,
+                altExpression != null && altExpression.hasReference()
+                        ? altExpression.getReference()
+                        : defaultLibraryUrl);
+    }
+
+    public static CqfExpression of(org.hl7.fhir.r5.model.Expression expression, String defaultLibraryUrl) {
+        if (expression == null) {
+            return null;
+        }
+        var altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT);
+        var altExpression =
+                altExpressionExt == null ? null : (org.hl7.fhir.r5.model.Expression) altExpressionExt.getValue();
+        return new CqfExpression(
+                expression.getLanguage(),
+                expression.getExpression(),
+                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+                altExpression != null ? altExpression.getLanguage() : null,
+                altExpression != null ? altExpression.getExpression() : null,
+                altExpression != null && altExpression.hasReference()
+                        ? altExpression.getReference()
+                        : defaultLibraryUrl);
+    }
+
     public CqfExpression() {}
-
-    public CqfExpression(
-            @Nonnull org.hl7.fhir.r4.model.Expression expression,
-            String defaultLibraryUrl,
-            org.hl7.fhir.r4.model.Expression altExpression) {
-        this(
-                expression.getLanguage(),
-                expression.getExpression(),
-                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
-                altExpression != null ? altExpression.getLanguage() : null,
-                altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference()
-                        ? altExpression.getReference()
-                        : defaultLibraryUrl);
-    }
-
-    public CqfExpression(
-            @Nonnull org.hl7.fhir.r5.model.Expression expression,
-            String defaultLibraryUrl,
-            org.hl7.fhir.r5.model.Expression altExpression) {
-        this(
-                expression.getLanguage(),
-                expression.getExpression(),
-                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
-                altExpression != null ? altExpression.getLanguage() : null,
-                altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference()
-                        ? altExpression.getReference()
-                        : defaultLibraryUrl);
-    }
 
     public CqfExpression(String language, String expression, String libraryUrl) {
         this(language, expression, libraryUrl, null, null, null);

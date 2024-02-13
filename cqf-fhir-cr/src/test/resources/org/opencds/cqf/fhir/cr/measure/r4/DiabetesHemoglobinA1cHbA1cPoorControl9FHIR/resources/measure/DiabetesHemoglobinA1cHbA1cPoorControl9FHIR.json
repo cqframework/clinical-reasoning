@@ -64,6 +64,7 @@
   },
   "guidance": "If the HbA1c test result is in the medical record, the test can be used to determine numerator compliance.\n\nOnly patients with a diagnosis of Type 1 or Type 2 diabetes should be included in the denominator of this measure; patients with a diagnosis of secondary diabetes due to another condition should not be included.\n\nThis eCQM is a patient-based measure.\n\nThis version of the eCQM uses QDM version 5.5. Please refer to the eCQI resource center (https://ecqi.healthit.gov/qdm) for more information on the QDM.",
   "group": [ {
+    "id": "group-1",
     "population": [ {
       "id": "77E8676A-66BB-497E-8CF5-AE0DC97C4D68",
       "code": {
@@ -122,6 +123,7 @@
       }
     } ],
     "stratifier": [ {
+      "id": "stratifier-ethnicity",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -136,6 +138,7 @@
         "expression": "SDE Ethnicity"
       }
     }, {
+     "id": "stratifier-payer",
       "code": {
         "coding": [ {
           "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
@@ -150,6 +153,7 @@
         "expression": "SDE Payer"
       }
     }, {
+      "id": "stratifier-race",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -164,6 +168,7 @@
         "expression": "SDE Race"
       }
     }, {
+      "id": "stratifier-sex",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -178,6 +183,7 @@
         "expression": "SDE Sex"
       }
     }, {
+     "id": "stratifier-age-group",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -192,6 +198,7 @@
         "expression": "SDE Age Group"
       }
     }, {
+      "id": "stratifier-food-insecurity-risk-status",
       "code": {
         "coding": [ {
           "system": "http://loinc.org",
@@ -208,6 +215,7 @@
     } ]
   } ],
   "supplementalData": [ {
+    "id": "sde-ethnicity",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -228,6 +236,7 @@
       "expression": "SDE Ethnicity"
     }
   }, {
+    "id": "sde-payer",
     "code": {
       "coding": [ {
         "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
@@ -248,6 +257,7 @@
       "expression": "SDE Payer"
     }
   }, {
+    "id": "sde-race",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -268,6 +278,7 @@
       "expression": "SDE Race"
     }
   }, {
+    "id": "sde-sex",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -288,6 +299,7 @@
       "expression": "SDE Sex"
     }
   }, {
+    "id": "sde-age",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -308,6 +320,7 @@
       "expression": "SDE Age"
     }
   }, {
+    "id": "sde-state-of-residence",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -328,6 +341,7 @@
       "expression": "SDE State of Residence"
     }
   }, {
+    "id": "sde-postal-code-of-residence",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",
@@ -348,6 +362,7 @@
       "expression": "SDE Postal Code of Residence"
     }
   }, {
+    "id": "sde-food-insecurity-risk-status",
     "code": {
       "coding": [ {
         "system": "http://loinc.org",

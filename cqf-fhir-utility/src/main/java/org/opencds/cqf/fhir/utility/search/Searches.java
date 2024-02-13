@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.opencds.cqf.fhir.utility.Canonicals;
 
 /*
  * This is a utility class to help construct search maps, which are then passed into the Repository
@@ -34,11 +35,11 @@ public class Searches {
     }
 
     public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
-        if (canonical.contains("|")) {
-            var split = canonical.split("|");
-            return byUrlAndVersion(split[0], split[1]);
+        var parts = Canonicals.getParts(canonical);
+        if (parts.version() != null) {
+            return byUrlAndVersion(parts.url(), parts.version());
         } else {
-            return byUrl(canonical);
+            return byUrl(parts.url());
         }
     }
 

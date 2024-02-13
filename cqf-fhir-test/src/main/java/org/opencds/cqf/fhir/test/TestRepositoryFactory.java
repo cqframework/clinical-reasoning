@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.IGFileStructureRepository;
 import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 public class TestRepositoryFactory {
     private TestRepositoryFactory() {
@@ -21,10 +22,20 @@ public class TestRepositoryFactory {
 
     public static Repository createRepository(
             FhirContext fhirContext, Class<?> clazz, String path, IGLayoutMode layoutMode) {
+        return createRepository(fhirContext, clazz, path, layoutMode, null);
+    }
+
+    public static Repository createRepository(
+            FhirContext fhirContext,
+            Class<?> clazz,
+            String path,
+            IGLayoutMode layoutMode,
+            IRepositoryOperationProvider operationProvider) {
         return new IGFileStructureRepository(
                 fhirContext,
                 clazz.getProtectionDomain().getCodeSource().getLocation().getPath() + path,
                 layoutMode,
-                EncodingEnum.JSON);
+                EncodingEnum.JSON,
+                operationProvider);
     }
 }

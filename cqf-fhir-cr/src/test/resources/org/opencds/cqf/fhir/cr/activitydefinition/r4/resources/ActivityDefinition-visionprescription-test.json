@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "visionprescription-test",
+  "name": "VisionPrescription_Test",
+  "title": "CreateVisionPrescription",
+  "status": "draft",
+  "description": "Create the vision prescription.",
+  "kind": "VisionPrescription"
+}

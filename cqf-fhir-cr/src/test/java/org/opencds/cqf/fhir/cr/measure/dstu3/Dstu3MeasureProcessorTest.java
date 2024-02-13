@@ -1,14 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 
-public class Dstu3MeasureProcessorTest {
+class Dstu3MeasureProcessorTest {
     @Test
-    public void exm105_fullSubjectId() {
+    void exm105_fullSubjectId() {
         Measure.given()
                 .repositoryFor("EXM105FHIR3Measure")
                 .when()
@@ -28,7 +27,7 @@ public class Dstu3MeasureProcessorTest {
     }
 
     @Test
-    public void exm105_fullSubjectId_invalidMeasureScorer() {
+    void exm105_fullSubjectId_invalidMeasureScorer() {
         // Removed MeasureScorer from Measure, should trigger exception
         var when = Measure.given()
                 .repositoryFor("InvalidMeasure")
@@ -41,12 +40,7 @@ public class Dstu3MeasureProcessorTest {
                 .evaluate();
 
         String errorMsg = "MeasureScoring must be specified on Measure";
-        MeasureReport report = null;
-        try {
-            report = when.then().report();
-        } catch (RuntimeException e) {
-            assertTrue(e.getCause().toString().contains(errorMsg));
-        }
-        assertNull(report);
+        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        assertEquals(errorMsg, e.getMessage());
     }
 }

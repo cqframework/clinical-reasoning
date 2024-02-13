@@ -27,6 +27,7 @@ public class Constants {
     public static final String ALT_EXPRESSION_EXT =
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternativeExpression";
     public static final String PERTAINS_TO_GOAL = "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
+    public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";
     public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
             "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
     public static final String CPG_FEATURE_EXPRESSION =
@@ -46,6 +47,11 @@ public class Constants {
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
     // public static final String CQF_QUESTIONNAIRE =
     // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
+
+    public static final String CPG_CUSTOM_ACTIVITY_KIND =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
+    public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
+
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     // This is only for dstu3 since the Expression type does not exist in that version
     public static final String CQF_EXPRESSION_LANGUAGE =
@@ -86,4 +92,24 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter";
     public static final String SDC_QUESTIONNAIRE_SHORT_TEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText";
+
+    // $apply parameter names
+    public static final String APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition";
+    public static final String APPLY_PARAMETER_PLAN_DEFINITION = "planDefinition";
+    public static final String APPLY_PARAMETER_CANONICAL = "canonical";
+    public static final String APPLY_PARAMETER_SUBJECT = "subject";
+    public static final String APPLY_PARAMETER_ENCOUNTER = "encounter";
+    public static final String APPLY_PARAMETER_PRACTITIONER = "practitioner";
+    public static final String APPLY_PARAMETER_ORGANIZATION = "organization";
+    public static final String APPLY_PARAMETER_USER_TYPE = "userType";
+    public static final String APPLY_PARAMETER_USER_LANGUAGE = "userLanguage";
+    public static final String APPLY_PARAMETER_USER_TASK_CONTEXT = "userTaskContext";
+    public static final String APPLY_PARAMETER_SETTING = "setting";
+    public static final String APPLY_PARAMETER_SETTING_CONTEXT = "settingContext";
+    public static final String APPLY_PARAMETER_PARAMETERS = "parameters";
+    public static final String APPLY_PARAMETER_USE_SERVER_DATA = "useServerData";
+    public static final String APPLY_PARAMETER_DATA = "data";
+    public static final String APPLY_PARAMETER_DATA_ENDPOINT = "dataEndpoint";
+    public static final String APPLY_PARAMETER_CONTENT_ENDPOINT = "contentEndpoint";
+    public static final String APPLY_PARAMETER_TERMINOLOGY_ENDPOINT = "terminologyEndpoint";
 }

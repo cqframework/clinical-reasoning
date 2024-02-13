@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,17 +25,23 @@ class IGRepositoryAutoDetectTest {
     @Test
     void autoDetectDefault() {
         assertEquals(IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, IGRepositoryConfig.autoDetect(null));
-        assertEquals(IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, IGRepositoryConfig.autoDetect(tempDir.resolve("does_not_exist")));
+        assertEquals(
+                IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES,
+                IGRepositoryConfig.autoDetect(tempDir.resolve("does_not_exist")));
     }
 
     @Test
     void autoDetectStandard() {
-        assertEquals(IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES, IGRepositoryConfig.autoDetect(tempDir.resolve("directoryPerType/standard")));
+        assertEquals(
+                IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES,
+                IGRepositoryConfig.autoDetect(tempDir.resolve("directoryPerType/standard")));
     }
 
     @Test
     void autoDetectPrefix() {
-        assertEquals(IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES_AND_TYPE_NAMES, IGRepositoryConfig.autoDetect(tempDir.resolve("directoryPerType/prefixed")));
+        assertEquals(
+                IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES_AND_TYPE_NAMES,
+                IGRepositoryConfig.autoDetect(tempDir.resolve("directoryPerType/prefixed")));
     }
 
     @Test
@@ -46,6 +51,8 @@ class IGRepositoryAutoDetectTest {
 
     @Test
     void autoDetectFlatWithTypeNames() {
-        assertEquals(IGRepositoryConfig.FLAT_WITH_TYPE_NAMES, IGRepositoryConfig.autoDetect(tempDir.resolve("flatWithTypeNames")));
+        assertEquals(
+                IGRepositoryConfig.FLAT_WITH_TYPE_NAMES,
+                IGRepositoryConfig.autoDetect(tempDir.resolve("flatWithTypeNames")));
     }
 }

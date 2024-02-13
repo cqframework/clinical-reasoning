@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -40,8 +39,7 @@ public class IGRepositoryFlatTest {
         // we can test against an actual filesystem
         ResourceDirectoryCopier.copyFromJar(IGRepositoryDirectoryTest.class, "/sampleIgs/flat", tempDir);
         var flatRoot = tempDir.resolve("resources");
-        repository = new IGRepository(
-                FhirContext.forR4Cached(), flatRoot.toString(), IGRepositoryConfig.FLAT, EncodingEnum.JSON, null);
+        repository = new IGRepository(FhirContext.forR4Cached(), flatRoot.toString());
     }
 
     @Test

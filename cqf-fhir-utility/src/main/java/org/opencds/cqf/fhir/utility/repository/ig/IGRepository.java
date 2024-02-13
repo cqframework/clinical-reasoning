@@ -89,6 +89,12 @@ public class IGRepository implements Repository {
         }
     }
 
+    /**
+     * Create a new IGRepository instance. The repository configuration is auto-detected, and the encoding is set to JSON.
+     *
+     * @param fhirContext
+     * @param root
+     */
     public IGRepository(FhirContext fhirContext, String root) {
         this(fhirContext, root, IGRepositoryConfig.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
     }
@@ -97,6 +103,15 @@ public class IGRepository implements Repository {
         return path.endsWith(File.separator) ? path : path + File.separator;
     }
 
+    /**
+     * Create a new IGRepository instance.
+     *
+     * @param fhirContext The FHIR context to use for parsing and encoding resources.
+     * @param root The root directory of the IG repository.
+     * @param repositoryConfig The configuration for the IG repository.
+     * @param encodingEnum The encoding to use for parsing and encoding resources.
+     * @param operationProvider The operation provider to use for invoking operations.
+     */
     public IGRepository(
             FhirContext fhirContext,
             String root,

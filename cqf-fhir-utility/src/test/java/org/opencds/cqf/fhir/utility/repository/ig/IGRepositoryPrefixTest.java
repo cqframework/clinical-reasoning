@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -40,12 +39,7 @@ public class IGRepositoryPrefixTest {
         // we can test against an actual filesystem
         ResourceDirectoryCopier.copyFromJar(
                 IGRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/prefixed", tempDir);
-        repository = new IGRepository(
-                FhirContext.forR4Cached(),
-                tempDir.toString(),
-                IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES_AND_TYPE_NAMES,
-                EncodingEnum.JSON,
-                null);
+        repository = new IGRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @Test

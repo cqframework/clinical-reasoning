@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -34,7 +34,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
   }
 
-  public IBase visit(PlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));

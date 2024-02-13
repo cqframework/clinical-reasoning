@@ -40,8 +40,10 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
   Date getApprovalDate();
   ICompositeType getEffectivePeriod();
   List<? extends ICompositeType> getRelatedArtifact();
-
-  IBase accept(KnowledgeArtifactVisitor theVisitor, Repository theRepository, IBaseParameters theParameters);
+  List<? extends ICompositeType> getComponents();
+//   <T extends Enum<T>> List<? extends ICompositeType> getRelatedArtifactsOfType(T relatedArtifactType);
+//   IBase accept(KnowledgeArtifactVisitor theVisitor, Repository theRepository, IBaseParameters theParameters);
   String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
   String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
+  String valueSetConditionUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
 }

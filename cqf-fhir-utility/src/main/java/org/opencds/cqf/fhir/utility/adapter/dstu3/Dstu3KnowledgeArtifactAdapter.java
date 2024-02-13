@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
@@ -13,4 +13,26 @@ public interface Dstu3KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAda
   MetadataResource get();
   Period getEffectivePeriod();
   List<RelatedArtifact> getRelatedArtifact();
+  default List<RelatedArtifact> getOwnedRelatedArtifacts() {
+		return this.getRelatedArtifact().stream()
+			.filter(this::checkIfRelatedArtifactIsOwned)
+			.collect(Collectors.toList());
+  }
+  default Boolean checkIfRelatedArtifactIsOwned(RelatedArtifact ra){
+		return ra.getExtension()
+            .stream()
+            .filter(ext -> ext.getUrl().equals("http://hl7.org/fhir/StructureDefinition/crmi-isOwned"))
+            .findAny()
+            .map(e -> ((BooleanType) e.getValue()).getValue())
+            .orElseGet(()-> false);
+  }
+  default List<RelatedArtifact> getComponents() {
+    return this.getRelatedArtifactsOfType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+  }
+  default List<RelatedArtifact> getRelatedArtifactsOfType(RelatedArtifact.RelatedArtifactType relatedArtifactType) {
+    List<RelatedArtifact> relatedArtifacts = getRelatedArtifact().stream()
+        .filter(ra -> ra.getType() == relatedArtifactType)
+        .collect(Collectors.toList());
+    return relatedArtifacts;
+  }
 }

@@ -16,7 +16,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter {
+class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter {
 
   private PlanDefinition planDefinition;
 

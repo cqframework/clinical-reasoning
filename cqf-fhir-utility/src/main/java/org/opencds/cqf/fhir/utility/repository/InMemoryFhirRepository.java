@@ -20,6 +20,10 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 
@@ -70,14 +74,13 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = Ids.newRandomId(context, resource.fhirType());
         while (resources.containsKey(theId)) {
             theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
-        outcome.setCreated(true);
+        MethodOutcome outcome = new MethodOutcome(theId,true);
         resources.put(theId.toUnqualifiedVersionless(), resource);
         return outcome;
     }
@@ -90,9 +93,9 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = resource.getIdElement().toUnqualifiedVersionless();
+        MethodOutcome outcome = new MethodOutcome(theId,false);
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }
@@ -188,6 +191,29 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
         throw new NotImplementedException("The transaction operation is not currently supported");
+    }
+
+    public static Bundle transactionStub(Bundle transaction, Repository repository) {
+        Bundle returnBundle = new Bundle();
+        transaction.getEntry().stream()
+        .forEach((e) -> {
+            HTTPVerb v = e.getRequest().getMethod();
+            BundleEntryComponent entry = new BundleEntryComponent();
+            BundleEntryResponseComponent resp = new BundleEntryResponseComponent();
+            entry.setResponse(resp);
+            if (v == HTTPVerb.PUT) {
+                MethodOutcome outcome = repository.update(e.getResource());
+                String location = outcome.getId().getValue();
+                resp.setLocation(location);
+                returnBundle.addEntry(entry);
+            } else if (v == HTTPVerb.POST) {
+                MethodOutcome outcome = repository.create(e.getResource());
+                String location = outcome.getId().getValue();
+                resp.setLocation(location);
+                returnBundle.addEntry(entry);
+            }
+        });
+        return returnBundle;
     }
 
     @Override

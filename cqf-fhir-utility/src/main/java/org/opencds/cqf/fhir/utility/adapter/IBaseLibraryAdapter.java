@@ -13,8 +13,6 @@ import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 public interface IBaseLibraryAdapter extends IBaseKnowledgeArtifactAdapter {
 
     boolean hasContent();
-    List<DependencyInfo> getComponents();
-
     List<? extends ICompositeType> getContent();
     <T extends ICompositeType> void setContent(List<T> attachments);
     <T extends ICompositeType> T addContent();

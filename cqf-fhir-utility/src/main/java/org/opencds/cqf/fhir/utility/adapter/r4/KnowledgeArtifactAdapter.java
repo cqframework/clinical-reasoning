@@ -7,15 +7,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4KnowledgeArtifactAdapter {
     MetadataResource myResource;
@@ -37,6 +43,19 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
   public Date getApprovalDate(){
     return null;
   }
+  @Override
+  public Period getEffectivePeriod() {
+    return new Period();
+  }
+  // How to ensure that we don't forget to override this one? All descendants should return something
+  @Override
+  public List<DependencyInfo> getDependencies() {
+    return new ArrayList<>();
+  }
+  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters){
+    return visitor.visit(this, theRepository, theParameters);
+  }
+
   protected List<DependencyInfo> getRelatedArtifactReferences(MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {
     List<DependencyInfo> references = new ArrayList<>();
     for (RelatedArtifact ra : relatedArtifacts) {
@@ -53,20 +72,6 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
 
     return references;
   }
-
-  public List<RelatedArtifact> getOwnedRelatedArtifacts() {
-		return this.getRelatedArtifact().stream()
-			.filter(KnowledgeArtifactAdapter::checkIfRelatedArtifactIsOwned)
-			.collect(Collectors.toList());
-	}
-  public static Boolean checkIfRelatedArtifactIsOwned(RelatedArtifact ra){
-		return ra.getExtension()
-					.stream()
-					.filter(ext -> ext.getUrl().equals("http://hl7.org/fhir/StructureDefinition/crmi-isOwned"))
-					.findAny()
-					.map(e -> ((BooleanType) e.getValue()).getValue())
-					.orElseGet(()-> false);
-	}
 
   public static Optional<MetadataResource> findLatestVersion(List<MetadataResource> resources) {
 		// Comparator<String> versionComparator = SemanticVersion.getVersionComparator();
@@ -96,9 +101,13 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
 
 		return findLatestVersion(metadataResources);
 	}
-  public void setEffectivePeriod(String effectivePeriod) {
+  public void setEffectivePeriod(Period effectivePeriod) {
+    // does nothing
   }
   public List<RelatedArtifact> getRelatedArtifact(){
     return new ArrayList<RelatedArtifact>();
+  }
+  public void setRelatedArtifact(List<RelatedArtifact> relatedArtifacts) {
+    // does nothing
   }
 }

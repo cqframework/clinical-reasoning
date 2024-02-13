@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -17,7 +18,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
+public class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
 
   private ValueSet valueSet;
 
@@ -41,7 +42,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
   }
 
   @Override
-  public IBaseResource get() {
+  public MetadataResource get() {
     return this.valueSet;
   }
 
@@ -113,7 +114,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
   public Date getApprovalDate() {
     return null;
   }
-  public ICompositeType getEffectivePeriod() {
+  public Period getEffectivePeriod() {
     return new Period();
   }
 }

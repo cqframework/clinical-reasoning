@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.r4;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 
@@ -36,4 +38,9 @@ public class MetadataResourceHelper {
 			})
 			.forEach(callback);
 	}
+    public static <T extends Type> Optional<T> getParameter(String name, org.hl7.fhir.r4.model.Parameters theParameters, Class<T> type) {
+        return Optional.ofNullable(theParameters)
+        .map(p -> p.getParameter(name))
+        .map(rl -> (T) rl.getValue());
+    }
 }

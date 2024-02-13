@@ -12,27 +12,31 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
 
-class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter {
+public class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter {
 
     private Library library;
 
     public LibraryAdapter(IBaseResource library) {
         super(library);
-
         if (!library.fhirType().equals("Library")) {
             throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
         }
-
         this.library = (Library) library;
     }
-
+    public LibraryAdapter(Library library) {
+        super(library);
+        this.library = library;
+    }
     protected Library getLibrary() {
         return this.library;
     }
@@ -107,19 +111,30 @@ class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter {
     public List<DependencyInfo> getDependencies() {
         return new ArrayList<DependencyInfo>();
     }
-    public List<DependencyInfo> getComponents() {
-        return new ArrayList<DependencyInfo>();
+    // public List<DependencyInfo> getComponents() {
+    //     return new ArrayList<DependencyInfo>();
+    // }
+    public void setRelatedArtifact(List<RelatedArtifact> relatedArtifacts) {
+        this.getLibrary().setRelatedArtifact(relatedArtifacts);
     }
-
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+//     public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+//     return visitor.visit(this, theRepository, theParameters);
+//   }
+    public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
     return visitor.visit(this, theRepository, theParameters);
   }
   public Date getApprovalDate() {
     return this.getLibrary().getApprovalDate();
   }
+  @Override
   public Period getEffectivePeriod(){
     return this.getLibrary().getEffectivePeriod();
   }
+  @Override
+  public void setEffectivePeriod(Period effectivePeriod) {
+    this.getLibrary().setEffectivePeriod(effectivePeriod);
+  }
+  @Override
   public List<RelatedArtifact> getRelatedArtifact() {
     return this.getLibrary().getRelatedArtifact();
   }

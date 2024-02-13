@@ -1,5 +1,4 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
-import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
@@ -35,12 +34,4 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter {
 
     return references;
   }
-  public static Boolean checkIfRelatedArtifactIsOwned(RelatedArtifact ra){
-    return ra.getExtension()
-        .stream()
-        .filter(ext -> ext.getUrl().equals("http://hl7.org/fhir/StructureDefinition/crmi-isOwned"))
-        .findAny()
-        .map(e -> ((BooleanType) e.getValue()).getValue())
-        .orElseGet(()-> false);
-}
 }

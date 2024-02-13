@@ -153,9 +153,6 @@ implements Dstu3LibraryAdapter {
     return references;
   }
 
-  public List<DependencyInfo> getComponents(){
-    return new ArrayList<>();
-  }
   public Date getApprovalDate() {
     return this.getLibrary().getApprovalDate();
   }

@@ -4,16 +4,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
 
-class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter {
+public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r4PlanDefinitionAdapter {
 
   private PlanDefinition planDefinition;
 
@@ -28,7 +34,7 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
     this.planDefinition = planDefinition;
   }
 
-  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+  public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
     return visitor.visit(this, theRepository, theParameters);
   }
 
@@ -37,7 +43,7 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
   }
 
   @Override
-  public IBaseResource get() {
+  public PlanDefinition get() {
     return this.planDefinition;
   }
 
@@ -80,48 +86,44 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
   public void setVersion(String version) {
     this.getPlanDefinition().setVersion(version);
   }
+  
   @Override
   public List<DependencyInfo> getDependencies() {
     List<DependencyInfo> references = new ArrayList<>();
+
+    /*
+      relatedArtifact[].resource
+      library[]
+      action[]..trigger[].dataRequirement[].profile[]
+      action[]..trigger[].dataRequirement[].codeFilter[].valueSet
+      action[]..condition[].expression.reference
+      action[]..input[].profile[]
+      action[]..input[].codeFilter[].valueSet
+      action[]..output[].profile[]
+      action[]..output[].codeFilter[].valueSet
+      action[]..definitionCanonical
+      action[]..dynamicValue[].expression.reference
+      extension[cpg-partOf]
+     */
+
+    // relatedArtifact[].resource
+    references.addAll(getRelatedArtifactReferences(this.getPlanDefinition(), this.getPlanDefinition().getRelatedArtifact()));
+
+    // library[]
+    List<CanonicalType> libraries = this.getPlanDefinition().getLibrary();
+    for (CanonicalType ct : libraries) {
+      DependencyInfo dependency = new DependencyInfo(this.getPlanDefinition().getUrl(), ct.getValue(), ct.getExtension());
+      references.add(dependency);
+    }
+
+    // TODO: Complete retrieval from other elements (action etc.). Ideally use $data-requirements code
+
     return references;
   }
-  // @Override
-  // public List<DependencyInfo> getDependencies() {
-  //   List<DependencyInfo> references = new ArrayList<>();
-
-  //   /*
-  //     relatedArtifact[].resource
-  //     library[]
-  //     action[]..trigger[].dataRequirement[].profile[]
-  //     action[]..trigger[].dataRequirement[].codeFilter[].valueSet
-  //     action[]..condition[].expression.reference
-  //     action[]..input[].profile[]
-  //     action[]..input[].codeFilter[].valueSet
-  //     action[]..output[].profile[]
-  //     action[]..output[].codeFilter[].valueSet
-  //     action[]..definitionCanonical
-  //     action[]..dynamicValue[].expression.reference
-  //     extension[cpg-partOf]
-  //    */
-
-  //   // relatedArtifact[].resource
-  //   references.addAll(getRelatedArtifactReferences(this.getPlanDefinition(), this.getPlanDefinition().getRelatedArtifact()));
-
-  //   // library[]
-  //   List<CanonicalType> libraries = this.getPlanDefinition().getLibrary();
-  //   for (CanonicalType ct : libraries) {
-  //     DependencyInfo dependency = new DependencyInfo(this.getPlanDefinition().getUrl(), ct.getValue());
-  //     references.add(dependency);
-  //   }
-
-  //   // TODO: Complete retrieval from other elements. Ideally use $data-requirements code
-
-  //   return references;
-  // }
   public Date getApprovalDate() {
     return this.getPlanDefinition().getApprovalDate();
   }
-  public ICompositeType getEffectivePeriod(){
+  public Period getEffectivePeriod(){
     return this.getPlanDefinition().getEffectivePeriod();
   }
 }

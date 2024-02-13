@@ -7,13 +7,16 @@ import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.slf4j.LoggerFactory;
 import  org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
+import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -24,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -36,15 +40,21 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 
 import java.util.ArrayList;
@@ -57,22 +67,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
+import org.slf4j.Logger;
 
+public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisitor {
+	private Logger myLog = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
 
-
-public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
-
-  public IBase visit(r4LibraryAdapter library, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(r4LibraryAdapter rootLibraryAdapter, Repository theRepository, Parameters theParameters) {
     boolean latestFromTxServer = ((Parameters)theParameters).getParameterBool("latestFromTxServer");
-    String version = ((StringType)((Parameters)theParameters).getParameter("version").getValue()).getValue();
-    String releaseLabel = ((StringType)((Parameters)theParameters).getParameter("releaseLabel").getValue()).getValue();
-    CodeType versionBehavior = ((CodeType)((Parameters)theParameters).getParameter("versionBehavior").getValue());
-    CodeType requireNonExpermimental = ((CodeType)((Parameters)theParameters).getParameter("requireNonExpermimental").getValue());
+    
+    String version = MetadataResourceHelper.getParameter("version", theParameters, StringType.class).map(t -> t.getValue()).orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
+    String releaseLabel = MetadataResourceHelper.getParameter("releaseLabel", theParameters, StringType.class).map(t -> t.getValue()).orElse("");
+    Optional<CodeType> versionBehavior = MetadataResourceHelper.getParameter("versionBehavior", theParameters, CodeType.class);
+    Optional<CodeType> requireNonExpermimental = MetadataResourceHelper.getParameter("requireNonExpermimental", theParameters, CodeType.class);
     CRMIReleaseVersionBehaviorCodes versionBehaviorCode;
     CRMIReleaseExperimentalBehaviorCodes experimentalBehaviorCode;
     try {
-        versionBehaviorCode = versionBehavior == null ? CRMIReleaseVersionBehaviorCodes.NULL : CRMIReleaseVersionBehaviorCodes.fromCode(versionBehavior.getCode());
-        experimentalBehaviorCode = requireNonExpermimental == null ? CRMIReleaseExperimentalBehaviorCodes.NULL : CRMIReleaseExperimentalBehaviorCodes.fromCode(requireNonExpermimental.getCode());
+        versionBehaviorCode = versionBehavior.isPresent() ? CRMIReleaseVersionBehaviorCodes.fromCode(versionBehavior.get().getCode()) : CRMIReleaseVersionBehaviorCodes.NULL;
+        experimentalBehaviorCode = requireNonExpermimental.isPresent() ? CRMIReleaseExperimentalBehaviorCodes.fromCode(requireNonExpermimental.get().getCode()) : CRMIReleaseExperimentalBehaviorCodes.NULL;
     } catch (FHIRException e) {
         throw new UnprocessableEntityException(e.getMessage());
     }
@@ -81,40 +92,39 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         throw new NotImplementedOperationException("Support for 'latestFromTxServer' is not yet implemented.");
     }
     checkReleaseVersion(version, versionBehaviorCode);
-    MetadataResource rootArtifact = (MetadataResource)library.get();
-    // KnowledgeArtifactAdapter<MetadataResource> rootArtifactAdapter = new KnowledgeArtifactAdapter(rootArtifact);
-    Date currentApprovalDate = library.getApprovalDate();
-    checkReleasePreconditions(rootArtifact, currentApprovalDate);
+    Library rootLibrary = rootLibraryAdapter.get();
+    Date currentApprovalDate = rootLibraryAdapter.getApprovalDate();
+    checkReleasePreconditions(rootLibrary, currentApprovalDate);
 
     // Determine which version should be used.
-    String existingVersion = rootArtifact.hasVersion() ? rootArtifact.getVersion().replace("-draft","") : null;
+    String existingVersion = rootLibrary.hasVersion() ? rootLibrary.getVersion().replace("-draft","") : null;
     String releaseVersion = getReleaseVersion(version, versionBehaviorCode, existingVersion)
         .orElseThrow(() -> new UnprocessableEntityException("Could not resolve a version for the root artifact."));
-    Period rootEffectivePeriod = (Period) library.getEffectivePeriod();
+    Period rootEffectivePeriod = (Period) rootLibraryAdapter.getEffectivePeriod();
     // if the root artifact is experimental then we don't need to check for experimental children
-    if (rootArtifact.getExperimental()) {
+    if (rootLibrary.getExperimental()) {
         experimentalBehaviorCode = CRMIReleaseExperimentalBehaviorCodes.NONE;
     }
-    List<MetadataResource> releasedResources = internalRelease(library, releaseVersion, rootEffectivePeriod, versionBehaviorCode, latestFromTxServer, experimentalBehaviorCode, theRepository);
-    updateReleaseLabel(rootArtifact, releaseLabel);
-    List<DependencyInfo> rootArtifactOriginalDependencies = new ArrayList<DependencyInfo>(library.getDependencies());
+    List<MetadataResource> releasedResources = internalRelease(rootLibraryAdapter, releaseVersion, rootEffectivePeriod, versionBehaviorCode, latestFromTxServer, experimentalBehaviorCode, theRepository);
+    updateReleaseLabel(rootLibrary, releaseLabel);
+    List<DependencyInfo> rootArtifactOriginalDependencies = new ArrayList<DependencyInfo>(rootLibraryAdapter.getDependencies());
     // Get list of extensions which need to be preserved
     List<DependencyInfo> originalDependenciesWithExtensions = rootArtifactOriginalDependencies.stream().filter(dep -> dep.getExtension() != null && dep.getExtension().size() > 0).collect(Collectors.toList());
     // once iteration is complete, delete all depends-on RAs in the root artifact
-    library.getRelatedArtifact().removeIf(ra -> ((RelatedArtifact)ra).getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
+    rootLibraryAdapter.getRelatedArtifact().removeIf(ra -> ((RelatedArtifact)ra).getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
 
     Bundle transactionBundle = new Bundle()
         .setType(Bundle.BundleType.TRANSACTION);
     for (MetadataResource artifact: releasedResources) {
         transactionBundle.addEntry(createEntry(artifact));
 
-        KnowledgeArtifactAdapter artifactAdapter = new KnowledgeArtifactAdapter(artifact);
-        List<DependencyInfo> components = artifactAdapter.getComponents();
+        r4KnowledgeArtifactAdapter artifactAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
+        List<RelatedArtifact> components = artifactAdapter.getComponents();
         // add all root artifact components and child artifact components recursively as root artifact dependencies
-        for (DependencyInfo component : components) {
+        for (RelatedArtifact component : components) {
             MetadataResource resource;
             // if the relatedArtifact is Owned, need to update the reference to the new Version
-            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
+            if (r4KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
                 resource = checkIfReferenceInList(component, releasedResources)
                 // should never happen since we check all references as part of `internalRelease`
                 .orElseThrow(() -> new InternalErrorException("Owned resource reference not found during release"));
@@ -126,7 +136,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 component.setResource(updatedReference);
             }
             RelatedArtifact componentToDependency = new RelatedArtifact().setType(RelatedArtifact.RelatedArtifactType.DEPENDSON).setResource(component.getResourceElement().getValueAsString());
-            library.getRelatedArtifact().add(componentToDependency);
+            rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
         }
 
         List<DependencyInfo> dependencies = artifactAdapter.getDependencies();
@@ -135,26 +145,30 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             checkIfReferenceInList(dependency, releasedResources)
                 .ifPresentOrElse((resource) -> {
                     String updatedReference = String.format("%s|%s", resource.getUrl(), resource.getVersion());
-                    dependency.setResource(updatedReference);
+                    dependency.setReference(updatedReference);
                 },
                 // not present implies that the dependency wasn't updated as part of $release
                 () -> {
                     // if the dependency doesn't have a version, try to find the latest version
-                    if (Canonicals.getVersion(dependency.getResourceElement()) == null || Canonicals.getVersion(dependency.getResourceElement()).isEmpty()) {
+                    if (Canonicals.getVersion(dependency.getReference()) == null || Canonicals.getVersion(dependency.getReference()).isEmpty()) {
                         // TODO: update when we support expansionParameters and requireVersionedDependencies
-                        String updatedReference = tryUpdateReferenceToLatestActiveVersion(dependency.getResource(), theRepository, artifact.getUrl());
-                        dependency.setResource(updatedReference);
+                        String updatedReference = tryUpdateReferenceToLatestActiveVersion(dependency.getReference(), theRepository, artifact.getUrl());
+                        dependency.setReference(updatedReference);
                     }
                 });
             // only add the dependency to the manifest if it is from a leaf artifact
-            if (!artifact.getUrl().equals(rootArtifact.getUrl())) {
-                library.getRelatedArtifact().add(dependency);
+            if (!artifact.getUrl().equals(rootLibrary.getUrl())) {
+                RelatedArtifact newDep = new RelatedArtifact();
+                newDep
+                    .setType(RelatedArtifactType.DEPENDSON)
+                    .setResource(dependency.getReference());
+                rootLibraryAdapter.getRelatedArtifact().add(newDep);
             }
         }
     }
     // removed duplicates and add
     List<RelatedArtifact> distinctResolvedRelatedArtifacts = new ArrayList<>();
-    for (RelatedArtifact resolvedRelatedArtifact: library.getRelatedArtifact()) {
+    for (RelatedArtifact resolvedRelatedArtifact: rootLibraryAdapter.getRelatedArtifact()) {
         boolean isDistinct = !distinctResolvedRelatedArtifacts.stream().anyMatch(distinctRelatedArtifact -> {
             boolean referenceNotInArray = distinctRelatedArtifact.getResource().equals(resolvedRelatedArtifact.getResource());
             boolean typeMatches = distinctRelatedArtifact.getType().equals(resolvedRelatedArtifact.getType());
@@ -165,22 +179,45 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             // preserve Extensions if found
             originalDependenciesWithExtensions
             .stream()
-                .filter(originalDep -> originalDep.getResource().equals(resolvedRelatedArtifact.getResource()))
+                .filter(originalDep -> originalDep.getReference().equals(resolvedRelatedArtifact.getResource()))
                 .findFirst()
                 .ifPresent(dep -> {
                     checkIfValueSetNeedsCondition(null, dep, theRepository);
-                    resolvedRelatedArtifact.getExtension().addAll(dep.getExtension());
-                    originalDependenciesWithExtensions.removeIf(ra -> ra.getResource().equals(resolvedRelatedArtifact.getResource()));
+                    resolvedRelatedArtifact.getExtension().addAll(dep.getExtension().stream().map(e -> (Extension)e).collect(Collectors.toList()));
+                    originalDependenciesWithExtensions.removeIf(ra -> ra.getReference().equals(resolvedRelatedArtifact.getResource()));
                 });
         }
     }
     // update ArtifactComments referencing the old Canonical Reference
-    transactionBundle.getEntry().addAll(findArtifactCommentsToUpdate(rootArtifact, releaseVersion, theRepository));
-    library.setRelatedArtifact(distinctResolvedRelatedArtifacts);
+    transactionBundle.getEntry().addAll(findArtifactCommentsToUpdate(rootLibrary, releaseVersion, theRepository));
+    rootLibraryAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
-    return transactionBundle;
+    return theRepository.transaction(transactionBundle);
 
   }
+  private void checkIfValueSetNeedsCondition(MetadataResource resource, DependencyInfo relatedArtifact, Repository hapiFhirRepository) throws UnprocessableEntityException {
+    if (resource == null 
+    && relatedArtifact != null 
+    && relatedArtifact.getReference() != null 
+    && Canonicals.getResourceType(relatedArtifact.getReference()).equals("ValueSet")) {
+        List<MetadataResource> searchResults = getResourcesFromBundle(searchResourceByUrl(relatedArtifact.getReference(), hapiFhirRepository));
+        if (searchResults.size() > 0) {
+            resource = searchResults.get(0);
+        }
+    }
+    if (resource != null && resource.getResourceType() == ResourceType.ValueSet) {
+        ValueSet valueSet = (ValueSet)resource;
+        boolean isLeaf = !valueSet.hasCompose() || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0);
+        Optional<? extends IBaseExtension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
+            .map(DependencyInfo::getExtension)
+            .map(list -> {
+                return list.stream().filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl)).findFirst().orElse(null);
+            });
+        if (isLeaf && !maybeConditionExtension.isPresent()) {
+            throw new UnprocessableEntityException("Missing condition on ValueSet : " + valueSet.getUrl());
+        }
+    }
+}
   private List<MetadataResource> internalRelease(r4KnowledgeArtifactAdapter artifactAdapter, String version, Period rootEffectivePeriod,
 																 CRMIReleaseVersionBehaviorCodes versionBehavior, boolean latestFromTxServer, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository hapiFhirRepository) throws NotImplementedOperationException, ResourceNotFoundException {
 		List<MetadataResource> resourcesToUpdate = new ArrayList<MetadataResource>();
@@ -220,9 +257,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 					.orElseThrow(()-> new ResourceNotFoundException(
 							String.format("Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but was not found on the server.",
 								ownedResourceReference.getValueAsString(),
-								artifactAdapter.resource.getUrl()))
+								artifactAdapter.get().getUrl()))
 					);
-					KnowledgeArtifactAdapter searchResultAdapter = new KnowledgeArtifactAdapter(referencedResource);
+					r4KnowledgeArtifactAdapter searchResultAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(referencedResource);
+            
 					if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior && CRMIReleaseExperimentalBehaviorCodes.NONE != experimentalBehavior) {
 						checkNonExperimental(referencedResource, experimentalBehavior, hapiFhirRepository);
 					}
@@ -232,6 +270,28 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 		}
 
 		return resourcesToUpdate;
+	}
+    private void checkNonExperimental(MetadataResource resource, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository hapiFhirRepository) throws UnprocessableEntityException {
+		String nonExperimentalError = String.format("Root artifact is not Experimental, but references an Experimental resource with URL '%s'.",
+								resource.getUrl());
+		if (CRMIReleaseExperimentalBehaviorCodes.WARN == experimentalBehavior && resource.getExperimental()) {
+			myLog.warn(nonExperimentalError);
+		} else if (CRMIReleaseExperimentalBehaviorCodes.ERROR == experimentalBehavior && resource.getExperimental()) {
+			throw new UnprocessableEntityException(nonExperimentalError);
+		}
+		// for ValueSets need to check recursively if any chldren are experimental since we don't own these
+		if (resource.getResourceType().equals(ResourceType.ValueSet)) {
+			ValueSet valueSet = (ValueSet) resource;
+			List<CanonicalType> valueSets = valueSet
+				.getCompose()
+				.getInclude()
+				.stream().flatMap(include -> include.getValueSet().stream())
+				.collect(Collectors.toList());
+			for (CanonicalType value: valueSets) {
+				KnowledgeArtifactAdapter.findLatestVersion(searchResourceByUrl(value.getValueAsString(), hapiFhirRepository))
+				.ifPresent(childVs -> checkNonExperimental(childVs, experimentalBehavior, hapiFhirRepository));
+			}
+		}
 	}
   private Optional<String> getReleaseVersion(String version, CRMIReleaseVersionBehaviorCodes versionBehavior, String existingVersion) throws UnprocessableEntityException {
     Optional<String> releaseVersion = Optional.ofNullable(null);
@@ -258,7 +318,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 }
 private void updateReleaseLabel(MetadataResource artifact, String releaseLabel) throws IllegalArgumentException {
     if (releaseLabel != null) {
-        Extension releaseLabelExtension = artifact.getExtensionByUrl(releaseLabel);
+        Extension releaseLabelExtension = artifact.getExtensionByUrl(IBaseKnowledgeArtifactAdapter.releaseLabelUrl);
         if (releaseLabelExtension == null) {
             // create the Extension and add it to the artifact if it doesn't exist
             releaseLabelExtension = new Extension();
@@ -267,7 +327,18 @@ private void updateReleaseLabel(MetadataResource artifact, String releaseLabel) 
         releaseLabelExtension.setValue(new StringType(releaseLabel));
     }
 }
-  private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifactToUpdate, List<MetadataResource> resourceList){
+  private Optional<MetadataResource> checkIfReferenceInList(RelatedArtifact artifactToUpdate, List<MetadataResource> resourceList){
+    Optional<MetadataResource> updatedReference = Optional.ofNullable(null);
+    for (MetadataResource resource : resourceList) {
+        String referenceURL = Canonicals.getUrl(artifactToUpdate.getResource());
+        String currentResourceURL = resource.getUrl();
+        if (referenceURL.equals(currentResourceURL)) {
+            return Optional.of(resource);
+        }
+    }
+    return updatedReference;
+}
+private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifactToUpdate, List<MetadataResource> resourceList){
     Optional<MetadataResource> updatedReference = Optional.ofNullable(null);
     for (MetadataResource resource : resourceList) {
         String referenceURL = Canonicals.getUrl(artifactToUpdate.getReference());
@@ -444,7 +515,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
 
 		return resourceList;
 	}
-  public IBase visit(PlanDefinitionAdapter planDefinition, Repository theRepository) {
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, Parameters theParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -452,7 +523,39 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(ValueSetAdapter valueSet, Repository theRepository) {
+  public IBase visit(IBasePlanDefinitionAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+    List<DependencyInfo> dependencies = valueSet.getDependencies();
+    for (DependencyInfo dependency : dependencies) {
+      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
+    }
+    return new OperationOutcome();
+  }
+
+  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, Parameters theParameters) {
+    List<DependencyInfo> dependencies = valueSet.getDependencies();
+    for (DependencyInfo dependency : dependencies) {
+      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
+    }
+    return new OperationOutcome();
+  }
+
+  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+    List<DependencyInfo> dependencies = valueSet.getDependencies();
+    for (DependencyInfo dependency : dependencies) {
+      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
+    }
+    return new OperationOutcome();
+  }
+
+  public IBase visit(IBaseKnowledgeArtifactAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+    List<DependencyInfo> dependencies = valueSet.getDependencies();
+    for (DependencyInfo dependency : dependencies) {
+      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
+    }
+    return new OperationOutcome();
+  }
+
+  public IBase visit(IBaseLibraryAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));

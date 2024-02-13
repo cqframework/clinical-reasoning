@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,19 +25,26 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -47,8 +54,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 
-public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor  {
-  public Bundle visit(IBaseLibraryAdapter library, Repository theFhirRepository, IBaseParameters draftParameters) {
+public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor  {
+  public Bundle visit(r4LibraryAdapter library, Repository theFhirRepository, Parameters draftParameters) {
+    String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
     String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
     Library libRes = (Library)library.get();
     // check valid semverversion
@@ -57,7 +65,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor  
     // remove release label and extension
     List<Extension> removeReleaseLabelAndDescription = libRes.getExtension()
         .stream()
-        .filter(ext -> !ext.getUrl().equals("releaseLabelUrl") && !ext.getUrl().equals("releaseDescriptionUrl"))
+        .filter(ext -> !ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.releaseDescriptionUrl) && !ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.releaseLabelUrl))
         .collect(Collectors.toList());
     libRes.setExtension(removeReleaseLabelAndDescription);
     // remove approval date
@@ -94,13 +102,22 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor  
         updateIdForBundle.setId(urnList.get(i));
         transactionBundle.addEntry(createEntry(updateIdForBundle));
     }
+    // return InMemoryFhirRepository.transactionStub(transactionBundle, theFhirRepository);
     return theFhirRepository.transaction(transactionBundle);
 
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
     // what is dependency, where did it originate? potentially the package?
   }
-
-  public IBase visit(PlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBaseLibraryAdapter library, Repository theFhirRepository, IBaseParameters draftParameters){
+    return new OperationOutcome();
+  }
+  public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository theFhirRepository, IBaseParameters draftParameters){
+    return new OperationOutcome();
+  }
+//   public IBase visit(r4KnowledgeArtifactAdapter library, Repository theFhirRepository, IBaseParameters draftParameters){
+//     return new OperationOutcome();
+//   }
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -130,7 +147,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor  
         }
 
         if (newResource == null) {
-            KnowledgeArtifactAdapter sourceResourceAdapter = new KnowledgeArtifactAdapter(theResource);
+            r4KnowledgeArtifactAdapter sourceResourceAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(theResource);
             sourceResourceAdapter.setEffectivePeriod(null);
             newResource = theResource.copy();
             newResource.setStatus(Enumerations.PublicationStatus.DRAFT);
@@ -229,9 +246,12 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor  
         return ra;
       });
 	}
-  private List<DependencyInfo> combineComponentsAndDependencies(IBaseLibraryAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream(), adapter.getDependencies().stream()).collect(Collectors.toList());
+  private List<DependencyInfo> combineComponentsAndDependencies(r4LibraryAdapter adapter) {
+		return Stream.concat(adapter.getComponents().stream().map(ra -> convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
 	}
+    private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
+        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
+    }
   private BundleEntryComponent createEntry(IBaseResource theResource) {
 		BundleEntryComponent entry = new Bundle.BundleEntryComponent()
 				.setResource((Resource) theResource)

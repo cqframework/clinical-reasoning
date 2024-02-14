@@ -16,8 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
-@Disabled
-public class CliTest {
+class CliTest {
 
     private ByteArrayOutputStream outContent;
     private ByteArrayOutputStream errContent;
@@ -28,14 +27,14 @@ public class CliTest {
     private static String testResourcePath = null;
 
     @BeforeAll
-    public void setup() {
+    void setup() {
         File file = new File(testResourceRelativePath);
         testResourcePath = file.getAbsolutePath();
         System.out.println(String.format("Test resource directory: %s", testResourcePath));
     }
 
     @BeforeEach
-    public void setUpStreams() {
+    void setUpStreams() {
         outContent = new ByteArrayOutputStream();
         errContent = new ByteArrayOutputStream();
 
@@ -44,7 +43,7 @@ public class CliTest {
     }
 
     @AfterEach
-    public void restoreStreams() {
+    void restoreStreams() {
         String sysOut = outContent.toString();
         String sysError = errContent.toString();
 
@@ -56,14 +55,14 @@ public class CliTest {
     }
 
     @Test
-    public void testVersion() {
+    void testVersion() {
         String[] args = new String[] {"-V"};
         Main.run(args);
         assertTrue(outContent.toString().startsWith("cqf-fhir-cr-cli version:"));
     }
 
     @Test
-    public void testHelp() {
+    void testHelp() {
         String[] args = new String[] {"-h"};
         Main.run(args);
         String output = outContent.toString();
@@ -72,7 +71,7 @@ public class CliTest {
     }
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         String[] args = new String[] {};
         Main.run(args);
         String output = errContent.toString();
@@ -81,17 +80,17 @@ public class CliTest {
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
         assertThrows(NullPointerException.class, () -> {
             Main.run(null);
         });
     }
 
     @Test
-    public void testDstu3() {}
+    void testDstu3() {}
 
     @Test
-    public void testArgFile() {
+    void testArgFile() {
         String[] args = new String[] {"argfile", testResourcePath + "/argfile/args.txt"};
 
         Main.run(args);
@@ -103,7 +102,7 @@ public class CliTest {
     }
 
     @Test
-    public void testR4() {
+    void testR4() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -135,7 +134,7 @@ public class CliTest {
     }
 
     @Test
-    public void testR4WithHelpers() {
+    void testR4WithHelpers() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -167,7 +166,7 @@ public class CliTest {
     }
 
     @Test
-    public void testUSCore() {
+    void testUSCore() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -196,7 +195,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICore() {
+    void testQICore() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -260,7 +259,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreCommon() {
+    void testQICoreCommon() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -289,7 +288,7 @@ public class CliTest {
     }
 
     @Test
-    public void testOptions() {
+    void testOptions() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -313,7 +312,7 @@ public class CliTest {
     }
 
     @Test
-    public void testOptionsFailure() {
+    void testOptionsFailure() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -334,7 +333,7 @@ public class CliTest {
     }
 
     @Test
-    public void testVSCastFunction14() {
+    void testVSCastFunction14() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -357,7 +356,7 @@ public class CliTest {
     }
 
     @Test
-    public void testVSCastFunction15() {
+    void testVSCastFunction15() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -380,7 +379,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreSupplementalDataElements() {
+    void testQICoreSupplementalDataElements() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -413,7 +412,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Example() {
+    void testQICoreEXM124Example() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -450,7 +449,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Denom() {
+    void testQICoreEXM124Denom() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -478,7 +477,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Numer() {
+    void testQICoreEXM124Numer() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -507,7 +506,7 @@ public class CliTest {
 
     @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
-    public void testSampleContentIG() {
+    void testSampleContentIG() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",

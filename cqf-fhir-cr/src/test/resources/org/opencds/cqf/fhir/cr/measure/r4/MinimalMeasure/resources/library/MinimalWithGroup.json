@@ -1,0 +1,17 @@
+{
+    "resourceType": "Library",
+    "id": "MinimalWithGroup",
+    "url": "http://example.com/Library/MinimalWithGroup",
+    "name": "MinimalWithGroup",
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      } ]
+    },
+    "content": [ {
+      "contentType": "text/cql",
+      "url": "../../cql/MinimalWithGroup.cql"
+    } ]
+}

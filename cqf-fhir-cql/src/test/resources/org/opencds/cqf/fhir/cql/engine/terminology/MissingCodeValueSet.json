@@ -1,0 +1,20 @@
+{
+    "resourceType": "ValueSet",
+    "id": "MissingCodeValueSet",
+    "url": "http://example.com/ValueSet/MissingCodeValueSet",
+    "expansion": {
+        "contains": [
+            {
+                "system": "http://example.com/CodeSystem/Codes",
+                "code": "123"
+            },
+            {
+                "system": "http://example.com/CodeSystem/Codes"
+            },
+            {
+                "system": "http://example.com/CodeSystem/Codes",
+                "code": "456"
+            }
+        ]
+    }
+}

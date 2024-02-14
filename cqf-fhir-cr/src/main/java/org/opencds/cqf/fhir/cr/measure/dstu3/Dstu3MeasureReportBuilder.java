@@ -131,7 +131,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
-        if (measureGroup.getPopulation().size() != groupDef.populations().size()) {
+        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
+        // TOTAL-DENOMINATOR), and will not be added to group populations.
+        // Subtracting '2' from groupDef to balance with Measure defined Groups
+        if (measureGroup.getPopulation().size() != (groupDef.populations().size() - 2)) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
@@ -373,7 +376,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected Reference getEvaluatedResourceReference(String id) {
-        return this.getEvaluatedResourceReferences().computeIfAbsent(id, Reference::new);
+        return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {

@@ -2304,6 +2304,16 @@
   "differential": {
     "element": [
       {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "label": "Patient Name",
+        "type": [
+          {
+            "code": "HumanName"
+          }
+        ]
+      },
+      {
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",

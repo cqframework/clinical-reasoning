@@ -2304,6 +2304,16 @@
   "differential": {
     "element": [
       {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "label": "Patient Name",
+        "type": [
+          {
+            "code": "HumanName"
+          }
+        ]
+      },
+      {
         "extension": [
           {
             "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
@@ -2414,7 +2424,12 @@
         "path": "Patient.identifier",
         "sliceName": "MedicareID",
         "min": 1,
-        "max": "1"
+        "max": "1",
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ]
       },
       {
         "id": "Patient.identifier:MedicareID.system",

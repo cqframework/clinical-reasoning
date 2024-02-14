@@ -1,0 +1,18 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "referralrequest-test",
+  "name": "ReferralRequest_Test",
+  "title": "CreateReferralRequest",
+  "status": "draft",
+  "description": "Create the referral request.",
+  "kind": "ReferralRequest",
+  "intent": "proposal",
+  "code": {
+    "coding": [
+      {
+        "system": "http://test/fhir/system",
+        "code": "Test"
+      }
+    ]
+  }
+}

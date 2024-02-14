@@ -1,14 +1,16 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.Given;
 
-public class Dstu3MeasureProcessorTest {
-    protected static Given given = Measure.given().repositoryFor("EXM105FHIR3Measure");
-
+class Dstu3MeasureProcessorTest {
     @Test
-    public void exm105_fullSubjectId() {
-        given.when()
+    void exm105_fullSubjectId() {
+        Measure.given()
+                .repositoryFor("EXM105FHIR3Measure")
+                .when()
                 .measureId("measure-EXM105-FHIR3-8.0.000")
                 .periodStart("2019-01-01")
                 .periodEnd("2020-01-01")
@@ -22,5 +24,23 @@ public class Dstu3MeasureProcessorTest {
                 .up()
                 .population("denominator")
                 .hasCount(1);
+    }
+
+    @Test
+    void exm105_fullSubjectId_invalidMeasureScorer() {
+        // Removed MeasureScorer from Measure, should trigger exception
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("measure-EXM105-FHIR3-8.0.000")
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
+                .subject("Patient/denom-EXM105-FHIR3")
+                .reportType("subject")
+                .evaluate();
+
+        String errorMsg = "MeasureScoring must be specified on Measure";
+        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        assertEquals(errorMsg, e.getMessage());
     }
 }

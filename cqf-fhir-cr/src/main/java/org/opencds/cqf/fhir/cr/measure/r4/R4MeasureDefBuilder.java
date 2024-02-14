@@ -1,7 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,17 +33,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private final boolean enforceIds;
-
-    public R4MeasureDefBuilder() {
-        this(false);
-    }
-
-    public R4MeasureDefBuilder(boolean enforceIds) {
-        this.enforceIds = enforceIds;
-    }
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -51,9 +47,28 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // Groups
+        var measureLevelMeasureScoring = getMeasureScoring(measure);
         List<GroupDef> groups = new ArrayList<>();
+        Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            checkId(group);
+            // Ids are not required on groups in r4
+            // checkId(group);
+
+            // Use the measure level scoring as the default
+            var groupMeasureScoringCode = measureLevelMeasureScoring;
+
+            // But override measure level scoring if group scoring is present
+            var scoringExtension = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
+            if (scoringExtension != null) {
+                CodeableConcept coding = (CodeableConcept)
+                        group.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue();
+                groupMeasureScoringCode =
+                        MeasureScoring.fromCode(coding.getCodingFirstRep().getCode());
+            }
+
+            if (groupMeasureScoringCode == null) {
+                throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
+            }
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -67,6 +82,18 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         conceptToConceptDef(pop.getCode()),
                         populationType,
                         pop.getCriteria().getExpression()));
+            }
+            // total Denominator/Numerator Def Builder
+            // validate population is not in Def
+            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
+                // add to definition
+                populations.add(new PopulationDef(
+                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
+            }
+            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
+                // add to definition
+                populations.add(new PopulationDef(
+                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
             }
 
             // Stratifiers
@@ -95,16 +122,28 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 stratifiers.add(stratifierDef);
             }
 
-            groups.add(new GroupDef(group.getId(), conceptToConceptDef(group.getCode()), stratifiers, populations));
+            var groupDef = new GroupDef(group.getId(), conceptToConceptDef(group.getCode()), stratifiers, populations);
+            groups.add(groupDef);
+            groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
 
         return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
-                sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
+    }
+
+    private PopulationDef checkPopulationForCode(
+            List<PopulationDef> populations, MeasurePopulationType measurePopType) {
+        return populations.stream()
+                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
+                .findAny()
+                .orElse(null);
+    }
+
+    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType) {
+        return new ConceptDef(
+                Collections.singletonList(
+                        new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
+                null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -125,14 +164,18 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
+        if (e.getId() == null || StringUtils.isBlank(e.getId())) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
+        if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
+    }
+
+    private MeasureScoring getMeasureScoring(Measure measure) {
+        return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
     }
 }

@@ -7,28 +7,24 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class R4SubmitDataService {
 
-    private static final Logger ourLogger = LoggerFactory.getLogger(R4SubmitDataService.class);
+    private final Repository repository;
 
-    private final Repository myRepository;
-
-    public R4SubmitDataService(Repository theRepository) {
-        this.myRepository = theRepository;
+    public R4SubmitDataService(Repository repository) {
+        this.repository = repository;
     }
 
     /**
      * Save measure report and resources to the local repository
      *
-     * @param theId
-     * @param theReport
-     * @param theResources
+     * @param id
+     * @param report
+     * @param resources
      * @return Bundle transaction result
      */
-    public Bundle submitData(IdType theId, MeasureReport theReport, List<IBaseResource> theResources) {
+    public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
         /*
          * TODO - resource validation using $data-requirements operation (params are the provided id and
          * the measurement period from the MeasureReport)
@@ -38,10 +34,10 @@ public class R4SubmitDataService {
          */
 
         Bundle transactionBundle =
-                new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(createEntry(theReport));
+                new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(createEntry(report));
 
-        if (theResources != null) {
-            for (IBaseResource res : theResources) {
+        if (resources != null) {
+            for (IBaseResource res : resources) {
                 // Unpack nested Bundles
                 if (res instanceof Bundle) {
                     Bundle nestedBundle = (Bundle) res;
@@ -53,22 +49,22 @@ public class R4SubmitDataService {
                 }
             }
         }
-        return myRepository.transaction(transactionBundle);
+        return repository.transaction(transactionBundle);
     }
 
-    private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
+    private Bundle.BundleEntryComponent createEntry(IBaseResource resource) {
         return new Bundle.BundleEntryComponent()
-                .setResource((Resource) theResource)
-                .setRequest(createRequest(theResource));
+                .setResource((Resource) resource)
+                .setRequest(createRequest(resource));
     }
 
-    private Bundle.BundleEntryRequestComponent createRequest(IBaseResource theResource) {
+    private Bundle.BundleEntryRequestComponent createRequest(IBaseResource resource) {
         Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-        if (theResource.getIdElement().hasValue()) {
+        if (resource.getIdElement().hasValue()) {
             request.setMethod(Bundle.HTTPVerb.PUT)
-                    .setUrl(theResource.getIdElement().getValue());
+                    .setUrl(resource.getIdElement().getValue());
         } else {
-            request.setMethod(Bundle.HTTPVerb.POST).setUrl(theResource.fhirType());
+            request.setMethod(Bundle.HTTPVerb.POST).setUrl(resource.fhirType());
         }
 
         return request;

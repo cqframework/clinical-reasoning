@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "SupplementalDataElements-FHIR3-1.0.0",
+  "version": "1.0.0",
+  "name": "SupplementalDataElements_FHIR3",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SupplementalDataElements_FHIR3.cql"
+  } ]
+}

@@ -1,0 +1,17 @@
+{
+    "resourceType": "Library",
+    "id": "Minimal",
+    "url": "http://example.com/Library/Minimal",
+    "name": "Minimal",
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      } ]
+    },
+    "content": [ {
+      "contentType": "text/cql",
+      "url": "../../cql/Minimal.cql"
+    } ]
+}

@@ -14,19 +14,20 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-public class ExtensionResolverTests {
+class ExtensionResolverTests {
     private final String EXTENSION_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale";
     private final Expression expression =
             new Expression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
     private final Extension expressionExtension = new Extension(Constants.CQF_EXPRESSION, expression);
 
     @Test
-    public void testExtensionResolution() {
-        var patientId = "Patient/Patient1";
+    void testExtensionResolution() {
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
+        var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), "Patient/Patient1");
 
         var params = parameters();
         params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
@@ -34,8 +35,8 @@ public class ExtensionResolverTests {
         var extensionValue = new MarkdownType();
         extensionValue.addExtension(expressionExtension);
         var extensions = Collections.singletonList(new Extension(EXTENSION_URL, extensionValue));
-        var extensionResolver = new ExtensionResolver(patientId, params, null, libraryEngine);
-        extensionResolver.resolveExtensions(extensions, null);
+        var extensionResolver = new ExtensionResolver(subjectId, params, null, libraryEngine);
+        extensionResolver.resolveExtensions(null, extensions, null);
         assertEquals("Alice", extensions.get(0).getValueAsPrimitive().getValueAsString());
     }
 }

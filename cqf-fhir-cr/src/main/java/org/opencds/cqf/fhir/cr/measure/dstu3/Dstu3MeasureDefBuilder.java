@@ -1,7 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -24,17 +30,6 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private final boolean enforceIds;
-
-    public Dstu3MeasureDefBuilder() {
-        this(false);
-    }
-
-    public Dstu3MeasureDefBuilder(boolean enforceIds) {
-        this.enforceIds = enforceIds;
-    }
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -51,9 +46,21 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // Groups
+        MeasureScoring groupMeasureScoringCode = getMeasureScoring(measure);
+
+        // The group size check here is to ensure that there's parity in the behavior of builder
+        // between DSTU3 and R4. In R4, scoring can be on the group level so if we have an
+        // empty measure we simply generate an empty MeasureReport.
+        // This might not be the best behavior, but we want to ensure that the behavior is the same
+        // between versions
+        if (!measure.getGroup().isEmpty() && groupMeasureScoringCode == null) {
+            throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
+        }
         List<GroupDef> groups = new ArrayList<>();
+        Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            checkId(group);
+            // Ids are not required on groups in dstu3
+            // checkId(group);
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -64,6 +71,18 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 populations.add(new PopulationDef(
                         pop.getId(), conceptToConceptDef(pop.getCode()), populationType, pop.getCriteria()));
+            }
+            // total Denominator/Numerator Def Builder
+            // validate population is not in Def
+            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
+                // add to definition
+                populations.add(new PopulationDef(
+                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
+            }
+            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
+                // add to definition
+                populations.add(new PopulationDef(
+                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
             }
 
             // Stratifiers
@@ -78,21 +97,32 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 stratifiers.add(stratifierDef);
             }
-
-            groups.add(new GroupDef(
+            var groupDef = new GroupDef(
                     group.getId(),
                     null, // No code on group in dstu3
                     stratifiers,
-                    populations));
+                    populations);
+            groups.add(groupDef);
+            groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
 
         return new MeasureDef(
-                measure.getId(),
-                measure.getUrl(),
-                measure.getVersion(),
-                MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode()),
-                groups,
-                sdes);
+                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
+    }
+
+    private PopulationDef checkPopulationForCode(
+            List<PopulationDef> populations, MeasurePopulationType measurePopType) {
+        return populations.stream()
+                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
+                .findAny()
+                .orElse(null);
+    }
+
+    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType) {
+        return new ConceptDef(
+                Collections.singletonList(
+                        new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
+                null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {
@@ -113,14 +143,18 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void checkId(Element e) {
-        if (enforceIds && (e.getId() == null || StringUtils.isBlank(e.getId()))) {
+        if (e.getId() == null || StringUtils.isBlank(e.getId())) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
-        if (enforceIds && (r.getId() == null || StringUtils.isBlank(r.getId()))) {
+        if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
+    }
+
+    private MeasureScoring getMeasureScoring(Measure measure) {
+        return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
     }
 }

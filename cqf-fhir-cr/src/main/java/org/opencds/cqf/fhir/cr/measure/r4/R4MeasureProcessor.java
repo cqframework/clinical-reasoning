@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,16 +10,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -112,11 +115,28 @@ public class R4MeasureProcessor {
             measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         }
 
-        var id = VersionedIdentifiers.forUrl(measure.getLibrary().get(0).asStringValue());
+        var url = measure.getLibrary().get(0).asStringValue();
+
+        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+        if (b.getEntry().isEmpty()) {
+            var errorMsg = String.format("Unable to find Library with url: %s", url);
+            throw new ResourceNotFoundException(errorMsg);
+        }
+
+        var id = VersionedIdentifiers.forUrl(url);
         var context = Engines.forRepositoryAndSettings(
                 this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
 
-        var lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
+        CompiledLibrary lib;
+        try {
+            lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
+        } catch (CqlIncludeException e) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded.",
+                            id.getId()),
+                    e);
+        }
 
         context.getState().init(lib.getLibrary());
 
@@ -124,7 +144,8 @@ public class R4MeasureProcessor {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
             context.getState().setParameters(lib.getLibrary(), paramMap);
             // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same parameter name, but different
+            // Note: this may not be the optimal method (e.g. libraries with the same
+            // parameter name, but different
             // values)
             if (lib.getLibrary().getIncludes() != null) {
                 lib.getLibrary()
@@ -177,9 +198,9 @@ public class R4MeasureProcessor {
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         // resolve the measurement period
         return new Interval(
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodStart, true)),
+                DateHelper.resolveRequestDate(periodStart, true),
                 true,
-                DateTime.fromJavaDate(DateHelper.resolveRequestDate(periodEnd, false)),
+                DateHelper.resolveRequestDate(periodEnd, false),
                 true);
     }
 

@@ -9,136 +9,137 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
 public class CompositionSectionComponentBuilder<T extends IBaseBackboneElement>
-        extends BackboneElementBuilder<CompositionSectionComponentBuilder<T>, T> {
+        extends BaseBackboneElementBuilder<CompositionSectionComponentBuilder<T>, T> {
 
-    private String myTitle;
-    private String myFocus;
-    private List<String> myEntry;
-    private NarrativeSettings myText;
+    private String title;
+    private String focus;
+    private List<String> entries;
+    private NarrativeSettings text;
 
-    public CompositionSectionComponentBuilder(Class<T> theResourceClass) {
-        super(theResourceClass);
+    public CompositionSectionComponentBuilder(Class<T> resourceClass) {
+        super(resourceClass);
     }
 
-    public CompositionSectionComponentBuilder(Class<T> theResourceClass, String theId) {
-        super(theResourceClass, theId);
+    public CompositionSectionComponentBuilder(Class<T> resourceClass, String id) {
+        super(resourceClass, id);
     }
 
-    public CompositionSectionComponentBuilder(
-            Class<T> theResourceClass, String theId, String theFocus, String theEntry) {
-        this(theResourceClass, theId);
-        checkNotNull(theFocus, theEntry);
+    public CompositionSectionComponentBuilder(Class<T> resourceClass, String id, String focus, String entry) {
+        this(resourceClass, id);
+        checkNotNull(focus);
+        checkNotNull(entry);
 
-        myFocus = theFocus;
-        addEntry(theEntry);
+        this.focus = focus;
+        addEntry(entry);
     }
 
     private void addEntry(String entry) {
-        if (myEntry == null) {
-            myEntry = new ArrayList<>();
+        if (this.entries == null) {
+            this.entries = new ArrayList<>();
         }
 
-        myEntry.add(entry);
+        this.entries.add(entry);
     }
 
     private List<String> getEntries() {
-        if (myEntry == null) {
+        if (entries == null) {
             return Collections.emptyList();
         }
 
-        return myEntry;
+        return entries;
     }
 
-    public CompositionSectionComponentBuilder<T> withTitle(String theTitle) {
-        checkNotNull(theTitle);
+    public CompositionSectionComponentBuilder<T> withTitle(String title) {
+        checkNotNull(title);
 
-        myTitle = theTitle;
+        this.title = title;
 
         return this;
     }
 
-    public CompositionSectionComponentBuilder<T> withFocus(String theFocus) {
-        checkNotNull(theFocus);
+    public CompositionSectionComponentBuilder<T> withFocus(String focus) {
+        checkNotNull(focus);
 
-        myFocus = theFocus;
-
-        return this;
-    }
-
-    public CompositionSectionComponentBuilder<T> withEntry(String theEntry) {
-        checkNotNull(theEntry);
-
-        addEntry(theEntry);
+        this.focus = focus;
 
         return this;
     }
 
-    public CompositionSectionComponentBuilder<T> withText(NarrativeSettings theText) {
-        checkNotNull(theText);
+    public CompositionSectionComponentBuilder<T> withEntry(String entry) {
+        checkNotNull(entry);
 
-        myText = theText;
+        addEntry(entry);
+
+        return this;
+    }
+
+    public CompositionSectionComponentBuilder<T> withText(NarrativeSettings text) {
+        checkNotNull(text);
+
+        this.text = text;
 
         return this;
     }
 
     @Override
     public T build() {
-        checkNotNull(myFocus, myEntry);
-        checkArgument(!myEntry.isEmpty());
+        checkNotNull(focus);
+        checkNotNull(entries);
+        checkArgument(!entries.isEmpty());
 
         return super.build();
     }
 
     @Override
-    protected void initializeDstu3(T theResource) {
-        super.initializeDstu3(theResource);
+    protected void initializeDstu3(T resource) {
+        super.initializeDstu3(resource);
 
         org.hl7.fhir.dstu3.model.Composition.SectionComponent section =
-                (org.hl7.fhir.dstu3.model.Composition.SectionComponent) theResource;
+                (org.hl7.fhir.dstu3.model.Composition.SectionComponent) resource;
 
-        section.setTitle(myTitle).setId(getId());
+        section.setTitle(title).setId(getId());
         getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.dstu3.model.Reference(entry)));
-        if (myText != null) {
+        if (text != null) {
             org.hl7.fhir.dstu3.model.Narrative narrative = new org.hl7.fhir.dstu3.model.Narrative();
-            narrative.setStatusAsString(myText.getStatus());
-            narrative.setDivAsString(myText.getText());
+            narrative.setStatusAsString(text.getStatus());
+            narrative.setDivAsString(text.getText());
             section.setText(narrative);
         }
         // no focus
     }
 
     @Override
-    protected void initializeR4(T theResource) {
-        super.initializeR4(theResource);
+    protected void initializeR4(T resource) {
+        super.initializeR4(resource);
         org.hl7.fhir.r4.model.Composition.SectionComponent section =
-                (org.hl7.fhir.r4.model.Composition.SectionComponent) theResource;
+                (org.hl7.fhir.r4.model.Composition.SectionComponent) resource;
 
-        section.setFocus(new org.hl7.fhir.r4.model.Reference(myFocus))
-                .setTitle(myTitle)
+        section.setFocus(new org.hl7.fhir.r4.model.Reference(focus))
+                .setTitle(title)
                 .setId(getId());
         getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.r4.model.Reference(entry)));
-        if (myText != null) {
+        if (text != null) {
             org.hl7.fhir.r4.model.Narrative narrative = new org.hl7.fhir.r4.model.Narrative();
-            narrative.setStatusAsString(myText.getStatus());
-            narrative.setDivAsString(myText.getText());
+            narrative.setStatusAsString(text.getStatus());
+            narrative.setDivAsString(text.getText());
             section.setText(narrative);
         }
     }
 
     @Override
-    protected void initializeR5(T theResource) {
-        super.initializeR5(theResource);
+    protected void initializeR5(T resource) {
+        super.initializeR5(resource);
         org.hl7.fhir.r5.model.Composition.SectionComponent section =
-                (org.hl7.fhir.r5.model.Composition.SectionComponent) theResource;
+                (org.hl7.fhir.r5.model.Composition.SectionComponent) resource;
 
-        section.setFocus(new org.hl7.fhir.r5.model.Reference(myFocus))
-                .setTitle(myTitle)
+        section.setFocus(new org.hl7.fhir.r5.model.Reference(focus))
+                .setTitle(title)
                 .setId(getId());
         getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.r5.model.Reference(entry)));
-        if (myText != null) {
+        if (text != null) {
             org.hl7.fhir.r5.model.Narrative narrative = new org.hl7.fhir.r5.model.Narrative();
-            narrative.setStatusAsString(myText.getStatus());
-            narrative.setDivAsString(myText.getText());
+            narrative.setStatusAsString(text.getStatus());
+            narrative.setDivAsString(text.getText());
             section.setText(narrative);
         }
     }

@@ -27,22 +27,26 @@ public class InMemoryFhirRepository implements Repository {
 
     private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
     private final FhirContext context;
+    private final Map<String, Function<IBaseParameters, Object>> operationMap;
 
     public InMemoryFhirRepository(FhirContext context) {
         this.context = context;
         this.resourceMap = new HashMap<>();
+        this.operationMap = new HashMap<>();
     }
 
-    public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive) {
-        this.context = context;
-        // TODO: Resource loader.
-        this.resourceMap = new HashMap<>();
-        // var resourceLoader = new FhirResourceLoader(context, clazz, directoryList,
-        // recursive);
-        // this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(),
-        // r -> Ids.newId(this.context, r.fhirType(),
-        // r.getIdElement().getIdPart()));
-    }
+    // public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive)
+    // {
+    //     this.context = context;
+    //     // TODO: Resource loader.
+    //     this.resourceMap = new HashMap<>();
+    //     this.operationMap = new HashMap<>();
+    //     // var resourceLoader = new FhirResourceLoader(context, clazz, directoryList,
+    //     // recursive);
+    //     // this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(),
+    //     // r -> Ids.newId(this.context, r.fhirType(),
+    //     // r.getIdElement().getIdPart()));
+    // }
 
     public InMemoryFhirRepository(FhirContext context, IBaseBundle bundle) {
         this.context = context;
@@ -51,6 +55,7 @@ public class InMemoryFhirRepository implements Repository {
                 .collect(Collectors.groupingBy(
                         IBaseResource::fhirType,
                         Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless(), Function.identity())));
+        this.operationMap = new HashMap<>();
     }
 
     @Override
@@ -204,7 +209,7 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new NotImplementedException();
+        return invokeOperation(name, parameters);
     }
 
     @Override
@@ -246,5 +251,10 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public FhirContext fhirContext() {
         return this.context;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <R extends Object> R invokeOperation(String operationName, IBaseParameters parameters) {
+        return (R) operationMap.get(operationName).apply(parameters);
     }
 }

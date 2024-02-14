@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,7 +25,7 @@ public class MeasureProcessorEvaluateTest {
     protected static Given given = Measure.given().repositoryFor("CaseRepresentation101");
 
     @Test
-    public void measure_eval() {
+    void measure_eval() {
         var report = given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
                 .periodStart("2022-01-01")
@@ -35,12 +36,12 @@ public class MeasureProcessorEvaluateTest {
                 .then()
                 .report();
 
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-06-29");
+        assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
+        assertEquals("2022-06-29", formatter.format(report.getPeriod().getEnd()));
     }
 
     @Test
-    public void measure_eval_with_additional_data() {
+    void measure_eval_with_additional_data() {
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()
                 .parseResource(
@@ -56,8 +57,8 @@ public class MeasureProcessorEvaluateTest {
                 .hasMeasureVersion("0.000.01")
                 .report();
 
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2022-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2022-01-31");
+        assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
+        assertEquals("2022-01-31", formatter.format(report.getPeriod().getEnd()));
     }
 
     @Test
@@ -114,7 +115,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    public void test_with_custom_options() {
+    void test_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions
@@ -146,7 +147,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    public void test_additional_data_with_custom_options() {
+    void test_additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions
@@ -180,5 +181,43 @@ public class MeasureProcessorEvaluateTest {
 
         // Run again to find any issues with caching
         when.then().report();
+    }
+    /**
+     * test to validate that measure with MeasureScorer specified at the group level
+     * and nothing on measure-level MeasureScorer
+     */
+    @Test
+    void measure_eval_group_measurescorer() {
+        var when = Measure.given()
+                .repositoryFor("DischargedonAntithromboticTherapyFHIR")
+                .when()
+                .measureId("DischargedonAntithromboticTherapyFHIR")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("summary")
+                .evaluate();
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(1, report.getGroup().size());
+        assertEquals(3, report.getGroupFirstRep().getPopulation().get(0).getCount());
+    }
+
+    @Test
+    void measure_eval_group_measurescorer_invalidMeasureScore() {
+        // Removed MeasureScorer from Measure, should trigger exception
+        var when = Measure.given()
+                .repositoryFor("InvalidMeasure")
+                .when()
+                .measureId("DischargedonAntithromboticTherapyFHIR")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("summary")
+                .evaluate();
+
+        String errorMsg = "MeasureScoring must be specified on Group or Measure";
+        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        assertEquals(errorMsg, e.getMessage());
     }
 }

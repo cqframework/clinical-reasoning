@@ -23,22 +23,34 @@ public class BenchmarksIT {
     // and see what your specific hardware produces and then make modifications.
     // Check your results against your own personal reference scores.
     private static final Map<String, Double> REFERENCE_SCORES = Map.of(
-            "org.opencds.cqf.fhir.benchmark.PlanDefinitions.test", 300.0, // ops/second
-            "org.opencds.cqf.fhir.benchmark.Measures.test", 800.0, // ops/second
-            "org.opencds.cqf.fhir.benchmark.MeasuresAdditionalData.test", .35, // ops/second
-            "org.opencds.cqf.fhir.benchmark.Questionnaires.test", 530.0, // ops/second
-            "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testLarge", 4_000_000.0, // ops/second
-            "org.opencds.cqf.fhir.benchmark.TerminologyProviders.testSmall", 7_000_000.0); // ops/second
+            "testApply", 300.0, // ops/second
+            "testApplyWithGenerate", 300.0, // ops/second
+            "testEvaluate", 800.0, // ops/second
+            "testEvaluateAdditionalData", .35, // ops/second
+            "testPopulate", 530.0, // ops/second
+            "testLarge", 4_000_000.0, // ops/second
+            "testSmall", 7_000_000.0); // ops/second
+
+    // private static final Map<String, Double> BAR_REFERENCE_SCORES = Map.of(
+    //         "testApply", 200.0, // ops/second
+    //         "testApplyWithGenerate", 350.0, // ops/second
+    //         "testEvaluate", 675.0, // ops/second
+    //         "testEvaluateAdditionalData", .11, // ops/second
+    //         "testPopulate", 80.0, // ops/second
+    //         "testLarge", 4_900_000.0, // ops/second
+    //         "testSmall", 9_000_000.0); // ops/second
 
     private static final double SCORE_DEVIATION = .5; // +/- 50% ops/unit allowed
 
     @Test
-    @Disabled("need to reset the baseline of latest round of refactoring")
+    @Disabled("Test fails during package due to test-jar not working as expected ")
     public void benchmark() throws Exception {
         Options opt = new OptionsBuilder()
                 .include(Questionnaires.class.getSimpleName())
                 .include(Measures.class.getSimpleName())
+                .include(MeasuresAdditionalData.class.getSimpleName())
                 .include(PlanDefinitions.class.getSimpleName())
+                .include(PlanDefinitionsWithGenerate.class.getSimpleName())
                 .include(TerminologyProviders.class.getSimpleName())
                 .build();
         Collection<RunResult> runResults = new Runner(opt).run();

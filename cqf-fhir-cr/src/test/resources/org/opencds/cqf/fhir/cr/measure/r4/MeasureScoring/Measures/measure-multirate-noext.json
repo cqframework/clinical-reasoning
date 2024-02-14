@@ -1,0 +1,263 @@
+{
+  "resourceType": "Measure",
+  "id": "multirate-groupid",
+  "url": "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext",
+  "name": "multirate-groupid",
+  "status": "active",
+  "experimental": true,
+  "date": "2024-01-03T14:22:52-07:00",
+  "publisher": "Alphora",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "https://alphora.com"
+    } ]
+  } ],
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "version": "4.0.1",
+      "code": "program",
+      "display": "Program"
+    },
+    "valueCodeableConcept": {
+      "text": "eligible-provider"
+    }
+  } ],
+  "jurisdiction": [ {
+    "coding": [ {
+      "system": "urn:iso:std:iso:3166",
+      "version": "4.0.1",
+      "code": "US",
+      "display": "United States of America"
+    } ]
+  } ],
+  "effectivePeriod": {
+    "start": "2020-01-01T00:00:00-07:00",
+    "end": "2020-12-31T23:59:59-07:00"
+  },
+  "topic": [ {
+    "coding": [ {
+      "system": "http://loinc.org",
+      "code": "57024-2",
+      "display": "Health Quality Measure Document"
+    } ]
+  } ],
+  "library": [ "http://sample/Library" ],
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "version": "4.0.1",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "version": "4.2.0",
+      "code": "process",
+      "display": "Process"
+    } ]
+  } ],
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "version": "0.1.0",
+      "code": "increase",
+      "display": "Increased score indicates improvement"
+    } ]
+  },
+  "group": [ {
+    "id": "DataCompleteness",
+    "population": [ {
+      "id": "datacompleteness-ip",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "datacompleteness-den",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Denominator 1"
+      }
+    }, {
+      "id": "datacompleteness-den-exclusion",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exclusion",
+          "display": "Denominator Exclusion"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Denominator Exclusion"
+      }
+    }, {
+      "id": "datacompleteness-num",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Numerator 1"
+      }
+    } ]
+  }, {
+    "id": "PerformanceRate",
+    "population": [ {
+      "id": "performancerate-ip",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "performancerate-den",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Denominator 2"
+      }
+    }, {
+      "id": "performancerate-num",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.name",
+        "expression": "Numerator 2"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "sde-ethnicity",
+    "code": {
+      "text": "sde-ethnicity"
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Ethnicity"
+    }
+  }, {
+    "id": "sde-payer",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Payer"
+    }
+  }, {
+    "id": "sde-race",
+    "code": {
+      "text": "sde-race"
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Race"
+    }
+  }, {
+    "id": "sde-sex",
+    "code": {
+      "text": "sde-sex"
+    },
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Sex"
+    }
+  }, {
+    "id": "sde-performancemet",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "Performance Met"
+    }
+  }, {
+    "id": "sde-performancenotmet",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "Performance Not Met"
+    }
+  }, {
+    "id": "sde-denominatorexception",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "Denominator Exception"
+    }
+  } ]
+}

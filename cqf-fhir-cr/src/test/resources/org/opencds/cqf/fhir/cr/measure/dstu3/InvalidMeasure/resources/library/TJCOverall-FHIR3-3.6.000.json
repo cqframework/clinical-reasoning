@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "TJCOverall-FHIR3-3.6.000",
+  "version": "3.6.000",
+  "name": "TJCOverall_FHIR3",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://hl7.org/fhir/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/TJCOverall_FHIR3.cql"
+  } ]
+}

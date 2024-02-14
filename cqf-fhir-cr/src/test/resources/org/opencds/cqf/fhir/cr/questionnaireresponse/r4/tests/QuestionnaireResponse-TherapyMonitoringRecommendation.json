@@ -1,0 +1,101 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "TherapyMonitoringRecommendation",
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/Patient1"
+  },
+  "authored": "2024-01-22T11:45:33+11:00",
+  "questionnaire": "http://example.org/Questionnaire/TherapyMonitoringRecommendationQuestionnaire",
+  "item": [
+    {
+      "linkId": "1",
+      "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation",
+      "text": "ActiveTherapyFeature",
+      "item": [
+        {
+          "linkId": "1.1",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.value[x]",
+          "text": "Observation.value[x]",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "on-methotrexate",
+                "system": "http://example.org/CodeSystem/therapy-cs"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "1.2",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.code",
+          "text": "Type of observation (code / type)",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "on-medication-therapy",
+                "system": "http://example.org/CodeSystem/CaseFeatureCodes"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "1.3",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.status",
+          "text": "The status of the result value.",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "final",
+                "system": "http://hl7.org/fhir/observation-status"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "2",
+      "definition": "http://example.org/StructureDefinition/LastCbcPanelReportDateFeature#Observation",
+      "text": "LastCbcPanelReportDateFeature",
+      "item": [
+        {
+          "linkId": "2.1",
+          "definition": "http://example.org/StructureDefinition/LastCbcPanelReportDateFeature#Observation.value[x]",
+          "text": "Observation.value[x]",
+          "answer": [
+            {
+              "valueDateTime": "2024-01-22T11:45:33+11:00"
+            }
+          ]
+        },
+        {
+          "linkId": "2.2",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.code",
+          "text": "Type of observation (code / type)",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "last-cbc-panel-report-date",
+                "system": "http://example.org/CodeSystem/CaseFeatureCodes"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "2.3",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.status",
+          "text": "The status of the result value.",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "final",
+                "system": "http://hl7.org/fhir/observation-status"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

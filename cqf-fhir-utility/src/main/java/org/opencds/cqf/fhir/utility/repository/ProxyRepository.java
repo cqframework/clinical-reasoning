@@ -28,11 +28,12 @@ public class ProxyRepository implements Repository {
     private Repository content;
     private Repository terminology;
 
-    public ProxyRepository(Repository local, Repository data, Repository content, Repository terminology) {
+    public ProxyRepository(
+            Repository local, Boolean useLocalData, Repository data, Repository content, Repository terminology) {
         checkNotNull(local);
 
         this.local = local;
-        this.data = data == null ? this.local : data;
+        this.data = data == null ? this.local : useLocalData ? new FederatedRepository(local, data) : data;
         this.content = content == null ? this.local : content;
         this.terminology = terminology == null ? this.local : terminology;
     }
@@ -124,7 +125,13 @@ public class ProxyRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return null;
+        if (isTerminologyResource(resourceType.getSimpleName())) {
+            return terminology.invoke(resourceType, name, parameters, returnType, headers);
+        } else if (isContentResource(resourceType.getSimpleName())) {
+            return content.invoke(resourceType, name, parameters, returnType, headers);
+        } else {
+            return data.invoke(resourceType, name, parameters, returnType, headers);
+        }
     }
 
     @Override

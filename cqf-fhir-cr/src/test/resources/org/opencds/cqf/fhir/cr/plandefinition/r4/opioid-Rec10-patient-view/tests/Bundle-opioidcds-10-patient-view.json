@@ -15,7 +15,7 @@
               {
                 "severity": "error",
                 "code": "exception",
-                "diagnostics": "DynamicValue expression Indicator encountered exception: Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation"
+                "diagnostics": "DynamicValue resolution for path action.extension encountered exception: Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation"
               }
             ]
           }
@@ -34,10 +34,10 @@
         "status": "draft",
         "intent": "proposal",
         "subject": {
-          "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+          "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
         },
         "encounter": {
-          "reference": "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
+          "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
         },
         "action": [
           {
@@ -126,7 +126,7 @@
         "resourceType": "ServiceRequest",
         "id": "opioidcds-urine-screening-request",
         "instantiatesCanonical": [
-          "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request"
+          "http://fhir.org/guides/cdc/opioid-cds/ActivityDefinition/opioidcds-urine-screening-request|2022.1.0"
         ],
         "status": "draft",
         "intent": "order",
@@ -141,7 +141,10 @@
           ]
         },
         "subject": {
-          "reference": "example-rec-10-patient-view-POS-Cocaine-drugs"
+          "reference": "Patient/example-rec-10-patient-view-POS-Cocaine-drugs"
+        },
+        "encounter": {
+          "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
         }
       }
     }

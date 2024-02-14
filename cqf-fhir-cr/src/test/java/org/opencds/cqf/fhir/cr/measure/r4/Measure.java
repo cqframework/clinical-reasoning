@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
@@ -103,7 +103,7 @@ public class Measure {
                     FhirContext.forR4Cached(),
                     this.getClass(),
                     CLASS_PATH + "/" + repositoryPath,
-                    IGLayoutMode.DIRECTORY);
+                    IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES);
             return this;
         }
 
@@ -220,14 +220,7 @@ public class Measure {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            MeasureReport report = null;
-            try {
-                report = this.operation.get();
-            } catch (Exception e) {
-                throw new IllegalStateException("error when running 'then' and invoking the chosen operation", e);
-            }
-
-            return new SelectedReport(report);
+            return new SelectedReport(this.operation.get());
         }
     }
 

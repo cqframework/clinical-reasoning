@@ -9,10 +9,13 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,11 +34,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements the core Measure evaluation logic that's defined in the Quality Measure
- * implementation guide and HQMF specifications. There are a number of model-independent concepts
- * such as "groups", "populations", and "stratifiers" that can be used across a number of different
- * data models including FHIR, QDM, and QICore. To the extent feasible, this class is intended to be
- * model-independent so that it can be used in any Java-based implementation of Quality Measure
+ * This class implements the core Measure evaluation logic that's defined in the
+ * Quality Measure
+ * implementation guide and HQMF specifications. There are a number of
+ * model-independent concepts
+ * such as "groups", "populations", and "stratifiers" that can be used across a
+ * number of different
+ * data models including FHIR, QDM, and QICore. To the extent feasible, this
+ * class is intended to be
+ * model-independent so that it can be used in any Java-based implementation of
+ * Quality Measure
  * evaluation.
  *
  * @see <a href=
@@ -110,17 +118,17 @@ public class MeasureEvaluator {
 
     protected void setMeasurementPeriod(Interval measurementPeriod) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef();
-        if (measurementPeriod == null && pd.getDefault() == null) {
-            logger.warn(
-                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                    this.measurementPeriodParameterName);
-            return;
-        }
-
         if (pd == null) {
             logger.warn(
                     "Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
             this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            return;
+        }
+
+        if (measurementPeriod == null && pd.getDefault() == null) {
+            logger.warn(
+                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
+                    this.measurementPeriodParameterName);
             return;
         }
 
@@ -209,10 +217,7 @@ public class MeasureEvaluator {
                 type.toCode(),
                 subjectIds.size());
 
-        MeasureScoring scoring = measureDef.scoring();
-        if (scoring == null) {
-            throw new RuntimeException("MeasureScoring type is required in order to calculate.");
-        }
+        Map<GroupDef, MeasureScoring> scoring = measureDef.scoring();
 
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
@@ -229,7 +234,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateSubject(
-            MeasureDef measureDef, MeasureScoring scoring, String subjectType, String subjectId) {
+            MeasureDef measureDef, Map<GroupDef, MeasureScoring> scoring, String subjectType, String subjectId) {
         evaluateSdes(subjectId, measureDef.sdes());
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(scoring, groupDef, subjectType, subjectId);
@@ -286,7 +291,7 @@ public class MeasureEvaluator {
                     "Measure observation %s does not reference a function definition", criteriaExpression));
         }
 
-        Object result = null;
+        Object result;
         context.getState().pushWindow();
         try {
             context.getState()
@@ -342,6 +347,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(DENOMINATOR), groupDef.getSingle(DENOMINATOREXCLUSION));
 
             if (inDenominator) {
+                boolean inException = false;
                 // Are they in the numerator?
                 boolean inNumerator = evaluatePopulationMembership(
                         subjectType, subjectId, groupDef.getSingle(NUMERATOR), groupDef.getSingle(NUMERATOREXCLUSION));
@@ -351,7 +357,7 @@ public class MeasureEvaluator {
 
                     PopulationDef denominatorException = groupDef.getSingle(DENOMINATOREXCEPTION);
                     PopulationDef denominator = groupDef.getSingle(DENOMINATOR);
-                    boolean inException = false;
+
                     for (Object resource : evaluatePopulationCriteria(
                             subjectType,
                             subjectId,
@@ -366,6 +372,19 @@ public class MeasureEvaluator {
                         denominatorException.addSubject(subjectId);
                         denominator.removeSubject(subjectId);
                     }
+                }
+                // I & D & !E & !(X & !N) => inTotalDenominator
+                // denom-exclusion already considered in inDenominator
+                if (inInitialPopulation && inDenominator && !(inException && !inNumerator)) {
+                    PopulationDef totalDenominator = groupDef.getSingle(TOTALDENOMINATOR);
+                    totalDenominator.addSubject(subjectId);
+                }
+
+                // N & !NE => inTotalNumerator
+                // num-exclusion already considered in inNumerator
+                if (inNumerator) {
+                    PopulationDef totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
+                    totalNumerator.addSubject(subjectId);
                 }
             }
         }
@@ -399,9 +418,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-            MeasureScoring measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
+            Map<GroupDef, MeasureScoring> measureScoring, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
-        switch (measureScoring) {
+
+        var scoring = measureScoring.get(groupDef);
+        switch (scoring) {
             case PROPORTION:
             case RATIO:
                 evaluateProportion(groupDef, subjectType, subjectId);

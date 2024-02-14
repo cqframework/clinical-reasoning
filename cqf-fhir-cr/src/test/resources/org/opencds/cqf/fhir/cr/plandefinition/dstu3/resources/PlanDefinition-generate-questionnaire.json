@@ -6,6 +6,12 @@
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
     ]
   },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
+      "valueBoolean": true
+    }
+  ],
   "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
   "identifier": [
     {
@@ -55,6 +61,20 @@
   "purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
   "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
   "copyright": "© CDC 2016+.",
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "resource": {
+        "reference": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim"
+      }
+    },
+    {
+      "type": "depends-on",
+      "resource": {
+        "reference": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+      }
+    }
+  ],
   "library": [
     {
       "reference": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"

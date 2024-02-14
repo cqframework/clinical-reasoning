@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir-cr-cli</artifactId>
-    <version>3.0.0-PRE13-SNAPSHOT</version>
+    <version>3.0.0-PRE18-SNAPSHOT</version>
     <name>FHIR Clinical Reasoning (CLI)</name>
     <description>CLI for running FHIR Clincial Reasoning operations</description>
 
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir</artifactId>
-        <version>3.0.0-PRE13-SNAPSHOT</version>
+        <version>3.0.0-PRE18-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-api</artifactId>
-            <version>3.0.0-PRE13-SNAPSHOT</version>
+            <version>3.0.0-PRE18-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-utility</artifactId>
-            <version>3.0.0-PRE13-SNAPSHOT</version>
+            <version>3.0.0-PRE18-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-cql</artifactId>
-            <version>3.0.0-PRE13-SNAPSHOT</version>
+            <version>3.0.0-PRE18-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-jackson</artifactId>
-            <version>3.0.0-PRE13-SNAPSHOT</version>
+            <version>3.0.0-PRE18-SNAPSHOT</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -66,17 +67,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <failOnWarning>true</failOnWarning>
-                        <showWarnings>true</showWarnings>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>info.picocli</groupId>
-                                <artifactId>picocli-codegen</artifactId>
-                                <version>${picocli.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>compile</id>
@@ -84,9 +74,50 @@
                                 <goal>compile</goal>
                             </goals>
                             <configuration>
+                                <failOnWarning>true</failOnWarning>
+                                <showWarnings>true</showWarnings>
                                 <compilerArgs>
                                     <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                                    <arg>-XDcompilePolicy=simple</arg>
+                                    <!-- TODO: Ramp up error prone checkts to include warnings as
+                                    well -->
+                                    <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
                                 </compilerArgs>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>info.picocli</groupId>
+                                        <artifactId>picocli-codegen</artifactId>
+                                        <version>${picocli.version}</version>
+                                    </path>
+                                    <path>
+                                        <groupId>com.google.errorprone</groupId>
+                                        <artifactId>error_prone_core</artifactId>
+                                        <version>${error-prone.version}</version>
+                                    </path>
+                                </annotationProcessorPaths>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test-compile</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <failOnWarning>true</failOnWarning>
+                                <showWarnings>true</showWarnings>
+                                <compilerArgs>
+                                    <arg>-XDcompilePolicy=simple</arg>
+                                    <!-- TODO: Ramp up error prone checkts to include warnings as
+                                    well -->
+                                    <arg>-Xplugin:ErrorProne -XepDisableAllWarnings</arg>
+                                </compilerArgs>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>com.google.errorprone</groupId>
+                                        <artifactId>error_prone_core</artifactId>
+                                        <version>${error-prone.version}</version>
+                                    </path>
+                                </annotationProcessorPaths>
                             </configuration>
                         </execution>
                     </executions>
@@ -118,7 +149,9 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!--This is not a library module, it's a CLI app, so we don't need to be compliant with Android here -->
+                <!--This
+                is not a library module, it's a CLI app, so we don't need to be compliant with
+                Android here -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>animal-sniffer-maven-plugin</artifactId>

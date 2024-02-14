@@ -46,6 +46,7 @@
   },
   "action": [
     {
+      "id": "send-discharge-message",
       "title": "Send message with discharge instructions",
       "code": [
         {
@@ -63,7 +64,7 @@
           "path": "payload[0].contentString",
           "expression": {
             "language": "text/fhirpath",
-            "expression": "'Provide patient discharge instructions for ' + %subject.name.given.first()"
+            "expression": "%context.description + ' ' + %subject.name.given.first()"
           }
         }
       ],

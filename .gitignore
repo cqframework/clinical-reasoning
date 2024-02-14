@@ -7,11 +7,11 @@ bin/
 .settings
 .flattened-pom.xml
 .factorypath
+.DS_Store
 
 pom.xml.versionsBackup
 
 *.log*
-
 Snap.*
 core.*
 dump.*
@@ -26,3 +26,4 @@ jitdump.*
 .apt_generated
 
 input
+*DS_Store

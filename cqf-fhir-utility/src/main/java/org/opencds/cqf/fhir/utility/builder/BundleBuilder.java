@@ -5,54 +5,54 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Date;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-public class BundleBuilder<T extends IBaseBundle> extends ResourceBuilder<BundleBuilder<T>, T> {
+public class BundleBuilder<T extends IBaseBundle> extends BaseResourceBuilder<BundleBuilder<T>, T> {
 
-    private String myType;
+    private String type;
 
-    private Date myTimestamp = new Date();
+    private Date timestamp = new Date();
 
-    public BundleBuilder(Class<T> theResourceClass) {
-        super(theResourceClass);
+    public BundleBuilder(Class<T> resourceClass) {
+        super(resourceClass);
     }
 
-    public BundleBuilder(Class<T> theResourceClass, String theId) {
-        super(theResourceClass, theId);
+    public BundleBuilder(Class<T> resourceClass, String id) {
+        super(resourceClass, id);
     }
 
-    public BundleBuilder(Class<T> theResourceClass, String theId, String theType) {
-        this(theResourceClass, theId);
-        checkNotNull(theType);
+    public BundleBuilder(Class<T> resourceClass, String id, String type) {
+        this(resourceClass, id);
+        checkNotNull(type);
 
-        myType = theType;
+        this.type = type;
     }
 
-    public BundleBuilder<T> withType(String theType) {
-        checkNotNull(theType);
+    public BundleBuilder<T> withType(String type) {
+        checkNotNull(type);
 
-        myType = theType;
+        this.type = type;
 
         return this;
     }
 
-    public BundleBuilder<T> withTimestamp(Date theTimestamp) {
-        myTimestamp = theTimestamp;
+    public BundleBuilder<T> withTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
 
         return this;
     }
 
     @Override
     public T build() {
-        checkNotNull(myType);
+        checkNotNull(type);
 
         return super.build();
     }
 
     @Override
-    protected void initializeDstu3(T theResource) {
-        super.initializeDstu3(theResource);
-        org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) theResource;
+    protected void initializeDstu3(T resource) {
+        super.initializeDstu3(resource);
+        org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
 
-        bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.valueOf(myType));
+        bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.valueOf(type));
 
         bundle.setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
                 .setSystem(getIdentifier().getKey())
@@ -60,30 +60,30 @@ public class BundleBuilder<T extends IBaseBundle> extends ResourceBuilder<Bundle
     }
 
     @Override
-    protected void initializeR4(T theResource) {
-        super.initializeR4(theResource);
-        org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) theResource;
+    protected void initializeR4(T resource) {
+        super.initializeR4(resource);
+        org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
 
-        bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.valueOf(myType));
+        bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.valueOf(type));
 
         bundle.setIdentifier(new org.hl7.fhir.r4.model.Identifier()
                 .setSystem(getIdentifier().getKey())
                 .setValue(getIdentifier().getValue()));
 
-        bundle.setTimestamp(myTimestamp);
+        bundle.setTimestamp(timestamp);
     }
 
     @Override
-    protected void initializeR5(T theResource) {
-        super.initializeR5(theResource);
-        org.hl7.fhir.r5.model.Bundle bundle = (org.hl7.fhir.r5.model.Bundle) theResource;
+    protected void initializeR5(T resource) {
+        super.initializeR5(resource);
+        org.hl7.fhir.r5.model.Bundle bundle = (org.hl7.fhir.r5.model.Bundle) resource;
 
-        bundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.valueOf(myType));
+        bundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.valueOf(type));
 
         bundle.setIdentifier(new org.hl7.fhir.r5.model.Identifier()
                 .setSystem(getIdentifier().getKey())
                 .setValue(getIdentifier().getValue()));
 
-        bundle.setTimestamp(myTimestamp);
+        bundle.setTimestamp(timestamp);
     }
 }

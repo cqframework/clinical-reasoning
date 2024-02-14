@@ -36,7 +36,7 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService {
-    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(R4MeasureService.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureService.class);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
@@ -60,7 +60,7 @@ public class R4MeasureService {
             String productLine,
             String practitioner) {
 
-        var repo = Repositories.proxy(repository, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());
 
         ensureSupplementalDataElementSearchParameter();
@@ -98,12 +98,12 @@ public class R4MeasureService {
         return measureReport;
     }
 
-    private void addProductLineExtension(MeasureReport theMeasureReport, String theProductLine) {
-        if (theProductLine != null) {
+    private void addProductLineExtension(MeasureReport measureReport, String productLine) {
+        if (productLine != null) {
             Extension ext = new Extension();
             ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
-            ext.setValue(new StringType(theProductLine));
-            theMeasureReport.addExtension(ext);
+            ext.setValue(new StringType(productLine));
+            measureReport.addExtension(ext);
         }
     }
 
@@ -116,7 +116,7 @@ public class R4MeasureService {
         try {
             repository.transaction(builder.getBundle());
         } catch (UnsupportedOperationException e) {
-            ourLog.debug("e");
+            log.debug("e");
         }
     }
 

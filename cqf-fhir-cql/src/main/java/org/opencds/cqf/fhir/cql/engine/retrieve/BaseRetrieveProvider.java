@@ -63,14 +63,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public Predicate<IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
-        if (templateId == null
-                || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
-            logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
+        var profileMode = this.getRetrieveSettings().getProfileMode();
+        if (profileMode == PROFILE_MODE.OFF) {
             return resource -> true;
         }
 
-        var profileMode = this.getRetrieveSettings().getProfileMode();
-        if (profileMode == PROFILE_MODE.OFF || profileMode == PROFILE_MODE.TRUST) {
+        if (templateId == null
+                || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+            logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
             return resource -> true;
         }
 
@@ -94,7 +94,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             };
         }
 
-        throw new UnsupportedOperationException("ENFORCED profile mode is not yet supported.");
+        throw new UnsupportedOperationException(String.format("%s profile mode is not yet supported.", profileMode));
     }
 
     public Predicate<IBaseResource> filterByContext(

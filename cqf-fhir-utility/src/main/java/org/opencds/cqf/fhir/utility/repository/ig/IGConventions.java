@@ -6,8 +6,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.slf4j.Logger;
@@ -57,10 +55,6 @@ public class IGConventions {
         return filenameMode;
     }
 
-    static <V, T, U> BiConsumer<V, U> filterFirstArg(BiConsumer<T, U> c, Function<V, T> f) {
-        return (t, u) -> c.accept(f.apply(t), u);
-    }
-
     /**
      * Auto-detect the IG conventions based on the structure of the IG.
      * If the path is null or the convention can not be reliably detected,
@@ -75,7 +69,7 @@ public class IGConventions {
             return STANDARD;
         }
 
-        // A "category" hierarchy may exist in igs file structure,
+        // A "category" hierarchy may exist in the ig file structure,
         // where resource categories ("data", "terminology", "content") are organized into
         // subdirectories ("tests", "vocabulary", "resources").
         //
@@ -113,7 +107,7 @@ public class IGConventions {
                 && IGRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.')));
         var potentialResourceFiles = typePath.toFile().listFiles(resourceFileFilter);
 
-        // A file "claims" to be a FHIR resource type if it's filename starts with a valid FHIR type name.
+        // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
         // contain a FHIR resource matching the claim. This is a heuristic and may not always be accurate,
         // but it's the best we can do without parsing the file

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
@@ -26,9 +27,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
@@ -99,11 +99,9 @@ public class Measure {
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = TestRepositoryFactory.createRepository(
+            this.repository = new IGRepository(
                     FhirContext.forR4Cached(),
-                    this.getClass(),
-                    CLASS_PATH + "/" + repositoryPath,
-                    IGRepositoryConfig.WITH_CATEGORY_AND_TYPE_DIRECTORIES);
+                    getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             return this;
         }
 

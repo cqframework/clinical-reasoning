@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
+import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
@@ -16,29 +17,19 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.packages.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
 
 public class QuestionnaireProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final Repository repositoryDstu3 = TestRepositoryFactory.createRepository(
-            fhirContextDstu3,
-            this.getClass(),
-            CLASS_PATH + "/dstu3",
-            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
-    private final Repository repositoryR4 = TestRepositoryFactory.createRepository(
-            fhirContextR4,
-            this.getClass(),
-            CLASS_PATH + "/r4",
-            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
-    private final Repository repositoryR5 = TestRepositoryFactory.createRepository(
-            fhirContextR5,
-            this.getClass(),
-            CLASS_PATH + "/r5",
-            IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
+    private final Repository repositoryDstu3 =
+            new IGRepository(fhirContextDstu3, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3");
+    private final Repository repositoryR4 =
+            new IGRepository(fhirContextR4, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4");
+    private final Repository repositoryR5 =
+            new IGRepository(fhirContextR5, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5");
 
     @Test
     void testPrePopulateDstu3() {

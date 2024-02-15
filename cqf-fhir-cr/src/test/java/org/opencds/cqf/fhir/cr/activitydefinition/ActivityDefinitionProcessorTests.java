@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -24,7 +23,6 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -42,10 +40,7 @@ public class ActivityDefinitionProcessorTests {
                                 .getProtectionDomain()
                                 .getCodeSource()
                                 .getLocation()
-                                .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version,
-                IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES,
-                EncodingEnum.JSON,
-                null);
+                                .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version);
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

@@ -37,12 +37,16 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the Repository interface on onto a directory structure
  * that matches some common IG layouts.
  */
 public class IGRepository implements Repository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(IGRepository.class);
 
     // Potential metadata fields:
     // file dateTime
@@ -54,7 +58,7 @@ public class IGRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final IGRepositoryConfig repositoryConfig;
+    private final IGConventions repositoryConfig;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -96,7 +100,7 @@ public class IGRepository implements Repository {
      * @param root
      */
     public IGRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, root, IGRepositoryConfig.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
+        this(fhirContext, root, IGConventions.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
     }
 
     private static String ensureTrailingSlash(String path) {
@@ -107,24 +111,32 @@ public class IGRepository implements Repository {
      * Create a new IGRepository instance.
      *
      * @param fhirContext The FHIR context to use for parsing and encoding resources.
-     * @param root The root directory of the IG repository.
-     * @param repositoryConfig The configuration for the IG repository.
+     * @param root The root directory of the IG
+     * @param conventions The conventions for the IG
      * @param encodingEnum The encoding to use for parsing and encoding resources.
      * @param operationProvider The operation provider to use for invoking operations.
      */
     public IGRepository(
             FhirContext fhirContext,
             String root,
-            IGRepositoryConfig repositoryConfig,
+            IGConventions conventions,
             EncodingEnum encodingEnum,
             IRepositoryOperationProvider operationProvider) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.root = ensureTrailingSlash(requireNonNull(root, "root can not be null"));
-        this.repositoryConfig = requireNonNull(repositoryConfig, "repositoryConfig is required");
+        this.repositoryConfig = requireNonNull(conventions, "repositoryConfig is required");
         this.encodingEnum = requireNonNull(encodingEnum, "encodingEnum can not be null");
         this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
+        reportUnconventionalConventions(conventions);
+    }
+
+    private void reportUnconventionalConventions(IGConventions conventions) {
+        if (!conventions.equals(IGConventions.STANDARD) && !conventions.equals(IGConventions.FLAT)) {
+            LOG.warn(
+                    "Unconventional IG conventions detected.  Please ensure that the IG conforms to the expected structure.");
+        }
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
+import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
+
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -7,9 +9,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
 
 public class RequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
@@ -27,11 +28,8 @@ public class RequestResourceResolver {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = TestRepositoryFactory.createRepository(
-                    fhirContext,
-                    this.getClass(),
-                    CLASS_PATH + "/" + repositoryPath,
-                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
+            this.repository = new IGRepository(
+                    fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());
             return this;

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +19,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
 
 class R4RepositoryTest {
 
@@ -34,10 +32,7 @@ class R4RepositoryTest {
     public R4RepositoryTest() {
         repository = new IGRepository(
                 FhirContext.forR4Cached(),
-                path.resolve("org/opencds/cqf/fhir/cr/measure/r4/res").toString(),
-                IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES,
-                EncodingEnum.JSON,
-                null);
+                path.resolve("org/opencds/cqf/fhir/cr/measure/r4/res").toString());
     }
 
     @Test

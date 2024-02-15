@@ -21,7 +21,7 @@ public interface Dstu3KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAda
   default Boolean checkIfRelatedArtifactIsOwned(RelatedArtifact ra){
 		return ra.getExtension()
             .stream()
-            .filter(ext -> ext.getUrl().equals("http://hl7.org/fhir/StructureDefinition/crmi-isOwned"))
+            .filter(ext -> ext.getUrl().equals(isOwnedUrl))
             .findAny()
             .map(e -> ((BooleanType) e.getValue()).getValue())
             .orElseGet(()-> false);

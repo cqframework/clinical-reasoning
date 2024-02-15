@@ -1,46 +1,40 @@
 package org.opencds.cqf.fhir.utility.visitor.r5;
 
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r5.r5LibraryAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r5.model.OperationOutcome;
+import org.hl7.fhir.r5.model.Parameters;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 
 import java.util.List;
 
 
-public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
-
-  public void visit(LibraryAdapter library, Repository theRepository) {
-    // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
-      // what is dependency, where did it originate? potentially the package?
-
-    List<DependencyInfo> dependencies = library.getDependencies();
-    for (DependencyInfo dependency : dependencies) {
-      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-    }
-
-    // TODO: Use a HAPI FHIR Repository to search for the referenced resource, update it and visit it
-    // load resource for those
-    // update resources (per $release)
-    // $expand valuesets (so that we can recursively pin versions for any resources referenced (e.g., CodySystem references from ValueSets that we don't own)
-    // The expansion will not be persisted, it is only done as a step to pin all reference versions and record them in the manifest and root artifact (as 'depends-on' relatedArtifacts)
-      // Release needs to take in a Parameters for Manifest?
-
+public class KnowledgeArtifactReleaseVisitor implements r5KnowledgeArtifactVisitor {
+  @Override
+  public IBase visit(r5LibraryAdapter library, Repository theRepository, Parameters theParameters) {
+    return new OperationOutcome();
   }
-
-  public void visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository) {
-    List<DependencyInfo> dependencies = planDefinition.getDependencies();
-    for (DependencyInfo dependency : dependencies) {
-      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-    }
+  @Override
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
+    return new OperationOutcome();
   }
-
-  public void visit(ValueSetAdapter valueSet, Repository theRepository) {
-    List<DependencyInfo> dependencies = valueSet.getDependencies();
-    for (DependencyInfo dependency : dependencies) {
-      System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-    }
+  @Override
+  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+    return new OperationOutcome();
+  }
+  @Override
+  public IBase visit(IBaseLibraryAdapter library, Repository theRepository, IBaseParameters theParameters) {
+    return new OperationOutcome();
+  }
+  @Override
+  public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository theRepository, IBaseParameters theParameters) {
+    return new OperationOutcome();
   }
 }

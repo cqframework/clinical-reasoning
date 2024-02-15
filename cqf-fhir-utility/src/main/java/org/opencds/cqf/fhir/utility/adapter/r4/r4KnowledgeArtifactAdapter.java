@@ -24,7 +24,6 @@ public interface r4KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAdapte
   void setEffectivePeriod(Period effectivePeriod);
   List<RelatedArtifact> getRelatedArtifact();
   void setRelatedArtifact(List<RelatedArtifact> relatedArtifacts);
-//   Resource accept(r4KnowledgeArtifactVisitor theVisitor, Repository theRepository, Parameters theParameters);
   default void setName(String name) {
     this.get().setName(name);
   }

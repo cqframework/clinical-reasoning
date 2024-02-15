@@ -4,19 +4,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.dstu3.dstu3KnowledgeArtifactVisitor;
 
-class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter {
+class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements dstu3PlanDefinitionAdapter {
 
   private PlanDefinition planDefinition;
 
@@ -31,7 +30,7 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
     this.planDefinition = planDefinition;
   }
 
-  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+  public IBase accept(dstu3KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
     return visitor.visit(this, theRepository, theParameters);
   }
 
@@ -40,7 +39,7 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
   }
 
   @Override
-  public IBaseResource get() {
+  public PlanDefinition get() {
     return this.planDefinition;
   }
 
@@ -121,7 +120,7 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements org.open
   public Date getApprovalDate() {
     return this.getPlanDefinition().getApprovalDate();
   }
-  public ICompositeType getEffectivePeriod() {
+  public Period getEffectivePeriod() {
     return this.getPlanDefinition().getEffectivePeriod();
   }
   public List<RelatedArtifact> getRelatedArtifact() {

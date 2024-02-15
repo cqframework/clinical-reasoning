@@ -6,19 +6,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.r5.r5KnowledgeArtifactVisitor;
 
-class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter {
+public class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter {
 
     private Library library;
 
@@ -102,14 +103,25 @@ class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter {
     public Attachment addContent() {
         return this.getLibrary().addContent();
     }
-
+    @Override
     public List<DependencyInfo> getDependencies() {
-        return new ArrayList<DependencyInfo>();
+        List<DependencyInfo> retval = new ArrayList<DependencyInfo>();
+        final String source = this.getUrl();
+        this.getRelatedArtifactsOfType(RelatedArtifactType.DEPENDSON).stream()
+            .filter(ra -> ra.hasResource())
+            .forEach(ra -> retval.add(new DependencyInfo(source, ra.getResource(), ra.getExtension())));
+        this.get().getDataRequirement().stream()
+            .forEach(dr -> {
+                dr.getProfile().stream()
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> retval.add(new DependencyInfo(source, profile.getValue(), profile.getExtension())));
+                dr.getCodeFilter().stream()
+                    .filter(cf -> cf.hasValueSet())
+                    .forEach(cf -> retval.add(new DependencyInfo(source, cf.getValueSet(), cf.getExtension())));
+            });
+        return retval;
     }
-    public List<DependencyInfo> getComponents() {
-        return new ArrayList<DependencyInfo>();
-    }
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
+    public IBase accept(r5KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
     return visitor.visit(this, theRepository, theParameters);
   }
   public Date getApprovalDate() {
@@ -121,4 +133,12 @@ class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter {
   public List<RelatedArtifact> getRelatedArtifact() {
     return this.getLibrary().getRelatedArtifact();
   }
+  @Override
+  public void setEffectivePeriod(Period effectivePeriod) {
+    this.getLibrary().setEffectivePeriod(effectivePeriod);
+  }
+  @Override
+  public void setRelatedArtifact(List<RelatedArtifact> relatedArtifacts) {
+    this.getLibrary().setRelatedArtifact(relatedArtifacts);
+}
 }

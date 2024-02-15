@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,16 +14,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.fhir.ucum.Canonical;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -30,7 +40,9 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -41,6 +53,7 @@ import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
@@ -49,6 +62,8 @@ import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -59,30 +74,109 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 
 public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisitor  {
+    // as per http://hl7.org/fhir/R4/resource.html#canonical
+	public static final List<ResourceType> canonicalResourceTypes =
+    new ArrayList<>(
+        List.of(
+            ResourceType.ActivityDefinition,
+            ResourceType.CapabilityStatement,
+            ResourceType.ChargeItemDefinition,
+            ResourceType.CompartmentDefinition,
+            ResourceType.ConceptMap,
+            ResourceType.EffectEvidenceSynthesis,
+            ResourceType.EventDefinition,
+            ResourceType.Evidence,
+            ResourceType.EvidenceVariable,
+            ResourceType.ExampleScenario,
+            ResourceType.GraphDefinition,
+            ResourceType.ImplementationGuide,
+            ResourceType.Library,
+            ResourceType.Measure,
+            ResourceType.MessageDefinition,
+            ResourceType.NamingSystem,
+            ResourceType.OperationDefinition,
+            ResourceType.PlanDefinition,
+            ResourceType.Questionnaire,
+            ResourceType.ResearchDefinition,
+            ResourceType.ResearchElementDefinition,
+            ResourceType.RiskEvidenceSynthesis,
+            ResourceType.SearchParameter,
+            ResourceType.StructureDefinition,
+            ResourceType.StructureMap,
+            ResourceType.TerminologyCapabilities,
+            ResourceType.TestScript,
+            ResourceType.ValueSet
+        )
+    );
+
+public static final List<ResourceType> conformanceResourceTypes =
+    new ArrayList<>(
+        List.of(
+            ResourceType.CapabilityStatement,
+            ResourceType.StructureDefinition,
+            ResourceType.ImplementationGuide,
+            ResourceType.SearchParameter,
+            ResourceType.MessageDefinition,
+            ResourceType.OperationDefinition,
+            ResourceType.CompartmentDefinition,
+            ResourceType.StructureMap,
+            ResourceType.GraphDefinition,
+            ResourceType.ExampleScenario
+        )
+    );
+
+public static final List<ResourceType> knowledgeArtifactResourceTypes =
+    new ArrayList<>(
+        List.of(
+            ResourceType.Library,
+            ResourceType.Measure,
+            ResourceType.ActivityDefinition,
+            ResourceType.PlanDefinition
+        )
+    );
+
+public static final List<ResourceType> terminologyResourceTypes =
+    new ArrayList<>(
+        List.of(
+            ResourceType.CodeSystem,
+            ResourceType.ValueSet,
+            ResourceType.ConceptMap,
+            ResourceType.NamingSystem,
+            ResourceType.TerminologyCapabilities
+        )
+    );
   public Bundle visit(r4LibraryAdapter library, Repository theFhirRepository, Parameters thePackageParameters) {
-    Optional<UriType> artifactRoute = MetadataResourceHelper.getParameter("artifactRoute", thePackageParameters, UriType.class)
-    Optional<UriType> endpointUri = MetadataResourceHelper.getParameter("endpointUri", thePackageParameters, UriType.class)
-    Optional<Endpoint> endpoint = MetadataResourceHelper.getParameter("endpoint", thePackageParameters, Endpoint.class)
-    Optional<Endpoint> terminologyEndpoint = MetadataResourceHelper.getParameter("terminologyEndpoint", thePackageParameters, Endpoint.class)
+    Optional<String> artifactRoute = MetadataResourceHelper.getParameter("artifactRoute", thePackageParameters, UriType.class).map(r -> r.getValue());
+    Optional<String> endpointUri = MetadataResourceHelper.getParameter("endpointUri", thePackageParameters, UriType.class).map(r -> r.getValue());
+    Optional<Endpoint> endpoint = MetadataResourceHelper.getResourceParameter("endpoint", thePackageParameters, Endpoint.class);
+    Optional<Endpoint> terminologyEndpoint = MetadataResourceHelper.getResourceParameter("terminologyEndpoint", thePackageParameters, Endpoint.class);
+    Optional<Boolean> packageOnly = MetadataResourceHelper.getParameter("packageOnly", thePackageParameters, BooleanType.class).map(r -> r.getValue());
+    Optional<Integer> count = MetadataResourceHelper.getParameter("count", thePackageParameters, IntegerType.class).map(r -> r.getValue());
+    Optional<Integer> offset = MetadataResourceHelper.getParameter("offset", thePackageParameters, IntegerType.class).map(r -> r.getValue());
+    List<String> include = MetadataResourceHelper.getListParameter("include", thePackageParameters, StringType.class).map(list -> list.stream().map(r -> r.getValue()).collect(Collectors.toList())).orElseGet(() -> new ArrayList<>());
+    List<String> capability = MetadataResourceHelper.getListParameter("capability", thePackageParameters, StringType.class).map(list -> list.stream().map(r -> r.getValue()).collect(Collectors.toList())).orElseGet(() -> new ArrayList<>());
+    List<CanonicalType> artifactVersion = MetadataResourceHelper.getListParameter("artifactVersion", thePackageParameters, CanonicalType.class).orElseGet(() -> new ArrayList<>());
+    List<CanonicalType> checkArtifactVersion = MetadataResourceHelper.getListParameter("checkArtifactVersion", thePackageParameters, CanonicalType.class).orElseGet(() -> new ArrayList<>());
+    List<CanonicalType> forceArtifactVersion = MetadataResourceHelper.getListParameter("forceArtifactVersion", thePackageParameters, CanonicalType.class).orElseGet(() -> new ArrayList<>());
+
     if (
 				(artifactRoute.isPresent() && !artifactRoute.get().isBlank() && !artifactRoute.get().isEmpty())
-					|| (endpointUri != null && !endpointUri.isBlank() && !endpointUri.isEmpty())
-					|| contentEndpoint != null
-					|| terminologyEndpoint != null
+					|| (endpointUri.isPresent() && !endpointUri.get().isBlank() && !endpointUri.get().isEmpty())
+					|| endpoint.isPresent()
+					|| terminologyEndpoint.isPresent()
 			) {
 			throw new NotImplementedOperationException("This repository is not implementing custom Content and Terminology endpoints at this time");
 		}
-		if (packageOnly != null) {
+		if (packageOnly.isPresent()) {
 			throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
 		}
-		if (count != null && count < 0) {
+		if (count.isPresent() && count.get() < 0) {
 			throw new UnprocessableEntityException("'count' must be non-negative");
 		}
-		MetadataResource resource = (MetadataResource)hapiFhirRepository.read(ResourceClassMapHelper.getClass(id.getResourceType()), id);
+		Library resource = library.get();
 		// TODO: In the case of a released (active) root Library we can depend on the relatedArtifacts as a comprehensive manifest
 		Bundle packagedBundle = new Bundle();
-		if (include != null
-			&& include.size() == 1
+		if (   include.size() == 1
 			&& include.stream().anyMatch((includedType) -> includedType.equals("artifact"))) {
 			findUnsupportedCapability(resource, capability);
 			processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
@@ -92,18 +186,50 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
 			entry.getRequest().setIfNoneExist("url="+resource.getUrl()+"&version="+resource.getVersion());
 			packagedBundle.addEntry(entry);
 		} else {
-			recursivePackage(resource, packagedBundle, hapiFhirRepository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion);
+			recursivePackage(resource, packagedBundle, theFhirRepository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion);
 			List<BundleEntryComponent> included = findUnsupportedInclude(packagedBundle.getEntry(),include);
 			packagedBundle.setEntry(included);
 		}
 		setCorrectBundleType(count,offset,packagedBundle);
 		pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
-		handleValueSetReferenceExtensions(resource, packagedBundle.getEntry(), hapiFhirRepository);
-    return theFhirRepository.transaction(packagedBundle);
+		handleValueSetReferenceExtensions(resource, packagedBundle.getEntry(), theFhirRepository);
+    return packagedBundle;
 
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
     // what is dependency, where did it originate? potentially the package?
   }
+  void recursivePackage(
+		MetadataResource resource,
+		Bundle bundle,
+		Repository hapiFhirRepository,
+		List<String> capability,
+		List<String> include,
+		List<CanonicalType> artifactVersion,
+		List<CanonicalType> checkArtifactVersion,
+		List<CanonicalType> forceArtifactVersion
+		) throws PreconditionFailedException{
+		if (resource != null) {
+			r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
+			findUnsupportedCapability(resource, capability);
+			processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
+			boolean entryExists = bundle.getEntry().stream()
+				.map(e -> (MetadataResource)e.getResource())
+				.filter(mr -> mr.getUrl() != null && mr.getVersion() != null)
+				.anyMatch(mr -> mr.getUrl().equals(resource.getUrl()) && mr.getVersion().equals(resource.getVersion()));
+			if (!entryExists) {
+				BundleEntryComponent entry = createEntry(resource);
+				entry.getRequest().setUrl(resource.getResourceType() + "/" + resource.getIdElement().getIdPart());
+				entry.getRequest().setMethod(HTTPVerb.POST);
+				entry.getRequest().setIfNoneExist("url="+resource.getUrl()+"&version="+resource.getVersion());
+				bundle.addEntry(entry);
+			}
+
+			combineComponentsAndDependencies(adapter).stream()
+				.map(ra -> searchResourceByUrl(ra.getReference(), hapiFhirRepository))
+				.map(searchBundle -> searchBundle.getEntry().stream().findFirst().orElseGet(()-> new BundleEntryComponent()).getResource())
+				.forEach(component -> recursivePackage((MetadataResource)component, bundle, hapiFhirRepository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion));
+		}
+	}
   public IBase visit(IBaseLibraryAdapter library, Repository theFhirRepository, IBaseParameters draftParameters){
     return new OperationOutcome();
   }
@@ -128,158 +254,325 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
     }
     return new OperationOutcome();
   }
-    private List<MetadataResource> createDraftsOfArtifactAndRelated(MetadataResource theResource, Repository theRepository, String theVersion, List<MetadataResource> theNewResourcesToCreate) {
-        String draftVersion = theVersion + "-draft";
-        String draftVersionUrl = Canonicals.getUrl(theResource.getUrl()) + "|" + draftVersion;
-
-        // TODO: Decide if we need both of these checks
-        Optional<MetadataResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion(searchResourceByUrl(draftVersionUrl, theRepository));
-        Optional<MetadataResource> draftVersionAlreadyInBundle = theNewResourcesToCreate.stream().filter(res -> res.getUrl().equals(Canonicals.getUrl(draftVersionUrl)) && res.getVersion().equals(draftVersion)).findAny();
-        MetadataResource newResource = null;
-        if (existingArtifactsWithMatchingUrl.isPresent()) {
-            newResource = existingArtifactsWithMatchingUrl.get();
-        } else if(draftVersionAlreadyInBundle.isPresent()) {
-            newResource = draftVersionAlreadyInBundle.get();
+  private void findUnsupportedCapability(MetadataResource resource, List<String> capability) throws PreconditionFailedException{
+    if (capability != null && !capability.isEmpty()) {
+        List<Extension> knowledgeCapabilityExtension = resource.getExtension().stream()
+        .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
+        .collect(Collectors.toList());
+        if (knowledgeCapabilityExtension.isEmpty()) {
+            // consider resource unsupported if it's knowledgeCapability is undefined
+            throw new PreconditionFailedException(String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
         }
-
-        if (newResource == null) {
-            r4KnowledgeArtifactAdapter sourceResourceAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(theResource);
-            sourceResourceAdapter.setEffectivePeriod(null);
-            newResource = theResource.copy();
-            newResource.setStatus(Enumerations.PublicationStatus.DRAFT);
-            newResource.setVersion(draftVersion);
-            theNewResourcesToCreate.add(newResource);
-            for (RelatedArtifact ra : sourceResourceAdapter.getOwnedRelatedArtifacts()) {
-            // If it’s an owned RelatedArtifact composed-of then we want to copy it
-            // (references are updated in createDraftBundle before adding to the bundle
-            // hence they are ignored here)
-            // e.g. 
-            // relatedArtifact: [
-            //  { 
-            //    resource: www.test.com/Library/123|0.0.1 <- try to update this reference to the latest version in createDraftBundle
-            //   },
-            //  { 
-            //    extension: [{url: .../isOwned, valueBoolean: true}],
-            //    resource: www.test.com/Library/190|1.2.3 <- resolve this resource, create a draft of it and recursively check descendants
-            //  }
-            // ]
-                if (ra.hasUrl()) {
-                    Bundle referencedResourceBundle = searchResourceByUrl(ra.getUrl(), theRepository);
-                    processReferencedResourceForDraft(theRepository, referencedResourceBundle, ra, theVersion, theNewResourcesToCreate);
-                } else if (ra.hasResource()) {
-                    Bundle referencedResourceBundle = searchResourceByUrl(ra.getResourceElement().getValueAsString(), theRepository);
-                    processReferencedResourceForDraft(theRepository, referencedResourceBundle, ra, theVersion, theNewResourcesToCreate);
+        knowledgeCapabilityExtension.stream()
+            .filter(ext -> !capability.contains(((CodeType) ext.getValue()).getValue()))
+            .findAny()
+            .ifPresent((ext) -> {
+                throw new PreconditionFailedException(String.format("Resource with url: '%s' is not one of '%s'.",
+                resource.getUrl(),
+                String.join(", ", capability)));
+            });
+    }
+}
+private void processCanonicals(MetadataResource resource, List<CanonicalType> canonicalVersion,  List<CanonicalType> checkArtifactVersion,  List<CanonicalType> forceArtifactVersion) throws PreconditionFailedException {
+    if (checkArtifactVersion != null) {
+        // check throws an error
+        findVersionInListMatchingResource(checkArtifactVersion, resource)
+            .ifPresent((version) -> {
+                if (!resource.getVersion().equals(version)) {
+                    throw new PreconditionFailedException(String.format("Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
+                    resource.getUrl(),
+                    resource.getVersion(),
+                    version
+                    ));
                 }
+            });
+    } else if (forceArtifactVersion != null) {
+        // force just does a silent override
+        findVersionInListMatchingResource(forceArtifactVersion, resource)
+            .ifPresent((version) -> resource.setVersion(version));
+    } else if (canonicalVersion != null && !resource.hasVersion()) {
+        // canonicalVersion adds a version if it's missing
+        findVersionInListMatchingResource(canonicalVersion, resource)
+            .ifPresent((version) -> resource.setVersion(version));
+    }
+}
+private Optional<String> findVersionInListMatchingResource(List<CanonicalType> list, MetadataResource resource){
+    return list.stream()
+                .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
+                .map((canonical) -> Canonicals.getVersion(canonical))
+                .findAny();
+}
+private void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
+    // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
+    // if not, set type = transaction
+    // special case of count = 0 -> set type = searchset so we can display bundle.total
+    if (count.isPresent() && count.get() == 0) {
+        bundle.setType(BundleType.SEARCHSET);
+        bundle.setTotal(bundle.getEntry().size());
+    } else if (
+        (offset.isPresent() && offset.get() > 0) || 
+        (count.isPresent() && count.get() < bundle.getEntry().size())
+    ) {
+        bundle.setType(BundleType.COLLECTION);
+        List<BundleEntryComponent> removedRequest = bundle.getEntry().stream()
+            .map(entry -> {
+                entry.setRequest(null);
+                return entry;
+            }).collect(Collectors.toList());
+        bundle.setEntry(removedRequest);
+    } else {
+        bundle.setType(BundleType.TRANSACTION);
+    }
+}
+/**
+ * $package allows for a bundle to be paged
+ * @param count the maximum number of resources to be returned
+ * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
+ * @param bundle the bundle to page
+ */
+private void pageBundleBasedOnCountAndOffset(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
+    if (offset.isPresent()) {
+        List<BundleEntryComponent> entries = bundle.getEntry();
+        Integer bundleSize = entries.size();
+        if (offset.get() < bundleSize) {
+            bundle.setEntry(entries.subList(offset.get(), bundleSize));
+        } else {
+            bundle.setEntry(Arrays.asList());
+        }
+    }
+    if (count.isPresent()) {
+        // repeat these two from earlier because we might modify / replace the entries list at any time
+        List<BundleEntryComponent> entries = bundle.getEntry();
+        Integer bundleSize = entries.size();
+        if (count.get() < bundleSize){
+            bundle.setEntry(entries.subList(0, count.get()));
+        } else {
+            // there are not enough entries in the bundle to page, so we return all of them no change
+        }
+    }
+}
+private BundleEntryComponent createEntry(IBaseResource theResource) {
+    BundleEntryComponent entry = new Bundle.BundleEntryComponent()
+            .setResource((Resource) theResource)
+            .setRequest(createRequest(theResource));
+    String fullUrl = entry.getRequest().getUrl();
+    if (theResource instanceof MetadataResource) {
+        MetadataResource resource = (MetadataResource) theResource;
+        if (resource.hasUrl()) {
+            fullUrl = resource.getUrl();
+            if (resource.hasVersion()) {
+                fullUrl += "|" + resource.getVersion();
             }
         }
-        return theNewResourcesToCreate;
     }
-	
-	private void processReferencedResourceForDraft(Repository theRepository, Bundle referencedResourceBundle, RelatedArtifact ra, String version, List<MetadataResource> transactionBundle) {
-		if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
-			Bundle.BundleEntryComponent referencedResourceEntry = referencedResourceBundle.getEntry().get(0);
-			if (referencedResourceEntry.hasResource() && referencedResourceEntry.getResource() instanceof MetadataResource) {
-				MetadataResource referencedResource = (MetadataResource) referencedResourceEntry.getResource();
+    entry.setFullUrl(fullUrl);
+    return entry;
+}
 
-				createDraftsOfArtifactAndRelated(referencedResource, theRepository, version, transactionBundle);
-			}
-		}
-	}
-    private void checkVersionValidSemver(String version) throws UnprocessableEntityException {
-		if (version == null || version.isEmpty()) {
-			throw new UnprocessableEntityException("The version argument is required");
-		}
-		if (version.contains("draft")) {
-			throw new UnprocessableEntityException("The version cannot contain 'draft'");
-		}
-		if (version.contains("/") || version.contains("\\") || version.contains("|")) {
-			throw new UnprocessableEntityException("The version contains illegal characters");
-		}
-		Pattern pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\d+\\.)?(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
-    	Matcher matcher = pattern.matcher(version);
-    	boolean matchFound = matcher.find();
-		if (!matchFound) {
-			throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH.REVISION");
-		}
-	}
-    private TreeSet<String> createOwnedResourceUrlCache(List<MetadataResource> resources) {
-		TreeSet<String> retval = new TreeSet<String>();
-		resources.stream()
-			.map(KnowledgeArtifactAdapter::new)
-            .map(KnowledgeArtifactAdapter::getOwnedRelatedArtifacts).flatMap(List::stream)
-            .filter(RelatedArtifact::hasResource).map(RelatedArtifact::getResource)
-			.map(Canonicals::getUrl)
-			.forEach(retval::add);
-		return retval;
-	}
-	private void updateUsageContextReferencesWithUrns(MetadataResource newResource, List<MetadataResource> resourceListWithOriginalIds, List<IdType> idListForTransactionBundle) {
-		List<UsageContext> useContexts = newResource.getUseContext();
-		for (UsageContext useContext : useContexts) {
-			// TODO: will we ever need to resolve these references?
-			if (useContext.hasValueReference()) {
-				Reference useContextRef = useContext.getValueReference();
-				if (useContextRef != null) {
-					resourceListWithOriginalIds.stream()
-						.filter(resource -> (resource.getClass().getSimpleName() + "/" + resource.getIdElement().getIdPart()).equals(useContextRef.getReference()))
-						.findAny()
-						.ifPresent(resource -> {
-							int indexOfDraftInIdList = resourceListWithOriginalIds.indexOf(resource);
-							useContext.setValue(new Reference(idListForTransactionBundle.get(indexOfDraftInIdList)));
+private BundleEntryRequestComponent createRequest(IBaseResource theResource) {
+    Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
+    if (theResource.getIdElement().hasValue() && !theResource.getIdElement().getValue().contains("urn:uuid")) {
+        request
+            .setMethod(Bundle.HTTPVerb.PUT)
+            .setUrl(theResource.getIdElement().getValue());
+    } else {
+        request
+            .setMethod(Bundle.HTTPVerb.POST)
+            .setUrl(theResource.fhirType());
+    }
+    return request;
+}
+private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryComponent> entries, List<String> include) {
+    if (include == null || include.isEmpty() || include.stream().anyMatch((includedType) -> includedType.equals("all"))) {
+        return entries;
+    }
+    List<BundleEntryComponent> filteredList = new ArrayList<>();
+    entries.stream().forEach(entry -> {
+        if (include.stream().anyMatch((type) -> type.equals("knowledge"))) {
+            Boolean resourceIsKnowledgeType = knowledgeArtifactResourceTypes.contains(entry.getResource().getResourceType());
+            if (resourceIsKnowledgeType) {
+                filteredList.add(entry);
+            }
+        }
+        if (include.stream().anyMatch((type) -> type.equals("canonical"))) {
+            Boolean resourceIsCanonicalType = canonicalResourceTypes.contains(entry.getResource().getResourceType());
+            if (resourceIsCanonicalType) {
+                filteredList.add(entry);
+            }
+        }
+        if (include.stream().anyMatch((type) -> type.equals("terminology"))) {
+            Boolean resourceIsTerminologyType = terminologyResourceTypes.contains(entry.getResource().getResourceType());
+            if (resourceIsTerminologyType) {
+                filteredList.add(entry);
+            }
+        }
+        if (include.stream().anyMatch((type) -> type.equals("conformance"))) {
+            Boolean resourceIsConformanceType = conformanceResourceTypes.contains(entry.getResource().getResourceType());
+            if (resourceIsConformanceType) {
+                filteredList.add(entry);
+            }
+        }
+        if (include.stream().anyMatch((type) -> type.equals("extensions"))
+            && entry.getResource().getResourceType().equals(ResourceType.StructureDefinition)
+            && ((StructureDefinition) entry.getResource()).getType().equals("Extension")) {
+                filteredList.add(entry);
+        }
+        if (include.stream().anyMatch((type) -> type.equals("profiles"))
+            && entry.getResource().getResourceType().equals(ResourceType.StructureDefinition)
+            && !((StructureDefinition) entry.getResource()).getType().equals("Extension")) {
+                filteredList.add(entry);
+        }
+        if (include.stream().anyMatch((type) -> type.equals("tests"))){
+            if (entry.getResource().getResourceType().equals(ResourceType.Library)
+                && ((Library) entry.getResource()).getType().getCoding().stream().anyMatch(coding -> coding.getCode().equals("test-case"))) {
+                filteredList.add(entry);
+            } else if (((MetadataResource) entry.getResource()).getExtension().stream().anyMatch(ext -> ext.getUrl().contains("isTestCase")
+                && ((BooleanType) ext.getValue()).getValue())) {
+                filteredList.add(entry);
+            }
+        }
+        if (include.stream().anyMatch((type) -> type.equals("examples"))){
+            // TODO: idk if this is legit just a placeholder for now
+            if (((MetadataResource) entry.getResource()).getExtension().stream().anyMatch(ext -> ext.getUrl().contains("isExample")
+                && ((BooleanType) ext.getValue()).getValue())) {
+                filteredList.add(entry);
+            }
+        }
+    });
+    List<BundleEntryComponent> distinctFilteredEntries = new ArrayList<>();
+    // remove duplicates
+    for (BundleEntryComponent entry: filteredList) {
+        if (!distinctFilteredEntries.stream()
+            .map((e) -> ((MetadataResource) e.getResource()))
+            .anyMatch(existingEntry -> existingEntry.getUrl().equals(((MetadataResource) entry.getResource()).getUrl()) && existingEntry.getVersion().equals(((MetadataResource) entry.getResource()).getVersion()))
+        ) {
+            distinctFilteredEntries.add(entry);
+        }
+    }
+    return distinctFilteredEntries;
+}
+/**
+	 * ValueSets can be part of multiple artifacts at the same time. Certain properties are tracked/managed in the manifest to avoid conflicts with other artifacts. This function sets those properties on the ValueSets themselves at export / $package time
+	 * @param manifest the resource containing all RelatedArtifact references
+	 * @param bundleEntries the list of packaged resources to modify according to the extensions on the manifest relatedArtifact references
+	 */
+	private void handleValueSetReferenceExtensions(MetadataResource manifest, List<BundleEntryComponent> bundleEntries, Repository theRepository) throws UnprocessableEntityException, IllegalArgumentException {
+		r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(manifest);
+		List<DependencyInfo> relatedArtifactsWithPreservedExtension = getRelatedArtifactsWithPreservedExtensions(adapter.getDependencies());
+		bundleEntries.stream()
+			.forEach(entry -> {
+				if (entry.getResource().getResourceType().equals(ResourceType.ValueSet)) {
+					ValueSet valueSet = (ValueSet) entry.getResource();
+					// remove any existing Priority and Conditions
+					List<UsageContext> usageContexts = removeExistingReferenceExtensionData(valueSet.getUseContext());
+					valueSet.setUseContext(usageContexts);
+					Optional<DependencyInfo> maybeVSRelatedArtifact = relatedArtifactsWithPreservedExtension.stream().filter(ra -> Canonicals.getUrl(ra.getReference()).equals(valueSet.getUrl())).findFirst();
+					checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact, theRepository);
+					// If leaf valueset
+					if (!valueSet.hasCompose()
+					 || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0)) {
+						// If Condition extension is present
+						maybeVSRelatedArtifact
+							.map(ra -> ra.getExtension())
+							.ifPresent(
+								// add Conditions
+								exts -> {
+									exts.stream()
+										.filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl))
+										.forEach(ext -> tryAddCondition(usageContexts, (CodeableConcept) ext.getValue()));
+								});		
+					}
+					// update Priority
+					UsageContext priority = getOrCreateUsageContext(usageContexts, IBaseKnowledgeArtifactAdapter.usPhContextTypeUrl, IBaseKnowledgeArtifactAdapter.valueSetPriorityCode);
+					maybeVSRelatedArtifact
+						.flatMap(ra -> ra.getExtension().stream().filter(ext -> ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.valueSetPriorityUrl)).findFirst())
+						.ifPresentOrElse(
+							// set value as per extension
+							ext -> priority.setValue(((Extension)ext).getValue()),
+							// set to "routine" if missing
+							() -> {
+								CodeableConcept routine = new CodeableConcept(new Coding(IBaseKnowledgeArtifactAdapter.contextUrl, "routine", null)).setText("Routine");
+								priority.setValue(routine);
 						});
 				}
+			});
+	}
+    private List<DependencyInfo> getRelatedArtifactsWithPreservedExtensions(List<DependencyInfo> deps) {
+		return deps.stream()
+			.filter(ra -> IBaseKnowledgeArtifactAdapter.preservedExtensionUrls
+				.stream().anyMatch(url -> ra.getExtension()
+					.stream().anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
+			.collect(Collectors.toList());
+	}
+    /**
+	 * Removes any existing UsageContexts corresponding the the VSM specific extensions
+	 * @param usageContexts the list of usage contexts to modify
+	 */
+	private List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
+		List<String> useContextCodesToReplace = List.of(IBaseKnowledgeArtifactAdapter.valueSetConditionCode,IBaseKnowledgeArtifactAdapter.valueSetPriorityCode);
+		return usageContexts.stream()
+		// remove any useContexts which need to be replaced
+			.filter(useContext -> !useContextCodesToReplace.stream()
+				.anyMatch(code -> useContext.getCode().getCode().equals(code)))
+			.collect(Collectors.toList());
+	}
+    private void tryAddCondition(List<UsageContext> usageContexts, CodeableConcept condition) {
+		boolean focusAlreadyExists = usageContexts.stream().anyMatch(u -> 
+			u.getCode().getSystem().equals(IBaseKnowledgeArtifactAdapter.contextTypeUrl) 
+			&& u.getCode().getCode().equals(IBaseKnowledgeArtifactAdapter.valueSetConditionCode) 
+			&& u.getValueCodeableConcept().hasCoding(condition.getCoding().get(0).getSystem(), condition.getCoding().get(0).getCode())
+		);
+		if (!focusAlreadyExists) {
+			UsageContext newFocus = new UsageContext(new Coding(IBaseKnowledgeArtifactAdapter.contextTypeUrl,IBaseKnowledgeArtifactAdapter.valueSetConditionCode,null),condition);
+			newFocus.setValue(condition);
+			usageContexts.add(newFocus);
+		}
+	}
+	/**
+	 * 
+	 * Either finds a usageContext with the same system and code or creates an empty one
+	 * and appends it
+	 * 
+	 * @param usageContexts the list of usageContexts to search and/or append to
+	 * @param system the usageContext.code.system to find / create
+	 * @param code the usage.code.code to find / create
+	 * @return the found / created usageContext
+	 */
+	private UsageContext getOrCreateUsageContext(List<UsageContext> usageContexts, String system, String code) {
+		return usageContexts.stream()
+			.filter(useContext -> useContext.getCode().getSystem().equals(system) && useContext.getCode().getCode().equals(code))
+			.findFirst().orElseGet(()-> {
+				// create the UseContext if it doesn't exist
+				Coding c = new Coding(system, code, null);
+				UsageContext n = new UsageContext(c, null);
+				// add it to the ValueSet before returning
+				usageContexts.add(n);
+				return n;
+			});
+	}
+    private void checkIfValueSetNeedsCondition(MetadataResource resource, Optional<DependencyInfo> relatedArtifact, Repository theRepository) throws UnprocessableEntityException {
+		if (resource == null 
+		&& relatedArtifact.map(ra -> ra.getReference()).isPresent() 
+		&& Canonicals.getResourceType(relatedArtifact.get().getReference()).equals("ValueSet")) {
+			List<MetadataResource> searchResults = getResourcesFromBundle(searchResourceByUrl(relatedArtifact.get().getReference(), theRepository));
+			if (searchResults.size() > 0) {
+				resource = searchResults.get(0);
+			}
+		}
+		if (resource != null && resource.getResourceType() == ResourceType.ValueSet) {
+			ValueSet valueSet = (ValueSet)resource;
+			boolean isLeaf = !valueSet.hasCompose() || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0);
+			Optional<Extension> maybeConditionExtension = relatedArtifact
+				.map(ra -> (List<Extension>)ra.getExtension())
+				.map(list -> {
+					return list.stream().filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl)).findFirst().orElse(null);
+				});
+			if (isLeaf && !maybeConditionExtension.isPresent()) {
+				throw new UnprocessableEntityException("Missing condition on ValueSet : " + valueSet.getUrl());
 			}
 		}
 	}
-
-	private void updateRelatedArtifactUrlsWithNewVersions(List<DependencyInfo> referenceList, String updatedVersion, TreeSet<String> ownedUrlCache){
-		// For each  relatedArtifact, update the version of the reference.
-		referenceList.stream()
-			// only update the references to owned resources (including dependencies)
-			.filter(ra -> ownedUrlCache.contains(Canonicals.getUrl(ra.getReference())))
-			.collect(Collectors.toList())
-			.replaceAll(ra -> {
-        ra.setReference(Canonicals.getUrl(ra.getReference()) + "|" + updatedVersion);
-        return ra;
-      });
-	}
-  private List<DependencyInfo> combineComponentsAndDependencies(r4LibraryAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream().map(ra -> convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
-	}
-    private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
-    }
-  private BundleEntryComponent createEntry(IBaseResource theResource) {
-		BundleEntryComponent entry = new Bundle.BundleEntryComponent()
-				.setResource((Resource) theResource)
-				.setRequest(createRequest(theResource));
-		String fullUrl = entry.getRequest().getUrl();
-		if (theResource instanceof MetadataResource) {
-			MetadataResource resource = (MetadataResource) theResource;
-			if (resource.hasUrl()) {
-				fullUrl = resource.getUrl();
-				if (resource.hasVersion()) {
-					fullUrl += "|" + resource.getVersion();
-				}
-			}
-		}
-		entry.setFullUrl(fullUrl);
-		return entry;
-	}
-
-	private BundleEntryRequestComponent createRequest(IBaseResource theResource) {
-		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-		if (theResource.getIdElement().hasValue() && !theResource.getIdElement().getValue().contains("urn:uuid")) {
-			request
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(theResource.getIdElement().getValue());
-		} else {
-			request
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl(theResource.fhirType());
-		}
-		return request;
-	}
-  /**
+     /**
  * search by versioned Canonical URL
  * @param theUrl canonical URL of the form www.example.com/Patient/123|0.1
  * @param theRepository to do the searching
@@ -302,4 +595,25 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
 		Bundle searchResultsBundle = theRepository.search(Bundle.class,ResourceClassMapHelper.getClass(Canonicals.getResourceType(theUrl)), searchParams);
 		return searchResultsBundle;
 	}
+    private List<MetadataResource> getResourcesFromBundle(Bundle bundle) {
+		List<MetadataResource> resourceList = new ArrayList<>();
+
+		if (!bundle.getEntryFirstRep().isEmpty()) {
+			List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
+			for (Bundle.BundleEntryComponent entry: referencedResourceEntries) {
+				if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
+					MetadataResource referencedResource = (MetadataResource) entry.getResource();
+					resourceList.add(referencedResource);
+				}
+			}
+		}
+
+		return resourceList;
+	}
+    private List<DependencyInfo> combineComponentsAndDependencies(r4KnowledgeArtifactAdapter adapter) {
+		return Stream.concat(adapter.getComponents().stream().map(ra -> convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
+	}
+    private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
+        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
+    }
 }

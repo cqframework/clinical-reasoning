@@ -39,10 +39,12 @@ import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
+import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -56,8 +58,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor  {
   public Bundle visit(r4LibraryAdapter library, Repository theFhirRepository, Parameters draftParameters) {
-    String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
-    String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
+    // String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
+    String version = MetadataResourceHelper.getParameter("version", draftParameters, StringType.class).map(r -> r.getValue()).orElseThrow(() -> new UnprocessableEntityException("The version argument is required"));
     Library libRes = (Library)library.get();
     // check valid semverversion
     checkVersionValidSemver(version);
@@ -306,4 +308,5 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
 		Bundle searchResultsBundle = theRepository.search(Bundle.class,ResourceClassMapHelper.getClass(Canonicals.getResourceType(theUrl)), searchParams);
 		return searchResultsBundle;
 	}
+    
 }

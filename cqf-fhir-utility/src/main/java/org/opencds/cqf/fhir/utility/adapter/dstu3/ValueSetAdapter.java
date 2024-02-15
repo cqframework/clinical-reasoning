@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
@@ -116,6 +117,9 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     return new Period();
   }
   public List<? extends ICompositeType> getRelatedArtifact() {
+    return new ArrayList<>();
+  }
+  public List<RelatedArtifact> getComponents(){
     return new ArrayList<>();
   }
 }

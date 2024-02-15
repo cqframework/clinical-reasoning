@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
+import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
@@ -14,7 +15,11 @@ import java.util.List;
 
 
 public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
-
+  @Override
+  public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository theRepository, IBaseParameters theParameters) {
+    return new OperationOutcome();
+  }
+  @Override
   public IBase visit(IBaseLibraryAdapter library, Repository theRepository, IBaseParameters theParameters) {
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
       // what is dependency, where did it originate? potentially the package?
@@ -33,7 +38,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
       // Release needs to take in a Parameters for Manifest?
 
   }
-
+  @Override
   public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
@@ -41,7 +46,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     }
     return new OperationOutcome();
   }
-
+  @Override
   public IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {

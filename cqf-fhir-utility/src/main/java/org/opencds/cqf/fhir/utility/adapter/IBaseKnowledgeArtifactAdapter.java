@@ -46,4 +46,15 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
   String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
   String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
   String valueSetConditionUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
+  String valueSetPriorityUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
+  String valueSetPriorityCode = "priority";
+  String valueSetConditionCode = "focus";
+  List<String> preservedExtensionUrls = List.of(
+        valueSetPriorityUrl,
+        valueSetConditionUrl
+    );
+    String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
+	String contextTypeUrl = "http://terminology.hl7.org/CodeSystem/usage-context-type";
+	String contextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
+  String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
 }

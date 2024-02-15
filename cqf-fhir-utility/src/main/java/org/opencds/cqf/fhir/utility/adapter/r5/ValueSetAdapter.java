@@ -47,16 +47,6 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
   }
 
   @Override
-  public IIdType getId() {
-    return this.getValueSet().getIdElement();
-  }
-
-  @Override
-  public void setId(IIdType id) {
-    this.getValueSet().setId(id);
-  }
-
-  @Override
   public String getName() {
     return this.getValueSet().getName();
   }
@@ -111,13 +101,20 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     // TODO: Ideally this would use the $data-requirements code
     return references;
   }
+  @Override
   public Date getApprovalDate() {
     return null;
   }
+  @Override
   public ICompositeType getEffectivePeriod() {
     return new Period();
   }
+  @Override
   public List<RelatedArtifact> getRelatedArtifact() {
+    return new ArrayList<>();
+  }
+  @Override
+  public List<RelatedArtifact> getComponents() {
     return new ArrayList<>();
   }
 }

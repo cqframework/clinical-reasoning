@@ -17,7 +17,7 @@ class IgConventionsTest {
     static Path tempDir;
 
     @BeforeAll
-    static void setup() throws URISyntaxException, IOException, InterruptedException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs", tempDir);

@@ -44,13 +44,11 @@ public class Resources {
      * @param target the target directory to copy to
      * @throws URISyntaxException
      * @throws IOException
+     * @throws ClassNotFoundException if caller class cannot be determined
      */
-    public static void copyFromJar(final String sourcePackage, Path target) throws URISyntaxException, IOException {
-        try {
-            copyFromJar(getCallerClass(2), sourcePackage, target);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Unable to copy directory", e);
-        }
+    public static void copyFromJar(final String sourcePackage, Path target)
+            throws URISyntaxException, IOException, ClassNotFoundException {
+        copyFromJar(getCallerClass(2), sourcePackage, target);
     }
 
     /**
@@ -88,8 +86,6 @@ public class Resources {
                     return FileVisitResult.CONTINUE;
                 }
             });
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to copy directory", e);
         }
     }
 
@@ -110,15 +106,13 @@ public class Resources {
         }
 
         public void close() throws IOException {
-            if (this.fs != null) this.fs.close();
+            if (this.fs != null) {
+                this.fs.close();
+            }
         }
 
         public Path getPath() {
             return this.path;
-        }
-
-        public FileSystem getFileSystem() {
-            return this.fs;
         }
 
         public static PathReference getPath(final URI resPath) throws IOException {

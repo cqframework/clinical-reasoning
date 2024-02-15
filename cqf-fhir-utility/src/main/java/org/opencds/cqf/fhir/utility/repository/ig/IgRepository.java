@@ -154,13 +154,10 @@ public class IgRepository implements Repository {
 
     protected String fileNameForResource(String resourceType, String resourceId) {
         var name = resourceId + FILE_EXTENSIONS.get(this.encodingEnum);
-        switch (conventions.filenameMode()) {
-            case ID_ONLY:
-                return name;
-            case TYPE_AND_ID:
-                return resourceType + "-" + name;
-            default:
-                throw new IllegalArgumentException("unsupported filename mode: " + conventions.filenameMode());
+        if (FilenameMode.ID_ONLY.equals(conventions.filenameMode())) {
+            return name;
+        } else {
+            return resourceType + "-" + name;
         }
     }
 

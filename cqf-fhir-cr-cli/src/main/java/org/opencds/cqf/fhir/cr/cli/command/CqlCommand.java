@@ -185,7 +185,7 @@ public class CqlCommand implements Callable<Integer> {
         var retrieveSettings = new RetrieveSettings();
         retrieveSettings.setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
-        retrieveSettings.setProfileMode(PROFILE_MODE.OFF);
+        retrieveSettings.setProfileMode(PROFILE_MODE.DECLARED);
 
         var evaluationSettings = EvaluationSettings.getDefault();
         evaluationSettings.setCqlOptions(cqlOptions);

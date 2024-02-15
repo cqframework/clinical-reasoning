@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,22 +16,26 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.io.TempDir;
+import org.opencds.cqf.fhir.test.Resources;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class CliTest {
+
+    @TempDir
+    private static Path tempDir;
 
     private ByteArrayOutputStream outContent;
     private ByteArrayOutputStream errContent;
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
-    private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
 
     @BeforeAll
-    void setup() {
-        File file = new File(testResourceRelativePath);
-        testResourcePath = file.getAbsolutePath();
+    void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+        Resources.copyFromJar("/", tempDir);
+        testResourcePath = tempDir.toAbsolutePath().toString();
         System.out.println(String.format("Test resource directory: %s", testResourcePath));
     }
 

@@ -24,6 +24,7 @@ import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
@@ -184,6 +185,7 @@ public class CqlCommand implements Callable<Integer> {
         var retrieveSettings = new RetrieveSettings();
         retrieveSettings.setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
+        retrieveSettings.setProfileMode(PROFILE_MODE.OFF);
 
         var evaluationSettings = EvaluationSettings.getDefault();
         evaluationSettings.setCqlOptions(cqlOptions);
@@ -227,9 +229,10 @@ public class CqlCommand implements Callable<Integer> {
 
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
-            if (contextValue != null) {
+            if (contextValue != null && !path.endsWith(contextValue)) {
                 path = path.resolve(contextValue);
             }
+
             data = new IgRepository(fhirContext, path.toString());
         }
 
@@ -260,7 +263,6 @@ public class CqlCommand implements Callable<Integer> {
             result += "[";
             Iterable<?> values = (Iterable<?>) value;
             for (Object o : values) {
-
                 result += (tempConvert(o) + ", ");
             }
 

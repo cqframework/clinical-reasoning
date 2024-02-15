@@ -110,7 +110,7 @@ public final class IgConventions {
 
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
-        // have a resource with an id that matches the filename.
+        // have a resource that matches the claimed type.
         var hasTypeFilename = Stream.of(potentialResourceFiles)
                 .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
                 .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));

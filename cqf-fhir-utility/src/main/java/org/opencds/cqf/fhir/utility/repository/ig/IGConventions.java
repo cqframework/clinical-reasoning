@@ -133,6 +133,7 @@ public class IGConventions {
         }
 
         try {
+            @SuppressWarnings("null")
             var contents = Files.asCharSource(file, StandardCharsets.UTF_8).read();
             if (contents == null || contents.isEmpty()) {
                 return false;

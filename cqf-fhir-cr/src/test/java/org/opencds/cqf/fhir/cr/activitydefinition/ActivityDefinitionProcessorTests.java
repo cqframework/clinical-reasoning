@@ -22,7 +22,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -34,7 +34,7 @@ public class ActivityDefinitionProcessorTests {
     private ActivityDefinitionProcessor activityDefinitionProcessorR5;
 
     private Repository createRepository(FhirContext fhirContext, String version) {
-        return new IGRepository(
+        return new IgRepository(
                 fhirContext,
                 this.getClass()
                                 .getProtectionDomain()

@@ -70,5 +70,12 @@
       <artifactId>org.hl7.fhir.r5</artifactId>
       <version>${fhir-core.version}</version>
     </dependency>
+
+    <dependency>
+        <groupId>org.opencds.cqf.fhir</groupId>
+        <artifactId>cqf-fhir-test</artifactId>
+        <version>3.0.0-PRE18-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
   </dependencies>
 </project>

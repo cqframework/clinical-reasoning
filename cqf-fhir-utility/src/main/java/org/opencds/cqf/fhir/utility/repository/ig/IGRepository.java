@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
  * This class implements the Repository interface on onto a directory structure
  * that matches some common IG layouts.
  */
-public class IGRepository implements Repository {
+public class IgRepository implements Repository {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IGRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IgRepository.class);
 
     // Potential metadata fields:
     // file dateTime
@@ -58,7 +58,7 @@ public class IGRepository implements Repository {
 
     private final FhirContext fhirContext;
     private final String root;
-    private final IGConventions repositoryConfig;
+    private final IgConventions conventions;
     private final EncodingEnum encodingEnum;
     private final IParser parser;
     private final ResourceMatcher resourceMatcher;
@@ -99,8 +99,8 @@ public class IGRepository implements Repository {
      * @param fhirContext
      * @param root
      */
-    public IGRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, root, IGConventions.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
+    public IgRepository(FhirContext fhirContext, String root) {
+        this(fhirContext, root, IgConventions.autoDetect(Paths.get(root)), EncodingEnum.JSON, null);
     }
 
     private static String ensureTrailingSlash(String path) {
@@ -116,15 +116,15 @@ public class IGRepository implements Repository {
      * @param encodingEnum The encoding to use for parsing and encoding resources.
      * @param operationProvider The operation provider to use for invoking operations.
      */
-    public IGRepository(
+    public IgRepository(
             FhirContext fhirContext,
             String root,
-            IGConventions conventions,
+            IgConventions conventions,
             EncodingEnum encodingEnum,
             IRepositoryOperationProvider operationProvider) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.root = ensureTrailingSlash(requireNonNull(root, "root can not be null"));
-        this.repositoryConfig = requireNonNull(conventions, "repositoryConfig is required");
+        this.conventions = requireNonNull(conventions, "conventions is required");
         this.encodingEnum = requireNonNull(encodingEnum, "encodingEnum can not be null");
         this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
@@ -132,8 +132,8 @@ public class IGRepository implements Repository {
         reportUnconventionalConventions(conventions);
     }
 
-    private void reportUnconventionalConventions(IGConventions conventions) {
-        if (!conventions.equals(IGConventions.STANDARD) && !conventions.equals(IGConventions.FLAT)) {
+    private void reportUnconventionalConventions(IgConventions conventions) {
+        if (!conventions.equals(IgConventions.STANDARD) && !conventions.equals(IgConventions.FLAT)) {
             LOG.warn(
                     "Unconventional IG conventions detected.  Please ensure that the IG conforms to the expected structure.");
         }
@@ -154,19 +154,18 @@ public class IGRepository implements Repository {
 
     protected String fileNameForResource(String resourceType, String resourceId) {
         var name = resourceId + FILE_EXTENSIONS.get(this.encodingEnum);
-        switch (repositoryConfig.filenameMode()) {
+        switch (conventions.filenameMode()) {
             case ID_ONLY:
                 return name;
             case TYPE_AND_ID:
-                // TODO: Case sensitivity?
                 return resourceType + "-" + name;
             default:
-                throw new IllegalArgumentException("unsupported filename mode: " + repositoryConfig.filenameMode());
+                throw new IllegalArgumentException("unsupported filename mode: " + conventions.filenameMode());
         }
     }
 
     protected <T extends IBaseResource> String directoryForCategory(Class<T> resourceType) {
-        if (this.repositoryConfig.categoryLayout() == CategoryLayout.FLAT) {
+        if (this.conventions.categoryLayout() == CategoryLayout.FLAT) {
             return this.root;
         }
 
@@ -177,7 +176,7 @@ public class IGRepository implements Repository {
 
     protected <T extends IBaseResource> String directoryForResource(Class<T> resourceType) {
         var directory = directoryForCategory(resourceType);
-        if (this.repositoryConfig.typeLayout() == FhirTypeLayout.FLAT) {
+        if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
             return directory;
         }
 
@@ -261,7 +260,7 @@ public class IGRepository implements Repository {
         }
 
         FilenameFilter resourceFileFilter;
-        var filenameMode = this.repositoryConfig.filenameMode();
+        var filenameMode = this.conventions.filenameMode();
         if (filenameMode.equals(FilenameMode.ID_ONLY)) {
             resourceFileFilter = (dir, name) -> name.toLowerCase().endsWith(FILE_EXTENSIONS.get(this.encodingEnum));
         } else {
@@ -353,13 +352,6 @@ public class IGRepository implements Repository {
     }
 
     @Override
-    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-            I id, P patchParameters, Map<String, String> headers) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'patch'");
-    }
-
-    @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         requireNonNull(resource, "resource can not be null");
         requireNonNull(resource.getIdElement(), "resource id can not be null");
@@ -445,6 +437,13 @@ public class IGRepository implements Repository {
 
         builder.setType("searchset");
         return (B) builder.getBundle();
+    }
+
+    @Override
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
+            I id, P patchParameters, Map<String, String> headers) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'patch'");
     }
 
     @Override

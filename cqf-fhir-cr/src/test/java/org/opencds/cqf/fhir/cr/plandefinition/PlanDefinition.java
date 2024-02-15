@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
@@ -33,7 +33,7 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -65,7 +65,7 @@ public class PlanDefinition {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IGRepository(
+            this.repository = new IgRepository(
                     fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             return this;
         }
@@ -76,8 +76,8 @@ public class PlanDefinition {
         }
 
         public PlanDefinitionProcessor buildProcessor(Repository repository) {
-            if (repository instanceof IGRepository) {
-                ((IGRepository) repository)
+            if (repository instanceof IgRepository) {
+                ((IgRepository) repository)
                         .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {

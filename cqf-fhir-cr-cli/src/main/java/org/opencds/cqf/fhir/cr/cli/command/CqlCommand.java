@@ -20,7 +20,7 @@ import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -165,7 +165,7 @@ public class CqlCommand implements Callable<Integer> {
 
         var evaluationSettings = EvaluationSettings.getDefault();
         evaluationSettings.setCqlOptions(cqlOptions);
-        var repository = new IGRepository(fhirContext, rootDir);
+        var repository = new IgRepository(fhirContext, rootDir);
         var engine = Engines.forRepositoryAndSettings(
                 evaluationSettings, repository, null, new NpmProcessor(igContext), true);
 

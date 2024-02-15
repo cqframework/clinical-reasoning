@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
-import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,7 +10,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
@@ -28,7 +28,7 @@ public class RequestResourceResolver {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IGRepository(
+            this.repository = new IgRepository(
                     fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());

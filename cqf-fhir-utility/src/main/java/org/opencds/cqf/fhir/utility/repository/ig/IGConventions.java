@@ -16,24 +16,24 @@ import org.slf4j.LoggerFactory;
  * various configurations are whether or not the files are organized by resource type and/or category, and whether
  * or not the files are prefixed with the resource type.
  */
-public class IGConventions {
-    public static final IGConventions FLAT =
-            new IGConventions(FhirTypeLayout.FLAT, CategoryLayout.FLAT, FilenameMode.TYPE_AND_ID);
-    public static final IGConventions STANDARD = new IGConventions(
+public class IgConventions {
+    public static final IgConventions FLAT =
+            new IgConventions(FhirTypeLayout.FLAT, CategoryLayout.FLAT, FilenameMode.TYPE_AND_ID);
+    public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE, CategoryLayout.DIRECTORY_PER_CATEGORY, FilenameMode.ID_ONLY);
 
-    private static final Logger LOG = LoggerFactory.getLogger(IGConventions.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IgConventions.class);
 
     /**
-     * Creates new IGRepositoryConfig with the given typeLayout, categoryLayout, and filenameMode.
+     * Creates new IGConventions with the given typeLayout, categoryLayout, and filenameMode.
      *
-     * NOTE: The preferred way to create an IGRepositoryConfig is to use the autoDetect method or one of the static instances, STANDARD or FLAT. The only cases where this constructor should be used is if the IG repository configuration is known ahead of time and is non-standard.
+     * NOTE: The preferred way to create an IGConventions is to use the autoDetect method or one of the static instances, STANDARD or FLAT. The only cases where this constructor should be used is if the IG repository configuration is known ahead of time and is non-standard.
      *
      * @param typeLayout
      * @param categoryLayout
      * @param filenameMode
      */
-    public IGConventions(FhirTypeLayout typeLayout, CategoryLayout categoryLayout, FilenameMode filenameMode) {
+    public IgConventions(FhirTypeLayout typeLayout, CategoryLayout categoryLayout, FilenameMode filenameMode) {
         this.typeLayout = typeLayout;
         this.categoryLayout = categoryLayout;
         this.filenameMode = filenameMode;
@@ -64,7 +64,7 @@ public class IGConventions {
      *
      * @return The IG conventions.
      */
-    public static IGConventions autoDetect(Path path) {
+    public static IgConventions autoDetect(Path path) {
         if (path == null || !path.toFile().exists()) {
             return STANDARD;
         }
@@ -104,7 +104,7 @@ public class IGConventions {
 
         // Potential resource files are files that contain a "." and have a valid FHIR file extension.
         FilenameFilter resourceFileFilter = (dir, name) -> name.contains(".")
-                && IGRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.')));
+                && IgRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.')));
         var potentialResourceFiles = typePath.toFile().listFiles(resourceFileFilter);
 
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
@@ -116,7 +116,7 @@ public class IGConventions {
                 .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
                 .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
 
-        var config = new IGConventions(
+        var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY);
@@ -175,7 +175,7 @@ public class IGConventions {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        IGConventions other = (IGConventions) obj;
+        IgConventions other = (IgConventions) obj;
         if (typeLayout != other.typeLayout) return false;
         if (categoryLayout != other.categoryLayout) return false;
         return filenameMode == other.filenameMode;
@@ -184,7 +184,7 @@ public class IGConventions {
     @Override
     public String toString() {
         return String.format(
-                "IGRepositoryConfig [typeLayout=%s, categoryLayout=%s, filenameMode=%s]",
+                "IGConventions [typeLayout=%s, categoryLayout=%s, filenameMode=%s]",
                 typeLayout, categoryLayout, filenameMode);
     }
 }

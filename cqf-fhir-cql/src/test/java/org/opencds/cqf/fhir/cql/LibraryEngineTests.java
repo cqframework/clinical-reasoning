@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.opencds.cqf.fhir.test.Classes.getResourcePath;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -14,14 +14,14 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class LibraryEngineTests {
 
     @Test
     void testFhirPath() {
         var patientId = "Patient/Patient1";
-        var repository = new IGRepository(FhirContext.forR4Cached(), getResourcePath(LibraryEngineTests.class));
+        var repository = new IgRepository(FhirContext.forR4Cached(), getResourcePath(LibraryEngineTests.class));
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
 
         var params = parameters();
@@ -46,7 +46,7 @@ class LibraryEngineTests {
     @Test
     void testFhirPathWithResource() {
         var patientId = "Patient/Patient1";
-        var repository = new IGRepository(FhirContext.forR4Cached(), getResourcePath(LibraryEngineTests.class));
+        var repository = new IgRepository(FhirContext.forR4Cached(), getResourcePath(LibraryEngineTests.class));
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
 
         var params = parameters();

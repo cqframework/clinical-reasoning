@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class R4RepositoryTest {
 
@@ -30,7 +30,7 @@ class R4RepositoryTest {
             .getPath());
 
     public R4RepositoryTest() {
-        repository = new IGRepository(
+        repository = new IgRepository(
                 FhirContext.forR4Cached(),
                 path.resolve("org/opencds/cqf/fhir/cr/measure/r4/res").toString());
     }

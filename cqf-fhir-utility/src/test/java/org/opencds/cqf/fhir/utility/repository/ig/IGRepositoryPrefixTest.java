@@ -22,11 +22,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ResourceDirectoryCopier;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IGRepositoryPrefixTest {
+public class IgRepositoryPrefixTest {
 
     private static Repository repository;
 
@@ -37,9 +37,8 @@ public class IGRepositoryPrefixTest {
     public static void setup() throws URISyntaxException, IOException, InterruptedException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        ResourceDirectoryCopier.copyFromJar(
-                IGRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/prefixed", tempDir);
-        repository = new IGRepository(FhirContext.forR4Cached(), tempDir.toString());
+        Resources.copyFromJar("/sampleIgs/directoryPerType/prefixed", tempDir);
+        repository = new IgRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @Test

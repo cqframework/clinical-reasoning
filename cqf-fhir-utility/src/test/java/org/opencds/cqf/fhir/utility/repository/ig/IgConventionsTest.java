@@ -5,12 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
 
-class IgConventionsAutoDetectTest {
+class IgConventionsTest {
 
     @TempDir
     static Path tempDir;
@@ -20,6 +21,11 @@ class IgConventionsAutoDetectTest {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs", tempDir);
+    }
+
+    @Test
+    void verifyEquals() {
+        EqualsVerifier.forClass(IgConventions.class).verify();
     }
 
     @Test
@@ -57,5 +63,15 @@ class IgConventionsAutoDetectTest {
     @Test
     void autoDetectWithMisleadingFileName() {
         assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("misleadingFileName")));
+    }
+
+    @Test
+    void autoDetectWithEmptyContent() {
+        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("emptyContent")));
+    }
+
+    @Test
+    void autoDetectWithNonFhirFilename() {
+        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFilename")));
     }
 }

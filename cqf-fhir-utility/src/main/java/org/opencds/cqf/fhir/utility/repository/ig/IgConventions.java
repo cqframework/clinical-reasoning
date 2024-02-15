@@ -6,6 +6,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * various configurations are whether or not the files are organized by resource type and/or category, and whether
  * or not the files are prefixed with the resource type.
  */
-public class IgConventions {
+public final class IgConventions {
     public static final IgConventions FLAT =
             new IgConventions(FhirTypeLayout.FLAT, CategoryLayout.FLAT, FilenameMode.TYPE_AND_ID);
     public static final IgConventions STANDARD = new IgConventions(
@@ -109,9 +110,7 @@ public class IgConventions {
 
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
-        // contain a FHIR resource matching the claim. This is a heuristic and may not always be accurate,
-        // but it's the best we can do without parsing the file
-        // (which we can't do without knowing the FHIR version).
+        // have a resource with an id that matches the filename.
         var hasTypeFilename = Stream.of(potentialResourceFiles)
                 .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
                 .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
@@ -128,9 +127,8 @@ public class IgConventions {
 
     // This method checks to see if the contents of a file match the type claimed by the filename
     private static boolean contentsMatchClaimedType(File file, FHIRAllTypes claimedFhirType) {
-        if (file == null || claimedFhirType == null) {
-            return false;
-        }
+        Objects.requireNonNull(file);
+        Objects.requireNonNull(claimedFhirType);
 
         try {
             @SuppressWarnings("null")

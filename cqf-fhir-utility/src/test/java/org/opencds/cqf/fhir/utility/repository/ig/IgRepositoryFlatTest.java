@@ -22,11 +22,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ResourceDirectoryCopier;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IGRepositoryDirectoryTest {
+public class IgRepositoryFlatTest {
 
     private static Repository repository;
 
@@ -34,12 +34,11 @@ public class IGRepositoryDirectoryTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, InterruptedException {
+    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        ResourceDirectoryCopier.copyFromJar(
-                IGRepositoryDirectoryTest.class, "/sampleIgs/directoryPerType/standard", tempDir);
-        repository = new IGRepository(FhirContext.forR4Cached(), tempDir.toString());
+        Resources.copyFromJar("/sampleIgs/flat", tempDir);
+        repository = new IgRepository(FhirContext.forR4Cached(), tempDir.toString());
     }
 
     @Test
@@ -120,7 +119,7 @@ public class IGRepositoryDirectoryTest {
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("resources/library/new-library.json");
+        var loc = tempDir.resolve("Library-new-library.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
@@ -135,7 +134,7 @@ public class IGRepositoryDirectoryTest {
         var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/patient/new-patient.json");
+        var loc = tempDir.resolve("Patient-new-patient.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement());
@@ -150,7 +149,7 @@ public class IGRepositoryDirectoryTest {
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("vocabulary/valueset/new-valueset.json");
+        var loc = tempDir.resolve("ValueSet-new-valueset.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());

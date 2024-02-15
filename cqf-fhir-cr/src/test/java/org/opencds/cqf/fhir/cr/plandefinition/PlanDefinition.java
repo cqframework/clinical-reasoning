@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
@@ -29,12 +30,10 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
@@ -66,11 +65,8 @@ public class PlanDefinition {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = TestRepositoryFactory.createRepository(
-                    fhirContext,
-                    this.getClass(),
-                    CLASS_PATH + "/" + repositoryPath,
-                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
+            this.repository = new IgRepository(
+                    fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             return this;
         }
 
@@ -80,8 +76,8 @@ public class PlanDefinition {
         }
 
         public PlanDefinitionProcessor buildProcessor(Repository repository) {
-            if (repository instanceof IGRepository) {
-                ((IGRepository) repository)
+            if (repository instanceof IgRepository) {
+                ((IgRepository) repository)
                         .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {

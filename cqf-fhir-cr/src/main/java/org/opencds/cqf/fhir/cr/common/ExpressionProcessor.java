@@ -79,7 +79,6 @@ public class ExpressionProcessor {
     /**
      * Returns a CqfExpression from a list of extensions filtered by the given url.  This is done against a list of extensions to support the lack of an Expression type in Dstu3.
      *
-     * @param <E> IBaseExtension<?, ?> type
      * @param request operation request with parameters
      * @param extensions list of extensions to pull the CqfExpression from
      * @param extensionUrl the list of extensions will be filtered by this url

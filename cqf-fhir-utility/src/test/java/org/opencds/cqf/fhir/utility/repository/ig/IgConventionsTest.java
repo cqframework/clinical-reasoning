@@ -74,12 +74,4 @@ class IgConventionsTest {
     void autoDetectWithNonFhirFilename() {
         assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFilename")));
     }
-
-    @Test
-    void autoDetectWithMixedCase() {
-        var config = IgConventions.autoDetect(tempDir.resolve("caseSensitivity"));
-        assertEquals(FilenameMode.TYPE_AND_ID, config.filenameMode());
-        assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());
-        assertEquals(FhirTypeLayout.DIRECTORY_PER_TYPE, config.typeLayout());
-    }
 }

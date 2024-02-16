@@ -78,7 +78,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     String version = MetadataResourceHelper.getParameter("version", theParameters, StringType.class).map(t -> t.getValue()).orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
     String releaseLabel = MetadataResourceHelper.getParameter("releaseLabel", theParameters, StringType.class).map(t -> t.getValue()).orElse("");
     Optional<CodeType> versionBehavior = MetadataResourceHelper.getParameter("versionBehavior", theParameters, CodeType.class);
-    Optional<CodeType> requireNonExpermimental = MetadataResourceHelper.getParameter("requireNonExpermimental", theParameters, CodeType.class);
+    Optional<CodeType> requireNonExpermimental = MetadataResourceHelper.getParameter("requireNonExperimental", theParameters, CodeType.class);
     CRMIReleaseVersionBehaviorCodes versionBehaviorCode;
     CRMIReleaseExperimentalBehaviorCodes experimentalBehaviorCode;
     try {
@@ -321,7 +321,7 @@ private void updateReleaseLabel(MetadataResource artifact, String releaseLabel) 
         Extension releaseLabelExtension = artifact.getExtensionByUrl(IBaseKnowledgeArtifactAdapter.releaseLabelUrl);
         if (releaseLabelExtension == null) {
             // create the Extension and add it to the artifact if it doesn't exist
-            releaseLabelExtension = new Extension();
+            releaseLabelExtension = new Extension(IBaseKnowledgeArtifactAdapter.releaseLabelUrl);
             artifact.addExtension(releaseLabelExtension);
         }
         releaseLabelExtension.setValue(new StringType(releaseLabel));

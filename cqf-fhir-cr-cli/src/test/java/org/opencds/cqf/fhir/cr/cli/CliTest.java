@@ -18,9 +18,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class CliTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CliTest.class);
 
     @TempDir
     private static Path tempDir;
@@ -124,6 +128,9 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
+
+        LOG.error(output);
+        LOG.error(errContent.toString());
 
         assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));

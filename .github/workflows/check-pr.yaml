@@ -1,6 +1,8 @@
 name: Check PR
-on: pull_request
-
+on:
+    pull_request:
+      types: [opened, reopened, synchronize]
+  
 permissions:
     checks: write
 
@@ -15,7 +17,7 @@ jobs:
           os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'
@@ -27,9 +29,10 @@ jobs:
         run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: Publish test report
         uses: mikepenz/action-junit-report@v3
-        if: success() || failure() # always run even if the previous step fails
+        if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
           report_paths: "**/target/surefire-reports/TEST-*.xml"
+          job_name: "Check PR"
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         if: matrix.os == 'ubuntu-latest'

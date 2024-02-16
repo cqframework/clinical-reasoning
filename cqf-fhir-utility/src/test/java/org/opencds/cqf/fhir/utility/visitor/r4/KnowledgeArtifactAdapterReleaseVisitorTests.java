@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,12 +41,16 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.slf4j.LoggerFactory;
 import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 
 public class KnowledgeArtifactAdapterReleaseVisitorTests {
   private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -230,58 +236,54 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
 		assertTrue(nonExperimentalChildException.getMessage().contains("not Experimental"));
 	}
 
-	// @Test
-	// void releaseResource_require_non_experimental_warn() {
-	// 	// SpecificationLibrary - root is experimentalbut HAS experimental children
-    //     Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
-    //     spyRepository.transaction(bundle);
-	// 	// SpecificationLibrary2 - root is NOT experimental but HAS experimental children
-    //     Bundle bundle2 = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental-children.json"));
-    //     spyRepository.transaction(bundle2);
-	// 	Appender<ILoggingEvent> myMockAppender = mock(Appender.class);
-	// 	List<String> warningMessages = new ArrayList<>();
-	// 	doAnswer(t -> {
-	// 		ILoggingEvent evt = (ILoggingEvent) t.getArguments()[0];
-	// 		// we only care about warning messages here
-	// 		if (evt.getLevel().equals(Level.WARN)) {
-	// 			// instead of appending to logs, we just add it to a list
-	// 			warningMessages.add(evt.getFormattedMessage());
-	// 		}
-	// 		return null;
-	// 	}).when(myMockAppender).doAppend(any());
-	// 	org.slf4j.Logger logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-	// 	ch.qos.logback.classic.Logger myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
-	// 	// add the mocked appender, make sure it is detached at the end
-	// 	myLoggerRoot.addAppender(myMockAppender);
+	@Test
+	void releaseResource_require_non_experimental_warn() {
+		// SpecificationLibrary - root is experimentalbut HAS experimental children
+        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
+        spyRepository.transaction(bundle);
+		// SpecificationLibrary2 - root is NOT experimental but HAS experimental children
+        Bundle bundle2 = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental-children.json"));
+        spyRepository.transaction(bundle2);
 
-	// 	Parameters params = parameters(
-	// 		part("version", new StringType("1.2.3")),
-	// 		part("versionBehavior", new CodeType("default")),
-	// 		part("requireNonExperimental", new CodeType("warn"))
-	// 	);
-	// 	getClient().operation()
-	// 		.onInstance(specificationLibReference)
-	// 		.named("$release")
-	// 		.withParameters(params)
-	// 		.useHttpGet()
-	// 		.returnResourceType(Bundle.class)
-	// 		.execute();
-	// 	// no warning if the root is Experimental
-	// 	assertTrue(warningMessages.size()==0);
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        Library library2 = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary2")).copy();
+        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        r4LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
 
-	// 	getClient().operation()
-	// 		.onInstance(specificationLibReference+"2")
-	// 		.named("$release")
-	// 		.withParameters(params)
-	// 		.useHttpGet()
-	// 		.returnResourceType(Bundle.class)
-	// 		.execute();
-	// 	// SHOULD warn if the root is not experimental
-	// 	assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.7")));
-	// 	assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://ersd.aimsplatform.org/fhir/Library/rctc2")));
-	// 	// cleanup
-	// 	myLoggerRoot.detachAppender(myMockAppender);
-	// }
+		Appender<ILoggingEvent> myMockAppender = mock(Appender.class);
+		List<String> warningMessages = new ArrayList<>();
+		doAnswer(t -> {
+			ILoggingEvent evt = (ILoggingEvent) t.getArguments()[0];
+			// we only care about warning messages here
+			if (evt.getLevel().equals(Level.WARN)) {
+				// instead of appending to logs, we just add it to a list
+				warningMessages.add(evt.getFormattedMessage());
+			}
+			return null;
+		}).when(myMockAppender).doAppend(any());
+		org.slf4j.Logger logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		ch.qos.logback.classic.Logger myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
+		// add the mocked appender, make sure it is detached at the end
+		myLoggerRoot.addAppender(myMockAppender);
+
+		Parameters params = parameters(
+			part("version", new StringType("1.2.3")),
+			part("versionBehavior", new CodeType("default")),
+			part("requireNonExperimental", new CodeType("warn"))
+		);
+		libraryAdapter.accept(releaseVisitor, spyRepository, params);
+		// no warning if the root is Experimental
+		assertTrue(warningMessages.size()==0);
+
+        libraryAdapter2.accept(releaseVisitor, spyRepository, params);
+
+		// SHOULD warn if the root is not experimental
+		assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.7")));
+		assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://ersd.aimsplatform.org/fhir/Library/rctc2")));
+		// cleanup
+		myLoggerRoot.detachAppender(myMockAppender);
+	}
 
 	@Test
 	void releaseResource_propagate_effective_period() {

@@ -274,7 +274,7 @@ public static final List<ResourceType> terminologyResourceTypes =
     }
 }
 private void processCanonicals(MetadataResource resource, List<CanonicalType> canonicalVersion,  List<CanonicalType> checkArtifactVersion,  List<CanonicalType> forceArtifactVersion) throws PreconditionFailedException {
-    if (checkArtifactVersion != null) {
+    if (checkArtifactVersion != null && !checkArtifactVersion.isEmpty()) {
         // check throws an error
         findVersionInListMatchingResource(checkArtifactVersion, resource)
             .ifPresent((version) -> {
@@ -286,11 +286,11 @@ private void processCanonicals(MetadataResource resource, List<CanonicalType> ca
                     ));
                 }
             });
-    } else if (forceArtifactVersion != null) {
+    } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
         // force just does a silent override
         findVersionInListMatchingResource(forceArtifactVersion, resource)
             .ifPresent((version) -> resource.setVersion(version));
-    } else if (canonicalVersion != null && !resource.hasVersion()) {
+    } else if (canonicalVersion != null && !canonicalVersion.isEmpty() && !resource.hasVersion()) {
         // canonicalVersion adds a version if it's missing
         findVersionInListMatchingResource(canonicalVersion, resource)
             .ifPresent((version) -> resource.setVersion(version));

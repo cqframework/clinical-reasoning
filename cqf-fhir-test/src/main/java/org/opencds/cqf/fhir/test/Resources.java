@@ -32,7 +32,11 @@ public class Resources {
      * @return
      */
     public static String getResourcePath(Class<?> clazz) {
-        return new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
+        return new File(clazz.getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .getPath())
+                .getAbsolutePath();
     }
 
     /**

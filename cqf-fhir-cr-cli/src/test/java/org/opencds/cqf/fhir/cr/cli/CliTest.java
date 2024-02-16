@@ -128,9 +128,12 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
+        String error = errContent.toString();
 
-        LOG.error(output);
-        LOG.error(errContent.toString());
+        System.out.println(output);
+        System.err.println(output);
+        System.out.println(error);
+        System.err.println(error);
 
         assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));

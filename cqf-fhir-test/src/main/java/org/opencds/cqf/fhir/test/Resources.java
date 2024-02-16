@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,7 +32,7 @@ public class Resources {
      * @return
      */
     public static String getResourcePath(Class<?> clazz) {
-        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
+        return new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
     }
 
     /**

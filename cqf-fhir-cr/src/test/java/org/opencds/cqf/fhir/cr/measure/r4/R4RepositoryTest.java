@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.io.ByteArrayInputStream;
@@ -23,11 +24,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 class R4RepositoryTest {
 
     Repository repository;
-    Path path = Paths.get(R4RepositoryTest.class
-            .getProtectionDomain()
-            .getCodeSource()
-            .getLocation()
-            .getPath());
+    Path path = Paths.get(getResourcePath(R4RepositoryTest.class));
 
     public R4RepositoryTest() {
         repository = new IgRepository(

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -36,11 +37,7 @@ public class ActivityDefinitionProcessorTests {
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
-                this.getClass()
-                                .getProtectionDomain()
-                                .getCodeSource()
-                                .getLocation()
-                                .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version);
+                getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version);
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

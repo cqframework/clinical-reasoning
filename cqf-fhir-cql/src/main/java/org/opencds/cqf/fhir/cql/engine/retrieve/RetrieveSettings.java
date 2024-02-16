@@ -34,17 +34,17 @@ public class RetrieveSettings {
         FILTER_IN_MEMORY
     }
 
-    // TODO: Profiles are completely unsupported for now. This just lays out some potential options for doing that
     public enum PROFILE_MODE {
         // Always check the resource profile by validating the returned resource against the profile
         // This requires access to the structure defs that define the profile at runtime
         // Meaning, they need to be loaded on the server or otherwise. If they are unavailable, it's an automatic
-        // failure.
+        // failure. ENFORCED is not yet implemented.
         ENFORCED,
-        // Same as above, but don't error if you don't have access to the profiles at runtime
-        OPTIONAL,
-        // Check that the resources declare the profile they conform too (generally considered a bad practice)
+        // Use the declared profile (generally considered a bad practice).
+        // If the resource doesn't declare a profile, it's filtered out.
         DECLARED,
+        // Same as above, but if the resource doesn't declare a profile, it's not filtered out.
+        OPTIONAL,
         // Let the underlying repository validate profiles (IOW, offload validation)
         TRUST,
         // Don't check resource profile, even if specified by the engine

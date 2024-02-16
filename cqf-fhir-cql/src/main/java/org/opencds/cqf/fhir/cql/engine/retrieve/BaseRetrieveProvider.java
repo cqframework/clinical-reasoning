@@ -77,7 +77,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         if (profileMode == PROFILE_MODE.DECLARED || profileMode == PROFILE_MODE.OPTIONAL) {
             return (IBaseResource res) -> {
 
-                // Resources without profiles get special treatment in profile mode OPTIONAL/ENFORCED
+                // DECLARED == require a declared profile to be there, and use it.
+                // OPTIONAL == use the profile if it's there, but don't require it
                 if (res.getMeta() == null
                         || res.getMeta().getProfile() == null
                         || res.getMeta().getProfile().isEmpty()) {
@@ -93,6 +94,9 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                 return false;
             };
         }
+
+        // Should never see TRUST, since that should be handled by the repository.
+        // ENFORCED is not yet supported.
 
         throw new UnsupportedOperationException(String.format("%s profile mode is not yet supported.", profileMode));
     }

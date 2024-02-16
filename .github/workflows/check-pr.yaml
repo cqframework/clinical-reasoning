@@ -28,13 +28,13 @@ jobs:
       - name: Tests and additional checks
         run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: Publish test report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
           report_paths: "**/target/surefire-reports/TEST-*.xml"
           job_name: "Check PR"
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: matrix.os == 'ubuntu-latest'
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

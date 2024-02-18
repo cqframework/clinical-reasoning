@@ -116,7 +116,7 @@ class CliTest {
             "-ln=TestFHIR",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/r4",
-            "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -148,7 +148,7 @@ class CliTest {
             "-ln=TestFHIRWithHelpers",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/r4",
-            "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -180,7 +180,7 @@ class CliTest {
             "-ln=TestUSCore",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/uscore",
-            "-t=" + testResourcePath + "/uscore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/uscore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -209,7 +209,7 @@ class CliTest {
             "-ln=TestQICore",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -273,7 +273,7 @@ class CliTest {
             "-ln=QICoreCommonTests",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicorecommon",
-            "-t=" + testResourcePath + "/qicorecommon/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicorecommon/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -303,7 +303,7 @@ class CliTest {
             "-ln=FluentFunctions",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/options",
-            "-t=" + testResourcePath + "/options/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/options/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -327,7 +327,7 @@ class CliTest {
             "-ln=FluentFunctions",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/optionsFailure",
-            "-t=" + testResourcePath + "/optionsFailure/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/optionsFailure/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -348,7 +348,7 @@ class CliTest {
             "-ln=TestVSCastFunction",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/vscast/Patient-17",
-            "-t=" + testResourcePath + "/vscast/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/vscast/vocabulary/valueset",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -371,7 +371,7 @@ class CliTest {
             "-ln=TestVSCastFunction",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/vscast15/Patient-17",
-            "-t=" + testResourcePath + "/vscast15/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/vscast15/vocabulary/valueset",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -394,7 +394,7 @@ class CliTest {
             "-lv=2.0.0",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -427,7 +427,7 @@ class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -464,7 +464,7 @@ class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=denom-EXM124"
         };
@@ -492,7 +492,7 @@ class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=numer-EXM124"
         };
@@ -523,7 +523,7 @@ class CliTest {
             "-lv=0.1.0",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
-            "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };

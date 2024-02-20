@@ -48,7 +48,8 @@ public class ProcessDefinition {
             resource = resolveDefinition(request, definition);
             var actionId = request.resolvePathString(action, "id");
             if (actionId != null) {
-                resource.setId(String.format("%s-%s", actionId, resource.getIdElement().getIdPart()));
+                resource.setId(
+                        String.format("%s-%s", actionId, resource.getIdElement().getIdPart()));
             }
             if (resource != null) {
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);

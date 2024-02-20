@@ -18,39 +18,39 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class MetadataResourceHelper {
-    public static void forEachMetadataResource(List<BundleEntryComponent> entries, Consumer<MetadataResource> callback, Repository theRepository) {
+    public static void forEachMetadataResource(List<BundleEntryComponent> entries, Consumer<MetadataResource> callback, Repository repository) {
 		entries.stream()
 			.map(entry -> entry.getResponse().getLocation())
 			.map(location -> {
 				switch (location.split("/")[0]) {
 					case "ActivityDefinition":
-						return theRepository.read(ActivityDefinition.class, new IdType(location));
+						return repository.read(ActivityDefinition.class, new IdType(location));
 					case "Library":
-						return theRepository.read(Library.class, new IdType(location));
+						return repository.read(Library.class, new IdType(location));
 					case "Measure":
-						return theRepository.read(Measure.class, new IdType(location));
+						return repository.read(Measure.class, new IdType(location));
 					case "PlanDefinition":
-						return theRepository.read(PlanDefinition.class, new IdType(location));
+						return repository.read(PlanDefinition.class, new IdType(location));
 					case "ValueSet":
-						return theRepository.read(ValueSet.class, new IdType(location));
+						return repository.read(ValueSet.class, new IdType(location));
 					default:
 						return  null;
 				}
 			})
 			.forEach(callback);
 	}
-    public static <T extends Type> Optional<T> getParameter(String name, org.hl7.fhir.r4.model.Parameters theParameters, Class<T> type) {
-        return Optional.ofNullable(theParameters)
+    public static <T extends Type> Optional<T> getParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+        return Optional.ofNullable(operationParameters)
         .map(p -> p.getParameter(name))
         .map(rl -> (T) rl.getValue());
     }
-    public static <T extends IBaseResource> Optional<T> getResourceParameter(String name, org.hl7.fhir.r4.model.Parameters theParameters, Class<T> type) {
-        return Optional.ofNullable(theParameters)
+    public static <T extends IBaseResource> Optional<T> getResourceParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+        return Optional.ofNullable(operationParameters)
         .map(p -> p.getParameter(name))
         .map(rl -> (T) rl.getResource());
     }
-    public static <T extends Type> Optional<List<T>> getListParameter(String name, org.hl7.fhir.r4.model.Parameters theParameters, Class<T> type) {
-        return Optional.ofNullable(theParameters)
+    public static <T extends Type> Optional<List<T>> getListParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+        return Optional.ofNullable(operationParameters)
         .map(p -> p.getParameterValues(name))
         .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
     }

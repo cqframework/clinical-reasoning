@@ -13,6 +13,6 @@ import org.opencds.cqf.fhir.utility.visitor.r5.r5KnowledgeArtifactVisitor;
 public interface r5LibraryAdapter extends r5KnowledgeArtifactAdapter, IBaseLibraryAdapter {
     List<Attachment> getContent();
     Attachment addContent();
-    IBase accept(r5KnowledgeArtifactVisitor theVisitor, Repository theRepository, Parameters theParameters);
+    IBase accept(r5KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters);
     Library get();
 }

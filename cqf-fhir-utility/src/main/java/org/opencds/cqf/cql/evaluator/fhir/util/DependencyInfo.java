@@ -9,21 +9,21 @@ public class DependencyInfo {
   private String referenceSource;
   private String reference;
   private String referencePackageId;
-  private List<? extends IBaseExtension> myExtensions;
+  private List<? extends IBaseExtension> extensionList;
 
   public DependencyInfo() {}
 
-  public DependencyInfo(String referenceSource, String reference, List<? extends IBaseExtension> theExtensions) {
+  public DependencyInfo(String referenceSource, String reference, List<? extends IBaseExtension> extensionList) {
     this.referenceSource = referenceSource;
     this.reference = reference;
-    this.myExtensions = theExtensions;
+    this.extensionList = extensionList;
   }
 
   public String getReferenceSource() {
     return this.referenceSource;
   }
   public List<? extends IBaseExtension> getExtension() {
-    return this.myExtensions;
+    return this.extensionList;
   }
 
   public void setReferenceSource(String referenceSource) {

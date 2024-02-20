@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter{
-  private MetadataResource myResource;
-  KnowledgeArtifactAdapter(MetadataResource theResource) {
-    super(theResource);
-    this.myResource = theResource;
+  private MetadataResource adaptedResource;
+  KnowledgeArtifactAdapter(MetadataResource resource) {
+    super(resource);
+    this.adaptedResource = resource;
   }
 
   protected List<DependencyInfo> getRelatedArtifactReferences(MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {

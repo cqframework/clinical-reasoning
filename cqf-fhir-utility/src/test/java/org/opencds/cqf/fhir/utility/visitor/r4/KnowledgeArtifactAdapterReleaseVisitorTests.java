@@ -263,9 +263,9 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
 			return null;
 		}).when(myMockAppender).doAppend(any());
 		org.slf4j.Logger logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		ch.qos.logback.classic.Logger myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
+		ch.qos.logback.classic.Logger loggerRoot = (ch.qos.logback.classic.Logger) logger;
 		// add the mocked appender, make sure it is detached at the end
-		myLoggerRoot.addAppender(myMockAppender);
+		loggerRoot.addAppender(myMockAppender);
 
 		Parameters params = parameters(
 			part("version", new StringType("1.2.3")),
@@ -282,7 +282,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
 		assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.7")));
 		assertTrue(warningMessages.stream().anyMatch(message -> message.contains("http://ersd.aimsplatform.org/fhir/Library/rctc2")));
 		// cleanup
-		myLoggerRoot.detachAppender(myMockAppender);
+		loggerRoot.detachAppender(myMockAppender);
 	}
 
 	@Test

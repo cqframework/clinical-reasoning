@@ -33,8 +33,8 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.ope
     this.valueSet = valueSet;
   }
 
-  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository,  IBaseParameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+  public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository,  IBaseParameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
 
   protected ValueSet getValueSet() {

@@ -12,6 +12,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
 
 public interface r4PlanDefinitionAdapter extends r4KnowledgeArtifactAdapter, IBasePlanDefinitionAdapter {
-    IBase accept(r4KnowledgeArtifactVisitor theVisitor, Repository theRepository, Parameters theParameters);
+    IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters);
     PlanDefinition get();
 }

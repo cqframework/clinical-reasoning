@@ -34,8 +34,8 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     this.planDefinition = planDefinition;
   }
 
-  public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+  public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
 
   protected PlanDefinition getPlanDefinition() {

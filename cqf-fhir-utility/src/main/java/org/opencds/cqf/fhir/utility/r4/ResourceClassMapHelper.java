@@ -39,37 +39,40 @@ import org.hl7.fhir.r4.model.ValueSet;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class ResourceClassMapHelper {
-  public static final Map<ResourceType, Class<? extends IBaseResource>> resourceTypeToClass  = new HashMap<ResourceType, Class<? extends IBaseResource>>() {{
-		put(ResourceType.ActivityDefinition, ActivityDefinition.class);
-		put(ResourceType.CapabilityStatement, CapabilityStatement.class);
-		put(ResourceType.ChargeItemDefinition, ChargeItemDefinition.class);
-		put(ResourceType.CompartmentDefinition, CompartmentDefinition.class);
-		put(ResourceType.ConceptMap, ConceptMap.class);
-		put(ResourceType.EffectEvidenceSynthesis, EffectEvidenceSynthesis.class);
-		put(ResourceType.EventDefinition, EventDefinition.class);
-		put(ResourceType.Evidence, Evidence.class);
-		put(ResourceType.EvidenceVariable, EvidenceVariable.class);
-		put(ResourceType.ExampleScenario, ExampleScenario.class);
-		put(ResourceType.GraphDefinition, GraphDefinition.class);
-		put(ResourceType.ImplementationGuide, ImplementationGuide.class);
-		put(ResourceType.Library, Library.class);
-		put(ResourceType.Measure, Measure.class);
-		put(ResourceType.MessageDefinition, MessageDefinition.class);
-		put(ResourceType.NamingSystem, NamingSystem.class);
-		put(ResourceType.OperationDefinition, OperationDefinition.class);
-		put(ResourceType.PlanDefinition, PlanDefinition.class);
-		put(ResourceType.Questionnaire, Questionnaire.class);
-		put(ResourceType.ResearchDefinition, ResearchDefinition.class);
-		put(ResourceType.ResearchElementDefinition, ResearchElementDefinition.class);
-		put(ResourceType.RiskEvidenceSynthesis, RiskEvidenceSynthesis.class);
-		put(ResourceType.SearchParameter, SearchParameter.class);
-		put(ResourceType.StructureDefinition, StructureDefinition.class);
-		put(ResourceType.StructureMap, StructureMap.class);
-		put(ResourceType.TerminologyCapabilities, TerminologyCapabilities.class);
-		put(ResourceType.TestScript, TestScript.class);
-		put(ResourceType.ValueSet, ValueSet.class);
-		put(ResourceType.CodeSystem, CodeSystem.class);
-	}};
+  public static final Map<ResourceType, Class<? extends IBaseResource>> resourceTypeToClass;
+  static {
+    Map<ResourceType, Class<? extends IBaseResource>> initializer = new HashMap<ResourceType, Class<? extends IBaseResource>>();
+    initializer.put(ResourceType.ActivityDefinition, ActivityDefinition.class);
+    initializer.put(ResourceType.CapabilityStatement, CapabilityStatement.class);
+    initializer.put(ResourceType.ChargeItemDefinition, ChargeItemDefinition.class);
+    initializer.put(ResourceType.CompartmentDefinition, CompartmentDefinition.class);
+    initializer.put(ResourceType.ConceptMap, ConceptMap.class);
+    initializer.put(ResourceType.EffectEvidenceSynthesis, EffectEvidenceSynthesis.class);
+    initializer.put(ResourceType.EventDefinition, EventDefinition.class);
+    initializer.put(ResourceType.Evidence, Evidence.class);
+    initializer.put(ResourceType.EvidenceVariable, EvidenceVariable.class);
+    initializer.put(ResourceType.ExampleScenario, ExampleScenario.class);
+    initializer.put(ResourceType.GraphDefinition, GraphDefinition.class);
+    initializer.put(ResourceType.ImplementationGuide, ImplementationGuide.class);
+    initializer.put(ResourceType.Library, Library.class);
+    initializer.put(ResourceType.Measure, Measure.class);
+    initializer.put(ResourceType.MessageDefinition, MessageDefinition.class);
+    initializer.put(ResourceType.NamingSystem, NamingSystem.class);
+    initializer.put(ResourceType.OperationDefinition, OperationDefinition.class);
+    initializer.put(ResourceType.PlanDefinition, PlanDefinition.class);
+    initializer.put(ResourceType.Questionnaire, Questionnaire.class);
+    initializer.put(ResourceType.ResearchDefinition, ResearchDefinition.class);
+    initializer.put(ResourceType.ResearchElementDefinition, ResearchElementDefinition.class);
+    initializer.put(ResourceType.RiskEvidenceSynthesis, RiskEvidenceSynthesis.class);
+    initializer.put(ResourceType.SearchParameter, SearchParameter.class);
+    initializer.put(ResourceType.StructureDefinition, StructureDefinition.class);
+    initializer.put(ResourceType.StructureMap, StructureMap.class);
+    initializer.put(ResourceType.TerminologyCapabilities, TerminologyCapabilities.class);
+    initializer.put(ResourceType.TestScript, TestScript.class);
+    initializer.put(ResourceType.ValueSet, ValueSet.class);
+    initializer.put(ResourceType.CodeSystem, CodeSystem.class);
+	resourceTypeToClass = initializer;
+  }
 
   public static Class<? extends IBaseResource> getClass(String resourceType) throws UnprocessableEntityException {
     ResourceType type = null;

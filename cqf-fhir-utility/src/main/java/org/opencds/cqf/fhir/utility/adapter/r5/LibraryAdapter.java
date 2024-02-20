@@ -121,8 +121,8 @@ public class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter 
             });
         return retval;
     }
-    public IBase accept(r5KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+    public IBase accept(r5KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
   public Date getApprovalDate() {
     return this.library.getApprovalDate();

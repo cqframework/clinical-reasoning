@@ -1340,8 +1340,8 @@ public String toSystem(ArtifactAssessmentDisposition code) {
 			@ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/certainty-type")
 			protected CodeableConcept value;
 
-			private Extension setValue(CodeableConcept theValue) {
-				this.value = theValue;
+			private Extension setValue(CodeableConcept value) {
+				this.value = value;
 				return this;
 			};
 
@@ -1355,8 +1355,8 @@ public String toSystem(ArtifactAssessmentDisposition code) {
 			@ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/certainty-rating")
 			protected CodeableConcept value;
 
-			private Extension setValue(CodeableConcept theValue) {
-				this.value = theValue;
+			private Extension setValue(CodeableConcept value) {
+				this.value = value;
 				return this;
 			};
 			public ArtifactAssessmentContentClassifierExtension(CodeableConcept classifierConcept) {

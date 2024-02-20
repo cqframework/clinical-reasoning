@@ -12,10 +12,10 @@ import org.opencds.cqf.fhir.api.Repository;
 
 public interface r4KnowledgeArtifactVisitor extends KnowledgeArtifactVisitor{
   //	void visit(ActivityDefinitionAdapter activityDefinition);
-//   IBase visit(r4KnowledgeArtifactAdapter knowledgeArtifact, Repository theRepository, IBaseParameters draftParameters);
-  IBase visit(r4LibraryAdapter library, Repository theRepository, Parameters draftParameters);
-  IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters draftParameters);
+//   IBase visit(r4KnowledgeArtifactAdapter knowledgeArtifact, Repository repository, IBaseParameters draftParameters);
+  IBase visit(r4LibraryAdapter library, Repository repository, Parameters draftParameters);
+  IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters draftParameters);
 //  //	void visit(StructureDefinitionAdapter structureDefinition);
-IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters draftParameters); 
+IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters draftParameters); 
 }
 

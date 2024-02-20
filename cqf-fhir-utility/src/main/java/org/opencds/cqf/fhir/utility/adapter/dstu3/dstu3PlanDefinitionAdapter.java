@@ -9,6 +9,6 @@ import org.opencds.cqf.fhir.utility.visitor.dstu3.dstu3KnowledgeArtifactVisitor;
 import org.hl7.fhir.dstu3.model.Parameters;
 
 public interface dstu3PlanDefinitionAdapter extends Dstu3KnowledgeArtifactAdapter, IBasePlanDefinitionAdapter {
-    IBase accept(dstu3KnowledgeArtifactVisitor theVisitor, Repository theRepository, Parameters theParameters);
+    IBase accept(dstu3KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters);
     PlanDefinition get();
 }

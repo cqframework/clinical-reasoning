@@ -30,8 +30,8 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements dstu3Pla
     this.planDefinition = planDefinition;
   }
 
-  public IBase accept(dstu3KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+  public IBase accept(dstu3KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
 
   protected PlanDefinition getPlanDefinition() {

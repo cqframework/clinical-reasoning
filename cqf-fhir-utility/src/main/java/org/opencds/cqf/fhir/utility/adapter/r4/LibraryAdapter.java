@@ -127,8 +127,8 @@ public class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter 
         this.getLibrary().setRelatedArtifact(relatedArtifacts);
     }
 
-    public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository theRepository, Parameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+    public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
   public Date getApprovalDate() {
     return this.getLibrary().getApprovalDate();

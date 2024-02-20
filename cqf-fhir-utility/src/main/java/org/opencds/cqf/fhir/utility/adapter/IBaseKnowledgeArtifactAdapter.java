@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -42,17 +45,17 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
   List<? extends ICompositeType> getRelatedArtifact();
   List<? extends ICompositeType> getComponents();
 //   <T extends Enum<T>> List<? extends ICompositeType> getRelatedArtifactsOfType(T relatedArtifactType);
-//   IBase accept(KnowledgeArtifactVisitor theVisitor, Repository theRepository, IBaseParameters theParameters);
+//   IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters);
   String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
   String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
   String valueSetConditionUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
   String valueSetPriorityUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
   String valueSetPriorityCode = "priority";
   String valueSetConditionCode = "focus";
-  List<String> preservedExtensionUrls = List.of(
+  List<String> preservedExtensionUrls = Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(
         valueSetPriorityUrl,
         valueSetConditionUrl
-    );
+    )));
     String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
 	String contextTypeUrl = "http://terminology.hl7.org/CodeSystem/usage-context-type";
 	String contextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";

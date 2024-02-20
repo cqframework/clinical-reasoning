@@ -16,11 +16,11 @@ import java.util.List;
 
 public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
   @Override
-  public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters operationParameters) {
     return new OperationOutcome();
   }
   @Override
-  public IBase visit(IBaseLibraryAdapter library, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters operationParameters) {
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
       // what is dependency, where did it originate? potentially the package?
 
@@ -39,7 +39,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
   }
   @Override
-  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -47,7 +47,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     return new OperationOutcome();
   }
   @Override
-  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));

@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -70,15 +70,15 @@ import static java.util.Comparator.comparing;
 import org.slf4j.Logger;
 
 public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisitor {
-	private Logger myLog = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
+	private Logger log = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
 
-  public IBase visit(r4LibraryAdapter rootLibraryAdapter, Repository theRepository, Parameters theParameters) {
-    boolean latestFromTxServer = ((Parameters)theParameters).getParameterBool("latestFromTxServer");
+  public IBase visit(r4LibraryAdapter rootLibraryAdapter, Repository repository, Parameters operationParameters) {
+    boolean latestFromTxServer = ((Parameters)operationParameters).getParameterBool("latestFromTxServer");
     
-    String version = MetadataResourceHelper.getParameter("version", theParameters, StringType.class).map(t -> t.getValue()).orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
-    String releaseLabel = MetadataResourceHelper.getParameter("releaseLabel", theParameters, StringType.class).map(t -> t.getValue()).orElse("");
-    Optional<CodeType> versionBehavior = MetadataResourceHelper.getParameter("versionBehavior", theParameters, CodeType.class);
-    Optional<CodeType> requireNonExpermimental = MetadataResourceHelper.getParameter("requireNonExperimental", theParameters, CodeType.class);
+    String version = MetadataResourceHelper.getParameter("version", operationParameters, StringType.class).map(t -> t.getValue()).orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
+    String releaseLabel = MetadataResourceHelper.getParameter("releaseLabel", operationParameters, StringType.class).map(t -> t.getValue()).orElse("");
+    Optional<CodeType> versionBehavior = MetadataResourceHelper.getParameter("versionBehavior", operationParameters, CodeType.class);
+    Optional<CodeType> requireNonExpermimental = MetadataResourceHelper.getParameter("requireNonExperimental", operationParameters, CodeType.class);
     CRMIReleaseVersionBehaviorCodes versionBehaviorCode;
     CRMIReleaseExperimentalBehaviorCodes experimentalBehaviorCode;
     try {
@@ -105,7 +105,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     if (rootLibrary.getExperimental()) {
         experimentalBehaviorCode = CRMIReleaseExperimentalBehaviorCodes.NONE;
     }
-    List<MetadataResource> releasedResources = internalRelease(rootLibraryAdapter, releaseVersion, rootEffectivePeriod, versionBehaviorCode, latestFromTxServer, experimentalBehaviorCode, theRepository);
+    List<MetadataResource> releasedResources = internalRelease(rootLibraryAdapter, releaseVersion, rootEffectivePeriod, versionBehaviorCode, latestFromTxServer, experimentalBehaviorCode, repository);
     updateReleaseLabel(rootLibrary, releaseLabel);
     List<DependencyInfo> rootArtifactOriginalDependencies = new ArrayList<DependencyInfo>(rootLibraryAdapter.getDependencies());
     // Get list of extensions which need to be preserved
@@ -132,7 +132,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                 component.setResource(reference);
             } else if (Canonicals.getVersion(component.getResourceElement()) == null || Canonicals.getVersion(component.getResourceElement()).isEmpty()) {
                 // if the not Owned component doesn't have a version, try to find the latest version
-                String updatedReference = tryUpdateReferenceToLatestActiveVersion(component.getResource(), theRepository, artifact.getUrl());
+                String updatedReference = tryUpdateReferenceToLatestActiveVersion(component.getResource(), repository, artifact.getUrl());
                 component.setResource(updatedReference);
             }
             RelatedArtifact componentToDependency = new RelatedArtifact().setType(RelatedArtifact.RelatedArtifactType.DEPENDSON).setResource(component.getResourceElement().getValueAsString());
@@ -142,20 +142,17 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
         List<DependencyInfo> dependencies = artifactAdapter.getDependencies();
         for (DependencyInfo dependency : dependencies) {
             // if the dependency gets updated as part of $release then update the reference as well
-            checkIfReferenceInList(dependency, releasedResources)
-                .ifPresentOrElse((resource) -> {
-                    String updatedReference = String.format("%s|%s", resource.getUrl(), resource.getVersion());
+            Optional<MetadataResource> maybeReference = checkIfReferenceInList(dependency, releasedResources);
+            if (maybeReference.isPresent()) {
+                String updatedReference = String.format("%s|%s", maybeReference.get().getUrl(), maybeReference.get().getVersion());
+                dependency.setReference(updatedReference);
+            } else {
+                if (Canonicals.getVersion(dependency.getReference()) == null || Canonicals.getVersion(dependency.getReference()).isEmpty()) {
+                    // TODO: update when we support expansionParameters and requireVersionedDependencies
+                    String updatedReference = tryUpdateReferenceToLatestActiveVersion(dependency.getReference(), repository, artifact.getUrl());
                     dependency.setReference(updatedReference);
-                },
-                // not present implies that the dependency wasn't updated as part of $release
-                () -> {
-                    // if the dependency doesn't have a version, try to find the latest version
-                    if (Canonicals.getVersion(dependency.getReference()) == null || Canonicals.getVersion(dependency.getReference()).isEmpty()) {
-                        // TODO: update when we support expansionParameters and requireVersionedDependencies
-                        String updatedReference = tryUpdateReferenceToLatestActiveVersion(dependency.getReference(), theRepository, artifact.getUrl());
-                        dependency.setReference(updatedReference);
-                    }
-                });
+                }
+            }
             // only add the dependency to the manifest if it is from a leaf artifact
             if (!artifact.getUrl().equals(rootLibrary.getUrl())) {
                 RelatedArtifact newDep = new RelatedArtifact();
@@ -182,17 +179,17 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                 .filter(originalDep -> originalDep.getReference().equals(resolvedRelatedArtifact.getResource()))
                 .findFirst()
                 .ifPresent(dep -> {
-                    checkIfValueSetNeedsCondition(null, dep, theRepository);
+                    checkIfValueSetNeedsCondition(null, dep, repository);
                     resolvedRelatedArtifact.getExtension().addAll(dep.getExtension().stream().map(e -> (Extension)e).collect(Collectors.toList()));
                     originalDependenciesWithExtensions.removeIf(ra -> ra.getReference().equals(resolvedRelatedArtifact.getResource()));
                 });
         }
     }
     // update ArtifactComments referencing the old Canonical Reference
-    transactionBundle.getEntry().addAll(findArtifactCommentsToUpdate(rootLibrary, releaseVersion, theRepository));
+    transactionBundle.getEntry().addAll(findArtifactCommentsToUpdate(rootLibrary, releaseVersion, repository));
     rootLibraryAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
-    return theRepository.transaction(transactionBundle);
+    return repository.transaction(transactionBundle);
 
   }
   private void checkIfValueSetNeedsCondition(MetadataResource resource, DependencyInfo relatedArtifact, Repository hapiFhirRepository) throws UnprocessableEntityException {
@@ -275,7 +272,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 		String nonExperimentalError = String.format("Root artifact is not Experimental, but references an Experimental resource with URL '%s'.",
 								resource.getUrl());
 		if (CRMIReleaseExperimentalBehaviorCodes.WARN == experimentalBehavior && resource.getExperimental()) {
-			myLog.warn(nonExperimentalError);
+			log.warn(nonExperimentalError);
 		} else if (CRMIReleaseExperimentalBehaviorCodes.ERROR == experimentalBehavior && resource.getExperimental()) {
 			throw new UnprocessableEntityException(nonExperimentalError);
 		}
@@ -296,7 +293,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
   private Optional<String> getReleaseVersion(String version, CRMIReleaseVersionBehaviorCodes versionBehavior, String existingVersion) throws UnprocessableEntityException {
     Optional<String> releaseVersion = Optional.ofNullable(null);
     // If no version exists use the version argument provided
-    if (existingVersion == null || existingVersion.isEmpty() || existingVersion.isBlank()) {
+    if (existingVersion == null || existingVersion.isEmpty() || StringUtils.isBlank(existingVersion)) {
         return Optional.ofNullable(version);
     }
     String replaceDraftInExisting = existingVersion.replace("-draft","");
@@ -366,18 +363,18 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
 		}
 	}
 	
-  private Bundle searchArtifactAssessmentForArtifact(IdType reference, Repository theRepository) {
+  private Bundle searchArtifactAssessmentForArtifact(IdType reference, Repository repository) {
 		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
 		List<IQueryParameterType> urlList = new ArrayList<>();
 		urlList.add(new ReferenceParam(reference));
 		searchParams.put("artifact", urlList);
-		Bundle searchResultsBundle = (Bundle)theRepository.search(Bundle.class,Basic.class, searchParams);
+		Bundle searchResultsBundle = (Bundle)repository.search(Bundle.class,Basic.class, searchParams);
 		return searchResultsBundle;
 	}
-  private List<BundleEntryComponent> findArtifactCommentsToUpdate(MetadataResource rootArtifact,String releaseVersion, Repository theRepository){
+  private List<BundleEntryComponent> findArtifactCommentsToUpdate(MetadataResource rootArtifact,String releaseVersion, Repository repository){
 		List<BundleEntryComponent> returnEntries = new ArrayList<BundleEntryComponent>();
 		// find any artifact assessments and update those as part of the bundle
-		this.searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), theRepository)
+		this.searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository)
 			.getEntry()
 			.stream()
 			// The search is on Basic resources only unless we can register the ArtifactAssessment class
@@ -408,31 +405,31 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
     }
     checkVersionValidSemver(version);
 }
-private BundleEntryRequestComponent createRequest(IBaseResource theResource) {
+private BundleEntryRequestComponent createRequest(IBaseResource resource) {
     Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-    if (theResource.getIdElement().hasValue() && !theResource.getIdElement().getValue().contains("urn:uuid")) {
+    if (resource.getIdElement().hasValue() && !resource.getIdElement().getValue().contains("urn:uuid")) {
         request
             .setMethod(Bundle.HTTPVerb.PUT)
-            .setUrl(theResource.getIdElement().getValue());
+            .setUrl(resource.getIdElement().getValue());
     } else {
         request
             .setMethod(Bundle.HTTPVerb.POST)
-            .setUrl(theResource.fhirType());
+            .setUrl(resource.fhirType());
     }
     return request;
 }
 
-	private BundleEntryComponent createEntry(IBaseResource theResource) {
+	private BundleEntryComponent createEntry(IBaseResource resource) {
 		BundleEntryComponent entry = new Bundle.BundleEntryComponent()
-				.setResource((Resource) theResource)
-				.setRequest(createRequest(theResource));
+				.setResource((Resource) resource)
+				.setRequest(createRequest(resource));
 		String fullUrl = entry.getRequest().getUrl();
-		if (theResource instanceof MetadataResource) {
-			MetadataResource resource = (MetadataResource) theResource;
-			if (resource.hasUrl()) {
-				fullUrl = resource.getUrl();
-				if (resource.hasVersion()) {
-					fullUrl += "|" + resource.getVersion();
+		if (resource instanceof MetadataResource) {
+			MetadataResource metadataResource = (MetadataResource) resource;
+			if (metadataResource.hasUrl()) {
+				fullUrl = metadataResource.getUrl();
+				if (metadataResource.hasVersion()) {
+					fullUrl += "|" + metadataResource.getVersion();
 				}
 			}
 		}
@@ -443,10 +440,10 @@ private BundleEntryRequestComponent createRequest(IBaseResource theResource) {
 /**
  * search by versioned Canonical URL
  * @param url canonical URL of the form www.example.com/Patient/123|0.1
- * @param theRepository to do the searching
+ * @param repository to do the searching
  * @return a bundle of results
  */
-	private Bundle searchResourceByUrl(String url, Repository theRepository) {
+	private Bundle searchResourceByUrl(String url, Repository repository) {
 		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
 
 		List<IQueryParameterType> urlList = new ArrayList<>();
@@ -460,15 +457,15 @@ private BundleEntryRequestComponent createRequest(IBaseResource theResource) {
 			searchParams.put("version", versionList);
 		}
 
-		Bundle searchResultsBundle = (Bundle)theRepository.search(Bundle.class, ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
+		Bundle searchResultsBundle = (Bundle)repository.search(Bundle.class, ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
 		return searchResultsBundle;
 	}
 
 	
-private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Repository theRepository, String sourceArtifactUrl) throws ResourceNotFoundException {
+private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Repository repository, String sourceArtifactUrl) throws ResourceNotFoundException {
 		// List<MetadataResource> matchingResources = getResourcesFromBundle(searchResourceByUrlAndStatus(inputReference, "active", hapiFhirRepository));
 		// using filtered list until APHL-601 (searchResourceByUrlAndStatus bug) resolved
-		List<MetadataResource> matchingResources = getResourcesFromBundle(searchResourceByUrl(inputReference, theRepository))
+		List<MetadataResource> matchingResources = getResourcesFromBundle(searchResourceByUrl(inputReference, repository))
 			.stream()
 			.filter(r -> r.getStatus().equals(Enumerations.PublicationStatus.ACTIVE))
 			.collect(Collectors.toList());
@@ -515,7 +512,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
 
 		return resourceList;
 	}
-  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository theRepository, Parameters theParameters) {
+  public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository repository, Parameters operationParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -523,7 +520,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(IBasePlanDefinitionAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBasePlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -531,7 +528,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, Parameters theParameters) {
+  public IBase visit(ValueSetAdapter valueSet, Repository repository, Parameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -539,7 +536,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(ValueSetAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -547,7 +544,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(IBaseKnowledgeArtifactAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBaseKnowledgeArtifactAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
@@ -555,7 +552,7 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
     return new OperationOutcome();
   }
 
-  public IBase visit(IBaseLibraryAdapter valueSet, Repository theRepository, IBaseParameters theParameters) {
+  public IBase visit(IBaseLibraryAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
     List<DependencyInfo> dependencies = valueSet.getDependencies();
     for (DependencyInfo dependency : dependencies) {
       System.out.println(String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));

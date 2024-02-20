@@ -24,10 +24,10 @@ import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4KnowledgeArtifactAdapter {
-    MetadataResource myResource;
-  public KnowledgeArtifactAdapter(MetadataResource theResource) {
-    super(theResource);
-    this.myResource = theResource;
+    MetadataResource adaptedResource;
+  public KnowledgeArtifactAdapter(MetadataResource resource) {
+    super(resource);
+    this.adaptedResource = resource;
   }
   public r4KnowledgeArtifactAdapter adapt(Library library) {
     return new LibraryAdapter(library);
@@ -37,7 +37,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
   }
   @Override
   public MetadataResource get() {
-    return this.myResource;
+    return this.adaptedResource;
   }
   @Override
   public Date getApprovalDate(){
@@ -52,8 +52,8 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
   public List<DependencyInfo> getDependencies() {
     return new ArrayList<>();
   }
-  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters){
-    return visitor.visit(this, theRepository, theParameters);
+  public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters){
+    return visitor.visit(this, repository, operationParameters);
   }
 
   protected List<DependencyInfo> getRelatedArtifactReferences(MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {

@@ -37,8 +37,8 @@ implements Dstu3LibraryAdapter {
     this.library = (Library) library;
   }
 
-  public IBase accept(KnowledgeArtifactVisitor visitor, Repository theRepository, IBaseParameters theParameters) {
-    return visitor.visit(this, theRepository, theParameters);
+  public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
+    return visitor.visit(this, repository, operationParameters);
   }
 
   protected Library getLibrary() {

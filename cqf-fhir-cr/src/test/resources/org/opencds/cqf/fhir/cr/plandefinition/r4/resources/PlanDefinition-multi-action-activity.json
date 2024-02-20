@@ -6,7 +6,7 @@
       "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
     ]
   },
-  "url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view",
+  "url": "http://example.org/PlanDefinition/multi-action-activity",
   "identifier": [
     {
       "use": "official",

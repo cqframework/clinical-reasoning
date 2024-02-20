@@ -4,6 +4,8 @@ import static org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryByCan
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -159,11 +161,17 @@ public class PackageHelper {
             request.setMethod(HTTPVerb.PUT).setUrl(resourceType + "/" + resource.getIdPart());
         } else {
             request.setMethod(HTTPVerb.POST).setUrl(resourceType);
-            if (hasUrl(resource)) {
-                var url = getUrl(resource);
-                if (hasVersion(resource)) {
+        }
+        if (hasUrl(resource)) {
+            var url = getUrl(resource);
+            if (hasVersion(resource)) {
+                entry.setFullUrl(url + "|" + getVersion(resource));
+                if (isPut) {
                     request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(resource)));
-                } else {
+                }
+            } else {
+                entry.setFullUrl(url);
+                if (isPut) {
                     request.setIfNoneExist(String.format("url=%s", url));
                 }
             }

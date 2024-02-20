@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import org.slf4j.LoggerFactory;
 import  org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
+import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -116,7 +117,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     Bundle transactionBundle = new Bundle()
         .setType(Bundle.BundleType.TRANSACTION);
     for (MetadataResource artifact: releasedResources) {
-        transactionBundle.addEntry(createEntry(artifact));
+        transactionBundle.addEntry(PackageHelper.createEntry(artifact, true));
 
         r4KnowledgeArtifactAdapter artifactAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
         List<RelatedArtifact> components = artifactAdapter.getComponents();
@@ -395,7 +396,7 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
 			})
 			.forEach(artifactComment -> {
 				artifactComment.setDerivedFromContentRelatedArtifact(new CanonicalType(String.format("%s|%s", rootArtifact.getUrl(), releaseVersion)));
-				returnEntries.add(createEntry(artifactComment));
+				returnEntries.add(PackageHelper.createEntry(artifactComment, true));
 			});
 			return returnEntries;
 	}
@@ -405,37 +406,6 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
     }
     checkVersionValidSemver(version);
 }
-private BundleEntryRequestComponent createRequest(IBaseResource resource) {
-    Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-    if (resource.getIdElement().hasValue() && !resource.getIdElement().getValue().contains("urn:uuid")) {
-        request
-            .setMethod(Bundle.HTTPVerb.PUT)
-            .setUrl(resource.getIdElement().getValue());
-    } else {
-        request
-            .setMethod(Bundle.HTTPVerb.POST)
-            .setUrl(resource.fhirType());
-    }
-    return request;
-}
-
-	private BundleEntryComponent createEntry(IBaseResource resource) {
-		BundleEntryComponent entry = new Bundle.BundleEntryComponent()
-				.setResource((Resource) resource)
-				.setRequest(createRequest(resource));
-		String fullUrl = entry.getRequest().getUrl();
-		if (resource instanceof MetadataResource) {
-			MetadataResource metadataResource = (MetadataResource) resource;
-			if (metadataResource.hasUrl()) {
-				fullUrl = metadataResource.getUrl();
-				if (metadataResource.hasVersion()) {
-					fullUrl += "|" + metadataResource.getVersion();
-				}
-			}
-		}
-		entry.setFullUrl(fullUrl);
-		return entry;
-	}
 
 /**
  * search by versioned Canonical URL

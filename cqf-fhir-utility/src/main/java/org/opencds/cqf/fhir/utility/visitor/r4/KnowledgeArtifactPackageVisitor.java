@@ -62,6 +62,7 @@ import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
+import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -79,7 +80,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisitor  {
     // as per http://hl7.org/fhir/R4/resource.html#canonical
 	public static final List<ResourceType> canonicalResourceTypes =
-    // can't use List.of for Android 28 compatibility
+    // can't use List.of for Android 26 compatibility
     Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
             ResourceType.ActivityDefinition,
             ResourceType.CapabilityStatement,
@@ -113,7 +114,7 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
     ));
 
 public static final List<ResourceType> conformanceResourceTypes =
-// can't use List.of for Android 28 compatibility
+// can't use List.of for Android 26 compatibility
 Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
             ResourceType.CapabilityStatement,
             ResourceType.StructureDefinition,
@@ -129,7 +130,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
     ));
 
 public static final List<ResourceType> knowledgeArtifactResourceTypes =
-// can't use List.of for Android 28 compatibility
+// can't use List.of for Android 26 compatibility
 Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
             ResourceType.Library,
             ResourceType.Measure,
@@ -139,7 +140,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 ));
 
 public static final List<ResourceType> terminologyResourceTypes =
-// can't use List.of for Android 28 compatibility
+// can't use List.of for Android 26 compatibility
 Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
             ResourceType.CodeSystem,
             ResourceType.ValueSet,
@@ -183,10 +184,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 			&& include.stream().anyMatch((includedType) -> includedType.equals("artifact"))) {
 			findUnsupportedCapability(resource, capability);
 			processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
-			BundleEntryComponent entry = createEntry(resource);
-			entry.getRequest().setUrl(resource.getResourceType() + "/" + resource.getIdElement().getIdPart());
-			entry.getRequest().setMethod(HTTPVerb.POST);
-			entry.getRequest().setIfNoneExist("url="+resource.getUrl()+"&version="+resource.getVersion());
+			BundleEntryComponent entry = PackageHelper.createEntry(resource, false);
 			packagedBundle.addEntry(entry);
 		} else {
 			recursivePackage(resource, packagedBundle, repository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion);
@@ -220,10 +218,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 				.filter(mr -> mr.getUrl() != null && mr.getVersion() != null)
 				.anyMatch(mr -> mr.getUrl().equals(resource.getUrl()) && mr.getVersion().equals(resource.getVersion()));
 			if (!entryExists) {
-				BundleEntryComponent entry = createEntry(resource);
-				entry.getRequest().setUrl(resource.getResourceType() + "/" + resource.getIdElement().getIdPart());
-				entry.getRequest().setMethod(HTTPVerb.POST);
-				entry.getRequest().setIfNoneExist("url="+resource.getUrl()+"&version="+resource.getVersion());
+				BundleEntryComponent entry = PackageHelper.createEntry(resource, false);
 				bundle.addEntry(entry);
 			}
 
@@ -354,37 +349,7 @@ private void pageBundleBasedOnCountAndOffset(Optional<Integer> count, Optional<I
         }
     }
 }
-private BundleEntryComponent createEntry(IBaseResource resource) {
-    BundleEntryComponent entry = new Bundle.BundleEntryComponent()
-            .setResource((Resource) resource)
-            .setRequest(createRequest(resource));
-    String fullUrl = entry.getRequest().getUrl();
-    if (resource instanceof MetadataResource) {
-        MetadataResource metadataResource = (MetadataResource) resource;
-        if (metadataResource.hasUrl()) {
-            fullUrl = metadataResource.getUrl();
-            if (metadataResource.hasVersion()) {
-                fullUrl += "|" + metadataResource.getVersion();
-            }
-        }
-    }
-    entry.setFullUrl(fullUrl);
-    return entry;
-}
 
-private BundleEntryRequestComponent createRequest(IBaseResource resource) {
-    Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-    if (resource.getIdElement().hasValue() && !resource.getIdElement().getValue().contains("urn:uuid")) {
-        request
-            .setMethod(Bundle.HTTPVerb.PUT)
-            .setUrl(resource.getIdElement().getValue());
-    } else {
-        request
-            .setMethod(Bundle.HTTPVerb.POST)
-            .setUrl(resource.fhirType());
-    }
-    return request;
-}
 private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryComponent> entries, List<String> include) {
     if (include == null || include.isEmpty() || include.stream().anyMatch((includedType) -> includedType.equals("all"))) {
         return entries;
@@ -510,7 +475,7 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 	 * @param usageContexts the list of usage contexts to modify
 	 */
 	private List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
-		// can't use List.of for Android 28 compatibility
+		// can't use List.of for Android 26 compatibility
         List<String> useContextCodesToReplace = Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(IBaseKnowledgeArtifactAdapter.valueSetConditionCode,IBaseKnowledgeArtifactAdapter.valueSetPriorityCode)));
 		return usageContexts.stream()
 		// remove any useContexts which need to be replaced

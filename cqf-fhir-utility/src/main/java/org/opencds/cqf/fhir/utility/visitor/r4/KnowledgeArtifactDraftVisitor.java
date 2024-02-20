@@ -15,23 +15,17 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -41,24 +35,20 @@ import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
+import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.r4.ResourceClassMapHelper;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 
 public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor  {
   public Bundle visit(r4LibraryAdapter library, Repository repository, Parameters draftParameters) {
-    // String version = ((StringType)(((Parameters)draftParameters).getParameter("version").getValue())).getValue();
     String version = MetadataResourceHelper.getParameter("version", draftParameters, StringType.class).map(r -> r.getValue()).orElseThrow(() -> new UnprocessableEntityException("The version argument is required"));
     Library libRes = (Library)library.get();
     // check valid semverversion
@@ -102,7 +92,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         updateRelatedArtifactUrlsWithNewVersions(combineComponentsAndDependencies(library), draftVersion, ownedResourceUrls);
         MetadataResource updateIdForBundle = (MetadataResource) newResourceAdapter.copy();
         updateIdForBundle.setId(urnList.get(i));
-        transactionBundle.addEntry(createEntry(updateIdForBundle));
+        transactionBundle.addEntry(PackageHelper.createEntry(updateIdForBundle, false));
     }
     // return InMemoryFhirRepository.transactionStub(transactionBundle, repository);
     return repository.transaction(transactionBundle);
@@ -254,37 +244,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
         return new DependencyInfo(source, ra.getResource(), ra.getExtension());
     }
-  private BundleEntryComponent createEntry(IBaseResource resource) {
-		BundleEntryComponent entry = new Bundle.BundleEntryComponent()
-				.setResource((Resource) resource)
-				.setRequest(createRequest(resource));
-		String fullUrl = entry.getRequest().getUrl();
-		if (resource instanceof MetadataResource) {
-			MetadataResource metadataResource = (MetadataResource) resource;
-			if (metadataResource.hasUrl()) {
-				fullUrl = metadataResource.getUrl();
-				if (metadataResource.hasVersion()) {
-					fullUrl += "|" + metadataResource.getVersion();
-				}
-			}
-		}
-		entry.setFullUrl(fullUrl);
-		return entry;
-	}
-
-	private BundleEntryRequestComponent createRequest(IBaseResource resource) {
-		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-		if (resource.getIdElement().hasValue() && !resource.getIdElement().getValue().contains("urn:uuid")) {
-			request
-				.setMethod(Bundle.HTTPVerb.PUT)
-				.setUrl(resource.getIdElement().getValue());
-		} else {
-			request
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl(resource.fhirType());
-		}
-		return request;
-	}
+  
   /**
  * search by versioned Canonical URL
  * @param url canonical URL of the form www.example.com/Patient/123|0.1

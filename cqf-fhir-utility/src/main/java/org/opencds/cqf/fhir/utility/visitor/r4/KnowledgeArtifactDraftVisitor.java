@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
@@ -75,7 +77,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
             String.format("Drafts can only be created from artifacts with status of 'active'. Resource '%s' has a status of: %s", library.getUrl(), String.valueOf(libRes.getStatus())));
     }
     // Ensure only one resource exists with this URL
-		Bundle existingArtifactsForUrl = searchResourceByUrl(draftVersionUrl, repository);
+		Bundle existingArtifactsForUrl = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(draftVersionUrl));
 		if(existingArtifactsForUrl.getEntry().size() != 0){
 			throw new PreconditionFailedException(
 				String.format("A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time.", library.getUrl(), draftVersionUrl));
@@ -129,7 +131,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         String draftVersionUrl = Canonicals.getUrl(resource.getUrl()) + "|" + draftVersion;
 
         // TODO: Decide if we need both of these checks
-        Optional<MetadataResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion(searchResourceByUrl(draftVersionUrl, repository));
+        Optional<MetadataResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging( repository, new CanonicalType(draftVersionUrl)));
         Optional<MetadataResource> draftVersionAlreadyInBundle = resourcesToCreate.stream().filter(res -> res.getUrl().equals(Canonicals.getUrl(draftVersionUrl)) && res.getVersion().equals(draftVersion)).findAny();
         MetadataResource newResource = null;
         if (existingArtifactsWithMatchingUrl.isPresent()) {
@@ -160,10 +162,10 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
             //  }
             // ]
                 if (ra.hasUrl()) {
-                    Bundle referencedResourceBundle = searchResourceByUrl(ra.getUrl(), repository);
+                    Bundle referencedResourceBundle = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging( repository, new CanonicalType(ra.getUrl()));
                     processReferencedResourceForDraft(repository, referencedResourceBundle, ra, version, resourcesToCreate);
                 } else if (ra.hasResource()) {
-                    Bundle referencedResourceBundle = searchResourceByUrl(ra.getResourceElement().getValueAsString(), repository);
+                    Bundle referencedResourceBundle = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
                     processReferencedResourceForDraft(repository, referencedResourceBundle, ra, version, resourcesToCreate);
                 }
             }
@@ -244,29 +246,5 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
         return new DependencyInfo(source, ra.getResource(), ra.getExtension());
     }
-  
-  /**
- * search by versioned Canonical URL
- * @param url canonical URL of the form www.example.com/Patient/123|0.1
- * @param repository to do the searching
- * @return a bundle of results
- */
-	private Bundle searchResourceByUrl(String url, Repository repository) {
-		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-
-		List<IQueryParameterType> urlList = new ArrayList<>();
-		urlList.add(new UriParam(Canonicals.getUrl(url)));
-		searchParams.put("url", urlList);
-
-		List<IQueryParameterType> versionList = new ArrayList<>();
-		String version = Canonicals.getVersion(url);
-		if (version != null && !version.isEmpty()) {
-			versionList.add(new TokenParam(Canonicals.getVersion((url))));
-			searchParams.put("version", versionList);
-		}
-
-		Bundle searchResultsBundle = repository.search(Bundle.class,ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
-		return searchResultsBundle;
-	}
     
 }

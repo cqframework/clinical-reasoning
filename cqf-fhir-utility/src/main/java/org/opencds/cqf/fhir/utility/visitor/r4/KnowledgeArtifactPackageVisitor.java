@@ -52,6 +52,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
@@ -202,7 +203,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
   void recursivePackage(
 		MetadataResource resource,
 		Bundle bundle,
-		Repository hapiFhirRepository,
+		Repository repository,
 		List<String> capability,
 		List<String> include,
 		List<CanonicalType> artifactVersion,
@@ -223,9 +224,9 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 			}
 
 			combineComponentsAndDependencies(adapter).stream()
-				.map(ra -> searchResourceByUrl(ra.getReference(), hapiFhirRepository))
+				.map(ra -> (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(ra.getReference())))
 				.map(searchBundle -> searchBundle.getEntry().stream().findFirst().orElseGet(()-> new BundleEntryComponent()).getResource())
-				.forEach(component -> recursivePackage((MetadataResource)component, bundle, hapiFhirRepository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion));
+				.forEach(component -> recursivePackage((MetadataResource)component, bundle, repository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion));
 		}
 	}
   public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters){
@@ -521,7 +522,7 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 		if (resource == null 
 		&& relatedArtifact.map(ra -> ra.getReference()).isPresent() 
 		&& Canonicals.getResourceType(relatedArtifact.get().getReference()).equals("ValueSet")) {
-			List<MetadataResource> searchResults = getResourcesFromBundle(searchResourceByUrl(relatedArtifact.get().getReference(), repository));
+			List<MetadataResource> searchResults = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(relatedArtifact.get().getReference())));
 			if (searchResults.size() > 0) {
 				resource = searchResults.get(0);
 			}
@@ -538,29 +539,6 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 				throw new UnprocessableEntityException("Missing condition on ValueSet : " + valueSet.getUrl());
 			}
 		}
-	}
-     /**
- * search by versioned Canonical URL
- * @param url canonical URL of the form www.example.com/Patient/123|0.1
- * @param repository to do the searching
- * @return a bundle of results
- */
-	private Bundle searchResourceByUrl(String url, Repository repository) {
-		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-
-		List<IQueryParameterType> urlList = new ArrayList<>();
-		urlList.add(new UriParam(Canonicals.getUrl(url)));
-		searchParams.put("url", urlList);
-
-		List<IQueryParameterType> versionList = new ArrayList<>();
-		String version = Canonicals.getVersion(url);
-		if (version != null && !version.isEmpty()) {
-			versionList.add(new TokenParam(Canonicals.getVersion((url))));
-			searchParams.put("version", versionList);
-		}
-
-		Bundle searchResultsBundle = repository.search(Bundle.class,ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
-		return searchResultsBundle;
 	}
     private List<MetadataResource> getResourcesFromBundle(Bundle bundle) {
 		List<MetadataResource> resourceList = new ArrayList<>();

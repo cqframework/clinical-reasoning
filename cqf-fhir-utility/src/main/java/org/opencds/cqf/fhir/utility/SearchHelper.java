@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.utility;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -83,6 +85,44 @@ public class SearchHelper {
         }
 
         return result;
+    }
+    /**
+     * Searches the given Repository and returns the first entry found
+     *
+     * @param <CanonicalType>
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @return
+     */
+    public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
+            Repository repository, CanonicalType canonical) {
+        var resourceType = repository
+                .fhirContext()
+                .getResourceDefinition(Canonicals.getResourceType(canonical))
+                .getImplementingClass();
+
+        return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
+    }
+    /**
+     * Searches the given Repository and returns all entries
+     *
+     * @param <CanonicalType> an IPrimitiveType<String> type
+     * @param <R> an IBaseResource type
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @param resourceType the class of the IBaseResource type
+     * @return
+     */
+    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
+            IBaseBundle searchRepositoryByCanonicalWithPaging(
+                    Repository repository, CanonicalType canonical, Class<R> resourceType) {
+        var url = Canonicals.getUrl(canonical);
+        var version = Canonicals.getVersion(canonical);
+
+        var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
+        var searchResult = searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
+
+        return searchResult;
     }
 
     /**

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
@@ -193,12 +194,12 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     return repository.transaction(transactionBundle);
 
   }
-  private void checkIfValueSetNeedsCondition(MetadataResource resource, DependencyInfo relatedArtifact, Repository hapiFhirRepository) throws UnprocessableEntityException {
+  private void checkIfValueSetNeedsCondition(MetadataResource resource, DependencyInfo relatedArtifact, Repository repository) throws UnprocessableEntityException {
     if (resource == null 
     && relatedArtifact != null 
     && relatedArtifact.getReference() != null 
     && Canonicals.getResourceType(relatedArtifact.getReference()).equals("ValueSet")) {
-        List<MetadataResource> searchResults = getResourcesFromBundle(searchResourceByUrl(relatedArtifact.getReference(), hapiFhirRepository));
+        List<MetadataResource> searchResults = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging( repository, new CanonicalType(relatedArtifact.getReference())));
         if (searchResults.size() > 0) {
             resource = searchResults.get(0);
         }
@@ -217,7 +218,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     }
 }
   private List<MetadataResource> internalRelease(r4KnowledgeArtifactAdapter artifactAdapter, String version, Period rootEffectivePeriod,
-																 CRMIReleaseVersionBehaviorCodes versionBehavior, boolean latestFromTxServer, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository hapiFhirRepository) throws NotImplementedOperationException, ResourceNotFoundException {
+																 CRMIReleaseVersionBehaviorCodes versionBehavior, boolean latestFromTxServer, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository repository) throws NotImplementedOperationException, ResourceNotFoundException {
 		List<MetadataResource> resourcesToUpdate = new ArrayList<MetadataResource>();
 
 		// Step 1: Update the Date and the version
@@ -249,9 +250,9 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 					.isPresent();
 				if(!alreadyUpdated) {
 					// For composition references, if a version is not specified in the reference then the latest version
-					// of the referenced artifact should be used. If a version is specified then `searchResourceByUrl` will
+					// of the referenced artifact should be used. If a version is specified then `searchRepositoryByCanonicalWithPaging` will
 					// return that version.
-					referencedResource = KnowledgeArtifactAdapter.findLatestVersion(searchResourceByUrl(ownedResourceReference.getValueAsString(), hapiFhirRepository))
+					referencedResource = KnowledgeArtifactAdapter.findLatestVersion((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ownedResourceReference ))
 					.orElseThrow(()-> new ResourceNotFoundException(
 							String.format("Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but was not found on the server.",
 								ownedResourceReference.getValueAsString(),
@@ -260,16 +261,16 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 					r4KnowledgeArtifactAdapter searchResultAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(referencedResource);
             
 					if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior && CRMIReleaseExperimentalBehaviorCodes.NONE != experimentalBehavior) {
-						checkNonExperimental(referencedResource, experimentalBehavior, hapiFhirRepository);
+						checkNonExperimental(referencedResource, experimentalBehavior, repository);
 					}
-					resourcesToUpdate.addAll(internalRelease(searchResultAdapter, version, rootEffectivePeriod, versionBehavior, latestFromTxServer, experimentalBehavior, hapiFhirRepository));
+					resourcesToUpdate.addAll(internalRelease(searchResultAdapter, version, rootEffectivePeriod, versionBehavior, latestFromTxServer, experimentalBehavior, repository));
 				}
 			}
 		}
 
 		return resourcesToUpdate;
 	}
-    private void checkNonExperimental(MetadataResource resource, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository hapiFhirRepository) throws UnprocessableEntityException {
+    private void checkNonExperimental(MetadataResource resource, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository repository) throws UnprocessableEntityException {
 		String nonExperimentalError = String.format("Root artifact is not Experimental, but references an Experimental resource with URL '%s'.",
 								resource.getUrl());
 		if (CRMIReleaseExperimentalBehaviorCodes.WARN == experimentalBehavior && resource.getExperimental()) {
@@ -286,8 +287,8 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 				.stream().flatMap(include -> include.getValueSet().stream())
 				.collect(Collectors.toList());
 			for (CanonicalType value: valueSets) {
-				KnowledgeArtifactAdapter.findLatestVersion(searchResourceByUrl(value.getValueAsString(), hapiFhirRepository))
-				.ifPresent(childVs -> checkNonExperimental(childVs, experimentalBehavior, hapiFhirRepository));
+				KnowledgeArtifactAdapter.findLatestVersion((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, value))
+				.ifPresent(childVs -> checkNonExperimental(childVs, experimentalBehavior, repository));
 			}
 		}
 	}
@@ -407,35 +408,9 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
     checkVersionValidSemver(version);
 }
 
-/**
- * search by versioned Canonical URL
- * @param url canonical URL of the form www.example.com/Patient/123|0.1
- * @param repository to do the searching
- * @return a bundle of results
- */
-	private Bundle searchResourceByUrl(String url, Repository repository) {
-		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-
-		List<IQueryParameterType> urlList = new ArrayList<>();
-		urlList.add(new UriParam(Canonicals.getUrl(url)));
-		searchParams.put("url", urlList);
-
-		List<IQueryParameterType> versionList = new ArrayList<>();
-		String version = Canonicals.getVersion(url);
-		if (version != null && !version.isEmpty()) {
-			versionList.add(new TokenParam(Canonicals.getVersion((url))));
-			searchParams.put("version", versionList);
-		}
-
-		Bundle searchResultsBundle = (Bundle)repository.search(Bundle.class, ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
-		return searchResultsBundle;
-	}
-
 	
 private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Repository repository, String sourceArtifactUrl) throws ResourceNotFoundException {
-		// List<MetadataResource> matchingResources = getResourcesFromBundle(searchResourceByUrlAndStatus(inputReference, "active", hapiFhirRepository));
-		// using filtered list until APHL-601 (searchResourceByUrlAndStatus bug) resolved
-		List<MetadataResource> matchingResources = getResourcesFromBundle(searchResourceByUrl(inputReference, repository))
+		List<MetadataResource> matchingResources = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(inputReference)))
 			.stream()
 			.filter(r -> r.getStatus().equals(Enumerations.PublicationStatus.ACTIVE))
 			.collect(Collectors.toList());

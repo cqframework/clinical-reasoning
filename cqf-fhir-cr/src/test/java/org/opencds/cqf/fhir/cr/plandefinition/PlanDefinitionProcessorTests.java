@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -13,6 +15,7 @@ import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.packages.PackageProcessor;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -273,6 +276,24 @@ public class PlanDefinitionProcessorTests {
                 .terminology(content)
                 .thenApplyR5()
                 .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
+    }
+
+    @Test
+    void testMultipleActionsUsingSameActivity() {
+        var planDefinitionID = "multi-action-activity";
+        var patientID = "OPA-Patient1";
+        var result = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .thenApplyR5()
+                .generatedBundle;
+        var resources = BundleHelper.getEntryResources(result);
+        var resource1 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(1);
+        var resource2 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(2);
+        assertNotNull(resource1);
+        assertNotNull(resource2);
+        assertFalse(resource1.getId().equals(resource2.getId()));
     }
 
     @Test

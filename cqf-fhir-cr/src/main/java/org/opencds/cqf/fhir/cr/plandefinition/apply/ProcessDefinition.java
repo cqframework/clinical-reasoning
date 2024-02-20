@@ -46,6 +46,10 @@ public class ProcessDefinition {
         var definition = getDefinition(request, action);
         if (isDefinitionCanonical(request, definition)) {
             resource = resolveDefinition(request, definition);
+            var actionId = request.resolvePathString(action, "id");
+            if (actionId != null) {
+                resource.setId(String.format("%s-%s", actionId, resource.getIdElement().getIdPart()));
+            }
             if (resource != null) {
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);
                 request.getModelResolver()

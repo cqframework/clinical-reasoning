@@ -167,7 +167,7 @@ public interface Repository {
      * @param resource the Resource to update
      * @return a MethodOutcome with the id of the updated Resource
      */
-    default <T extends IBaseResource> MethodOutcome  update(T resource) {
+    default <T extends IBaseResource> MethodOutcome update(T resource) {
         return this.update(resource, Collections.emptyMap());
     }
 

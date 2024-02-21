@@ -87,7 +87,7 @@ public class SearchHelper {
         return result;
     }
     /**
-     * Searches the given Repository and returns the first entry found
+     * Searches the given Repository and returns handles paging to return all entries
      *
      * @param <CanonicalType>
      * @param repository the repository to search
@@ -104,7 +104,7 @@ public class SearchHelper {
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
     }
     /**
-     * Searches the given Repository and returns all entries
+     * Searches the given Repository and handles paging to return all entries
      *
      * @param <CanonicalType> an IPrimitiveType<String> type
      * @param <R> an IBaseResource type

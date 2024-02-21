@@ -166,12 +166,12 @@ public class PackageHelper {
             var url = getUrl(resource);
             if (hasVersion(resource)) {
                 entry.setFullUrl(url + "|" + getVersion(resource));
-                if (isPut) {
+                if (!isPut) {
                     request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(resource)));
                 }
             } else {
                 entry.setFullUrl(url);
-                if (isPut) {
+                if (!isPut) {
                     request.setIfNoneExist(String.format("url=%s", url));
                 }
             }

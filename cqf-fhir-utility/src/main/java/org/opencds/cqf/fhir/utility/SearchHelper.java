@@ -87,7 +87,7 @@ public class SearchHelper {
         return result;
     }
     /**
-     * Searches the given Repository and returns handles paging to return all entries
+     * Searches the given Repository and handles paging to return all entries
      *
      * @param <CanonicalType>
      * @param repository the repository to search

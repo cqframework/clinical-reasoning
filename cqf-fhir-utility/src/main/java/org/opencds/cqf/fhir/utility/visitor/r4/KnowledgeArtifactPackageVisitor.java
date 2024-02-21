@@ -9,14 +9,11 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -29,8 +26,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -166,7 +161,6 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 		}
 		setCorrectBundleType(count,offset,packagedBundle);
 		pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
-		handleValueSetReferenceExtensions(resource, packagedBundle.getEntry(), repository);
     return packagedBundle;
 
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.
@@ -392,101 +386,4 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
     }
     return distinctFilteredEntries;
 }
-/**
-	 * ValueSets can be part of multiple artifacts at the same time. Certain properties are tracked/managed in the manifest to avoid conflicts with other artifacts. This function sets those properties on the ValueSets themselves at export / $package time
-	 * @param manifest the resource containing all RelatedArtifact references
-	 * @param bundleEntries the list of packaged resources to modify according to the extensions on the manifest relatedArtifact references
-	 */
-	private void handleValueSetReferenceExtensions(MetadataResource manifest, List<BundleEntryComponent> bundleEntries, Repository repository) throws UnprocessableEntityException, IllegalArgumentException {
-		r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(manifest);
-		List<DependencyInfo> relatedArtifactsWithPreservedExtension = getRelatedArtifactsWithPreservedExtensions(adapter.getDependencies());
-		bundleEntries.stream()
-			.forEach(entry -> {
-				if (entry.getResource().getResourceType().equals(ResourceType.ValueSet)) {
-					ValueSet valueSet = (ValueSet) entry.getResource();
-					// remove any existing Priority and Conditions
-					List<UsageContext> usageContexts = removeExistingReferenceExtensionData(valueSet.getUseContext());
-					valueSet.setUseContext(usageContexts);
-					Optional<DependencyInfo> maybeVSRelatedArtifact = relatedArtifactsWithPreservedExtension.stream().filter(ra -> Canonicals.getUrl(ra.getReference()).equals(valueSet.getUrl())).findFirst();
-					// If leaf valueset
-					if (!valueSet.hasCompose()
-					 || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0)) {
-						// If Condition extension is present
-						maybeVSRelatedArtifact
-							.map(ra -> ra.getExtension())
-							.ifPresent(
-								// add Conditions
-								exts -> {
-									exts.stream()
-										.filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl))
-										.forEach(ext -> tryAddCondition(usageContexts, (CodeableConcept) ext.getValue()));
-								});		
-					}
-					// update Priority
-					UsageContext priority = getOrCreateUsageContext(usageContexts, IBaseKnowledgeArtifactAdapter.usPhContextTypeUrl, IBaseKnowledgeArtifactAdapter.valueSetPriorityCode);
-					Optional<? extends IBaseExtension> maybeExtension = maybeVSRelatedArtifact
-						.flatMap(ra -> ra.getExtension().stream().filter(ext -> ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.valueSetPriorityUrl)).findFirst());
-					if (maybeExtension.isPresent()) {
-                        priority.setValue(((Extension)maybeExtension.get()).getValue());
-                    } else {
-                        CodeableConcept routine = new CodeableConcept(new Coding(IBaseKnowledgeArtifactAdapter.contextUrl, "routine", null)).setText("Routine");
-                        priority.setValue(routine);
-                    }
-				}
-			});
-	}
-    private List<DependencyInfo> getRelatedArtifactsWithPreservedExtensions(List<DependencyInfo> deps) {
-		return deps.stream()
-			.filter(ra -> IBaseKnowledgeArtifactAdapter.preservedExtensionUrls
-				.stream().anyMatch(url -> ra.getExtension()
-					.stream().anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
-			.collect(Collectors.toList());
-	}
-    /**
-	 * Removes any existing UsageContexts corresponding the the VSM specific extensions
-	 * @param usageContexts the list of usage contexts to modify
-	 */
-	private List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
-		// can't use List.of for Android 26 compatibility
-        List<String> useContextCodesToReplace = Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(IBaseKnowledgeArtifactAdapter.valueSetConditionCode,IBaseKnowledgeArtifactAdapter.valueSetPriorityCode)));
-		return usageContexts.stream()
-		// remove any useContexts which need to be replaced
-			.filter(useContext -> !useContextCodesToReplace.stream()
-				.anyMatch(code -> useContext.getCode().getCode().equals(code)))
-			.collect(Collectors.toList());
-	}
-    private void tryAddCondition(List<UsageContext> usageContexts, CodeableConcept condition) {
-		boolean focusAlreadyExists = usageContexts.stream().anyMatch(u -> 
-			u.getCode().getSystem().equals(IBaseKnowledgeArtifactAdapter.contextTypeUrl) 
-			&& u.getCode().getCode().equals(IBaseKnowledgeArtifactAdapter.valueSetConditionCode) 
-			&& u.getValueCodeableConcept().hasCoding(condition.getCoding().get(0).getSystem(), condition.getCoding().get(0).getCode())
-		);
-		if (!focusAlreadyExists) {
-			UsageContext newFocus = new UsageContext(new Coding(IBaseKnowledgeArtifactAdapter.contextTypeUrl,IBaseKnowledgeArtifactAdapter.valueSetConditionCode,null),condition);
-			newFocus.setValue(condition);
-			usageContexts.add(newFocus);
-		}
-	}
-	/**
-	 * 
-	 * Either finds a usageContext with the same system and code or creates an empty one
-	 * and appends it
-	 * 
-	 * @param usageContexts the list of usageContexts to search and/or append to
-	 * @param system the usageContext.code.system to find / create
-	 * @param code the usage.code.code to find / create
-	 * @return the found / created usageContext
-	 */
-	private UsageContext getOrCreateUsageContext(List<UsageContext> usageContexts, String system, String code) {
-		return usageContexts.stream()
-			.filter(useContext -> useContext.getCode().getSystem().equals(system) && useContext.getCode().getCode().equals(code))
-			.findFirst().orElseGet(()-> {
-				// create the UseContext if it doesn't exist
-				Coding c = new Coding(system, code, null);
-				UsageContext n = new UsageContext(c, null);
-				// add it to the ValueSet before returning
-				usageContexts.add(n);
-				return n;
-			});
-	}
 }

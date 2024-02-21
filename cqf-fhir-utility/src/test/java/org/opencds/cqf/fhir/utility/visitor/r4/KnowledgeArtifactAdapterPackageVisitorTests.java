@@ -20,22 +20,17 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -272,64 +267,6 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
 			String version = ((MetadataResource) component.getResource()).getVersion();
 			assertTrue(ifNoneExist.equals("url="+url+"&version="+version));
 		}
-	}
-	@Test
-	void packageOperation_should_be_aware_of_valueset_priority_extension() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        spyRepository.transaction(bundle);
-        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
-        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-		Parameters emptyParams = parameters();
-		Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, emptyParams);
-		Optional<ValueSet> shouldBeUpdatedToEmergent = packagedBundle.getEntry().stream()
-			.filter(entry -> entry.getResource().getResourceType().equals(ResourceType.ValueSet))
-			.map(entry -> (ValueSet) entry.getResource())
-			.filter(vs -> vs.getUrl().equals("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6") && vs.getVersion().equals("20210526"))
-			.findFirst();
-		assertTrue(shouldBeUpdatedToEmergent.isPresent());
-		Optional<UsageContext> priority = shouldBeUpdatedToEmergent.get().getUseContext().stream()
-			.filter(useContext -> useContext.getCode().getSystem().equals(IBaseKnowledgeArtifactAdapter.usPhContextTypeUrl) && useContext.getCode().getCode().equals(IBaseKnowledgeArtifactAdapter.valueSetPriorityCode))
-			.findFirst();
-		assertTrue(priority.isPresent());
-		assertTrue(((CodeableConcept) priority.get().getValue()).getCoding().get(0).getCode().equals("emergent"));
-		assertTrue(((CodeableConcept) priority.get().getValue()).getCoding().get(0).getSystem().equals(IBaseKnowledgeArtifactAdapter.contextUrl));
-
-		Optional<ValueSet> shouldBeUpdatedToRoutine = packagedBundle.getEntry().stream()
-			.filter(entry -> entry.getResource().getResourceType().equals(ResourceType.ValueSet))
-			.map(entry -> (ValueSet) entry.getResource())
-			.filter(vs -> vs.getUrl().equals("http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine") && vs.getVersion().equals("20210526"))
-			.findFirst();
-		assertTrue(shouldBeUpdatedToRoutine.isPresent());
-		Optional<UsageContext> priority2 = shouldBeUpdatedToRoutine.get().getUseContext().stream()
-			.filter(useContext -> useContext.getCode().getSystem().equals(IBaseKnowledgeArtifactAdapter.usPhContextTypeUrl) && useContext.getCode().getCode().equals(IBaseKnowledgeArtifactAdapter.valueSetPriorityCode))
-			.findFirst();
-		assertTrue(priority2.isPresent());
-		assertTrue(((CodeableConcept) priority2.get().getValue()).getCoding().get(0).getCode().equals("routine"));
-		assertTrue(((CodeableConcept) priority2.get().getValue()).getCoding().get(0).getSystem().equals(IBaseKnowledgeArtifactAdapter.contextUrl));
-	}
-	
-	@Test
-	void packageOperation_should_be_aware_of_useContext_extension() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        spyRepository.transaction(bundle);
-        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
-        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-		Parameters emptyParams = parameters();
-		Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, emptyParams);
-		Optional<ValueSet> shouldHaveFocusSetToNewValue = packagedBundle.getEntry().stream()
-			.filter(entry -> entry.getResource().getResourceType().equals(ResourceType.ValueSet))
-			.map(entry -> (ValueSet) entry.getResource())
-			.filter(vs -> vs.getUrl().equals("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6") && vs.getVersion().equals("20210526"))
-			.findFirst();
-		assertTrue(shouldHaveFocusSetToNewValue.isPresent());
-		Optional<UsageContext> focus = shouldHaveFocusSetToNewValue.get().getUseContext().stream()
-			.filter(useContext -> useContext.getCode().getSystem().equals(IBaseKnowledgeArtifactAdapter.contextTypeUrl) && useContext.getCode().getCode().equals(IBaseKnowledgeArtifactAdapter.valueSetConditionCode))
-			.findFirst();
-		assertTrue(focus.isPresent());
-		assertTrue(((CodeableConcept) focus.get().getValue()).getCoding().get(0).getCode().equals("49649001"));
-		assertTrue(((CodeableConcept) focus.get().getValue()).getCoding().get(0).getSystem().equals("http://snomed.info/sct"));
 	}
 
 	@Test

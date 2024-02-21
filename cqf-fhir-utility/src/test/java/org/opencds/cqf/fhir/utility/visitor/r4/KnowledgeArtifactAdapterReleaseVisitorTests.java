@@ -451,35 +451,6 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
 			assertNotNull(maybeException);
 		}
 	}
-	@Test
-	void release_preserve_extensions() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
-        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-
-		Parameters params = parameters(
-			part("version", new StringType("1.2.3.23")),
-			part("versionBehavior", new CodeType("default"))
-		);
-		Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
-
-		assertNotNull(returnResource);
-		Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream().filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary")).findFirst();
-		assertTrue(maybeLib.isPresent());
-		Library releasedLibrary = spyRepository.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-		Optional<RelatedArtifact> maybeRelatedArtifactWithPriorityExtension = releasedLibrary.getRelatedArtifact().stream().filter(ra -> ra.getExtensionByUrl(IBaseKnowledgeArtifactAdapter.valueSetPriorityUrl) != null).findAny();
-		Optional<RelatedArtifact> maybeRelatedArtifactWithUseContextExtension = releasedLibrary.getRelatedArtifact().stream().filter(ra -> ra.getExtensionByUrl(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl) != null).findAny();
-		assertTrue(maybeRelatedArtifactWithUseContextExtension.isPresent());
-		assertTrue(maybeRelatedArtifactWithUseContextExtension.get().getResource().equals("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526"));
-		assertTrue(maybeRelatedArtifactWithPriorityExtension.isPresent());
-		assertTrue(maybeRelatedArtifactWithPriorityExtension.get().getResource().equals("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526"));
-		Extension priority = maybeRelatedArtifactWithUseContextExtension.get().getExtensionByUrl(IBaseKnowledgeArtifactAdapter.valueSetPriorityUrl);
-		assertTrue(((CodeableConcept) priority.getValue()).getCoding().get(0).getCode().equals("emergent"));
-		Extension condition = maybeRelatedArtifactWithUseContextExtension.get().getExtensionByUrl(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl);
-		assertTrue(((CodeableConcept) condition.getValue()).getCoding().get(0).getCode().equals("49649001"));
-	}
 
 	// @Test
 	// void release_test_artifactComment_updated() {

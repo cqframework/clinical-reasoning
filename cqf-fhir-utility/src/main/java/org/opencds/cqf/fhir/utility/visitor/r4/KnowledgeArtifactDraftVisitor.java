@@ -237,10 +237,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
       });
 	}
   private List<DependencyInfo> combineComponentsAndDependencies(r4LibraryAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream().map(ra -> convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
+		return Stream.concat(adapter.getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
 	}
-    private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
-    }
     
 }

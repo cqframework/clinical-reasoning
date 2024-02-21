@@ -411,7 +411,6 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 					List<UsageContext> usageContexts = removeExistingReferenceExtensionData(valueSet.getUseContext());
 					valueSet.setUseContext(usageContexts);
 					Optional<DependencyInfo> maybeVSRelatedArtifact = relatedArtifactsWithPreservedExtension.stream().filter(ra -> Canonicals.getUrl(ra.getReference()).equals(valueSet.getUrl())).findFirst();
-					checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact, repository);
 					// If leaf valueset
 					if (!valueSet.hasCompose()
 					 || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0)) {
@@ -493,47 +492,8 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 				return n;
 			});
 	}
-    private void checkIfValueSetNeedsCondition(MetadataResource resource, Optional<DependencyInfo> relatedArtifact, Repository repository) throws UnprocessableEntityException {
-		if (resource == null 
-		&& relatedArtifact.map(ra -> ra.getReference()).isPresent() 
-		&& Canonicals.getResourceType(relatedArtifact.get().getReference()).equals("ValueSet")) {
-			List<MetadataResource> searchResults = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(relatedArtifact.get().getReference())));
-			if (searchResults.size() > 0) {
-				resource = searchResults.get(0);
-			}
-		}
-		if (resource != null && resource.getResourceType() == ResourceType.ValueSet) {
-			ValueSet valueSet = (ValueSet)resource;
-			boolean isLeaf = !valueSet.hasCompose() || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0);
-			Optional<Extension> maybeConditionExtension = relatedArtifact
-				.map(ra -> (List<Extension>)ra.getExtension())
-				.map(list -> {
-					return list.stream().filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl)).findFirst().orElse(null);
-				});
-			if (isLeaf && !maybeConditionExtension.isPresent()) {
-				throw new UnprocessableEntityException("Missing condition on ValueSet : " + valueSet.getUrl());
-			}
-		}
-	}
-    private List<MetadataResource> getResourcesFromBundle(Bundle bundle) {
-		List<MetadataResource> resourceList = new ArrayList<>();
-
-		if (!bundle.getEntryFirstRep().isEmpty()) {
-			List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
-			for (Bundle.BundleEntryComponent entry: referencedResourceEntries) {
-				if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
-					MetadataResource referencedResource = (MetadataResource) entry.getResource();
-					resourceList.add(referencedResource);
-				}
-			}
-		}
-
-		return resourceList;
-	}
+ 
     private List<DependencyInfo> combineComponentsAndDependencies(r4KnowledgeArtifactAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream().map(ra -> convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
+		return Stream.concat(adapter.getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
 	}
-    private DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
-    }
 }

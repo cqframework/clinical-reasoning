@@ -409,22 +409,4 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
 			}
 		}
 	}
-
-	@Test
-	void package_test_condition_missing() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterPackageVisitorTests.class.getResourceAsStream("Bundle-approved-draft-no-conditions.json"));
-        spyRepository.transaction(bundle);
-        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
-        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-		UnprocessableEntityException noConditionExtension = null;
-		try {
-			libraryAdapter.accept(packageVisitor, spyRepository, new Parameters());
-		} catch (UnprocessableEntityException e) {
-			// TODO: handle exception
-			noConditionExtension = e;
-		}
-		assertNotNull(noConditionExtension);
-		assertTrue(noConditionExtension.getMessage().contains("Missing condition"));
-	}
 }

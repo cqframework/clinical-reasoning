@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.r4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -7,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
@@ -54,4 +56,19 @@ public class MetadataResourceHelper {
         .map(p -> p.getParameterValues(name))
         .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
     }
+    public static List<MetadataResource> getMetadataResourcesFromBundle(Bundle bundle) {
+		List<MetadataResource> resourceList = new ArrayList<>();
+
+		if (!bundle.getEntryFirstRep().isEmpty()) {
+			List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
+			for (Bundle.BundleEntryComponent entry: referencedResourceEntries) {
+				if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
+					MetadataResource referencedResource = (MetadataResource) entry.getResource();
+					resourceList.add(referencedResource);
+				}
+			}
+		}
+
+		return resourceList;
+	}
 }

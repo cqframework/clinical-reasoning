@@ -179,7 +179,6 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                 .filter(originalDep -> originalDep.getReference().equals(resolvedRelatedArtifact.getResource()))
                 .findFirst()
                 .ifPresent(dep -> {
-                    checkIfValueSetNeedsCondition(null, dep, repository);
                     resolvedRelatedArtifact.getExtension().addAll(dep.getExtension().stream().map(e -> (Extension)e).collect(Collectors.toList()));
                     originalDependenciesWithExtensions.removeIf(ra -> ra.getReference().equals(resolvedRelatedArtifact.getResource()));
                 });
@@ -192,29 +191,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     return repository.transaction(transactionBundle);
 
   }
-  private void checkIfValueSetNeedsCondition(MetadataResource resource, DependencyInfo relatedArtifact, Repository repository) throws UnprocessableEntityException {
-    if (resource == null 
-    && relatedArtifact != null 
-    && relatedArtifact.getReference() != null 
-    && Canonicals.getResourceType(relatedArtifact.getReference()).equals("ValueSet")) {
-        List<MetadataResource> searchResults = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging( repository, new CanonicalType(relatedArtifact.getReference())));
-        if (searchResults.size() > 0) {
-            resource = searchResults.get(0);
-        }
-    }
-    if (resource != null && resource.getResourceType() == ResourceType.ValueSet) {
-        ValueSet valueSet = (ValueSet)resource;
-        boolean isLeaf = !valueSet.hasCompose() || (valueSet.hasCompose() && valueSet.getCompose().getIncludeFirstRep().getValueSet().size() == 0);
-        Optional<? extends IBaseExtension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
-            .map(DependencyInfo::getExtension)
-            .map(list -> {
-                return list.stream().filter(ext -> ext.getUrl().equalsIgnoreCase(IBaseKnowledgeArtifactAdapter.valueSetConditionUrl)).findFirst().orElse(null);
-            });
-        if (isLeaf && !maybeConditionExtension.isPresent()) {
-            throw new UnprocessableEntityException("Missing condition on ValueSet : " + valueSet.getUrl());
-        }
-    }
-}
+  
   private List<MetadataResource> internalRelease(r4KnowledgeArtifactAdapter artifactAdapter, String version, Period rootEffectivePeriod,
 																 CRMIReleaseVersionBehaviorCodes versionBehavior, boolean latestFromTxServer, CRMIReleaseExperimentalBehaviorCodes experimentalBehavior, Repository repository) throws NotImplementedOperationException, ResourceNotFoundException {
 		List<MetadataResource> resourcesToUpdate = new ArrayList<MetadataResource>();
@@ -408,7 +385,7 @@ private Optional<MetadataResource> checkIfReferenceInList(DependencyInfo artifac
 
 	
 private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Repository repository, String sourceArtifactUrl) throws ResourceNotFoundException {
-		List<MetadataResource> matchingResources = getResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(inputReference)))
+		List<MetadataResource> matchingResources = MetadataResourceHelper.getMetadataResourcesFromBundle((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(inputReference)))
 			.stream()
 			.filter(r -> r.getStatus().equals(Enumerations.PublicationStatus.ACTIVE))
 			.collect(Collectors.toList());
@@ -439,21 +416,6 @@ private String tryUpdateReferenceToLatestActiveVersion(String inputReference, Re
 		if (!matchFound) {
 			throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH.REVISION");
 		}
-	}
-	private List<MetadataResource> getResourcesFromBundle(Bundle bundle) {
-		List<MetadataResource> resourceList = new ArrayList<>();
-
-		if (!bundle.getEntryFirstRep().isEmpty()) {
-			List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
-			for (Bundle.BundleEntryComponent entry: referencedResourceEntries) {
-				if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
-					MetadataResource referencedResource = (MetadataResource) entry.getResource();
-					resourceList.add(referencedResource);
-				}
-			}
-		}
-
-		return resourceList;
 	}
   public IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository repository, Parameters operationParameters) {
     List<DependencyInfo> dependencies = planDefinition.getDependencies();

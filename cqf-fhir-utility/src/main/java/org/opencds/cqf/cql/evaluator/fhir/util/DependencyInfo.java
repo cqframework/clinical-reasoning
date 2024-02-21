@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.evaluator.fhir.util;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 
 public class DependencyInfo {
   // TODO: Need for figuring out how to determine which package the dependency is in.
@@ -45,4 +46,14 @@ public class DependencyInfo {
   public void setReferencePackageId(String referencePackageId) {
     this.referencePackageId = referencePackageId;
   }
+  public static DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
+    return new DependencyInfo(source, ra.getResource(), ra.getExtension());
+  }
+  public static DependencyInfo convertRelatedArtifact(org.hl7.fhir.dstu3.model.RelatedArtifact ra, String source) {
+    return new DependencyInfo(source, ra.getResource().getReference(), ra.getExtension());
+  }
+  public static DependencyInfo convertRelatedArtifact(org.hl7.fhir.r5.model.RelatedArtifact ra, String source) {
+    return new DependencyInfo(source, ra.getResource(), ra.getExtension());
+  }
+  
 }

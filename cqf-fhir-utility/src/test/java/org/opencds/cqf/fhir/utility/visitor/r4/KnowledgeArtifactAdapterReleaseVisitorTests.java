@@ -481,28 +481,6 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
 		assertTrue(((CodeableConcept) condition.getValue()).getCoding().get(0).getCode().equals("49649001"));
 	}
 
-	@Test
-	void release_test_condition_missing() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-approved-draft-no-conditions.json"));
-        spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
-        Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-		Parameters params = parameters(
-			part("version", new StringType("1.2.3.23")),
-			part("versionBehavior", new CodeType("default"))
-		);
-		UnprocessableEntityException noConditionExtension = null;
-		try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
-		} catch (UnprocessableEntityException e) {
-			// TODO: handle exception
-			noConditionExtension = e;
-		}
-		assertNotNull(noConditionExtension);
-		assertTrue(noConditionExtension.getMessage().contains("Missing condition"));
-	}
-
 	// @Test
 	// void release_test_artifactComment_updated() {
     //     Bundle bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));

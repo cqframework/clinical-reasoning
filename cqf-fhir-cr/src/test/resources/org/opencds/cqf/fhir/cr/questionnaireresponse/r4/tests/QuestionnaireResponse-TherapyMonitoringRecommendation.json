@@ -25,6 +25,32 @@
               }
             }
           ]
+        },
+        {
+          "linkId": "1.2",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.code",
+          "text": "Type of observation (code / type)",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "on-medication-therapy",
+                "system": "http://example.org/CodeSystem/CaseFeatureCodes"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "1.3",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.status",
+          "text": "The status of the result value.",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "final",
+                "system": "http://hl7.org/fhir/observation-status"
+              }
+            }
+          ]
         }
       ]
     },
@@ -40,6 +66,32 @@
           "answer": [
             {
               "valueDateTime": "2024-01-22T11:45:33+11:00"
+            }
+          ]
+        },
+        {
+          "linkId": "2.2",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.code",
+          "text": "Type of observation (code / type)",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "last-cbc-panel-report-date",
+                "system": "http://example.org/CodeSystem/CaseFeatureCodes"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "2.3",
+          "definition": "http://example.org/StructureDefinition/ActiveTherapyFeature#Observation.status",
+          "text": "The status of the result value.",
+          "answer": [
+            {
+              "valueCoding": {
+                "code": "final",
+                "system": "http://hl7.org/fhir/observation-status"
+              }
             }
           ]
         }

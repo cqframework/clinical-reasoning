@@ -37,7 +37,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class RequestResourceResolverTests {
+class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final IIdType subjectId = Ids.newId(Patient.class, "patient123");
     private final IIdType practitionerId = Ids.newId(Practitioner.class, "practitioner123");
@@ -62,57 +62,57 @@ public class RequestResourceResolverTests {
     }
 
     @Test
-    public void testAppointmentResolver() {
+    void testAppointmentResolver() {
         testResolver("appointment-test", Appointment.class);
     }
 
     @Test
-    public void testAppointmentResponseResolver() {
+    void testAppointmentResponseResolver() {
         testResolver("appointmentresponse-test", AppointmentResponse.class);
     }
 
     @Test
-    public void testCarePlanResolver() {
+    void testCarePlanResolver() {
         testResolver("careplan-test", CarePlan.class);
     }
 
     @Test
-    public void testClaimResolver() {
+    void testClaimResolver() {
         testResolver("claim-test", Claim.class);
     }
 
     @Test
-    public void testCommunicationRequestResolver() {
+    void testCommunicationRequestResolver() {
         testResolver("communicationrequest-test", CommunicationRequest.class);
     }
 
     @Test
-    public void testCommunicationResolver() {
+    void testCommunicationResolver() {
         testResolver("communication-test", Communication.class);
     }
 
     @Test
-    public void testContractResolver() {
+    void testContractResolver() {
         testResolver("contract-test", Contract.class);
     }
 
     @Test
-    public void testDeviceRequestResolver() {
+    void testDeviceRequestResolver() {
         testResolver("devicerequest-test", DeviceRequest.class);
     }
 
     @Test
-    public void testDiagnosticReportResolver() {
+    void testDiagnosticReportResolver() {
         testResolver("diagnosticreport-test", DiagnosticReport.class);
     }
 
     @Test
-    public void testEnrollmentRequestResolver() {
+    void testEnrollmentRequestResolver() {
         testResolver("enrollmentrequest-test", EnrollmentRequest.class);
     }
 
     @Test
-    public void testImmunizationRecommendationResolver() {
+    void testImmunizationRecommendationResolver() {
         assertThrows(FHIRException.class, () -> {
             testResolver("immunizationrecommendation-test", ImmunizationRecommendation.class);
         });
@@ -120,47 +120,47 @@ public class RequestResourceResolverTests {
     }
 
     @Test
-    public void testMedicationRequestResolver() {
+    void testMedicationRequestResolver() {
         testResolver("medicationrequest-test", MedicationRequest.class);
     }
 
     @Test
-    public void testNutritionOrderResolver() {
+    void testNutritionOrderResolver() {
         testResolver("nutritionorder-test", NutritionOrder.class);
     }
 
     @Test
-    public void testProcedureResolver() {
+    void testProcedureResolver() {
         testResolver("procedure-test", Procedure.class);
     }
 
     @Test
-    public void testRequestGroupResolver() {
+    void testRequestGroupResolver() {
         testResolver("requestgroup-test", RequestGroup.class);
     }
 
     @Test
-    public void testServiceRequestResolver() {
+    void testServiceRequestResolver() {
         testResolver("servicerequest-test", ServiceRequest.class);
     }
 
     @Test
-    public void testSupplyRequestResolver() {
+    void testSupplyRequestResolver() {
         testResolver("supplyrequest-test", SupplyRequest.class);
     }
 
     @Test
-    public void testTaskResolver() {
+    void testTaskResolver() {
         testResolver("task-test", Task.class);
     }
 
     @Test
-    public void testVisionPrescriptionResolver() {
+    void testVisionPrescriptionResolver() {
         testResolver("visionprescription-test", VisionPrescription.class);
     }
 
     @Test
-    public void testUnsupported() {
+    void testUnsupported() {
         assertThrows(FHIRException.class, () -> {
             testResolver("unsupported-test", Task.class);
         });

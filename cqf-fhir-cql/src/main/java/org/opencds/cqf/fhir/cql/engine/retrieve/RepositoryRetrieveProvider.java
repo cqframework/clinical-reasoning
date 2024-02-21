@@ -51,7 +51,7 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         var config = new SearchConfig();
         this.configureTerminology(config, dataType, codePath, codes, valueSet);
         this.configureContext(config, dataType, context, contextPath, contextValue);
-        this.configureProfile(config, templateId);
+        this.configureProfile(config, dataType, templateId);
         this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
 
         var resources = this.repository.search(bt, resourceType, config.searchParams);
@@ -60,12 +60,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         return iter.toStream().filter(config.filter).collect(Collectors.toList());
     }
 
-    private void configureProfile(SearchConfig config, String templateId) {
+    private void configureProfile(SearchConfig config, String dataType, String templateId) {
         var mode = this.getRetrieveSettings().getSearchParameterMode();
         switch (mode) {
             case FILTER_IN_MEMORY:
             case AUTO: // TODO: Auto-detect based on CapabilityStatement
-                config.filter = config.filter.and(filterByTemplateId(templateId, templateId));
+                config.filter = config.filter.and(filterByTemplateId(dataType, templateId));
                 break;
             case USE_SEARCH_PARAMETERS:
                 populateTemplateSearchParams(config.searchParams, templateId);

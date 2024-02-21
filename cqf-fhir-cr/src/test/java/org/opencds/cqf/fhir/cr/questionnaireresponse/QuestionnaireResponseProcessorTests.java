@@ -76,7 +76,11 @@ public class QuestionnaireResponseProcessorTests {
         var resources = BundleHelper.getEntryResources(result);
         var obs1 = (Observation) resources.get(0);
         var obs2 = (Observation) resources.get(1);
+        assertTrue(obs1.hasCode());
+        assertTrue(obs1.hasStatus());
         assertTrue(obs1.hasValueCodeableConcept());
+        assertTrue(obs2.hasCode());
+        assertTrue(obs2.hasStatus());
         assertTrue(obs2.hasValueDateTimeType());
     }
 }

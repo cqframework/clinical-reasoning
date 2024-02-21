@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "Patient-17",
+  "name": [ {
+    "family": "Narcolepsy",
+    "given": [ "Narcolepsy" ]
+  } ],
+  "gender": "female",
+  "birthDate": "1970-12-31"
+}

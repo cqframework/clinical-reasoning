@@ -6,15 +6,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
 

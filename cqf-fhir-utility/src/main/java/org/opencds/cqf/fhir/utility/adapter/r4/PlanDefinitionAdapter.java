@@ -5,18 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
 
 public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r4PlanDefinitionAdapter {

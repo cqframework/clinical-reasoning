@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;

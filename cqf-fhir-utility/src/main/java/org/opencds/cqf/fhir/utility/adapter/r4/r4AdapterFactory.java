@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.MetadataResource;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 

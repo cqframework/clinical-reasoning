@@ -1,17 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class KnowledgeArtifactAdapterReleaseVisitorTests {
   @Test

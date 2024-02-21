@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

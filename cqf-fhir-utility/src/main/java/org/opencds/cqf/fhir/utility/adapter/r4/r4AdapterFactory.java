@@ -9,5 +9,6 @@ public interface r4AdapterFactory extends AdapterFactory {
     default IBaseLibraryAdapter createLibrary(IBaseResource library) {
         return new LibraryAdapter(library);
     }
+
     public r4LibraryAdapter createLibrary(Library library);
 }

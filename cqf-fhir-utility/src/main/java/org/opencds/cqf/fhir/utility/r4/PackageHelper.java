@@ -4,7 +4,6 @@ import static org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryByCan
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;

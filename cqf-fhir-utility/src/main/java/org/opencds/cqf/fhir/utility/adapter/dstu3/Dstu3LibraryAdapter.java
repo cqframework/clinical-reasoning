@@ -6,5 +6,6 @@ import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 
 public interface Dstu3LibraryAdapter extends Dstu3KnowledgeArtifactAdapter, IBaseLibraryAdapter {
     List<Attachment> getContent();
+
     Attachment addContent();
 }

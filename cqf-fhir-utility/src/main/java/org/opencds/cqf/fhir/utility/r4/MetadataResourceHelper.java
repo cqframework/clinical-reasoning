@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
@@ -20,55 +19,63 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class MetadataResourceHelper {
-    public static void forEachMetadataResource(List<BundleEntryComponent> entries, Consumer<MetadataResource> callback, Repository repository) {
-		entries.stream()
-			.map(entry -> entry.getResponse().getLocation())
-			.map(location -> {
-				switch (location.split("/")[0]) {
-					case "ActivityDefinition":
-						return repository.read(ActivityDefinition.class, new IdType(location));
-					case "Library":
-						return repository.read(Library.class, new IdType(location));
-					case "Measure":
-						return repository.read(Measure.class, new IdType(location));
-					case "PlanDefinition":
-						return repository.read(PlanDefinition.class, new IdType(location));
-					case "ValueSet":
-						return repository.read(ValueSet.class, new IdType(location));
-					default:
-						return  null;
-				}
-			})
-			.forEach(callback);
-	}
-    public static <T extends Type> Optional<T> getParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
-        return Optional.ofNullable(operationParameters)
-        .map(p -> p.getParameter(name))
-        .map(rl -> (T) rl.getValue());
+    public static void forEachMetadataResource(
+            List<BundleEntryComponent> entries, Consumer<MetadataResource> callback, Repository repository) {
+        entries.stream()
+                .map(entry -> entry.getResponse().getLocation())
+                .map(location -> {
+                    switch (location.split("/")[0]) {
+                        case "ActivityDefinition":
+                            return repository.read(ActivityDefinition.class, new IdType(location));
+                        case "Library":
+                            return repository.read(Library.class, new IdType(location));
+                        case "Measure":
+                            return repository.read(Measure.class, new IdType(location));
+                        case "PlanDefinition":
+                            return repository.read(PlanDefinition.class, new IdType(location));
+                        case "ValueSet":
+                            return repository.read(ValueSet.class, new IdType(location));
+                        default:
+                            return null;
+                    }
+                })
+                .forEach(callback);
     }
-    public static <T extends IBaseResource> Optional<T> getResourceParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+
+    public static <T extends Type> Optional<T> getParameter(
+            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
         return Optional.ofNullable(operationParameters)
-        .map(p -> p.getParameter(name))
-        .map(rl -> (T) rl.getResource());
+                .map(p -> p.getParameter(name))
+                .map(rl -> (T) rl.getValue());
     }
-    public static <T extends Type> Optional<List<T>> getListParameter(String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+
+    public static <T extends IBaseResource> Optional<T> getResourceParameter(
+            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
         return Optional.ofNullable(operationParameters)
-        .map(p -> p.getParameterValues(name))
-        .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
+                .map(p -> p.getParameter(name))
+                .map(rl -> (T) rl.getResource());
     }
+
+    public static <T extends Type> Optional<List<T>> getListParameter(
+            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+        return Optional.ofNullable(operationParameters)
+                .map(p -> p.getParameterValues(name))
+                .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
+    }
+
     public static List<MetadataResource> getMetadataResourcesFromBundle(Bundle bundle) {
-		List<MetadataResource> resourceList = new ArrayList<>();
+        List<MetadataResource> resourceList = new ArrayList<>();
 
-		if (!bundle.getEntryFirstRep().isEmpty()) {
-			List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
-			for (Bundle.BundleEntryComponent entry: referencedResourceEntries) {
-				if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
-					MetadataResource referencedResource = (MetadataResource) entry.getResource();
-					resourceList.add(referencedResource);
-				}
-			}
-		}
+        if (!bundle.getEntryFirstRep().isEmpty()) {
+            List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
+            for (Bundle.BundleEntryComponent entry : referencedResourceEntries) {
+                if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
+                    MetadataResource referencedResource = (MetadataResource) entry.getResource();
+                    resourceList.add(referencedResource);
+                }
+            }
+        }
 
-		return resourceList;
-	}
+        return resourceList;
+    }
 }

@@ -4,10 +4,10 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.Library;
 
 public class AdapterFactory implements r4AdapterFactory {
 
@@ -16,6 +16,7 @@ public class AdapterFactory implements r4AdapterFactory {
 
         return new ResourceAdapter(resource);
     }
+
     public r4KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(MetadataResource resource) {
         r4KnowledgeArtifactAdapter retval;
         if (resource.fhirType().equals("Library")) {
@@ -29,6 +30,7 @@ public class AdapterFactory implements r4AdapterFactory {
         }
         return retval;
     }
+
     @Override
     public r4LibraryAdapter createLibrary(Library library) {
         return new LibraryAdapter(library);

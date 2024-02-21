@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -30,10 +29,12 @@ public class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter 
         }
         this.library = (Library) library;
     }
+
     public LibraryAdapter(Library library) {
         super(library);
         this.library = library;
     }
+
     protected Library getLibrary() {
         return this.library;
     }
@@ -104,22 +105,23 @@ public class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter 
     public Attachment addContent() {
         return this.getLibrary().addContent();
     }
+
     @Override
     public List<DependencyInfo> getDependencies() {
         List<DependencyInfo> retval = new ArrayList<DependencyInfo>();
         final String source = this.getUrl();
         this.getRelatedArtifactsOfType(RelatedArtifactType.DEPENDSON).stream()
-            .filter(ra -> ra.hasResource())
-            .forEach(ra -> retval.add(new DependencyInfo(source, ra.getResource(), ra.getExtension())));
-        this.get().getDataRequirement().stream()
-            .forEach(dr -> {
-                dr.getProfile().stream()
+                .filter(ra -> ra.hasResource())
+                .forEach(ra -> retval.add(new DependencyInfo(source, ra.getResource(), ra.getExtension())));
+        this.get().getDataRequirement().stream().forEach(dr -> {
+            dr.getProfile().stream()
                     .filter(profile -> profile.hasValue())
-                    .forEach(profile -> retval.add(new DependencyInfo(source, profile.getValue(), profile.getExtension())));
-                dr.getCodeFilter().stream()
+                    .forEach(profile ->
+                            retval.add(new DependencyInfo(source, profile.getValue(), profile.getExtension())));
+            dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
                     .forEach(cf -> retval.add(new DependencyInfo(source, cf.getValueSet(), cf.getExtension())));
-            });
+        });
         return retval;
     }
 
@@ -128,21 +130,25 @@ public class LibraryAdapter extends ResourceAdapter implements r4LibraryAdapter 
     }
 
     public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
-    return visitor.visit(this, repository, operationParameters);
-  }
-  public Date getApprovalDate() {
-    return this.getLibrary().getApprovalDate();
-  }
-  @Override
-  public Period getEffectivePeriod(){
-    return this.getLibrary().getEffectivePeriod();
-  }
-  @Override
-  public void setEffectivePeriod(Period effectivePeriod) {
-    this.getLibrary().setEffectivePeriod(effectivePeriod);
-  }
-  @Override
-  public List<RelatedArtifact> getRelatedArtifact() {
-    return this.getLibrary().getRelatedArtifact();
-  }
+        return visitor.visit(this, repository, operationParameters);
+    }
+
+    public Date getApprovalDate() {
+        return this.getLibrary().getApprovalDate();
+    }
+
+    @Override
+    public Period getEffectivePeriod() {
+        return this.getLibrary().getEffectivePeriod();
+    }
+
+    @Override
+    public void setEffectivePeriod(Period effectivePeriod) {
+        this.getLibrary().setEffectivePeriod(effectivePeriod);
+    }
+
+    @Override
+    public List<RelatedArtifact> getRelatedArtifact() {
+        return this.getLibrary().getRelatedArtifact();
+    }
 }

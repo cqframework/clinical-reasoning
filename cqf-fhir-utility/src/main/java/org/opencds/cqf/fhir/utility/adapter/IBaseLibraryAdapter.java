@@ -9,7 +9,10 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 public interface IBaseLibraryAdapter extends IBaseKnowledgeArtifactAdapter {
 
     boolean hasContent();
+
     List<? extends ICompositeType> getContent();
+
     <T extends ICompositeType> void setContent(List<T> attachments);
+
     <T extends ICompositeType> T addContent();
 }

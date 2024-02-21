@@ -85,7 +85,7 @@ public class InMemoryFhirRepository implements Repository {
             theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
-        MethodOutcome outcome = new MethodOutcome(theId,true);
+        MethodOutcome outcome = new MethodOutcome(theId, true);
         resources.put(theId.toUnqualifiedVersionless(), resource);
         return outcome;
     }
@@ -100,7 +100,7 @@ public class InMemoryFhirRepository implements Repository {
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = resource.getIdElement().toUnqualifiedVersionless();
-        MethodOutcome outcome = new MethodOutcome(theId,false);
+        MethodOutcome outcome = new MethodOutcome(theId, false);
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }
@@ -200,8 +200,7 @@ public class InMemoryFhirRepository implements Repository {
 
     public static Bundle transactionStub(Bundle transaction, Repository repository) {
         Bundle returnBundle = new Bundle();
-        transaction.getEntry().stream()
-        .forEach((e) -> {
+        transaction.getEntry().stream().forEach((e) -> {
             HTTPVerb v = e.getRequest().getMethod();
             BundleEntryComponent entry = new BundleEntryComponent();
             BundleEntryResponseComponent resp = new BundleEntryResponseComponent();

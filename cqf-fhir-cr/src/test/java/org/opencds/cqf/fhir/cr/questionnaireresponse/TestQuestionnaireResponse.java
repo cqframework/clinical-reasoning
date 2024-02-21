@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -16,10 +17,9 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaireResponse {
@@ -50,11 +50,8 @@ public class TestQuestionnaireResponse {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = TestRepositoryFactory.createRepository(
-                    fhirContext,
-                    this.getClass(),
-                    CLASS_PATH + "/" + repositoryPath,
-                    IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES);
+            this.repository = new IgRepository(
+                    fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
             return this;
         }
 

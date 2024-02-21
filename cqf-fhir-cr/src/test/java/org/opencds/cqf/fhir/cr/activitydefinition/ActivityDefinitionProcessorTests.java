@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -23,8 +23,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IGRepositoryConfig;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ActivityDefinitionProcessorTests {
@@ -36,16 +35,9 @@ public class ActivityDefinitionProcessorTests {
     private ActivityDefinitionProcessor activityDefinitionProcessorR5;
 
     private Repository createRepository(FhirContext fhirContext, String version) {
-        return new IGRepository(
+        return new IgRepository(
                 fhirContext,
-                this.getClass()
-                                .getProtectionDomain()
-                                .getCodeSource()
-                                .getLocation()
-                                .getPath() + "org/opencds/cqf/fhir/cr/activitydefinition/" + version,
-                IGRepositoryConfig.WITH_CATEGORY_DIRECTORY_AND_TYPE_NAMES,
-                EncodingEnum.JSON,
-                null);
+                getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version);
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

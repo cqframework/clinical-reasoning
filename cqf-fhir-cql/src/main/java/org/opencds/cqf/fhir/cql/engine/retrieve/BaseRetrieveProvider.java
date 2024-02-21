@@ -63,8 +63,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public Predicate<IBaseResource> filterByTemplateId(final String dataType, final String templateId) {
-
-        if (this.getRetrieveSettings().getProfileMode() == PROFILE_MODE.OFF) {
+        var profileMode = this.getRetrieveSettings().getProfileMode();
+        if (profileMode == PROFILE_MODE.OFF) {
             return resource -> true;
         }
 
@@ -74,17 +74,31 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             return resource -> true;
         }
 
-        // TODO: If profile mode is TRUST, this works. But for ENFORCED we should use the validator
-        return (IBaseResource res) -> {
-            if (res.getMeta() != null && res.getMeta().getProfile() != null) {
+        if (profileMode == PROFILE_MODE.DECLARED || profileMode == PROFILE_MODE.OPTIONAL) {
+            return (IBaseResource res) -> {
+
+                // DECLARED == require a declared profile to be there, and use it.
+                // OPTIONAL == use the profile if it's there, but don't require it
+                if (res.getMeta() == null
+                        || res.getMeta().getProfile() == null
+                        || res.getMeta().getProfile().isEmpty()) {
+                    return profileMode == PROFILE_MODE.OPTIONAL;
+                }
+
                 for (IPrimitiveType<?> profile : res.getMeta().getProfile()) {
                     if (profile.hasValue() && profile.getValueAsString().equals(templateId)) {
                         return true;
                     }
                 }
-            }
-            return false;
-        };
+
+                return false;
+            };
+        }
+
+        // Should never see TRUST, since that should be handled by the repository.
+        // ENFORCED is not yet supported.
+
+        throw new UnsupportedOperationException(String.format("%s profile mode is not yet supported.", profileMode));
     }
 
     public Predicate<IBaseResource> filterByContext(
@@ -271,7 +285,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
     // Super hackery, just to get this running for connectathon
     private String getValueSetFromCode(
-            IBase base) { // what valuesets is it a part of, but just picking one, why not done association Chris
+            IBase base) { // what valuesets is it a part of, but just picking one, why not done
+        // association Chris
         IBaseExtension<?, ?> ext = ExtensionUtil.getExtensionByUrl(
                 base, "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-notDoneValueSet");
         if (ext != null && ext.getValue() != null && ext.getValue() instanceof IPrimitiveType) {
@@ -283,7 +298,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     public void populateTemplateSearchParams(
             Map<String, List<IQueryParameterType>> searchParams, final String templateId) {
 
-        // TODO: If profile mode is optional, trust, or enforced AND the repository supports the _profile
+        // TODO: If profile mode is optional, trust, or enforced AND the repository
+        // supports the _profile
         // parameter, we should add it.
         if (this.getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF && StringUtils.isNotBlank(templateId)) {
             searchParams.put("_profile", Collections.singletonList(new ReferenceParam(templateId)));
@@ -348,7 +364,8 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                                 .setModifier(TokenParamModifier.IN)
                                 .setValue(valueSet)));
             } else {
-                // Inline the codes into the retrieve e.g. Observation?code=system|code,system|code
+                // Inline the codes into the retrieve e.g.
+                // Observation?code=system|code,system|code
                 List<IQueryParameterType> codeList = new ArrayList<>();
                 for (Code code : this.terminologyProvider.expand(new ValueSetInfo().withId(valueSet))) {
                     codeList.add(new TokenParam(

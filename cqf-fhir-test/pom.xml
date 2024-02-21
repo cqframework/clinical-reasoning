@@ -5,22 +5,27 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-test</artifactId>
-  <version>3.0.0-PRE18-SNAPSHOT</version>
+  <version>3.0.0</version>
   <name>FHIR Clinical Reasoning (Test Utilities)</name>
   <description>Utilities to support unit testing clinical reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.0.0-PRE18-SNAPSHOT</version>
+    <version>3.0.0</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-api</artifactId>
-      <version>3.0.0-PRE18-SNAPSHOT</version>
+      <version>3.0.0</version>
     </dependency>
+    <dependency>
+        <groupId>ca.uhn.hapi.fhir</groupId>
+        <artifactId>hapi-fhir-caching-caffeine</artifactId>
+        <version>${hapi.version}</version>
+      </dependency>
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>

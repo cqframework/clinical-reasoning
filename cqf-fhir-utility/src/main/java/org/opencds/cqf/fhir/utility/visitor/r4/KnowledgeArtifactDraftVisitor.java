@@ -87,7 +87,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     for (int i = 0; i < resourcesToCreate.size(); i++) {
         KnowledgeArtifactAdapter newResourceAdapter = new KnowledgeArtifactAdapter(resourcesToCreate.get(i));
         updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList);
-        updateRelatedArtifactUrlsWithNewVersions(combineComponentsAndDependencies(library), draftVersion, ownedResourceUrls);
+        updateRelatedArtifactUrlsWithNewVersions(library.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
         MetadataResource updateIdForBundle = (MetadataResource) newResourceAdapter.copy();
         updateIdForBundle.setId(urnList.get(i));
         transactionBundle.addEntry(PackageHelper.createEntry(updateIdForBundle, false));
@@ -235,9 +235,6 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         ra.setReference(Canonicals.getUrl(ra.getReference()) + "|" + updatedVersion);
         return ra;
       });
-	}
-  private List<DependencyInfo> combineComponentsAndDependencies(r4LibraryAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
 	}
     
 }

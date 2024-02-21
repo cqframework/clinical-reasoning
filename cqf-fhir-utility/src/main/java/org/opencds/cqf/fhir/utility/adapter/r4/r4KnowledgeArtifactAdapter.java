@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -63,5 +65,8 @@ public interface r4KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAdapte
         .filter(ra -> ra.getType() == relatedArtifactType)
         .collect(Collectors.toList());
     return relatedArtifacts;
+  }
+  default List<DependencyInfo> combineComponentsAndDependencies() {
+		return Stream.concat(getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, getUrl() + "|" + getVersion())), getDependencies().stream()).collect(Collectors.toList());
   }
 }

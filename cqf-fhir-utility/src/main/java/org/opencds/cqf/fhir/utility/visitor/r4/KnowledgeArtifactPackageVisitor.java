@@ -198,7 +198,7 @@ Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
 				bundle.addEntry(entry);
 			}
 
-			combineComponentsAndDependencies(adapter).stream()
+			adapter.combineComponentsAndDependencies().stream()
 				.map(ra -> (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(ra.getReference())))
 				.map(searchBundle -> searchBundle.getEntry().stream().findFirst().orElseGet(()-> new BundleEntryComponent()).getResource())
 				.forEach(component -> recursivePackage((MetadataResource)component, bundle, repository, capability, include, artifactVersion, checkArtifactVersion, forceArtifactVersion));
@@ -491,9 +491,5 @@ private List<BundleEntryComponent> findUnsupportedInclude(List<BundleEntryCompon
 				usageContexts.add(n);
 				return n;
 			});
-	}
- 
-    private List<DependencyInfo> combineComponentsAndDependencies(r4KnowledgeArtifactAdapter adapter) {
-		return Stream.concat(adapter.getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, adapter.getUrl() + "|" + adapter.getVersion())), adapter.getDependencies().stream()).collect(Collectors.toList());
 	}
 }

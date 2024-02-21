@@ -226,12 +226,12 @@ public class ElementProcessorTests {
                 .setType(org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.REFERENCE);
         doReturn(cqfExpression)
                 .when(expressionProcessor)
-                .getCqfExpression(request, Collections.EMPTY_LIST, Constants.CQF_EXPRESSION);
+                .getCqfExpression(request, Collections.emptyList(), Constants.CQF_EXPRESSION);
         doReturn(Collections.singletonList(expectedResource))
                 .when(expressionProcessor)
                 .getExpressionResult(request, cqfExpression);
         var actual = (QuestionnaireItemComponent)
-                new ElementHasCqfExpression(expressionProcessor).addProperties(request, Collections.EMPTY_LIST, item);
+                new ElementHasCqfExpression(expressionProcessor).addProperties(request, Collections.emptyList(), item);
         assertNotNull(actual);
         assertTrue(actual.hasInitial());
         assertEquals("test", actual.getInitial().get(0).getValueReference().getReference());

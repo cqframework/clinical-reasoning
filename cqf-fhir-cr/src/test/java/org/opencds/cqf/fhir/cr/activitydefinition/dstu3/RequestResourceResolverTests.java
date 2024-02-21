@@ -27,7 +27,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class RequestResourceResolverTests {
+class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final IIdType subjectId = Ids.newId(Patient.class, "patient123");
     private final IIdType practitionerId = Ids.newId(Practitioner.class, "practitioner123");
@@ -52,52 +52,52 @@ public class RequestResourceResolverTests {
     }
 
     @Test
-    public void testCommunicationRequestResolver() {
+    void testCommunicationRequestResolver() {
         testResolver("communicationrequest-test", CommunicationRequest.class);
     }
 
     @Test
-    public void testCommunicationResolver() {
+    void testCommunicationResolver() {
         testResolver("communication-test", Communication.class);
     }
 
     @Test
-    public void testDiagnosticReportResolver() {
+    void testDiagnosticReportResolver() {
         testResolver("diagnosticreport-test", DiagnosticReport.class);
     }
 
     @Test
-    public void testMedicationRequestResolver() {
+    void testMedicationRequestResolver() {
         testResolver("medicationrequest-test", MedicationRequest.class);
     }
 
     @Test
-    public void testProcedureRequestResolver() {
+    void testProcedureRequestResolver() {
         testResolver("procedurerequest-test", ProcedureRequest.class);
     }
 
     @Test
-    public void testProcedureResolver() {
+    void testProcedureResolver() {
         testResolver("procedure-test", Procedure.class);
     }
 
     @Test
-    public void testReferralRequestResolver() {
+    void testReferralRequestResolver() {
         testResolver("referralrequest-test", ReferralRequest.class);
     }
 
     @Test
-    public void testSupplyRequestResolver() {
+    void testSupplyRequestResolver() {
         testResolver("supplyrequest-test", SupplyRequest.class);
     }
 
     @Test
-    public void testTaskResolver() {
+    void testTaskResolver() {
         testResolver("task-test", Task.class);
     }
 
     @Test
-    public void testUnsupported() {
+    void testUnsupported() {
         assertThrows(FHIRException.class, () -> {
             testResolver("unsupported-test", Task.class);
         });

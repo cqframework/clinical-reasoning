@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,28 +16,31 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.io.TempDir;
+import org.opencds.cqf.fhir.test.Resources;
 
 @TestInstance(Lifecycle.PER_CLASS)
-@Disabled
-public class CliTest {
+class CliTest {
+
+    @TempDir
+    private static Path tempDir;
 
     private ByteArrayOutputStream outContent;
     private ByteArrayOutputStream errContent;
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
-    private static final String testResourceRelativePath = "src/test/resources";
     private static String testResourcePath = null;
 
     @BeforeAll
-    public void setup() {
-        File file = new File(testResourceRelativePath);
-        testResourcePath = file.getAbsolutePath();
+    void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+        Resources.copyFromJar("/", tempDir);
+        testResourcePath = tempDir.toAbsolutePath().toString();
         System.out.println(String.format("Test resource directory: %s", testResourcePath));
     }
 
     @BeforeEach
-    public void setUpStreams() {
+    void setUpStreams() {
         outContent = new ByteArrayOutputStream();
         errContent = new ByteArrayOutputStream();
 
@@ -44,7 +49,7 @@ public class CliTest {
     }
 
     @AfterEach
-    public void restoreStreams() {
+    void restoreStreams() {
         String sysOut = outContent.toString();
         String sysError = errContent.toString();
 
@@ -56,14 +61,14 @@ public class CliTest {
     }
 
     @Test
-    public void testVersion() {
+    void testVersion() {
         String[] args = new String[] {"-V"};
         Main.run(args);
         assertTrue(outContent.toString().startsWith("cqf-fhir-cr-cli version:"));
     }
 
     @Test
-    public void testHelp() {
+    void testHelp() {
         String[] args = new String[] {"-h"};
         Main.run(args);
         String output = outContent.toString();
@@ -72,7 +77,7 @@ public class CliTest {
     }
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         String[] args = new String[] {};
         Main.run(args);
         String output = errContent.toString();
@@ -81,17 +86,17 @@ public class CliTest {
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
         assertThrows(NullPointerException.class, () -> {
             Main.run(null);
         });
     }
 
     @Test
-    public void testDstu3() {}
+    void testDstu3() {}
 
     @Test
-    public void testArgFile() {
+    void testArgFile() {
         String[] args = new String[] {"argfile", testResourcePath + "/argfile/args.txt"};
 
         Main.run(args);
@@ -103,7 +108,7 @@ public class CliTest {
     }
 
     @Test
-    public void testR4() {
+    void testR4() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -111,7 +116,7 @@ public class CliTest {
             "-ln=TestFHIR",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/r4",
-            "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -135,7 +140,7 @@ public class CliTest {
     }
 
     @Test
-    public void testR4WithHelpers() {
+    void testR4WithHelpers() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -143,7 +148,7 @@ public class CliTest {
             "-ln=TestFHIRWithHelpers",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/r4",
-            "-t=" + testResourcePath + "/r4/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -167,7 +172,7 @@ public class CliTest {
     }
 
     @Test
-    public void testUSCore() {
+    void testUSCore() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -175,7 +180,7 @@ public class CliTest {
             "-ln=TestUSCore",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/uscore",
-            "-t=" + testResourcePath + "/uscore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/uscore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -196,7 +201,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICore() {
+    void testQICore() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -204,7 +209,7 @@ public class CliTest {
             "-ln=TestQICore",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -260,7 +265,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreCommon() {
+    void testQICoreCommon() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -268,7 +273,7 @@ public class CliTest {
             "-ln=QICoreCommonTests",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicorecommon",
-            "-t=" + testResourcePath + "/qicorecommon/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicorecommon/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -289,7 +294,7 @@ public class CliTest {
     }
 
     @Test
-    public void testOptions() {
+    void testOptions() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -298,7 +303,7 @@ public class CliTest {
             "-ln=FluentFunctions",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/options",
-            "-t=" + testResourcePath + "/options/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/options/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -313,7 +318,7 @@ public class CliTest {
     }
 
     @Test
-    public void testOptionsFailure() {
+    void testOptionsFailure() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -322,7 +327,7 @@ public class CliTest {
             "-ln=FluentFunctions",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/optionsFailure",
-            "-t=" + testResourcePath + "/optionsFailure/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/optionsFailure/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -334,7 +339,7 @@ public class CliTest {
     }
 
     @Test
-    public void testVSCastFunction14() {
+    void testVSCastFunction14() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -343,7 +348,7 @@ public class CliTest {
             "-ln=TestVSCastFunction",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/vscast/Patient-17",
-            "-t=" + testResourcePath + "/vscast/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/vscast/vocabulary/valueset",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -357,7 +362,7 @@ public class CliTest {
     }
 
     @Test
-    public void testVSCastFunction15() {
+    void testVSCastFunction15() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -366,7 +371,7 @@ public class CliTest {
             "-ln=TestVSCastFunction",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/vscast15/Patient-17",
-            "-t=" + testResourcePath + "/vscast15/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/vscast15/vocabulary/valueset",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -380,7 +385,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreSupplementalDataElements() {
+    void testQICoreSupplementalDataElements() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -389,7 +394,7 @@ public class CliTest {
             "-lv=2.0.0",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -413,7 +418,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Example() {
+    void testQICoreEXM124Example() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -422,7 +427,7 @@ public class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -450,7 +455,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Denom() {
+    void testQICoreEXM124Denom() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -459,7 +464,7 @@ public class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=denom-EXM124"
         };
@@ -478,7 +483,7 @@ public class CliTest {
     }
 
     @Test
-    public void testQICoreEXM124Numer() {
+    void testQICoreEXM124Numer() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -487,7 +492,7 @@ public class CliTest {
             "-lv=8.2.000",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/qicore",
-            "-t=" + testResourcePath + "/qicore/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=numer-EXM124"
         };
@@ -507,7 +512,7 @@ public class CliTest {
 
     @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
-    public void testSampleContentIG() {
+    void testSampleContentIG() {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
@@ -518,7 +523,7 @@ public class CliTest {
             "-lv=0.1.0",
             "-m=FHIR",
             "-mu=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
-            "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/ValueSet",
+            "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };

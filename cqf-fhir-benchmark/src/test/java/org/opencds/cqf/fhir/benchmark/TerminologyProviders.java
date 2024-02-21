@@ -6,8 +6,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
-import org.opencds.cqf.fhir.test.TestRepositoryFactory;
-import org.opencds.cqf.fhir.utility.repository.IGLayoutMode;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -42,11 +41,7 @@ public class TerminologyProviders {
 
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
-        var repository = TestRepositoryFactory.createRepository(
-                FhirContext.forR4Cached(),
-                Measure.class,
-                Measure.CLASS_PATH + "/CaseRepresentation101",
-                IGLayoutMode.DIRECTORY);
+        var repository = new IgRepository(FhirContext.forR4Cached(), Measure.CLASS_PATH + "/CaseRepresentation101");
         this.terminologyProvider = new RepositoryTerminologyProvider(repository);
     }
 

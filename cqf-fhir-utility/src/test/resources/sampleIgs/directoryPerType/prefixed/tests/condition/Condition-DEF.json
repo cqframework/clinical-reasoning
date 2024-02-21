@@ -1,0 +1,12 @@
+{
+    "resourceType": "Condition",
+    "id": "DEF",
+    "code": {
+        "coding": [
+            {
+                "system": "example.com/codesystem",
+                "code": "12345"
+            }
+        ]
+    }
+}

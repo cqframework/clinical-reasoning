@@ -92,7 +92,6 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         updateIdForBundle.setId(urnList.get(i));
         transactionBundle.addEntry(PackageHelper.createEntry(updateIdForBundle, false));
     }
-    // return InMemoryFhirRepository.transactionStub(transactionBundle, repository);
     return repository.transaction(transactionBundle);
 
     // DependencyInfo --document here that there is a need for figuring out how to determine which package the dependency is in.

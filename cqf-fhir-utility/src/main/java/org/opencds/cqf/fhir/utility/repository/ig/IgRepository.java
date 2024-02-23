@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -94,7 +95,8 @@ public class IgRepository implements Repository {
     }
 
     /**
-     * Create a new IGRepository instance. The repository configuration is auto-detected, and the encoding is set to JSON.
+     * Create a new IGRepository instance. The repository configuration is
+     * auto-detected, and the encoding is set to JSON.
      *
      * @param fhirContext
      * @param root
@@ -110,11 +112,14 @@ public class IgRepository implements Repository {
     /**
      * Create a new IGRepository instance.
      *
-     * @param fhirContext The FHIR context to use for parsing and encoding resources.
-     * @param root The root directory of the IG
-     * @param conventions The conventions for the IG
-     * @param encodingEnum The encoding to use for parsing and encoding resources.
-     * @param operationProvider The operation provider to use for invoking operations.
+     * @param fhirContext       The FHIR context to use for parsing and encoding
+     *                          resources.
+     * @param root              The root directory of the IG
+     * @param conventions       The conventions for the IG
+     * @param encodingEnum      The encoding to use for parsing and encoding
+     *                          resources.
+     * @param operationProvider The operation provider to use for invoking
+     *                          operations.
      */
     public IgRepository(
             FhirContext fhirContext,
@@ -228,6 +233,24 @@ public class IgRepository implements Repository {
     }
 
     protected <T extends IBaseResource> MethodOutcome writeLocation(T resource, String location) {
+
+        var external = resource.getUserData("isExternalResource");
+        if (external != null && (Boolean) external) {
+            throw new ForbiddenOperationException(String.format(
+                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only.",
+                    resource.getIdElement().toUnqualifiedVersionless()));
+        }
+
+        var path = Paths.get(location);
+        if (!path.getParent().toFile().exists()) {
+            try {
+                Files.createParentDirs(path.toFile());
+            } catch (IOException e) {
+                throw new UnclassifiedServerFailureException(
+                        500, String.format("unable to create directory for location %s", location));
+            }
+        }
+
         try (var os = new FileOutputStream(location)) {
             String result = parser.setPrettyPrint(true).encodeResourceToString(resource);
             os.write(result.getBytes());

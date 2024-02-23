@@ -128,9 +128,11 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements dstu3Pla
                     references.add(new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
                 });
                 // trigger[].dataRequirement[].codeFilter[].valueSet
-                eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
-                    references.add(dependencyFromDataRequirementCodeFilter(cf));
-                });
+                eventData.getCodeFilter().stream()
+                        .filter(cf -> cf.hasValueSet())
+                        .forEach(cf -> {
+                            references.add(dependencyFromDataRequirementCodeFilter(cf));
+                        });
             });
             Stream.concat(action.getInput().stream(), action.getOutput().stream())
                     .forEach(inputOrOutput -> {

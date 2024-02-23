@@ -3,11 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -86,24 +85,32 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     @Override
     public List<DependencyInfo> getDependencies() {
         List<DependencyInfo> references = new ArrayList<>();
+        final String referenceSource = this.getValueSet().hasVersion()
+                ? this.getValueSet().getUrl() + "|" + this.getValueSet().getVersion()
+                : this.getValueSet().getUrl();
 
         /*
           compose.include[].valueSet
+          compose.include[].system
           compose.exclude[].valueSet
+          compose.exclude[].system
         */
-        List<ConceptSetComponent> composeEntries = new ArrayList<>();
-        composeEntries.addAll(this.valueSet.getCompose().getInclude());
-        composeEntries.addAll(this.valueSet.getCompose().getExclude());
-
-        for (ConceptSetComponent component : composeEntries) {
-            if (component.hasValueSet()) {
-                for (UriType uri : component.getValueSet()) {
-                    DependencyInfo dependency =
-                            new DependencyInfo(this.valueSet.getUrl(), uri.getValue(), component.getExtension());
-                    references.add(dependency);
-                }
-            }
-        }
+        Stream.concat(
+                        this.valueSet.getCompose().getInclude().stream(),
+                        this.valueSet.getCompose().getExclude().stream())
+                .forEach(component -> {
+                    if (component.hasValueSet()) {
+                        component.getValueSet().forEach(uri -> {
+                            references.add(new DependencyInfo(referenceSource, uri.getValue(), uri.getExtension()));
+                        });
+                    }
+                    if (component.hasSystem()) {
+                        references.add(new DependencyInfo(
+                                referenceSource,
+                                component.getSystem(),
+                                component.getSystemElement().getExtension()));
+                    }
+                });
 
         // TODO: Ideally this would use the $data-requirements code
         return references;

@@ -109,9 +109,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         return new OperationOutcome();
     }
-    //   public IBase visit(r4KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters){
-    //     return new OperationOutcome();
-    //   }
+
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         List<DependencyInfo> dependencies = planDefinition.getDependencies();

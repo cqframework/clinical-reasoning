@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -216,12 +217,25 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
             }
 
             adapter.combineComponentsAndDependencies().stream()
+                    // sometimes VS dependencies aren't FHIR resources
+                    .filter(ra -> !StringUtils.isBlank(Canonicals.getResourceType(ra.getReference())))
+                    .filter(ra -> {
+                        try {
+                            var resourceDef = repository
+                                    .fhirContext()
+                                    .getResourceDefinition(Canonicals.getResourceType(ra.getReference()));
+                            return resourceDef != null;
+                        } catch (DataFormatException e) {
+                            if (e.getMessage().contains("1684")) {
+                                return false;
+                            } else {
+                                throw new DataFormatException(e.getMessage());
+                            }
+                        }
+                    })
                     .map(ra -> (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
                             repository, new CanonicalType(ra.getReference())))
-                    .map(searchBundle -> searchBundle.getEntry().stream()
-                            .findFirst()
-                            .orElseGet(() -> new BundleEntryComponent())
-                            .getResource())
+                    .map(searchBundle -> searchBundle.getEntryFirstRep().getResource())
                     .forEach(component -> recursivePackage(
                             (MetadataResource) component,
                             bundle,
@@ -241,9 +255,6 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         return new OperationOutcome();
     }
-    //   public IBase visit(r4KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters){
-    //     return new OperationOutcome();
-    //   }
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         List<DependencyInfo> dependencies = planDefinition.getDependencies();

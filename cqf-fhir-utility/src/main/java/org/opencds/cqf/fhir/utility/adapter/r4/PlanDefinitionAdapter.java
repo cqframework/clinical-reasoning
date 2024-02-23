@@ -122,20 +122,30 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
                     references.add(new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
                 });
                 // trigger[].dataRequirement[].codeFilter[].valueSet
-                eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
-                    references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
-                });
+                eventData.getCodeFilter().stream()
+                        .filter(cf -> cf.hasValueSet())
+                        .forEach(cf -> {
+                            references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                        });
             });
             // condition[].expression.reference
-            action.getCondition().stream().filter(c -> c.hasExpression()).map(c -> c.getExpression()).filter(e -> e.hasReference()).forEach(expression -> {
-                references.add(
-                        new DependencyInfo(referenceSource, expression.getReference(), expression.getExtension()));
-            });
+            action.getCondition().stream()
+                    .filter(c -> c.hasExpression())
+                    .map(c -> c.getExpression())
+                    .filter(e -> e.hasReference())
+                    .forEach(expression -> {
+                        references.add(new DependencyInfo(
+                                referenceSource, expression.getReference(), expression.getExtension()));
+                    });
             // dynamicValue[].expression.reference
-            action.getDynamicValue().stream().filter(dv -> dv.hasExpression()).map(dv -> dv.getExpression()).filter(e -> e.hasReference()).forEach(expression -> {
-                references.add(
-                        new DependencyInfo(referenceSource, expression.getReference(), expression.getExtension()));
-            });
+            action.getDynamicValue().stream()
+                    .filter(dv -> dv.hasExpression())
+                    .map(dv -> dv.getExpression())
+                    .filter(e -> e.hasReference())
+                    .forEach(expression -> {
+                        references.add(new DependencyInfo(
+                                referenceSource, expression.getReference(), expression.getExtension()));
+                    });
             Stream.concat(action.getInput().stream(), action.getOutput().stream())
                     .forEach(inputOrOutput -> {
                         // ..input[].profile[]
@@ -146,9 +156,12 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
                         });
                         // input[].codeFilter[].valueSet
                         // output[].codeFilter[].valueSet
-                        inputOrOutput.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
-                            references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
-                        });
+                        inputOrOutput.getCodeFilter().stream()
+                                .filter(cf -> cf.hasValueSet())
+                                .forEach(cf -> {
+                                    references.add(
+                                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                                });
                     });
         });
         this.getPlanDefinition().getExtension().stream()

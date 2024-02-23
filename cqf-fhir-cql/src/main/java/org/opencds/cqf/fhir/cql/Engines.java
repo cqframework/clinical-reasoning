@@ -57,7 +57,8 @@ public class Engines {
             Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
-        var sources = Collections.singletonList(buildLibrarySource(repository));
+        var sources = new ArrayList<LibrarySourceProvider>();
+        sources.add(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
         var environment =

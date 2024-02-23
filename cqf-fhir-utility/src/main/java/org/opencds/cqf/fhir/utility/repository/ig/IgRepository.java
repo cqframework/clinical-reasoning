@@ -129,14 +129,6 @@ public class IgRepository implements Repository {
         this.parser = parserForEncoding(fhirContext, encodingEnum);
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
-        reportUnconventionalConventions(conventions);
-    }
-
-    private void reportUnconventionalConventions(IgConventions conventions) {
-        if (!conventions.equals(IgConventions.STANDARD) && !conventions.equals(IgConventions.FLAT)) {
-            LOG.warn(
-                    "Unconventional IG conventions detected.  Please ensure that the IG conforms to the expected structure.");
-        }
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {

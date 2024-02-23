@@ -229,10 +229,6 @@ public class CqlCommand implements Callable<Integer> {
 
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
-            if (contextValue != null && !path.endsWith(contextValue)) {
-                path = path.resolve(contextValue);
-            }
-
             data = new IgRepository(fhirContext, path.toString());
         }
 

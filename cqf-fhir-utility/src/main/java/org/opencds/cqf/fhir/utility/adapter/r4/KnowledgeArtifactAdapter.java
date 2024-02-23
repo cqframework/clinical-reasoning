@@ -45,6 +45,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
     }
 
     @Override
+    public void setApprovalDate(Date approvalDate) {
+        // do nothing
+    }
+
+    @Override
     public Period getEffectivePeriod() {
         return new Period();
     }

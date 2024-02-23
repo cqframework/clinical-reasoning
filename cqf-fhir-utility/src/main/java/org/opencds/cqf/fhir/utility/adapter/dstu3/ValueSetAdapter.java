@@ -109,18 +109,27 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
         return references;
     }
 
+    @Override
     public Date getApprovalDate() {
         return null;
     }
 
+    @Override
+    public void setApprovalDate(Date date) {
+        // do nothing;
+    }
+
+    @Override
     public ICompositeType getEffectivePeriod() {
         return new Period();
     }
 
+    @Override
     public List<? extends ICompositeType> getRelatedArtifact() {
         return new ArrayList<>();
     }
 
+    @Override
     public List<RelatedArtifact> getComponents() {
         return new ArrayList<>();
     }

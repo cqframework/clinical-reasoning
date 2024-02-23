@@ -102,7 +102,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
 
     @Override
     public Date getApprovalDate() {
-        return null;
+        return this.valueSet.getApprovalDate();
     }
 
     @Override
@@ -118,5 +118,10 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     @Override
     public List<RelatedArtifact> getComponents() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public void setApprovalDate(Date approvalDate) {
+        this.valueSet.setApprovalDate(approvalDate);
     }
 }

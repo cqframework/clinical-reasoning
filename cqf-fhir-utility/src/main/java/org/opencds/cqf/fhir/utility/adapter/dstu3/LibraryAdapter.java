@@ -150,15 +150,23 @@ class LibraryAdapter extends KnowledgeArtifactAdapter implements Dstu3LibraryAda
         return references;
     }
 
+    @Override
     public Date getApprovalDate() {
         return this.getLibrary().getApprovalDate();
     }
 
+    @Override
+    public void setApprovalDate(Date approvalDate) {
+        this.getLibrary().setApprovalDate(approvalDate);
+    }
+
+    @Override
     public Period getEffectivePeriod() {
         return this.getLibrary().getEffectivePeriod();
     }
     ;
 
+    @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return this.getLibrary().getRelatedArtifact();
     }

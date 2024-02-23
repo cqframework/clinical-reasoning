@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.Attachment;
@@ -17,4 +18,12 @@ public interface r5LibraryAdapter extends r5KnowledgeArtifactAdapter, IBaseLibra
     IBase accept(r5KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters);
 
     Library get();
+
+    default Date getApprovalDate() {
+        return this.get().getApprovalDate();
+    }
+
+    default void setApprovalDate(Date approvalDate) {
+        this.get().setApprovalDate(approvalDate);
+    }
 }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -84,7 +85,10 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     @Override
     public List<DependencyInfo> getDependencies() {
         List<DependencyInfo> references = new ArrayList<>();
-
+        final String referenceSource = this.getPlanDefinition().hasVersion()
+                ? this.getPlanDefinition().getUrl() + "|"
+                        + this.getPlanDefinition().getVersion()
+                : this.getPlanDefinition().getUrl();
         /*
          relatedArtifact[].resource
          library[]
@@ -107,12 +111,55 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
         // library[]
         List<CanonicalType> libraries = this.getPlanDefinition().getLibrary();
         for (CanonicalType ct : libraries) {
-            DependencyInfo dependency =
-                    new DependencyInfo(this.getPlanDefinition().getUrl(), ct.getValue(), ct.getExtension());
+            DependencyInfo dependency = new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension());
             references.add(dependency);
         }
-
-        // TODO: Complete retrieval from other elements (action etc.). Ideally use $data-requirements code
+        // action[]
+        this.planDefinition.getAction().forEach(action -> {
+            action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
+                // trigger[].dataRequirement[].profile[]
+                eventData.getProfile().forEach(profile -> {
+                    references.add(new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                });
+                // trigger[].dataRequirement[].codeFilter[].valueSet
+                eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
+                    references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                });
+            });
+            // condition[].expression.reference
+            action.getCondition().stream().filter(c -> c.hasExpression()).map(c -> c.getExpression()).filter(e -> e.hasReference()).forEach(expression -> {
+                references.add(
+                        new DependencyInfo(referenceSource, expression.getReference(), expression.getExtension()));
+            });
+            // dynamicValue[].expression.reference
+            action.getDynamicValue().stream().filter(dv -> dv.hasExpression()).map(dv -> dv.getExpression()).filter(e -> e.hasReference()).forEach(expression -> {
+                references.add(
+                        new DependencyInfo(referenceSource, expression.getReference(), expression.getExtension()));
+            });
+            Stream.concat(action.getInput().stream(), action.getOutput().stream())
+                    .forEach(inputOrOutput -> {
+                        // ..input[].profile[]
+                        // ..output[].profile[]
+                        inputOrOutput.getProfile().forEach(profile -> {
+                            references.add(
+                                    new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                        });
+                        // input[].codeFilter[].valueSet
+                        // output[].codeFilter[].valueSet
+                        inputOrOutput.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
+                            references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                        });
+                    });
+        });
+        this.getPlanDefinition().getExtension().stream()
+                .filter(ext -> ext.getUrl().contains("cpg-partOf"))
+                .filter(ext -> ext.hasValue())
+                .findAny()
+                .ifPresent(ext -> {
+                    references.add(new DependencyInfo(
+                            referenceSource, ((CanonicalType) ext.getValue()).getValue(), ext.getExtension()));
+                });
+        // TODO: Ideally use $data-requirements code
 
         return references;
     }

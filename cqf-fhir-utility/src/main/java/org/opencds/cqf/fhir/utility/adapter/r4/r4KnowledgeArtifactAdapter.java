@@ -71,9 +71,13 @@ public interface r4KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAdapte
     }
 
     default List<DependencyInfo> combineComponentsAndDependencies() {
+        final String referenceSource = get().hasVersion()
+        ? getUrl() + "|"
+                + getVersion()
+        : getUrl();
         return Stream.concat(
                         getComponents().stream()
-                                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, getUrl() + "|" + getVersion())),
+                                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource)),
                         getDependencies().stream())
                 .collect(Collectors.toList());
     }

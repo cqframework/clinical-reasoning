@@ -35,6 +35,8 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
 
     Date getApprovalDate();
 
+    void setApprovalDate(Date approvalDate);
+
     ICompositeType getEffectivePeriod();
 
     List<? extends ICompositeType> getRelatedArtifact();

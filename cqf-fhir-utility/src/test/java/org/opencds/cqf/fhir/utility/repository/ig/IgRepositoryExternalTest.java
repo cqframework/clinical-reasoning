@@ -193,6 +193,6 @@ public class IgRepositoryExternalTest {
         // Is external, should be marked
         id = Ids.newId(ValueSet.class, "789");
         vs = repository.read(ValueSet.class, id);
-        assertTrue((Boolean)vs.getUserData("isExternalResource"));
+        assertTrue((Boolean) vs.getUserData("isExternalResource"));
     }
 }

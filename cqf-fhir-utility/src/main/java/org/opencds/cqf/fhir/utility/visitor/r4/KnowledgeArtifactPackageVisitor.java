@@ -24,13 +24,11 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
@@ -249,29 +247,20 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
     }
 
     public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
+
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = planDefinition.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     private void findUnsupportedCapability(MetadataResource resource, List<String> capability)

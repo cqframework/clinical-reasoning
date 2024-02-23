@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -15,10 +15,8 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.MarkdownType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
@@ -110,31 +108,19 @@ public class KnowledgeArtifactApproveVisitor implements r4KnowledgeArtifactVisit
     }
 
     public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
-    //   public IBase visit(r4KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters){
-    //     return new OperationOutcome();
-    //   }
+
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = planDefinition.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -103,30 +103,20 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     }
 
     public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = planDefinition.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     private List<MetadataResource> createDraftsOfArtifactAndRelated(

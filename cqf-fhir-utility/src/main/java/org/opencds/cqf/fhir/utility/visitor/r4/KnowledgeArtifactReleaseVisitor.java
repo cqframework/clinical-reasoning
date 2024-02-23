@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -494,58 +493,28 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, Parameters operationParameters) {
-        List<DependencyInfo> dependencies = planDefinition.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(
             IBasePlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(ValueSetAdapter valueSet, Repository repository, Parameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(
             IBaseKnowledgeArtifactAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 
     public IBase visit(IBaseLibraryAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        List<DependencyInfo> dependencies = valueSet.getDependencies();
-        for (DependencyInfo dependency : dependencies) {
-            System.out.println(
-                    String.format("'%s' references '%s'", dependency.getReferenceSource(), dependency.getReference()));
-        }
-        return new OperationOutcome();
+        throw new NotImplementedOperationException("Not implemented");
     }
 }

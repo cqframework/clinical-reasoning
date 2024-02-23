@@ -53,7 +53,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
     public Period getEffectivePeriod() {
         return new Period();
     }
-    // How to ensure that we don't forget to override this one? All descendants should return something
+
     @Override
     public List<DependencyInfo> getDependencies() {
         return new ArrayList<>();
@@ -83,7 +83,6 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
     }
 
     public static Optional<MetadataResource> findLatestVersion(List<MetadataResource> resources) {
-        // Comparator<String> versionComparator = SemanticVersion.getVersionComparator();
         Comparator<String> versionComparator = (String v1, String v2) -> v1.compareTo(v2);
         MetadataResource latestResource = null;
 

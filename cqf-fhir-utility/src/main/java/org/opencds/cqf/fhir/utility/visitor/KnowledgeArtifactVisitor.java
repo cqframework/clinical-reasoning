@@ -9,13 +9,12 @@ import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 
 public interface KnowledgeArtifactVisitor {
-    //	void visit(ActivityDefinitionAdapter activityDefinition);
     IBase visit(
             IBaseKnowledgeArtifactAdapter knowledgeArtifact, Repository repository, IBaseParameters draftParameters);
 
     IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters);
 
     IBase visit(IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters draftParameters);
-    //  //	void visit(StructureDefinitionAdapter structureDefinition);
+
     IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters draftParameters);
 }

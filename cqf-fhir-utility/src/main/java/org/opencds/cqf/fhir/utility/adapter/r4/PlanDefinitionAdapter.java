@@ -29,6 +29,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
         this.planDefinition = planDefinition;
     }
 
+    @Override
     public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }
@@ -177,10 +178,12 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
         return references;
     }
 
+    @Override
     public Date getApprovalDate() {
         return this.getPlanDefinition().getApprovalDate();
     }
 
+    @Override
     public Period getEffectivePeriod() {
         return this.getPlanDefinition().getEffectivePeriod();
     }

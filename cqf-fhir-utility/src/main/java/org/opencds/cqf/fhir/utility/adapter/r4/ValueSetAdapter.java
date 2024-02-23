@@ -29,6 +29,7 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
         this.valueSet = valueSet;
     }
 
+    @Override
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }
@@ -116,10 +117,12 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
         return references;
     }
 
+    @Override
     public Date getApprovalDate() {
         return null;
     }
 
+    @Override
     public Period getEffectivePeriod() {
         return new Period();
     }

@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -587,88 +586,22 @@ public class IgRepository implements Repository {
     }
 
     @Override
-    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-            I id, P patchParameters, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'patch'");
-    }
-
-    @Override
-    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'link'");
-    }
-
-    @Override
-    public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'capabilities'");
-    }
-
-    @Override
-    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'transaction'");
-    }
-
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters> R invoke(
-            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
-    }
-
-    @Override
-    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
-    }
-
-    @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(null, resourceType.getSimpleName(), name, parameters, headers);
-    }
-
-    @Override
-    public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+        return invokeOperation(null, resourceType.getSimpleName(), name, parameters);
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(id, id.getResourceType(), name, parameters, headers);
-    }
-
-    @Override
-    public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-            I id, String name, P parameters, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'invoke'");
+        return invokeOperation(id, id.getResourceType(), name, parameters);
     }
 
     protected <R extends IBaseResource> R invokeOperation(
-            IIdType id,
-            String resourceType,
-            String operationName,
-            IBaseParameters parameters,
-            Map<String, String> headers) {
+            IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
         if (operationProvider == null) {
             throw new IllegalArgumentException("No operation provider found.  Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
-    }
-
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters> B history(
-            P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'history'");
-    }
-
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'history'");
-    }
-
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-            I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new UnsupportedOperationException("Unimplemented method 'history'");
     }
 }

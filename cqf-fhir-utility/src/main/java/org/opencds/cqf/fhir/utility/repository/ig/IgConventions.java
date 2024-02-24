@@ -105,7 +105,7 @@ public final class IgConventions {
 
         // Potential resource files are files that contain a "." and have a valid FHIR file extension.
         FilenameFilter resourceFileFilter = (dir, name) -> name.contains(".")
-                && IgRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.')));
+                && IgRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.') + 1));
         var potentialResourceFiles = typePath.toFile().listFiles(resourceFileFilter);
 
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.

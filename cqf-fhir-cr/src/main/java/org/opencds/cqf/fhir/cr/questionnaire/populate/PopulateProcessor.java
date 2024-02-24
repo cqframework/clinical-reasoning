@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class PopulateProcessor implements IPopulateProcessor {
     public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
         final String questionnaireId = request.getQuestionnaire().getIdElement().getIdPart() + "-"
                 + request.getSubjectId().getIdPart();
-        final IBaseResource populatedQuestionnaire = SerializationUtils.clone(request.getQuestionnaire());
+        final IBaseResource populatedQuestionnaire = Resources.clone(request.getQuestionnaire());
         request.getModelResolver().setValue(populatedQuestionnaire, "item", null);
         populatedQuestionnaire.setId(questionnaireId);
         request.getModelResolver()

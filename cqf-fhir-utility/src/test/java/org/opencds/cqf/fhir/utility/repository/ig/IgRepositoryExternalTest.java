@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -161,38 +160,30 @@ public class IgRepositoryExternalTest {
     }
 
     @Test
-    void externalResourceModificationFails() {
-        var p = new Patient().setId("XYZ");
-        p.setUserData("isExternalResource", Boolean.TRUE);
-        assertThrows(ForbiddenOperationException.class, () -> repository.create(p));
-        assertThrows(ForbiddenOperationException.class, () -> repository.update(p));
-    }
-
-    @Test
     void readExternalValueSet() {
         var id = Ids.newId(ValueSet.class, "789");
         var vs = repository.read(ValueSet.class, id);
         assertNotNull(vs);
         assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
+
+        // Should be tagged with its source path
+        var path = (Path) vs.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(path);
+        assertTrue(path.toFile().exists());
+        assertTrue(path.toString().contains("external"));
     }
 
     @Test
     void searchExternalValueSet() {
         var sets = repository.search(Bundle.class, ValueSet.class, Searches.byUrl("example.com/ValueSet/789"));
         assertNotNull(sets);
-        assertEquals(2, sets.getEntry().size());
+        assertEquals(1, sets.getEntry().size());
     }
 
     @Test
-    void externalResourcesAreMarked() {
-        // Not external, should not be marked
-        var id = Ids.newId(ValueSet.class, "456");
+    void updateExternalValueSetFails() {
+        var id = Ids.newId(ValueSet.class, "789");
         var vs = repository.read(ValueSet.class, id);
-        assertNull(vs.getUserData("isExternalResource"));
-
-        // Is external, should be marked
-        id = Ids.newId(ValueSet.class, "789");
-        vs = repository.read(ValueSet.class, id);
-        assertTrue((Boolean) vs.getUserData("isExternalResource"));
+        assertThrows(ForbiddenOperationException.class, () -> repository.update(vs));
     }
 }

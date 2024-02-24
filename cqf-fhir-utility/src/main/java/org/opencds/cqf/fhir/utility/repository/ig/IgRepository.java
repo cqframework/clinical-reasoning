@@ -40,6 +40,10 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
@@ -481,7 +485,7 @@ public class IgRepository implements Repository {
         // If the preferred path and the actual path are different, and the encoding behavior is set to overwrite,
         // move the resource to the preferred path and delete the old one.
         if (!preferred.equals(actual)
-                && this.encodingBehavior.preservationMode() == EncodingPreservationMode.OVERWRITE) {
+                && this.encodingBehavior.preserveEncoding() == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
             try {
                 java.nio.file.Files.deleteIfExists(actual);
             } catch (IOException e) {

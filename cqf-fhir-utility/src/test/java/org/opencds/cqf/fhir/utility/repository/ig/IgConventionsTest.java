@@ -10,6 +10,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 
 class IgConventionsTest {
 

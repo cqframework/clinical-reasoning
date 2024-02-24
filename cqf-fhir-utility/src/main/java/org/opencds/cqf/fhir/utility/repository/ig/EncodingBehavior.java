@@ -10,23 +10,32 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
  */
 public class EncodingBehavior {
 
+    /**
+     * When updating a resource, you can choose to preserve the original encoding of the resource
+     * or you can choose to overwrite the original encoding with the preferred encoding.
+     */
+    public enum PreserveEncoding {
+        PRESERVE_ORIGINAL_ENCODING,
+        OVERWRITE_WITH_PREFERRED_ENCODING
+    }
+
     public static final EncodingBehavior DEFAULT =
-            new EncodingBehavior(EncodingEnum.JSON, EncodingPreservationMode.PRESERVE);
+            new EncodingBehavior(EncodingEnum.JSON, PreserveEncoding.PRESERVE_ORIGINAL_ENCODING);
 
     private final EncodingEnum preferredEncoding;
-    private final EncodingPreservationMode preservationMode;
+    private final PreserveEncoding preserveEncoding;
 
-    public EncodingBehavior(EncodingEnum preferredEncoding, EncodingPreservationMode encodingPreservation) {
+    public EncodingBehavior(EncodingEnum preferredEncoding, PreserveEncoding preserveEncoding) {
         this.preferredEncoding = preferredEncoding;
-        this.preservationMode = encodingPreservation;
+        this.preserveEncoding = preserveEncoding;
     }
 
     EncodingEnum preferredEncoding() {
         return preferredEncoding;
     }
 
-    EncodingPreservationMode preservationMode() {
-        return preservationMode;
+    PreserveEncoding preserveEncoding() {
+        return preserveEncoding;
     }
 
     /**
@@ -42,6 +51,8 @@ public class EncodingBehavior {
         if (sourceEncoding == null) {
             return this.preferredEncoding;
         }
-        return preservationMode == EncodingPreservationMode.PRESERVE ? sourceEncoding : this.preferredEncoding;
+        return preserveEncoding == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING
+                ? sourceEncoding
+                : this.preferredEncoding;
     }
 }

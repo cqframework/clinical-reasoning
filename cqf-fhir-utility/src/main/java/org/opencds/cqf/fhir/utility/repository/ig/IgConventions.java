@@ -13,11 +13,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This enum represents the different file structures for an IG repository. The main differences between the
+ * This class represents the different file structures for an IG repository. The main differences between the
  * various configurations are whether or not the files are organized by resource type and/or category, and whether
  * or not the files are prefixed with the resource type.
  */
 public final class IgConventions {
+
+    /**
+     * Whether or not the files are organized by resource type.
+     */
+    public enum FhirTypeLayout {
+        DIRECTORY_PER_TYPE,
+        FLAT
+    }
+
+    /**
+     * Whether or not the resources are organized by category (tests, resources, vocabulary)
+     */
+    public enum CategoryLayout {
+        DIRECTORY_PER_CATEGORY,
+        FLAT
+    }
+
+    /**
+     * Whether or not the files are prefixed with the resource type.
+     */
+    public enum FilenameMode {
+        TYPE_AND_ID,
+        ID_ONLY
+    }
+
     public static final IgConventions FLAT =
             new IgConventions(FhirTypeLayout.FLAT, CategoryLayout.FLAT, FilenameMode.TYPE_AND_ID);
     public static final IgConventions STANDARD = new IgConventions(

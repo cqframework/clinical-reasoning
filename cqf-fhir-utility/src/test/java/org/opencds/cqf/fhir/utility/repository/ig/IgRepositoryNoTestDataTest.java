@@ -32,7 +32,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
  * This set of tests ensures that we can create new directories as needed if
  * they don't exist ahead of time
  */
-public class IgRepositoryNoTestDataTest {
+class IgRepositoryNoTestDataTest {
 
     private static Repository repository;
 
@@ -40,7 +40,7 @@ public class IgRepositoryNoTestDataTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/noTestData", tempDir);

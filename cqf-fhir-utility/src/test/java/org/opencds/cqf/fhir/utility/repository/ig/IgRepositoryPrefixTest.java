@@ -20,14 +20,18 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IgRepositoryPrefixTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class IgRepositoryPrefixTest {
 
     private static Repository repository;
 
@@ -35,7 +39,7 @@ public class IgRepositoryPrefixTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/directoryPerType/prefixed", tempDir);
@@ -199,6 +203,7 @@ public class IgRepositoryPrefixTest {
     }
 
     @Test
+    @Order(1) // Do this test first because it puts the filesystem (temporarily) in an invalid state
     void resourceMissingWhenCacheCleared() throws IOException {
         var id = new IdType("Library", "ToDelete");
         var lib = new Library().setIdElement(id);
@@ -223,5 +228,8 @@ public class IgRepositoryPrefixTest {
 
         // Try to read again, should be gone because it's not in the cache and the content is gone.
         assertThrows(ResourceNotFoundException.class, () -> repository.read(Library.class, id));
+
+        // Clean up so that we don't affect other tests
+        path.toFile().delete();
     }
 }

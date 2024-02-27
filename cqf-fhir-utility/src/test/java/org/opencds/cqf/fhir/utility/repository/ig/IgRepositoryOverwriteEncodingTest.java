@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 
-public class IgRepositoryOverwriteEncodingTest {
+class IgRepositoryOverwriteEncodingTest {
 
     private static Repository repository;
 
@@ -27,7 +27,7 @@ public class IgRepositoryOverwriteEncodingTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/mixedEncoding", tempDir);

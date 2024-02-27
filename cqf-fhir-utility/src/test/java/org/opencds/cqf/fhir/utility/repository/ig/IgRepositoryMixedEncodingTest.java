@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IgRepositoryMixedEncodingTest {
+class IgRepositoryMixedEncodingTest {
 
     private static Repository repository;
 
@@ -34,7 +34,7 @@ public class IgRepositoryMixedEncodingTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/mixedEncoding", tempDir);

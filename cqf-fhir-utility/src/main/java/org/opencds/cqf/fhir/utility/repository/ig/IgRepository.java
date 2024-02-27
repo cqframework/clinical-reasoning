@@ -103,17 +103,6 @@ public class IgRepository implements Repository {
      * @param fhirContext
      * @param root
      */
-    public IgRepository(FhirContext fhirContext, String root) {
-        this(fhirContext, Paths.get(root));
-    }
-
-    /**
-     * Create a new IGRepository instance. The repository configuration is
-     * auto-detected, and the encoding is set to JSON.
-     *
-     * @param fhirContext
-     * @param root
-     */
     public IgRepository(FhirContext fhirContext, Path root) {
         this(fhirContext, root, IgConventions.autoDetect(root), EncodingBehavior.DEFAULT, null);
     }

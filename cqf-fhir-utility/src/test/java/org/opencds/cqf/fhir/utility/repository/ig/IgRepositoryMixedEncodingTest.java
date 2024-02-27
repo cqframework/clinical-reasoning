@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IgRepositoryDirectoryTest {
+public class IgRepositoryMixedEncodingTest {
 
     private static Repository repository;
 
@@ -37,7 +37,7 @@ public class IgRepositoryDirectoryTest {
     public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
-        Resources.copyFromJar("/sampleIgs/directoryPerType/standard", tempDir);
+        Resources.copyFromJar("/sampleIgs/mixedEncoding", tempDir);
         repository = new IgRepository(FhirContext.forR4Cached(), tempDir);
     }
 
@@ -60,12 +60,12 @@ public class IgRepositoryDirectoryTest {
         var libs = repository.search(Bundle.class, Library.class, Searches.ALL);
 
         assertNotNull(libs);
-        assertEquals(2, libs.getEntry().size());
+        assertEquals(1, libs.getEntry().size());
     }
 
     @Test
     void searchLibraryWithFilter() {
-        var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/Library/Test"));
+        var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/Library/123"));
 
         assertNotNull(libs);
         assertEquals(1, libs.getEntry().size());
@@ -76,23 +76,6 @@ public class IgRepositoryDirectoryTest {
         var libs = repository.search(Bundle.class, Library.class, Searches.byUrl("not-exists"));
         assertNotNull(libs);
         assertEquals(0, libs.getEntry().size());
-    }
-
-    @Test
-    void readPatient() {
-        var id = Ids.newId(Patient.class, "ABC");
-        var cond = repository.read(Patient.class, id);
-
-        assertNotNull(cond);
-        assertEquals(id.getIdPart(), cond.getIdElement().getIdPart());
-    }
-
-    @Test
-    void searchCondition() {
-        var cons = repository.search(
-                Bundle.class, Condition.class, Searches.byCodeAndSystem("12345", "example.com/codesystem"));
-        assertNotNull(cons);
-        assertEquals(2, cons.getEntry().size());
     }
 
     @Test
@@ -109,6 +92,13 @@ public class IgRepositoryDirectoryTest {
         var sets = repository.search(Bundle.class, ValueSet.class, Searches.byUrl("example.com/ValueSet/456"));
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());
+    }
+
+    @Test
+    void searchWithExternalValueSet() {
+        var sets = repository.search(Bundle.class, ValueSet.class, Searches.ALL);
+        assertNotNull(sets);
+        assertEquals(2, sets.getEntry().size());
     }
 
     @Test
@@ -157,20 +147,6 @@ public class IgRepositoryDirectoryTest {
     }
 
     @Test
-    void updatePatient() {
-        var id = Ids.newId(Patient.class, "ABC");
-        var p = repository.read(Patient.class, id);
-        assertFalse(p.hasActive());
-
-        p.setActive(true);
-        repository.update(p);
-
-        var updated = repository.read(Patient.class, id);
-        assertTrue(updated.hasActive());
-        assertTrue(updated.getActive());
-    }
-
-    @Test
     void deleteNonExistentPatient() {
         var id = Ids.newId(Patient.class, "DoesNotExist");
         assertThrows(ResourceNotFoundException.class, () -> repository.delete(Patient.class, id));
@@ -181,5 +157,33 @@ public class IgRepositoryDirectoryTest {
         var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());
+    }
+
+    @Test
+    void readExternalValueSet() {
+        var id = Ids.newId(ValueSet.class, "789");
+        var vs = repository.read(ValueSet.class, id);
+        assertNotNull(vs);
+        assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
+
+        // Should be tagged with its source path
+        var path = (Path) vs.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(path);
+        assertTrue(path.toFile().exists());
+        assertTrue(path.toString().contains("external"));
+    }
+
+    @Test
+    void searchExternalValueSet() {
+        var sets = repository.search(Bundle.class, ValueSet.class, Searches.byUrl("example.com/ValueSet/789"));
+        assertNotNull(sets);
+        assertEquals(1, sets.getEntry().size());
+    }
+
+    @Test
+    void updateExternalValueSetFails() {
+        var id = Ids.newId(ValueSet.class, "789");
+        var vs = repository.read(ValueSet.class, id);
+        assertThrows(ForbiddenOperationException.class, () -> repository.update(vs));
     }
 }

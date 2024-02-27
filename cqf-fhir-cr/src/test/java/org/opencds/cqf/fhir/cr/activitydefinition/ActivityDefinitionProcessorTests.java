@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.nio.file.Paths;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -37,7 +38,7 @@ public class ActivityDefinitionProcessorTests {
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
-                getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version);
+                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version));
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

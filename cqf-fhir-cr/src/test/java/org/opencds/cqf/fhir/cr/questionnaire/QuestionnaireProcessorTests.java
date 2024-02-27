@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -24,12 +25,12 @@ public class QuestionnaireProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final Repository repositoryDstu3 =
-            new IgRepository(fhirContextDstu3, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3");
+    private final Repository repositoryDstu3 = new IgRepository(
+            fhirContextDstu3, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3"));
     private final Repository repositoryR4 =
-            new IgRepository(fhirContextR4, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4");
+            new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
     private final Repository repositoryR5 =
-            new IgRepository(fhirContextR5, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5");
+            new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
     @Test
     void testPrePopulateDstu3() {

@@ -38,7 +38,7 @@ public class IgRepositoryFlatNoTypeNamesTest {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/flatNoTypeNames", tempDir);
-        repository = new IgRepository(FhirContext.forR4Cached(), tempDir.toString());
+        repository = new IgRepository(FhirContext.forR4Cached(), tempDir);
     }
 
     @Test

@@ -741,6 +741,66 @@ public class ArtifactAssessment extends Basic {
         }
     }
 
+    public static class ArtifactAssessmentWorkflowStatusEnumFactory implements EnumFactory<ArtifactAssessmentWorkflowStatus> {
+        public ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws IllegalArgumentException {
+            if (codeString == null || "".equals(codeString))
+                if (codeString == null || "".equals(codeString)) return null;
+            if ("submitted".equals(codeString)) return ArtifactAssessmentWorkflowStatus.SUBMITTED;
+            if ("triaged".equals(codeString)) return ArtifactAssessmentWorkflowStatus.TRIAGED;
+            if ("waiting-for-input".equals(codeString)) return ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT;
+            if ("resolved-no-change".equals(codeString)) return ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE;
+            if ("resolved-change-required".equals(codeString)) return ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED;
+            if ("deferred".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DEFERRED;
+            if ("duplicate".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DUPLICATE;
+            if ("applied".equals(codeString)) return ArtifactAssessmentWorkflowStatus.APPLIED;
+            if ("published".equals(codeString)) return ArtifactAssessmentWorkflowStatus.PUBLISHED;
+            else throw new IllegalArgumentException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+        }
+
+        public Enumeration<ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
+            if (code == null) return null;
+            if (code.isEmpty()) return new Enumeration<ArtifactAssessmentWorkflowStatus>(this);
+            String codeString = ((PrimitiveType) code).asStringValue();
+            if (codeString == null || "".equals(codeString)) return null;
+            if ("submitted".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.SUBMITTED);
+            if ("triaged".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.TRIAGED);
+            if ("waiting-for-input".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT);
+            if ("resolved-no-change".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE);
+            if ("resolved-change-required".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED);
+            if ("deferred".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.DEFERRED);
+            if ("duplicate".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.DUPLICATE);
+            if ("applied".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.APPLIED);
+            if ("published".equals(codeString))
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.PUBLISHED);
+            throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+        }
+
+        public String toCode(ArtifactAssessmentWorkflowStatus code) {
+            if (code == ArtifactAssessmentWorkflowStatus.SUBMITTED) return "submitted";
+            if (code == ArtifactAssessmentWorkflowStatus.TRIAGED) return "triaged";
+            if (code == ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT) return "waiting-for-input";
+            if (code == ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE) return "resolved-no-change";
+            if (code == ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED) return "resolved-change-required";
+            if (code == ArtifactAssessmentWorkflowStatus.DEFERRED) return "deferred";
+            if (code == ArtifactAssessmentWorkflowStatus.DUPLICATE) return "duplicate";
+            if (code == ArtifactAssessmentWorkflowStatus.APPLIED) return "applied";
+            if (code == ArtifactAssessmentWorkflowStatus.PUBLISHED) return "published";
+            return "?";
+        }
+
+        public String toSystem(ArtifactAssessmentWorkflowStatus code) {
+            return code.getSystem();
+        }
+    }
+
     public enum ArtifactAssessmentDisposition {
         /**
          * The comment is unresolved

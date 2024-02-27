@@ -20,10 +20,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -227,8 +225,9 @@ public class IgRepository implements Repository {
 
             // Attach metadata to the resource
             resource.setUserData(SOURCE_PATH_TAG, path);
+            CqlContent.loadCqlContent(resource, path.getParent()); // Use the directory as the root, not the filename
 
-            return Optional.of(handleLibrary(resource, path.toString()));
+            return Optional.of(resource);
         } catch (FileNotFoundException e) {
             return Optional.empty();
         } catch (DataFormatException e) {
@@ -241,50 +240,6 @@ public class IgRepository implements Repository {
 
     protected Optional<IBaseResource> cachedReadResource(Path path) {
         return this.resourceCache.computeIfAbsent(path, this::readResource);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T extends IBaseResource> T handleLibrary(T resource, String location) {
-        if (!"Library".equals(resource.fhirType())) {
-            return resource;
-        }
-
-        String cqlLocation;
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                cqlLocation = org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil.getCqlLocation(resource);
-                if (cqlLocation != null) {
-                    resource = (T) org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil.addData(
-                            resource, getCqlContent(location, cqlLocation));
-                }
-                break;
-            case R4:
-                cqlLocation = org.opencds.cqf.fhir.utility.r4.AttachmentUtil.getCqlLocation(resource);
-                if (cqlLocation != null) {
-                    resource = (T) org.opencds.cqf.fhir.utility.r4.AttachmentUtil.addData(
-                            resource, getCqlContent(location, cqlLocation));
-                }
-                break;
-            case R5:
-                cqlLocation = org.opencds.cqf.fhir.utility.r5.AttachmentUtil.getCqlLocation(resource);
-                if (cqlLocation != null) {
-                    resource = (T) org.opencds.cqf.fhir.utility.r5.AttachmentUtil.addData(
-                            resource, getCqlContent(location, cqlLocation));
-                }
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported FHIR version: %s", fhirContext));
-        }
-        return resource;
-    }
-
-    protected String getCqlContent(String rootPath, String relativePath) {
-        var path = Paths.get(rootPath).getParent().resolve(relativePath).normalize();
-        try {
-            return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ResourceNotFoundException(String.format("Unable to read CQL content from path: %s", path));
-        }
     }
 
     protected EncodingEnum encodingForPath(Path path) {

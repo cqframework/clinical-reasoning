@@ -37,22 +37,4 @@ public class EncodingBehavior {
     PreserveEncoding preserveEncoding() {
         return preserveEncoding;
     }
-
-    /**
-     * This method will return the encoding that should be used when writing a resource. If the sourceEncoding
-     * is null, then the preferredEncoding will be returned. If the preservationMode is set to PRESERVE, then the
-     * sourceEncoding will be returned. If the preservationMode is set to OVERWRITE, then the preferredEncoding will
-     * be returned.
-     *
-     * @param sourceEncoding the original encoding of the resource
-     * @return the encoding that should be used when writing the resource
-     */
-    EncodingEnum encodingFor(EncodingEnum sourceEncoding) {
-        if (sourceEncoding == null) {
-            return this.preferredEncoding;
-        }
-        return preserveEncoding == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING
-                ? sourceEncoding
-                : this.preferredEncoding;
-    }
 }

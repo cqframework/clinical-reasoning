@@ -1577,15 +1577,8 @@ public class ArtifactAssessment extends Basic {
             @ca.uhn.fhir.model.api.annotation.Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-rating")
             protected CodeableConcept value;
 
-            private Extension setValue(CodeableConcept value) {
-                this.value = value;
-                return this;
-            }
-            ;
-
             public ArtifactAssessmentContentClassifierExtension(CodeableConcept classifierConcept) {
-                super(CLASSIFIER);
-                this.setValue(classifierConcept);
+                super(CLASSIFIER, classifierConcept);
             }
         }
 

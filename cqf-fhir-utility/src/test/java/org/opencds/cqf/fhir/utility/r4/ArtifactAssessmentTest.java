@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -172,7 +173,23 @@ public class ArtifactAssessmentTest {
         Optional<Extension> contentTypeExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.TYPE));
         assertTrue(contentTypeExtension.isPresent());
         assertTrue(((CodeableConcept)contentTypeExtension.get().getValue()).equals(type));
-        
+        var freeToShare = new BooleanType(true);
+        contentExtension.setFreeToShareExtension(freeToShare);
+        Optional<Extension> contentFreeToShareExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.FREETOSHARE));
+        assertTrue(contentFreeToShareExtension.isPresent());
+        assertTrue(((BooleanType)contentFreeToShareExtension.get().getValue()).equals(freeToShare));
+        var classifierCoding = new Coding("http://hl7.org/fhir/ValueSet/certainty-type", "LargeEffect", "higher certainty due to large effect size");
+        var classifer = new CodeableConcept();
+        classifer.addCoding(classifierCoding);
+        contentExtension.addClassifierExtension(classifer);
+        Optional<Extension> contentClassifierExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.CLASSIFIER));
+        assertTrue(contentClassifierExtension.isPresent());
+        assertTrue(((CodeableConcept)contentClassifierExtension.get().getValue()).equals(classifer));
+        var path = new UriType("path/test/thing");
+        contentExtension.addPathExtension(path);
+        Optional<Extension> contentPathExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.PATH));
+        assertTrue(contentPathExtension.isPresent());
+        assertTrue(((UriType)contentPathExtension.get().getValue()).equals(path));
         
         var derivedFrom = new CanonicalType("Library/derived-from");
         artifactAssessment.setDerivedFromContentRelatedArtifact(derivedFrom);

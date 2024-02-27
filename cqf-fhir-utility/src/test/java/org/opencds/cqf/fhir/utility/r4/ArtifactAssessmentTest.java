@@ -7,16 +7,24 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentExtension;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationTypeEnumFactory;
+import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDisposition;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatus;
 
 public class ArtifactAssessmentTest {
@@ -130,5 +138,46 @@ public class ArtifactAssessmentTest {
         workflowStatus.setValue(workflowStatusCode);
         artifactAssessment.setArtifactAssessmentWorkflowStatusExtension(workflowStatus);
         assertTrue(((Enumeration<ArtifactAssessmentWorkflowStatus>)artifactAssessment.getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS).getValue()).getValue().equals(workflowStatusCode));
+        var dispositionCode = ArtifactAssessmentDisposition.PERSUASIVE;
+        var disposition = new Enumeration<ArtifactAssessmentDisposition>(new ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory());
+        disposition.setValue(dispositionCode);
+        artifactAssessment.setArtifactAssessmentDispositionExtension(disposition);
+        assertTrue(((Enumeration<ArtifactAssessmentDisposition>)artifactAssessment.getExtensionByUrl(ArtifactAssessment.DISPOSITION).getValue()).getValue().equals(dispositionCode));
+        var contentExtension = artifactAssessment.new ArtifactAssessmentContentExtension();
+        artifactAssessment.addExtension(contentExtension);
+        var authorReference = new Reference("Practitioner/author");
+        contentExtension.setAuthorExtension(authorReference);
+        Optional<Extension> contentAuthorExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.AUTHOR));
+        assertTrue(contentAuthorExtension.isPresent());
+        assertTrue(((Reference)contentAuthorExtension.get().getValue()).equals(authorReference));
+        var summary = new MarkdownType("summary");
+        contentExtension.setSummary(summary);
+        Optional<Extension> contentSummaryExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.SUMMARY));
+        assertTrue(contentSummaryExtension.isPresent());
+        assertTrue(((MarkdownType)contentSummaryExtension.get().getValue()).equals(summary));
+        var relatedArtifactCanonical = new CanonicalType("canonical");
+        contentExtension.addRelatedArtifact(relatedArtifactCanonical, RelatedArtifactType.CITATION);
+        Optional<Extension> contentRelatedArtifactExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.RELATEDARTIFACT));
+        assertTrue(contentRelatedArtifactExtension.isPresent());
+        assertTrue(((RelatedArtifact)contentRelatedArtifactExtension.get().getValue()).getResourceElement().equals(relatedArtifactCanonical));
+        var quantity = new Quantity(4);
+        contentExtension.setQuantityExtension(quantity);
+        Optional<Extension> contentQuantityExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.QUANTITY));
+        assertTrue(contentQuantityExtension.isPresent());
+        assertTrue(((Quantity)contentQuantityExtension.get().getValue()).equals(quantity));
+        var typeCoding = new Coding("http://hl7.org/fhir/ValueSet/certainty-type", "LargeEffect", "higher certainty due to large effect size");
+        var type = new CodeableConcept();
+        type.addCoding(typeCoding);
+        contentExtension.setTypeExtension(type);
+        Optional<Extension> contentTypeExtension = Optional.of(artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT)).map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.TYPE));
+        assertTrue(contentTypeExtension.isPresent());
+        assertTrue(((CodeableConcept)contentTypeExtension.get().getValue()).equals(type));
+        
+        
+        var derivedFrom = new CanonicalType("Library/derived-from");
+        artifactAssessment.setDerivedFromContentRelatedArtifact(derivedFrom);
+        var derivedFromContentRelatedArtifact = artifactAssessment.getDerivedFromContentRelatedArtifact();
+        assertTrue(derivedFromContentRelatedArtifact.isPresent());
+        assertTrue(derivedFromContentRelatedArtifact.get().getResourceElement().equals(derivedFrom));
     }
 }

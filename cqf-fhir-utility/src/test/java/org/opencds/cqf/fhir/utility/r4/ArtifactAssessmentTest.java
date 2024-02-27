@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Extension;
@@ -22,9 +21,9 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentClassifier;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentExtension;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
-import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationTypeEnumFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDisposition;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatus;
 
@@ -78,6 +77,98 @@ public class ArtifactAssessmentTest {
             invalidCodeException = e.getMessage();
         }
         assertTrue(invalidCodeException.contains("Unknown"));
+        // reset
+        invalidCodeException = "";
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("high");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("moderate");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("low");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("no-concern");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("serious-concern");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("very-serious-concern");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("extremely-serious-concern");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("present");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("absent");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("no-change");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("downcode1");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("downcode2");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("downcode3");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("upcode1");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
+        try {
+            ArtifactAssessmentContentClassifier.fromCode("upcode2");
+        } catch (FHIRException e) {
+            invalidCodeException = e.getMessage();
+        }
+        assertTrue(invalidCodeException.equals(""));
     }
     @Test
     void test_valid_comment() {

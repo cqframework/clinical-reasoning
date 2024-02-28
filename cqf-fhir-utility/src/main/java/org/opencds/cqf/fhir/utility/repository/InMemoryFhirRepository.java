@@ -84,7 +84,7 @@ public class InMemoryFhirRepository implements Repository {
             theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
-        MethodOutcome outcome = new MethodOutcome(theId, true);
+        var outcome = new MethodOutcome(theId, true);
         resources.put(theId.toUnqualifiedVersionless(), resource);
         return outcome;
     }
@@ -99,7 +99,7 @@ public class InMemoryFhirRepository implements Repository {
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = resource.getIdElement().toUnqualifiedVersionless();
-        MethodOutcome outcome = new MethodOutcome(theId, false);
+        var outcome = new MethodOutcome(theId, false);
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }

@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
+import org.opencds.cqf.fhir.utility.r4.RepositoryHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class KnowledgeArtifactApproveVisitorTest {
@@ -52,7 +53,7 @@ public class KnowledgeArtifactApproveVisitorTest {
                     @Override
                     public Bundle answer(InvocationOnMock a) throws Throwable {
                         Bundle b = a.getArgument(0);
-                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
+                        return RepositoryHelper.transactionStub(b, spyRepository);
                     }
                 })
                 .when(spyRepository)

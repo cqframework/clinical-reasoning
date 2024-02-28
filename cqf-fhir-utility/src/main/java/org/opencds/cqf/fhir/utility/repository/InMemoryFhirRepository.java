@@ -198,28 +198,6 @@ public class InMemoryFhirRepository implements Repository {
         throw new NotImplementedException("The transaction operation is not currently supported");
     }
 
-    public static Bundle transactionStub(Bundle transaction, Repository repository) {
-        Bundle returnBundle = new Bundle();
-        transaction.getEntry().stream().forEach((e) -> {
-            HTTPVerb v = e.getRequest().getMethod();
-            BundleEntryComponent entry = new BundleEntryComponent();
-            BundleEntryResponseComponent resp = new BundleEntryResponseComponent();
-            entry.setResponse(resp);
-            if (v == HTTPVerb.PUT) {
-                MethodOutcome outcome = repository.update(e.getResource());
-                String location = outcome.getId().getValue();
-                resp.setLocation(location);
-                returnBundle.addEntry(entry);
-            } else if (v == HTTPVerb.POST) {
-                MethodOutcome outcome = repository.create(e.getResource());
-                String location = outcome.getId().getValue();
-                resp.setLocation(location);
-                returnBundle.addEntry(entry);
-            }
-        });
-        return returnBundle;
-    }
-
     @Override
     public <R extends IBaseResource, P extends IBaseParameters> R invoke(
             String name, P parameters, Class<R> returnType, Map<String, String> headers) {

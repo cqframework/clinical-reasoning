@@ -48,6 +48,12 @@
             <optional>true</optional>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-caching-caffeine</artifactId>
+            <version>${hapi.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- NPM Packaging Dependencies -->
         <dependency>

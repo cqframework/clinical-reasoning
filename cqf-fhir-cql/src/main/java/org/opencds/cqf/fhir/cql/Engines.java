@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,8 @@ public class Engines {
             Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
-        var sources = Collections.singletonList(buildLibrarySource(repository));
+        var sources = new ArrayList<LibrarySourceProvider>();
+        sources.add(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
         var environment =

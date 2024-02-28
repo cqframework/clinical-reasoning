@@ -10,17 +10,20 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.Resources;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IgRepositoryBadDataTest {
+class IgRepositoryBadDataTest {
 
     private static Repository repository;
 
@@ -28,11 +31,11 @@ public class IgRepositoryBadDataTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/badData", tempDir);
-        repository = new IgRepository(FhirContext.forR4Cached(), tempDir.toString());
+        repository = new IgRepository(FhirContext.forR4Cached(), tempDir);
     }
 
     @ParameterizedTest
@@ -40,6 +43,19 @@ public class IgRepositoryBadDataTest {
     void readInvalidContentThrowsException(IIdType id, String errorMessage) {
         var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
         assertTrue(e.getMessage().contains(errorMessage));
+    }
+
+    @Test
+    void nonFhirFilesAreIgnored() {
+        var id = new IdType("Patient/NotAFhirFile");
+        assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
+    }
+
+    @Test
+    void searchThrowsBecauseOfInvalidContent() {
+        var e = assertThrows(
+                ResourceNotFoundException.class, () -> repository.search(Bundle.class, Patient.class, Searches.ALL));
+        assertTrue(e.getMessage().contains("Found empty or invalid content"));
     }
 
     private static Stream<Arguments> invalidContentTestData() {

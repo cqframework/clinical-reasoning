@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
@@ -7,12 +8,14 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.packages.PackageProcessor;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -24,14 +27,16 @@ public class PlanDefinitionProcessorTests {
 
     @Test
     void testDefaultSettings() {
-        var repository = new IgRepository(fhirContextR4, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4");
+        var repository =
+                new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new PlanDefinitionProcessor(repository);
         assertNotNull(processor.evaluationSettings());
     }
 
     @Test
     void testProcessor() {
-        var repository = new IgRepository(fhirContextR5, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5");
+        var repository =
+                new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
@@ -150,8 +155,8 @@ public class PlanDefinitionProcessorTests {
         var planDefinitionId = "ANCDT17";
         var patientId = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterId = "Encounter/helloworld-patient-1-encounter-1";
-        var repository =
-                new IgRepository(fhirContextR4, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/anc-dak");
+        var repository = new IgRepository(
+                fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/anc-dak"));
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
                 org.opencds.cqf.fhir.utility.r4.Parameters.part("encounter", "helloworld-patient-1-encounter-1"));
         given().repository(repository)
@@ -273,6 +278,24 @@ public class PlanDefinitionProcessorTests {
                 .terminology(content)
                 .thenApplyR5()
                 .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
+    }
+
+    @Test
+    void testMultipleActionsUsingSameActivity() {
+        var planDefinitionID = "multi-action-activity";
+        var patientID = "OPA-Patient1";
+        var result = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .thenApplyR5()
+                .generatedBundle;
+        var resources = BundleHelper.getEntryResources(result);
+        var resource1 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(1);
+        var resource2 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(2);
+        assertNotNull(resource1);
+        assertNotNull(resource2);
+        assertFalse(resource1.getId().equals(resource2.getId()));
     }
 
     @Test

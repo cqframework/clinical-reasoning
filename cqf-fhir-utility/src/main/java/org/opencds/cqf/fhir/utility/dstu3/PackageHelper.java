@@ -158,11 +158,17 @@ public class PackageHelper {
             request.setMethod(HTTPVerb.PUT).setUrl(resourceType + "/" + resource.getIdPart());
         } else {
             request.setMethod(HTTPVerb.POST).setUrl(resourceType);
-            if (hasUrl(resource)) {
-                var url = getUrl(resource);
-                if (hasVersion(resource)) {
+        }
+        if (hasUrl(resource)) {
+            var url = getUrl(resource);
+            if (hasVersion(resource)) {
+                entry.setFullUrl(url + "|" + getVersion(resource));
+                if (!isPut) {
                     request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(resource)));
-                } else {
+                }
+            } else {
+                entry.setFullUrl(url);
+                if (!isPut) {
                     request.setIfNoneExist(String.format("url=%s", url));
                 }
             }

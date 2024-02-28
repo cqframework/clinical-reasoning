@@ -58,4 +58,17 @@ public class Resources {
 
         return backboneElement;
     }
+
+    /**
+     * Deep clone a resource with the FhirTerser
+     *
+     * @param <T> the resource type
+     * @param resource the resource to clone
+     * @return the cloned resource
+     */
+    public static <T extends IBaseResource> T clone(T resource) {
+        checkNotNull(resource);
+        var terser = resource.getStructureFhirVersionEnum().newContextCached().newTerser();
+        return terser.clone(resource);
+    }
 }

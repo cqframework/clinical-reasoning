@@ -2,12 +2,14 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,7 +57,7 @@ public class TestQuestionnaire {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
+                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -348,6 +350,17 @@ public class TestQuestionnaire {
                     .collect(Collectors.toList());
             for (var item : matchingItems) {
                 assertFalse(request.resolvePathList(item, "answer").isEmpty());
+            }
+
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasAuthorExt(String theLinkId) {
+            var matchingItems = items.stream()
+                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
+                    .collect(Collectors.toList());
+            for (var item : matchingItems) {
+                assertNotNull(request.getExtensionByUrl(item, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
             }
 
             return this;

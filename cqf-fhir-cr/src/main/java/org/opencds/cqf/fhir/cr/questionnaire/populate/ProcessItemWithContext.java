@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -16,14 +18,14 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 
-public class ProcessItemWithExtension {
+public class ProcessItemWithContext {
     private final ExpressionProcessor expressionProcessor;
 
-    public ProcessItemWithExtension() {
+    public ProcessItemWithContext() {
         this(new ExpressionProcessor());
     }
 
-    private ProcessItemWithExtension(ExpressionProcessor expressionProcessor) {
+    private ProcessItemWithContext(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 
@@ -59,6 +61,14 @@ public class ProcessItemWithExtension {
                 .split("\\.")[1]
                 .replace("[x]", "");
         final var initialValue = request.getModelResolver().resolvePath(context, path);
+        if (initialValue != null) {
+            request.getModelResolver()
+                    .setValue(
+                            populatedItem,
+                            "extension",
+                            Collections.singletonList(buildReferenceExt(
+                                    request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION, false)));
+        }
         if (initialValue instanceof IBase) {
             request.getModelResolver()
                     .setValue(

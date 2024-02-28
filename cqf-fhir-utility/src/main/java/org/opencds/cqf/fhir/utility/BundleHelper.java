@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -134,11 +133,20 @@ public class BundleHelper {
     public static boolean getEntryRequestIsPut(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
         switch (fhirVersion) {
             case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
+                        .isPresent();
             case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                        .isPresent();
             case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.PUT).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.PUT)
+                        .isPresent();
 
             default:
                 throw new IllegalArgumentException(
@@ -156,11 +164,20 @@ public class BundleHelper {
     public static boolean getEntryRequestIsPost(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
         switch (fhirVersion) {
             case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.POST).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.POST)
+                        .isPresent();
             case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
+                        .isPresent();
             case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest()).map(r -> r.getMethod()).filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.POST).isPresent();
+                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(r -> r.getMethod())
+                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.POST)
+                        .isPresent();
 
             default:
                 throw new IllegalArgumentException(
@@ -308,7 +325,8 @@ public class BundleHelper {
      * @param response
      * @return
      */
-    public static IBaseBackboneElement newEntryWithResponse(FhirVersionEnum fhirVersion, IBaseBackboneElement response) {
+    public static IBaseBackboneElement newEntryWithResponse(
+            FhirVersionEnum fhirVersion, IBaseBackboneElement response) {
         switch (fhirVersion) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
@@ -335,14 +353,11 @@ public class BundleHelper {
     public static IBaseBackboneElement newResponseWithLocation(FhirVersionEnum fhirVersion, String location) {
         switch (fhirVersion) {
             case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent()
-                        .setLocation(location);
+                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent().setLocation(location);
             case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent()
-                    .setLocation(location);
-                case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent()
-                    .setLocation(location);
+                return new org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent().setLocation(location);
+            case R5:
+                return new org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent().setLocation(location);
 
             default:
                 throw new IllegalArgumentException(

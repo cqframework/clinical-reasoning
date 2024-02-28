@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository;
 
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -7,9 +9,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
-
-import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,10 +22,6 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -209,11 +204,17 @@ public class InMemoryFhirRepository implements Repository {
             if (BundleHelper.getEntryRequestIsPut(version, e)) {
                 var outcome = repository.update(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
-                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResponse(version, BundleHelper.newResponseWithLocation(version, location)));
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.getEntryRequestIsPost(version, e)) {
                 var outcome = repository.create(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
-                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResponse(version, BundleHelper.newResponseWithLocation(version, location)));
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
             }
         });
         return returnBundle;

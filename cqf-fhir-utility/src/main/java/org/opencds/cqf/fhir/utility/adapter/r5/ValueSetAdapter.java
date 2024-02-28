@@ -11,8 +11,9 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
@@ -73,8 +74,8 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
-        List<DependencyInfo> references = new ArrayList<>();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = this.getValueSet().hasVersion()
                 ? this.getValueSet().getUrl() + "|" + this.getValueSet().getVersion()
                 : this.getValueSet().getUrl();

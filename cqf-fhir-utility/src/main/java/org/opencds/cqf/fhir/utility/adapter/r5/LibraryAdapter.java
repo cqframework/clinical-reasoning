@@ -14,8 +14,9 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.r5.r5KnowledgeArtifactVisitor;
 
 public class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter {
@@ -104,8 +105,8 @@ public class LibraryAdapter extends ResourceAdapter implements r5LibraryAdapter 
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
-        List<DependencyInfo> retval = new ArrayList<DependencyInfo>();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> retval = new ArrayList<IDependencyInfo>();
         final String source = this.getUrl();
         this.getRelatedArtifactsOfType(RelatedArtifactType.DEPENDSON).stream()
                 .filter(ra -> ra.hasResource())

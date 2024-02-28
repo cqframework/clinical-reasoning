@@ -10,8 +10,9 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
 
 public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r4PlanDefinitionAdapter {
@@ -84,8 +85,8 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
-        List<DependencyInfo> references = new ArrayList<>();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = this.getPlanDefinition().hasVersion()
                 ? this.getPlanDefinition().getUrl() + "|"
                         + this.getPlanDefinition().getVersion()

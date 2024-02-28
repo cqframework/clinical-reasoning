@@ -7,8 +7,9 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public interface r4KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAdapter {
     MetadataResource get();
@@ -70,7 +71,7 @@ public interface r4KnowledgeArtifactAdapter extends IBaseKnowledgeArtifactAdapte
         return relatedArtifacts;
     }
 
-    default List<DependencyInfo> combineComponentsAndDependencies() {
+    default List<IDependencyInfo> combineComponentsAndDependencies() {
         final String referenceSource = get().hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
         return Stream.concat(
                         getComponents().stream().map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource)),

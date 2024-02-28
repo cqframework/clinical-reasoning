@@ -14,8 +14,9 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.dstu3.dstu3KnowledgeArtifactVisitor;
 
 class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements dstu3PlanDefinitionAdapter {
@@ -88,8 +89,8 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements dstu3Pla
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
-        List<DependencyInfo> references = new ArrayList<>();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = this.getPlanDefinition().hasVersion()
                 ? this.getPlanDefinition().getUrl() + "|"
                         + this.getPlanDefinition().getVersion()

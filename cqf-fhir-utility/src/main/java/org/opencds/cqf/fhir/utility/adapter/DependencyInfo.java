@@ -1,10 +1,10 @@
-package org.opencds.cqf.cql.evaluator.fhir.util;
+package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 
-public class DependencyInfo {
+public class DependencyInfo implements IDependencyInfo {
     // TODO: Need for figuring out how to determine which package the dependency is in.
     private String referenceSource;
     private String reference;

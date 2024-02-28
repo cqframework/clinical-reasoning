@@ -15,8 +15,9 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 class LibraryAdapter extends KnowledgeArtifactAdapter implements Dstu3LibraryAdapter {
@@ -109,8 +110,8 @@ class LibraryAdapter extends KnowledgeArtifactAdapter implements Dstu3LibraryAda
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
-        List<DependencyInfo> references = new ArrayList<>();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
 
         // relatedArtifact[].resource
         references.addAll(getRelatedArtifactReferences(this.library, this.library.getRelatedArtifact()));

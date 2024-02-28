@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter {
     private MetadataResource adaptedResource;
@@ -18,9 +19,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter {
         return this.adaptedResource;
     }
 
-    protected List<DependencyInfo> getRelatedArtifactReferences(
+    protected List<IDependencyInfo> getRelatedArtifactReferences(
             MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {
-        List<DependencyInfo> references = new ArrayList<>();
+        List<IDependencyInfo> references = new ArrayList<>();
 
         for (RelatedArtifact ra : relatedArtifacts) {
             if (ra.getType() == RelatedArtifact.RelatedArtifactType.COMPOSEDOF

@@ -5,7 +5,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 
 public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
 
@@ -31,7 +30,7 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
 
     void setVersion(String version);
 
-    List<DependencyInfo> getDependencies();
+    List<IDependencyInfo> getDependencies();
 
     Date getApprovalDate();
 

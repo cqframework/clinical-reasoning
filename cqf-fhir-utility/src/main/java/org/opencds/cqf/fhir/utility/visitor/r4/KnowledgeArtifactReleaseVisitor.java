@@ -39,13 +39,14 @@ import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
@@ -118,10 +119,10 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                 experimentalBehaviorCode,
                 repository);
         updateReleaseLabel(rootLibrary, releaseLabel);
-        List<DependencyInfo> rootArtifactOriginalDependencies =
-                new ArrayList<DependencyInfo>(rootLibraryAdapter.getDependencies());
+        List<IDependencyInfo> rootArtifactOriginalDependencies =
+                new ArrayList<IDependencyInfo>(rootLibraryAdapter.getDependencies());
         // Get list of extensions which need to be preserved
-        List<DependencyInfo> originalDependenciesWithExtensions = rootArtifactOriginalDependencies.stream()
+        List<IDependencyInfo> originalDependenciesWithExtensions = rootArtifactOriginalDependencies.stream()
                 .filter(dep -> dep.getExtension() != null && dep.getExtension().size() > 0)
                 .collect(Collectors.toList());
         // once iteration is complete, delete all depends-on RAs in the root artifact
@@ -159,7 +160,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                 rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
             }
 
-            List<DependencyInfo> dependencies = artifactAdapter.getDependencies();
+            List<IDependencyInfo> dependencies = artifactAdapter.getDependencies();
             for (DependencyInfo dependency : dependencies) {
                 // if the dependency gets updated as part of $release then update the reference as well
                 Optional<MetadataResource> maybeReference = checkIfReferenceInList(dependency, releasedResources);

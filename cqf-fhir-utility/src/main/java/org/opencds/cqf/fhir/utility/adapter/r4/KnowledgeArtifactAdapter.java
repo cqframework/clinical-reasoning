@@ -14,8 +14,9 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4KnowledgeArtifactAdapter {
@@ -55,7 +56,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
     }
 
     @Override
-    public List<DependencyInfo> getDependencies() {
+    public List<IDependencyInfo> getDependencies() {
         return new ArrayList<>();
     }
 
@@ -63,9 +64,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements r4Knowl
         return visitor.visit(this, repository, operationParameters);
     }
 
-    protected List<DependencyInfo> getRelatedArtifactReferences(
+    protected List<IDependencyInfo> getRelatedArtifactReferences(
             MetadataResource referencingResource, List<RelatedArtifact> relatedArtifacts) {
-        List<DependencyInfo> references = new ArrayList<>();
+        List<IDependencyInfo> references = new ArrayList<>();
         for (RelatedArtifact ra : relatedArtifacts) {
             if (ra.hasResource()) {
                 String referenceSource = referencingResource.getUrl();

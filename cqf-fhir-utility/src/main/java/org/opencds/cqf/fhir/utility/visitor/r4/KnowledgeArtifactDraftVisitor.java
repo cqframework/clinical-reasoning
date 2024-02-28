@@ -25,13 +25,13 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.opencds.cqf.cql.evaluator.fhir.util.DependencyInfo;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
@@ -258,7 +258,7 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     }
 
     private void updateRelatedArtifactUrlsWithNewVersions(
-            List<DependencyInfo> referenceList, String updatedVersion, TreeSet<String> ownedUrlCache) {
+            List<IDependencyInfo> referenceList, String updatedVersion, TreeSet<String> ownedUrlCache) {
         // For each  relatedArtifact, update the version of the reference.
         referenceList.stream()
                 // only update the references to owned resources (including dependencies)

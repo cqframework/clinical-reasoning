@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -52,136 +53,103 @@ public class ArtifactAssessmentTest {
 
     @Test
     void test_code() {
-        var invalidCodeException = "";
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("comment");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
+        
+        var infoTypeSystem = "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
+        var infoTypeCodes = List.of("comment",
+        "classifier",
+        "rating",
+        "container",
+        "response",
+        "change-request");
+        for (var infoType : ArtifactAssessmentContentInformationType.values()) {
+            if (infoType != ArtifactAssessmentContentInformationType.NULL) {
+                assertTrue(infoType.getSystem().equals(infoTypeSystem));
+            }
         }
-        assertTrue(invalidCodeException.equals(""));
-        assertTrue(ArtifactAssessmentContentInformationType.COMMENT.toCode().equals("comment"));
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("classifier");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
+        infoTypeCodes.forEach(code -> {
+            var invalidCodeException = "";
+            try {
+                ArtifactAssessmentContentInformationType.fromCode(code);
+            } catch (FHIRException e) {
+                invalidCodeException = e.getMessage();
+            }
+            assertTrue(invalidCodeException.equals(""));
+        });
+        var contentClassifierCodes = List.of("high",
+        "moderate",
+        "low",
+        "very-low",
+        "no-concern",
+        "serious-concern",
+        "very-serious-concern",
+        "extremely-serious-concern",
+        "present",
+        "absent",
+        "no-change",
+        "downcode1",
+        "downcode2",
+        "downcode3",
+        "upcode1",
+        "upcode2");
+        var contentClassifierSystem = "http://terminology.hl7.org/CodeSystem/certainty-rating";
+        for (var classifier : ArtifactAssessmentContentClassifier.values()) {
+            if (classifier != ArtifactAssessmentContentClassifier.NULL) {
+                assertTrue(classifier.getSystem().equals(contentClassifierSystem));
+            }
         }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("rating");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
+        contentClassifierCodes.forEach(code -> {
+            var invalidCodeException = "";
+            try {
+                ArtifactAssessmentContentClassifier.fromCode(code);
+            } catch (FHIRException e) {
+                invalidCodeException = e.getMessage();
+            }
+            assertTrue(invalidCodeException.equals(""));
+        });
+        var workflowStatusSystem = "http://hl7.org/fhir/artifactassessment-workflow-status";
+        var workflowStatusCodes = List.of("submitted",
+        "triaged",
+        "waiting-for-input",
+        "resolved-no-change",
+        "resolved-change-required",
+        "deferred",
+        "duplicate",
+        "applied",
+        "published");
+        for (var classifier : ArtifactAssessmentWorkflowStatus.values()) {
+            if (classifier != ArtifactAssessmentWorkflowStatus.NULL) {
+                assertTrue(classifier.getSystem().equals(workflowStatusSystem));
+            }
         }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("change-request");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
+        workflowStatusCodes.forEach(code -> {
+            var invalidCodeException = "";
+            try {
+                ArtifactAssessmentWorkflowStatus.fromCode(code);
+            } catch (FHIRException e) {
+                invalidCodeException = e.getMessage();
+            }
+            assertTrue(invalidCodeException.equals(""));
+        });
+        var dispositionCodes = List.of("unresolved",
+        "not-persuasive",
+        "persuasive",
+        "persuasive-with-modification",
+        "not-persuasive-with-modification");
+        var dispositionSystem = "http://hl7.org/fhir/artifactassessment-disposition";
+        for (var classifier : ArtifactAssessmentDisposition.values()) {
+            if (classifier != ArtifactAssessmentDisposition.NULL) {
+                assertTrue(classifier.getSystem().equals(dispositionSystem));
+            }
         }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("response");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentInformationType.fromCode("this-is-not-a-code");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.contains("Unknown"));
-        // reset
-        invalidCodeException = "";
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("high");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("moderate");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("low");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("no-concern");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("serious-concern");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("very-serious-concern");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("extremely-serious-concern");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("present");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("absent");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("no-change");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("downcode1");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("downcode2");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("downcode3");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("upcode1");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
-        try {
-            ArtifactAssessmentContentClassifier.fromCode("upcode2");
-        } catch (FHIRException e) {
-            invalidCodeException = e.getMessage();
-        }
-        assertTrue(invalidCodeException.equals(""));
+        dispositionCodes.forEach(code -> {
+            var invalidCodeException = "";
+            try {
+                ArtifactAssessmentDisposition.fromCode(code);
+            } catch (FHIRException e) {
+                invalidCodeException = e.getMessage();
+            }
+            assertTrue(invalidCodeException.equals(""));
+        });
     }
 
     @Test

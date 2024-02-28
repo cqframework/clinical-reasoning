@@ -741,7 +741,8 @@ public class ArtifactAssessment extends Basic {
         }
     }
 
-    public static class ArtifactAssessmentWorkflowStatusEnumFactory implements EnumFactory<ArtifactAssessmentWorkflowStatus> {
+    public static class ArtifactAssessmentWorkflowStatusEnumFactory
+            implements EnumFactory<ArtifactAssessmentWorkflowStatus> {
         public ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 if (codeString == null || "".equals(codeString)) return null;
@@ -749,12 +750,15 @@ public class ArtifactAssessment extends Basic {
             if ("triaged".equals(codeString)) return ArtifactAssessmentWorkflowStatus.TRIAGED;
             if ("waiting-for-input".equals(codeString)) return ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT;
             if ("resolved-no-change".equals(codeString)) return ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE;
-            if ("resolved-change-required".equals(codeString)) return ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED;
+            if ("resolved-change-required".equals(codeString))
+                return ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED;
             if ("deferred".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DEFERRED;
             if ("duplicate".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DUPLICATE;
             if ("applied".equals(codeString)) return ArtifactAssessmentWorkflowStatus.APPLIED;
             if ("published".equals(codeString)) return ArtifactAssessmentWorkflowStatus.PUBLISHED;
-            else throw new IllegalArgumentException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+            else
+                throw new IllegalArgumentException(
+                        "Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
         }
 
         public Enumeration<ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
@@ -763,23 +767,32 @@ public class ArtifactAssessment extends Basic {
             String codeString = ((PrimitiveType) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("submitted".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.SUBMITTED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.SUBMITTED);
             if ("triaged".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.TRIAGED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.TRIAGED);
             if ("waiting-for-input".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT);
             if ("resolved-no-change".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE);
             if ("resolved-change-required".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED);
             if ("deferred".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.DEFERRED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.DEFERRED);
             if ("duplicate".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.DUPLICATE);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.DUPLICATE);
             if ("applied".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.APPLIED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.APPLIED);
             if ("published".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(this, ArtifactAssessmentWorkflowStatus.PUBLISHED);
+                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
+                        this, ArtifactAssessmentWorkflowStatus.PUBLISHED);
             throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
         }
 

@@ -7,6 +7,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
+
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class InMemoryFhirRepository implements Repository {
@@ -196,6 +200,23 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
         throw new NotImplementedException("The transaction operation is not currently supported");
+    }
+
+    public static <B extends IBaseBundle> B transactionStub(B transaction, Repository repository) {
+        var version = transaction.getStructureFhirVersionEnum();
+        var returnBundle = (B) newBundle(version);
+        BundleHelper.getEntry(transaction).forEach(e -> {
+            if (BundleHelper.getEntryRequestIsPut(version, e)) {
+                var outcome = repository.update(BundleHelper.getEntryResource(version, e));
+                var location = outcome.getId().getValue();
+                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResponse(version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.getEntryRequestIsPost(version, e)) {
+                var outcome = repository.create(BundleHelper.getEntryResource(version, e));
+                var location = outcome.getId().getValue();
+                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResponse(version, BundleHelper.newResponseWithLocation(version, location)));
+            }
+        });
+        return returnBundle;
     }
 
     @Override

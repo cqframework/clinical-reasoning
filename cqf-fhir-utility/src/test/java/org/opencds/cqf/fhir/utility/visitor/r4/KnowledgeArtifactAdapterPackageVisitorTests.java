@@ -36,7 +36,6 @@ import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
-import org.opencds.cqf.fhir.utility.r4.RepositoryHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class KnowledgeArtifactAdapterPackageVisitorTests {
@@ -51,7 +50,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
                     @Override
                     public Bundle answer(InvocationOnMock a) throws Throwable {
                         Bundle b = a.getArgument(0);
-                        return RepositoryHelper.transactionStub(b, spyRepository);
+                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
                     }
                 })
                 .when(spyRepository)

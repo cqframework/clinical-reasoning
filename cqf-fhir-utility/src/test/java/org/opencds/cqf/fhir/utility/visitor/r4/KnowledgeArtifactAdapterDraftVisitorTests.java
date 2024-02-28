@@ -38,7 +38,6 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
-import org.opencds.cqf.fhir.utility.r4.RepositoryHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class KnowledgeArtifactAdapterDraftVisitorTests {
@@ -70,7 +69,7 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
                     @Override
                     public Bundle answer(InvocationOnMock a) throws Throwable {
                         Bundle b = a.getArgument(0);
-                        return RepositoryHelper.transactionStub(b, spyRepository);
+                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
                     }
                 })
                 .when(spyRepository)

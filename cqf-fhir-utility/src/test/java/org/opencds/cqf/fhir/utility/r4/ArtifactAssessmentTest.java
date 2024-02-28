@@ -53,14 +53,9 @@ public class ArtifactAssessmentTest {
 
     @Test
     void test_code() {
-        
+
         var infoTypeSystem = "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-        var infoTypeCodes = List.of("comment",
-        "classifier",
-        "rating",
-        "container",
-        "response",
-        "change-request");
+        var infoTypeCodes = List.of("comment", "classifier", "rating", "container", "response", "change-request");
         for (var infoType : ArtifactAssessmentContentInformationType.values()) {
             if (infoType != ArtifactAssessmentContentInformationType.NULL) {
                 assertTrue(infoType.getSystem().equals(infoTypeSystem));
@@ -75,22 +70,23 @@ public class ArtifactAssessmentTest {
             }
             assertTrue(invalidCodeException.equals(""));
         });
-        var contentClassifierCodes = List.of("high",
-        "moderate",
-        "low",
-        "very-low",
-        "no-concern",
-        "serious-concern",
-        "very-serious-concern",
-        "extremely-serious-concern",
-        "present",
-        "absent",
-        "no-change",
-        "downcode1",
-        "downcode2",
-        "downcode3",
-        "upcode1",
-        "upcode2");
+        var contentClassifierCodes = List.of(
+                "high",
+                "moderate",
+                "low",
+                "very-low",
+                "no-concern",
+                "serious-concern",
+                "very-serious-concern",
+                "extremely-serious-concern",
+                "present",
+                "absent",
+                "no-change",
+                "downcode1",
+                "downcode2",
+                "downcode3",
+                "upcode1",
+                "upcode2");
         var contentClassifierSystem = "http://terminology.hl7.org/CodeSystem/certainty-rating";
         for (var classifier : ArtifactAssessmentContentClassifier.values()) {
             if (classifier != ArtifactAssessmentContentClassifier.NULL) {
@@ -107,15 +103,16 @@ public class ArtifactAssessmentTest {
             assertTrue(invalidCodeException.equals(""));
         });
         var workflowStatusSystem = "http://hl7.org/fhir/artifactassessment-workflow-status";
-        var workflowStatusCodes = List.of("submitted",
-        "triaged",
-        "waiting-for-input",
-        "resolved-no-change",
-        "resolved-change-required",
-        "deferred",
-        "duplicate",
-        "applied",
-        "published");
+        var workflowStatusCodes = List.of(
+                "submitted",
+                "triaged",
+                "waiting-for-input",
+                "resolved-no-change",
+                "resolved-change-required",
+                "deferred",
+                "duplicate",
+                "applied",
+                "published");
         for (var classifier : ArtifactAssessmentWorkflowStatus.values()) {
             if (classifier != ArtifactAssessmentWorkflowStatus.NULL) {
                 assertTrue(classifier.getSystem().equals(workflowStatusSystem));
@@ -130,11 +127,12 @@ public class ArtifactAssessmentTest {
             }
             assertTrue(invalidCodeException.equals(""));
         });
-        var dispositionCodes = List.of("unresolved",
-        "not-persuasive",
-        "persuasive",
-        "persuasive-with-modification",
-        "not-persuasive-with-modification");
+        var dispositionCodes = List.of(
+                "unresolved",
+                "not-persuasive",
+                "persuasive",
+                "persuasive-with-modification",
+                "not-persuasive-with-modification");
         var dispositionSystem = "http://hl7.org/fhir/artifactassessment-disposition";
         for (var classifier : ArtifactAssessmentDisposition.values()) {
             if (classifier != ArtifactAssessmentDisposition.NULL) {

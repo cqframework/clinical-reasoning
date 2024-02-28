@@ -233,7 +233,9 @@ public class QuestionnaireProcessorTests {
                 .thenPopulate(true)
                 .hasItems(13)
                 .itemHasAnswer("1")
-                .itemHasAnswer("2");
+                .itemHasAuthorExt("1")
+                .itemHasAnswer("2")
+                .itemHasAuthorExt("2");
     }
 
     @Test

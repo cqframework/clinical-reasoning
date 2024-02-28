@@ -161,7 +161,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
             }
 
             List<IDependencyInfo> dependencies = artifactAdapter.getDependencies();
-            for (DependencyInfo dependency : dependencies) {
+            for (IDependencyInfo dependency : dependencies) {
                 // if the dependency gets updated as part of $release then update the reference as well
                 Optional<MetadataResource> maybeReference = checkIfReferenceInList(dependency, releasedResources);
                 if (maybeReference.isPresent()) {
@@ -370,7 +370,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     }
 
     private Optional<MetadataResource> checkIfReferenceInList(
-            DependencyInfo artifactToUpdate, List<MetadataResource> resourceList) {
+            IDependencyInfo artifactToUpdate, List<MetadataResource> resourceList) {
         Optional<MetadataResource> updatedReference = Optional.ofNullable(null);
         for (MetadataResource resource : resourceList) {
             String referenceURL = Canonicals.getUrl(artifactToUpdate.getReference());

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -62,6 +63,23 @@ class CqlContentTest {
     void nonLibraryResourceDoesNotThrow() {
         assertDoesNotThrow(() -> {
             CqlContent.loadCqlContent(new ValueSet(), tempDir);
+        });
+    }
+
+    @Test
+    void invalidFhirVersionThrows() {
+        var lib = new org.hl7.fhir.r4b.model.Library();
+        assertThrows(IllegalArgumentException.class, () -> {
+            CqlContent.loadCqlContent(lib, tempDir);
+        });
+    }
+
+    @Test
+    void invalidPathThrows() {
+        var lib = new org.hl7.fhir.r4.model.Library();
+        lib.addContent().setContentType("text/cql").setUrl("not-a-real-path/Test.cql");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            CqlContent.loadCqlContent(lib, tempDir);
         });
     }
 

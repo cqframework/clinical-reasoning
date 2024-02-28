@@ -85,6 +85,7 @@ public class SearchHelper {
 
         return result;
     }
+    
     /**
      * Searches the given Repository and handles paging to return all entries
      *

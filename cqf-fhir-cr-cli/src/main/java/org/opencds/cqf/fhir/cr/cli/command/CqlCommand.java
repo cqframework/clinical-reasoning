@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.cli.command;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -229,15 +230,11 @@ public class CqlCommand implements Callable<Integer> {
 
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
-            if (contextValue != null && !path.endsWith(contextValue)) {
-                path = path.resolve(contextValue);
-            }
-
-            data = new IgRepository(fhirContext, path.toString());
+            data = new IgRepository(fhirContext, path);
         }
 
         if (terminologyUrl != null) {
-            terminology = new IgRepository(fhirContext, terminologyUrl);
+            terminology = new IgRepository(fhirContext, Paths.get(terminologyUrl));
         }
 
         return new ProxyRepository(data, null, terminology);

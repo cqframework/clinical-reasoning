@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -79,7 +80,7 @@ public class Measure {
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forDstu3Cached(),
-                    getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath);
+                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -348,6 +349,17 @@ public class TestQuestionnaire {
                     .collect(Collectors.toList());
             for (var item : matchingItems) {
                 assertFalse(request.resolvePathList(item, "answer").isEmpty());
+            }
+
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasAuthorExt(String theLinkId) {
+            var matchingItems = items.stream()
+                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
+                    .collect(Collectors.toList());
+            for (var item : matchingItems) {
+                assertNotNull(request.getExtensionByUrl(item, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
             }
 
             return this;

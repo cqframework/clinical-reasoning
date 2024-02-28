@@ -214,7 +214,6 @@ public class ElementProcessorTests {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void testElementWithCqfExpressionWithResourceResult() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(fhirContextR4).when(repository).fhirContext();

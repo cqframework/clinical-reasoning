@@ -155,8 +155,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a MethodOutcome with the id of the patched resource
      */
-    <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-            I id, P patchParameters, Map<String, String> headers);
+    default <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
+            I id, P patchParameters, Map<String, String> headers) {
+        throw new NotImplementedOperationException("patch is not supported by this repository");
+    }
 
     /**
      * Updates a Resource in the repository
@@ -282,7 +284,9 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a Bundle
      */
-    <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers);
+    default <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
+        throw new NotImplementedOperationException("link is not supported by this repository");
+    }
 
     // Metadata starts here
 
@@ -309,7 +313,9 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a CapabilityStatement/Conformance with the repository's metadata
      */
-    <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers);
+    default <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
+        throw new NotImplementedOperationException("capabilities is not supported by this repository");
+    }
 
     // Transactions starts here
 
@@ -336,7 +342,9 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a Bundle with the results of the transaction/batch
      */
-    <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers);
+    default <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+        throw new NotImplementedOperationException("transaction is not supported by this repository");
+    }
 
     // Operations starts here
 
@@ -370,8 +378,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return the results of the operation
      */
-    <R extends IBaseResource, P extends IBaseParameters> R invoke(
-            String name, P parameters, Class<R> returnType, Map<String, String> headers);
+    default <R extends IBaseResource, P extends IBaseParameters> R invoke(
+            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+        throw new NotImplementedOperationException("server-level invoke is not supported by this repository");
+    }
 
     /**
      * Invokes a server-level operation on this repository
@@ -398,7 +408,9 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a MethodOutcome with a status code
      */
-    <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers);
+    default <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
+        throw new NotImplementedOperationException("server-level invoke is not supported by this repository");
+    }
 
     /**
      * Invokes a type-level operation on this repository that returns a Resource
@@ -467,8 +479,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a MethodOutcome with a status code
      */
-    <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters, Map<String, String> headers);
+    default <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
+            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
+        throw new NotImplementedOperationException("type-level invoke is not supported by this repository");
+    }
 
     /**
      * Invokes an instance-level operation on this repository that returns a Resource
@@ -536,8 +550,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a MethodOutcome with a status code
      */
-    <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-            I id, String name, P parameters, Map<String, String> headers);
+    default <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
+            I id, String name, P parameters, Map<String, String> headers) {
+        throw new NotImplementedOperationException("instance-level invoke is not supported by this repository");
+    }
 
     // History starts here
 
@@ -568,8 +584,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a Bundle with the server history
      */
-    <B extends IBaseBundle, P extends IBaseParameters> B history(
-            P parameters, Class<B> returnType, Map<String, String> headers);
+    default <B extends IBaseBundle, P extends IBaseParameters> B history(
+            P parameters, Class<B> returnType, Map<String, String> headers) {
+        throw new NotImplementedOperationException("server-level history is not supported by this repository");
+    }
 
     /**
      * Returns a Bundle with type-level history for this repository
@@ -603,8 +621,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a Bundle with the type history
      */
-    <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers);
+    default <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
+        throw new NotImplementedOperationException("type-level history is not supported by this repository");
+    }
 
     /**
      * Returns a Bundle with instance-level history
@@ -638,8 +658,10 @@ public interface Repository {
      * @param headers headers for this request, typically key-value pairs of HTTP headers
      * @return a Bundle with the instance history
      */
-    <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-            I id, P parameters, Class<B> returnType, Map<String, String> headers);
+    default <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
+            I id, P parameters, Class<B> returnType, Map<String, String> headers) {
+        throw new NotImplementedOperationException("instance-level history is not supported by this repository");
+    }
 
     /**
      * Returns the {@link FhirContext} used by the repository

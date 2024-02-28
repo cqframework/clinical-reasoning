@@ -27,9 +27,8 @@ class R4RepositoryTest {
     Path path = Paths.get(getResourcePath(R4RepositoryTest.class));
 
     public R4RepositoryTest() {
-        repository = new IgRepository(
-                FhirContext.forR4Cached(),
-                path.resolve("org/opencds/cqf/fhir/cr/measure/r4/res").toString());
+        repository =
+                new IgRepository(FhirContext.forR4Cached(), path.resolve("org/opencds/cqf/fhir/cr/measure/r4/res"));
     }
 
     @Test

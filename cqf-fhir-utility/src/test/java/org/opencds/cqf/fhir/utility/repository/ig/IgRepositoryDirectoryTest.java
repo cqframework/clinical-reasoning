@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class IgRepositoryDirectoryTest {
+class IgRepositoryDirectoryTest {
 
     private static Repository repository;
 
@@ -34,11 +34,11 @@ public class IgRepositoryDirectoryTest {
     static Path tempDir;
 
     @BeforeAll
-    public static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
+    static void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         // This copies the sample IG to a temporary directory so that
         // we can test against an actual filesystem
         Resources.copyFromJar("/sampleIgs/directoryPerType/standard", tempDir);
-        repository = new IgRepository(FhirContext.forR4Cached(), tempDir.toString());
+        repository = new IgRepository(FhirContext.forR4Cached(), tempDir);
     }
 
     @Test

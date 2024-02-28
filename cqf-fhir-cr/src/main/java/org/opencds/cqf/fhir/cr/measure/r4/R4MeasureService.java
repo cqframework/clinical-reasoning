@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.BundleBuilder;
 import java.util.Collections;
 import java.util.List;
@@ -115,8 +116,10 @@ public class R4MeasureService {
         builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
         try {
             repository.transaction(builder.getBundle());
-        } catch (UnsupportedOperationException e) {
-            log.debug("e");
+        } catch (NotImplementedOperationException e) {
+            log.warn(
+                    "Error creating supplemental data search parameter. This may be due to the server not supporting transactions.",
+                    e);
         }
     }
 

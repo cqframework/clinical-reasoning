@@ -18,19 +18,19 @@ import org.slf4j.LoggerFactory;
 public class PopulateProcessor implements IPopulateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(PopulateProcessor.class);
     private final ProcessItem processItem;
-    private final ProcessItemWithExtension processItemWithExtension;
+    private final ProcessItemWithContext processItemWithContext;
     private final ProcessResponseItem processResponseItem;
 
     public PopulateProcessor() {
-        this(new ProcessItem(), new ProcessItemWithExtension(), new ProcessResponseItem());
+        this(new ProcessItem(), new ProcessItemWithContext(), new ProcessResponseItem());
     }
 
     private PopulateProcessor(
             ProcessItem processItem,
-            ProcessItemWithExtension processItemWithExtension,
+            ProcessItemWithContext processItemWithExtension,
             ProcessResponseItem processResponseItem) {
         this.processItem = processItem;
-        this.processItemWithExtension = processItemWithExtension;
+        this.processItemWithContext = processItemWithExtension;
         this.processResponseItem = processResponseItem;
     }
 
@@ -91,30 +91,30 @@ public class PopulateProcessor implements IPopulateProcessor {
                     .findFirst()
                     .orElse(null);
             if (populationContextExt != null) {
-                populatedItems.addAll(processItemWithExtension(request, item));
+                populatedItems.addAll(processItemWithContext(request, item));
             } else {
-                final IBaseBackboneElement populatedItem = SerializationUtils.clone(item);
-                request.getModelResolver().setValue(populatedItem, "item", null);
                 var childItems = request.getItems(item);
                 if (!childItems.isEmpty()) {
+                    final IBaseBackboneElement populatedItem = SerializationUtils.clone(item);
+                    request.getModelResolver().setValue(populatedItem, "item", null);
                     final var processedChildItems = processItems(request, childItems);
                     request.getModelResolver().setValue(populatedItem, "item", processedChildItems);
                     populatedItems.add(populatedItem);
                 } else {
-                    populatedItems.add(processItem(request, populatedItem));
+                    var populatedItem = processItem(request, item);
+                    populatedItems.add(populatedItem);
                 }
             }
         });
         return populatedItems;
     }
 
-    protected List<IBaseBackboneElement> processItemWithExtension(PopulateRequest request, IBaseBackboneElement item) {
+    protected List<IBaseBackboneElement> processItemWithContext(PopulateRequest request, IBaseBackboneElement item) {
         try {
             // extension value is the context resource we're using to populate
             // Expression-based Population
-            return processItemWithExtension.processItem(request, item);
+            return processItemWithContext.processItem(request, item);
         } catch (ResolveExpressionException e) {
-            // would return empty list if exception thrown
             logger.error(e.getMessage());
             request.logException(e.getMessage());
             return new ArrayList<>();
@@ -125,10 +125,8 @@ public class PopulateProcessor implements IPopulateProcessor {
         try {
             return processItem.processItem(request, item);
         } catch (ResolveExpressionException e) {
-            // would return just the item.copy if exception thrown
             logger.error(e.getMessage());
             request.logException(e.getMessage());
-            // return questionnaireItem.copy();
             return item;
         }
     }

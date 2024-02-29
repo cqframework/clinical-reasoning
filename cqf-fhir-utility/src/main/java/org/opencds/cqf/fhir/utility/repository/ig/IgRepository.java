@@ -112,7 +112,7 @@ public class IgRepository implements Repository {
      *                          resources.
      * @param root              The root directory of the IG
      * @param conventions       The conventions for the IG
-     * @param encodingEnum      The encoding to use for parsing and encoding
+     * @param encodingBehavior   The encoding behavior to use for parsing and encoding
      *                          resources.
      * @param operationProvider The operation provider to use for invoking
      *                          operations.

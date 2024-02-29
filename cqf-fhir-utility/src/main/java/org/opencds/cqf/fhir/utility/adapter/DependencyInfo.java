@@ -9,11 +9,11 @@ public class DependencyInfo implements IDependencyInfo {
     private String referenceSource;
     private String reference;
     private String referencePackageId;
-    private List<? extends IBaseExtension> extensionList;
+    private List<? extends IBaseExtension<?, ?>> extensionList;
 
     public DependencyInfo() {}
 
-    public DependencyInfo(String referenceSource, String reference, List<? extends IBaseExtension> extensionList) {
+    public DependencyInfo(String referenceSource, String reference, List<? extends IBaseExtension<?, ?>> extensionList) {
         this.referenceSource = referenceSource;
         this.reference = reference;
         this.extensionList = extensionList;
@@ -23,7 +23,7 @@ public class DependencyInfo implements IDependencyInfo {
         return this.referenceSource;
     }
 
-    public List<? extends IBaseExtension> getExtension() {
+    public List<? extends IBaseExtension<?, ?>> getExtension() {
         return this.extensionList;
     }
 

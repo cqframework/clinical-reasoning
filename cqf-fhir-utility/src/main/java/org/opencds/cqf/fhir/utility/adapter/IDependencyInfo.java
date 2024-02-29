@@ -16,5 +16,5 @@ public interface IDependencyInfo {
 
     public void setReferencePackageId(String referencePackageId);
 
-    public List<? extends IBaseExtension> getExtension();
+    public List<? extends IBaseExtension<?, ?>> getExtension();
 }

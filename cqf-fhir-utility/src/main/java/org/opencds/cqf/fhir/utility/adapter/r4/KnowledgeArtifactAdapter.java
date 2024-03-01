@@ -115,6 +115,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
 
     @Override
     public void setEffectivePeriod(ICompositeType effectivePeriod) {
+        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
+            throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
+        }
         // does nothing
     }
 

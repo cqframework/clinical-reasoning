@@ -217,7 +217,8 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
                             try {
                                 return (RelatedArtifact) ra;
                             } catch (ClassCastException e) {
-                                throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
+                                throw new UnprocessableEntityException(
+                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
                             }
                         })
                         .collect(Collectors.toList()));

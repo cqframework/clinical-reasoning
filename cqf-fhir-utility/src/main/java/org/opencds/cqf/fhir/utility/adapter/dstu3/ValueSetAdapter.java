@@ -158,16 +158,19 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
         return new Period();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return new ArrayList<>();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getComponents() {
         return this.getRelatedArtifactsOfType("composed-of");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type;
@@ -184,13 +187,14 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
             throws UnprocessableEntityException {
-                relatedArtifacts.stream().map(ra -> {
-                    try {
-                        return (RelatedArtifact) ra;
-                    } catch (ClassCastException e) {
-                        throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
-                    }
-                });
+        relatedArtifacts.stream().map(ra -> {
+            try {
+                return (RelatedArtifact) ra;
+            } catch (ClassCastException e) {
+                throw new UnprocessableEntityException(
+                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
+            }
+        });
         // do nothing
     }
 

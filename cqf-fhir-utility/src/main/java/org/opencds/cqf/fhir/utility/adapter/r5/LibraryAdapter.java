@@ -196,13 +196,14 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
             throws UnprocessableEntityException {
         this.getLibrary()
                 .setRelatedArtifact(relatedArtifacts.stream()
-                .map(ra -> {
-                    try {
-                        return (RelatedArtifact) ra;
-                    } catch (ClassCastException e) {
-                        throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
-                    }
-                })
+                        .map(ra -> {
+                            try {
+                                return (RelatedArtifact) ra;
+                            } catch (ClassCastException e) {
+                                throw new UnprocessableEntityException(
+                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
+                            }
+                        })
                         .collect(Collectors.toList()));
     }
 

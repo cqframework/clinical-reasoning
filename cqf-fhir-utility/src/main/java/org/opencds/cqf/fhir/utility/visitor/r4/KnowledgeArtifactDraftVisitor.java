@@ -28,10 +28,10 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
@@ -86,7 +86,8 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
         TreeSet<String> ownedResourceUrls = createOwnedResourceUrlCache(resourcesToCreate);
         for (int i = 0; i < resourcesToCreate.size(); i++) {
-            KnowledgeArtifactAdapter newResourceAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
+            KnowledgeArtifactAdapter newResourceAdapter =
+                    new AdapterFactory().createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
             updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList);
             updateRelatedArtifactUrlsWithNewVersions(
                     library.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
@@ -126,9 +127,8 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         String draftVersionUrl = Canonicals.getUrl(resource.getUrl()) + "|" + draftVersion;
 
         // TODO: Decide if we need both of these checks
-        Optional<IBaseResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion(
-                (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
-                        repository, new CanonicalType(draftVersionUrl)));
+        Optional<IBaseResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion((Bundle)
+                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(draftVersionUrl)));
         Optional<MetadataResource> draftVersionAlreadyInBundle = resourcesToCreate.stream()
                 .filter(res -> res.getUrl().equals(Canonicals.getUrl(draftVersionUrl))
                         && res.getVersion().equals(draftVersion))

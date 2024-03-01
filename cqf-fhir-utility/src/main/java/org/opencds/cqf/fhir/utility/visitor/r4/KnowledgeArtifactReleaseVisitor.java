@@ -42,10 +42,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
@@ -132,8 +132,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         for (MetadataResource artifact : releasedResources) {
             transactionBundle.addEntry(PackageHelper.createEntry(artifact, true));
 
-            KnowledgeArtifactAdapter artifactAdapter =
-                    new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
+            KnowledgeArtifactAdapter artifactAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
             List<RelatedArtifact> components = artifactAdapter.getComponents().stream()
                     .map(ra -> (RelatedArtifact) ra)
                     .collect(Collectors.toList());
@@ -499,8 +498,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     }
 
     @Override
-    public IBase visit(
-            PlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
+    public IBase visit(PlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 

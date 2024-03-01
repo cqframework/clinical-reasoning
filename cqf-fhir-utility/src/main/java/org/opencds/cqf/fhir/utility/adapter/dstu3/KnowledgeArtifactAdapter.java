@@ -21,7 +21,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
+public class KnowledgeArtifactAdapter extends ResourceAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {

@@ -201,14 +201,14 @@ public class InMemoryFhirRepository implements Repository {
         var version = transaction.getStructureFhirVersionEnum();
         var returnBundle = (B) newBundle(version);
         BundleHelper.getEntry(transaction).forEach(e -> {
-            if (BundleHelper.getEntryRequestIsPut(version, e)) {
+            if (BundleHelper.isEntryRequestPut(version, e)) {
                 var outcome = repository.update(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
                 BundleHelper.addEntry(
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
-            } else if (BundleHelper.getEntryRequestIsPost(version, e)) {
+            } else if (BundleHelper.isEntryRequestPost(version, e)) {
                 var outcome = repository.create(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
                 BundleHelper.addEntry(

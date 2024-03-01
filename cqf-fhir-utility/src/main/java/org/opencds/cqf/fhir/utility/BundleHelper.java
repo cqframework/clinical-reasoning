@@ -130,7 +130,7 @@ public class BundleHelper {
      * @param entry IBaseBackboneElement type
      * @return
      */
-    public static boolean getEntryRequestIsPut(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+    public static boolean isEntryRequestPut(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
         switch (fhirVersion) {
             case DSTU3:
                 return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
@@ -161,7 +161,7 @@ public class BundleHelper {
      * @param entry IBaseBackboneElement type
      * @return
      */
-    public static boolean getEntryRequestIsPost(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+    public static boolean isEntryRequestPost(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
         switch (fhirVersion) {
             case DSTU3:
                 return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())

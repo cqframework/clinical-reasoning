@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
+public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     IBaseResource get();
 
@@ -51,7 +51,7 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
 
     Date getDate();
 
-    void setDate(Date approvalDate);
+    void setDate(Date date);
 
     void setDateElement(IPrimitiveType<Date> approvalDate);
 
@@ -105,7 +105,7 @@ public interface IBaseKnowledgeArtifactAdapter extends ResourceAdapter {
     static Optional<IBaseResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> isSupportedMetadataResource(r))
-                .map(r -> (IBaseKnowledgeArtifactAdapter) AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                .map(r -> (KnowledgeArtifactAdapter) AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
                 .sorted((a, b) -> a.getVersion().compareTo(b.getVersion()))
                 .collect(Collectors.toList());

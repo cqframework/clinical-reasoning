@@ -42,8 +42,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
@@ -132,7 +132,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         for (MetadataResource artifact : releasedResources) {
             transactionBundle.addEntry(PackageHelper.createEntry(artifact, true));
 
-            IBaseKnowledgeArtifactAdapter artifactAdapter =
+            KnowledgeArtifactAdapter artifactAdapter =
                     new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
             List<RelatedArtifact> components = artifactAdapter.getComponents().stream()
                     .map(ra -> (RelatedArtifact) ra)
@@ -141,7 +141,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             for (RelatedArtifact component : components) {
                 MetadataResource resource;
                 // if the relatedArtifact is Owned, need to update the reference to the new Version
-                if (IBaseKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
+                if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
                     resource = checkIfReferenceInList(component, releasedResources)
                             // should never happen since we check all references as part of `internalRelease`
                             .orElseThrow(() ->
@@ -224,7 +224,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     }
 
     private List<MetadataResource> internalRelease(
-            IBaseKnowledgeArtifactAdapter artifactAdapter,
+            KnowledgeArtifactAdapter artifactAdapter,
             String version,
             Period rootEffectivePeriod,
             CRMIReleaseVersionBehaviorCodes versionBehavior,
@@ -268,13 +268,13 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     // of the referenced artifact should be used. If a version is specified then
                     // `searchRepositoryByCanonicalWithPaging` will
                     // return that version.
-                    referencedResource = (MetadataResource) IBaseKnowledgeArtifactAdapter.findLatestVersion(
+                    referencedResource = (MetadataResource) KnowledgeArtifactAdapter.findLatestVersion(
                                     (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
                                             repository, ownedResourceReference))
                             .orElseThrow(() -> new ResourceNotFoundException(String.format(
                                     "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but was not found on the server.",
                                     ownedResourceReference.getValueAsString(), artifactAdapter.getUrl())));
-                    IBaseKnowledgeArtifactAdapter searchResultAdapter =
+                    KnowledgeArtifactAdapter searchResultAdapter =
                             new AdapterFactory().createKnowledgeArtifactAdapter(referencedResource);
 
                     if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior
@@ -314,7 +314,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     .flatMap(include -> include.getValueSet().stream())
                     .collect(Collectors.toList());
             for (CanonicalType value : valueSets) {
-                IBaseKnowledgeArtifactAdapter.findLatestVersion(
+                KnowledgeArtifactAdapter.findLatestVersion(
                                 (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, value))
                         .ifPresent(childVs ->
                                 checkNonExperimental((MetadataResource) childVs, experimentalBehavior, repository));
@@ -352,10 +352,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
     private void updateReleaseLabel(MetadataResource artifact, String releaseLabel) throws IllegalArgumentException {
         if (releaseLabel != null) {
-            Extension releaseLabelExtension = artifact.getExtensionByUrl(IBaseKnowledgeArtifactAdapter.releaseLabelUrl);
+            Extension releaseLabelExtension = artifact.getExtensionByUrl(KnowledgeArtifactAdapter.releaseLabelUrl);
             if (releaseLabelExtension == null) {
                 // create the Extension and add it to the artifact if it doesn't exist
-                releaseLabelExtension = new Extension(IBaseKnowledgeArtifactAdapter.releaseLabelUrl);
+                releaseLabelExtension = new Extension(KnowledgeArtifactAdapter.releaseLabelUrl);
                 artifact.addExtension(releaseLabelExtension);
             }
             releaseLabelExtension.setValue(new StringType(releaseLabel));
@@ -500,7 +500,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
     @Override
     public IBase visit(
-            IBasePlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
+            PlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
@@ -511,7 +511,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
     @Override
     public IBase visit(
-            IBaseKnowledgeArtifactAdapter knowledgeArtifactAdapter,
+            KnowledgeArtifactAdapter knowledgeArtifactAdapter,
             Repository repository,
             IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");

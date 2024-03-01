@@ -18,11 +18,10 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter implements IBaseKnowledgeArtifactAdapter {
+public class KnowledgeArtifactAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {

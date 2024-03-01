@@ -18,11 +18,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter implements IBaseKnowledgeArtifactAdapter {
+public class KnowledgeArtifactAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {
@@ -81,8 +80,8 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IBaseKn
     }
 
     @Override
-    public void setDate(Date approvalDate) {
-        this.get().setDate(approvalDate);
+    public void setDate(Date date) {
+        this.get().setDate(date);
     }
 
     @Override

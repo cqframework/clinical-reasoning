@@ -24,11 +24,11 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class PlanDefinitionAdapter extends ResourceAdapter implements IBaseKnowledgeArtifactAdapter {
+class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
 
     private PlanDefinition planDefinition;
 
@@ -195,8 +195,8 @@ class PlanDefinitionAdapter extends ResourceAdapter implements IBaseKnowledgeArt
     }
 
     @Override
-    public void setDate(Date approvalDate) {
-        this.getPlanDefinition().setDate(approvalDate);
+    public void setDate(Date date) {
+        this.getPlanDefinition().setDate(date);
     }
 
     @Override
@@ -232,10 +232,16 @@ class PlanDefinitionAdapter extends ResourceAdapter implements IBaseKnowledgeArt
 
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws ClassCastException {
+            throws UnprocessableEntityException {
         this.getPlanDefinition()
                 .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> (RelatedArtifact) ra)
+                .map(ra -> {
+                    try {
+                        return (RelatedArtifact) ra;
+                    } catch (ClassCastException e) {
+                        throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
+                    }
+                })
                         .collect(Collectors.toList()));
     }
 

@@ -16,7 +16,7 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
 
     @Override
     public LibraryAdapter createLibrary(IBaseResource library) {
-        return new org.opencds.cqf.fhir.utility.adapter.r5.r5LibraryAdapter(library);
+        return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter(library);
     }
 
     @Override

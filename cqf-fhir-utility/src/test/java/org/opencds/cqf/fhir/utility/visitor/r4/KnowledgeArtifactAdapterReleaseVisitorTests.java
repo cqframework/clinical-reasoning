@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
@@ -336,7 +336,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
                 resource -> {
                     assertNotNull(resource);
                     if (!resource.getClass().getSimpleName().equals("ValueSet")) {
-                        IBaseKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
+                        KnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();
                         Calendar calendar = new GregorianCalendar();
@@ -452,7 +452,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library releasedLibrary = spyRepository.read(
                 Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         Optional<Extension> maybeReleaseLabel = releasedLibrary.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.releaseLabelUrl))
+                .filter(ext -> ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
         assertTrue(((StringType) maybeReleaseLabel.get().getValue()).getValue().equals(releaseLabel));

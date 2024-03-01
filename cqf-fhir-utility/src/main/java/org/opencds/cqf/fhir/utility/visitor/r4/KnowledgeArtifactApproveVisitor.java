@@ -19,8 +19,8 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
@@ -108,13 +108,13 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
     }
 
     @Override
-    public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
+    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
     @Override
     public IBase visit(
-            IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
+            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 

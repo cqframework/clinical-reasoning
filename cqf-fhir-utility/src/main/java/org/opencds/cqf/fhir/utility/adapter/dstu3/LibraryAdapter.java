@@ -173,8 +173,8 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     }
 
     @Override
-    public void setDate(Date approvalDate) {
-        this.getLibrary().setDate(approvalDate);
+    public void setDate(Date date) {
+        this.getLibrary().setDate(date);
     }
 
     @Override
@@ -210,10 +210,16 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
 
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws ClassCastException {
+            throws UnprocessableEntityException {
         this.getLibrary()
                 .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> (RelatedArtifact) ra)
+                        .map(ra -> {
+                            try {
+                                return (RelatedArtifact) ra;
+                            } catch (ClassCastException e) {
+                                throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
+                            }
+                        })
                         .collect(Collectors.toList()));
     }
 

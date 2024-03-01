@@ -28,13 +28,12 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -51,8 +50,8 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
 
         // remove release label and extension
         List<Extension> removeReleaseLabelAndDescription = libRes.getExtension().stream()
-                .filter(ext -> !ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.releaseDescriptionUrl)
-                        && !ext.getUrl().equals(IBaseKnowledgeArtifactAdapter.releaseLabelUrl))
+                .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
+                        && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .collect(Collectors.toList());
         libRes.setExtension(removeReleaseLabelAndDescription);
         // remove approval date
@@ -87,7 +86,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
         TreeSet<String> ownedResourceUrls = createOwnedResourceUrlCache(resourcesToCreate);
         for (int i = 0; i < resourcesToCreate.size(); i++) {
-            KnowledgeArtifactAdapter newResourceAdapter = new KnowledgeArtifactAdapter(resourcesToCreate.get(i));
+            KnowledgeArtifactAdapter newResourceAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
             updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList);
             updateRelatedArtifactUrlsWithNewVersions(
                     library.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
@@ -103,13 +102,13 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
     }
 
     @Override
-    public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
+    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
     @Override
     public IBase visit(
-            IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
+            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
@@ -127,7 +126,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         String draftVersionUrl = Canonicals.getUrl(resource.getUrl()) + "|" + draftVersion;
 
         // TODO: Decide if we need both of these checks
-        Optional<IBaseResource> existingArtifactsWithMatchingUrl = IBaseKnowledgeArtifactAdapter.findLatestVersion(
+        Optional<IBaseResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion(
                 (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
                         repository, new CanonicalType(draftVersionUrl)));
         Optional<MetadataResource> draftVersionAlreadyInBundle = resourcesToCreate.stream()
@@ -142,7 +141,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         }
 
         if (newResource == null) {
-            IBaseKnowledgeArtifactAdapter sourceResourceAdapter =
+            KnowledgeArtifactAdapter sourceResourceAdapter =
                     new AdapterFactory().createKnowledgeArtifactAdapter(resource);
             sourceResourceAdapter.setEffectivePeriod(null);
             newResource = resource.copy();
@@ -225,7 +224,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         TreeSet<String> retval = new TreeSet<String>();
         resources.stream()
                 .map(resource -> new AdapterFactory().createKnowledgeArtifactAdapter(resource))
-                .map(IBaseKnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
+                .map(KnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
                 .flatMap(List::stream)
                 .map(ra -> (RelatedArtifact) ra)
                 .filter(RelatedArtifact::hasResource)

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -12,30 +12,33 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.DateTimeType;
-import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Period;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class r5LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.LibraryAdapter {
+public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.LibraryAdapter {
 
     private Library library;
 
-    public r5LibraryAdapter(IBaseResource library) {
+    public LibraryAdapter(IBaseResource library) {
         super(library);
-
         if (!library.fhirType().equals("Library")) {
             throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
         }
-
         this.library = (Library) library;
+    }
+
+    public LibraryAdapter(Library library) {
+        super(library);
+        this.library = library;
     }
 
     protected Library getLibrary() {
@@ -94,7 +97,8 @@ public class r5LibraryAdapter extends ResourceAdapter implements org.opencds.cqf
 
     @Override
     public void setContent(List<? extends ICompositeType> attachments) {
-        var castAttachments = attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
+        List<Attachment> castAttachments =
+                attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
         this.getLibrary().setContent(castAttachments);
     }
 
@@ -123,13 +127,28 @@ public class r5LibraryAdapter extends ResourceAdapter implements org.opencds.cqf
     }
 
     @Override
+    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
+            throws UnprocessableEntityException {
+        this.getLibrary()
+                .setRelatedArtifact(relatedArtifacts.stream()
+                .map(ra -> {
+                    try {
+                        return (RelatedArtifact) ra;
+                    } catch (ClassCastException e) {
+                        throw new UnprocessableEntityException("All related artifacts must be of type " + RelatedArtifact.class.getName());
+                    }
+                })
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }
 
     @Override
     public Date getApprovalDate() {
-        return this.library.getApprovalDate();
+        return this.getLibrary().getApprovalDate();
     }
 
     @Override
@@ -156,16 +175,22 @@ public class r5LibraryAdapter extends ResourceAdapter implements org.opencds.cqf
     }
 
     @Override
+    public void setEffectivePeriod(ICompositeType effectivePeriod) {
+        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
+            throw new UnprocessableEntityException("EffectivePeriod must be org.hl7.fhir.r4.model.Period");
+        }
+        this.getLibrary().setEffectivePeriod((Period) effectivePeriod);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return this.getLibrary().getRelatedArtifact();
     }
 
     @Override
-    public void setEffectivePeriod(ICompositeType effectivePeriod) {
-        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be org.hl7.fhir.r5.model.Period");
-        }
-        this.getLibrary().setEffectivePeriod((Period) effectivePeriod);
+    public void setApprovalDate(Date approvalDate) {
+        this.getLibrary().setApprovalDate(approvalDate);
     }
 
     @Override
@@ -181,23 +206,10 @@ public class r5LibraryAdapter extends ResourceAdapter implements org.opencds.cqf
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void setApprovalDate(Date approvalDate) {
-        this.getLibrary().setApprovalDate(approvalDate);
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getComponents() {
         return this.getRelatedArtifactsOfType("composed-of");
-    }
-
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws ClassCastException {
-        this.getLibrary()
-                .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> (RelatedArtifact) ra)
-                        .collect(Collectors.toList()));
     }
 
     @Override

@@ -34,7 +34,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
@@ -93,8 +93,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         params.addParameter("version", version);
         // Root Artifact must have approval date, releaseLabel and releaseDescription for this test
         assertTrue(library.hasApprovalDate());
-        assertTrue(library.hasExtension(IBaseKnowledgeArtifactAdapter.releaseDescriptionUrl));
-        assertTrue(library.hasExtension(IBaseKnowledgeArtifactAdapter.releaseLabelUrl));
+        assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
+        assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
         assertTrue(library.hasApprovalDate());
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, spyRepository, params);
         // 1 time for setup
@@ -110,8 +110,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         assertTrue(lib.getStatus() == Enumerations.PublicationStatus.DRAFT);
         assertTrue(lib.getVersion().equals(draftedVersion));
         assertFalse(lib.hasApprovalDate());
-        assertFalse(lib.hasExtension(IBaseKnowledgeArtifactAdapter.releaseDescriptionUrl));
-        assertFalse(lib.hasExtension(IBaseKnowledgeArtifactAdapter.releaseLabelUrl));
+        assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
+        assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
         List<RelatedArtifact> relatedArtifacts = lib.getRelatedArtifact();
         assertTrue(!relatedArtifacts.isEmpty());
         MetadataResourceHelper.forEachMetadataResource(
@@ -122,7 +122,7 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
                                     .getRelatedArtifact();
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
-                            if (IBaseKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
+                            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
                                 assertTrue(Canonicals.getVersion(relatedArtifact.getResource())
                                         .equals(draftedVersion));
                             }

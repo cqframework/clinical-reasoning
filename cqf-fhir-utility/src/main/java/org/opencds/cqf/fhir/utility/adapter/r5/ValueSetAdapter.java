@@ -136,7 +136,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
-    public void setDateElement(IPrimitiveType<Date> date) {
+    public void setDateElement(IPrimitiveType<Date> date) throws UnprocessableEntityException{
         if (date != null && !(date instanceof DateTimeType)) {
             throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
         }
@@ -148,6 +148,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
         return this.getValueSet().getEffectivePeriod();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return this.getValueSet().getRelatedArtifact();

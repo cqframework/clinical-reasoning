@@ -7,7 +7,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 
 public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.AdapterFactory {
@@ -21,8 +21,8 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         }
     }
 
-    public IBaseKnowledgeArtifactAdapter createKnowledgeArtifactAdapter(MetadataResource resource) {
-        IBaseKnowledgeArtifactAdapter retval;
+    public KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(MetadataResource resource) {
+        KnowledgeArtifactAdapter retval;
         if (resource.fhirType().equals("Library")) {
             retval = createLibrary(resource);
         } else if (resource.fhirType().equals("PlanDefinition")) {
@@ -30,14 +30,14 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         } else if (resource.fhirType().equals("ValueSet")) {
             retval = new org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter((ValueSet) resource);
         } else {
-            retval = new KnowledgeArtifactAdapter(resource);
+            retval = new org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter(resource);
         }
         return retval;
     }
 
     @Override
     public LibraryAdapter createLibrary(IBaseResource library) {
-        return new r4LibraryAdapter(library);
+        return new org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter(library);
     }
 
     @Override

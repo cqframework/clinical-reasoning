@@ -31,8 +31,8 @@ import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
@@ -200,7 +200,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             List<CanonicalType> forceArtifactVersion)
             throws PreconditionFailedException {
         if (resource != null) {
-            IBaseKnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
+            KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
             findUnsupportedCapability(resource, capability);
             processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
             boolean entryExists = bundle.getEntry().stream()
@@ -246,13 +246,13 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
     }
 
     @Override
-    public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
+    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
     @Override
     public IBase visit(
-            IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
+            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 

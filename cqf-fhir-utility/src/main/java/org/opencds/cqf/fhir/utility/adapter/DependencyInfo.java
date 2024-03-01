@@ -1,8 +1,9 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public class DependencyInfo implements IDependencyInfo {
     // TODO: Need for figuring out how to determine which package the dependency is in.
@@ -13,7 +14,8 @@ public class DependencyInfo implements IDependencyInfo {
 
     public DependencyInfo() {}
 
-    public DependencyInfo(String referenceSource, String reference, List<? extends IBaseExtension<?, ?>> extensionList) {
+    public DependencyInfo(
+            String referenceSource, String reference, List<? extends IBaseExtension<?, ?>> extensionList) {
         this.referenceSource = referenceSource;
         this.reference = reference;
         this.extensionList = extensionList;
@@ -47,15 +49,26 @@ public class DependencyInfo implements IDependencyInfo {
         this.referencePackageId = referencePackageId;
     }
 
-    public static DependencyInfo convertRelatedArtifact(RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
-    }
-
-    public static DependencyInfo convertRelatedArtifact(org.hl7.fhir.dstu3.model.RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource().getReference(), ra.getExtension());
-    }
-
-    public static DependencyInfo convertRelatedArtifact(org.hl7.fhir.r5.model.RelatedArtifact ra, String source) {
-        return new DependencyInfo(source, ra.getResource(), ra.getExtension());
+    public static IDependencyInfo convertRelatedArtifact(ICompositeType ra, String source) {
+        if (ra instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
+            return new DependencyInfo(
+                    source,
+                    ((org.hl7.fhir.dstu3.model.RelatedArtifact) ra)
+                            .getResource()
+                            .getReference(),
+                    ((org.hl7.fhir.dstu3.model.RelatedArtifact) ra).getExtension());
+        } else if (ra instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
+            return new DependencyInfo(
+                    source,
+                    ((org.hl7.fhir.r4.model.RelatedArtifact) ra).getResource(),
+                    ((org.hl7.fhir.r4.model.RelatedArtifact) ra).getExtension());
+        } else if (ra instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
+            return new DependencyInfo(
+                    source,
+                    ((org.hl7.fhir.r5.model.RelatedArtifact) ra).getResource(),
+                    ((org.hl7.fhir.r5.model.RelatedArtifact) ra).getExtension());
+        } else {
+            throw new UnprocessableEntityException("A valid RelatedArtifact object must be provided");
+        }
     }
 }

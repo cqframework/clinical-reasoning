@@ -1,15 +1,23 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
@@ -69,6 +77,11 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
+    public boolean hasVersion() {
+        return this.getValueSet().hasVersion();
+    }
+
+    @Override
     public void setVersion(String version) {
         this.getValueSet().setVersion(version);
     }
@@ -113,22 +126,80 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
+    public Date getDate() {
+        return this.getValueSet().getDate();
+    }
+
+    @Override
+    public void setDate(Date date) {
+        this.getValueSet().setDate(date);
+    }
+
+    @Override
+    public void setDateElement(IPrimitiveType<Date> date) {
+        if (date != null && !(date instanceof DateTimeType)) {
+            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
+        }
+        this.getValueSet().setDateElement((DateTimeType) date);
+    }
+
+    @Override
     public ICompositeType getEffectivePeriod() {
-        return new Period();
+        return this.getValueSet().getEffectivePeriod();
     }
 
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {
-        return new ArrayList<>();
+        return this.getValueSet().getRelatedArtifact();
+    }
+
+    @Override
+    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
+        this.getValueSet()
+                .setRelatedArtifact(relatedArtifacts.stream()
+                        .map(ra -> (RelatedArtifact) ra)
+                        .collect(Collectors.toList()));
     }
 
     @Override
     public List<RelatedArtifact> getComponents() {
-        return new ArrayList<>();
+        return this.getRelatedArtifactsOfType("composed-of");
     }
 
     @Override
     public void setApprovalDate(Date approvalDate) {
         this.valueSet.setApprovalDate(approvalDate);
+    }
+
+    @Override
+    public void setEffectivePeriod(ICompositeType effectivePeriod) {
+        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
+            throw new UnprocessableEntityException("EffectivePeriod must be org.hl7.fhir.r5.model.Period");
+        }
+        this.getValueSet().setEffectivePeriod((Period) effectivePeriod);
+    }
+
+    @Override
+    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
+        RelatedArtifactType type;
+        try {
+            type = RelatedArtifactType.fromCode(codeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid related artifact code");
+        }
+        return this.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == type)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void setStatus(String statusCodeString) {
+        PublicationStatus type;
+        try {
+            type = PublicationStatus.fromCode(statusCodeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid status code");
+        }
+        this.getValueSet().setStatus(type);
     }
 }

@@ -42,28 +42,26 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisitor {
+public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
 
-    public IBase visit(r4LibraryAdapter rootLibraryAdapter, Repository repository, Parameters operationParameters) {
+    @Override
+    public IBase visit(LibraryAdapter rootLibraryAdapter, Repository repository, IBaseParameters operationParameters) {
         boolean latestFromTxServer = ((Parameters) operationParameters).getParameterBool("latestFromTxServer");
 
         String version = MetadataResourceHelper.getParameter("version", operationParameters, StringType.class)
@@ -95,7 +93,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
             throw new NotImplementedOperationException("Support for 'latestFromTxServer' is not yet implemented.");
         }
         checkReleaseVersion(version, versionBehaviorCode);
-        Library rootLibrary = rootLibraryAdapter.get();
+        Library rootLibrary = (Library) rootLibraryAdapter.get();
         Date currentApprovalDate = rootLibraryAdapter.getApprovalDate();
         checkReleasePreconditions(rootLibrary, currentApprovalDate);
 
@@ -134,13 +132,16 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
         for (MetadataResource artifact : releasedResources) {
             transactionBundle.addEntry(PackageHelper.createEntry(artifact, true));
 
-            r4KnowledgeArtifactAdapter artifactAdapter = new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
-            List<RelatedArtifact> components = artifactAdapter.getComponents();
+            IBaseKnowledgeArtifactAdapter artifactAdapter =
+                    new AdapterFactory().createKnowledgeArtifactAdapter(artifact);
+            List<RelatedArtifact> components = artifactAdapter.getComponents().stream()
+                    .map(ra -> (RelatedArtifact) ra)
+                    .collect(Collectors.toList());
             // add all root artifact components and child artifact components recursively as root artifact dependencies
             for (RelatedArtifact component : components) {
                 MetadataResource resource;
                 // if the relatedArtifact is Owned, need to update the reference to the new Version
-                if (r4KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
+                if (IBaseKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
                     resource = checkIfReferenceInList(component, releasedResources)
                             // should never happen since we check all references as part of `internalRelease`
                             .orElseThrow(() ->
@@ -188,7 +189,10 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
         }
         // removed duplicates and add
         List<RelatedArtifact> distinctResolvedRelatedArtifacts = new ArrayList<>();
-        for (RelatedArtifact resolvedRelatedArtifact : rootLibraryAdapter.getRelatedArtifact()) {
+        var relatedArtifacts = rootLibraryAdapter.getRelatedArtifact().stream()
+                .map(ra -> (RelatedArtifact) ra)
+                .collect(Collectors.toList());
+        for (RelatedArtifact resolvedRelatedArtifact : relatedArtifacts) {
             boolean isDistinct = !distinctResolvedRelatedArtifacts.stream().anyMatch(distinctRelatedArtifact -> {
                 boolean referenceNotInArray =
                         distinctRelatedArtifact.getResource().equals(resolvedRelatedArtifact.getResource());
@@ -220,7 +224,7 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
     }
 
     private List<MetadataResource> internalRelease(
-            r4KnowledgeArtifactAdapter artifactAdapter,
+            IBaseKnowledgeArtifactAdapter artifactAdapter,
             String version,
             Period rootEffectivePeriod,
             CRMIReleaseVersionBehaviorCodes versionBehavior,
@@ -232,9 +236,9 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
 
         // Step 1: Update the Date and the version
         // Need to update the Date element because we're changing the status
-        artifactAdapter.get().setDate(new Date());
-        artifactAdapter.get().setStatus(Enumerations.PublicationStatus.ACTIVE);
-        artifactAdapter.get().setVersion(version);
+        artifactAdapter.setDate(new Date());
+        artifactAdapter.setStatus("active");
+        artifactAdapter.setVersion(version);
 
         // Step 2: propagate effectivePeriod if it doesn't exist
         Period effectivePeriod = (Period) artifactAdapter.getEffectivePeriod();
@@ -245,10 +249,12 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
             artifactAdapter.setEffectivePeriod(rootEffectivePeriod);
         }
 
-        resourcesToUpdate.add(artifactAdapter.get());
-
+        resourcesToUpdate.add((MetadataResource) artifactAdapter.get());
+        var ownedRelatedArtifacts = artifactAdapter.getOwnedRelatedArtifacts().stream()
+                .map(ra -> (RelatedArtifact) ra)
+                .collect(Collectors.toList());
         // Step 3 : Get all the OWNED relatedArtifacts
-        for (RelatedArtifact ownedRelatedArtifact : artifactAdapter.getOwnedRelatedArtifacts()) {
+        for (RelatedArtifact ownedRelatedArtifact : ownedRelatedArtifacts) {
             if (ownedRelatedArtifact.hasResource()) {
                 MetadataResource referencedResource;
                 CanonicalType ownedResourceReference = ownedRelatedArtifact.getResourceElement();
@@ -262,14 +268,13 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                     // of the referenced artifact should be used. If a version is specified then
                     // `searchRepositoryByCanonicalWithPaging` will
                     // return that version.
-                    referencedResource = KnowledgeArtifactAdapter.findLatestVersion(
+                    referencedResource = (MetadataResource) IBaseKnowledgeArtifactAdapter.findLatestVersion(
                                     (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
                                             repository, ownedResourceReference))
                             .orElseThrow(() -> new ResourceNotFoundException(String.format(
                                     "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but was not found on the server.",
-                                    ownedResourceReference.getValueAsString(),
-                                    artifactAdapter.get().getUrl())));
-                    r4KnowledgeArtifactAdapter searchResultAdapter =
+                                    ownedResourceReference.getValueAsString(), artifactAdapter.getUrl())));
+                    IBaseKnowledgeArtifactAdapter searchResultAdapter =
                             new AdapterFactory().createKnowledgeArtifactAdapter(referencedResource);
 
                     if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior
@@ -309,9 +314,10 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
                     .flatMap(include -> include.getValueSet().stream())
                     .collect(Collectors.toList());
             for (CanonicalType value : valueSets) {
-                KnowledgeArtifactAdapter.findLatestVersion(
+                IBaseKnowledgeArtifactAdapter.findLatestVersion(
                                 (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, value))
-                        .ifPresent(childVs -> checkNonExperimental(childVs, experimentalBehavior, repository));
+                        .ifPresent(childVs ->
+                                checkNonExperimental((MetadataResource) childVs, experimentalBehavior, repository));
             }
         }
     }
@@ -492,30 +498,22 @@ public class KnowledgeArtifactReleaseVisitor implements r4KnowledgeArtifactVisit
         }
     }
 
-    public IBase visit(
-            IBasePlanDefinitionAdapter planDefinition, Repository repository, Parameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
+    @Override
     public IBase visit(
             IBasePlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, Parameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
+    @Override
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(
-            IBaseKnowledgeArtifactAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    public IBase visit(IBaseLibraryAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
+            IBaseKnowledgeArtifactAdapter knowledgeArtifactAdapter,
+            Repository repository,
+            IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 }

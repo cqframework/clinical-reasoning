@@ -24,7 +24,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -33,16 +32,15 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisitor {
+public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor {
     // as per http://hl7.org/fhir/R4/resource.html#canonical
     public static final List<ResourceType> canonicalResourceTypes =
             // can't use List.of for Android 26 compatibility
@@ -107,7 +105,8 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
                     ResourceType.NamingSystem,
                     ResourceType.TerminologyCapabilities)));
 
-    public Bundle visit(r4LibraryAdapter library, Repository repository, Parameters packageParameters) {
+    @Override
+    public Bundle visit(LibraryAdapter library, Repository repository, IBaseParameters packageParameters) {
         Optional<String> artifactRoute = MetadataResourceHelper.getParameter(
                         "artifactRoute", packageParameters, UriType.class)
                 .map(r -> r.getValue());
@@ -159,7 +158,7 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
         if (count.isPresent() && count.get() < 0) {
             throw new UnprocessableEntityException("'count' must be non-negative");
         }
-        Library resource = library.get();
+        Library resource = (Library) library.get();
         // TODO: In the case of a released (active) root Library we can depend on the relatedArtifacts as a
         // comprehensive manifest
         Bundle packagedBundle = new Bundle();
@@ -201,7 +200,7 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
             List<CanonicalType> forceArtifactVersion)
             throws PreconditionFailedException {
         if (resource != null) {
-            r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
+            IBaseKnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
             findUnsupportedCapability(resource, capability);
             processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
             boolean entryExists = bundle.getEntry().stream()
@@ -246,19 +245,18 @@ public class KnowledgeArtifactPackageVisitor implements r4KnowledgeArtifactVisit
         }
     }
 
-    public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
+    @Override
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }

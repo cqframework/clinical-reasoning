@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -20,7 +21,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
@@ -29,19 +29,19 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor {
-    public Bundle visit(r4LibraryAdapter library, Repository repository, Parameters draftParameters) {
+public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
+    @Override
+    public Bundle visit(LibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
         String version = MetadataResourceHelper.getParameter("version", draftParameters, StringType.class)
                 .map(r -> r.getValue())
                 .orElseThrow(() -> new UnprocessableEntityException("The version argument is required"));
@@ -102,19 +102,18 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         // what is dependency, where did it originate? potentially the package?
     }
 
-    public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
+    @Override
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
@@ -128,8 +127,8 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
         String draftVersionUrl = Canonicals.getUrl(resource.getUrl()) + "|" + draftVersion;
 
         // TODO: Decide if we need both of these checks
-        Optional<MetadataResource> existingArtifactsWithMatchingUrl =
-                KnowledgeArtifactAdapter.findLatestVersion((Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
+        Optional<IBaseResource> existingArtifactsWithMatchingUrl = IBaseKnowledgeArtifactAdapter.findLatestVersion(
+                (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
                         repository, new CanonicalType(draftVersionUrl)));
         Optional<MetadataResource> draftVersionAlreadyInBundle = resourcesToCreate.stream()
                 .filter(res -> res.getUrl().equals(Canonicals.getUrl(draftVersionUrl))
@@ -137,20 +136,23 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
                 .findAny();
         MetadataResource newResource = null;
         if (existingArtifactsWithMatchingUrl.isPresent()) {
-            newResource = existingArtifactsWithMatchingUrl.get();
+            newResource = (MetadataResource) existingArtifactsWithMatchingUrl.get();
         } else if (draftVersionAlreadyInBundle.isPresent()) {
             newResource = draftVersionAlreadyInBundle.get();
         }
 
         if (newResource == null) {
-            r4KnowledgeArtifactAdapter sourceResourceAdapter =
+            IBaseKnowledgeArtifactAdapter sourceResourceAdapter =
                     new AdapterFactory().createKnowledgeArtifactAdapter(resource);
             sourceResourceAdapter.setEffectivePeriod(null);
             newResource = resource.copy();
             newResource.setStatus(Enumerations.PublicationStatus.DRAFT);
             newResource.setVersion(draftVersion);
             resourcesToCreate.add(newResource);
-            for (RelatedArtifact ra : sourceResourceAdapter.getOwnedRelatedArtifacts()) {
+            var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts().stream()
+                    .map(ra -> (RelatedArtifact) ra)
+                    .collect(Collectors.toList());
+            for (RelatedArtifact ra : ownedRelatedArtifacts) {
                 // If it’s an owned RelatedArtifact composed-of then we want to copy it
                 // (references are updated in createDraftBundle before adding to the bundle
                 // hence they are ignored here)
@@ -222,9 +224,10 @@ public class KnowledgeArtifactDraftVisitor implements r4KnowledgeArtifactVisitor
     private TreeSet<String> createOwnedResourceUrlCache(List<MetadataResource> resources) {
         TreeSet<String> retval = new TreeSet<String>();
         resources.stream()
-                .map(KnowledgeArtifactAdapter::new)
-                .map(KnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
+                .map(resource -> new AdapterFactory().createKnowledgeArtifactAdapter(resource))
+                .map(IBaseKnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
                 .flatMap(List::stream)
+                .map(ra -> (RelatedArtifact) ra)
                 .filter(RelatedArtifact::hasResource)
                 .map(RelatedArtifact::getResource)
                 .map(Canonicals::getUrl)

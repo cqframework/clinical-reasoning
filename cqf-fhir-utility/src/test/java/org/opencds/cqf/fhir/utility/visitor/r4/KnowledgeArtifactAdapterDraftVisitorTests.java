@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,11 +35,11 @@ import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapterDraftVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -81,11 +82,11 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactAdapterDraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(bundle);
-        r4KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1.23";
         String draftedVersion = version + "-draft";
         Parameters params = new Parameters();
@@ -121,7 +122,7 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
                                     .getRelatedArtifact();
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
-                            if (r4KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
+                            if (IBaseKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
                                 assertTrue(Canonicals.getVersion(relatedArtifact.getResource())
                                         .equals(draftedVersion));
                             }
@@ -140,8 +141,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        r4KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
         PlanDefinition planDef = spyRepository
                 .read(PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
                 .copy();
@@ -153,9 +154,9 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         MetadataResourceHelper.forEachMetadataResource(
                 returnedBundle.getEntry(),
                 resource -> {
-                    r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(baseLib);
-                    assertFalse(adapter.getEffectivePeriod().hasStart()
-                            || adapter.getEffectivePeriod().hasEnd());
+                    LibraryAdapter adapter = new AdapterFactory().createLibrary(baseLib);
+                    assertFalse(((Period) adapter.getEffectivePeriod()).hasStart()
+                            || ((Period) adapter.getEffectivePeriod()).hasEnd());
                 },
                 spyRepository);
     }
@@ -173,8 +174,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         Library baseLib = spyRepository
                 .read(Library.class, new IdType(specificationLibReference))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        r4KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
 
         try {
             libraryAdapter.accept(draftVisitor, spyRepository, params);
@@ -196,8 +197,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         Library baseLib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        r4KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
         try {
             libraryAdapter.accept(draftVisitor, spyRepository, params);
         } catch (Exception e) {
@@ -215,8 +216,8 @@ public class KnowledgeArtifactAdapterDraftVisitorTests {
         Library baseLib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        r4KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
 
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;

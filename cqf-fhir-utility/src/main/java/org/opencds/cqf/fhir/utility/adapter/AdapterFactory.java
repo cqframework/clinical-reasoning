@@ -37,7 +37,7 @@ public interface AdapterFactory {
      * @param library a FHIR Library Resource
      * @return an adapter exposing common api calls
      */
-    public IBaseLibraryAdapter createLibrary(IBaseResource library);
+    public LibraryAdapter createLibrary(IBaseResource library);
 
     /**
      * Creates an adapter that exposes common Attachment operations across multiple versions of FHIR

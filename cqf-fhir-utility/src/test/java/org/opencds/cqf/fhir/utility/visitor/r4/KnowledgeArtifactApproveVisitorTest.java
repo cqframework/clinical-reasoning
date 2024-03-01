@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -68,7 +68,7 @@ public class KnowledgeArtifactApproveVisitorTest {
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params);
@@ -98,7 +98,7 @@ public class KnowledgeArtifactApproveVisitorTest {
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params);
@@ -132,7 +132,7 @@ public class KnowledgeArtifactApproveVisitorTest {
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
         Bundle returnedResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
 
         assertNotNull(returnedResource);

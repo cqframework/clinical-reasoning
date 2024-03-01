@@ -32,6 +32,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
@@ -41,9 +42,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1.23";
         String existingVersion = "1.2.3";
         Parameters params = new Parameters();
@@ -193,7 +193,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("version", new StringType(newVersionToForce)), part("versionBehavior", new CodeType("force")));
 
@@ -231,7 +231,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params);
         } catch (Exception e) {
@@ -243,7 +243,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library2 = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
-        r4LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
+        LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
         try {
             libraryAdapter2.accept(releaseVisitor, spyRepository, params);
         } catch (UnprocessableEntityException e) {
@@ -273,8 +273,8 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library2 = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        r4LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
 
         Appender<ILoggingEvent> myMockAppender = mock(Appender.class);
         List<String> warningMessages = new ArrayList<>();
@@ -328,7 +328,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
         assertNotNull(returnResource);
         MetadataResourceHelper.forEachMetadataResource(
@@ -336,9 +336,9 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
                 resource -> {
                     assertNotNull(resource);
                     if (!resource.getClass().getSimpleName().equals("ValueSet")) {
-                        r4KnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
-                        assertTrue(adapter.getEffectivePeriod().hasStart());
-                        Date start = adapter.getEffectivePeriod().getStart();
+                        IBaseKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
+                        assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
+                        Date start = ((Period) adapter.getEffectivePeriod()).getStart();
                         Calendar calendar = new GregorianCalendar();
                         calendar.setTime(start);
                         int year = calendar.get(Calendar.YEAR);
@@ -368,7 +368,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params);
@@ -393,7 +393,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params1);
         } catch (Exception e) {
@@ -412,7 +412,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;
             Parameters params = parameters(
@@ -438,7 +438,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("releaseLabel", new StringType(releaseLabel)),
                 part("version", "1.2.3.23"),
@@ -467,7 +467,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         PreconditionFailedException maybeException = null;
         Parameters params =
@@ -490,7 +490,7 @@ public class KnowledgeArtifactAdapterReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         List<String> badVersionBehaviors = Arrays.asList("not-a-valid-option", null);
         for (String versionBehaviour : badVersionBehaviors) {
             UnprocessableEntityException maybeException = null;

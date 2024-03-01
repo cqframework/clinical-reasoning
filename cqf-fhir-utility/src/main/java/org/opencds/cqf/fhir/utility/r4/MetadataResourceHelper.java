@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 public class MetadataResourceHelper {
     public static void forEachMetadataResource(
@@ -43,22 +45,30 @@ public class MetadataResourceHelper {
     }
 
     public static <T extends Type> Optional<T> getParameter(
-            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+            String name, IBaseParameters operationParameters, Class<T> type) {
+        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
+                .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
+                .map(p -> factory.createParametersParameters(p))
                 .map(rl -> (T) rl.getValue());
     }
 
     public static <T extends IBaseResource> Optional<T> getResourceParameter(
-            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+            String name, IBaseParameters operationParameters, Class<T> type) {
+        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
+                .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
+                .map(p -> factory.createParametersParameters(p))
                 .map(rl -> (T) rl.getResource());
     }
 
     public static <T extends Type> Optional<List<T>> getListParameter(
-            String name, org.hl7.fhir.r4.model.Parameters operationParameters, Class<T> type) {
+            String name, IBaseParameters operationParameters, Class<T> type) {
+        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
+                .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameterValues(name))
                 .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
     }

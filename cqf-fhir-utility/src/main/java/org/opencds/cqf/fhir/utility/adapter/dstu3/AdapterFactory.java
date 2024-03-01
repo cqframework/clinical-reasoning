@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 
 public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.AdapterFactory {
 
@@ -15,8 +15,8 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
     }
 
     @Override
-    public IBaseLibraryAdapter createLibrary(IBaseResource library) {
-        return new LibraryAdapter(library);
+    public LibraryAdapter createLibrary(IBaseResource library) {
+        return new org.opencds.cqf.fhir.utility.adapter.dstu3.LibraryAdapter(library);
     }
 
     @Override

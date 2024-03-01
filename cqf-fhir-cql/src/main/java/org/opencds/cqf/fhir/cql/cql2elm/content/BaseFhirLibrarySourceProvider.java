@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.AttachmentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 
 /**
  * This class implements logic for extracting content from a FHIR Library resource and provides an
@@ -40,7 +40,7 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
 
     protected InputStream getContentStream(IBaseResource library, String contentType) {
 
-        IBaseLibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
+        LibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
 
         if (libraryAdapter.hasContent()) {
             for (ICompositeType attachment : libraryAdapter.getContent()) {

@@ -1,21 +1,32 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.visitor.r4.r4KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r4PlanDefinitionAdapter {
+public class PlanDefinitionAdapter extends ResourceAdapter implements IBaseKnowledgeArtifactAdapter {
 
     private PlanDefinition planDefinition;
 
@@ -31,7 +42,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     }
 
     @Override
-    public IBase accept(r4KnowledgeArtifactVisitor visitor, Repository repository, Parameters operationParameters) {
+    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }
 
@@ -80,6 +91,11 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     }
 
     @Override
+    public boolean hasVersion() {
+        return this.getPlanDefinition().hasVersion();
+    }
+
+    @Override
     public void setVersion(String version) {
         this.getPlanDefinition().setVersion(version);
     }
@@ -107,8 +123,9 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
         */
 
         // relatedArtifact[].resource
-        references.addAll(getRelatedArtifactReferences(
-                this.getPlanDefinition(), this.getPlanDefinition().getRelatedArtifact()));
+        references.addAll(this.getRelatedArtifact().stream()
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .collect(Collectors.toList()));
 
         // library[]
         List<CanonicalType> libraries = this.getPlanDefinition().getLibrary();
@@ -185,7 +202,77 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements r
     }
 
     @Override
+    public Date getDate() {
+        return this.getPlanDefinition().getDate();
+    }
+
+    @Override
+    public void setDate(Date date) {
+        this.getPlanDefinition().setDate(date);
+    }
+
+    @Override
+    public void setDateElement(IPrimitiveType<Date> date) {
+        if (date != null && !(date instanceof DateTimeType)) {
+            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
+        }
+        this.getPlanDefinition().setDateElement((DateTimeType) date);
+    }
+
+    @Override
     public Period getEffectivePeriod() {
         return this.getPlanDefinition().getEffectivePeriod();
+    }
+
+    @Override
+    public void setApprovalDate(Date date) {
+        this.getPlanDefinition().setApprovalDate(date);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RelatedArtifact> getRelatedArtifact() {
+        return this.getPlanDefinition().getRelatedArtifact();
+    }
+
+    @Override
+    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
+        this.getPlanDefinition()
+                .setRelatedArtifact(relatedArtifacts.stream()
+                        .map(ra -> (RelatedArtifact) ra)
+                        .collect(Collectors.toList()));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
+        RelatedArtifactType type;
+        try {
+            type = RelatedArtifactType.fromCode(codeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid related artifact code");
+        }
+        return this.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == type)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void setEffectivePeriod(ICompositeType effectivePeriod) {
+        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
+            throw new UnprocessableEntityException("EffectivePeriod must be org.hl7.fhir.r4.model.Period");
+        }
+        this.getPlanDefinition().setEffectivePeriod((Period) effectivePeriod);
+    }
+
+    @Override
+    public void setStatus(String statusCodeString) {
+        PublicationStatus type;
+        try {
+            type = PublicationStatus.fromCode(statusCodeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid status code");
+        }
+        this.getPlanDefinition().setStatus(type);
     }
 }

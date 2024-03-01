@@ -14,23 +14,24 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MarkdownType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IBaseKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IBaseLibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IBasePlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactApproveVisitor implements r4KnowledgeArtifactVisitor {
-    public Bundle visit(r4LibraryAdapter library, Repository repository, Parameters approveParameters) {
+public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor {
+    @Override
+    public Bundle visit(LibraryAdapter library, Repository repository, IBaseParameters approveParameters) {
         Date currentDate = new Date();
         Date approvalDate = MetadataResourceHelper.getParameter("approvalDate", approveParameters, DateType.class)
                 .map(d -> d.getValue())
@@ -48,9 +49,8 @@ public class KnowledgeArtifactApproveVisitor implements r4KnowledgeArtifactVisit
                 throw new UnprocessableEntityException(
                         "ArtifactCommentTarget URL does not match URL of resource being approved.");
             }
-            if (library.get().hasVersion()) {
-                if (!Canonicals.getVersion(artifactAssessmentTarget.get())
-                        .equals(library.get().getVersion())) {
+            if (library.hasVersion()) {
+                if (!Canonicals.getVersion(artifactAssessmentTarget.get()).equals(library.getVersion())) {
                     throw new UnprocessableEntityException(
                             "ArtifactCommentTarget version does not match version of resource being approved.");
                 }
@@ -71,9 +71,9 @@ public class KnowledgeArtifactApproveVisitor implements r4KnowledgeArtifactVisit
                 new Reference(library.get().getIdElement()));
         library.setApprovalDate(approvalDate);
         DateTimeType theDate = new DateTimeType(currentDate, TemporalPrecisionEnum.DAY);
-        library.get().setDateElement(theDate);
+        library.setDateElement(theDate);
         returnBundle.addEntry(PackageHelper.createEntry(assessment, false));
-        returnBundle.addEntry(PackageHelper.createEntry(library.get(), true));
+        returnBundle.addEntry(PackageHelper.createEntry((Library) library.get(), true));
         return repository.transaction(returnBundle);
 
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
@@ -107,19 +107,18 @@ public class KnowledgeArtifactApproveVisitor implements r4KnowledgeArtifactVisit
         return artifactAssessment;
     }
 
-    public IBase visit(IBaseLibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
+    @Override
     public IBase visit(IBaseKnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(
             IBasePlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }
 
+    @Override
     public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
         throw new NotImplementedOperationException("Not implemented");
     }

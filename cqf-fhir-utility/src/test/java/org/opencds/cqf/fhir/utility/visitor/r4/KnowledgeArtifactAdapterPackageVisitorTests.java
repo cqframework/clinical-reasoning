@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.r4LibraryAdapter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class KnowledgeArtifactAdapterPackageVisitorTests {
@@ -66,7 +66,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
 
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
@@ -85,7 +85,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         // the library contains all three capabilities
         // so we should get an error when trying with
         // any one capability
@@ -118,7 +118,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String versionToUpdateTo = "1.3.1.23";
         Parameters params = parameters(
                 part(
@@ -180,7 +180,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, countZeroParams);
         // when count = 0 only show the total
@@ -218,7 +218,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, countZeroParams);
         assertTrue(countZeroBundle.getType() == BundleType.SEARCHSET);
@@ -257,7 +257,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters emptyParams = parameters();
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, emptyParams);
         for (BundleEntryComponent component : packagedBundle.getEntry()) {
@@ -277,7 +277,7 @@ public class KnowledgeArtifactAdapterPackageVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Map<String, List<String>> includeOptions = new HashMap<String, List<String>>();
         includeOptions.put("artifact", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         includeOptions.put(

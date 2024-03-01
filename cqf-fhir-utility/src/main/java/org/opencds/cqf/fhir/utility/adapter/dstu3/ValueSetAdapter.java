@@ -1,22 +1,30 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
+class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
 
     private ValueSet valueSet;
 
@@ -41,11 +49,6 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     @Override
     public ValueSet get() {
         return this.valueSet;
-    }
-
-    @Override
-    public IIdType getId() {
-        return this.getValueSet().getIdElement();
     }
 
     @Override
@@ -76,6 +79,11 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     @Override
     public String getVersion() {
         return this.getValueSet().getVersion();
+    }
+
+    @Override
+    public boolean hasVersion() {
+        return this.getValueSet().hasVersion();
     }
 
     @Override
@@ -128,17 +136,70 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
-    public ICompositeType getEffectivePeriod() {
+    public Date getDate() {
+        return this.getValueSet().getDate();
+    }
+
+    @Override
+    public void setDate(Date date) {
+        this.getValueSet().setDate(date);
+    }
+
+    @Override
+    public void setDateElement(IPrimitiveType<Date> date) {
+        if (date != null && !(date instanceof DateTimeType)) {
+            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
+        }
+        this.getValueSet().setDateElement((DateTimeType) date);
+    }
+
+    @Override
+    public Period getEffectivePeriod() {
         return new Period();
     }
 
     @Override
-    public List<? extends ICompositeType> getRelatedArtifact() {
+    public List<RelatedArtifact> getRelatedArtifact() {
         return new ArrayList<>();
     }
 
     @Override
     public List<RelatedArtifact> getComponents() {
-        return new ArrayList<>();
+        return this.getRelatedArtifactsOfType("composed-of");
+    }
+
+    @Override
+    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
+        RelatedArtifactType type;
+        try {
+            type = RelatedArtifactType.fromCode(codeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid related artifact code");
+        }
+        return this.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == type)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
+            throws ClassCastException {
+        // do nothing
+    }
+
+    @Override
+    public void setEffectivePeriod(ICompositeType effectivePeriod) {
+        // do nothing
+    }
+
+    @Override
+    public void setStatus(String statusCodeString) {
+        PublicationStatus type;
+        try {
+            type = PublicationStatus.fromCode(statusCodeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid status code");
+        }
+        this.getValueSet().setStatus(type);
     }
 }

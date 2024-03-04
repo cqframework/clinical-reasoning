@@ -19,10 +19,8 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory;
-import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentClassifier;
@@ -31,7 +29,9 @@ import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentCont
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationTypeEnumFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDisposition;
+import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatus;
+import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory;
 
 public class ArtifactAssessmentTest {
     @Test
@@ -68,7 +68,9 @@ public class ArtifactAssessmentTest {
             if (infoType != ArtifactAssessmentContentInformationType.NULL) {
                 assertTrue(infoType.getSystem().equals(infoTypeSystem));
                 assertTrue(infoType.toCode().equals(infoTypeCodes.get(i)));
-                assertTrue(new ArtifactAssessmentContentInformationTypeEnumFactory().toCode(infoType).equals(infoTypeCodes.get(i)));
+                assertTrue(new ArtifactAssessmentContentInformationTypeEnumFactory()
+                        .toCode(infoType)
+                        .equals(infoTypeCodes.get(i)));
             }
         }
         infoTypeCodes.forEach(code -> {
@@ -112,8 +114,8 @@ public class ArtifactAssessmentTest {
             var invalidCodeException = "";
             try {
                 ArtifactAssessmentContentClassifier.fromCode(code);
-                new ArtifactAssessmentContentClassifierEnumFactory().fromCode(code);    
-                new ArtifactAssessmentContentClassifierEnumFactory().fromType(new StringType(code));    
+                new ArtifactAssessmentContentClassifierEnumFactory().fromCode(code);
+                new ArtifactAssessmentContentClassifierEnumFactory().fromType(new StringType(code));
             } catch (FHIRException e) {
                 invalidCodeException = e.getMessage();
             }

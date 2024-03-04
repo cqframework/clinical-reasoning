@@ -191,7 +191,7 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
             if (ra != null && !(ra instanceof RelatedArtifact)) {
                 throw new UnprocessableEntityException(
                         "All related artifacts must be of type " + RelatedArtifact.class.getName());
-            };
+            }
         });
         // do nothing
     }

@@ -62,12 +62,22 @@ public class ArtifactAssessmentTest {
 
         var infoTypeSystem = "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
         var infoTypeCodes = List.of("comment", "classifier", "rating", "container", "response", "change-request");
+        var infoTypeDefinitions = List.of(
+                "A comment on the artifact.",
+                "A classifier of the artifact.",
+                "A rating  of the artifact.",
+                "A container for multiple components.",
+                "A response to a comment.",
+                "A change request for the artifact.");
+        var infoTypeDisplays = List.of("Comment", "Classifier", "Rating", "Container", "Response", "Change Request");
         var infoTypesList = Arrays.asList(ArtifactAssessmentContentInformationType.values());
         for (var i = 0; i < infoTypesList.size(); i++) {
             var infoType = infoTypesList.get(i);
             if (infoType != ArtifactAssessmentContentInformationType.NULL) {
                 assertTrue(infoType.getSystem().equals(infoTypeSystem));
                 assertTrue(infoType.toCode().equals(infoTypeCodes.get(i)));
+                assertTrue(infoType.getDefinition().equals(infoTypeDefinitions.get(i)));
+                assertTrue(infoType.getDisplay().equals(infoTypeDisplays.get(i)));
                 assertTrue(new ArtifactAssessmentContentInformationTypeEnumFactory()
                         .toCode(infoType)
                         .equals(infoTypeCodes.get(i)));
@@ -101,6 +111,40 @@ public class ArtifactAssessmentTest {
                 "downcode3",
                 "upcode1",
                 "upcode2");
+        var contentClassifierDefinitions = List.of(
+                "High quality evidence.",
+                "Moderate quality evidence.",
+                "Low quality evidence.",
+                "Very low quality evidence.",
+                "No serious concern.",
+                "Serious concern.",
+                "Very serious concern.",
+                "Extremely serious concern.",
+                "Possible reason for increasing quality rating was checked and found to be present.",
+                "Possible reason for increasing quality rating was checked and found to be absent.",
+                "No change to quality rating.",
+                "Reduce quality rating by 1.",
+                "Reduce quality rating by 2.",
+                "Reduce quality rating by 3.",
+                "Increase quality rating by 1.",
+                "Increase quality rating by 2.");
+        var contentClassifierDisplays = List.of(
+                "High quality",
+                "Moderate quality",
+                "Low quality",
+                "Very low quality",
+                "No serious concern",
+                "Serious concern",
+                "Very serious concern",
+                "Extremely serious concern",
+                "Present",
+                "Absent",
+                "No change to rating",
+                "Reduce rating: -1",
+                "Reduce rating: -2",
+                "Reduce rating: -3",
+                "Increase rating: +1",
+                "Increase rating: +2");
         var contentClassifierSystem = "http://terminology.hl7.org/CodeSystem/certainty-rating";
         var contentClassifiersList = Arrays.asList(ArtifactAssessmentContentClassifier.values());
         for (var i = 0; i < contentClassifiersList.size(); i++) {
@@ -108,6 +152,11 @@ public class ArtifactAssessmentTest {
             if (classifier != ArtifactAssessmentContentClassifier.NULL) {
                 assertTrue(classifier.getSystem().equals(contentClassifierSystem));
                 assertTrue(classifier.toCode().equals(contentClassifierCodes.get(i)));
+                assertTrue(classifier.getDefinition().equals(contentClassifierDefinitions.get(i)));
+                assertTrue(classifier.getDisplay().equals(contentClassifierDisplays.get(i)));
+                assertTrue(new ArtifactAssessmentContentClassifierEnumFactory()
+                        .toCode(classifier)
+                        .equals(contentClassifierCodes.get(i)));
             }
         }
         contentClassifierCodes.forEach(code -> {
@@ -132,12 +181,37 @@ public class ArtifactAssessmentTest {
                 "duplicate",
                 "applied",
                 "published");
+        var workflowStatusDefinitions = List.of(
+                "The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken.",
+                "The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment.",
+                "The comment is waiting for input from a specific party before next steps can be taken.",
+                "The comment has been resolved and no changes resulted from the resolution",
+                "The comment has been resolved and changes are required to address the comment",
+                "The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred",
+                "The comment is a duplicate of another comment already received",
+                "The comment is resolved and any necessary changes have been applied",
+                "The necessary changes to the artifact have been published in a new version of the artifact");
+        var workflowStatusDisplays = List.of(
+                "Submitted",
+                "Triaged",
+                "Waiting for Input",
+                "Resolved - No Change",
+                "Resolved - Change Required",
+                "Deferred",
+                "Duplicate",
+                "Applied",
+                "Published");
         var workflowStatusesList = Arrays.asList(ArtifactAssessmentWorkflowStatus.values());
         for (var i = 0; i < workflowStatusesList.size(); i++) {
             var workflowStatus = workflowStatusesList.get(i);
             if (workflowStatus != ArtifactAssessmentWorkflowStatus.NULL) {
                 assertTrue(workflowStatus.getSystem().equals(workflowStatusSystem));
                 assertTrue(workflowStatus.toCode().equals(workflowStatusCodes.get(i)));
+                assertTrue(workflowStatus.getDefinition().equals(workflowStatusDefinitions.get(i)));
+                assertTrue(workflowStatus.getDisplay().equals(workflowStatusDisplays.get(i)));
+                assertTrue(new ArtifactAssessmentWorkflowStatusEnumFactory()
+                        .toCode(workflowStatus)
+                        .equals(workflowStatusCodes.get(i)));
             }
         }
         workflowStatusCodes.forEach(code -> {
@@ -157,6 +231,18 @@ public class ArtifactAssessmentTest {
                 "persuasive",
                 "persuasive-with-modification",
                 "not-persuasive-with-modification");
+        var dispositionDefinitions = List.of(
+                "The comment is unresolved",
+                "The comment is not persuasive (rejected in full)",
+                "The comment is persuasive (accepted in full)",
+                "The comment is persuasive with modification (partially accepted)",
+                "The comment is not persuasive with modification (partially rejected)");
+        var dispositionDisplays = List.of(
+                "Unresolved",
+                "Not Persuasive",
+                "Persuasive",
+                "Persuasive with Modification",
+                "Not Persuasive with Modification");
         var dispositionSystem = "http://hl7.org/fhir/artifactassessment-disposition";
         var dispositionsList = Arrays.asList(ArtifactAssessmentDisposition.values());
         for (var i = 0; i < dispositionsList.size(); i++) {
@@ -164,6 +250,11 @@ public class ArtifactAssessmentTest {
             if (disposition != ArtifactAssessmentDisposition.NULL) {
                 assertTrue(disposition.getSystem().equals(dispositionSystem));
                 assertTrue(disposition.toCode().equals(dispositionCodes.get(i)));
+                assertTrue(disposition.getDefinition().equals(dispositionDefinitions.get(i)));
+                assertTrue(disposition.getDisplay().equals(dispositionDisplays.get(i)));
+                assertTrue(new ArtifactAssessmentDispositionEnumFactory()
+                        .toCode(disposition)
+                        .equals(dispositionCodes.get(i)));
             }
         }
         dispositionCodes.forEach(code -> {

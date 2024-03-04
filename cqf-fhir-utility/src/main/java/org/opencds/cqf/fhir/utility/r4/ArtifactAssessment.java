@@ -143,7 +143,7 @@ public class ArtifactAssessment extends Basic {
                 case COMMENT:
                     return "Comment";
                 case CLASSIFIER:
-                    return "Classifer";
+                    return "Classifier";
                 case RATING:
                     return "Rating";
                 case CONTAINER:

@@ -88,6 +88,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters);
 
+    @SuppressWarnings("unchecked")
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getOwnedRelatedArtifacts() {
         return (List<T>) getRelatedArtifactsOfType("composed-of").stream()
                 .filter(ra -> checkIfRelatedArtifactIsOwned(ra))

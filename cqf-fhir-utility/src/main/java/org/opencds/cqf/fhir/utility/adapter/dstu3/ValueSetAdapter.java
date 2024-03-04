@@ -187,13 +187,11 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
             throws UnprocessableEntityException {
-        relatedArtifacts.stream().map(ra -> {
-            try {
-                return (RelatedArtifact) ra;
-            } catch (ClassCastException e) {
+        relatedArtifacts.stream().forEach(ra -> {
+            if (ra != null && !(ra instanceof RelatedArtifact)) {
                 throw new UnprocessableEntityException(
                         "All related artifacts must be of type " + RelatedArtifact.class.getName());
-            }
+            };
         });
         // do nothing
     }

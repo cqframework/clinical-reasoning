@@ -51,7 +51,7 @@ public class MetadataResourceHelper {
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
                 .map(p -> factory.createParametersParameters(p))
-                .map(rl -> (T) rl.getValue());
+                .map(parametersParameters -> (T) parametersParameters.getValue());
     }
 
     public static <T extends IBaseResource> Optional<T> getResourceParameter(
@@ -61,7 +61,7 @@ public class MetadataResourceHelper {
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
                 .map(p -> factory.createParametersParameters(p))
-                .map(rl -> (T) rl.getResource());
+                .map(parametersParameters -> (T) parametersParameters.getResource());
     }
 
     public static <T extends Type> Optional<List<T>> getListParameter(
@@ -70,7 +70,7 @@ public class MetadataResourceHelper {
         return Optional.ofNullable(operationParameters)
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameterValues(name))
-                .map(vals -> vals.stream().map(rl -> (T) rl).collect(Collectors.toList()));
+                .map(vals -> vals.stream().map(val -> (T) val).collect(Collectors.toList()));
     }
 
     public static List<MetadataResource> getMetadataResourcesFromBundle(Bundle bundle) {

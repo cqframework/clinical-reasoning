@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.r4;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -56,9 +57,12 @@ public class ArtifactAssessmentTest {
 
         var infoTypeSystem = "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
         var infoTypeCodes = List.of("comment", "classifier", "rating", "container", "response", "change-request");
-        for (var infoType : ArtifactAssessmentContentInformationType.values()) {
+        var infoTypesList = Arrays.asList(ArtifactAssessmentContentInformationType.values());
+        for (var i = 0; i < infoTypesList.size(); i++) {
+            var infoType = infoTypesList.get(i);
             if (infoType != ArtifactAssessmentContentInformationType.NULL) {
                 assertTrue(infoType.getSystem().equals(infoTypeSystem));
+                assertTrue(infoType.toCode().equals(infoTypeCodes.get(i)));
             }
         }
         infoTypeCodes.forEach(code -> {
@@ -88,9 +92,12 @@ public class ArtifactAssessmentTest {
                 "upcode1",
                 "upcode2");
         var contentClassifierSystem = "http://terminology.hl7.org/CodeSystem/certainty-rating";
-        for (var classifier : ArtifactAssessmentContentClassifier.values()) {
+        var contentClassifiersList = Arrays.asList(ArtifactAssessmentContentClassifier.values());
+        for (var i = 0; i < contentClassifiersList.size(); i++) {
+            var classifier = contentClassifiersList.get(i);
             if (classifier != ArtifactAssessmentContentClassifier.NULL) {
                 assertTrue(classifier.getSystem().equals(contentClassifierSystem));
+                assertTrue(classifier.toCode().equals(contentClassifierCodes.get(i)));
             }
         }
         contentClassifierCodes.forEach(code -> {
@@ -113,9 +120,12 @@ public class ArtifactAssessmentTest {
                 "duplicate",
                 "applied",
                 "published");
-        for (var classifier : ArtifactAssessmentWorkflowStatus.values()) {
-            if (classifier != ArtifactAssessmentWorkflowStatus.NULL) {
-                assertTrue(classifier.getSystem().equals(workflowStatusSystem));
+        var workflowStatusesList = Arrays.asList(ArtifactAssessmentWorkflowStatus.values());
+        for (var i = 0; i < workflowStatusesList.size(); i++) {
+            var workflowStatus = workflowStatusesList.get(i);
+            if (workflowStatus != ArtifactAssessmentWorkflowStatus.NULL) {
+                assertTrue(workflowStatus.getSystem().equals(workflowStatusSystem));
+                assertTrue(workflowStatus.toCode().equals(workflowStatusCodes.get(i)));
             }
         }
         workflowStatusCodes.forEach(code -> {
@@ -134,9 +144,12 @@ public class ArtifactAssessmentTest {
                 "persuasive-with-modification",
                 "not-persuasive-with-modification");
         var dispositionSystem = "http://hl7.org/fhir/artifactassessment-disposition";
-        for (var classifier : ArtifactAssessmentDisposition.values()) {
-            if (classifier != ArtifactAssessmentDisposition.NULL) {
-                assertTrue(classifier.getSystem().equals(dispositionSystem));
+        var dispositionsList = Arrays.asList(ArtifactAssessmentDisposition.values());
+        for (var i = 0; i < dispositionsList.size(); i++) {
+            var disposition = dispositionsList.get(i);
+            if (disposition != ArtifactAssessmentDisposition.NULL) {
+                assertTrue(disposition.getSystem().equals(dispositionSystem));
+                assertTrue(disposition.toCode().equals(dispositionCodes.get(i)));
             }
         }
         dispositionCodes.forEach(code -> {

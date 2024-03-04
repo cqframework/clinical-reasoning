@@ -80,7 +80,7 @@ public class ArtifactAssessment extends Basic {
                 case COMMENT:
                     return "comment";
                 case CLASSIFIER:
-                    return "classifer";
+                    return "classifier";
                 case RATING:
                     return "rating";
                 case CONTAINER:

@@ -67,13 +67,12 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getComponents() {
         return this.getRelatedArtifactsOfType("composed-of");
-    }
-    ;
+    };
 
     static <T extends ICompositeType & IBaseHasExtensions> boolean checkIfRelatedArtifactIsOwned(T relatedArtifact) {
         return relatedArtifact.getExtension().stream()
                 .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl));
-    }
+    };
 
     default List<IDependencyInfo> combineComponentsAndDependencies() {
         final String referenceSource = this.hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
@@ -89,7 +88,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters);
 
-    @SuppressWarnings("unchecked")
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getOwnedRelatedArtifacts() {
         return (List<T>) getRelatedArtifactsOfType("composed-of").stream()
                 .filter(ra -> checkIfRelatedArtifactIsOwned(ra))

@@ -74,7 +74,6 @@ public class SearchHelper {
                     Repository repository, CanonicalType canonical, Class<R> resourceType) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
-
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
         var result = getEntryResourceFirstRep(searchResult);
@@ -118,7 +117,6 @@ public class SearchHelper {
                     Repository repository, CanonicalType canonical, Class<R> resourceType) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
-
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
 

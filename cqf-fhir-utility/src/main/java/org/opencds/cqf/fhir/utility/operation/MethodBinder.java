@@ -40,14 +40,18 @@ class MethodBinder {
 
         validateParameterBinders(parameterBinders);
 
-        this.name = requireNonNull(operation.name(), "Operation name cannot be null");
+        this.name = requireNonNull(operation.name(), "Operation name cannot be null")
+            // Remove the $ from the operation name if it's present
+            .substring(Math.max(0, operation.name().indexOf("$")));
         this.idParam = parameterBinders.stream()
             .filter(ParameterBinder::isIdParam)
             .findFirst()
             .flatMap(ParameterBinder::idParam);
 
         this.typeName = typeNameFor(operation);
-        this.scope = idParam.isPresent() ? Scope.INSTANCE : !typeName.isEmpty() ? Scope.TYPE : Scope.SERVER;
+        this.scope = idParam.isPresent() ? Scope.INSTANCE : 
+            !this.typeName.isEmpty() ? Scope.TYPE : 
+            Scope.SERVER;
         this.description = method.getAnnotation(Description.class);
     }
 
@@ -63,7 +67,7 @@ class MethodBinder {
         return typeName;
     }
 
-    String canonical() {
+    String canonicalUrl() {
         return operation.canonicalUrl() != null ? operation.canonicalUrl() : "";
     }
 
@@ -92,7 +96,7 @@ class MethodBinder {
 
         // If we have an id parameter for the method
         // it's guaranteed to be the first parameter
-        if (this.idParam != null) {
+        if (this.idParam.isPresent()) {
             args.add(id);
             paramIndex++;
         }
@@ -138,11 +142,8 @@ class MethodBinder {
         }
     }
 
-
-    public Callable<? extends IBaseResource> bind(Object provider, IIdType id, IBaseParameters parameters) {
+    public Callable<IBaseResource> bind(Object provider, IIdType id, IBaseParameters parameters) {
         var args = args(id, parameters);
-        return () -> {
-            return (IBaseResource) method.invoke(provider, args);
-        };
+        return () -> (IBaseResource) method.invoke(provider, args);
     }
 }

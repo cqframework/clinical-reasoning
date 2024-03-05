@@ -71,6 +71,13 @@ class ParameterBinder {
     }
 
     public IBase value(IBaseParameters parameters) {
+
+        // Here, we need to go grab the the value from the parameters that matches the
+        // external name of the parameter. Also need to do type validation here.
+        // And handle collection types like list.
+
+        // Whatever values we take from the parameters, we need to remove them from the parameters
+        // resource. If a Parameter is required, and it's not found, we need to throw an error.
         return null;
     }
 }

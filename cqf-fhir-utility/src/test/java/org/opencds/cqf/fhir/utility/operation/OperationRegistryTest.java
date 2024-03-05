@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.operation;
 
 import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -44,5 +45,4 @@ class OperationRegistryTest {
         var igRepo = new IgRepository(FhirContext.forR4Cached(), "testDirectory", operationRegistry);
         igRepo.invoke("example", null);
     }
-    
 }

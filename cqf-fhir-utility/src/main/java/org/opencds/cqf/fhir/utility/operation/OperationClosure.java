@@ -1,13 +1,11 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import jakarta.annotation.Nonnull;
 import java.util.function.Function;
-
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
-
-import jakarta.annotation.Nonnull;
 
 class OperationClosure {
 
@@ -18,7 +16,6 @@ class OperationClosure {
         this.methodBinder = methodBinder;
         this.factory = factory;
     }
-
 
     MethodBinder methodBinder() {
         return this.methodBinder;

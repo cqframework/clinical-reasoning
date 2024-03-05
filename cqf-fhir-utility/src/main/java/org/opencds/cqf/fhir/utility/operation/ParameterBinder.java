@@ -1,83 +1,161 @@
 package org.opencds.cqf.fhir.utility.operation;
 
-import java.lang.reflect.Parameter;
-import java.util.Optional;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.Objects;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.opencds.cqf.fhir.utility.Parameters;
+import org.opencds.cqf.fhir.utility.Resources;
 
-class ParameterBinder {
-    
-    private final Parameter parameter;
-    private final Optional<IdParam> idParam;
-    private final Optional<OperationParam> operationParam;
-    private final Optional<UnboundParam> unboundParam;
-    ParameterBinder(Parameter parameter) {
-        this.parameter = parameter;
-        this.idParam = Optional.ofNullable(parameter.getAnnotation(IdParam.class));
-        this.operationParam = Optional.ofNullable(parameter.getAnnotation(OperationParam.class));
-        this.unboundParam = Optional.ofNullable(parameter.getAnnotation(UnboundParam.class));
-        if (idParam.isEmpty() && operationParam.isEmpty() && unboundParam.isEmpty()) {
-            throw new IllegalArgumentException("Parameter must be annotated with @IdParam, @OperationParam, or @UnboundParam");
+interface ParameterBinder {
+    enum Type {
+        ID,
+        OPERATION,
+        UNBOUND
+    }
+
+    // Extract the value from the parameters resource that matches the external name of the parameter.
+    // And removes the value from the parameters resource. This is to ensure that all parameters get consumed
+    Object bind(IBaseParameters parameters);
+
+    Type type();
+
+    String name();
+
+    Parameter parameter();
+
+    static ParameterBinder from(Parameter parameter) {
+        Objects.requireNonNull(parameter, "parameter can not be null");
+
+        var idParam = parameter.getAnnotation(IdParam.class);
+        var operationParam = parameter.getAnnotation(OperationParam.class);
+        var unboundParam = parameter.getAnnotation(UnboundParam.class);
+
+        ensureOnlyOneOf(idParam, operationParam, unboundParam);
+
+        if (idParam != null) {
+            return new IdParameterBinder(parameter, idParam);
+        } else if (operationParam != null) {
+            return new OperationParameterBinder(parameter, operationParam);
+        } else {
+            return new UnboundParamBinder(parameter, unboundParam);
         }
     }
 
-    boolean isIdParam() {
-        return idParam.isPresent();
+    static void ensureOnlyOneOf(Annotation... annotations) {
+        var count = Arrays.stream(annotations).filter(Objects::nonNull).count();
+        if (count == 0) {
+            throw new IllegalArgumentException(
+                    "Parameter must be annotated with @IdParam, @OperationParam, or @UnboundParam");
+        } else if (count > 1) {
+            throw new IllegalArgumentException(
+                    "Parameter can only be annotated with one of @IdParam, @OperationParam, or @UnboundParam");
+        }
     }
 
-    Optional<IdParam> idParam() {
-        return idParam;
-    }
+    static class IdParameterBinder implements ParameterBinder {
+        private final Parameter parameter;
+        private final IdParam idParam;
 
-    boolean isUnboundParam() {
-        return unboundParam.isPresent();
-    }
+        public IdParameterBinder(Parameter parameter, IdParam idParam) {
+            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
+            this.idParam = Objects.requireNonNull(idParam, "idParam can not be null");
+        }
 
-    Optional<UnboundParam> unboundParam() {
-        return unboundParam;
-    }
+        @Override
+        public Type type() {
+            return Type.ID;
+        }
 
-    boolean isOperationParam() {
-        return operationParam.isPresent();
-    }
-
-    Optional<OperationParam> operationParam() {
-        return operationParam;
-    }
-
-    Parameter parameter() {
-        return parameter;
-    }
-
-    String internalName(){
-        return parameter.getName();
-    }
-
-    String externalName() {
-        if (isIdParam()) {
+        @Override
+        public String name() {
             return "_id";
         }
-        else if (isOperationParam()) {
-            var name = operationParam.get().name();
-            return name == null || name.isEmpty() ? internalName() : name;
+
+        @Override
+        public Object bind(IBaseParameters parameters) {
+            throw new UnsupportedOperationException("bind is not supported for @IdParam");
         }
-        else {
-            return "<unbound>";
+
+        @Override
+        public Parameter parameter() {
+            return parameter;
         }
     }
 
-    public IBase value(IBaseParameters parameters) {
+    static class OperationParameterBinder implements ParameterBinder {
+        private final Parameter parameter;
+        private final OperationParam operationParam;
 
-        // Here, we need to go grab the the value from the parameters that matches the
-        // external name of the parameter. Also need to do type validation here.
-        // And handle collection types like list.
+        public OperationParameterBinder(Parameter parameter, OperationParam operationParam) {
+            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
+            this.operationParam = Objects.requireNonNull(operationParam, "operationParam can not be null");
+            Objects.requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
+        }
 
-        // Whatever values we take from the parameters, we need to remove them from the parameters
-        // resource. If a Parameter is required, and it's not found, we need to throw an error.
-        return null;
+        @Override
+        public Type type() {
+            return Type.OPERATION;
+        }
+
+        @Override
+        public String name() {
+            return operationParam.name();
+        }
+
+        @Override
+        public Object bind(IBaseParameters parameters) {
+            // Extract the value from the parameters resource that matches the external name of the @OperationParam
+            // And handle collection types like list.
+            var context = parameters.getStructureFhirVersionEnum().newContextCached();
+
+            var parts = Parameters.getPartsByName(context, parameters, this.name());
+
+            // Check min and max, check types for target arguments, etc.
+
+            return null;
+        }
+
+        @Override
+        public Parameter parameter() {
+            return parameter;
+        }
+    }
+
+    static class UnboundParamBinder implements ParameterBinder {
+        private final Parameter parameter;
+        private final UnboundParam unboundParam;
+
+        public UnboundParamBinder(Parameter parameter, UnboundParam unboundParam) {
+            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
+            this.unboundParam = Objects.requireNonNull(unboundParam, "unboundParam can not be null");
+        }
+
+        @Override
+        public Type type() {
+            return Type.OPERATION;
+        }
+
+        @Override
+        public String name() {
+            return "<unbound>";
+        }
+
+        @Override
+        public Object bind(IBaseParameters parameters) {
+            var value = Resources.clone(parameters);
+
+            // Remove all values from the parameters resource
+
+            return value;
+        }
+
+        @Override
+        public Parameter parameter() {
+            return this.parameter;
+        }
     }
 }

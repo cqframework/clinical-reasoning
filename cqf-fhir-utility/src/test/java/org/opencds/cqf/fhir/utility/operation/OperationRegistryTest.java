@@ -1,15 +1,14 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 
 class OperationRegistryTest {
 
@@ -22,7 +21,10 @@ class OperationRegistryTest {
         }
 
         @Operation(name = "example")
-        public void example(@IdParam IdType id, @OperationParam(name = "stringParam") String param, @UnboundParam IBaseParameters everythingElseNotBound) {
+        public void example(
+                @IdParam IdType id,
+                @OperationParam(name = "stringParam") String param,
+                @UnboundParam IBaseParameters everythingElseNotBound) {
             System.out.println("the value of some other config, like evaluation settings is : " + someOtherConfigParam);
         }
     }
@@ -38,7 +40,6 @@ class OperationRegistryTest {
         // factory and constructs the operation provider on the fly.
         var repository = new Repository();
         operationRegistry.execute(repository, "example", null, null, null);
-
 
         // Externally, the IG repo passes itself to the operation registry, allowing
         // reentrant/recursive operations to be called

@@ -4,11 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
+import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -17,6 +17,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.operation.ParameterBinder.Type;
 
+/*
+ * This class is responsible for binding a Parameters resource to a Method annotated
+ * with @Operation. Once the parameters are bound, the method can be invoked.
+ *
+ * Each individual parameter of the Method is bound using a ParameterBinder.
+ */
 class MethodBinder {
 
     private final Method method;
@@ -29,58 +35,63 @@ class MethodBinder {
     private final boolean hasIdParam;
 
     MethodBinder(Method method) {
-        this.method = Objects.requireNonNull(method, "Method cannot be null");
-        this.operation = Objects.requireNonNull(
-                method.getAnnotation(Operation.class), "Method must be annotated with @Operation");
+        this.method = requireNonNull(method, "Method cannot be null");
+        this.operation =
+                requireNonNull(method.getAnnotation(Operation.class), "Method must be annotated with @Operation");
+        this.name = requireNonNull(operation.name(), "@Operation name cannot be null")
+                .substring(Math.max(operation.name().indexOf("$"), 0)); // Normalize name to remove $
+        this.typeName = typeNameFrom(operation);
+        this.description = method.getAnnotation(Description.class);
+
         this.parameterBinders =
                 Arrays.stream(method.getParameters()).map(ParameterBinder::from).collect(Collectors.toList());
 
+        this.hasIdParam = parameterBinders.stream().anyMatch(x -> x.type() == Type.ID);
+        this.scope = hasIdParam ? Scope.INSTANCE : (!this.typeName.isEmpty() ? Scope.TYPE : Scope.SERVER);
         validateParameterBinders(parameterBinders);
-
-        this.name = requireNonNull(operation.name(), "Operation name cannot be null")
-                // Remove the $ from the operation name if it's present
-                .substring(Math.max(0, operation.name().indexOf("$")));
-        this.hasIdParam = parameterBinders.stream().anyMatch(x -> x.type().equals(Type.ID));
-        this.typeName = typeNameFor(operation);
-
-        this.scope = hasIdParam ? Scope.INSTANCE : !this.typeName.isEmpty() ? Scope.TYPE : Scope.SERVER;
-
-        this.description = method.getAnnotation(Description.class);
     }
 
+    @Nonnull
     Operation operation() {
         return operation;
     }
 
+    @Nonnull
     String name() {
         return name;
     }
 
+    @Nonnull
     String typeName() {
         return typeName;
     }
 
+    @Nonnull
     String canonicalUrl() {
         return operation.canonicalUrl() != null ? operation.canonicalUrl() : "";
     }
 
+    @Nonnull
     Method method() {
         return method;
     }
 
+    @Nonnull
     String description() {
         return description != null && description.shortDefinition() != null ? description.shortDefinition() : "";
     }
 
+    @Nonnull
     Scope scope() {
         return scope;
     }
 
+    @Nonnull
     List<ParameterBinder> parameters() {
         return parameterBinders;
     }
 
-    List<Object> args(IIdType id, IBaseParameters parameters) {
+    private List<Object> args(IIdType id, IBaseParameters parameters) {
         // The binding process consumes the parameters it binds,
         // so we need to clone the parameters to avoid modifying the original
         var cloned = Resources.clone(parameters);
@@ -105,7 +116,7 @@ class MethodBinder {
         return args;
     }
 
-    static void validateParameterBinders(List<ParameterBinder> parameterBinders) {
+    private static void validateParameterBinders(List<ParameterBinder> parameterBinders) {
         var idParamCount =
                 parameterBinders.stream().filter(x -> x.type().equals(Type.ID)).count();
         if (idParamCount > 1) {
@@ -129,7 +140,7 @@ class MethodBinder {
         }
     }
 
-    static String typeNameFor(Operation operation) {
+    private static String typeNameFrom(Operation operation) {
         if (operation.type() != null) {
             return operation.type().getSimpleName();
         } else if (operation.typeName() != null) {

@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import jakarta.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -21,48 +24,49 @@ interface ParameterBinder {
     // And removes the value from the parameters resource. This is to ensure that all parameters get consumed
     Object bind(IBaseParameters parameters);
 
+    @Nonnull
     Type type();
 
+    @Nonnull
     String name();
 
+    @Nonnull
     Parameter parameter();
 
     static ParameterBinder from(Parameter parameter) {
-        Objects.requireNonNull(parameter, "parameter can not be null");
+        requireNonNull(parameter, "parameter can not be null");
 
         var idParam = parameter.getAnnotation(IdParam.class);
         var operationParam = parameter.getAnnotation(OperationParam.class);
         var unboundParam = parameter.getAnnotation(UnboundParam.class);
 
-        ensureOnlyOneOf(idParam, operationParam, unboundParam);
+        ensureExactlyOneOf(idParam, operationParam, unboundParam);
 
         if (idParam != null) {
-            return new IdParameterBinder(parameter, idParam);
+            return new IdParameterBinder(parameter);
         } else if (operationParam != null) {
             return new OperationParameterBinder(parameter, operationParam);
         } else {
-            return new UnboundParamBinder(parameter, unboundParam);
+            return new UnboundParamBinder(parameter);
         }
     }
 
-    static void ensureOnlyOneOf(Annotation... annotations) {
+    static void ensureExactlyOneOf(Annotation... annotations) {
         var count = Arrays.stream(annotations).filter(Objects::nonNull).count();
         if (count == 0) {
             throw new IllegalArgumentException(
-                    "Parameter must be annotated with @IdParam, @OperationParam, or @UnboundParam");
+                    "Method Parameter must be annotated with @IdParam, @OperationParam, or @UnboundParam");
         } else if (count > 1) {
             throw new IllegalArgumentException(
-                    "Parameter can only be annotated with one of @IdParam, @OperationParam, or @UnboundParam");
+                    "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @UnboundParam");
         }
     }
 
     static class IdParameterBinder implements ParameterBinder {
         private final Parameter parameter;
-        private final IdParam idParam;
 
-        public IdParameterBinder(Parameter parameter, IdParam idParam) {
-            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
-            this.idParam = Objects.requireNonNull(idParam, "idParam can not be null");
+        public IdParameterBinder(Parameter parameter) {
+            this.parameter = requireNonNull(parameter, "parameter can not be null");
         }
 
         @Override
@@ -91,9 +95,9 @@ interface ParameterBinder {
         private final OperationParam operationParam;
 
         public OperationParameterBinder(Parameter parameter, OperationParam operationParam) {
-            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
-            this.operationParam = Objects.requireNonNull(operationParam, "operationParam can not be null");
-            Objects.requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
+            this.parameter = requireNonNull(parameter, "parameter can not be null");
+            this.operationParam = requireNonNull(operationParam, "operationParam can not be null");
+            requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
         }
 
         @Override
@@ -127,11 +131,9 @@ interface ParameterBinder {
 
     static class UnboundParamBinder implements ParameterBinder {
         private final Parameter parameter;
-        private final UnboundParam unboundParam;
 
-        public UnboundParamBinder(Parameter parameter, UnboundParam unboundParam) {
-            this.parameter = Objects.requireNonNull(parameter, "parameter can not be null");
-            this.unboundParam = Objects.requireNonNull(unboundParam, "unboundParam can not be null");
+        public UnboundParamBinder(Parameter parameter) {
+            this.parameter = requireNonNull(parameter, "parameter can not be null");
         }
 
         @Override

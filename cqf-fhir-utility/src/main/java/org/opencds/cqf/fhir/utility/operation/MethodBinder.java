@@ -118,24 +118,24 @@ class MethodBinder {
 
     private static void validateParameterBinders(List<ParameterBinder> parameterBinders) {
         var idParamCount =
-                parameterBinders.stream().filter(x -> x.type().equals(Type.ID)).count();
+                parameterBinders.stream().filter(x -> x.type()== Type.ID).count();
         if (idParamCount > 1) {
             throw new IllegalArgumentException("Method cannot have more than one @IdParam");
         }
 
         var unboundParamCount = parameterBinders.stream()
-                .filter(x -> x.type().equals(Type.UNBOUND))
+                .filter(x -> x.type() == Type.UNBOUND)
                 .count();
         if (unboundParamCount > 1) {
             throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
         }
 
-        if (idParamCount > 0 && !parameterBinders.get(0).type().equals(Type.ID)) {
+        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
             throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
         }
 
         if (unboundParamCount > 0
-                && !parameterBinders.get(parameterBinders.size() - 1).type().equals(Type.UNBOUND)) {
+                && parameterBinders.get(parameterBinders.size() - 1).type() != Type.UNBOUND) {
             throw new IllegalArgumentException("If @UnboundParam is present, it must be the last parameter");
         }
     }

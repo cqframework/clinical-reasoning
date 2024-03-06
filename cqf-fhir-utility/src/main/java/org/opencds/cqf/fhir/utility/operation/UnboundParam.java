@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to denote the parameters that are not bound by the operation definition.
+ * Used to denote the parameters that are not bound by the @Operation definition.
  * The absence of this annotation on a method implies that it is strict, and will
- * only accept parameters that are defined in the operation definition. Additional
+ * only accept parameters that are defined in the @Operation  definition. Additional
  * parameters will result in an error.
  *
  * If this annotation is present on a method, it must be the last parameter.

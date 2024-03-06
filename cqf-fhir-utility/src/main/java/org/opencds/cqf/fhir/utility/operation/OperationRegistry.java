@@ -1,10 +1,11 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.rest.annotation.Operation;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -13,6 +14,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
+/**
+ * That class allows registering of methods annotated with @Operation, and then can be used to execute those
+ * operations by name.
+ */
 public class OperationRegistry {
 
     private final Multimap<String, OperationClosure> operationMap;
@@ -43,43 +48,52 @@ public class OperationRegistry {
             String name,
             Class<? extends IBaseResource> resourceType,
             IIdType id,
-            IBaseParameters parameters)
-            throws Exception {
-        Objects.requireNonNull(repository, "Repository cannot be null");
-        Objects.requireNonNull(name, "Operation name cannot be null");
-        if (id != null && resourceType == null) {
-            throw new IllegalArgumentException("Resource type must be provided when an id is provided");
-        }
+            IBaseParameters parameters) {
+        requireNonNull(repository, "Repository cannot be null");
+        requireNonNull(name, "Operation name cannot be null");
 
-        var scope = id != null ? Scope.INSTANCE : resourceType != null ? Scope.TYPE : Scope.SERVER;
+        var scope = id != null ? Scope.INSTANCE : (resourceType != null ? Scope.TYPE : Scope.SERVER);
+        var typeName = resourceType != null ? resourceType.getSimpleName() : null;
+        var closure = findOperation(scope, name, typeName);
+
+        var instance = closure.factory().apply(repository);
+        var callable = closure.methodBinder().bind(instance, id, parameters);
+
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException("Error invoking operation " + name, e);
+        }
+    }
+
+    private OperationClosure findOperation(Scope scope, String name, String typeName) {
+        requireNonNull(scope, "Scope cannot be null");
+        requireNonNull(name, "Operation name cannot be null");
 
         var closures = operationMap.get(name);
         if (closures.isEmpty()) {
             throw new IllegalArgumentException("No operation found with name " + name);
         }
 
-        Predicate<OperationClosure> scopePredicate = c -> c.scope() == scope;
-        var scopedClosures = closures.stream().filter(scopePredicate).collect(Collectors.toList());
+        var scopedClosures =
+                closures.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
 
         if (scopedClosures.isEmpty()) {
             throw new IllegalArgumentException("No operation found with name " + name + " and scope " + scope);
         }
 
         Predicate<OperationClosure> typePredicate =
-                resourceType != null ? c -> c.typeName().equals(resourceType.getSimpleName()) : c -> true;
+                typeName != null ? c -> c.methodBinder().typeName().equals(typeName) : c -> true;
         var typedClosures = scopedClosures.stream().filter(typePredicate).collect(Collectors.toList());
 
         if (typedClosures.isEmpty()) {
-            throw new IllegalArgumentException("No operation found with type " + resourceType.getSimpleName());
+            throw new IllegalArgumentException("No operation found with type " + typeName);
         }
 
         if (typedClosures.size() > 1) {
-            throw new IllegalArgumentException(
-                    "Multiple operations found with name " + name + " and type " + resourceType.getSimpleName());
+            throw new IllegalArgumentException("Multiple operations found with name " + name + " and type " + typeName);
         }
 
-        var closure = typedClosures.get(0);
-
-        return closure.execute(repository, id, parameters);
+        return typedClosures.get(0);
     }
 }

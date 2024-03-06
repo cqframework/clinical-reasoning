@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.utility.operation;
 
-import jakarta.annotation.Nonnull;
 import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
+/*
+ * An OperationClosure is a wrapper around a method annotated with @Operation. It contains a reference to the method
+ * and to a factory for the class that contains this method. This allows instantiating the class as needed
+ */
 class OperationClosure {
 
     private final MethodBinder methodBinder;
@@ -23,23 +23,5 @@ class OperationClosure {
 
     Function<Repository, Object> factory() {
         return this.factory;
-    }
-
-    @Nonnull
-    String name() {
-        return methodBinder.name();
-    }
-
-    Scope scope() {
-        return methodBinder.scope();
-    }
-
-    String typeName() {
-        return methodBinder.typeName();
-    }
-
-    IBaseResource execute(Repository repository, IIdType id, IBaseParameters parameters) throws Exception {
-        var callable = methodBinder.bind(factory.apply(repository), id, parameters);
-        return callable.call();
     }
 }

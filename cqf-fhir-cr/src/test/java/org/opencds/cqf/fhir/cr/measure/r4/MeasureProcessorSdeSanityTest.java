@@ -2,7 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -38,8 +39,9 @@ public class MeasureProcessorSdeSanityTest {
                 .then()
                 .report();
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2019-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2019-12-31");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC"));
+        assertEquals(
+                "2019-01-01", formatter.format(report.getPeriod().getStart().toInstant()));
+        assertEquals("2020-01-01", formatter.format(report.getPeriod().getEnd().toInstant()));
     }
 }

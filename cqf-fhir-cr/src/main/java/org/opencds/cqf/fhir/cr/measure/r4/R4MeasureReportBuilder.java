@@ -49,6 +49,8 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.engine.elm.executing.PredecessorEvaluator;
+import org.opencds.cqf.cql.engine.elm.executing.SuccessorEvaluator;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -708,11 +710,30 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             DateTime dtStart = (DateTime) measurementPeriod.getStart();
             DateTime dtEnd = (DateTime) measurementPeriod.getEnd();
 
+            // Convert to inclusive intervals for MeasureReport
+            if (!measurementPeriod.getLowClosed()) {
+                dtStart = (DateTime) PredecessorEvaluator.predecessor(dtStart);
+            }
+
+            if (!measurementPeriod.getHighClosed()) {
+                dtEnd = (DateTime) SuccessorEvaluator.successor(dtEnd);
+            }
+
             return new Period().setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
 
         } else if (measurementPeriod.getStart() instanceof Date) {
             Date dStart = (Date) measurementPeriod.getStart();
             Date dEnd = (Date) measurementPeriod.getEnd();
+
+            // Convert to inclusive intervals for MeasureReport
+            if (!measurementPeriod.getLowClosed()) {
+                dStart = (Date) PredecessorEvaluator.predecessor(dStart);
+            }
+
+            if (!measurementPeriod.getHighClosed()) {
+                dEnd = (Date) SuccessorEvaluator.successor(dEnd);
+            }
+
             return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");

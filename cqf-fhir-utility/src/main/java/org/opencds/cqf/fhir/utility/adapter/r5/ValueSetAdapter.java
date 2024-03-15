@@ -8,13 +8,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
@@ -24,7 +25,7 @@ import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
+class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
 
     private ValueSet valueSet;
 
@@ -47,8 +48,13 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
-    public IBaseResource get() {
+    public ValueSet get() {
         return this.valueSet;
+    }
+
+    @Override
+    public ValueSet copy() {
+        return this.get().copy();
     }
 
     @Override
@@ -59,6 +65,11 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     @Override
     public void setName(String name) {
         this.getValueSet().setName(name);
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getValueSet().hasUrl();
     }
 
     @Override
@@ -100,19 +111,24 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
           compose.exclude[].system
         */
         Stream.concat(
-                        this.valueSet.getCompose().getInclude().stream(),
-                        this.valueSet.getCompose().getExclude().stream())
+                        this.getValueSet().getCompose().getInclude().stream(),
+                        this.getValueSet().getCompose().getExclude().stream())
                 .forEach(component -> {
                     if (component.hasValueSet()) {
                         component.getValueSet().forEach(ct -> {
-                            references.add(new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension()));
+                            references.add(new DependencyInfo(
+                                    referenceSource,
+                                    ct.getValue(),
+                                    ct.getExtension(),
+                                    (reference) -> ct.setValue(reference)));
                         });
                     }
                     if (component.hasSystem()) {
                         references.add(new DependencyInfo(
                                 referenceSource,
                                 component.getSystem(),
-                                component.getSystemElement().getExtension()));
+                                component.getSystemElement().getExtension(),
+                                (reference) -> component.setSystem(reference)));
                     }
                 });
 
@@ -122,7 +138,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
 
     @Override
     public Date getApprovalDate() {
-        return this.valueSet.getApprovalDate();
+        return this.getValueSet().getApprovalDate();
     }
 
     @Override
@@ -144,7 +160,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
     }
 
     @Override
-    public ICompositeType getEffectivePeriod() {
+    public Period getEffectivePeriod() {
         return this.getValueSet().getEffectivePeriod();
     }
 
@@ -162,6 +178,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
                         .collect(Collectors.toList()));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getComponents() {
         return this.getRelatedArtifactsOfType("composed-of");
@@ -169,7 +186,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
 
     @Override
     public void setApprovalDate(Date approvalDate) {
-        this.valueSet.setApprovalDate(approvalDate);
+        this.getValueSet().setApprovalDate(approvalDate);
     }
 
     @Override
@@ -180,6 +197,7 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
         this.getValueSet().setEffectivePeriod((Period) effectivePeriod);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type;
@@ -195,12 +213,27 @@ class ValueSetAdapter extends KnowledgeArtifactAdapter implements org.opencds.cq
 
     @Override
     public void setStatus(String statusCodeString) {
-        PublicationStatus type;
+        PublicationStatus status;
         try {
-            type = PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        this.getValueSet().setStatus(type);
+        this.getValueSet().setStatus(status);
+    }
+
+    @Override
+    public String getStatus() {
+        return this.getValueSet().getStatus() == null ? null : this.getValueSet().getStatus().toCode();
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.getValueSet().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

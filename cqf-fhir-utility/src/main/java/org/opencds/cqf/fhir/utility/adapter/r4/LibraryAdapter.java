@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -28,7 +30,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
 
     private Library library;
 
-    public LibraryAdapter(IBaseResource library) {
+    public LibraryAdapter(IDomainResource library) {
         super(library);
         if (!library.fhirType().equals("Library")) {
             throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
@@ -51,6 +53,11 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     }
 
     @Override
+    public Library copy() {
+        return this.get().copy();
+    }
+
+    @Override
     public String getName() {
         return this.getLibrary().getName();
     }
@@ -58,6 +65,11 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     @Override
     public void setName(String name) {
         this.getLibrary().setName(name);
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getLibrary().hasUrl();
     }
 
     @Override
@@ -110,18 +122,29 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> retval = new ArrayList<IDependencyInfo>();
-        final String source = this.getUrl();
-        this.getRelatedArtifactsOfType("depends-on").stream()
+        final String referenceSource =
+                this.hasVersion() ? this.getUrl() + "|" + this.getLibrary().getVersion() : this.getUrl();
+
+        // relatedArtifact[].resource
+        this.getRelatedArtifact().stream()
                 .filter(ra -> ra.hasResource())
-                .forEach(ra -> retval.add(new DependencyInfo(source, ra.getResource(), ra.getExtension())));
-        this.get().getDataRequirement().stream().forEach(dr -> {
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(ra -> retval.add(ra));
+        this.getLibrary().getDataRequirement().stream().forEach(dr -> {
             dr.getProfile().stream()
                     .filter(profile -> profile.hasValue())
-                    .forEach(profile ->
-                            retval.add(new DependencyInfo(source, profile.getValue(), profile.getExtension())));
+                    .forEach(profile -> retval.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValue(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference))));
             dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
-                    .forEach(cf -> retval.add(new DependencyInfo(source, cf.getValueSet(), cf.getExtension())));
+                    .forEach(cf -> retval.add(new DependencyInfo(
+                            referenceSource,
+                            cf.getValueSet(),
+                            cf.getExtension(),
+                            (reference) -> cf.setValueSet(reference))));
         });
         return retval;
     }
@@ -194,6 +217,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
         this.getLibrary().setApprovalDate(approvalDate);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type;
@@ -214,13 +238,28 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     }
 
     @Override
+    public String getStatus() {
+        return this.getLibrary().getStatus() == null ? null : this.getLibrary().getStatus().toCode();
+    }
+
+    @Override
     public void setStatus(String statusCodeString) {
-        PublicationStatus type;
+        PublicationStatus status;
         try {
-            type = PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid status code");
+            throw new UnprocessableEntityException("Invalid status code: " + statusCodeString);
         }
-        this.getLibrary().setStatus(type);
+        this.getLibrary().setStatus(status);
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.getLibrary().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

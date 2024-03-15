@@ -177,7 +177,7 @@ public class ArtifactAssessment extends Basic {
         public Enumeration<ArtifactAssessmentContentInformationType> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<ArtifactAssessmentContentInformationType>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("comment".equals(codeString))
                 return new Enumeration<ArtifactAssessmentContentInformationType>(
@@ -502,7 +502,7 @@ public class ArtifactAssessment extends Basic {
         public Enumeration<ArtifactAssessmentContentClassifier> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<ArtifactAssessmentContentClassifier>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("high".equals(codeString))
                 return new Enumeration<ArtifactAssessmentContentClassifier>(
@@ -764,7 +764,7 @@ public class ArtifactAssessment extends Basic {
         public Enumeration<ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<ArtifactAssessmentWorkflowStatus>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("submitted".equals(codeString))
                 return new Enumeration<ArtifactAssessmentWorkflowStatus>(
@@ -937,7 +937,7 @@ public class ArtifactAssessment extends Basic {
         public Enumeration<ArtifactAssessmentDisposition> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<ArtifactAssessmentDisposition>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("unresolved".equals(codeString))
                 return new Enumeration<ArtifactAssessmentDisposition>(this, ArtifactAssessmentDisposition.UNRESOLVED);
@@ -1149,6 +1149,10 @@ public class ArtifactAssessment extends Basic {
         return this;
     }
 
+    public ArtifactAssessment setDerivedFromContentRelatedArtifact(String targetUri) {
+        return setDerivedFromContentRelatedArtifact(new CanonicalType(targetUri));
+    }
+
     public boolean checkArtifactCommentParams(
             String artifactAssessmentType,
             String artifactAssessmentSummary,
@@ -1169,7 +1173,7 @@ public class ArtifactAssessment extends Basic {
             if (infoTypeIndex != -1) {
                 Extension infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
                 infoTypeCorrect =
-                        ((Enumeration) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
+                        ((Enumeration<?>) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
             }
             int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
             if (summaryIndex != -1) {

@@ -6,20 +6,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
@@ -31,7 +31,7 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
 
     private Library library;
 
-    public LibraryAdapter(IBaseResource library) {
+    public LibraryAdapter(IDomainResource library) {
         super(library);
 
         if (!library.fhirType().equals("Library")) {
@@ -39,6 +39,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
         }
 
         this.library = (Library) library;
+    }
+
+    public LibraryAdapter(Library library) {
+        super(library);
+        this.library = library;
     }
 
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
@@ -52,6 +57,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     @Override
     public Library get() {
         return this.library;
+    }
+
+    @Override
+    public Library copy() {
+        return this.get().copy();
     }
 
     @Override
@@ -77,6 +87,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     @Override
     public String getUrl() {
         return this.getLibrary().getUrl();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getLibrary().hasUrl();
     }
 
     @Override
@@ -123,37 +138,33 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
 
     @Override
     public List<IDependencyInfo> getDependencies() {
-        final String referenceSource =
-                this.hasVersion() ? this.library.getUrl() + "|" + this.library.getVersion() : this.library.getUrl();
         List<IDependencyInfo> references = new ArrayList<>();
+        final String referenceSource =
+                this.hasVersion() ? this.getUrl() + "|" + this.getLibrary().getVersion() : this.getUrl();
 
         // relatedArtifact[].resource
-        references.addAll(this.getRelatedArtifact().stream()
+        this.getRelatedArtifact().stream()
+                .filter(ra -> ra.hasResource())
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .collect(Collectors.toList()));
+                .forEach(ra -> references.add(ra));
 
         // dataRequirement
-        List<DataRequirement> dataRequirements = this.library.getDataRequirement();
-        for (DataRequirement dr : dataRequirements) {
-            // dataRequirement.profile[]
-            List<UriType> profiles = dr.getProfile();
-            for (UriType uri : profiles) {
-                if (uri.hasValue()) {
-                    DependencyInfo dependency = new DependencyInfo(referenceSource, uri.getValue(), dr.getExtension());
-                    references.add(dependency);
-                }
-            }
-
-            // dataRequirement.codeFilter[].valueset
-            List<DataRequirement.DataRequirementCodeFilterComponent> codeFilters = dr.getCodeFilter();
-            for (DataRequirement.DataRequirementCodeFilterComponent cf : codeFilters) {
-                if (cf.hasValueSet()) {
-                    DependencyInfo dependency = new DependencyInfo(
-                            referenceSource, cf.getValueSetReference().getReference(), cf.getExtension());
-                    references.add(dependency);
-                }
-            }
-        }
+        this.getLibrary().getDataRequirement().stream().forEach(dr -> {
+            dr.getProfile().stream()
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> references.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValue(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference))));
+            dr.getCodeFilter().stream()
+                    .filter(cf -> cf.hasValueSet())
+                    .forEach(cf -> references.add(new DependencyInfo(
+                            referenceSource,
+                            cf.getValueSetReference().getReference(),
+                            cf.getValueSet().getExtension(),
+                            (reference) -> cf.getValueSetReference().setReference(reference))));
+        });
         return references;
     }
 
@@ -190,11 +201,13 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
         return this.getLibrary().getEffectivePeriod();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return this.getLibrary().getRelatedArtifact();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type;
@@ -234,12 +247,27 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
 
     @Override
     public void setStatus(String statusCodeString) {
-        PublicationStatus type;
+        PublicationStatus status;
         try {
-            type = PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        this.getLibrary().setStatus(type);
+        this.getLibrary().setStatus(status);
+    }
+
+    @Override
+    public String getStatus() {
+        return this.getLibrary().getStatus() == null ? null : this.getLibrary().getStatus().toCode();
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.getLibrary().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

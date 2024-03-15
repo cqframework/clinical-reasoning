@@ -8,14 +8,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -30,7 +33,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
 
     private PlanDefinition planDefinition;
 
-    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+    public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
 
         if (!planDefinition.fhirType().equals("PlanDefinition")) {
@@ -38,6 +41,11 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
 
+        this.planDefinition = (PlanDefinition) planDefinition;
+    }
+
+    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+        super(planDefinition);
         this.planDefinition = planDefinition;
     }
 
@@ -53,6 +61,11 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
     @Override
     public PlanDefinition get() {
         return this.planDefinition;
+    }
+
+    @Override
+    public PlanDefinition copy() {
+        return this.get().copy();
     }
 
     @Override
@@ -78,6 +91,11 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
     @Override
     public String getUrl() {
         return this.getPlanDefinition().getUrl();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getPlanDefinition().hasUrl();
     }
 
     @Override
@@ -130,7 +148,8 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         // library[]
         List<CanonicalType> libraries = this.getPlanDefinition().getLibrary();
         for (CanonicalType ct : libraries) {
-            DependencyInfo dependency = new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension());
+            DependencyInfo dependency = new DependencyInfo(
+                    referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
             references.add(dependency);
         }
         // action[]
@@ -138,13 +157,21 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
             action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
                 // trigger[].dataRequirement[].profile[]
                 eventData.getProfile().forEach(profile -> {
-                    references.add(new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                    references.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValue(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference)));
                 });
                 // trigger[].dataRequirement[].codeFilter[].valueSet
                 eventData.getCodeFilter().stream()
                         .filter(cf -> cf.hasValueSet())
                         .forEach(cf -> {
-                            references.add(new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                            references.add(new DependencyInfo(
+                                    referenceSource,
+                                    cf.getValueSet(),
+                                    cf.getExtension(),
+                                    (reference) -> cf.setValueSet(reference)));
                         });
             });
             // condition[].expression.reference
@@ -154,7 +181,10 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     .filter(e -> e.hasReference())
                     .forEach(expression -> {
                         references.add(new DependencyInfo(
-                                referenceSource, expression.getReference(), expression.getExtension()));
+                                referenceSource,
+                                expression.getReference(),
+                                expression.getExtension(),
+                                (reference) -> expression.setReference(reference)));
                     });
             // dynamicValue[].expression.reference
             action.getDynamicValue().stream()
@@ -163,23 +193,32 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     .filter(e -> e.hasReference())
                     .forEach(expression -> {
                         references.add(new DependencyInfo(
-                                referenceSource, expression.getReference(), expression.getExtension()));
+                                referenceSource,
+                                expression.getReference(),
+                                expression.getExtension(),
+                                (reference) -> expression.setReference(reference)));
                     });
             Stream.concat(action.getInput().stream(), action.getOutput().stream())
                     .forEach(inputOrOutput -> {
                         // ..input[].profile[]
                         // ..output[].profile[]
                         inputOrOutput.getProfile().forEach(profile -> {
-                            references.add(
-                                    new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                            references.add(new DependencyInfo(
+                                    referenceSource,
+                                    profile.getValue(),
+                                    profile.getExtension(),
+                                    (reference) -> profile.setValue(reference)));
                         });
                         // input[].codeFilter[].valueSet
                         // output[].codeFilter[].valueSet
                         inputOrOutput.getCodeFilter().stream()
                                 .filter(cf -> cf.hasValueSet())
                                 .forEach(cf -> {
-                                    references.add(
-                                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension()));
+                                    references.add(new DependencyInfo(
+                                            referenceSource,
+                                            cf.getValueSet(),
+                                            cf.getExtension(),
+                                            (reference) -> cf.setValueSet(reference)));
                                 });
                     });
         });
@@ -189,7 +228,10 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                 .findAny()
                 .ifPresent(ext -> {
                     references.add(new DependencyInfo(
-                            referenceSource, ((CanonicalType) ext.getValue()).getValue(), ext.getExtension()));
+                            referenceSource,
+                            ((CanonicalType) ext.getValue()).getValue(),
+                            ext.getExtension(),
+                            (reference) -> ext.setValue(new CanonicalType(reference))));
                 });
         // TODO: Ideally use $data-requirements code
 
@@ -267,12 +309,27 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
 
     @Override
     public void setStatus(String statusCodeString) {
-        PublicationStatus type;
+        PublicationStatus status;
         try {
-            type = PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        this.getPlanDefinition().setStatus(type);
+        this.getPlanDefinition().setStatus(status);
+    }
+
+    @Override
+    public String getStatus() {
+        return this.getPlanDefinition().getStatus() == null ? null : this.getPlanDefinition().getStatus().toCode();
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.getPlanDefinition().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

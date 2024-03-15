@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -33,6 +35,16 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public MetadataResource get() {
         return this.adaptedResource;
+    }
+
+    @Override
+    public MetadataResource copy() {
+        return this.get().copy();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.get().hasUrl();
     }
 
     @Override
@@ -148,11 +160,27 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
 
     @Override
     public void setStatus(String statusCodeString) {
+        PublicationStatus status;
         try {
-            PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        // does nothing
+        this.get().setStatus(status);
+    }
+
+    @Override
+    public String getStatus() {
+        return this.get().getStatus() == null ? null : this.get().getStatus().toCode();
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.get().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

@@ -15,6 +15,4 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
     void setContent(List<? extends ICompositeType> attachments);
 
     ICompositeType addContent();
-
-    List<? extends ICompositeType> getRelatedArtifactsOfType(String codeString);
 }

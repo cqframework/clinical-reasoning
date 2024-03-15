@@ -1,46 +1,21 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.UriType;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
-import org.opencds.cqf.fhir.utility.r4.PackageHelper;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor {
+public class KnowledgeArtifactPackageVisitor {
     // as per http://hl7.org/fhir/R4/resource.html#canonical
     public static final List<ResourceType> canonicalResourceTypes =
             // can't use List.of for Android 26 compatibility
@@ -105,218 +80,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                     ResourceType.NamingSystem,
                     ResourceType.TerminologyCapabilities)));
 
-    @Override
-    public Bundle visit(LibraryAdapter library, Repository repository, IBaseParameters packageParameters) {
-        Optional<String> artifactRoute = MetadataResourceHelper.getParameter(
-                        "artifactRoute", packageParameters, UriType.class)
-                .map(r -> r.getValue());
-        Optional<String> endpointUri = MetadataResourceHelper.getParameter(
-                        "endpointUri", packageParameters, UriType.class)
-                .map(r -> r.getValue());
-        Optional<Endpoint> endpoint =
-                MetadataResourceHelper.getResourceParameter("endpoint", packageParameters, Endpoint.class);
-        Optional<Endpoint> terminologyEndpoint =
-                MetadataResourceHelper.getResourceParameter("terminologyEndpoint", packageParameters, Endpoint.class);
-        Optional<Boolean> packageOnly = MetadataResourceHelper.getParameter(
-                        "packageOnly", packageParameters, BooleanType.class)
-                .map(r -> r.getValue());
-        Optional<Integer> count = MetadataResourceHelper.getParameter("count", packageParameters, IntegerType.class)
-                .map(r -> r.getValue());
-        Optional<Integer> offset = MetadataResourceHelper.getParameter("offset", packageParameters, IntegerType.class)
-                .map(r -> r.getValue());
-        List<String> include = MetadataResourceHelper.getListParameter("include", packageParameters, StringType.class)
-                .map(list -> list.stream().map(r -> r.getValue()).collect(Collectors.toList()))
-                .orElseGet(() -> new ArrayList<>());
-        List<String> capability = MetadataResourceHelper.getListParameter(
-                        "capability", packageParameters, StringType.class)
-                .map(list -> list.stream().map(r -> r.getValue()).collect(Collectors.toList()))
-                .orElseGet(() -> new ArrayList<>());
-        List<CanonicalType> artifactVersion = MetadataResourceHelper.getListParameter(
-                        "artifactVersion", packageParameters, CanonicalType.class)
-                .orElseGet(() -> new ArrayList<>());
-        List<CanonicalType> checkArtifactVersion = MetadataResourceHelper.getListParameter(
-                        "checkArtifactVersion", packageParameters, CanonicalType.class)
-                .orElseGet(() -> new ArrayList<>());
-        List<CanonicalType> forceArtifactVersion = MetadataResourceHelper.getListParameter(
-                        "forceArtifactVersion", packageParameters, CanonicalType.class)
-                .orElseGet(() -> new ArrayList<>());
-
-        if ((artifactRoute.isPresent()
-                        && !StringUtils.isBlank(artifactRoute.get())
-                        && !artifactRoute.get().isEmpty())
-                || (endpointUri.isPresent()
-                        && !StringUtils.isBlank(endpointUri.get())
-                        && !endpointUri.get().isEmpty())
-                || endpoint.isPresent()
-                || terminologyEndpoint.isPresent()) {
-            throw new NotImplementedOperationException(
-                    "This repository is not implementing custom Content and Terminology endpoints at this time");
-        }
-        if (packageOnly.isPresent()) {
-            throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
-        }
-        if (count.isPresent() && count.get() < 0) {
-            throw new UnprocessableEntityException("'count' must be non-negative");
-        }
-        Library resource = (Library) library.get();
-        // TODO: In the case of a released (active) root Library we can depend on the relatedArtifacts as a
-        // comprehensive manifest
-        Bundle packagedBundle = new Bundle();
-        if (include.size() == 1 && include.stream().anyMatch((includedType) -> includedType.equals("artifact"))) {
-            findUnsupportedCapability(resource, capability);
-            processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
-            BundleEntryComponent entry = PackageHelper.createEntry(resource, false);
-            packagedBundle.addEntry(entry);
-        } else {
-            recursivePackage(
-                    resource,
-                    packagedBundle,
-                    repository,
-                    capability,
-                    include,
-                    artifactVersion,
-                    checkArtifactVersion,
-                    forceArtifactVersion);
-            List<BundleEntryComponent> included = findUnsupportedInclude(packagedBundle.getEntry(), include);
-            packagedBundle.setEntry(included);
-        }
-        setCorrectBundleType(count, offset, packagedBundle);
-        pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
-        return packagedBundle;
-
-        // DependencyInfo --document here that there is a need for figuring out how to determine which package the
-        // dependency is in.
-        // what is dependency, where did it originate? potentially the package?
-    }
-
-    void recursivePackage(
-            MetadataResource resource,
-            Bundle bundle,
-            Repository repository,
-            List<String> capability,
-            List<String> include,
-            List<CanonicalType> artifactVersion,
-            List<CanonicalType> checkArtifactVersion,
-            List<CanonicalType> forceArtifactVersion)
-            throws PreconditionFailedException {
-        if (resource != null) {
-            KnowledgeArtifactAdapter adapter = new AdapterFactory().createKnowledgeArtifactAdapter(resource);
-            findUnsupportedCapability(resource, capability);
-            processCanonicals(resource, artifactVersion, checkArtifactVersion, forceArtifactVersion);
-            boolean entryExists = bundle.getEntry().stream()
-                    .map(e -> (MetadataResource) e.getResource())
-                    .filter(mr -> mr.getUrl() != null && mr.getVersion() != null)
-                    .anyMatch(mr -> mr.getUrl().equals(resource.getUrl())
-                            && mr.getVersion().equals(resource.getVersion()));
-            if (!entryExists) {
-                BundleEntryComponent entry = PackageHelper.createEntry(resource, false);
-                bundle.addEntry(entry);
-            }
-
-            adapter.combineComponentsAndDependencies().stream()
-                    // sometimes VS dependencies aren't FHIR resources
-                    .filter(ra -> !StringUtils.isBlank(Canonicals.getResourceType(ra.getReference())))
-                    .filter(ra -> {
-                        try {
-                            var resourceDef = repository
-                                    .fhirContext()
-                                    .getResourceDefinition(Canonicals.getResourceType(ra.getReference()));
-                            return resourceDef != null;
-                        } catch (DataFormatException e) {
-                            if (e.getMessage().contains("1684")) {
-                                return false;
-                            } else {
-                                throw new DataFormatException(e.getMessage());
-                            }
-                        }
-                    })
-                    .map(ra -> (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
-                            repository, new CanonicalType(ra.getReference())))
-                    .map(searchBundle -> searchBundle.getEntryFirstRep().getResource())
-                    .forEach(component -> recursivePackage(
-                            (MetadataResource) component,
-                            bundle,
-                            repository,
-                            capability,
-                            include,
-                            artifactVersion,
-                            checkArtifactVersion,
-                            forceArtifactVersion));
-        }
-    }
-
-    @Override
-    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    private void findUnsupportedCapability(MetadataResource resource, List<String> capability)
-            throws PreconditionFailedException {
-        if (capability != null && !capability.isEmpty()) {
-            List<Extension> knowledgeCapabilityExtension = resource.getExtension().stream()
-                    .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
-                    .collect(Collectors.toList());
-            if (knowledgeCapabilityExtension.isEmpty()) {
-                // consider resource unsupported if it's knowledgeCapability is undefined
-                throw new PreconditionFailedException(
-                        String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
-            }
-            knowledgeCapabilityExtension.stream()
-                    .filter(ext -> !capability.contains(((CodeType) ext.getValue()).getValue()))
-                    .findAny()
-                    .ifPresent((ext) -> {
-                        throw new PreconditionFailedException(String.format(
-                                "Resource with url: '%s' is not one of '%s'.",
-                                resource.getUrl(), String.join(", ", capability)));
-                    });
-        }
-    }
-
-    private void processCanonicals(
-            MetadataResource resource,
-            List<CanonicalType> canonicalVersion,
-            List<CanonicalType> checkArtifactVersion,
-            List<CanonicalType> forceArtifactVersion)
-            throws PreconditionFailedException {
-        if (checkArtifactVersion != null && !checkArtifactVersion.isEmpty()) {
-            // check throws an error
-            findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent((version) -> {
-                if (!resource.getVersion().equals(version)) {
-                    throw new PreconditionFailedException(String.format(
-                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
-                            resource.getUrl(), resource.getVersion(), version));
-                }
-            });
-        } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
-            // force just does a silent override
-            findVersionInListMatchingResource(forceArtifactVersion, resource)
-                    .ifPresent((version) -> resource.setVersion(version));
-        } else if (canonicalVersion != null && !canonicalVersion.isEmpty() && !resource.hasVersion()) {
-            // canonicalVersion adds a version if it's missing
-            findVersionInListMatchingResource(canonicalVersion, resource)
-                    .ifPresent((version) -> resource.setVersion(version));
-        }
-    }
-
-    private Optional<String> findVersionInListMatchingResource(List<CanonicalType> list, MetadataResource resource) {
-        return list.stream()
-                .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
-                .map((canonical) -> Canonicals.getVersion(canonical))
-                .findAny();
-    }
-
-    private void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
+    public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
         // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
         // if not, set type = transaction
         // special case of count = 0 -> set type = searchset so we can display bundle.total
@@ -337,35 +101,8 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             bundle.setType(BundleType.TRANSACTION);
         }
     }
-    /**
-     * $package allows for a bundle to be paged
-     * @param count the maximum number of resources to be returned
-     * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
-     * @param bundle the bundle to page
-     */
-    private void pageBundleBasedOnCountAndOffset(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
-        if (offset.isPresent()) {
-            List<BundleEntryComponent> entries = bundle.getEntry();
-            Integer bundleSize = entries.size();
-            if (offset.get() < bundleSize) {
-                bundle.setEntry(entries.subList(offset.get(), bundleSize));
-            } else {
-                bundle.setEntry(Arrays.asList());
-            }
-        }
-        if (count.isPresent()) {
-            // repeat these two from earlier because we might modify / replace the entries list at any time
-            List<BundleEntryComponent> entries = bundle.getEntry();
-            Integer bundleSize = entries.size();
-            if (count.get() < bundleSize) {
-                bundle.setEntry(entries.subList(0, count.get()));
-            } else {
-                // there are not enough entries in the bundle to page, so we return all of them no change
-            }
-        }
-    }
 
-    private List<BundleEntryComponent> findUnsupportedInclude(
+    public static List<BundleEntryComponent> findUnsupportedInclude(
             List<BundleEntryComponent> entries, List<String> include) {
         if (include == null
                 || include.isEmpty()

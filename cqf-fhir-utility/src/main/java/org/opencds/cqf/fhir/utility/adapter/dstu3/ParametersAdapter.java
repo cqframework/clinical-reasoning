@@ -57,6 +57,6 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
         return this.getParameters().getParameter().stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
-                .get();
+                .orElse(null);
     }
 }

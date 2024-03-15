@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Library;
@@ -20,6 +17,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
  */
-public class PackageHelper {
+public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
 
     private PackageHelper() {}
 
@@ -151,34 +149,6 @@ public class PackageHelper {
         }
     }
 
-    public static BundleEntryComponent createEntry(Resource resource, boolean isPut) {
-        var resourceType = resource.getResourceType().toString();
-        var entry = new BundleEntryComponent().setResource(resource);
-        var request = new BundleEntryRequestComponent();
-        if (isPut) {
-            request.setMethod(HTTPVerb.PUT).setUrl(resourceType + "/" + resource.getIdPart());
-        } else {
-            request.setMethod(HTTPVerb.POST).setUrl(resourceType);
-        }
-        if (hasUrl(resource)) {
-            var url = getUrl(resource);
-            if (hasVersion(resource)) {
-                entry.setFullUrl(url + "|" + getVersion(resource));
-                if (!isPut) {
-                    request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(resource)));
-                }
-            } else {
-                entry.setFullUrl(url);
-                if (!isPut) {
-                    request.setIfNoneExist(String.format("url=%s", url));
-                }
-            }
-        }
-        entry.setRequest(request);
-
-        return entry;
-    }
-
     public static void addRelatedArtifacts(
             Bundle bundle, List<RelatedArtifact> artifacts, Repository repository, boolean isPut) {
         for (var artifact : artifacts) {
@@ -191,7 +161,7 @@ public class PackageHelper {
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->
                                                 e.getResource().getIdElement().equals(resource.getIdElement()))) {
-                            bundle.addEntry(createEntry(resource, isPut));
+                            BundleHelper.addEntry(bundle, createEntry(resource, isPut));
                             if (hasRelatedArtifact(resource)) {
                                 addRelatedArtifacts(bundle, getRelatedArtifact(resource), repository, isPut);
                             }

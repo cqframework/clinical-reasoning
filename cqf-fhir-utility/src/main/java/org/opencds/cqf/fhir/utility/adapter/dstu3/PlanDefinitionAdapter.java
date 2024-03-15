@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -18,9 +19,11 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
@@ -32,7 +35,7 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
 
     private PlanDefinition planDefinition;
 
-    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+    public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
 
         if (!planDefinition.fhirType().equals("PlanDefinition")) {
@@ -40,6 +43,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
 
+        this.planDefinition = (PlanDefinition) planDefinition;
+    }
+
+    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+        super(planDefinition);
         this.planDefinition = planDefinition;
     }
 
@@ -58,6 +66,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
     }
 
     @Override
+    public PlanDefinition copy() {
+        return this.get().copy();
+    }
+
+    @Override
     public String getName() {
         return this.getPlanDefinition().getName();
     }
@@ -70,6 +83,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
     @Override
     public String getUrl() {
         return this.getPlanDefinition().getUrl();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getPlanDefinition().hasUrl();
     }
 
     @Override
@@ -124,7 +142,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         List<Reference> libraries = this.planDefinition.getLibrary();
         for (Reference ref : libraries) {
             // TODO: Account for reference.identifier?
-            DependencyInfo dependency = new DependencyInfo(referenceSource, ref.getReference(), ref.getExtension());
+            DependencyInfo dependency = new DependencyInfo(
+                    referenceSource,
+                    ref.getReference(),
+                    ref.getExtension(),
+                    (reference) -> ref.setReference(reference));
             references.add(dependency);
         }
         // action[]
@@ -132,7 +154,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
             action.getTriggerDefinition().stream().map(t -> t.getEventData()).forEach(eventData -> {
                 // trigger[].dataRequirement[].profile[]
                 eventData.getProfile().forEach(profile -> {
-                    references.add(new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                    references.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValue(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference)));
                 });
                 // trigger[].dataRequirement[].codeFilter[].valueSet
                 eventData.getCodeFilter().stream()
@@ -146,8 +172,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
                         // ..input[].profile[]
                         // ..output[].profile[]
                         inputOrOutput.getProfile().forEach(profile -> {
-                            references.add(
-                                    new DependencyInfo(referenceSource, profile.getValue(), profile.getExtension()));
+                            references.add(new DependencyInfo(
+                                    referenceSource,
+                                    profile.getValue(),
+                                    profile.getExtension(),
+                                    (reference) -> profile.setValue(reference)));
                         });
                         // input[].codeFilter[].valueSet
                         // output[].codeFilter[].valueSet
@@ -162,7 +191,10 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
                 .findAny()
                 .ifPresent(ext -> {
                     references.add(new DependencyInfo(
-                            referenceSource, ((UriType) ext.getValue()).getValue(), ext.getExtension()));
+                            referenceSource,
+                            ((UriType) ext.getValue()).getValue(),
+                            ext.getExtension(),
+                            (reference) -> ((UriType) ext.getValue()).setValue(reference)));
                 });
         // TODO: Ideally use $data-requirements code
 
@@ -172,9 +204,17 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
     private DependencyInfo dependencyFromDataRequirementCodeFilter(DataRequirementCodeFilterComponent cf) {
         var vs = cf.getValueSet();
         if (vs instanceof StringType) {
-            return new DependencyInfo(this.planDefinition.getUrl(), ((StringType) vs).getValue(), vs.getExtension());
+            return new DependencyInfo(
+                    this.planDefinition.getUrl(),
+                    ((StringType) vs).getValue(),
+                    vs.getExtension(),
+                    (reference) -> ((StringType) vs).setValue(reference));
         } else if (vs instanceof Reference) {
-            return new DependencyInfo(this.planDefinition.getUrl(), ((Reference) vs).getReference(), vs.getExtension());
+            return new DependencyInfo(
+                    this.planDefinition.getUrl(),
+                    ((Reference) vs).getReference(),
+                    vs.getExtension(),
+                    (reference) -> ((Reference) vs).setReference(reference));
         }
         return null;
     }
@@ -212,11 +252,13 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         return this.getPlanDefinition().getEffectivePeriod();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {
         return this.getPlanDefinition().getRelatedArtifact();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type;
@@ -256,12 +298,27 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
 
     @Override
     public void setStatus(String statusCodeString) {
-        PublicationStatus type;
+        PublicationStatus status;
         try {
-            type = PublicationStatus.fromCode(statusCodeString);
+            status = PublicationStatus.fromCode(statusCodeString);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        this.getPlanDefinition().setStatus(type);
+        this.getPlanDefinition().setStatus(status);
+    }
+
+    @Override
+    public String getStatus() {
+        return this.getPlanDefinition().getStatus() == null ? null : this.getPlanDefinition().getStatus().toCode();
+    }
+
+    @Override
+    public boolean getExperimental() {
+        return this.getPlanDefinition().getExperimental();
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

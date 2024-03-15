@@ -102,6 +102,25 @@ public class SearchHelper {
 
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
     }
+
+    /**
+     * Searches the given Repository and handles paging to return all entries
+     *
+     * @param <CanonicalType>
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @return
+     */
+    public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
+            Repository repository, String canonical) {
+        var resourceType = repository
+                .fhirContext()
+                .getResourceDefinition(Canonicals.getResourceType(canonical))
+                .getImplementingClass();
+
+        return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
+    }
+
     /**
      * Searches the given Repository and handles paging to return all entries
      *
@@ -115,6 +134,26 @@ public class SearchHelper {
     public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
             IBaseBundle searchRepositoryByCanonicalWithPaging(
                     Repository repository, CanonicalType canonical, Class<R> resourceType) {
+        var url = Canonicals.getUrl(canonical);
+        var version = Canonicals.getVersion(canonical);
+        var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
+        var searchResult = searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
+
+        return searchResult;
+    }
+
+    /**
+     * Searches the given Repository and handles paging to return all entries
+     *
+     * @param <CanonicalType> an IPrimitiveType<String> type
+     * @param <R> an IBaseResource type
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @param resourceType the class of the IBaseResource type
+     * @return
+     */
+    public static <R extends IBaseResource> IBaseBundle searchRepositoryByCanonicalWithPaging(
+            Repository repository, String canonical, Class<R> resourceType) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);

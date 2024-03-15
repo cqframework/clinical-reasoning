@@ -71,7 +71,8 @@ public class PackageProcessor implements IPackageProcessor {
     protected IBaseBundle packageR4(org.hl7.fhir.r4.model.PlanDefinition planDefinition, boolean isPut) {
         var packageBundle = new org.hl7.fhir.r4.model.Bundle();
         packageBundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        packageBundle.addEntry(org.opencds.cqf.fhir.utility.r4.PackageHelper.createEntry(planDefinition, isPut));
+        packageBundle.addEntry((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent)
+                org.opencds.cqf.fhir.utility.PackageHelper.createEntry(planDefinition, isPut));
         // The CPG IG specifies a main cql library for a PlanDefinition
         var libraryCanonical =
                 planDefinition.hasLibrary() ? planDefinition.getLibrary().get(0) : null;
@@ -80,7 +81,8 @@ public class PackageProcessor implements IPackageProcessor {
                     org.opencds.cqf.fhir.utility.r4.SearchHelper.searchRepositoryByCanonical(
                             repository, libraryCanonical);
             if (library != null) {
-                packageBundle.addEntry(org.opencds.cqf.fhir.utility.r4.PackageHelper.createEntry(library, isPut));
+                packageBundle.addEntry((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent)
+                        org.opencds.cqf.fhir.utility.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
                     org.opencds.cqf.fhir.utility.r4.PackageHelper.addRelatedArtifacts(
                             packageBundle, library.getRelatedArtifact(), repository, isPut);

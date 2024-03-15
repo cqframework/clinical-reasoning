@@ -36,6 +36,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactApproveVisitor;
 
 public class KnowledgeArtifactApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -45,7 +46,7 @@ public class KnowledgeArtifactApproveVisitorTest {
     @BeforeEach
     public void setup() {
         var lib = (Library) jsonParser.parseResource(
-                KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
+                KnowledgeArtifactReleaseVisitorR4Tests.class.getResourceAsStream("Library-ersd-active.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(lib);
         doAnswer(new Answer<Bundle>() {
@@ -61,14 +62,14 @@ public class KnowledgeArtifactApproveVisitorTest {
 
     @Test
     void approveOperation_endpoint_id_should_match_target_parameter() {
-        String artifactAssessmentTarget = "Library/This-Library-Does-Not-Exist|1.0.0";
-        Parameters params = parameters(part("artifactAssessmentTarget", new CanonicalType(artifactAssessmentTarget)));
+        var artifactAssessmentTarget = "Library/This-Library-Does-Not-Exist|1.0.0";
+        var params = parameters(part("artifactAssessmentTarget", new CanonicalType(artifactAssessmentTarget)));
         UnprocessableEntityException maybeException = null;
-        KnowledgeArtifactApproveVisitor releaseVisitor = new KnowledgeArtifactApproveVisitor();
-        Library lib = spyRepository
+        var releaseVisitor = new KnowledgeArtifactApproveVisitor();
+        var lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        var libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
             libraryAdapter.accept(releaseVisitor, spyRepository, params);
@@ -111,7 +112,7 @@ public class KnowledgeArtifactApproveVisitorTest {
     @Test
     void approveOperation_test() {
         var practitioner = (Practitioner) jsonParser.parseResource(
-                KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Practitioner-minimal.json"));
+                KnowledgeArtifactReleaseVisitorR4Tests.class.getResourceAsStream("Practitioner-minimal.json"));
         spyRepository.update(practitioner);
         Date today = new Date();
         // get today's date in the form "2023-05-11"
@@ -128,12 +129,12 @@ public class KnowledgeArtifactApproveVisitorTest {
                 part("artifactAssessmentTarget", new CanonicalType(artifactAssessmentTarget)),
                 part("artifactAssessmentRelatedArtifact", new CanonicalType(artifactAssessmentRelatedArtifact)),
                 part("artifactAssessmentAuthor", new Reference(artifactAssessmentAuthor)));
-        KnowledgeArtifactApproveVisitor releaseVisitor = new KnowledgeArtifactApproveVisitor();
+        KnowledgeArtifactApproveVisitor approveVisitor = new KnowledgeArtifactApproveVisitor();
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
-        Bundle returnedResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnedResource = (Bundle) libraryAdapter.accept(approveVisitor, spyRepository, params);
 
         assertNotNull(returnedResource);
         Library approvedLibrary = spyRepository

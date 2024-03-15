@@ -110,7 +110,7 @@ public class CRMIReleaseVersionBehavior {
         public Enumeration<CRMIReleaseVersionBehaviorCodes> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<CRMIReleaseVersionBehaviorCodes>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("default".equals(codeString))
                 return new Enumeration<CRMIReleaseVersionBehaviorCodes>(this, CRMIReleaseVersionBehaviorCodes.DEFAULT);

@@ -1,240 +1,43 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
-import org.opencds.cqf.fhir.utility.r4.PackageHelper;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
-    @Override
-    public Bundle visit(LibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        String version = MetadataResourceHelper.getParameter("version", draftParameters, StringType.class)
-                .map(r -> r.getValue())
-                .orElseThrow(() -> new UnprocessableEntityException("The version argument is required"));
-        Library libRes = (Library) library.get();
-        // check valid semverversion
-        checkVersionValidSemver(version);
+public class KnowledgeArtifactDraftVisitor {
 
-        // remove release label and extension
-        List<Extension> removeReleaseLabelAndDescription = libRes.getExtension().stream()
-                .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
-                        && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
-                .collect(Collectors.toList());
-        libRes.setExtension(removeReleaseLabelAndDescription);
-        // remove approval date
-        libRes.setApprovalDate(null);
-        // new draft version
-        String draftVersion = version + "-draft";
-        String draftVersionUrl = Canonicals.getUrl(library.getUrl()) + "|" + draftVersion;
-
-        // Root artifact must NOT have status of 'Active'. Existing drafts of
-        // reference artifacts with the right verison number will be adopted.
-        // This check is performed here to facilitate that different treatment
-        // for the root artifact and those referenced by it.
-        if (libRes.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
-            throw new PreconditionFailedException(String.format(
-                    "Drafts can only be created from artifacts with status of 'active'. Resource '%s' has a status of: %s",
-                    library.getUrl(), String.valueOf(libRes.getStatus())));
-        }
-        // Ensure only one resource exists with this URL
-        Bundle existingArtifactsForUrl = (Bundle)
-                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(draftVersionUrl));
-        if (existingArtifactsForUrl.getEntry().size() != 0) {
-            throw new PreconditionFailedException(String.format(
-                    "A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time.",
-                    library.getUrl(), draftVersionUrl));
-        }
-        // create draft resources
-        List<MetadataResource> resourcesToCreate =
-                createDraftsOfArtifactAndRelated(libRes, repository, version, new ArrayList<MetadataResource>());
-        Bundle transactionBundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
-        List<IdType> urnList = resourcesToCreate.stream()
-                .map(res -> new IdType("urn:uuid:" + UUID.randomUUID().toString()))
-                .collect(Collectors.toList());
-        TreeSet<String> ownedResourceUrls = createOwnedResourceUrlCache(resourcesToCreate);
-        for (int i = 0; i < resourcesToCreate.size(); i++) {
-            KnowledgeArtifactAdapter newResourceAdapter =
-                    new AdapterFactory().createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
-            updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList);
-            updateRelatedArtifactUrlsWithNewVersions(
-                    library.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
-            MetadataResource updateIdForBundle = (MetadataResource) newResourceAdapter.copy();
-            updateIdForBundle.setId(urnList.get(i));
-            transactionBundle.addEntry(PackageHelper.createEntry(updateIdForBundle, false));
-        }
-        return repository.transaction(transactionBundle);
-
-        // DependencyInfo --document here that there is a need for figuring out how to determine which package the
-        // dependency is in.
-        // what is dependency, where did it originate? potentially the package?
-    }
-
-    @Override
-    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    private List<MetadataResource> createDraftsOfArtifactAndRelated(
-            MetadataResource resource,
-            Repository repository,
-            String version,
-            List<MetadataResource> resourcesToCreate) {
-        String draftVersion = version + "-draft";
-        String draftVersionUrl = Canonicals.getUrl(resource.getUrl()) + "|" + draftVersion;
-
-        // TODO: Decide if we need both of these checks
-        Optional<IBaseResource> existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion((Bundle)
-                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(draftVersionUrl)));
-        Optional<MetadataResource> draftVersionAlreadyInBundle = resourcesToCreate.stream()
-                .filter(res -> res.getUrl().equals(Canonicals.getUrl(draftVersionUrl))
-                        && res.getVersion().equals(draftVersion))
-                .findAny();
-        MetadataResource newResource = null;
-        if (existingArtifactsWithMatchingUrl.isPresent()) {
-            newResource = (MetadataResource) existingArtifactsWithMatchingUrl.get();
-        } else if (draftVersionAlreadyInBundle.isPresent()) {
-            newResource = draftVersionAlreadyInBundle.get();
-        }
-
-        if (newResource == null) {
-            KnowledgeArtifactAdapter sourceResourceAdapter =
-                    new AdapterFactory().createKnowledgeArtifactAdapter(resource);
-            sourceResourceAdapter.setEffectivePeriod(null);
-            newResource = resource.copy();
-            newResource.setStatus(Enumerations.PublicationStatus.DRAFT);
-            newResource.setVersion(draftVersion);
-            resourcesToCreate.add(newResource);
-            var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts().stream()
-                    .map(ra -> (RelatedArtifact) ra)
-                    .collect(Collectors.toList());
-            for (RelatedArtifact ra : ownedRelatedArtifacts) {
-                // If it’s an owned RelatedArtifact composed-of then we want to copy it
-                // (references are updated in createDraftBundle before adding to the bundle
-                // hence they are ignored here)
-                // e.g.
-                // relatedArtifact: [
-                //  {
-                //    resource: www.test.com/Library/123|0.0.1 <- try to update this reference to the latest version in
-                // createDraftBundle
-                //   },
-                //  {
-                //    extension: [{url: .../isOwned, valueBoolean: true}],
-                //    resource: www.test.com/Library/190|1.2.3 <- resolve this resource, create a draft of it and
-                // recursively check descendants
-                //  }
-                // ]
-                if (ra.hasUrl()) {
-                    Bundle referencedResourceBundle = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
-                            repository, new CanonicalType(ra.getUrl()));
-                    processReferencedResourceForDraft(
-                            repository, referencedResourceBundle, ra, version, resourcesToCreate);
-                } else if (ra.hasResource()) {
-                    Bundle referencedResourceBundle = (Bundle)
-                            SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
-                    processReferencedResourceForDraft(
-                            repository, referencedResourceBundle, ra, version, resourcesToCreate);
+    public static Optional<MetadataResource> processReferencedResourceForDraft(
+            Repository repository, RelatedArtifact ra, String version) {
+        Optional<MetadataResource> referencedResource = Optional.empty();
+        if (ra.hasUrl() || ra.hasResource()) {
+            Bundle referencedResourceBundle;
+            if (ra.hasUrl()) {
+                referencedResourceBundle = (Bundle)
+                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, new CanonicalType(ra.getUrl()));
+            } else {
+                referencedResourceBundle = (Bundle)
+                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
+            }
+            if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
+                var referencedResourceEntry = referencedResourceBundle.getEntryFirstRep();
+                if (referencedResourceEntry.hasResource()
+                        && referencedResourceEntry.getResource() instanceof MetadataResource) {
+                    referencedResource = Optional.of((MetadataResource) referencedResourceEntry.getResource());
                 }
             }
         }
-        return resourcesToCreate;
+        return referencedResource;
     }
 
-    private void processReferencedResourceForDraft(
-            Repository repository,
-            Bundle referencedResourceBundle,
-            RelatedArtifact ra,
-            String version,
-            List<MetadataResource> transactionBundle) {
-        if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
-            Bundle.BundleEntryComponent referencedResourceEntry =
-                    referencedResourceBundle.getEntry().get(0);
-            if (referencedResourceEntry.hasResource()
-                    && referencedResourceEntry.getResource() instanceof MetadataResource) {
-                MetadataResource referencedResource = (MetadataResource) referencedResourceEntry.getResource();
-
-                createDraftsOfArtifactAndRelated(referencedResource, repository, version, transactionBundle);
-            }
-        }
-    }
-
-    private void checkVersionValidSemver(String version) throws UnprocessableEntityException {
-        if (version == null || version.isEmpty()) {
-            throw new UnprocessableEntityException("The version argument is required");
-        }
-        if (version.contains("draft")) {
-            throw new UnprocessableEntityException("The version cannot contain 'draft'");
-        }
-        if (version.contains("/") || version.contains("\\") || version.contains("|")) {
-            throw new UnprocessableEntityException("The version contains illegal characters");
-        }
-        Pattern pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\d+\\.)?(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(version);
-        boolean matchFound = matcher.find();
-        if (!matchFound) {
-            throw new UnprocessableEntityException(
-                    "The version must be in the format MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH.REVISION");
-        }
-    }
-
-    private TreeSet<String> createOwnedResourceUrlCache(List<MetadataResource> resources) {
-        TreeSet<String> retval = new TreeSet<String>();
-        resources.stream()
-                .map(resource -> new AdapterFactory().createKnowledgeArtifactAdapter(resource))
-                .map(KnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
-                .flatMap(List::stream)
-                .map(ra -> (RelatedArtifact) ra)
-                .filter(RelatedArtifact::hasResource)
-                .map(RelatedArtifact::getResource)
-                .map(Canonicals::getUrl)
-                .forEach(retval::add);
-        return retval;
-    }
-
-    private void updateUsageContextReferencesWithUrns(
+    public static void updateUsageContextReferencesWithUrns(
             MetadataResource newResource,
             List<MetadataResource> resourceListWithOriginalIds,
             List<IdType> idListForTransactionBundle) {
@@ -257,18 +60,5 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                 }
             }
         }
-    }
-
-    private void updateRelatedArtifactUrlsWithNewVersions(
-            List<IDependencyInfo> referenceList, String updatedVersion, TreeSet<String> ownedUrlCache) {
-        // For each  relatedArtifact, update the version of the reference.
-        referenceList.stream()
-                // only update the references to owned resources (including dependencies)
-                .filter(ra -> ownedUrlCache.contains(Canonicals.getUrl(ra.getReference())))
-                .collect(Collectors.toList())
-                .replaceAll(ra -> {
-                    ra.setReference(Canonicals.getUrl(ra.getReference()) + "|" + updatedVersion);
-                    return ra;
-                });
     }
 }

@@ -168,32 +168,42 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
     }
 
     private void processReferencedResourceForDraft(
-            Repository repository,
-            ICompositeType ra,
-            String version,
-            List<IDomainResource> transactionBundle,
-            FhirVersionEnum fhirVersion) {
+        Repository repository,
+        ICompositeType ra,
+        String version,
+        List<IDomainResource> transactionBundle,
+        FhirVersionEnum fhirVersion) {
+        
         Optional<IDomainResource> referencedResource = Optional.empty();
         switch (fhirVersion) {
             case DSTU3:
                 referencedResource =
                         org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor
                                 .processReferencedResourceForDraft(
-                                        repository, (org.hl7.fhir.dstu3.model.RelatedArtifact) ra, version)
+                                    repository, 
+                                    (org.hl7.fhir.dstu3.model.RelatedArtifact) ra, 
+                                    version
+                                )
                                 .map(r -> (IDomainResource) r);
                 break;
             case R4:
                 referencedResource =
                         org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor
                                 .processReferencedResourceForDraft(
-                                        repository, (org.hl7.fhir.r4.model.RelatedArtifact) ra, version)
+                                    repository, 
+                                    (org.hl7.fhir.r4.model.RelatedArtifact) ra, 
+                                    version
+                                )
                                 .map(r -> (IDomainResource) r);
                 break;
             case R5:
                 referencedResource =
                         org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor
                                 .processReferencedResourceForDraft(
-                                        repository, (org.hl7.fhir.r5.model.RelatedArtifact) ra, version)
+                                    repository, 
+                                    (org.hl7.fhir.r5.model.RelatedArtifact) ra, 
+                                    version
+                                )
                                 .map(r -> (IDomainResource) r);
                 break;
             case DSTU2:

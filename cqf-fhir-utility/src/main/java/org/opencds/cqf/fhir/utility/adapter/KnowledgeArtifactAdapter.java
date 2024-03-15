@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -109,7 +110,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
     }
-    ;
 
     private static String getRelatedArtifactReference(org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact) {
         return relatedArtifact.getResource().getReference();
@@ -134,7 +134,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
     }
-    ;
 
     private static String getRelatedArtifactType(org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact) {
         return relatedArtifact.getType().toCode();
@@ -159,8 +158,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
-    }
-    ;
+    };
 
     private static void setRelatedArtifactReference(
             org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact, String reference) {
@@ -213,7 +211,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                 .collect(Collectors.toList());
     }
 
-    static boolean isSupportedMetadataResource(IDomainResource resource) {
+    static boolean isSupportedMetadataResource(IBaseResource resource) {
         return resource instanceof org.hl7.fhir.dstu3.model.MetadataResource
                 || resource instanceof org.hl7.fhir.r4.model.MetadataResource
                 || resource instanceof org.hl7.fhir.r5.model.MetadataResource;
@@ -221,7 +219,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
-                .filter(r -> isSupportedMetadataResource((IDomainResource) r))
+                .filter(r -> isSupportedMetadataResource(r))
                 .map(r -> (KnowledgeArtifactAdapter) AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
                 .sorted((a, b) -> a.getVersion().compareTo(b.getVersion()))

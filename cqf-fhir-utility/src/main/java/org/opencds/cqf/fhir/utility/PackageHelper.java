@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
@@ -28,7 +29,7 @@ public class PackageHelper {
         }
         final var request = BundleHelper.newRequest(fhirVersion, method, requestUrl);
         BundleHelper.setEntryRequest(fhirVersion, entry, request);
-        try {
+        if (KnowledgeArtifactAdapter.isSupportedMetadataResource(resource)) {
             final var adapter = AdapterFactory.forFhirVersion(fhirVersion)
                     .createKnowledgeArtifactAdapter((IDomainResource) resource);
             if (adapter.hasUrl()) {
@@ -45,9 +46,7 @@ public class PackageHelper {
                         BundleHelper.setRequestIfNoneExist(fhirVersion, request, String.format("url=%s", url));
                     }
                 }
-            }
-        } catch (UnprocessableEntityException e) {
-            // ignore fullURL for non-canonical resources
+            }   
         }
         return entry;
     }

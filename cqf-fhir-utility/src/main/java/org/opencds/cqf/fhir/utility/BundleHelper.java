@@ -394,9 +394,10 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Returns a new BundleEntryRequest element with the method and url
      * @param fhirVersion
-     * @param location
+     * @param method
+     * @param url
      * @return
      */
     public static IBaseBackboneElement newRequest(FhirVersionEnum fhirVersion, String method, String url) {
@@ -421,9 +422,9 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Returns a new BundleEntryRequest element with the method
      * @param fhirVersion
-     * @param location
+     * @param method
      * @return
      */
     public static IBaseBackboneElement newRequest(FhirVersionEnum fhirVersion, String method) {
@@ -445,8 +446,9 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Sets the BundleEntryRequest url
      * @param fhirVersion
+     * @param request
      * @param location
      * @return
      */
@@ -470,9 +472,10 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Sets the BundleEntryRequest ifNoneExist property
      * @param fhirVersion
-     * @param location
+     * @param request
+     * @param ifNoneExist
      * @return
      */
     public static IBaseBackboneElement setRequestIfNoneExist(
@@ -496,9 +499,10 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Sets the BundleEntry fullUrl property
      * @param fhirVersion
-     * @param location
+     * @param entry
+     * @param fullUrl
      * @return
      */
     public static IBaseBackboneElement setEntryFullUrl(
@@ -521,9 +525,10 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new BundleEntryResponse element with the location
+     * Sets the BundleEntry request property
      * @param fhirVersion
-     * @param location
+     * @param entry
+     * @param request
      * @return
      */
     public static IBaseBackboneElement setEntryRequest(

@@ -64,8 +64,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                     library.getUrl(), library.getStatus()));
         }
         // Ensure only one resource exists with this URL
-        var existingArtifactsForUrl =
-                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, draftVersionUrl);
+        var existingArtifactsForUrl = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, draftVersionUrl);
         if (BundleHelper.getEntry(existingArtifactsForUrl).size() != 0) {
             throw new PreconditionFailedException(String.format(
                     "A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time.",
@@ -177,17 +176,32 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         Optional<IDomainResource> referencedResource = Optional.empty();
         switch (fhirVersion) {
             case DSTU3:
-                referencedResource = org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor.processReferencedResourceForDraft(
-                    repository, (org.hl7.fhir.dstu3.model.RelatedArtifact) ra, version).map(r -> (IDomainResource) r);
+                referencedResource =
+                        org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor
+                                .processReferencedResourceForDraft(
+                                        repository, (org.hl7.fhir.dstu3.model.RelatedArtifact) ra, version)
+                                .map(r -> (IDomainResource) r);
                 break;
             case R4:
-                referencedResource = org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor.processReferencedResourceForDraft(
-                        repository, (org.hl7.fhir.r4.model.RelatedArtifact) ra, version).map(r -> (IDomainResource) r);
+                referencedResource =
+                        org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor
+                                .processReferencedResourceForDraft(
+                                        repository, (org.hl7.fhir.r4.model.RelatedArtifact) ra, version)
+                                .map(r -> (IDomainResource) r);
                 break;
+            case R5:
+                referencedResource =
+                        org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor
+                                .processReferencedResourceForDraft(
+                                        repository, (org.hl7.fhir.r5.model.RelatedArtifact) ra, version)
+                                .map(r -> (IDomainResource) r);
+                break;
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                referencedResource = org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor.processReferencedResourceForDraft(
-                        repository, (org.hl7.fhir.r5.model.RelatedArtifact) ra, version).map(r -> (IDomainResource) r);
-                break;
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
         referencedResource.ifPresent(
                 r -> createDraftsOfArtifactAndRelated(r, repository, version, transactionBundle, fhirVersion));
@@ -232,12 +246,15 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
             FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
-                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor.updateUsageContextReferencesWithUrns(
-                    (org.hl7.fhir.dstu3.model.MetadataResource)newResource,
-                    resourceListWithOriginalIds.stream().map(ra ->
-                (org.hl7.fhir.dstu3.model.MetadataResource)ra).collect(Collectors.toList()),
-                idListForTransactionBundle.stream().map(id -> new org.hl7.fhir.dstu3.model.IdType(id)).collect(Collectors.toList())
-                );
+                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor
+                        .updateUsageContextReferencesWithUrns(
+                                (org.hl7.fhir.dstu3.model.MetadataResource) newResource,
+                                resourceListWithOriginalIds.stream()
+                                        .map(ra -> (org.hl7.fhir.dstu3.model.MetadataResource) ra)
+                                        .collect(Collectors.toList()),
+                                idListForTransactionBundle.stream()
+                                        .map(id -> new org.hl7.fhir.dstu3.model.IdType(id))
+                                        .collect(Collectors.toList()));
                 break;
             case R4:
                 org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor
@@ -246,19 +263,28 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                                 resourceListWithOriginalIds.stream()
                                         .map(ra -> (org.hl7.fhir.r4.model.MetadataResource) ra)
                                         .collect(Collectors.toList()),
-                                idListForTransactionBundle.stream().map(id -> new org.hl7.fhir.r4.model.IdType(id)).collect(Collectors.toList()));
+                                idListForTransactionBundle.stream()
+                                        .map(id -> new org.hl7.fhir.r4.model.IdType(id))
+                                        .collect(Collectors.toList()));
                 break;
             case R5:
-                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor.updateUsageContextReferencesWithUrns(
-                    (org.hl7.fhir.r5.model.MetadataResource)newResource,
-                    resourceListWithOriginalIds.stream().map(ra ->
-                (org.hl7.fhir.r5.model.MetadataResource)ra).collect(Collectors.toList()),
-                    idListForTransactionBundle.stream().map(id -> new org.hl7.fhir.r5.model.IdType(id)).collect(Collectors.toList())
-                    );
+                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor
+                        .updateUsageContextReferencesWithUrns(
+                                (org.hl7.fhir.r5.model.MetadataResource) newResource,
+                                resourceListWithOriginalIds.stream()
+                                        .map(ra -> (org.hl7.fhir.r5.model.MetadataResource) ra)
+                                        .collect(Collectors.toList()),
+                                idListForTransactionBundle.stream()
+                                        .map(id -> new org.hl7.fhir.r5.model.IdType(id))
+                                        .collect(Collectors.toList()));
                 break;
 
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                break;
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 

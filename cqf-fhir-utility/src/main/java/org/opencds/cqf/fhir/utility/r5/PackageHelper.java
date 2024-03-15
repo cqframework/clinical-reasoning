@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.r5.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.Library;
@@ -149,34 +146,6 @@ public class PackageHelper {
         }
     }
 
-    public static BundleEntryComponent createEntry(Resource resource, boolean isPut) {
-        var resourceType = resource.getResourceType().toString();
-        var entry = new BundleEntryComponent().setResource(resource);
-        var request = new BundleEntryRequestComponent();
-        if (isPut) {
-            request.setMethod(HTTPVerb.PUT).setUrl(resourceType + "/" + resource.getIdPart());
-        } else {
-            request.setMethod(HTTPVerb.POST).setUrl(resourceType);
-        }
-        if (hasUrl(resource)) {
-            var url = getUrl(resource);
-            if (hasVersion(resource)) {
-                entry.setFullUrl(url + "|" + getVersion(resource));
-                if (!isPut) {
-                    request.setIfNoneExist(String.format("url=%s&version=%s", url, getVersion(resource)));
-                }
-            } else {
-                entry.setFullUrl(url);
-                if (!isPut) {
-                    request.setIfNoneExist(String.format("url=%s", url));
-                }
-            }
-        }
-        entry.setRequest(request);
-
-        return entry;
-    }
-
     public static void addRelatedArtifacts(
             Bundle bundle, List<RelatedArtifact> artifacts, Repository repository, boolean isPut) {
         for (var artifact : artifacts) {
@@ -189,7 +158,8 @@ public class PackageHelper {
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->
                                                 e.getResource().getIdElement().equals(resource.getIdElement()))) {
-                            bundle.addEntry(createEntry(resource, isPut));
+                            bundle.addEntry((Bundle.BundleEntryComponent)
+                                    org.opencds.cqf.fhir.utility.PackageHelper.createEntry(resource, isPut));
                             if (hasRelatedArtifact(resource)) {
                                 addRelatedArtifacts(bundle, getRelatedArtifact(resource), repository, isPut);
                             }

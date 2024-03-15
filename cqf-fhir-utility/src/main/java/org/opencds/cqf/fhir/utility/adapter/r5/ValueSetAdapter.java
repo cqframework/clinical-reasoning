@@ -224,7 +224,9 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
 
     @Override
     public String getStatus() {
-        return this.getValueSet().getStatus() == null ? null : this.getValueSet().getStatus().toCode();
+        return this.getValueSet().getStatus() == null
+                ? null
+                : this.getValueSet().getStatus().toCode();
     }
 
     @Override

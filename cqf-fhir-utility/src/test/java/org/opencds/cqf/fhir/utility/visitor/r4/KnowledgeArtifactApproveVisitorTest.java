@@ -46,7 +46,7 @@ public class KnowledgeArtifactApproveVisitorTest {
     @BeforeEach
     public void setup() {
         var lib = (Library) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorR4Tests.class.getResourceAsStream("Library-ersd-active.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(lib);
         doAnswer(new Answer<Bundle>() {
@@ -112,7 +112,7 @@ public class KnowledgeArtifactApproveVisitorTest {
     @Test
     void approveOperation_test() {
         var practitioner = (Practitioner) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorR4Tests.class.getResourceAsStream("Practitioner-minimal.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Practitioner-minimal.json"));
         spyRepository.update(practitioner);
         Date today = new Date();
         // get today's date in the form "2023-05-11"

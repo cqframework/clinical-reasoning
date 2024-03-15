@@ -66,8 +66,11 @@ public class PackageHelper {
                 return ((org.hl7.fhir.r5.model.Resource) resource)
                         .getResourceType()
                         .toString();
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                throw new UnprocessableEntityException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "Unsupported version of FHIR: %s",
                         resource.getStructureFhirVersionEnum().getFhirVersionString()));
         }

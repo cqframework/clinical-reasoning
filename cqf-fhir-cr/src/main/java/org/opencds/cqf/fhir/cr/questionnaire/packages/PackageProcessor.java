@@ -91,8 +91,9 @@ public class PackageProcessor implements IPackageProcessor {
     protected IBaseBundle packageR5(IBaseResource questionnaire, Boolean isPut) {
         var bundle = new org.hl7.fhir.r5.model.Bundle();
         bundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.TRANSACTION);
-        bundle.addEntry(org.opencds.cqf.fhir.utility.r5.PackageHelper.createEntry(
-                (org.hl7.fhir.r5.model.Resource) questionnaire, isPut));
+        bundle.addEntry((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent)
+                org.opencds.cqf.fhir.utility.PackageHelper.createEntry(
+                        (org.hl7.fhir.r5.model.Resource) questionnaire, isPut));
         var libraryExtension =
                 ((org.hl7.fhir.r5.model.Questionnaire) questionnaire).getExtensionByUrl(Constants.CQF_LIBRARY);
         if (libraryExtension != null) {
@@ -101,7 +102,8 @@ public class PackageProcessor implements IPackageProcessor {
                     org.opencds.cqf.fhir.utility.r5.SearchHelper.searchRepositoryByCanonical(
                             repository, libraryCanonical);
             if (library != null) {
-                bundle.addEntry(org.opencds.cqf.fhir.utility.r5.PackageHelper.createEntry(library, isPut));
+                bundle.addEntry((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent)
+                        org.opencds.cqf.fhir.utility.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
                     org.opencds.cqf.fhir.utility.r5.PackageHelper.addRelatedArtifacts(
                             bundle, library.getRelatedArtifact(), repository, isPut);

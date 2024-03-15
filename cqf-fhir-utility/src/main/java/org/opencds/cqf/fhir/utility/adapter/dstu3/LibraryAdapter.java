@@ -258,7 +258,9 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
 
     @Override
     public String getStatus() {
-        return this.getLibrary().getStatus() == null ? null : this.getLibrary().getStatus().toCode();
+        return this.getLibrary().getStatus() == null
+                ? null
+                : this.getLibrary().getStatus().toCode();
     }
 
     @Override

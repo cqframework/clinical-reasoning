@@ -93,9 +93,7 @@ public class KnowledgeArtifactDraftVisitorTests {
         String draftedVersion = version + "-draft";
         Parameters params = new Parameters();
         var newParam = params.addParameter();
-        newParam
-            .setName("version")
-            .setValue(new StringType(version));
+        newParam.setName("version").setValue(new StringType(version));
         // Root Artifact must have approval date, releaseLabel and releaseDescription for this test
         assertTrue(library.hasApprovalDate());
         assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
@@ -128,7 +126,8 @@ public class KnowledgeArtifactDraftVisitorTests {
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
                             if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
-                                assertTrue(Canonicals.getVersion(relatedArtifact.getResource().getReference())
+                                assertTrue(Canonicals.getVersion(
+                                                relatedArtifact.getResource().getReference())
                                         .equals(draftedVersion));
                             }
                         }

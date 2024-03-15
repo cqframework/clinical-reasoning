@@ -179,8 +179,8 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                         .filter(originalDep -> originalDep.getReference().equals(relatedArtifactReference))
                         .findFirst()
                         .ifPresent(dep -> {
-                            ((List<IBaseExtension>) resolvedRelatedArtifact.getExtension())
-                                    .addAll((List<IBaseExtension>) dep.getExtension());
+                            ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
+                                    .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
                             originalDependenciesWithExtensions.removeIf(
                                     ra -> ra.getReference().equals(relatedArtifactReference));
                         });
@@ -260,7 +260,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     }
 
     private void checkNonExperimental(
-            IBaseResource resource, Optional<String> experimentalBehavior, Repository repository)
+            IDomainResource resource, Optional<String> experimentalBehavior, Repository repository)
             throws UnprocessableEntityException {
         if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
             var code = experimentalBehavior.isPresent()
@@ -294,10 +294,14 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     private void propagageEffectivePeriod(
             ICompositeType rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
         if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period) {
+            org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
+                    (org.hl7.fhir.dstu3.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r4.model.Period) {
             org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
                     (org.hl7.fhir.r4.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r5.model.Period) {
+            org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
+                    (org.hl7.fhir.r5.model.Period) rootEffectivePeriod, artifactAdapter);
         } else {
             throw new UnprocessableEntityException(
                     rootEffectivePeriod.getClass().getName() + " not supported");
@@ -341,8 +345,12 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             case R5:
                 return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.getReleaseVersion(
                         version, versionBehavior, existingVersion);
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                throw new UnprocessableEntityException("Unsupported FHIR Version: " + fhirVersion.toString());
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 

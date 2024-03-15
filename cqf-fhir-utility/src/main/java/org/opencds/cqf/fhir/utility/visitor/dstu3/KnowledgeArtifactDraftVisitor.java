@@ -1,14 +1,7 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MetadataResource;
@@ -16,11 +9,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 
 public class KnowledgeArtifactDraftVisitor {
 
@@ -30,11 +19,11 @@ public class KnowledgeArtifactDraftVisitor {
         if (ra.hasUrl() || ra.hasResource()) {
             Bundle referencedResourceBundle;
             if (ra.hasUrl()) {
-                referencedResourceBundle = (Bundle)
-                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getUrl());
+                referencedResourceBundle =
+                        (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getUrl());
             } else {
-                referencedResourceBundle = (Bundle)
-                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResource().getReference());
+                referencedResourceBundle = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
+                        repository, ra.getResource().getReference());
             }
             if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
                 var referencedResourceEntry = referencedResourceBundle.getEntryFirstRep();

@@ -320,7 +320,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
 
     @Override
     public String getStatus() {
-        return this.getPlanDefinition().getStatus() == null ? null : this.getPlanDefinition().getStatus().toCode();
+        return this.getPlanDefinition().getStatus() == null
+                ? null
+                : this.getPlanDefinition().getStatus().toCode();
     }
 
     @Override

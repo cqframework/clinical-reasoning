@@ -50,7 +50,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
-public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
+public class KnowledgeArtifactReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -74,7 +74,7 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     @BeforeEach
     public void setup() {
         SearchParameter sp = (SearchParameter)
-                jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "SearchParameter-artifactAssessment.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(sp);
@@ -92,7 +92,7 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     @Test
     void visitLibraryTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
         spyRepository.transaction(bundle);
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         Library library = spyRepository
@@ -186,9 +186,8 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
 
     @Test
     void releaseResource_force_version() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         // Existing version should be "1.2.3";
         String newVersionToForce = "1.2.7.23";
@@ -216,12 +215,12 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     void releaseResource_require_non_experimental_error() {
         // SpecificationLibrary - root is experimentalbut HAS experimental children
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-small-approved-draft-experimental.json"));
         spyRepository.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
         Bundle bundle2 =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-small-approved-draft-experimental-children.json"));
         spyRepository.transaction(bundle2);
         Parameters params = parameters(
@@ -260,12 +259,12 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     void releaseResource_require_non_experimental_warn() {
         // SpecificationLibrary - root is experimentalbut HAS experimental children
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-small-approved-draft-experimental.json"));
         spyRepository.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
         Bundle bundle2 =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-small-approved-draft-experimental-children.json"));
         spyRepository.transaction(bundle2);
 
@@ -320,7 +319,7 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     @Test
     void releaseResource_propagate_effective_period() {
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-ersd-no-child-effective-period.json"));
         spyRepository.transaction(bundle);
         String effectivePeriodToPropagate = "2020-12-11";
@@ -356,9 +355,8 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
 
     @Test
     void releaseResource_latestFromTx_NotSupported_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
 
         String actualErrorMessage = "";
@@ -384,7 +382,7 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     @Test
     void release_missing_approvalDate_validation_test() {
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-release-missing-approvalDate.json"));
         spyRepository.transaction(bundle);
 
@@ -407,9 +405,8 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
 
     @Test
     void release_version_format_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         Library library = spyRepository
@@ -432,9 +429,8 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
 
     @Test
     void release_releaseLabel_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         String releaseLabel = "release label test";
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
@@ -464,7 +460,7 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
     @Test
     void release_version_active_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         Library library = spyRepository
@@ -485,9 +481,8 @@ public class KnowledgeArtifactReleaseVisitorDSTU3Tests {
 
     @Test
     void release_versionBehaviour_format_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorDSTU3Tests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         Library library = spyRepository

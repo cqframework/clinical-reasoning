@@ -117,11 +117,13 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                         artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.r5.model.CanonicalType(t)),
                         artifactAssessmentAuthor.map(t -> (org.hl7.fhir.r5.model.Reference) t),
                         new org.hl7.fhir.r5.model.Reference(artifactTargetReference));
-
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                break;
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
-        return null;
     }
 
     private void setDateElement(LibraryAdapter library, Date currentDate, FhirVersionEnum fhirVersion) {
@@ -135,10 +137,16 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                 library.setDateElement(theDateR4);
                 break;
 
-            default:
+            case R5:
                 var theDateR5 = new org.hl7.fhir.r5.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY);
                 library.setDateElement(theDateR5);
                 break;
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
+            default:
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 

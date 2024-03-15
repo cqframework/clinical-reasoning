@@ -264,8 +264,12 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                 org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor.setCorrectBundleType(
                         count, offset, (org.hl7.fhir.r5.model.Bundle) bundle);
                 break;
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                throw new UnprocessableEntityException("Unsupported version");
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
     /**
@@ -310,8 +314,12 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             case R5:
                 return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor.findUnsupportedInclude(
                         (List<org.hl7.fhir.r5.model.Bundle.BundleEntryComponent>) entries, include);
+            case DSTU2:
+            case DSTU2_1:
+            case DSTU2_HL7ORG:
             default:
-                throw new UnprocessableEntityException("Unsupported version");
+                throw new UnprocessableEntityException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 }

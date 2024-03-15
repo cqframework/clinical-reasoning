@@ -17,8 +17,8 @@ public class KnowledgeArtifactDraftVisitor {
             Repository repository, RelatedArtifact ra, String version) {
         Optional<MetadataResource> referencedResource = Optional.empty();
         if (ra.hasResource()) {
-            Bundle referencedResourceBundle = (Bundle)
-                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
+            Bundle referencedResourceBundle =
+                    (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
             if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
                 var referencedResourceEntry = referencedResourceBundle.getEntryFirstRep();
                 if (referencedResourceEntry.hasResource()

@@ -39,7 +39,7 @@ public class MeasureProcessorSdeSanityTest {
                 .report();
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        assertEquals(formatter.format(report.getPeriod().getStart()), "2019-01-01");
-        assertEquals(formatter.format(report.getPeriod().getEnd()), "2019-12-31");
+        assertEquals("2019-01-01", formatter.format(report.getPeriod().getStart()));
+        assertEquals("2019-12-31", formatter.format(report.getPeriod().getEnd()));
     }
 }

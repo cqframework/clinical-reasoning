@@ -36,7 +36,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
     public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
 
-        if (!planDefinition.fhirType().equals("PlanDefinition")) {
+        if (!(planDefinition instanceof PlanDefinition)) {
             throw new IllegalArgumentException(
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }

@@ -15,6 +15,7 @@ import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
  */
-public class PackageHelper {
+public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper{
 
     private PackageHelper() {}
 
@@ -158,9 +159,7 @@ public class PackageHelper {
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->
                                                 e.getResource().getIdElement().equals(resource.getIdElement()))) {
-                            bundle.addEntry((Bundle.BundleEntryComponent)
-                                    org.opencds.cqf.fhir.utility.PackageHelper.createEntry(resource, isPut));
-                            if (hasRelatedArtifact(resource)) {
+                                BundleHelper.addEntry(bundle, createEntry(resource, isPut));                            if (hasRelatedArtifact(resource)) {
                                 addRelatedArtifacts(bundle, getRelatedArtifact(resource), repository, isPut);
                             }
                         }

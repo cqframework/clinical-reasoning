@@ -32,7 +32,7 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     public ValueSetAdapter(ValueSet valueSet) {
         super(valueSet);
 
-        if (!valueSet.fhirType().equals("ValueSet")) {
+        if (!(valueSet instanceof ValueSet)) {
             throw new IllegalArgumentException("resource passed as valueSet argument is not a ValueSet resource");
         }
 

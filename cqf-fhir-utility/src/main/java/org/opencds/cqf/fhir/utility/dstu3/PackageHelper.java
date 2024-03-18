@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Library;
@@ -163,7 +160,8 @@ public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->
                                                 e.getResource().getIdElement().equals(resource.getIdElement()))) {
-                                BundleHelper.addEntry(bundle, createEntry(resource, isPut));                            if (hasRelatedArtifact(resource)) {
+                            BundleHelper.addEntry(bundle, createEntry(resource, isPut));
+                            if (hasRelatedArtifact(resource)) {
                                 addRelatedArtifacts(bundle, getRelatedArtifact(resource), repository, isPut);
                             }
                         }

@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility;
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,7 +45,7 @@ public class PackageHelper {
                         BundleHelper.setRequestIfNoneExist(fhirVersion, request, String.format("url=%s", url));
                     }
                 }
-            }   
+            }
         }
         return entry;
     }

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
  */
-public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper{
+public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
 
     private PackageHelper() {}
 
@@ -159,7 +159,8 @@ public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper{
                                 && bundle.getEntry().stream()
                                         .noneMatch(e ->
                                                 e.getResource().getIdElement().equals(resource.getIdElement()))) {
-                                BundleHelper.addEntry(bundle, createEntry(resource, isPut));                            if (hasRelatedArtifact(resource)) {
+                            BundleHelper.addEntry(bundle, createEntry(resource, isPut));
+                            if (hasRelatedArtifact(resource)) {
                                 addRelatedArtifacts(bundle, getRelatedArtifact(resource), repository, isPut);
                             }
                         }

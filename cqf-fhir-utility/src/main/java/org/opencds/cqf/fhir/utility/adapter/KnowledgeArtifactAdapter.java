@@ -158,7 +158,8 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
-    };
+    }
+    ;
 
     private static void setRelatedArtifactReference(
             org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact, String reference) {

@@ -197,7 +197,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
     private void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)
             throws PreconditionFailedException {
         if (capability != null && !capability.isEmpty()) {
-            List<IBaseExtension<?,?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
+            List<IBaseExtension<?, ?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
                     .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
                     .collect(Collectors.toList());
             if (knowledgeCapabilityExtension.isEmpty()) {
@@ -244,9 +244,9 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
 
     private Optional<String> findVersionInListMatchingResource(List<String> list, KnowledgeArtifactAdapter resource) {
         return list.stream()
-            .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
-            .map((canonical) -> Canonicals.getVersion(canonical))
-            .findAny();
+                .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
+                .map((canonical) -> Canonicals.getVersion(canonical))
+                .findAny();
     }
 
     private void setCorrectBundleType(
@@ -303,28 +303,18 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
     }
 
     private List<? extends IBaseBackboneElement> findUnsupportedInclude(
-            List<? extends IBaseBackboneElement> entries, 
-            List<String> include, 
-            FhirVersionEnum fhirVersion
-        ) {
+            List<? extends IBaseBackboneElement> entries, List<String> include, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
                 return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor
-                    .findUnsupportedInclude(
-                        (List<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent>) entries, 
-                        include
-                    );
+                        .findUnsupportedInclude(
+                                (List<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent>) entries, include);
             case R4:
-                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor
-                    .findUnsupportedInclude(
-                        (List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent>) entries, 
-                        include
-                    );
+                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor.findUnsupportedInclude(
+                        (List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent>) entries, include);
             case R5:
                 return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor.findUnsupportedInclude(
-                        (List<org.hl7.fhir.r5.model.Bundle.BundleEntryComponent>) entries, 
-                        include
-                    );
+                        (List<org.hl7.fhir.r5.model.Bundle.BundleEntryComponent>) entries, include);
             case DSTU2:
             case DSTU2_1:
             case DSTU2_HL7ORG:

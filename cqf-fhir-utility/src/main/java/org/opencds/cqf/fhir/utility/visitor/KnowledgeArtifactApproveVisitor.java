@@ -59,14 +59,14 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
         var returnBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");
 
         var assessment = createApprovalAssessment(
-            library.getId(),
-            artifactAssessmentType,
-            artifactAssessmentSummary,
-            artifactAssessmentTarget,
-            artifactAssessmentRelatedArtifact,
-            artifactAssessmentAuthor,
-            library.get().getIdElement(),
-            fhirVersion);
+                library.getId(),
+                artifactAssessmentType,
+                artifactAssessmentSummary,
+                artifactAssessmentTarget,
+                artifactAssessmentRelatedArtifact,
+                artifactAssessmentAuthor,
+                library.get().getIdElement(),
+                fhirVersion);
         library.setApprovalDate(approvalDate);
         setDateElement(library, currentDate, fhirVersion);
         BundleHelper.addEntry(returnBundle, PackageHelper.createEntry(assessment, false));
@@ -75,49 +75,44 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
     }
 
     private IBaseResource createApprovalAssessment(
-        IIdType id,
-        String artifactAssessmentType,
-        Optional<String> artifactAssessmentSummary,
-        Optional<String> artifactAssessmentTargetCanonical,
-        Optional<String> artifactAssessmentRelatedArtifact,
-        Optional<IBaseReference> artifactAssessmentAuthor,
-        IIdType artifactTargetReference,
-        FhirVersionEnum fhirVersion)
-        throws UnprocessableEntityException {
+            IIdType id,
+            String artifactAssessmentType,
+            Optional<String> artifactAssessmentSummary,
+            Optional<String> artifactAssessmentTargetCanonical,
+            Optional<String> artifactAssessmentRelatedArtifact,
+            Optional<IBaseReference> artifactAssessmentAuthor,
+            IIdType artifactTargetReference,
+            FhirVersionEnum fhirVersion)
+            throws UnprocessableEntityException {
         switch (fhirVersion) {
             case DSTU3:
                 return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactApproveVisitor
-                    .createApprovalAssessment(
-                        id,
-                        artifactAssessmentType,
-                        artifactAssessmentSummary.map(t -> new org.hl7.fhir.dstu3.model.MarkdownType(t)),
-                        artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
-                        artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
-                        artifactAssessmentAuthor.map(t -> (org.hl7.fhir.dstu3.model.Reference) t),
-                        new org.hl7.fhir.dstu3.model.Reference(artifactTargetReference)
-                    );
+                        .createApprovalAssessment(
+                                id,
+                                artifactAssessmentType,
+                                artifactAssessmentSummary.map(t -> new org.hl7.fhir.dstu3.model.MarkdownType(t)),
+                                artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
+                                artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
+                                artifactAssessmentAuthor.map(t -> (org.hl7.fhir.dstu3.model.Reference) t),
+                                new org.hl7.fhir.dstu3.model.Reference(artifactTargetReference));
             case R4:
-                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactApproveVisitor
-                    .createApprovalAssessment(
+                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactApproveVisitor.createApprovalAssessment(
                         id,
                         artifactAssessmentType,
                         artifactAssessmentSummary.map(t -> new org.hl7.fhir.r4.model.MarkdownType(t)),
                         artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.r4.model.CanonicalType(t)),
                         artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.r4.model.CanonicalType(t)),
                         artifactAssessmentAuthor.map(t -> (org.hl7.fhir.r4.model.Reference) t),
-                        new org.hl7.fhir.r4.model.Reference(artifactTargetReference)
-                    );
+                        new org.hl7.fhir.r4.model.Reference(artifactTargetReference));
             case R5:
-                return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactApproveVisitor
-                    .createApprovalAssessment(
+                return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactApproveVisitor.createApprovalAssessment(
                         id,
                         artifactAssessmentType,
                         artifactAssessmentSummary.map(t -> new org.hl7.fhir.r5.model.MarkdownType(t)),
                         artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.r5.model.CanonicalType(t)),
                         artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.r5.model.CanonicalType(t)),
                         artifactAssessmentAuthor.map(t -> (org.hl7.fhir.r5.model.Reference) t),
-                        new org.hl7.fhir.r5.model.Reference(artifactTargetReference)
-                    );
+                        new org.hl7.fhir.r5.model.Reference(artifactTargetReference));
             case DSTU2:
             case DSTU2_1:
             case DSTU2_HL7ORG:
@@ -131,18 +126,13 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
         switch (fhirVersion) {
             case DSTU3:
                 library.setDateElement(
-                    new org.hl7.fhir.dstu3.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY)
-                );
+                        new org.hl7.fhir.dstu3.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case R4:
-                library.setDateElement(
-                    new org.hl7.fhir.r4.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY)
-                );
+                library.setDateElement(new org.hl7.fhir.r4.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case R5:
-                library.setDateElement(
-                    new org.hl7.fhir.r5.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY)
-                );
+                library.setDateElement(new org.hl7.fhir.r5.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case DSTU2:
             case DSTU2_1:

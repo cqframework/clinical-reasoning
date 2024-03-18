@@ -709,10 +709,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             DateTime dtEnd = (DateTime) measurementPeriod.getEnd();
 
             return new Period().setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
-
         } else if (measurementPeriod.getStart() instanceof Date) {
             Date dStart = (Date) measurementPeriod.getStart();
             Date dEnd = (Date) measurementPeriod.getEnd();
+
             return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");

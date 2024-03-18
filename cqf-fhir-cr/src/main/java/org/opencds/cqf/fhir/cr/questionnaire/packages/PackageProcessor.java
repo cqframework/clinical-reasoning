@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PackageProcessor implements IPackageProcessor {
@@ -43,7 +44,7 @@ public class PackageProcessor implements IPackageProcessor {
     protected IBaseBundle packageDstu3(IBaseResource questionnaire, Boolean isPut) {
         var bundle = new org.hl7.fhir.dstu3.model.Bundle();
         bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
-        bundle.addEntry(org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(
+        BundleHelper.addEntry(bundle ,org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(
                 (org.hl7.fhir.dstu3.model.Resource) questionnaire, isPut));
         var libraryExtension =
                 ((org.hl7.fhir.dstu3.model.Questionnaire) questionnaire).getExtensionByUrl(Constants.CQF_LIBRARY);
@@ -53,7 +54,7 @@ public class PackageProcessor implements IPackageProcessor {
                     org.opencds.cqf.fhir.utility.dstu3.SearchHelper.searchRepositoryByCanonical(
                             repository, libraryCanonical);
             if (library != null) {
-                bundle.addEntry(org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(library, isPut));
+                BundleHelper.addEntry(bundle, org.opencds.cqf.fhir.utility.dstu3.PackageHelper.createEntry(library, isPut));
                 if (library.hasRelatedArtifact()) {
                     org.opencds.cqf.fhir.utility.dstu3.PackageHelper.addRelatedArtifacts(
                             bundle, library.getRelatedArtifact(), repository, isPut);

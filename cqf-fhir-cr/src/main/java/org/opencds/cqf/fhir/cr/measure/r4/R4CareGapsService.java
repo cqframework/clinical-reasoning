@@ -150,7 +150,7 @@ public class R4CareGapsService {
                     Msg.code(2275) + "Only the subject parameter has been implemented.");
         }
 
-        if(statuses.isEmpty()){
+        if (statuses.isEmpty()) {
             throw new RuntimeException("CareGap 'statuses' parameter is empty");
         }
 
@@ -606,10 +606,12 @@ public class R4CareGapsService {
         return careGapsProperties;
     }
 
-    public void checkValidStatusCode(List<String> statuses){
-        for(int x=0; x<statuses.size(); x++){
+    public void checkValidStatusCode(List<String> statuses) {
+        for (int x = 0; x < statuses.size(); x++) {
             var status = statuses.get(x);
-            if(!status.equals(CareGapsStatusCode.CLOSED_GAP.toString()) && !status.equals(CareGapsStatusCode.OPEN_GAP.toString()) && !status.equals(CareGapsStatusCode.NOT_APPLICABLE.toString())){
+            if (!status.equals(CareGapsStatusCode.CLOSED_GAP.toString())
+                    && !status.equals(CareGapsStatusCode.OPEN_GAP.toString())
+                    && !status.equals(CareGapsStatusCode.NOT_APPLICABLE.toString())) {
                 throw new RuntimeException("CareGap status parameter: " + status + " is not an accepted value");
             }
         }

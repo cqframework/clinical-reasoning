@@ -238,7 +238,7 @@ public class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.
     @Override
     public void setEffectivePeriod(ICompositeType effectivePeriod) {
         if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be org.hl7.fhir.r4.model.Period");
+            throw new UnprocessableEntityException("EffectivePeriod must be " + Period.class.getName());
         }
         // do nothing
     }

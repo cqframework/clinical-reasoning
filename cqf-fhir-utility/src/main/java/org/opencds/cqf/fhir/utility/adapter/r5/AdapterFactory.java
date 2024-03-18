@@ -39,7 +39,7 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
                         (MetadataResource) resource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resouce must be instance of ", MetadataResource.class.getName()));
+                        String.format("Resouce must be instance of %s", MetadataResource.class.getName()));
             }
         }
         return retval;
@@ -47,7 +47,7 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
 
     @Override
     public LibraryAdapter createLibrary(IBaseResource library) {
-        return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter(library);
+        return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter((IDomainResource)library);
     }
 
     @Override

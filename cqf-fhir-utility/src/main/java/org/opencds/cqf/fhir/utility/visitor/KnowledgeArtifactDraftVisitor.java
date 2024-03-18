@@ -83,7 +83,7 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                     AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
             updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList, fhirVersion);
             updateRelatedArtifactUrlsWithNewVersions(
-                    library.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
+                    newResourceAdapter.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
             var updateIdForBundle = newResourceAdapter.copy();
             updateIdForBundle.setId(urnList.get(i));
             BundleHelper.addEntry(transactionBundle, PackageHelper.createEntry(updateIdForBundle, false));

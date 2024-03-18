@@ -123,7 +123,7 @@ public class KnowledgeArtifactDraftVisitorTests {
                             new org.opencds.cqf.fhir.utility.adapter.r5.KnowledgeArtifactAdapter(resource)
                                     .getRelatedArtifact();
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
-                        for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
+                        for (var relatedArtifact : relatedArtifacts2) {
                             if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
                                 assertTrue(Canonicals.getVersion(relatedArtifact.getResource())
                                         .equals(draftedVersion));

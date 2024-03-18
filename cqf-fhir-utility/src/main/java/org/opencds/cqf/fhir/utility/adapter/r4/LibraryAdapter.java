@@ -32,7 +32,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
 
     public LibraryAdapter(IDomainResource library) {
         super(library);
-        if (!library.fhirType().equals("Library")) {
+        if (!(library instanceof Library)) {
             throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
         }
         this.library = (Library) library;

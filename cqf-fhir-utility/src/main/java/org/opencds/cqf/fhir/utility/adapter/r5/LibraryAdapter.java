@@ -10,8 +10,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -30,10 +30,10 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
 
     private Library library;
 
-    public LibraryAdapter(IBaseResource library) {
+    public LibraryAdapter(IDomainResource library) {
         super(library);
 
-        if (!library.fhirType().equals("Library")) {
+        if (!(library instanceof Library)) {
             throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
         }
 

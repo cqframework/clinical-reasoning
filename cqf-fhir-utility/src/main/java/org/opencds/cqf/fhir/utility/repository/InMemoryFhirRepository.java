@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.utility.repository;
 
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -21,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class InMemoryFhirRepository implements Repository {
@@ -75,14 +79,13 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = Ids.newRandomId(context, resource.fhirType());
         while (resources.containsKey(theId)) {
             theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
-        outcome.setCreated(true);
+        var outcome = new MethodOutcome(theId, true);
         resources.put(theId.toUnqualifiedVersionless(), resource);
         return outcome;
     }
@@ -95,9 +98,9 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = resource.getIdElement().toUnqualifiedVersionless();
+        var outcome = new MethodOutcome(theId, false);
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }
@@ -193,6 +196,32 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
         throw new NotImplementedException("The transaction operation is not currently supported");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <B extends IBaseBundle> B transactionStub(B transaction, Repository repository) {
+        var version = transaction.getStructureFhirVersionEnum();
+        var returnBundle = (B) newBundle(version);
+        BundleHelper.getEntry(transaction).forEach(e -> {
+            if (BundleHelper.isEntryRequestPut(version, e)) {
+                var outcome = repository.update(BundleHelper.getEntryResource(version, e));
+                var location = outcome.getId().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestPost(version, e)) {
+                var outcome = repository.create(BundleHelper.getEntryResource(version, e));
+                var location = outcome.getId().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else {
+                throw new NotImplementedOperationException("Transaction stub only supports PUT or POST");
+            }
+        });
+        return returnBundle;
     }
 
     @Override

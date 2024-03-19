@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 
 public interface AdapterFactory {
 
@@ -30,6 +31,14 @@ public interface AdapterFactory {
      * @return an adapter exposing common api calls
      */
     public ResourceAdapter createResource(IBaseResource resource);
+
+    /**
+     * Creates an adapter that exposes common MetadataResource operations across multiple versions of FHIR
+     *
+     * @param metadataResource A FHIR MetadataResource
+     * @return an adapter exposing common api calls
+     */
+    public KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(IDomainResource metadataResource);
 
     /**
      * Creates an adapter that exposes common Library operations across multiple versions of FHIR

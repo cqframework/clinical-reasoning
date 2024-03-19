@@ -191,7 +191,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unused")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaire(
             Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireProcessorFactory == null) {
@@ -204,7 +204,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unused")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaireResponse(
             Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireResponseProcessorFactory == null) {

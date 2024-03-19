@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
+import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
 
 public class R4CareGapsTest {
+    protected static Given given = CareGaps.given().repositoryFor("BreastCancerScreeningFhir");
 
     @Test
     public void exm125_careGaps_closedGap() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -44,9 +44,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_openGap() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Patient/denom-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -78,9 +76,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_NA() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Patient/neg-denom-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -113,9 +109,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_group() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Group/exm125-group")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -167,9 +161,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresById() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -188,9 +180,8 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresByUrl() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+
+        given.when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -209,9 +200,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresByUrlAndId() {
-        CareGaps.given()
-                .repositoryFor("BreastCancerScreeningFhir")
-                .when()
+        given.when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -231,9 +220,7 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongSubjectParam() {
         assertThrows(ResourceNotFoundException.class, () -> {
-            CareGaps.given()
-                    .repositoryFor("BreastCancerScreeningFhir")
-                    .when()
+            given.when()
                     .subject("Patient/numer-EXM124")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -248,9 +235,7 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongMeasureParam() {
         assertThrows(ResourceNotFoundException.class, () -> {
-            CareGaps.given()
-                    .repositoryFor("BreastCancerScreeningFhir")
-                    .when()
+            given.when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -265,9 +250,7 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongPeriodParam() {
         assertThrows(InvalidInterval.class, () -> {
-            CareGaps.given()
-                    .repositoryFor("BreastCancerScreeningFhir")
-                    .when()
+            given.when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2020-01-01")
                     .periodEnd("2019-12-31")
@@ -282,9 +265,7 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongsStatusParam() {
         assertThrows(RuntimeException.class, () -> {
-            CareGaps.given()
-                    .repositoryFor("BreastCancerScreeningFhir")
-                    .when()
+            given.when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -299,9 +280,7 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_noStatusParam() {
         assertThrows(RuntimeException.class, () -> {
-            CareGaps.given()
-                    .repositoryFor("BreastCancerScreeningFhir")
-                    .when()
+            given.when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")

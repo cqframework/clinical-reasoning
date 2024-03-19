@@ -1,18 +1,36 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.nio.file.Paths;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
-import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class R4CareGapsTest {
-    protected static Given given = CareGaps.given().repositoryFor("BreastCancerScreeningFhir");
+    private final Repository myRepository = new IgRepository(
+            FhirContext.forR4Cached(),
+            Paths.get(getResourcePath(this.getClass())
+                    + "/org/opencds/cqf/fhir/cr/measure/r4/BreastCancerScreeningFhir"));
+
+    @Test
+    public void verifyCareGapsPropertiesAreReadable() {
+        assertNotNull(myRepository.read(Organization.class, new IdType("alphora")));
+        assertNotNull(myRepository.read(Organization.class, new IdType("alphora-author")));
+    }
 
     @Test
     public void exm125_careGaps_closedGap() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -44,7 +62,9 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_openGap() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/denom-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -76,7 +96,9 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_NA() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/neg-denom-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -109,7 +131,9 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_group() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Group/exm125-group")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -161,7 +185,9 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresById() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -181,7 +207,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_twoMeasuresByUrl() {
 
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -200,7 +228,9 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresByUrlAndId() {
-        given.when()
+        CareGaps.given()
+                .repository(myRepository)
+                .when()
                 .subject("Patient/numer-EXM125")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
@@ -220,7 +250,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongSubjectParam() {
         assertThrows(ResourceNotFoundException.class, () -> {
-            given.when()
+            CareGaps.given()
+                    .repository(myRepository)
+                    .when()
                     .subject("Patient/numer-EXM124")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -235,7 +267,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongMeasureParam() {
         assertThrows(ResourceNotFoundException.class, () -> {
-            given.when()
+            CareGaps.given()
+                    .repository(myRepository)
+                    .when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -250,7 +284,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongPeriodParam() {
         assertThrows(InvalidInterval.class, () -> {
-            given.when()
+            CareGaps.given()
+                    .repository(myRepository)
+                    .when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2020-01-01")
                     .periodEnd("2019-12-31")
@@ -265,7 +301,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_wrongsStatusParam() {
         assertThrows(RuntimeException.class, () -> {
-            given.when()
+            CareGaps.given()
+                    .repository(myRepository)
+                    .when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
@@ -280,7 +318,9 @@ public class R4CareGapsTest {
     @Test
     public void exm125_careGaps_error_noStatusParam() {
         assertThrows(RuntimeException.class, () -> {
-            given.when()
+            CareGaps.given()
+                    .repository(myRepository)
+                    .when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")

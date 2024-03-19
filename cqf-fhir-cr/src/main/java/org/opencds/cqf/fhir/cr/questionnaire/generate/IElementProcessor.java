@@ -12,7 +12,7 @@ import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 
 public interface IElementProcessor {
     IBaseBackboneElement processElement(
-            GenerateRequest request,            
+            GenerateRequest request,
             ICompositeType element,
             String elementType,
             String childLinkId,

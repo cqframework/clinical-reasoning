@@ -112,7 +112,8 @@ public class ItemGenerator {
                     request.resolvePathString(element, "sliceName"));
             // if child elements exist ignore the type and create a group
             var elementType = getElementType(request, element);
-            var childItem = processElement(request, element, elementType, childLinkId, caseFeature, !childElements.isEmpty());
+            var childItem =
+                    processElement(request, element, elementType, childLinkId, caseFeature, !childElements.isEmpty());
             if (childElements.isEmpty()) {
                 request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
             } else {
@@ -220,7 +221,12 @@ public class ItemGenerator {
         var type = resolveElementType(request, element);
         if (type == null) {
             var path = request.resolvePathString(element, "path");
-            var snapshot = request.getSnapshotElements() == null ? null : request.getSnapshotElements().stream().filter(e -> path.equals(request.resolvePathString(e, "path"))).findFirst().orElse(null);
+            var snapshot = request.getSnapshotElements() == null
+                    ? null
+                    : request.getSnapshotElements().stream()
+                            .filter(e -> path.equals(request.resolvePathString(e, "path")))
+                            .findFirst()
+                            .orElse(null);
             if (snapshot != null) {
                 type = resolveElementType(request, snapshot);
             }

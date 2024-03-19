@@ -135,9 +135,9 @@ public class ItemGeneratorTests {
     @Test
     void testGenerate() {
         given().repositoryFor(fhirContextR4, "r4")
-            .when()
-            .profileId(Ids.newId(fhirContextR4, "ActiveTherapyFeature"))
-            .then()
-            .hasItemCount(3);
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "ActiveTherapyFeature"))
+                .then()
+                .hasItemCount(3);
     }
 }

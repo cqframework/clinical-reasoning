@@ -109,8 +109,8 @@ public class CareGaps {
             this.careGapsProperties = new CareGapsProperties();
 
             this.careGapsProperties.setThreadedCareGapsEnabled(false);
-            this.careGapsProperties.setCareGapsReporter("Organization/alphora");
-            this.careGapsProperties.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
+            this.careGapsProperties.setCareGapsReporter("alphora");
+            this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
 
             this.serverBase = "http://localhost";
             CqlThreadFactory factory = new CqlThreadFactory();

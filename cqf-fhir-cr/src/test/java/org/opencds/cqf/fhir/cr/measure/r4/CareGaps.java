@@ -59,7 +59,7 @@ public class CareGaps {
         T value();
     }
 
-    protected static class Selected<T, P> implements Measure.SelectedOf<T>, Measure.ChildOf<P> {
+    protected static class Selected<T, P> implements CareGaps.SelectedOf<T>, CareGaps.ChildOf<P> {
         private final P parent;
         private final T value;
 

@@ -13,14 +13,19 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4CareGapsTest {
+    private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsTest.class);
     private final Repository myRepository = new IgRepository(
             FhirContext.forR4Cached(),
             Paths.get(getResourcePath(this.getClass())
                     + "/org/opencds/cqf/fhir/cr/measure/r4/BreastCancerScreeningFhir"));
 
     public void verifyCareGapsPropertiesAreReadable() {
+        ourLog.info("test path is: " + getResourcePath(this.getClass())
+                + "/org/opencds/cqf/fhir/cr/measure/r4/BreastCancerScreeningFhir");
         assertNotNull(myRepository.read(Organization.class, new IdType("alphora")));
         assertNotNull(myRepository.read(Organization.class, new IdType("alphora-author")));
     }

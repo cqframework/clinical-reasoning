@@ -1,15 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure;
 
 public class CareGapsProperties {
-    private boolean threadedCareGapsEnabled = true;
-    /**
-     * Implements the reporter element of the
-     * <a href= "https://www.hl7.org/fhir/measurereport.html">MeasureReport</a> FHIR Resource. This is
-     * required by the <a href=
-     * "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm">DEQMIndividualMeasureReportProfile</a>
-     * profile found in the <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci
-     * DEQM FHIR Implementation Guide</a>.
-     **/
     private String careGapsReporter;
     /**
      * Implements the author element of the
@@ -22,14 +13,6 @@ public class CareGapsProperties {
     private String fhirBaseUrl;
 
     private String careGapsCompositionSectionAuthor;
-
-    public void setThreadedCareGapsEnabled(boolean threadedCareGapsEnabled) {
-        this.threadedCareGapsEnabled = threadedCareGapsEnabled;
-    }
-
-    public boolean isThreadedCareGapsEnabled() {
-        return threadedCareGapsEnabled;
-    }
 
     public String getMyFhirBaseUrl() {
         return fhirBaseUrl;

@@ -12,9 +12,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -86,11 +83,7 @@ public class CareGaps {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
-
         private CareGapsProperties careGapsProperties;
-
-        private Executor cqlExecutor;
-
         private String serverBase;
 
         public Given() {
@@ -108,14 +101,10 @@ public class CareGaps {
 
             this.careGapsProperties = new CareGapsProperties();
 
-            this.careGapsProperties.setThreadedCareGapsEnabled(false);
             this.careGapsProperties.setCareGapsReporter("alphora");
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
 
             this.serverBase = "http://localhost";
-            CqlThreadFactory factory = new CqlThreadFactory();
-            ExecutorService executor = Executors.newFixedThreadPool(2, factory);
-            this.cqlExecutor = executor;
         }
 
         public CareGaps.Given repository(Repository repository) {
@@ -140,13 +129,8 @@ public class CareGaps {
             return this;
         }
 
-        public CareGaps.Given cqlExecutor(Executor cqlExecutor) {
-            this.cqlExecutor = cqlExecutor;
-            return this;
-        }
-
         private R4CareGapsService buildCareGapsService() {
-            return new R4CareGapsService(careGapsProperties, repository, evaluationOptions, cqlExecutor, serverBase);
+            return new R4CareGapsService(careGapsProperties, repository, evaluationOptions, serverBase);
         }
 
         public When when() {

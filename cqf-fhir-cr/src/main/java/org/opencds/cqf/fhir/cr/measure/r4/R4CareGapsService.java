@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,7 +46,6 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -89,8 +86,6 @@ public class R4CareGapsService {
 
     private CareGapsProperties careGapsProperties;
 
-    private Executor cqlExecutor;
-
     private String serverBase;
 
     private final Map<String, Resource> configuredResources = new HashMap<>();
@@ -99,12 +94,10 @@ public class R4CareGapsService {
             CareGapsProperties careGapsProperties,
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            Executor executor,
             String serverBase) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.measureEvaluationOptions = measureEvaluationOptions;
-        this.cqlExecutor = executor;
         this.serverBase = serverBase;
     }
 
@@ -156,35 +149,19 @@ public class R4CareGapsService {
 
         checkValidStatusCode(statuses);
 
-        List<CompletableFuture<ParametersParameterComponent>> futures = new ArrayList<>();
         Parameters result = initializeResult();
-        if (careGapsProperties.isThreadedCareGapsEnabled()) {
-            patients.forEach(patient -> {
-                Parameters.ParametersParameterComponent patientReports = patientReports(
-                        periodStart.getValueAsString(),
-                        periodEnd.getValueAsString(),
-                        patient,
-                        statuses,
-                        measures,
-                        organization);
-                futures.add(CompletableFuture.supplyAsync(() -> patientReports, cqlExecutor));
-            });
-
-            futures.forEach(x -> result.addParameter(x.join()));
-        } else {
-            patients.forEach(patient -> {
-                Parameters.ParametersParameterComponent patientReports = patientReports(
-                        periodStart.getValueAsString(),
-                        periodEnd.getValueAsString(),
-                        patient,
-                        statuses,
-                        measures,
-                        organization);
-                if (patientReports != null) {
-                    result.addParameter(patientReports);
-                }
-            });
-        }
+        patients.forEach(patient -> {
+            Parameters.ParametersParameterComponent patientReports = patientReports(
+                    periodStart.getValueAsString(),
+                    periodEnd.getValueAsString(),
+                    patient,
+                    statuses,
+                    measures,
+                    organization);
+            if (patientReports != null) {
+                result.addParameter(patientReports);
+            }
+        });
         return result;
     }
 

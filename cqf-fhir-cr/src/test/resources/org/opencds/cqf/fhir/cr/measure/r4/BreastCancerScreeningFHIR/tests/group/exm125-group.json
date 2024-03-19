@@ -1,0 +1,13 @@
+{
+  "resourceType": "Group",
+  "id": "exm125-group",
+  "type": "person",
+  "actual": true,
+  "name": "exm125-group",
+  "member": [
+    {  "entity": {  "reference": "Patient/denom-EXM125" } },
+    {  "entity": {  "reference": "Patient/numer-EXM125" } }
+
+
+  ]
+}

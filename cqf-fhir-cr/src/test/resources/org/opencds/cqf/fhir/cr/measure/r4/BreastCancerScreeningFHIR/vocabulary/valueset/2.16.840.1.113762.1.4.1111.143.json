@@ -2,54 +2,23 @@
   "resourceType": "ValueSet",
   "id": "2.16.840.1.113762.1.4.1111.143",
   "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
-  "identifier": [ {
-    "system": "urn:ietf:rfc:3986",
-    "value": "2.16.840.1.113762.1.4.1111.143"
-  } ],
-  "version": "20200305",
-  "name": "ObservationServices",
   "title": "Observation Services",
   "status": "active",
-  "experimental": false,
-  "publisher": "NLM",
-  "expansion": {
-    "identifier": "20200507",
-    "timestamp": "2021-01-14T20:59:45-07:00",
-    "contains": [ {
+  "publisher": "The Joint Commission",
+  "compose": {
+    "include": [ {
       "system": "http://snomed.info/sct",
       "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
-    }, {
-      "system": "http://snomed.info/sct",
-      "version": "2019-09",
-      "code": "448951000124107",
-      "display": "Admission to observation unit (procedure)"
+      "concept": [ {
+        "code": "448851000124103",
+        "display": "Hospital admission from observation unit (procedure)"
+      }, {
+        "code": "448951000124107",
+        "display": "Admission to observation unit (procedure)"
+      }, {
+        "code": "76464004",
+        "display": "Hospital admission, for observation (procedure)"
+      } ]
     } ]
   }
 }

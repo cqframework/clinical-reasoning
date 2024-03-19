@@ -1,14 +1,14 @@
 {
   "resourceType": "ValueSet",
-  "id": "2.16.840.1.113883.3.666.5.307",
-  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+  "id": "2.16.840.1.113883.3.117.1.7.1.424",
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.424",
   "identifier": [ {
     "system": "urn:ietf:rfc:3986",
-    "value": "2.16.840.1.113883.3.666.5.307"
+    "value": "2.16.840.1.113883.3.117.1.7.1.424"
   } ],
-  "version": "20170504",
-  "name": "EncounterInpatient",
-  "title": "Encounter Inpatient",
+  "version": "20170726",
+  "name": "Non-ElectiveInpatientEncounter",
+  "title": "Non-Elective Inpatient Encounter",
   "status": "active",
   "publisher": "NLM",
   "compose": {
@@ -21,9 +21,6 @@
       }, {
         "code": "32485007",
         "display": "Hospital admission (procedure)"
-      }, {
-        "code": "8715000",
-        "display": "Hospital admission, elective (procedure)"
       } ]
     } ]
   }

@@ -18,6 +18,7 @@ import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -63,8 +64,19 @@ public class Engines {
         var environment =
                 buildEnvironment(settings, sources, terminologyProvider, dataProviders, npmProcessor, useLibraryCache);
 
-        return new CqlEngine(
+        return createEngine(environment, settings);
+    }
+
+    private static CqlEngine createEngine(Environment environment, EvaluationSettings settings) {
+        var engine = new CqlEngine(
                 environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+        if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
+            var map = new DebugMap();
+            map.setIsLoggingEnabled(true);
+            engine.getState().setDebugMap(map);
+        }
+
+        return engine;
     }
 
     public static CqlEngine forRepositoryAndSettings(
@@ -90,8 +102,7 @@ public class Engines {
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(
                 settings, sourceProviders, terminologyProvider, dataProviders, npmProcessor, useLibraryCache);
-        return new CqlEngine(
-                environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+        return createEngine(environment, settings);
     }
 
     private static LibrarySourceProvider buildLibrarySource(Repository repository) {

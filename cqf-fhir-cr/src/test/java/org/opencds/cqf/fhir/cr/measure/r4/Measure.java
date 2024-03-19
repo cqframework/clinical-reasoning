@@ -185,7 +185,7 @@ public class Measure {
             return this;
         }
 
-        public When practitoner(String practitioner) {
+        public When practitioner(String practitioner) {
             this.practitioner = practitioner;
             return this;
         }

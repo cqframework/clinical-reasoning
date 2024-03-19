@@ -20,10 +20,10 @@
 
         <junit.version>5.9.1</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.8.0</cql.version>
+        <cql.version>3.9.0-SNAPSHOT</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>5.3.32</spring.version>
-        <hapi.version>7.0.0</hapi.version>
+        <hapi.version>7.1.5-SNAPSHOT</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>32.1.2-jre</guava.version>
         <error-prone.version>2.24.1</error-prone.version>

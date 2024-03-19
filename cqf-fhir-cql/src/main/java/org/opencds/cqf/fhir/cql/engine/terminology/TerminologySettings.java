@@ -77,7 +77,6 @@ public class TerminologySettings {
         this.valuesetMembershipMode = valuesetMembershipMode;
         return this;
     }
-    ;
 
     public CODE_LOOKUP_MODE getCodeLookupMode() {
         return codeLookupMode;

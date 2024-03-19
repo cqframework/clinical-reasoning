@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 
@@ -26,8 +27,18 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
     }
 
     @Override
-    public List<IBaseBackboneElement> getParameter() {
+    public List<ParametersParameterComponent> getParameter() {
         return this.getParameters().getParameter().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DataType> getParameterValues(String name) {
+        return this.getParameters().getParameterValues(name);
+    }
+
+    @Override
+    public ParametersParameterComponent getParameter(String name) {
+        return this.getParameters().getParameter(name);
     }
 
     @Override
@@ -39,7 +50,7 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
     }
 
     @Override
-    public IBaseBackboneElement addParameter() {
+    public ParametersParameterComponent addParameter() {
         return this.getParameters().addParameter();
     }
 }

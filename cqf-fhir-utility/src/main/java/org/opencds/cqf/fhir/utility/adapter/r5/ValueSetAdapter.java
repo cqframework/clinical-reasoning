@@ -164,6 +164,11 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
         return this.getValueSet().getEffectivePeriod();
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return this.getValueSet().hasRelatedArtifact();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

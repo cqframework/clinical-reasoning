@@ -198,6 +198,7 @@ public class InMemoryFhirRepository implements Repository {
         throw new NotImplementedException("The transaction operation is not currently supported");
     }
 
+    @SuppressWarnings("unchecked")
     public static <B extends IBaseBundle> B transactionStub(B transaction, Repository repository) {
         var version = transaction.getStructureFhirVersionEnum();
         var returnBundle = (B) newBundle(version);

@@ -201,6 +201,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
         return this.getLibrary().getEffectivePeriod();
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return this.getLibrary().hasRelatedArtifact();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

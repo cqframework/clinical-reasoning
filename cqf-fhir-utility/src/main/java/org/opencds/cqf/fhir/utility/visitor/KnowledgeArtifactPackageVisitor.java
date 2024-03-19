@@ -302,6 +302,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<? extends IBaseBackboneElement> findUnsupportedInclude(
             List<? extends IBaseBackboneElement> entries, List<String> include, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {

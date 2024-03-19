@@ -142,6 +142,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         this.get().setEffectivePeriod((Period) effectivePeriod);
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return this.get().hasRelatedArtifact();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

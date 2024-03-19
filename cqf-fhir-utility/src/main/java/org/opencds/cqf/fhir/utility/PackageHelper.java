@@ -16,7 +16,7 @@ public class PackageHelper {
         final var fhirVersion = resource.getStructureFhirVersionEnum();
         final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(), resource);
         String method;
-        var requestUrl = getResourceType(resource);
+        var requestUrl = resource.fhirType();
         if (isPut) {
             method = "PUT";
             if (resource.getIdElement() != null
@@ -48,29 +48,5 @@ public class PackageHelper {
             }
         }
         return entry;
-    }
-
-    private static String getResourceType(IBaseResource resource) {
-        switch (resource.getStructureFhirVersionEnum()) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Resource) resource)
-                        .getResourceType()
-                        .toString();
-            case R4:
-                return ((org.hl7.fhir.r4.model.Resource) resource)
-                        .getResourceType()
-                        .toString();
-            case R5:
-                return ((org.hl7.fhir.r5.model.Resource) resource)
-                        .getResourceType()
-                        .toString();
-            case DSTU2:
-            case DSTU2_1:
-            case DSTU2_HL7ORG:
-            default:
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported version of FHIR: %s",
-                        resource.getStructureFhirVersionEnum().getFhirVersionString()));
-        }
     }
 }

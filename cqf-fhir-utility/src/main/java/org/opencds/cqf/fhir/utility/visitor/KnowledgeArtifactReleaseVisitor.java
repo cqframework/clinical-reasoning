@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
 
+    @SuppressWarnings("unchecked")
     @Override
     public IBase visit(LibraryAdapter rootLibraryAdapter, Repository repository, IBaseParameters operationParameters) {
         // boolean latestFromTxServer = operationParameters.getParameterBool("latestFromTxServer");

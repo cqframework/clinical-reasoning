@@ -111,7 +111,7 @@ public class CRMIReleaseExperimentalBehavior {
         public Enumeration<CRMIReleaseExperimentalBehaviorCodes> fromType(Base code) throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<CRMIReleaseExperimentalBehaviorCodes>(this);
-            String codeString = ((PrimitiveType) code).asStringValue();
+            String codeString = ((PrimitiveType<?>) code).asStringValue();
             if (codeString == null || "".equals(codeString)) return null;
             if ("error".equals(codeString))
                 return new Enumeration<CRMIReleaseExperimentalBehaviorCodes>(

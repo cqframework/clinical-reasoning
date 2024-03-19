@@ -178,6 +178,8 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     void setEffectivePeriod(ICompositeType effectivePeriod);
 
+    boolean hasRelatedArtifact();
+
     <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact();
 
     <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString);

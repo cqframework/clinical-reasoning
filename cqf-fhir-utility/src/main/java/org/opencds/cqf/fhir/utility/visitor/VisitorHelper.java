@@ -13,6 +13,7 @@ import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 public class VisitorHelper {
 
+    @SuppressWarnings("unchecked")
     public static <T extends IBaseDatatype> Optional<T> getParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
         var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
@@ -23,6 +24,7 @@ public class VisitorHelper {
                 .map(parametersParameters -> (T) parametersParameters.getValue());
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends IBaseResource> Optional<T> getResourceParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
         var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
@@ -33,6 +35,7 @@ public class VisitorHelper {
                 .map(parametersParameters -> (T) parametersParameters.getResource());
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends IBaseDatatype> Optional<List<T>> getListParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
         var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());

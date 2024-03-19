@@ -133,6 +133,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         // does nothing
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

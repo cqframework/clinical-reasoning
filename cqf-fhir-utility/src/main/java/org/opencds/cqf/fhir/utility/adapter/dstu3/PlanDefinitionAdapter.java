@@ -252,6 +252,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         return this.getPlanDefinition().getEffectivePeriod();
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return this.getPlanDefinition().hasRelatedArtifact();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

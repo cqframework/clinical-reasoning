@@ -271,6 +271,11 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         this.getPlanDefinition().setApprovalDate(date);
     }
 
+    @Override
+    public boolean hasRelatedArtifact() {
+        return this.getPlanDefinition().hasRelatedArtifact();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifact() {

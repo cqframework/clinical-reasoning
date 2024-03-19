@@ -20,7 +20,6 @@ public class R4CareGapsTest {
             Paths.get(getResourcePath(this.getClass())
                     + "/org/opencds/cqf/fhir/cr/measure/r4/BreastCancerScreeningFhir"));
 
-    @Test
     public void verifyCareGapsPropertiesAreReadable() {
         assertNotNull(myRepository.read(Organization.class, new IdType("alphora")));
         assertNotNull(myRepository.read(Organization.class, new IdType("alphora-author")));
@@ -28,6 +27,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_closedGap() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -62,6 +62,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_openGap() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -96,6 +97,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_NA() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -131,6 +133,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_group() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -185,6 +188,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresById() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -206,7 +210,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresByUrl() {
-
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -228,6 +232,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_twoMeasuresByUrlAndId() {
+        verifyCareGapsPropertiesAreReadable();
         CareGaps.given()
                 .repository(myRepository)
                 .when()
@@ -249,6 +254,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_error_wrongSubjectParam() {
+        verifyCareGapsPropertiesAreReadable();
         assertThrows(ResourceNotFoundException.class, () -> {
             CareGaps.given()
                     .repository(myRepository)
@@ -266,6 +272,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_error_wrongMeasureParam() {
+        verifyCareGapsPropertiesAreReadable();
         assertThrows(ResourceNotFoundException.class, () -> {
             CareGaps.given()
                     .repository(myRepository)
@@ -283,6 +290,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_error_wrongPeriodParam() {
+        verifyCareGapsPropertiesAreReadable();
         assertThrows(InvalidInterval.class, () -> {
             CareGaps.given()
                     .repository(myRepository)
@@ -300,6 +308,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_error_wrongsStatusParam() {
+        verifyCareGapsPropertiesAreReadable();
         assertThrows(RuntimeException.class, () -> {
             CareGaps.given()
                     .repository(myRepository)
@@ -317,6 +326,7 @@ public class R4CareGapsTest {
 
     @Test
     public void exm125_careGaps_error_noStatusParam() {
+        verifyCareGapsPropertiesAreReadable();
         assertThrows(RuntimeException.class, () -> {
             CareGaps.given()
                     .repository(myRepository)

@@ -220,6 +220,7 @@ public class ItemGenerator {
     protected String getElementType(GenerateRequest request, ICompositeType element) {
         var type = resolveElementType(request, element);
         if (type == null) {
+            // Attempt to resolve the type from the Snapshot if it is available
             var path = request.resolvePathString(element, "path");
             var snapshot = request.getSnapshotElements() == null
                     ? null

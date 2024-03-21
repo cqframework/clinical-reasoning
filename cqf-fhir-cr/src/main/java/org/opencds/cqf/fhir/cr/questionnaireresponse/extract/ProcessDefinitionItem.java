@@ -123,7 +123,6 @@ public class ProcessDefinitionItem {
                 path = path.replace(resource.fhirType() + ".", "");
                 var children = request.getItems(childItem);
                 if (!children.isEmpty()) {
-                    // var childDefinition = resourceDefinition.getChildByName(path);
                     processChildren(request, resourceDefinition, resource, children);
                 } else {
                     var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);

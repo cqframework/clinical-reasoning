@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -54,7 +53,7 @@ public class ItemGenerator {
             processExtensions(request, questionnaireItem);
             int childCount = request.getItems(questionnaireItem).size();
             var caseFeature = getCaseFeature(request, linkId);
-            var parentElements = getElementsWithNonNullElementType(request, null, null);
+            var parentElements = getElements(request, null, null);
             processElements(request, questionnaireItem, parentElements, childCount, linkId, caseFeature);
             return questionnaireItem;
         } catch (Exception ex) {
@@ -107,28 +106,32 @@ public class ItemGenerator {
         for (var element : elements) {
             childCount++;
             var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
-            var childItem = processElement(request, element, childLinkId, caseFeature);
-            if (request.resolvePath(childItem, "type", IBaseEnumeration.class)
-                    .getValueAsString()
-                    .equals("group")) {
-                var childElements = getElementsWithNonNullElementType(
-                        request,
-                        request.resolvePathString(element, "path"),
-                        request.resolvePathString(element, "sliceName"));
-                if (!childElements.isEmpty()) {
-                    processElements(request, childItem, childElements, 0, childLinkId, caseFeature);
-                    request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
-                }
+            var childElements = getElements(
+                    request,
+                    request.resolvePathString(element, "path"),
+                    request.resolvePathString(element, "sliceName"));
+            // if child elements exist ignore the type and create a group
+            var elementType = getElementType(request, element);
+            var childItem =
+                    processElement(request, element, elementType, childLinkId, caseFeature, !childElements.isEmpty());
+            if (childElements.isEmpty()) {
+                request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
             } else {
+                processElements(request, childItem, childElements, 0, childLinkId, caseFeature);
                 request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
             }
         }
     }
 
     protected IBaseBackboneElement processElement(
-            GenerateRequest request, ICompositeType element, String childLinkId, IBaseResource caseFeature) {
+            GenerateRequest request,
+            ICompositeType element,
+            String elementType,
+            String childLinkId,
+            IBaseResource caseFeature,
+            Boolean isGroup) {
         try {
-            return elementProcessor.processElement(request, element, childLinkId, caseFeature);
+            return elementProcessor.processElement(request, element, elementType, childLinkId, caseFeature, isGroup);
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
             logger.warn(message);
@@ -137,7 +140,7 @@ public class ItemGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    protected <E extends ICompositeType> List<E> getElementsWithNonNullElementType(
+    protected <E extends ICompositeType> List<E> getElements(
             GenerateRequest request, String parentPath, String sliceName) {
         List<E> elements = new ArrayList<>();
         // Add all elements from the differential
@@ -154,10 +157,7 @@ public class ItemGenerator {
                     .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getRequiredOnly()))
                     .collect(Collectors.toList()));
         }
-        // Filter out elements for which a type cannot be derived
-        return elements.stream()
-                .filter(element -> getElementType(request, element) != null)
-                .collect(Collectors.toList());
+        return elements;
     }
 
     protected <E extends ICompositeType> Boolean filterElement(
@@ -172,6 +172,10 @@ public class ItemGenerator {
             if (existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")))) {
                 return false;
             }
+        }
+        // filter out slicing definitions
+        if (request.resolvePath(element, "slicing") != null) {
+            return false;
         }
         var pathSplit = path.split("\\.");
         if (parentPath == null) {
@@ -208,9 +212,27 @@ public class ItemGenerator {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
     }
 
+    protected String resolveElementType(GenerateRequest request, ICompositeType element) {
+        var typeList = request.resolvePathList(element, "type");
+        return typeList.isEmpty() ? null : request.resolvePathString(typeList.get(0), "code");
+    }
+
     protected String getElementType(GenerateRequest request, ICompositeType element) {
-        var type = request.resolvePathList(element, "type");
-        return type.isEmpty() ? null : request.resolvePathString(type.get(0), "code");
+        var type = resolveElementType(request, element);
+        if (type == null) {
+            // Attempt to resolve the type from the Snapshot if it is available
+            var path = request.resolvePathString(element, "path");
+            var snapshot = request.getSnapshotElements() == null
+                    ? null
+                    : request.getSnapshotElements().stream()
+                            .filter(e -> path.equals(request.resolvePathString(e, "path")))
+                            .findFirst()
+                            .orElse(null);
+            if (snapshot != null) {
+                type = resolveElementType(request, snapshot);
+            }
+        }
+        return type;
     }
 
     public IBaseBackboneElement createQuestionnaireItem(GenerateRequest request, String linkId) {

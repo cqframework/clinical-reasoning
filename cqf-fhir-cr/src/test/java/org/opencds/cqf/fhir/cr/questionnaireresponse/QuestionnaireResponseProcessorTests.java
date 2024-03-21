@@ -83,4 +83,20 @@ public class QuestionnaireResponseProcessorTests {
         assertTrue(obs2.hasStatus());
         assertTrue(obs2.hasValueDateTimeType());
     }
+
+    @Test
+    void testExtractWithHiddenItems() {
+        var questionnaireResponseId = "sigmoidoscopy-complication-casefeature-definition";
+        var result = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(1)
+                .getBundle();
+        var resources = BundleHelper.getEntryResources(result);
+        var obs = (Observation) resources.get(0);
+        assertTrue(obs.hasCode());
+        assertTrue(obs.hasSubject());
+        assertTrue(obs.hasValueBooleanType());
+    }
 }

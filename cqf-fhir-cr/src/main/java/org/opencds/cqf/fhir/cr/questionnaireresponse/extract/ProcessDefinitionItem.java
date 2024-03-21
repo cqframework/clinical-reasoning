@@ -104,32 +104,47 @@ public class ProcessDefinitionItem {
                 });
             }
         }
-        request.getItems(item).forEach(childItem -> {
+        var items = request.getItems(item);
+        processChildren(request, resourceDefinition, resource, items);
+
+        resources.add(resource);
+    }
+
+    private void processChildren(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IBaseResource resource,
+            List<IBaseBackboneElement> items) {
+        items.forEach(childItem -> {
             var childDefinition = request.resolvePathString(childItem, "definition");
             if (childDefinition != null) {
                 var path = childDefinition.split("#")[1];
                 // First element is always the resource type, so it can be ignored
-                path = path.replace(resourceType + ".", "");
-                var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
-                var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-                if (answerValue != null) {
-                    // Check if answer type matches path types available and transform if necessary
-                    var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
-                    if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
-                        var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
-                        if (!choices.contains(answerValue.getClass())) {
+                path = path.replace(resource.fhirType() + ".", "");
+                var children = request.getItems(childItem);
+                if (!children.isEmpty()) {
+                    processChildren(request, resourceDefinition, resource, children);
+                } else {
+                    var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
+                    var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
+                    if (answerValue != null) {
+                        // Check if answer type matches path types available and transform if necessary
+                        var pathDefinition =
+                                (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
+                        if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
+                            var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
+                            if (!choices.contains(answerValue.getClass())) {
+                                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                            }
+                        } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
+                                && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
                             answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
                         }
-                    } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
-                            && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
-                        answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                        request.getModelResolver().setValue(resource, path, answerValue);
                     }
-                    request.getModelResolver().setValue(resource, path, answerValue);
                 }
             }
         });
-
-        resources.add(resource);
     }
 
     private String getDefinitionType(String definition) {

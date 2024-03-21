@@ -24,6 +24,7 @@ import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
+import org.opencds.cqf.fhir.utility.Ids;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemGeneratorTests {
@@ -137,5 +138,25 @@ public class ItemGeneratorTests {
     @Test
     void testGenerateQuestionnaire() {
         given().repositoryFor(fhirContextR4, "r4").when().id("test").then().hasId("test");
+    }
+
+    @Test
+    void testGenerateItemForElementWithChildren() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition"))
+                .subjectId(ROUTE_ONE_PATIENT)
+                .then()
+                .hasItemCount(2);
+    }
+
+    @Test
+    void testGenerateHiddenItem() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition2"))
+                .subjectId(ROUTE_ONE_PATIENT)
+                .then()
+                .hasItemCount(2);
     }
 }

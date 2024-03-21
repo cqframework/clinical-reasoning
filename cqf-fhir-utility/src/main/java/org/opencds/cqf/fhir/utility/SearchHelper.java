@@ -145,7 +145,6 @@ public class SearchHelper {
     /**
      * Searches the given Repository and handles paging to return all entries
      *
-     * @param <CanonicalType> an IPrimitiveType<String> type
      * @param <R> an IBaseResource type
      * @param repository the repository to search
      * @param canonical the canonical url to search for

@@ -211,7 +211,7 @@ public class BundleHelper {
      * Sets the list of entries of the Bundle
      *
      * @param bundle IBaseBundle type
-     * @return
+     * @param entries List of IBaseBackboneElement type
      */
     @SuppressWarnings("unchecked")
     public static void setEntry(IBaseBundle bundle, List<? extends IBaseBackboneElement> entries) {
@@ -449,7 +449,7 @@ public class BundleHelper {
      * Sets the BundleEntryRequest url
      * @param fhirVersion
      * @param request
-     * @param location
+     * @param url
      * @return
      */
     public static IBaseBackboneElement setRequestUrl(

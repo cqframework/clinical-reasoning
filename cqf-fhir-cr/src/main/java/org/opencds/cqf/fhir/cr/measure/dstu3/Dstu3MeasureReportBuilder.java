@@ -120,13 +120,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         for (int i = 0; i < measure.getGroup().size(); i++) {
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), null, i);
-            buildGroup(
-                    groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
+            buildGroup(measureDef, groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
         }
     }
 
     protected void buildGroup(
-            String groupKey,
+        MeasureDef measureDef,
+        String groupKey,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
@@ -152,6 +152,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(
+                    measureDef,
                     groupKey,
                     mgpc,
                     reportGroup.addPopulation(),
@@ -272,6 +273,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildPopulation(
+            MeasureDef measureDef,
             String groupKey,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
@@ -280,7 +282,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if (checkIfNotBooleanBasedMeasure(measure)) {
+        if (measureDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
@@ -574,19 +576,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         reference.addExtension(extension);
-    }
-
-    protected boolean checkIfNotBooleanBasedMeasure(Measure measure) {
-        if (measure.hasExtension() && measure.getExtension().size() > 0) {
-            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item));
-        }
-        return false;
-    }
-
-    private boolean checkForNotBoolean(Extension item) {
-        return (item.getUrl() != null
-                && StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL)
-                && !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
@@ -302,6 +303,12 @@ public class Measure {
             assertEquals(ref.getReference(), subjectReference);
             return this;
         }
+
+        public SelectedReport hasReportType(String reportType) {
+            var ref = this.report().getType();
+            assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
     }
 
     static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
@@ -389,6 +396,11 @@ public class Measure {
 
             public SelectedPopulation hasCount(int count) {
                 MeasureValidationUtils.validatePopulation(value(), count);
+                return this;
+            }
+
+            public SelectedPopulation hasSubjectResults() {
+                assertNotNull(value().getSubjectResults().getReference());
                 return this;
             }
 

@@ -1,36 +1,47 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import org.hl7.fhir.dstu2.model.IdType;
+import java.nio.file.Path;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class OperationRegistryTest {
 
     static class Example {
         private Repository repository;
-        private String someOtherConfigParam;
+        private String configParam;
 
-        Example(Repository repository, String someOtherConfigParam) {
+        Example(Repository repository, String configParam) {
             this.repository = repository;
         }
 
         @Operation(name = "example")
-        public void example(
-                @IdParam IdType id,
+        public IBaseParameters example(
                 @OperationParam(name = "stringParam") String param,
                 @UnboundParam IBaseParameters everythingElseNotBound) {
-            System.out.println("the value of some other config, like evaluation settings is : " + someOtherConfigParam);
+            return new Parameters()
+                    .addParameter("result", new IntegerType(5))
+                    .addParameter("config", new StringType(configParam));
         }
     }
 
     @Test
     void registerOperation() {
+
+        // test directory setup for the IG repo
+        var root = Path.of("/does-not-exist");
         // If you have some config above and beyond just a repo, you pass it as part of the
         // factory function
         var operationRegistry = new OperationRegistry();
@@ -38,12 +49,31 @@ class OperationRegistryTest {
 
         // Internally, the operation registry passes an instance of the repository to the operation
         // factory and constructs the operation provider on the fly.
-        var repository = new Repository();
-        operationRegistry.execute(repository, "example", null, null, null);
+        var repository = new IgRepository(FhirContext.forR4Cached(), root);
+        var result = operationRegistry.execute(repository, "example", null, null, null);
+        var p = assertInstanceOf(Parameters.class, result);
+        var num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
+                .getValue();
+        assertEquals(5, num);
+        var config = assertInstanceOf(StringType.class, p.getParameter("config").getValue())
+                .getValue();
+        assertEquals("test config", config);
 
         // Externally, the IG repo passes itself to the operation registry, allowing
         // reentrant/recursive operations to be called
-        var igRepo = new IgRepository(FhirContext.forR4Cached(), "testDirectory", operationRegistry);
-        igRepo.invoke("example", null);
+        var igRepo = new IgRepository(
+                FhirContext.forR4Cached(),
+                root,
+                IgConventions.autoDetect(root),
+                EncodingBehavior.DEFAULT,
+                operationRegistry);
+        result = igRepo.invoke("example", null).getResource();
+        p = assertInstanceOf(Parameters.class, result);
+        num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
+                .getValue();
+        assertEquals(5, num);
+        config = assertInstanceOf(StringType.class, p.getParameter("config").getValue())
+                .getValue();
+        assertEquals("test config", config);
     }
 }

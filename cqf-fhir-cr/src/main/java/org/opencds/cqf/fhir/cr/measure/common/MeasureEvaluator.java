@@ -294,15 +294,14 @@ public class MeasureEvaluator {
         Object result;
         context.getState().pushWindow();
         try {
-            if(!isBooleanBasis) {
+            if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
-                    .push(new Variable()
-                        .withName(((FunctionDef) ed).getOperand().get(0).getName())
-                        .withValue(resource));
+                        .push(new Variable()
+                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
+                                .withValue(resource));
             }
-            result = context.getEvaluationVisitor()
-                .visitExpression(ed.getExpression(), context.getState());
+            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
             context.getState().popWindow();
         }
@@ -313,21 +312,20 @@ public class MeasureEvaluator {
     }
 
     protected PopulationDef evaluatePopulationMembership(
-        String subjectType, String subjectId, PopulationDef inclusionDef) {
+            String subjectType, String subjectId, PopulationDef inclusionDef) {
         // Add Resources from SubjectId
-        int i =0;
+        int i = 0;
         for (Object resource : evaluatePopulationCriteria(
-            subjectType, subjectId, inclusionDef.expression(), inclusionDef.getEvaluatedResources())) {
+                subjectType, subjectId, inclusionDef.expression(), inclusionDef.getEvaluatedResources())) {
             inclusionDef.addResource(resource);
             i++;
         }
         // If SubjectId Added Resources to Population
-        if(i>0){
+        if (i > 0) {
             inclusionDef.addSubject(subjectId);
         }
         return inclusionDef;
     }
-
 
     protected void evaluateProportion(MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
@@ -338,19 +336,21 @@ public class MeasureEvaluator {
         PopulationDef numeratorExclusion = groupDef.getSingle(NUMERATOREXCLUSION);
 
         // Validate Required Populations are Present
-        if(initialPopulation == null || denominator == null || numerator == null){
-            throw new NullPointerException("`"+INITIALPOPULATION.getDisplay() +"`, `"+ NUMERATOR.getDisplay()
-                +"`, `"+ DENOMINATOR.getDisplay()+"` are required Population Definitions for Measure Scoring Type: " +
-                measureDef.scoring().get(groupDef).toCode());
+        if (initialPopulation == null || denominator == null || numerator == null) {
+            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay() + "`, `" + NUMERATOR.getDisplay()
+                    + "`, `" + DENOMINATOR.getDisplay()
+                    + "` are required Population Definitions for Measure Scoring Type: "
+                    + measureDef.scoring().get(groupDef).toCode());
         }
         // Ratio Populations Check
-        if (measureDef.scoring().get(groupDef).toCode().equals("ratio") && denominatorException!= null){
-            throw new IllegalArgumentException("`"+DENOMINATOREXCEPTION.getDisplay() + "` are not permitted "
-                + "for MeasureScoring type: " + measureDef.scoring().get(groupDef).toCode());
+        if (measureDef.scoring().get(groupDef).toCode().equals("ratio") && denominatorException != null) {
+            throw new IllegalArgumentException(
+                    "`" + DENOMINATOREXCEPTION.getDisplay() + "` are not permitted " + "for MeasureScoring type: "
+                            + measureDef.scoring().get(groupDef).toCode());
         }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation);
-        if(initialPopulation.getSubjects().contains(subjectId)) {
+        if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
             denominator = evaluatePopulationMembership(subjectType, subjectId, denominator);
             numerator = evaluatePopulationMembership(subjectType, subjectId, numerator);
@@ -358,32 +358,29 @@ public class MeasureEvaluator {
             var totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
 
             // Evaluate Exclusions and Exception Populations
-            if(denominatorExclusion!=null){
-                denominatorExclusion = evaluatePopulationMembership(subjectType,
-                    subjectId, denominatorExclusion);
+            if (denominatorExclusion != null) {
+                denominatorExclusion = evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion);
             }
-            if(denominatorException != null) {
-                denominatorException = evaluatePopulationMembership(subjectType,
-                    subjectId, denominatorException);
+            if (denominatorException != null) {
+                denominatorException = evaluatePopulationMembership(subjectType, subjectId, denominatorException);
             }
-            if(numeratorExclusion != null) {
-                numeratorExclusion = evaluatePopulationMembership(subjectType,
-                    subjectId, numeratorExclusion);
+            if (numeratorExclusion != null) {
+                numeratorExclusion = evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion);
             }
             // Apply Exclusions and Exceptions
-            if(measureDef.isBooleanBasis()){
+            if (measureDef.isBooleanBasis()) {
                 // Remove Subject and Resource Exclusions
-                if(denominatorExclusion != null) {
+                if (denominatorExclusion != null) {
                     denominator.getSubjects().removeAll(denominatorExclusion.getSubjects());
                     denominator.getResources().removeAll(denominatorExclusion.getResources());
                     numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
                     numerator.getResources().removeAll(denominatorExclusion.getResources());
                 }
-                if(numeratorExclusion != null) {
+                if (numeratorExclusion != null) {
                     numerator.getSubjects().removeAll(numeratorExclusion.getSubjects());
                     numerator.getResources().removeAll(numeratorExclusion.getResources());
                 }
-                if(denominatorException != null) {
+                if (denominatorException != null) {
                     // Remove Subjects Exceptions that are present in Numerator
                     denominatorException.getSubjects().removeAll(numerator.getSubjects());
                     denominatorException.getResources().removeAll(numerator.getResources());
@@ -397,14 +394,14 @@ public class MeasureEvaluator {
                 // Remove Only Resource Exclusions
                 // * Multiple resources can be from one subject and represented in multiple populations
                 // * This is why we only remove resources and not subjects too for `Resource Basis`.
-                if(denominatorExclusion != null) {
+                if (denominatorExclusion != null) {
                     denominator.getResources().removeAll(denominatorExclusion.getResources());
                     numerator.getResources().removeAll(denominatorExclusion.getResources());
                 }
-                if(numeratorExclusion != null) {
+                if (numeratorExclusion != null) {
                     numerator.getResources().removeAll(numeratorExclusion.getResources());
                 }
-                if(denominatorException != null) {
+                if (denominatorException != null) {
                     // Remove Resource Exceptions that are present in Numerator
                     denominatorException.getResources().removeAll(numerator.getResources());
                     // Remove Resources in Denominator that are not in Numerator
@@ -417,47 +414,48 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateContinuousVariable(MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
+    protected void evaluateContinuousVariable(
+            MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
-        if(initialPopulation == null || measurePopulation == null){
-            throw new NullPointerException("`"+INITIALPOPULATION.getDisplay() +"` & `"+ MEASUREPOPULATION.getDisplay()
-                + "` are required Population Definitions for Measure Scoring Type: " +
-                measureDef.scoring().get(groupDef).toCode());
+        if (initialPopulation == null || measurePopulation == null) {
+            throw new NullPointerException(
+                    "`" + INITIALPOPULATION.getDisplay() + "` & `" + MEASUREPOPULATION.getDisplay()
+                            + "` are required Population Definitions for Measure Scoring Type: "
+                            + measureDef.scoring().get(groupDef).toCode());
         }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation);
-        if(initialPopulation.getSubjects().contains(subjectId)) {
+        if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
             measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation);
 
-            if(measurePopulationExclusion != null) {
+            if (measurePopulationExclusion != null) {
                 measurePopulationExclusion = evaluatePopulationMembership(
-                    subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION));
+                        subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION));
             }
             // Apply Exclusions to Population
-            if(measureDef.isBooleanBasis()){
-                if(measurePopulationExclusion != null) {
-                    measurePopulation.getSubjects()
-                        .removeAll(measurePopulationExclusion.getSubjects());
-                    measurePopulation.getResources()
-                        .removeAll(measurePopulationExclusion.getResources());
+            if (measureDef.isBooleanBasis()) {
+                if (measurePopulationExclusion != null) {
+                    measurePopulation.getSubjects().removeAll(measurePopulationExclusion.getSubjects());
+                    measurePopulation.getResources().removeAll(measurePopulationExclusion.getResources());
                 }
             } else {
-                if(measurePopulationExclusion != null) {
-                    measurePopulation.getResources()
-                        .removeAll(measurePopulationExclusion.getResources());
+                if (measurePopulationExclusion != null) {
+                    measurePopulation.getResources().removeAll(measurePopulationExclusion.getResources());
                 }
             }
             // Evaluate Observation Population
-            if(measureObservation != null) {
+            if (measureObservation != null) {
                 for (Object resource : measurePopulation.getResources()) {
                     Object observationResult = evaluateObservationCriteria(
-                        resource, measureObservation.expression(), measureObservation.getEvaluatedResources(),
-                        measureDef.isBooleanBasis());
+                            resource,
+                            measureObservation.expression(),
+                            measureObservation.getEvaluatedResources(),
+                            measureDef.isBooleanBasis());
                     measureObservation.addResource(observationResult);
                 }
             }
@@ -467,17 +465,16 @@ public class MeasureEvaluator {
     protected void evaluateCohort(MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
-        if(initialPopulation == null) {
-            throw new NullPointerException("`"+INITIALPOPULATION.getDisplay()
-                + "` is a required Population Definition for Measure Scoring Type: " +
-                measureDef.scoring().get(groupDef).toCode());
+        if (initialPopulation == null) {
+            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay()
+                    + "` is a required Population Definition for Measure Scoring Type: "
+                    + measureDef.scoring().get(groupDef).toCode());
         }
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation);
     }
 
-    protected void evaluateGroup(
-            MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
+    protected void evaluateGroup(MeasureDef measureDef, GroupDef groupDef, String subjectType, String subjectId) {
         evaluateStratifiers(subjectId, groupDef.stratifiers());
 
         var scoring = measureDef.scoring().get(groupDef);

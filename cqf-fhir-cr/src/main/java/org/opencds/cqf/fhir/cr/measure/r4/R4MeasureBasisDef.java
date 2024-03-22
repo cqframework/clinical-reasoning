@@ -8,9 +8,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 
 /*
 
- */
+*/
 public class R4MeasureBasisDef implements MeasureBasisDef<Measure> {
-
 
     @Override
     public boolean isBooleanBasis(Measure measure) {
@@ -22,10 +21,7 @@ public class R4MeasureBasisDef implements MeasureBasisDef<Measure> {
 
     private boolean isBooleanBasisExtension(Extension item) {
         return (item.getUrl() != null
-            && StringUtils.equalsIgnoreCase(item.getUrl(), MeasureConstants.POPULATION_BASIS_URL)
-            && StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
+                && StringUtils.equalsIgnoreCase(item.getUrl(), MeasureConstants.POPULATION_BASIS_URL)
+                && StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
-
-
-
 }

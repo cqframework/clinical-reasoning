@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
@@ -120,13 +119,18 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         for (int i = 0; i < measure.getGroup().size(); i++) {
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), null, i);
-            buildGroup(measureDef, groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
+            buildGroup(
+                    measureDef,
+                    groupKey,
+                    mgc,
+                    this.report.addGroup(),
+                    measureDef.groups().get(i));
         }
     }
 
     protected void buildGroup(
-        MeasureDef measureDef,
-        String groupKey,
+            MeasureDef measureDef,
+            String groupKey,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {

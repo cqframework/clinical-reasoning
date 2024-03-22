@@ -355,36 +355,32 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // add extension to group for totalDenominator and totalNumerator
         if (bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.PROPORTION)
                 || bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.RATIO)) {
-            if(bc.measureDef.isBooleanBasis()) {
+            if (bc.measureDef.isBooleanBasis()) {
                 reportGroup
-                    .addExtension()
-                    .setUrl(EXT_TOTAL_DENOMINATOR_URL)
-                    .setValue(new StringType(
-                        Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
-                            .getSubjects()
-                            .size())));
+                        .addExtension()
+                        .setUrl(EXT_TOTAL_DENOMINATOR_URL)
+                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
+                                .getSubjects()
+                                .size())));
                 reportGroup
-                    .addExtension()
-                    .setUrl(EXT_TOTAL_NUMERATOR_URL)
-                    .setValue(new StringType(
-                        Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
-                            .getSubjects()
-                            .size())));
+                        .addExtension()
+                        .setUrl(EXT_TOTAL_NUMERATOR_URL)
+                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
+                                .getSubjects()
+                                .size())));
             } else {
                 reportGroup
-                    .addExtension()
-                    .setUrl(EXT_TOTAL_DENOMINATOR_URL)
-                    .setValue(new StringType(
-                        Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
-                            .getResources()
-                            .size())));
+                        .addExtension()
+                        .setUrl(EXT_TOTAL_DENOMINATOR_URL)
+                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
+                                .getResources()
+                                .size())));
                 reportGroup
-                    .addExtension()
-                    .setUrl(EXT_TOTAL_NUMERATOR_URL)
-                    .setValue(new StringType(
-                        Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
-                            .getResources()
-                            .size())));
+                        .addExtension()
+                        .setUrl(EXT_TOTAL_NUMERATOR_URL)
+                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
+                                .getResources()
+                                .size())));
             }
         }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
@@ -511,7 +507,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if(bc.measureDef.isBooleanBasis()){
+        if (bc.measureDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getSubjects().size());
         } else {
             reportPopulation.setCount(populationDef.getResources().size());

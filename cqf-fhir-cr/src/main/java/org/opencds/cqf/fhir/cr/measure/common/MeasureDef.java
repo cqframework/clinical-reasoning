@@ -63,5 +63,8 @@ public class MeasureDef {
     public Map<GroupDef, MeasureScoring> scoring() {
         return this.scoring;
     }
-    public boolean isBooleanBasis(){ return this.isBooleanBasis; }
+
+    public boolean isBooleanBasis() {
+        return this.isBooleanBasis;
+    }
 }

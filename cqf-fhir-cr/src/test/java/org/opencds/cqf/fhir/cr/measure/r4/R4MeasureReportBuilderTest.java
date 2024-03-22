@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureBasisDef;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class R4MeasureReportBuilderTest {

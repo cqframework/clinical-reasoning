@@ -89,8 +89,8 @@ public class R4MeasureService {
 
         // add subject reference for non-individual reportTypes
         if ((StringUtils.isNotBlank(practitioner) || StringUtils.isNotBlank(subjectId))
-                && (measureReport.getType().name().equals(MeasureReportType.SUMMARY.name()) ||
-            measureReport.getType().name().equals(MeasureReportType.SUBJECTLIST.name()))) {
+                && (measureReport.getType().name().equals(MeasureReportType.SUMMARY.name())
+                        || measureReport.getType().name().equals(MeasureReportType.SUBJECTLIST.name()))) {
             if (StringUtils.isNotBlank(practitioner)) {
                 measureReport.setSubject(new Reference(practitioner));
             } else {

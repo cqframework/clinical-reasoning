@@ -21,7 +21,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureBasisDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -106,11 +105,17 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
             groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
-        //define basis of measure
+        // define basis of measure
         Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();
 
         return new MeasureDef(
-                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes, measureBasisDef.isBooleanBasis(measure));
+                measure.getId(),
+                measure.getUrl(),
+                measure.getVersion(),
+                groupMeasureScoring,
+                groups,
+                sdes,
+                measureBasisDef.isBooleanBasis(measure));
     }
 
     private PopulationDef checkPopulationForCode(

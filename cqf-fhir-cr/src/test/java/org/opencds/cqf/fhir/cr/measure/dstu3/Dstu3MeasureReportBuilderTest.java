@@ -38,12 +38,12 @@ public class Dstu3MeasureReportBuilderTest {
         Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();
 
         assertNotNull(measureEncounterBias);
-        //Encounter Basis
+        // Encounter Basis
         assertFalse(measureBasisDef.isBooleanBasis(measureEncounterBias));
-        //No specified Basis
+        // No specified Basis
         assertNotNull(measureWithoutExtension);
         assertFalse(measureBasisDef.isBooleanBasis(measureWithoutExtension));
-        //Boolean Basis
+        // Boolean Basis
         assertNotNull(measureBooleanBias);
         assertTrue(measureBasisDef.isBooleanBasis(measureBooleanBias));
     }

@@ -118,14 +118,13 @@ class MethodBinder {
 
     private static void validateParameterBinders(List<ParameterBinder> parameterBinders) {
         var idParamCount =
-                parameterBinders.stream().filter(x -> x.type()== Type.ID).count();
+                parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
         if (idParamCount > 1) {
             throw new IllegalArgumentException("Method cannot have more than one @IdParam");
         }
 
-        var unboundParamCount = parameterBinders.stream()
-                .filter(x -> x.type() == Type.UNBOUND)
-                .count();
+        var unboundParamCount =
+                parameterBinders.stream().filter(x -> x.type() == Type.UNBOUND).count();
         if (unboundParamCount > 1) {
             throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
         }
@@ -141,12 +140,13 @@ class MethodBinder {
     }
 
     private static String typeNameFrom(Operation operation) {
-        if (operation.type() != null) {
-            return operation.type().getSimpleName();
-        } else if (operation.typeName() != null) {
-            return operation.typeName();
-        } else {
+        if ((IBaseResource.class == operation.type() || operation.type() == null)
+                && (operation.typeName() == null || "".equals(operation.typeName()))) {
             return "";
+        } else if (operation.type() != null) {
+            return operation.type().getSimpleName();
+        } else {
+            return operation.typeName();
         }
     }
 

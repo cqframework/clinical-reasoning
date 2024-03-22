@@ -26,7 +26,7 @@ public class OperationRegistry {
         this.operationMap = MultimapBuilder.hashKeys().arrayListValues().build();
     }
 
-    <T> void register(Class<T> clazz, Function<Repository, T> factory) {
+    public <T> void register(Class<T> clazz, Function<Repository, T> factory) {
         var methodBinders = Arrays.stream(clazz.getMethods())
                 .filter(m -> m.isAnnotationPresent(Operation.class))
                 .map(MethodBinder::new)
@@ -43,7 +43,7 @@ public class OperationRegistry {
         }
     }
 
-    IBaseResource execute(
+    public IBaseResource execute(
             Repository repository,
             String name,
             Class<? extends IBaseResource> resourceType,

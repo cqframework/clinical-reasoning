@@ -37,12 +37,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
+import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
-import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
  * This class implements the Repository interface on onto a directory structure
@@ -56,7 +56,7 @@ public class IgRepository implements Repository {
     private final IgConventions conventions;
     private final EncodingBehavior encodingBehavior;
     private final ResourceMatcher resourceMatcher;
-    private IRepositoryOperationProvider operationProvider;
+    private final OperationRegistry operationRegistry;
 
     private final Map<Path, Optional<IBaseResource>> resourceCache = new HashMap<>();
 
@@ -114,7 +114,7 @@ public class IgRepository implements Repository {
      * @param conventions       The conventions for the IG
      * @param encodingBehavior   The encoding behavior to use for parsing and encoding
      *                          resources.
-     * @param operationProvider The operation provider to use for invoking
+     * @param operationRegistry The operation registry to use for invoking
      *                          operations.
      */
     public IgRepository(
@@ -122,24 +122,20 @@ public class IgRepository implements Repository {
             Path root,
             IgConventions conventions,
             EncodingBehavior encodingBehavior,
-            IRepositoryOperationProvider operationProvider) {
+            OperationRegistry operationRegistry) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
         this.root = requireNonNull(root, "root can not be null");
         this.conventions = requireNonNull(conventions, "conventions is required");
         this.encodingBehavior = requireNonNull(encodingBehavior, "encodingBehavior is required");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
-        this.operationProvider = operationProvider;
-    }
-
-    public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
-        this.operationProvider = operationProvider;
+        this.operationRegistry = operationRegistry;
     }
 
     public void clearCache() {
         this.resourceCache.clear();
     }
 
-    private boolean isExternaPath(Path path) {
+    private static boolean isExternaPath(Path path) {
         return path.getParent() != null
                 && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
     }
@@ -534,22 +530,16 @@ public class IgRepository implements Repository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(null, resourceType.getSimpleName(), name, parameters);
+        return (R) this.operationRegistry.execute(this, name, resourceType, null, parameters);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(id, id.getResourceType(), name, parameters);
-    }
-
-    protected <R extends IBaseResource> R invokeOperation(
-            IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
-        if (operationProvider == null) {
-            throw new IllegalArgumentException("No operation provider found.  Unable to invoke operations.");
-        }
-        return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
+        return (R) this.operationRegistry.execute(this, name, null, id, parameters);
     }
 }

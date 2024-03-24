@@ -25,6 +25,7 @@ class OperationRegistryTest {
 
         Example(Repository repository, String configParam) {
             this.repository = repository;
+            this.configParam = configParam;
         }
 
         @Operation(name = "example")
@@ -35,6 +36,11 @@ class OperationRegistryTest {
                     .addParameter("result", new IntegerType(5))
                     .addParameter("config", new StringType(configParam));
         }
+
+        @Operation(name = "recursive")
+        public IBaseParameters recursive() {
+            return this.repository.invoke("example", null, Parameters.class);
+        }
     }
 
     @Test
@@ -42,6 +48,7 @@ class OperationRegistryTest {
 
         // test directory setup for the IG repo
         var root = Path.of("/does-not-exist");
+
         // If you have some config above and beyond just a repo, you pass it as part of the
         // factory function
         var operationRegistry = new OperationRegistry();
@@ -51,6 +58,7 @@ class OperationRegistryTest {
         // factory and constructs the operation provider on the fly.
         var repository = new IgRepository(FhirContext.forR4Cached(), root);
         var result = operationRegistry.execute(repository, "example", null, null, null);
+
         var p = assertInstanceOf(Parameters.class, result);
         var num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
                 .getValue();
@@ -60,14 +68,25 @@ class OperationRegistryTest {
         assertEquals("test config", config);
 
         // Externally, the IG repo passes itself to the operation registry, allowing
-        // reentrant/recursive operations to be called
+        // calls back into the repository
         var igRepo = new IgRepository(
                 FhirContext.forR4Cached(),
                 root,
                 IgConventions.autoDetect(root),
                 EncodingBehavior.DEFAULT,
                 operationRegistry);
-        result = igRepo.invoke("example", null).getResource();
+        result = igRepo.invoke("example", null, Parameters.class);
+
+        p = assertInstanceOf(Parameters.class, result);
+        num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
+                .getValue();
+        assertEquals(5, num);
+        config = assertInstanceOf(StringType.class, p.getParameter("config").getValue())
+                .getValue();
+        assertEquals("test config", config);
+
+        // Same as above, but using a reentrant operation
+        result = igRepo.invoke("recursive", null, Parameters.class);
         p = assertInstanceOf(Parameters.class, result);
         num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
                 .getValue();

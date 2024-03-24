@@ -542,4 +542,11 @@ public class IgRepository implements Repository {
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         return (R) this.operationRegistry.execute(this, name, null, id, parameters);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <R extends IBaseResource, P extends IBaseParameters> R invoke(
+            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+        return (R) this.operationRegistry.execute(this, name, null, null, parameters);
+    }
 }

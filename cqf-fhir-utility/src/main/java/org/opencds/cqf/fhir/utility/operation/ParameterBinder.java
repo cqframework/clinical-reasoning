@@ -8,6 +8,7 @@ import jakarta.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.utility.Parameters;
@@ -112,15 +113,47 @@ interface ParameterBinder {
 
         @Override
         public Object bind(IBaseParameters parameters) {
+            if (parameters == null) {
+                return null;
+            }
+
             // Extract the value from the parameters resource that matches the external name of the @OperationParam
             // And handle collection types like list.
             var context = parameters.getStructureFhirVersionEnum().newContextCached();
-
             var parts = Parameters.getPartsByName(context, parameters, this.name());
 
-            // Check min and max, check types for target arguments, etc.
+            // TODO: Clear consumed parameters.
 
-            return null;
+            if (parts.size() > operationParam.max()) {
+                throw new IllegalArgumentException("Parameter " + this.name() + " has more values than allowed by max");
+            }
+
+            if (parts.size() < operationParam.min()) {
+                throw new IllegalArgumentException(
+                        "Parameter " + this.name() + " has fewer values than required by min");
+            }
+
+            // Hmm... this validation should happen in the registration
+            if (List.class.isAssignableFrom(parameter.getType())) {
+                return parts;
+            }
+
+            if (parts.isEmpty()) {
+                return null;
+            }
+
+            if (parts.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Parameter " + this.name() + " is a single value, but multiple values were found");
+            }
+
+            var part = parts.get(0);
+
+            if (part.getClass().isAssignableFrom(parameter.getType())) {
+                return part;
+            }
+
+            throw new IllegalArgumentException("Parameter " + this.name() + " is not of the expected type");
         }
 
         @Override
@@ -148,6 +181,10 @@ interface ParameterBinder {
 
         @Override
         public Object bind(IBaseParameters parameters) {
+            if (parameters == null) {
+                return null;
+            }
+
             var value = Resources.clone(parameters);
 
             // Remove all values from the parameters resource

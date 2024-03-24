@@ -92,9 +92,7 @@ class MethodBinder {
     }
 
     private List<Object> args(IIdType id, IBaseParameters parameters) {
-        // The binding process consumes the parameters it binds,
-        // so we need to clone the parameters to avoid modifying the original
-        var cloned = Resources.clone(parameters);
+
         var args = new ArrayList<>(parameterBinders.size());
         int paramIndex = 0;
 
@@ -105,11 +103,15 @@ class MethodBinder {
             paramIndex++;
         }
 
+        // The binding process consumes the parameters it binds,
+        // so we need to clone the parameters to avoid modifying the original
+        var cloned = parameters != null ? Resources.clone(parameters) : null;
+
         for (; paramIndex < parameterBinders.size(); paramIndex++) {
             args.add(parameterBinders.get(paramIndex).bind(cloned));
         }
 
-        if (!cloned.isEmpty()) {
+        if (cloned != null && !cloned.isEmpty()) {
             throw new IllegalArgumentException("Parameters were not bound to @Operation invocation: " + cloned);
         }
 
@@ -152,6 +154,6 @@ class MethodBinder {
 
     public Callable<IBaseResource> bind(Object provider, IIdType id, IBaseParameters parameters) {
         var args = args(id, parameters);
-        return () -> (IBaseResource) method.invoke(provider, args);
+        return () -> (IBaseResource) method.invoke(provider, args.toArray());
     }
 }

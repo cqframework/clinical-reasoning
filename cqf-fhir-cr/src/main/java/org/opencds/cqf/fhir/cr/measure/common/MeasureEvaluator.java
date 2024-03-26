@@ -314,16 +314,18 @@ public class MeasureEvaluator {
     protected PopulationDef evaluatePopulationMembership(
             String subjectType, String subjectId, PopulationDef inclusionDef) {
         // Add Resources from SubjectId
-        int i = 0;
-        for (Object resource : evaluatePopulationCriteria(
-                subjectType, subjectId, inclusionDef.expression(), inclusionDef.getEvaluatedResources())) {
-            inclusionDef.addResource(resource);
-            i++;
-        }
+        var resources = evaluatePopulationCriteria(
+                subjectType, subjectId, inclusionDef.expression(), inclusionDef.getEvaluatedResources());
+
         // If SubjectId Added Resources to Population
-        if (i > 0) {
+        if (resources.iterator().hasNext()) {
             inclusionDef.addSubject(subjectId);
         }
+
+        for (Object resource : resources) {
+            inclusionDef.addResource(resource);
+        }
+
         return inclusionDef;
     }
 
@@ -357,6 +359,11 @@ public class MeasureEvaluator {
             var totalDenominator = groupDef.getSingle(TOTALDENOMINATOR);
             var totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
 
+            totalDenominator.getSubjects().addAll(denominator.getSubjects());
+            totalDenominator.getResources().addAll(denominator.getResources());
+            totalNumerator.getSubjects().addAll(numerator.getSubjects());
+            totalNumerator.getResources().addAll(numerator.getResources());
+
             // Evaluate Exclusions and Exception Populations
             if (denominatorExclusion != null) {
                 denominatorExclusion = evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion);
@@ -371,45 +378,40 @@ public class MeasureEvaluator {
             if (measureDef.isBooleanBasis()) {
                 // Remove Subject and Resource Exclusions
                 if (denominatorExclusion != null) {
-                    denominator.getSubjects().removeAll(denominatorExclusion.getSubjects());
-                    denominator.getResources().removeAll(denominatorExclusion.getResources());
-                    numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
-                    numerator.getResources().removeAll(denominatorExclusion.getResources());
+                    totalDenominator.getSubjects().removeAll(denominatorExclusion.getSubjects());
+                    totalDenominator.getResources().removeAll(denominatorExclusion.getResources());
+                    totalNumerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
+                    totalNumerator.getResources().removeAll(denominatorExclusion.getResources());
                 }
                 if (numeratorExclusion != null) {
-                    numerator.getSubjects().removeAll(numeratorExclusion.getSubjects());
-                    numerator.getResources().removeAll(numeratorExclusion.getResources());
+                    totalNumerator.getSubjects().removeAll(numeratorExclusion.getSubjects());
+                    totalNumerator.getResources().removeAll(numeratorExclusion.getResources());
                 }
                 if (denominatorException != null) {
                     // Remove Subjects Exceptions that are present in Numerator
-                    denominatorException.getSubjects().removeAll(numerator.getSubjects());
-                    denominatorException.getResources().removeAll(numerator.getResources());
+                    denominatorException.getSubjects().removeAll(totalNumerator.getSubjects());
+                    denominatorException.getResources().removeAll(totalNumerator.getResources());
                     // Remove Subjects in Denominator that are not in Numerator
-                    denominator.getSubjects().removeAll(denominatorException.getSubjects());
-                    denominator.getResources().removeAll(denominatorException.getResources());
+                    totalDenominator.getSubjects().removeAll(denominatorException.getSubjects());
+                    totalDenominator.getResources().removeAll(denominatorException.getResources());
                 }
-                totalDenominator.getSubjects().addAll(denominator.getSubjects());
-                totalNumerator.getSubjects().addAll(numerator.getSubjects());
             } else {
                 // Remove Only Resource Exclusions
                 // * Multiple resources can be from one subject and represented in multiple populations
                 // * This is why we only remove resources and not subjects too for `Resource Basis`.
                 if (denominatorExclusion != null) {
-                    denominator.getResources().removeAll(denominatorExclusion.getResources());
-                    numerator.getResources().removeAll(denominatorExclusion.getResources());
+                    totalDenominator.getResources().removeAll(denominatorExclusion.getResources());
+                    totalNumerator.getResources().removeAll(denominatorExclusion.getResources());
                 }
                 if (numeratorExclusion != null) {
-                    numerator.getResources().removeAll(numeratorExclusion.getResources());
+                    totalNumerator.getResources().removeAll(numeratorExclusion.getResources());
                 }
                 if (denominatorException != null) {
                     // Remove Resource Exceptions that are present in Numerator
-                    denominatorException.getResources().removeAll(numerator.getResources());
+                    denominatorException.getResources().removeAll(totalNumerator.getResources());
                     // Remove Resources in Denominator that are not in Numerator
-                    denominator.getResources().removeAll(denominatorException.getResources());
+                    totalDenominator.getResources().removeAll(denominatorException.getResources());
                 }
-                // TODO: Evaluate validity of TotalDenominator & TotalDenominator
-                totalDenominator.getResources().addAll(denominator.getResources());
-                totalNumerator.getResources().addAll(numerator.getResources());
             }
         }
     }

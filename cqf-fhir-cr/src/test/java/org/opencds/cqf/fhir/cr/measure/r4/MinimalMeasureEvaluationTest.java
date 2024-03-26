@@ -9,6 +9,40 @@ public class MinimalMeasureEvaluationTest {
     private static final Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test
+    void ProportionNoBasisSingleGroup_Population() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate();
+
+        when.then()
+                .hasReportType("Summary")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .population("denominator")
+                .hasCount(5)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(3)
+                .up()
+                .hasScore("0.6");
+    }
+
+    @Test
     void ProportionBooleanBasisSingleGroup_Population() {
         var when = GIVEN_REPO
                 .when()

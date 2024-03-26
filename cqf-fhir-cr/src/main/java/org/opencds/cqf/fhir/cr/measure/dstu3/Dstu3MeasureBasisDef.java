@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureBasisDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 
@@ -19,9 +18,8 @@ public class Dstu3MeasureBasisDef implements MeasureBasisDef<Measure> {
         return false;
     }
 
-    private boolean isBooleanBasisExtension(Extension item) {
-        return (item.getUrl() != null
-                && StringUtils.equalsIgnoreCase(item.getUrl(), MeasureConstants.POPULATION_BASIS_URL)
-                && StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
+    private boolean isBooleanBasisExtension(IBaseExtension item) {
+        return (item.getUrl().equalsIgnoreCase(MeasureConstants.POPULATION_BASIS_URL)
+                && item.getValue().toString().equalsIgnoreCase("boolean"));
     }
 }

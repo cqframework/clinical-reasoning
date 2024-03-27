@@ -13,6 +13,7 @@ public class MeasureDef {
     private final Map<GroupDef, MeasureScoring> scoring;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
+    private final boolean isBooleanBasis;
 
     public MeasureDef(
             String id,
@@ -20,13 +21,15 @@ public class MeasureDef {
             String version,
             Map<GroupDef, MeasureScoring> scoring,
             List<GroupDef> groups,
-            List<SdeDef> sdes) {
+            List<SdeDef> sdes,
+            boolean isBooleanBasis) {
         this.id = id;
         this.url = url;
         this.version = version;
         this.groups = groups;
         this.sdes = sdes;
         this.scoring = scoring;
+        this.isBooleanBasis = isBooleanBasis;
     }
 
     public String id() {
@@ -59,5 +62,9 @@ public class MeasureDef {
 
     public Map<GroupDef, MeasureScoring> scoring() {
         return this.scoring;
+    }
+
+    public boolean isBooleanBasis() {
+        return this.isBooleanBasis;
     }
 }

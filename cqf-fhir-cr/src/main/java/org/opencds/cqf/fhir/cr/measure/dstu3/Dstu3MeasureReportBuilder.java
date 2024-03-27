@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
@@ -121,11 +120,16 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureGroupComponent mgc = measure.getGroup().get(i);
             String groupKey = this.getKey("group", mgc.getId(), null, i);
             buildGroup(
-                    groupKey, mgc, this.report.addGroup(), measureDef.groups().get(i));
+                    measureDef,
+                    groupKey,
+                    mgc,
+                    this.report.addGroup(),
+                    measureDef.groups().get(i));
         }
     }
 
     protected void buildGroup(
+            MeasureDef measureDef,
             String groupKey,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
@@ -152,6 +156,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(
+                    measureDef,
                     groupKey,
                     mgpc,
                     reportGroup.addPopulation(),
@@ -272,6 +277,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildPopulation(
+            MeasureDef measureDef,
             String groupKey,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
@@ -280,7 +286,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if (checkIfNotBooleanBasedMeasure(measure)) {
+        if (measureDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
@@ -574,19 +580,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         reference.addExtension(extension);
-    }
-
-    protected boolean checkIfNotBooleanBasedMeasure(Measure measure) {
-        if (measure.hasExtension() && measure.getExtension().size() > 0) {
-            return measure.getExtension().stream().anyMatch(item -> checkForNotBoolean(item));
-        }
-        return false;
-    }
-
-    private boolean checkForNotBoolean(Extension item) {
-        return (item.getUrl() != null
-                && StringUtils.equalsIgnoreCase(item.getUrl(), POPULATION_BASIS_URL)
-                && !StringUtils.equalsIgnoreCase(item.getValue().toString(), "boolean"));
     }
 
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {

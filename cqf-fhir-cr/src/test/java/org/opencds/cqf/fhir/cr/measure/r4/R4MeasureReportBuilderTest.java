@@ -39,16 +39,18 @@ public class R4MeasureReportBuilderTest {
         Measure measureWithEmptyExtension = (Measure) parser.parseResource(
                 R4MeasureReportBuilderTest.class.getResourceAsStream("MeasureBuilderSampleWithEmptyExtension.json"));
 
+        R4MeasureBasisDef measureBasisDef = new R4MeasureBasisDef();
+
         assertNotNull(measureEncounterBias);
-        assertFalse(this.measureReportBuilder.isBooleanBasis(measureEncounterBias));
+        assertFalse(measureBasisDef.isBooleanBasis(measureEncounterBias));
 
         assertNotNull(measureWithoutExtension);
-        assertFalse(this.measureReportBuilder.isBooleanBasis(measureWithoutExtension));
+        assertFalse(measureBasisDef.isBooleanBasis(measureWithoutExtension));
 
         assertNotNull(measureBooleanBias);
-        assertTrue(this.measureReportBuilder.isBooleanBasis(measureBooleanBias));
+        assertTrue(measureBasisDef.isBooleanBasis(measureBooleanBias));
 
         assertNotNull(measureWithEmptyExtension);
-        assertFalse(this.measureReportBuilder.isBooleanBasis(measureWithEmptyExtension));
+        assertFalse(measureBasisDef.isBooleanBasis(measureWithEmptyExtension));
     }
 }

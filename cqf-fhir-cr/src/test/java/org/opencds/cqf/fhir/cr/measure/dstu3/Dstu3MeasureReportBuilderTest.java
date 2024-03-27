@@ -35,14 +35,16 @@ public class Dstu3MeasureReportBuilderTest {
         Measure measureBooleanBias =
                 (Measure) parser.parseResource(Dstu3MeasureReportBuilderTest.class.getResourceAsStream(
                         "EXM105FHIR3SampleWithBoolenPopulationBias.json"));
+        Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();
 
         assertNotNull(measureEncounterBias);
-        assertTrue(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureEncounterBias));
-
+        // Encounter Basis
+        assertFalse(measureBasisDef.isBooleanBasis(measureEncounterBias));
+        // No specified Basis
         assertNotNull(measureWithoutExtension);
-        assertFalse(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureWithoutExtension));
-
+        assertFalse(measureBasisDef.isBooleanBasis(measureWithoutExtension));
+        // Boolean Basis
         assertNotNull(measureBooleanBias);
-        assertFalse(this.measureReportBuilder.checkIfNotBooleanBasedMeasure(measureBooleanBias));
+        assertTrue(measureBasisDef.isBooleanBasis(measureBooleanBias));
     }
 }

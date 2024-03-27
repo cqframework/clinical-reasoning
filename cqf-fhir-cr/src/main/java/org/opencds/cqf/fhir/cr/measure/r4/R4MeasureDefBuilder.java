@@ -126,9 +126,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
             groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
-
+        // define basis of measure
+        R4MeasureBasisDef measureBasisDef = new R4MeasureBasisDef();
         return new MeasureDef(
-                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
+                measure.getId(),
+                measure.getUrl(),
+                measure.getVersion(),
+                groupMeasureScoring,
+                groups,
+                sdes,
+                measureBasisDef.isBooleanBasis(measure));
     }
 
     private PopulationDef checkPopulationForCode(

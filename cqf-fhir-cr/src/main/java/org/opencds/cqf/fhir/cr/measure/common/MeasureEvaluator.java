@@ -73,11 +73,6 @@ public class MeasureEvaluator {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
-        // default behavior is population for many subjects, individual for one subject
-        if (measureEvalType == null) {
-            measureEvalType = subjectIds.size() > 1 ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT;
-        }
-
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
@@ -88,10 +83,12 @@ public class MeasureEvaluator {
             case SUBJECTLIST:
                 return this.evaluate(measureDef, MeasureReportType.SUBJECTLIST, subjectIds);
             case PATIENTLIST:
+                // DSTU3 Only
                 return this.evaluate(measureDef, MeasureReportType.PATIENTLIST, subjectIds);
             case POPULATION:
                 return this.evaluate(measureDef, MeasureReportType.SUMMARY, subjectIds);
             default:
+                // never hit because this value is set upstream
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
         }

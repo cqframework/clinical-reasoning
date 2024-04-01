@@ -19,6 +19,7 @@ public class ElementHasDefaultValue {
                         questionnaireItem,
                         "extension",
                         buildBooleanExt(request.getFhirVersion(), sdcQuestionnaireHidden(Boolean.TRUE)));
+        // Collections.singletonList(buildBooleanExt(request.getFhirVersion(), sdcQuestionnaireHidden(Boolean.TRUE))));
         request.getModelResolver()
                 .setValue(questionnaireItem, "readOnly", buildBooleanType(request.getFhirVersion(), Boolean.TRUE));
         return questionnaireItem;

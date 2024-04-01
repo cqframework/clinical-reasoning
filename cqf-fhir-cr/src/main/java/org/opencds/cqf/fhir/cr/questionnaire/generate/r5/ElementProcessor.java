@@ -33,11 +33,22 @@ public class ElementProcessor implements IElementProcessor {
 
     @Override
     public IBaseBackboneElement processElement(
-            GenerateRequest request, ICompositeType baseElement, String childLinkId, IBaseResource caseFeature) {
+            GenerateRequest request,
+            ICompositeType baseElement,
+            String elementType,
+            String childLinkId,
+            IBaseResource caseFeature,
+            Boolean isGroup) {
         var element = (ElementDefinition) baseElement;
-        final QuestionnaireItemType itemType = getItemType(element);
-        final QuestionnaireItemComponent item =
-                initializeQuestionnaireItem(itemType, request.getProfileUrl(), element, childLinkId);
+        final var itemType = isGroup ? QuestionnaireItemType.GROUP : parseItemType(elementType, element.hasBinding());
+        final var item = initializeQuestionnaireItem(itemType, request.getProfileUrl(), element, childLinkId);
+        item.setRequired(element.hasMin() && element.getMin() > 0);
+        item.setRepeats(element.hasMax() && !element.getMax().equals("1"));
+        // set enableWhen based on? use
+        // http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression
+        if (itemType == QuestionnaireItemType.GROUP) {
+            return item;
+        }
         if (itemType == QuestionnaireItemType.QUESTION) {
             questionnaireTypeIsChoice.addProperties(element, item);
         }
@@ -53,10 +64,6 @@ public class ElementProcessor implements IElementProcessor {
                 item.addInitial().setValue(transformValueToItem((DataType) pathValue));
             }
         }
-        item.setRequired(element.hasMin() && element.getMin() > 0);
-        item.setRepeats(element.hasMax() && !element.getMax().equals("1"));
-        // set enableWhen based on? use
-        // http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-enableWhenExpression
         return item;
     }
 
@@ -70,19 +77,12 @@ public class ElementProcessor implements IElementProcessor {
                 .setText(getElementText(element));
     }
 
-    public QuestionnaireItemType getItemType(ElementDefinition element) {
-        final String elementType = element.getType().get(0).getCode();
-        final QuestionnaireItemType itemType = parseItemType(elementType, element.hasBinding());
-        if (itemType == null) {
-            final String message = String.format(ITEM_TYPE_ERROR, element.getId());
-            throw new IllegalArgumentException(message);
-        }
-        return itemType;
-    }
-
     public QuestionnaireItemType parseItemType(String elementType, Boolean hasBinding) {
         if (Boolean.TRUE.equals(hasBinding)) {
             return QuestionnaireItemType.QUESTION;
+        }
+        if (elementType == null) {
+            throw new IllegalArgumentException("Unable to determine item type.");
         }
         switch (elementType) {
             case "code":

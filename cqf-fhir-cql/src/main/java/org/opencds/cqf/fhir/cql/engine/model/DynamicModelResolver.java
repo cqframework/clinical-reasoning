@@ -30,6 +30,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
 
     private final FhirContext fhirContext;
 
+    @SuppressWarnings("rawtypes")
     public DynamicModelResolver(ModelResolver modelResolver) {
         super(modelResolver);
         this.fhirContext = ((FhirModelResolver) modelResolver).getFhirContext();

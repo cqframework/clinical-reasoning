@@ -105,9 +105,17 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
             groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
+        // define basis of measure
+        Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();
 
         return new MeasureDef(
-                measure.getId(), measure.getUrl(), measure.getVersion(), groupMeasureScoring, groups, sdes);
+                measure.getId(),
+                measure.getUrl(),
+                measure.getVersion(),
+                groupMeasureScoring,
+                groups,
+                sdes,
+                measureBasisDef.isBooleanBasis(measure));
     }
 
     private PopulationDef checkPopulationForCode(

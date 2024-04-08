@@ -78,6 +78,11 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
     }
 
     @Override
+    public String getPurpose() {
+        return this.getPlanDefinition().getPurpose();
+    }
+
+    @Override
     public void setName(String name) {
         this.getPlanDefinition().setName(name);
     }

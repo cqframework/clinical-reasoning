@@ -78,6 +78,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     }
 
     @Override
+    public String getPurpose() {
+        return null;
+    }
+
+    @Override
     public void setName(String name) {
         this.get().setName(name);
     }

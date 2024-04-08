@@ -81,6 +81,11 @@ public class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.
     }
 
     @Override
+    public String getPurpose() {
+        return this.getValueSet().getPurpose();
+    }
+
+    @Override
     public void setName(String name) {
         this.getValueSet().setName(name);
     }

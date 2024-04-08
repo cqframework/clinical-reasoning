@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
@@ -54,7 +53,7 @@ public class LibraryConstructor {
 
         if (libraries != null) {
             for (Pair<String, String> library : libraries) {
-                VersionedIdentifier vi = getVersionedIdentifier(library.getLeft());
+                var vi = VersionedIdentifiers.forUrl(library.getLeft());
                 sb.append(String.format("include \"%s\"", vi.getId()));
                 if (vi.getVersion() != null) {
                     sb.append(String.format(" version '%s'", vi.getVersion()));
@@ -99,33 +98,5 @@ public class LibraryConstructor {
 
     private void constructHeader(StringBuilder sb) {
         sb.append(String.format("library expression version '1.0.0'%n%n"));
-    }
-
-    protected VersionedIdentifier getVersionedIdentifier(String url) {
-        if (!url.contains("/Library/")) {
-            throw new IllegalArgumentException(
-                    "Invalid resource type for determining library version identifier: Library");
-        }
-        String[] urlSplit = url.split("/Library/");
-        if (urlSplit.length != 2) {
-            throw new IllegalArgumentException(
-                    "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
-        }
-
-        // TODO: Use the namespace manager here to do the mapping?
-        // String cqlNamespaceUrl = urlSplit[0];
-
-        String cqlName = urlSplit[1];
-        VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
-        if (cqlName.contains("|")) {
-            String[] nameVersion = cqlName.split("\\|");
-            String name = nameVersion[0];
-            String version = nameVersion[1];
-            versionedIdentifier.setId(name);
-            versionedIdentifier.setVersion(version);
-        } else {
-            versionedIdentifier.setId(cqlName);
-        }
-        return versionedIdentifier;
     }
 }

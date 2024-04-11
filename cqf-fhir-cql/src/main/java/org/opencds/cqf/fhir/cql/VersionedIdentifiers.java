@@ -9,17 +9,18 @@ public class VersionedIdentifiers {
     }
 
     public static VersionedIdentifier forUrl(String url) {
-        if (!url.contains("/Library/")) {
+        if (!url.contains("/Library/") && !url.startsWith("Library/")) {
             throw new IllegalArgumentException(
                     "Invalid resource type for determining library version identifier: Library");
         }
-        String[] urlSplit = url.split("/Library/");
-        if (urlSplit.length != 2) {
+
+        String[] urlSplit = url.split("Library/");
+        if (urlSplit.length > 2) {
             throw new IllegalArgumentException(
                     "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        String cqlName = urlSplit[1];
+        String cqlName = urlSplit.length == 1 ? urlSplit[0] : urlSplit[1];
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
         if (cqlName.contains("|")) {
             String[] nameVersion = cqlName.split("\\|");

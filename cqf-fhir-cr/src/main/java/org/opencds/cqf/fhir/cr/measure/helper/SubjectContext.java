@@ -7,11 +7,13 @@ public class SubjectContext {
     }
 
     private String contextType;
+
     public String getContextType() {
         return contextType;
     }
 
     private Object contextValue;
+
     public Object getContextValue() {
         return contextValue;
     }

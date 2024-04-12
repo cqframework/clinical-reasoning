@@ -4,13 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -18,13 +15,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class CollectData {
+public class DataRequirements {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-
-    @FunctionalInterface
-    interface Selector<T, S> {
-        T select(S from);
-    }
 
     interface ChildOf<T> {
         T up();
@@ -88,31 +80,29 @@ public class CollectData {
             return this;
         }
 
-        private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions);
+        private R4DataRequirementsService buildR4DataRequirementsService() {
+            return new R4DataRequirementsService(repository, evaluationOptions);
         }
 
         public When when() {
-            return new When(buildR4CollectDataService());
+            return new When(buildR4DataRequirementsService());
         }
     }
 
     public static class When {
-        private final R4CollectDataService service;
+        private final R4DataRequirementsService service;
 
-        When(R4CollectDataService service) {
+        When(R4DataRequirementsService service) {
             this.service = service;
         }
 
-        private IdType theId;
+        private IdType measureId;
         private String periodStart;
         private String periodEnd;
-        private String subject;
-        private String practitioner;
-        private Supplier<Parameters> operation;
+        private Supplier<Library> operation;
 
-        public When measureId(String theId) {
-            this.theId = new IdType(theId);
+        public When measureId(String measureId) {
+            this.measureId = new IdType(measureId);
             return this;
         }
 
@@ -126,18 +116,8 @@ public class CollectData {
             return this;
         }
 
-        public When subject(String subjectId) {
-            this.subject = subjectId;
-            return this;
-        }
-
-        public When practitioner(String practitioner) {
-            this.practitioner = practitioner;
-            return this;
-        }
-
-        public When collectData() {
-            this.operation = () -> service.collectData(theId, periodStart, periodEnd, subject, practitioner);
+        public When DataRequirements() {
+            this.operation = () -> service.dataRequirements(measureId, periodStart, periodEnd);
             return this;
         }
 
@@ -151,66 +131,28 @@ public class CollectData {
         }
     }
 
-    public static class SelectedReport extends Selected<Parameters, Void> {
-        public SelectedReport(Parameters report) {
+    public static class SelectedReport extends Selected<Library, Void> {
+        public SelectedReport(Library report) {
             super(report, null);
         }
 
-        public SelectedMeasureReport measureReport() {
-            return this.measureReport(g -> resourceToMeasureReport(g.getParameter().stream()
-                    .filter(x -> x.getResource().getResourceType().toString().equals("MeasureReport"))
-                    .findFirst()
-                    .get()
-                    .getResource()));
-        }
-
-        public SelectedMeasureReport measureReport(CollectData.Selector<MeasureReport, Parameters> paramSelector) {
-            var p = paramSelector.select(value());
-            return new SelectedMeasureReport(p, this);
-        }
-
-        public MeasureReport resourceToMeasureReport(Resource theResource) {
-            IParser parser = FhirContext.forR4Cached().newJsonParser();
-            return (MeasureReport) parser.parseResource(parser.encodeResourceToString(theResource));
-        }
-
-        public SelectedReport hasParameterCount(int count) {
+        public SelectedReport hasParameterDefCount(int count) {
             assertEquals(count, report().getParameter().size());
             return this;
         }
 
-        public SelectedReport hasMeasureReportCount(int count) {
-            assertEquals(count, (int) report().getParameter().stream()
-                    .filter(x -> x.getResource().getResourceType().toString().equals("MeasureReport"))
-                    .count());
+        public SelectedReport hasDataRequirementCount(int count) {
+            assertEquals(count, report().getDataRequirement().size());
             return this;
         }
 
-        public Parameters report() {
+        public SelectedReport hasRelatedArtifactCount(int count) {
+            assertEquals(count, report().getRelatedArtifact().size());
+            return this;
+        }
+
+        public Library report() {
             return this.value();
-        }
-    }
-
-    static class SelectedMeasureReport extends CollectData.Selected<MeasureReport, SelectedReport> {
-
-        public SelectedMeasureReport(MeasureReport value, SelectedReport parent) {
-            super(value, parent);
-        }
-
-        public MeasureReport measureReport() {
-            return this.value();
-        }
-
-        public CollectData.SelectedMeasureReport hasEvaluatedResourceCount(int count) {
-            assertEquals(count, measureReport().getEvaluatedResource().size());
-            return this;
-        }
-
-        public CollectData.SelectedMeasureReport hasDataCollectionReportType() {
-            assertEquals(
-                    MeasureReport.MeasureReportType.DATACOLLECTION,
-                    measureReport().getType());
-            return this;
         }
     }
 }

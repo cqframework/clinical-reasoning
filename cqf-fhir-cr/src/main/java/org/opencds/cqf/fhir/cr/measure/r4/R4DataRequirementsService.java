@@ -2,6 +2,17 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -48,35 +59,22 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class R4DataRequirementsService {
     private static final Logger ourLog = LoggerFactory.getLogger(R4DataRequirementsService.class);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
-    private static final String EXTENSION_URL_FHIR_QUERY_PATTERN = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-fhirQueryPattern";
-    public R4DataRequirementsService(
-        Repository repository,
-        MeasureEvaluationOptions measureEvaluationOptions) {
+    private static final String EXTENSION_URL_FHIR_QUERY_PATTERN =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-fhirQueryPattern";
+
+    public R4DataRequirementsService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
     }
 
-    public Library dataRequirements(IdType theId,
-        String periodStart,
-        String periodEnd)  {
+    public Library dataRequirements(IdType measureId, String periodStart, String periodEnd) {
 
-        Measure measure = repository.read(Measure.class, theId);
+        Measure measure = repository.read(Measure.class, measureId);
         Library library = getLibraryFromMeasure(measure);
 
         if (library == null) {
@@ -88,15 +86,14 @@ public class R4DataRequirementsService {
         Interval measurementPeriod;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
             measurementPeriod = new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
+                    DateHelper.resolveRequestDate(periodStart, true),
+                    true,
+                    DateHelper.resolveRequestDate(periodEnd, false),
+                    true);
             parameters.put("MeasurementPeriod", measurementPeriod);
 
             return processDataRequirements(measure, library, parameters);
-        }
-        else {
+        } else {
             ourLog.warn("periodStart & periodEnd was defaulted to empty");
 
             return processDataRequirements(library, parameters);
@@ -132,7 +129,8 @@ public class R4DataRequirementsService {
     private static LibrarySourceProvider buildLibrarySource(Repository repository) {
         AdapterFactory adapterFactory = new AdapterFactory();
         return new RepositoryFhirLibrarySourceProvider(
-            repository, adapterFactory, new LibraryVersionSelector(adapterFactory));}
+                repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
+    }
 
     private LibraryManager createLibraryManager(Library library) {
         var librarySourceProvider = buildLibrarySource(repository);
@@ -147,11 +145,10 @@ public class R4DataRequirementsService {
             libraryBundle.addEntry(component);
         });
 
-
-        List<LibrarySourceProvider> sourceProviders = new ArrayList<>(
-            Arrays.asList(librarySourceProvider, librarySourceProvider));
+        List<LibrarySourceProvider> sourceProviders =
+                new ArrayList<>(Arrays.asList(librarySourceProvider, librarySourceProvider));
         LibraryManager ll = new LibraryManager(new ModelManager());
-        for(LibrarySourceProvider lsp: sourceProviders){
+        for (LibrarySourceProvider lsp : sourceProviders) {
             ll.getLibrarySourceLoader().registerProvider(lsp);
         }
         return ll;
@@ -163,14 +160,17 @@ public class R4DataRequirementsService {
             translator = CqlTranslator.fromStream(cqlStream, libraryManager);
         } catch (IOException e) {
             throw new IllegalArgumentException(
-                String.format("Errors occurred translating library: %s", e.getMessage()));
+                    String.format("Errors occurred translating library: %s", e.getMessage()));
         }
 
         return translator;
     }
+
     private CqlTranslator translateLibrary(Library library, LibraryManager libraryManager) {
         CqlTranslator translator = getTranslator(
-            new ByteArrayInputStream(Libraries.getContent(library, "text/cql").get()), libraryManager);
+                new ByteArrayInputStream(
+                        Libraries.getContent(library, "text/cql").get()),
+                libraryManager);
         if (!translator.getErrors().isEmpty()) {
             throw new RuntimeException(translator.getErrors().get(0).getMessage());
         }
@@ -184,28 +184,50 @@ public class R4DataRequirementsService {
         ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
         var searchParameterResolver = new SearchParameterResolver(repository.fhirContext());
         var terminologyProvider = new RepositoryTerminologyProvider(
-            repository, measureEvaluationOptions.getEvaluationSettings().getValueSetCache(), measureEvaluationOptions.getEvaluationSettings().getTerminologySettings());
+                repository,
+                measureEvaluationOptions.getEvaluationSettings().getValueSetCache(),
+                measureEvaluationOptions.getEvaluationSettings().getTerminologySettings());
 
         // TODO: Enable passing a capability statement as a parameter to the operation
-        return getModuleDefinitionLibraryR4(libraryManager, translator.getTranslatedLibrary(),
-            searchParameterResolver, terminologyProvider,
-            modelResolver, null, parameters, measureEvaluationOptions);
+        return getModuleDefinitionLibraryR4(
+                libraryManager,
+                translator.getTranslatedLibrary(),
+                searchParameterResolver,
+                terminologyProvider,
+                modelResolver,
+                null,
+                parameters,
+                measureEvaluationOptions);
     }
 
-    public static Library getModuleDefinitionLibraryR4(LibraryManager libraryManager,
-        CompiledLibrary translatedLibrary, SearchParameterResolver searchParameterResolver,
-        TerminologyProvider terminologyProvider, ModelResolver modelResolver, IBaseConformance capStatement,
-        Map<String, Object> parameters, MeasureEvaluationOptions measureEvaluationOptions) {
+    public static Library getModuleDefinitionLibraryR4(
+            LibraryManager libraryManager,
+            CompiledLibrary translatedLibrary,
+            SearchParameterResolver searchParameterResolver,
+            TerminologyProvider terminologyProvider,
+            ModelResolver modelResolver,
+            IBaseConformance capStatement,
+            Map<String, Object> parameters,
+            MeasureEvaluationOptions measureEvaluationOptions) {
 
-        org.hl7.fhir.r5.model.Library libraryR5 = getModuleDefinitionLibraryR5(libraryManager, translatedLibrary,
-            measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlCompilerOptions(), parameters);
+        org.hl7.fhir.r5.model.Library libraryR5 = getModuleDefinitionLibraryR5(
+                libraryManager,
+                translatedLibrary,
+                measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlCompilerOptions(),
+                parameters);
 
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
 
-        org.hl7.fhir.r4.model.Library libraryR4 = (org.hl7.fhir.r4.model.Library) versionConvertor_40_50.convertResource(libraryR5);
+        org.hl7.fhir.r4.model.Library libraryR4 =
+                (org.hl7.fhir.r4.model.Library) versionConvertor_40_50.convertResource(libraryR5);
 
-        libraryR4 = addDataRequirementFhirQueries(libraryR4, searchParameterResolver, terminologyProvider, modelResolver,
-            measureEvaluationOptions, capStatement);
+        libraryR4 = addDataRequirementFhirQueries(
+                libraryR4,
+                searchParameterResolver,
+                terminologyProvider,
+                modelResolver,
+                measureEvaluationOptions,
+                capStatement);
 
         return libraryR4;
     }
@@ -217,12 +239,21 @@ public class R4DataRequirementsService {
         ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
         var searchParameterResolver = new SearchParameterResolver(repository.fhirContext());
         var terminologyProvider = new RepositoryTerminologyProvider(
-            repository, measureEvaluationOptions.getEvaluationSettings().getValueSetCache(), measureEvaluationOptions.getEvaluationSettings().getTerminologySettings());
+                repository,
+                measureEvaluationOptions.getEvaluationSettings().getValueSetCache(),
+                measureEvaluationOptions.getEvaluationSettings().getTerminologySettings());
 
         // TODO: Enable passing a capability statement as a parameter to the operation
-        return getModuleDefinitionLibraryR4(measure, libraryManager, translator.getTranslatedLibrary(),
-            measureEvaluationOptions, searchParameterResolver, terminologyProvider,
-            modelResolver, null, parameters);
+        return getModuleDefinitionLibraryR4(
+                measure,
+                libraryManager,
+                translator.getTranslatedLibrary(),
+                measureEvaluationOptions,
+                searchParameterResolver,
+                terminologyProvider,
+                modelResolver,
+                null,
+                parameters);
     }
 
     private List<Library> fetchDependencyLibraries(Library library) {
@@ -238,10 +269,10 @@ public class R4DataRequirementsService {
         return new ArrayList<>(resources.values());
     }
 
-    private void visitLibrary(Library library, List<Library> queue, Map<String, Library> resources){
+    private void visitLibrary(Library library, List<Library> queue, Map<String, Library> resources) {
         for (RelatedArtifact relatedArtifact : library.getRelatedArtifact()) {
             if (relatedArtifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                && relatedArtifact.hasResource()) {
+                    && relatedArtifact.hasResource()) {
 
                 // FHIR R4+, resource is defined as a canonical
                 String resourceCanonical = relatedArtifact.getResource();
@@ -254,20 +285,23 @@ public class R4DataRequirementsService {
         }
     }
 
-    public List<IBaseResource> fetchbundleEntries(List<BundleEntryComponent> bundleList){
+    public List<IBaseResource> fetchbundleEntries(List<BundleEntryComponent> bundleList) {
         List<IBaseResource> resources = new ArrayList<>();
         for (BundleEntryComponent drq : bundleList) {
             resources.add(drq.getResource());
         }
         return resources;
     }
+
     private Library fetchDependencyLibrary(String resourceCanonical) {
 
         Library library = null;
         CanonicalParts parts = Canonicals.getParts(resourceCanonical);
 
         if (parts.resourceType().equals("Library")) {
-            List<BundleEntryComponent> bundleList = repository.search(Bundle.class, Library.class, Searches.byCanonical(resourceCanonical)).getEntry();
+            List<BundleEntryComponent> bundleList = repository
+                    .search(Bundle.class, Library.class, Searches.byCanonical(resourceCanonical))
+                    .getEntry();
 
             if (bundleList != null && !bundleList.isEmpty()) {
 
@@ -276,7 +310,8 @@ public class R4DataRequirementsService {
                 } else {
                     AdapterFactory adapterFactory = new AdapterFactory();
                     LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-                    LibraryAdapter libAdapter = adapterFactory.createLibrary(bundleList.get(0).getResource());
+                    LibraryAdapter libAdapter =
+                            adapterFactory.createLibrary(bundleList.get(0).getResource());
                     VersionedIdentifier identifier = new VersionedIdentifier();
                     if (StringUtils.isNotBlank(libAdapter.getName())) {
                         identifier.setId(libAdapter.getName());
@@ -290,71 +325,138 @@ public class R4DataRequirementsService {
         }
         return library;
     }
-    public static Library getModuleDefinitionLibraryR4(Measure measureToUse,
-        LibraryManager libraryManager, CompiledLibrary translatedLibrary, MeasureEvaluationOptions measureEvaluationOptions,
-        SearchParameterResolver searchParameterResolver, TerminologyProvider terminologyProvider, ModelResolver modelResolver,
-        IBaseConformance capStatement, Map<String, Object> parameters) {
+
+    public static Library getModuleDefinitionLibraryR4(
+            Measure measureToUse,
+            LibraryManager libraryManager,
+            CompiledLibrary translatedLibrary,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            SearchParameterResolver searchParameterResolver,
+            TerminologyProvider terminologyProvider,
+            ModelResolver modelResolver,
+            IBaseConformance capStatement,
+            Map<String, Object> parameters) {
 
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-        org.hl7.fhir.r5.model.Measure r5Measure = (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(measureToUse);
+        org.hl7.fhir.r5.model.Measure r5Measure =
+                (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(measureToUse);
 
-        org.hl7.fhir.r5.model.Library effectiveDataRequirements =
-            getModuleDefinitionLibraryR5(r5Measure, libraryManager, translatedLibrary, measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlCompilerOptions(), parameters);
+        org.hl7.fhir.r5.model.Library effectiveDataRequirements = getModuleDefinitionLibraryR5(
+                r5Measure,
+                libraryManager,
+                translatedLibrary,
+                measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlCompilerOptions(),
+                parameters);
 
-        org.hl7.fhir.r4.model.Library r4EffectiveDataRequirements = (org.hl7.fhir.r4.model.Library) versionConvertor_40_50
-            .convertResource(effectiveDataRequirements);
-        r4EffectiveDataRequirements = addDataRequirementFhirQueries(r4EffectiveDataRequirements, searchParameterResolver,
-            terminologyProvider, modelResolver, measureEvaluationOptions, capStatement);
+        org.hl7.fhir.r4.model.Library r4EffectiveDataRequirements =
+                (org.hl7.fhir.r4.model.Library) versionConvertor_40_50.convertResource(effectiveDataRequirements);
+        r4EffectiveDataRequirements = addDataRequirementFhirQueries(
+                r4EffectiveDataRequirements,
+                searchParameterResolver,
+                terminologyProvider,
+                modelResolver,
+                measureEvaluationOptions,
+                capStatement);
         return r4EffectiveDataRequirements;
     }
-    public static org.hl7.fhir.r5.model.Library getModuleDefinitionLibraryR5(LibraryManager libraryManager,
-        CompiledLibrary translatedLibrary, CqlCompilerOptions options, Map<String, Object> parameters) {
+
+    public static org.hl7.fhir.r5.model.Library getModuleDefinitionLibraryR5(
+            LibraryManager libraryManager,
+            CompiledLibrary translatedLibrary,
+            CqlCompilerOptions options,
+            Map<String, Object> parameters) {
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
 
-        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, options, null,
-            parameters, true, true);
+        return dqReqTrans.gatherDataRequirements(
+                libraryManager, translatedLibrary, options, null, parameters, true, true);
     }
 
-    public static org.hl7.fhir.r5.model.Library getModuleDefinitionLibraryR5(org.hl7.fhir.r5.model.Measure measureToUse,
-        LibraryManager libraryManager, CompiledLibrary translatedLibrary, CqlCompilerOptions options, Map<String, Object> parameters) {
+    public static org.hl7.fhir.r5.model.Library getModuleDefinitionLibraryR5(
+            org.hl7.fhir.r5.model.Measure measureToUse,
+            LibraryManager libraryManager,
+            CompiledLibrary translatedLibrary,
+            CqlCompilerOptions options,
+            Map<String, Object> parameters) {
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
 
-        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, options, expressionList,
-            parameters, true, true);
+        return dqReqTrans.gatherDataRequirements(
+                libraryManager, translatedLibrary, options, expressionList, parameters, true, true);
     }
+
     private static Set<String> getExpressions(org.hl7.fhir.r5.model.Measure measureToUse) {
         Set<String> expressionSet = new HashSet<>();
-        measureToUse.getSupplementalData().forEach(supData -> expressionSet.add(supData.getCriteria().getExpression()));
+        measureToUse
+                .getSupplementalData()
+                .forEach(supData -> expressionSet.add(supData.getCriteria().getExpression()));
         measureToUse.getGroup().forEach(groupMember -> {
-            groupMember.getPopulation().forEach(population -> expressionSet.add(population.getCriteria().getExpression()));
-            groupMember.getStratifier().forEach(stratifier -> expressionSet.add(stratifier.getCriteria().getExpression()));
+            groupMember
+                    .getPopulation()
+                    .forEach(population ->
+                            expressionSet.add(population.getCriteria().getExpression()));
+            groupMember
+                    .getStratifier()
+                    .forEach(stratifier ->
+                            expressionSet.add(stratifier.getCriteria().getExpression()));
         });
         return expressionSet;
     }
 
-    private static org.hl7.fhir.r4.model.Library addDataRequirementFhirQueries(org.hl7.fhir.r4.model.Library library,
-        SearchParameterResolver searchParameterResolver, TerminologyProvider terminologyProvider, ModelResolver modelResolver,
-        MeasureEvaluationOptions measureEvaluationOptions, IBaseConformance capStatement) {
+    private static org.hl7.fhir.r4.model.Library addDataRequirementFhirQueries(
+            org.hl7.fhir.r4.model.Library library,
+            SearchParameterResolver searchParameterResolver,
+            TerminologyProvider terminologyProvider,
+            ModelResolver modelResolver,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            IBaseConformance capStatement) {
         List<org.hl7.fhir.r4.model.DataRequirement> dataReqs = library.getDataRequirement();
 
         try {
-            BaseFhirQueryGenerator fhirQueryGenerator = new R4FhirQueryGenerator(searchParameterResolver,
-                terminologyProvider, modelResolver);
+            BaseFhirQueryGenerator fhirQueryGenerator =
+                    new R4FhirQueryGenerator(searchParameterResolver, terminologyProvider, modelResolver);
 
-            if (measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getPageSize() != null) {
-                fhirQueryGenerator.setPageSize(measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getPageSize());
+            if (measureEvaluationOptions
+                            .getEvaluationSettings()
+                            .getCqlOptions()
+                            .getCqlEngineOptions()
+                            .getPageSize()
+                    != null) {
+                fhirQueryGenerator.setPageSize(measureEvaluationOptions
+                        .getEvaluationSettings()
+                        .getCqlOptions()
+                        .getCqlEngineOptions()
+                        .getPageSize());
             }
-            fhirQueryGenerator.setExpandValueSets(measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().shouldExpandValueSets());
+            fhirQueryGenerator.setExpandValueSets(measureEvaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .shouldExpandValueSets());
 
-            Integer maxCodesPerQuery = measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getMaxCodesPerQuery();
+            Integer maxCodesPerQuery = measureEvaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .getMaxCodesPerQuery();
             if (maxCodesPerQuery != null && maxCodesPerQuery > 0) {
-                fhirQueryGenerator.setMaxCodesPerQuery(measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getMaxCodesPerQuery());
+                fhirQueryGenerator.setMaxCodesPerQuery(measureEvaluationOptions
+                        .getEvaluationSettings()
+                        .getCqlOptions()
+                        .getCqlEngineOptions()
+                        .getMaxCodesPerQuery());
             }
 
-            Integer queryBatchThreshold = measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getQueryBatchThreshold();
+            Integer queryBatchThreshold = measureEvaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .getQueryBatchThreshold();
             if (queryBatchThreshold != null && queryBatchThreshold > 0) {
-                fhirQueryGenerator.setQueryBatchThreshold(measureEvaluationOptions.getEvaluationSettings().getCqlOptions().getCqlEngineOptions().getQueryBatchThreshold());
+                fhirQueryGenerator.setQueryBatchThreshold(measureEvaluationOptions
+                        .getEvaluationSettings()
+                        .getCqlOptions()
+                        .getCqlEngineOptions()
+                        .getQueryBatchThreshold());
             }
 
             Map<String, Object> contextValues = new HashMap<>();
@@ -363,7 +465,8 @@ public class R4DataRequirementsService {
 
             for (org.hl7.fhir.r4.model.DataRequirement drq : dataReqs) {
                 // TODO: Support DataRequirement-level subject overrides
-                List<String> queries = fhirQueryGenerator.generateFhirQueries(drq, null, contextValues, null, capStatement);
+                List<String> queries =
+                        fhirQueryGenerator.generateFhirQueries(drq, null, contextValues, null, capStatement);
                 for (String query : queries) {
                     org.hl7.fhir.r4.model.Extension ext = new org.hl7.fhir.r4.model.Extension();
                     ext.setUrl(EXTENSION_URL_FHIR_QUERY_PATTERN);

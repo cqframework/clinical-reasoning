@@ -144,10 +144,6 @@ public class RequestHelpers {
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 
-    public static PopulateRequest newPopulateRequestForVersion(FhirVersionEnum fhirVersion, String operationName) {
-        return new PopulateRequest(fhirVersion, operationName);
-    }
-
     public static PopulateRequest newPopulateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource questionnaire) {
         return newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire, "populate");

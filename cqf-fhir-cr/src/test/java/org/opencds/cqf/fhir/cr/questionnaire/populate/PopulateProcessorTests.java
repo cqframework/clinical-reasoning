@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.PATIENT_ID;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
 import java.util.List;
@@ -17,20 +18,30 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
 class PopulateProcessorTests {
     @Mock
+    private Repository repository;
+
+    @Mock
     private LibraryEngine libraryEngine;
 
     @Spy
     private final PopulateProcessor fixture = new PopulateProcessor();
+
+    @BeforeEach
+    void setup() {
+        doReturn(repository).when(libraryEngine).getRepository();
+    }
 
     @Test
     void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsDstu3() {
@@ -40,6 +51,7 @@ class PopulateProcessorTests {
         final var originalQuestionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
+        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
@@ -77,6 +89,7 @@ class PopulateProcessorTests {
         final var originalQuestionnaire = new Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
@@ -110,6 +123,7 @@ class PopulateProcessorTests {
         final var originalQuestionnaire = new org.hl7.fhir.r5.model.Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
+        doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
@@ -205,6 +219,7 @@ class PopulateProcessorTests {
         // setup
         final OperationOutcome operationOutcome = withOperationOutcomeWithIssue();
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute
@@ -218,6 +233,7 @@ class PopulateProcessorTests {
         // setup
         final OperationOutcome operationOutcome = new OperationOutcome();
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute

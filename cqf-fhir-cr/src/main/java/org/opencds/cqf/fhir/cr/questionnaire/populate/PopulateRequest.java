@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -9,8 +11,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateRequest implements IQuestionnaireRequest {
@@ -23,20 +25,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+    private final Boolean useServerData;
+    private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
-
-    // test constructor
-    public PopulateRequest(FhirVersionEnum fhirVersion, String operationName) {
-        this.operationName = operationName;
-        this.questionnaire = null;
-        this.subjectId = null;
-        this.parameters = null;
-        this.bundle = null;
-        this.libraryEngine = null;
-        this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.fhirVersion = fhirVersion;
-        this.defaultLibraryUrl = null;
-    }
 
     public PopulateRequest(
             String operationName,
@@ -44,17 +35,28 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
+        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
+        inputParameterResolver = IInputParameterResolver.createResolver(
+                libraryEngine.getRepository(),
+                this.subjectId,
+                null,
+                null,
+                this.parameters,
+                this.useServerData,
+                this.bundle);
     }
 
     @Override
@@ -79,7 +81,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @Override
     public IBaseParameters getParameters() {
-        return parameters;
+        return inputParameterResolver.getParameters();
     }
 
     @Override

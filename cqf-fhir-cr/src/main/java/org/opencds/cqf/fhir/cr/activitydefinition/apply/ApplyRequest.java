@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -49,6 +51,7 @@ public class ApplyRequest implements ICpgRequest {
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         this.activityDefinition = activityDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -66,16 +69,14 @@ public class ApplyRequest implements ICpgRequest {
         this.modelResolver = modelResolver;
         fhirVersion = activityDefinition.getStructureFhirVersionEnum();
         defaultLibraryUrl = resolveDefaultLibraryUrl();
-        inputParameterResolver = libraryEngine == null
-                ? null
-                : IInputParameterResolver.createResolver(
-                        libraryEngine.getRepository(),
-                        this.subjectId,
-                        this.encounterId,
-                        this.practitionerId,
-                        this.parameters,
-                        this.useServerData,
-                        this.bundle);
+        inputParameterResolver = IInputParameterResolver.createResolver(
+                libraryEngine.getRepository(),
+                this.subjectId,
+                this.encounterId,
+                this.practitionerId,
+                this.parameters,
+                this.useServerData,
+                this.bundle);
     }
 
     public IBaseResource getActivityDefinition() {

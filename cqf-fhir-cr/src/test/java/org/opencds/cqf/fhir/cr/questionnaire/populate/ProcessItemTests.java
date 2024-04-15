@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -15,12 +16,14 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
@@ -30,6 +33,9 @@ import org.opencds.cqf.fhir.utility.Constants;
 @ExtendWith(MockitoExtension.class)
 class ProcessItemTests {
     @Mock
+    private Repository repository;
+
+    @Mock
     private ExpressionProcessor expressionProcessorService;
 
     @Mock
@@ -38,6 +44,11 @@ class ProcessItemTests {
     @Spy
     @InjectMocks
     private ProcessItem fixture;
+
+    @BeforeEach
+    void setup() {
+        doReturn(repository).when(libraryEngine).getRepository();
+    }
 
     @AfterEach
     void tearDown() {
@@ -49,6 +60,7 @@ class ProcessItemTests {
     void processItemShouldReturnQuestionnaireItemComponentDstu3() throws ResolveExpressionException {
         // setup
         final org.hl7.fhir.dstu3.model.Questionnaire questionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
+        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, questionnaire);
         final IBaseBackboneElement originalQuestionnaireItemComponent =
@@ -75,6 +87,7 @@ class ProcessItemTests {
     void processItemShouldReturnQuestionnaireItemComponentR4() throws ResolveExpressionException {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final IBaseBackboneElement originalQuestionnaireItemComponent = new QuestionnaireItemComponent();
@@ -102,6 +115,7 @@ class ProcessItemTests {
     void processItemShouldReturnQuestionnaireItemComponentR5() throws ResolveExpressionException {
         // setup
         final org.hl7.fhir.r5.model.Questionnaire questionnaire = new org.hl7.fhir.r5.model.Questionnaire();
+        doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, questionnaire);
         final IBaseBackboneElement originalQuestionnaireItemComponent =
@@ -151,6 +165,7 @@ class ProcessItemTests {
     void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() throws ResolveExpressionException {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
@@ -171,6 +186,7 @@ class ProcessItemTests {
         // setup
         final List<IBase> expected = withExpressionResults(FhirVersionEnum.R4);
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();

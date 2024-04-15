@@ -24,7 +24,8 @@ public class ApplyRequestTests {
 
     @Test
     void testInvalidVersionReturnsNull() {
-        var request = RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B);
+        var request =
+                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, inputParameterResolver);
         var activityDef = new org.hl7.fhir.r4.model.ActivityDefinition();
         assertNull(request.transformRequestParameters(activityDef));
     }

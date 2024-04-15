@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_DATA;
@@ -69,6 +70,7 @@ public class ApplyRequest implements ICpgRequest {
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         this.planDefinition = planDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -87,16 +89,14 @@ public class ApplyRequest implements ICpgRequest {
         fhirVersion = planDefinition.getStructureFhirVersionEnum();
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
-                : this.libraryEngine == null
-                        ? null
-                        : createResolver(
-                                libraryEngine.getRepository(),
-                                this.subjectId,
-                                this.encounterId,
-                                this.practitionerId,
-                                this.parameters,
-                                this.useServerData,
-                                this.bundle);
+                : createResolver(
+                        libraryEngine.getRepository(),
+                        this.subjectId,
+                        this.encounterId,
+                        this.practitionerId,
+                        this.parameters,
+                        this.useServerData,
+                        this.bundle);
         defaultLibraryUrl = resolveDefaultLibraryUrl();
         requestResources = new ArrayList<>();
         extractedResources = new ArrayList<>();

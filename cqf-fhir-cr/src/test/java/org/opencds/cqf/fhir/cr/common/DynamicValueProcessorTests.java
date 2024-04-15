@@ -32,7 +32,8 @@ public class DynamicValueProcessorTests {
 
     @Test
     void testUnsupportedFhirVersion() {
-        var request = RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B);
+        var request =
+                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, inputParameterResolver);
         assertNull(fixture.getDynamicValueExpression(request, null));
     }
 

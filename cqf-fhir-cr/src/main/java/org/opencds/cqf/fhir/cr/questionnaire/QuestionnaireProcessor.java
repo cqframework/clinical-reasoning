@@ -189,6 +189,7 @@ public class QuestionnaireProcessor {
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine) {
         return new PopulateRequest(
                 operationName,
@@ -196,6 +197,7 @@ public class QuestionnaireProcessor {
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
                 bundle,
+                useServerData,
                 libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
                 modelResolver);
     }
@@ -231,7 +233,12 @@ public class QuestionnaireProcessor {
             Repository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return prePopulate(
-                questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
+                questionnaire,
+                patientId,
+                parameters,
+                bundle,
+                useServerData,
+                new LibraryEngine(repository, evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
@@ -239,8 +246,10 @@ public class QuestionnaireProcessor {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine) {
-        return prePopulate(resolveQuestionnaire(questionnaire), patientId, parameters, bundle, libraryEngine);
+        return prePopulate(
+                resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
     }
 
     public <R extends IBaseResource> R prePopulate(
@@ -248,9 +257,10 @@ public class QuestionnaireProcessor {
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine) {
-        return prePopulate(
-                buildPopulateRequest("prepopulate", questionnaire, subjectId, parameters, bundle, libraryEngine));
+        return prePopulate(buildPopulateRequest(
+                "prepopulate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
     }
 
     @SuppressWarnings("unchecked")
@@ -289,7 +299,12 @@ public class QuestionnaireProcessor {
             Repository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return populate(
-                questionnaire, patientId, parameters, bundle, new LibraryEngine(repository, this.evaluationSettings));
+                questionnaire,
+                patientId,
+                parameters,
+                bundle,
+                useServerData,
+                new LibraryEngine(repository, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
@@ -297,8 +312,10 @@ public class QuestionnaireProcessor {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine) {
-        return populate(resolveQuestionnaire(questionnaire), patientId, parameters, bundle, libraryEngine);
+        return populate(
+                resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
     }
 
     public IBaseResource populate(
@@ -306,8 +323,10 @@ public class QuestionnaireProcessor {
             String subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine) {
-        return populate(buildPopulateRequest("populate", questionnaire, subjectId, parameters, bundle, libraryEngine));
+        return populate(buildPopulateRequest(
+                "populate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

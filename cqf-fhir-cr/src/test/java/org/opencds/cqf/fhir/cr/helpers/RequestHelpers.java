@@ -23,14 +23,6 @@ public class RequestHelpers {
     public static final String PROFILE_ID = "profileId";
     public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
-    // public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion) {
-    //     return new ApplyRequest(fhirVersion);
-    // }
-
-    public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion) {
-        return newPDApplyRequestForVersion(fhirVersion, null, null);
-    }
-
     public static ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IInputParameterResolver inputParameterResolver) {
         var fhirContext = FhirContext.forCached(fhirVersion);
@@ -144,10 +136,6 @@ public class RequestHelpers {
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 
-    public static PopulateRequest newPopulateRequestForVersion(FhirVersionEnum fhirVersion, String operationName) {
-        return new PopulateRequest(fhirVersion, operationName);
-    }
-
     public static PopulateRequest newPopulateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource questionnaire) {
         return newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire, "populate");
@@ -164,6 +152,7 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
+                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }

@@ -11,6 +11,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateRequest implements IQuestionnaireRequest {
@@ -23,6 +24,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+    private final Boolean useServerData;
+    private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
 
     // test constructor
@@ -32,10 +35,12 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.subjectId = null;
         this.parameters = null;
         this.bundle = null;
+        this.useServerData = true;
         this.libraryEngine = null;
         this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.fhirVersion = fhirVersion;
         this.defaultLibraryUrl = null;
+        inputParameterResolver = null;
     }
 
     public PopulateRequest(
@@ -44,6 +49,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            Boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         this.operationName = operationName;
@@ -51,10 +57,21 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.bundle = bundle;
+        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
+        inputParameterResolver = libraryEngine == null
+                ? null
+                : IInputParameterResolver.createResolver(
+                        libraryEngine.getRepository(),
+                        this.subjectId,
+                        null,
+                        null,
+                        this.parameters,
+                        this.useServerData,
+                        this.bundle);
     }
 
     @Override
@@ -79,7 +96,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @Override
     public IBaseParameters getParameters() {
-        return parameters;
+        return inputParameterResolver.getParameters();
     }
 
     @Override

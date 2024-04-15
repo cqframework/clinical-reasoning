@@ -164,6 +164,7 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
+                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }

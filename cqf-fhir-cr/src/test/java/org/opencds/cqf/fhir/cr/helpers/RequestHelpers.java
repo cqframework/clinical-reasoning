@@ -23,14 +23,6 @@ public class RequestHelpers {
     public static final String PROFILE_ID = "profileId";
     public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
-    // public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion) {
-    //     return new ApplyRequest(fhirVersion);
-    // }
-
-    public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion) {
-        return newPDApplyRequestForVersion(fhirVersion, null, null);
-    }
-
     public static ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IInputParameterResolver inputParameterResolver) {
         var fhirContext = FhirContext.forCached(fhirVersion);

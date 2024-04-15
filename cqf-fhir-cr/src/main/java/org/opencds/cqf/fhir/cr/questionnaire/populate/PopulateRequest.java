@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -36,6 +38,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
             Boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
@@ -46,16 +49,14 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.modelResolver = modelResolver;
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
-        inputParameterResolver = libraryEngine == null
-                ? null
-                : IInputParameterResolver.createResolver(
-                        libraryEngine.getRepository(),
-                        this.subjectId,
-                        null,
-                        null,
-                        this.parameters,
-                        this.useServerData,
-                        this.bundle);
+        inputParameterResolver = IInputParameterResolver.createResolver(
+                libraryEngine.getRepository(),
+                this.subjectId,
+                null,
+                null,
+                this.parameters,
+                this.useServerData,
+                this.bundle);
     }
 
     @Override

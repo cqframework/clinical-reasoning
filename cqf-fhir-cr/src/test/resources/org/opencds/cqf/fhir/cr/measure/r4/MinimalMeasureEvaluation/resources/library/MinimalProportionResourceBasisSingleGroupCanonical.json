@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "MinimalProportionResourceBasisSingleGroupCanonical",
+  "url": "http://example.com/Library/MinimalProportionResourceBasisSingleGroupCanonical",
+  "name": "MinimalProportionResourceBasisSingleGroup",
+  "version": "0.0.01",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/MinimalProportionResourceBasisSingleGroup.cql"
+  } ]
+}

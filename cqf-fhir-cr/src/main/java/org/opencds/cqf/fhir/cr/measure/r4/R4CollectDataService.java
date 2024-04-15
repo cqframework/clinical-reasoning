@@ -56,6 +56,9 @@ public class R4CollectDataService {
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
+        // if(subjectList.isEmpty() || subjectList == null){
+
+        // }
         // loop over subjects
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
@@ -64,7 +67,7 @@ public class R4CollectDataService {
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters);
             }
         } else {
-            addReports(processor, measureId, periodStart, periodEnd, null, parameters);
+            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters);
         }
         return parameters;
     }
@@ -88,9 +91,12 @@ public class R4CollectDataService {
 
         report.setType(MeasureReport.MeasureReportType.DATACOLLECTION);
         report.setGroup(null);
-
-        var subjectId = subjects.get(0).replace("Patient/", "");
-
+        String subjectId = null;
+        if (!subjects.isEmpty()) {
+            subjectId = subjects.get(0).replace("Patient/", "");
+        } else {
+            subjectId = "no-subjectId";
+        }
         parameters.addParameter(part("measureReport-" + subjectId, report));
         if (!report.getEvaluatedResource().isEmpty()) {
             populateEvaluatedResources(report, parameters, subjectId);

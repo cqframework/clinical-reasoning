@@ -69,4 +69,34 @@ public class CollectDataTest {
                 .hasMeasureReportCount(4)
                 .report();
     }
+
+    @Test
+    public void collectData_resourceBasisMeasure_practitioner() {
+        CollectData.Given given = CollectData.given().repositoryFor("MinimalMeasureEvaluation");
+        given.when()
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .practitioner("Practitioner/tester")
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
+                .collectData()
+                .then()
+                .hasParameterCount(2)
+                .hasMeasureReportCount(1)
+                .report();
+    }
+
+    @Test
+    public void collectData_resourceBasisMeasure_practitioner_noPatients() {
+        CollectData.Given given = CollectData.given().repositoryFor("MinimalMeasureEvaluation");
+        given.when()
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .practitioner("Practitioner/empty")
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
+                .collectData()
+                .then()
+                .hasParameterCount(1)
+                .hasMeasureReportCount(1)
+                .report();
+    }
 }

@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 
 public class DataRequirementsTest {
@@ -33,7 +36,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_resourceBasisMeasure_noMeasurementPeriod() {
+    public void dataRequirements_resourceBasisMeasure_noPeriod() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -69,6 +72,33 @@ public class DataRequirementsTest {
                 .then()
                 .hasDataRequirementCount(1)
                 .hasParameterDefCount(7)
+                .hasRelatedArtifactCount(0)
+                .report();
+    }
+
+    @Test
+    public void dataRequirements_booleanBasisMeasure_badLibraryUrl() {
+        DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
+        var when = given.when()
+                .measureId("MinimalCohortBooleanBasisSingleGroup_badLibraryUrl")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .DataRequirements();
+
+        assertThrows(ResourceNotFoundException.class, () -> when.then().report());
+    }
+
+    @Test
+    public void dataRequirements_booleanBasisMeasure_Canonical() {
+        DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
+        given.when()
+                .measureId("MinimalCohortBooleanBasisSingleGroupCanonical")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .DataRequirements()
+                .then()
+                .hasDataRequirementCount(1)
+                .hasParameterDefCount(1)
                 .hasRelatedArtifactCount(0)
                 .report();
     }

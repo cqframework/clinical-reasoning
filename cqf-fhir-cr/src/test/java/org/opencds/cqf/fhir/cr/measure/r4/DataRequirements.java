@@ -66,6 +66,22 @@ public class DataRequirements {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .setQueryBatchThreshold(1000);
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .setMaxCodesPerQuery(100);
+            this.evaluationOptions
+                    .getEvaluationSettings()
+                    .getCqlOptions()
+                    .getCqlEngineOptions()
+                    .setPageSize(50);
         }
 
         public Given repository(Repository repository) {

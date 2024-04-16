@@ -142,25 +142,12 @@ public class R4CareGapsService {
         } else {
             throw new NotImplementedOperationException("Only the subject parameter has been implemented.");
         }
-
-        if (practitioner != null) {
-            throw new NotImplementedOperationException("Practitioner parameter is not implemented.");
-        }
-        if (organization != null) {
-            throw new NotImplementedOperationException("Organization parameter is not implemented.");
-        }
-        if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
-            throw new NotImplementedOperationException("MeasureIdentifiers parameter is not implemented.");
-        }
-        if (programs != null && !programs.isEmpty()) {
-            throw new NotImplementedOperationException("Programs parameter is not implemented.");
-        }
-        if (topic != null && !topic.isEmpty()) {
-            throw new NotImplementedOperationException("Topic parameter is not implemented.");
-        }
-        if (statuses != null && statuses.isEmpty()) {
-            throw new RuntimeException("CareGap 'statuses' parameter is empty");
-        }
+        throwNotImplementIfPresent(practitioner, "practitioner");
+        throwNotImplementIfPresent(organization, "organization");
+        listThrowNotImplementIfPresent(measureIdentifiers, "measureIdentifier");
+        listThrowNotImplementIfPresent(programs, "program");
+        listThrowNotImplementIfPresent(topic, "topic");
+        listThrowNotImplementIfEmpty(statuses, "status");
 
         checkValidStatusCode(statuses);
 
@@ -178,6 +165,24 @@ public class R4CareGapsService {
             }
         });
         return result;
+    }
+
+    protected void throwNotImplementIfPresent(Object value, String parameterName) {
+        if (value != null) {
+            throw new NotImplementedOperationException(parameterName + " parameter not implemented");
+        }
+    }
+
+    protected void listThrowNotImplementIfPresent(List<String> value, String parameterName) {
+        if (value != null && !value.isEmpty()) {
+            throw new NotImplementedOperationException(parameterName + " parameter not implemented");
+        }
+    }
+
+    protected void listThrowNotImplementIfEmpty(List<String> value, String parameterName) {
+        if (value == null || value.isEmpty()) {
+            throw new IllegalArgumentException(parameterName + " parameter requires a value.");
+        }
     }
 
     protected void validateConfiguration() {
@@ -267,15 +272,15 @@ public class R4CareGapsService {
         List<Measure> measureList = new ArrayList<>();
 
         if (hasMeasureIds) {
-            for (int i = 0; i < measureIds.size(); i++) {
-                Measure measureById = resolveById(new IdType("Measure", measureIds.get(i)));
+            for (String measureId : measureIds) {
+                Measure measureById = resolveById(new IdType("Measure", measureId));
                 measureList.add(measureById);
             }
         }
 
         if (hasMeasureUrls) {
-            for (int i = 0; i < measureCanonicals.size(); i++) {
-                Measure measureByUrl = resolveByUrl(measureCanonicals.get(i));
+            for (CanonicalType measureCanonical : measureCanonicals) {
+                Measure measureByUrl = resolveByUrl(measureCanonical);
                 measureList.add(measureByUrl);
             }
         }
@@ -304,7 +309,7 @@ public class R4CareGapsService {
     }
 
     protected <T extends Resource> T addConfiguredResource(Class<T> resourceClass, String id, String key) {
-        T resource = null;
+        T resource;
         // read resource from repository
         resource = repository.read(resourceClass, new IdType(id));
         // add resource to configured resources
@@ -598,8 +603,7 @@ public class R4CareGapsService {
     }
 
     protected void checkValidStatusCode(List<String> statuses) {
-        for (int x = 0; x < statuses.size(); x++) {
-            var status = statuses.get(x);
+        for (String status : statuses) {
             if (!status.equals(CareGapsStatusCode.CLOSED_GAP.toString())
                     && !status.equals(CareGapsStatusCode.OPEN_GAP.toString())
                     && !status.equals(CareGapsStatusCode.NOT_APPLICABLE.toString())) {

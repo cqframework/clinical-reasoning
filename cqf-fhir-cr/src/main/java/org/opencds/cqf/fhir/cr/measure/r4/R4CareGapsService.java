@@ -147,13 +147,18 @@ public class R4CareGapsService {
         if (practitioner != null) {
             throw new NotImplementedOperationException("Practitioner parameter is not implemented.");
         }
+        if (organization != null) {
+            throw new NotImplementedOperationException("Organization parameter is not implemented.");
+        }
+        if (!measureIdentifiers.isEmpty()) {
+            throw new NotImplementedOperationException("MeasureIdentifiers parameter is not implemented.");
+        }
         if (!programs.isEmpty()) {
             throw new NotImplementedOperationException("Programs parameter is not implemented.");
         }
         if (!topic.isEmpty()) {
             throw new NotImplementedOperationException("Topic parameter is not implemented.");
         }
-
         if (statuses.isEmpty()) {
             throw new RuntimeException("CareGap 'statuses' parameter is empty");
         }

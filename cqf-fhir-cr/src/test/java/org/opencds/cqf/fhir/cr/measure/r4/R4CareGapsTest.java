@@ -356,6 +356,19 @@ class R4CareGapsTest {
     }
 
     @Test
+    void exm125_careGaps_error_notSupportedOrg() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .organization("Organization/error")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
     void exm125_careGaps_error_invalidPatient() {
         assertThrows(IllegalArgumentException.class, () -> {
             given.when()

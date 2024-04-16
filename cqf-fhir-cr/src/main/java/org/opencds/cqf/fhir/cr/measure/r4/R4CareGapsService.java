@@ -147,7 +147,7 @@ public class R4CareGapsService {
         listThrowNotImplementIfPresent(measureIdentifiers, "measureIdentifier");
         listThrowNotImplementIfPresent(programs, "program");
         listThrowNotImplementIfPresent(topic, "topic");
-        listThrowNotImplementIfEmpty(statuses, "status");
+        listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         checkValidStatusCode(statuses);
 
@@ -179,7 +179,7 @@ public class R4CareGapsService {
         }
     }
 
-    protected void listThrowNotImplementIfEmpty(List<String> value, String parameterName) {
+    protected void listThrowIllegalArgumentIfEmpty(List<String> value, String parameterName) {
         if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException(parameterName + " parameter requires a value.");
         }

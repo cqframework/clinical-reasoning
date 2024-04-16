@@ -1,6 +1,7 @@
 target
 test-output
 bin/
+htmlReport/
 
 .classpath
 .project

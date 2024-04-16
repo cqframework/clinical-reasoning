@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
@@ -143,6 +144,16 @@ public class R4CareGapsService {
                     Msg.code(2275) + "Only the subject parameter has been implemented.");
         }
 
+        if (practitioner != null) {
+            throw new NotImplementedOperationException("Practitioner parameter is not implemented.");
+        }
+        if (!programs.isEmpty()) {
+            throw new NotImplementedOperationException("Programs parameter is not implemented.");
+        }
+        if (!topic.isEmpty()) {
+            throw new NotImplementedOperationException("Topic parameter is not implemented.");
+        }
+
         if (statuses.isEmpty()) {
             throw new RuntimeException("CareGap 'statuses' parameter is empty");
         }
@@ -201,15 +212,16 @@ public class R4CareGapsService {
         } else if (subject.startsWith("Group/")) {
             return getPatientListFromGroup(subject);
         }
-
-        ourLog.info("Subject member was not a Patient or a Group, so skipping. \n{}", subject);
+        ourLog.warn("Subject member was not a Patient or a Group, so skipping. \n{}", subject);
         return Collections.emptyList();
     }
 
     protected List<Patient> getPatientListFromGroup(String subjectGroupId) {
         List<Patient> patientList = new ArrayList<>();
-        Group group = repository.read(Group.class, newId(subjectGroupId));
-        if (group == null) {
+        Group group;
+        try {
+            group = repository.read(Group.class, newId(subjectGroupId));
+        } catch (ResourceNotFoundException e) {
             throw new IllegalArgumentException(Msg.code(2276) + "Could not find Group: " + subjectGroupId);
         }
 
@@ -229,8 +241,10 @@ public class R4CareGapsService {
     }
 
     protected Patient validatePatientExists(String patientRef) {
-        Patient patient = repository.read(Patient.class, new IdType(patientRef));
-        if (patient == null) {
+        Patient patient;
+        try {
+            patient = repository.read(Patient.class, new IdType(patientRef));
+        } catch (ResourceNotFoundException e) {
             throw new IllegalArgumentException(Msg.code(2277) + "Could not find Patient: " + patientRef);
         }
 
@@ -577,10 +591,6 @@ public class R4CareGapsService {
 
     protected static String getFullUrl(String serverAddress, String fhirType, String elementId) {
         return String.format("%s%s/%s", serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
-    }
-
-    protected CareGapsProperties getCareGapsProperties() {
-        return careGapsProperties;
     }
 
     protected void checkValidStatusCode(List<String> statuses) {

@@ -10,7 +10,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.cr.measure.r4.MeasureProcessorEvaluateTest;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
@@ -46,7 +45,7 @@ public class MeasuresAdditionalData {
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()
                 .parseResource(
-                        MeasureProcessorEvaluateTest.class.getResourceAsStream("CaseRepresentation101/generated.json"));
+                       this.getClass().getResourceAsStream("CaseRepresentation101/generated.json"));
 
         this.when = Measure.given()
                 .repositoryFor("CaseRepresentation101")

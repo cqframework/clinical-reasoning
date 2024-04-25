@@ -7,9 +7,9 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
 
-public class CanonicalsTest {
+class CanonicalsTest {
     @Test
-    public void fullCanonicalUrl() {
+    void fullCanonicalUrl() {
         String testUrl = "http://fhir.acme.com/Questionnaire/example|1.0#vs1";
 
         assertEquals("http://fhir.acme.com/Questionnaire/example", Canonicals.getUrl(testUrl));
@@ -19,7 +19,7 @@ public class CanonicalsTest {
     }
 
     @Test
-    public void fullCanonicalUrlWithoutHash() {
+    void fullCanonicalUrlWithoutHash() {
         String testUrl = "http://fhir.acme.com/Questionnaire/example|1.0";
 
         assertEquals("http://fhir.acme.com/Questionnaire/example", Canonicals.getUrl(testUrl));
@@ -28,7 +28,7 @@ public class CanonicalsTest {
     }
 
     @Test
-    public void partialCanonicalUrl() {
+    void partialCanonicalUrl() {
         String testUrl = "http://fhir.acme.com/Questionnaire/example";
 
         assertEquals("http://fhir.acme.com/Questionnaire/example", Canonicals.getUrl(testUrl));
@@ -38,7 +38,7 @@ public class CanonicalsTest {
     }
 
     @Test
-    public void fullCanonicalType() {
+    void fullCanonicalType() {
         CanonicalType testUrl = new CanonicalType("http://fhir.acme.com/Questionnaire/example|1.0#vs1");
 
         assertEquals("http://fhir.acme.com/Questionnaire/example", Canonicals.getUrl(testUrl));
@@ -48,7 +48,7 @@ public class CanonicalsTest {
     }
 
     @Test
-    public void partialCanonicalType() {
+    void partialCanonicalType() {
         CanonicalType testUrl = new CanonicalType("http://fhir.acme.com/Questionnaire/example");
 
         assertEquals("http://fhir.acme.com/Questionnaire/example", Canonicals.getUrl(testUrl));
@@ -59,7 +59,7 @@ public class CanonicalsTest {
     }
 
     @Test
-    public void canonicalParts() {
+    void canonicalParts() {
         CanonicalType testUrl = new CanonicalType("http://fhir.acme.com/Questionnaire/example|1.0#vs1");
 
         CanonicalParts parts = Canonicals.getParts(testUrl);

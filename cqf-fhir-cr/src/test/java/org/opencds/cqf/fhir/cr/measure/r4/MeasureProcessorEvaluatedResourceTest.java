@@ -6,12 +6,12 @@ import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasureProcessorEvaluatedResourceTest {
+class MeasureProcessorEvaluatedResourceTest {
 
     protected static Given given = Measure.given().repositoryFor("ContentBundleUpdated");
 
     @Test
-    public void measure_eval_contained_is_unique() {
+    void measure_eval_contained_is_unique() {
         var report = given.when()
                 .measureId("HTN1Measure")
                 .periodStart("2020-08-16")

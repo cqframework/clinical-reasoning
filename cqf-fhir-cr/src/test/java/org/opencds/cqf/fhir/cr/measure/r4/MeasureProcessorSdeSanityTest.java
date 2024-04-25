@@ -7,12 +7,12 @@ import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasureProcessorSdeSanityTest {
+class MeasureProcessorSdeSanityTest {
 
     protected static Given given = Measure.given().repositoryFor("DM1Measure");
 
     @Test
-    public void measure_eval_unique_extension_list() {
+    void measure_eval_unique_extension_list() {
         given.when()
                 .measureId("DM1Measure")
                 .periodStart("2020-01-01")
@@ -30,7 +30,7 @@ public class MeasureProcessorSdeSanityTest {
     }
 
     @Test
-    public void measure_eval_without_measure_period() {
+    void measure_eval_without_measure_period() {
         var report = given.when()
                 .measureId("DM1Measure")
                 .subject("Patient/DM1-patient-1")

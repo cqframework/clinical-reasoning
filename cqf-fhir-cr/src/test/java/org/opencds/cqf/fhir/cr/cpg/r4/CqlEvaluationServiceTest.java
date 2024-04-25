@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
-public class CqlEvaluationServiceTest {
+class CqlEvaluationServiceTest {
     @Test
     void libraryEvaluationService_inlineAsthma() {
         var content = "library AsthmaTest version '1.0.0'\n" + "\n"

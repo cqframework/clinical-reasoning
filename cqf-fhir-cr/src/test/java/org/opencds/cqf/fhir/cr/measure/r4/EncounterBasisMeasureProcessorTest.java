@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class EncounterBasisMeasureProcessorTest {
+class EncounterBasisMeasureProcessorTest {
     protected static Given given = Measure.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
 
     @Test
-    public void exm104_singlePatient() {
+    void exm104_singlePatient() {
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
                 .periodStart("2019-01-01")

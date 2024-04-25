@@ -7,12 +7,12 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class SimpleMeasureProcessorTest {
+class SimpleMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("EXM108");
 
     @Test
-    public void exm108_partialSubjectId() {
+    void exm108_partialSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
                 .periodStart("2018-12-31")
@@ -45,7 +45,7 @@ public class SimpleMeasureProcessorTest {
     }
 
     @Test
-    public void exm108_fullSubjectId() {
+    void exm108_fullSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
                 .periodStart("2018-12-31")
@@ -80,7 +80,7 @@ public class SimpleMeasureProcessorTest {
     }
 
     @Test
-    public void exm108_population() {
+    void exm108_population() {
         // This bundle has two patients, a numerator and denominator
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -103,11 +103,11 @@ public class SimpleMeasureProcessorTest {
                 .up()
                 .report();
 
-        assertEquals(report.getType(), MeasureReportType.SUMMARY);
+        assertEquals(MeasureReportType.SUMMARY, report.getType());
     }
 
     @Test
-    public void exm108_noReportType_noSubject_runsPopulation() {
+    void exm108_noReportType_noSubject_runsPopulation() {
         // This default behavior if no type or subject is specified is "population"
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -129,11 +129,11 @@ public class SimpleMeasureProcessorTest {
                 .up()
                 .report();
 
-        assertEquals(report.getType(), MeasureReportType.SUMMARY);
+        assertEquals(MeasureReportType.SUMMARY, report.getType());
     }
 
     @Test
-    public void exm108_noType_hasSubject_runsIndividual() {
+    void exm108_noType_hasSubject_runsIndividual() {
         // This default behavior if no type is specified is "individual"
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -153,11 +153,11 @@ public class SimpleMeasureProcessorTest {
                 .up()
                 .report();
 
-        assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
+        assertEquals(MeasureReportType.INDIVIDUAL, report.getType());
     }
 
     @Test
-    public void exm108_singlePatient_hasMetadata() {
+    void exm108_singlePatient_hasMetadata() {
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
                 .periodStart("2018-12-31")
@@ -168,9 +168,9 @@ public class SimpleMeasureProcessorTest {
                 .then()
                 .report();
 
-        assertEquals(report.getType(), MeasureReportType.INDIVIDUAL);
-        assertEquals(report.getMeasure(), "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108|8.3.000");
-        assertEquals(report.getSubject().getReference(), "Patient/numer-EXM108");
+        assertEquals(MeasureReportType.INDIVIDUAL, report.getType());
+        assertEquals("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108|8.3.000", report.getMeasure());
+        assertEquals("Patient/numer-EXM108", report.getSubject().getReference());
 
         // TODO: The MeasureProcessor assumes local timezone if none is specified.
         // Need to make the test smart enough to handle that.

@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessActionTests {
+class ProcessActionTests {
     @Mock
     Repository repository;
 
@@ -51,7 +51,7 @@ public class ProcessActionTests {
     }
 
     @Test
-    void testDstu3Request() {
+    void dstu3Request() {
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
         var action = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent();
@@ -60,7 +60,7 @@ public class ProcessActionTests {
     }
 
     @Test
-    void testR4Request() {
+    void r4Request() {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
@@ -69,7 +69,7 @@ public class ProcessActionTests {
     }
 
     @Test
-    void testR5Request() {
+    void r5Request() {
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
         var action = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent();

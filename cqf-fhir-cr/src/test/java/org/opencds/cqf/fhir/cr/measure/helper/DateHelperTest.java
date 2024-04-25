@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 // TODO: These tests are only partially complete. We need to actually verify that resolved dates are
 // correct.
-public class DateHelperTest {
+class DateHelperTest {
 
     @Test
-    public void testResolveRequestDateWithTime() throws Exception {
+    void resolveRequestDateWithTime() throws Exception {
         String date = "2019-01-17T12:30:00";
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
@@ -21,7 +21,7 @@ public class DateHelperTest {
     }
 
     @Test
-    public void testResolveRequestDateOffset() throws Exception {
+    void resolveRequestDateOffset() throws Exception {
         String date = "2019-01-01T22:00:00.0-06:00";
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
@@ -32,7 +32,7 @@ public class DateHelperTest {
     }
 
     @Test
-    public void testResolveRequestDateWithZOffset() throws Exception {
+    void resolveRequestDateWithZOffset() throws Exception {
         String date = "2017-01-01T00:00:00.000Z";
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
@@ -43,7 +43,7 @@ public class DateHelperTest {
     }
 
     @Test
-    public void testResolveRequestOnlyDate() throws Exception {
+    void resolveRequestOnlyDate() throws Exception {
         String date = "2017-01-01";
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);
@@ -53,7 +53,7 @@ public class DateHelperTest {
     }
 
     @Test
-    public void testResolveRequestOnlyYear() throws Exception {
+    void resolveRequestOnlyYear() throws Exception {
         String date = "2017";
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertTrue(resolvedDateStart != null);

@@ -27,7 +27,7 @@ import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @ExtendWith(MockitoExtension.class)
-public class ItemGeneratorTests {
+class ItemGeneratorTests {
     private final String ROUTE_ONE_PATIENT = "OPA-Patient1";
     private final String ROUTE_ONE_PATIENT_PROFILE =
             "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient";
@@ -81,7 +81,7 @@ public class ItemGeneratorTests {
     /* Tests using TestItemGenerator class */
 
     @Test
-    void testGenerateItemDstu3() {
+    void generateItemDstu3() {
         given().repositoryFor(fhirContextDstu3, "dstu3")
                 .when()
                 .subjectId(ROUTE_ONE_PATIENT)
@@ -92,7 +92,7 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testGenerateItemR4() {
+    void generateItemR4() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .subjectId(ROUTE_ONE_PATIENT)
@@ -103,7 +103,7 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testGenerateItemR5() {
+    void generateItemR5() {
         given().repositoryFor(fhirContextR5, "r5")
                 .when()
                 .subjectId(ROUTE_ONE_PATIENT)
@@ -114,7 +114,7 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testSleepStudyOrderR4() {
+    void sleepStudyOrderR4() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .profileUrl(new CanonicalType(SLEEP_STUDY_PROFILE))
@@ -125,7 +125,7 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testSleepStudyOrderR5() {
+    void sleepStudyOrderR5() {
         given().repositoryFor(fhirContextR5, "r5/pa-aslp")
                 .when()
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(SLEEP_STUDY_PROFILE))
@@ -136,12 +136,12 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testGenerateQuestionnaire() {
+    void generateQuestionnaire() {
         given().repositoryFor(fhirContextR4, "r4").when().id("test").then().hasId("test");
     }
 
     @Test
-    void testGenerateItemForElementWithChildren() {
+    void generateItemForElementWithChildren() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition"))
@@ -151,7 +151,7 @@ public class ItemGeneratorTests {
     }
 
     @Test
-    void testGenerateHiddenItem() {
+    void generateHiddenItem() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition2"))

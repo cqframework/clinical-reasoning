@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class ClientsTest {
     @Test
-    void testCreateClient() {
+    void createClient() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
 
         assertNotNull(client);
@@ -24,7 +24,7 @@ class ClientsTest {
     }
 
     @Test
-    void testRegisterAuth() {
+    void registerAuth() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         Clients.registerBasicAuth(client, "user", "password");
 
@@ -35,7 +35,7 @@ class ClientsTest {
     }
 
     @Test
-    void testRegisterHeaders() {
+    void registerHeaders() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         Clients.registerHeaders(client, "Basic: XYZ123");
 
@@ -46,7 +46,7 @@ class ClientsTest {
     }
 
     @Test
-    void testRejectInvalidHeaders() {
+    void rejectInvalidHeaders() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
         assertThrows(IllegalArgumentException.class, () -> {
             Clients.registerHeaders(client, "BasicXYZ123");
@@ -54,7 +54,7 @@ class ClientsTest {
     }
 
     @Test
-    void testClientForEndpoint() {
+    void clientForEndpoint() {
         Endpoint endpoint = new Endpoint();
         endpoint.setAddress("http://test.com");
 

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,13 +39,13 @@ import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactApproveVisitor;
 
-public class KnowledgeArtifactApproveVisitorTest {
+class KnowledgeArtifactApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         var lib = (Library) jsonParser.parseResource(
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
@@ -142,7 +143,7 @@ public class KnowledgeArtifactApproveVisitorTest {
                 .copy();
         assertNotNull(approvedLibrary);
         // Ensure Approval Date matches input parameter
-        assertTrue(approvedLibrary.getApprovalDateElement().asStringValue().equals(approvalDate.asStringValue()));
+        assertEquals(approvedLibrary.getApprovalDateElement().asStringValue(), approvalDate.asStringValue());
         // Ensure that approval date is NOT before Library.date (see $release)
         assertFalse(approvedLibrary.getApprovalDate().before(approvedLibrary.getDate()));
         // ArtifactAssessment is saved as type Basic, update when we change to OperationOutcome

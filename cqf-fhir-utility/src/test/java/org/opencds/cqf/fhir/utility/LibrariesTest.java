@@ -9,12 +9,12 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.Test;
 
-public class LibrariesTest {
+class LibrariesTest {
 
     private final byte[] testData = "test-data".getBytes();
 
     @Test
-    public void libraryNoContentReturnsNull() {
+    void libraryNoContentReturnsNull() {
         Library library = new Library();
 
         var content = Libraries.getContent(library, "text/cql");
@@ -23,7 +23,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void libraryWithContentReturnsContent() {
+    void libraryWithContentReturnsContent() {
         Library library = new Library();
         library.addContent().setContentType("text/cql").setData(testData);
 
@@ -33,7 +33,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void libraryMismatchedContentReturnsNull() {
+    void libraryMismatchedContentReturnsNull() {
         Library library = new Library();
         library.addContent().setContentType("text/cql").setData("test-data".getBytes());
 
@@ -43,7 +43,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void libraryDstu3WithContentReturnsContent() {
+    void libraryDstu3WithContentReturnsContent() {
         org.hl7.fhir.dstu3.model.Library library = new org.hl7.fhir.dstu3.model.Library();
         library.addContent().setContentType("text/cql").setData(testData);
 
@@ -53,7 +53,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void notALibraryThrowsException() {
+    void notALibraryThrowsException() {
         Measure m = new Measure();
         assertThrows(IllegalArgumentException.class, () -> {
             Libraries.getContent(m, "text/cql");
@@ -61,7 +61,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void libraryWithVersionReturnsVersion() {
+    void libraryWithVersionReturnsVersion() {
         Library library = new Library().setVersion("1.0.0");
 
         String version = Libraries.getVersion(library);
@@ -70,7 +70,7 @@ public class LibrariesTest {
     }
 
     @Test
-    public void libraryNoVersionReturnsNull() {
+    void libraryNoVersionReturnsNull() {
         Library library = new Library();
 
         String version = Libraries.getVersion(library);

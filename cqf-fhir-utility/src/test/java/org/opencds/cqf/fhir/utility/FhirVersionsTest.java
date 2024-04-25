@@ -6,17 +6,17 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Library;
 import org.junit.jupiter.api.Test;
 
-public class FhirVersionsTest {
+class FhirVersionsTest {
 
     @Test
-    public void testGetFhirVersion() {
+    void getFhirVersion() {
         FhirVersionEnum fhirVersion = FhirVersions.forClass(Library.class);
 
         assertEquals(FhirVersionEnum.DSTU3, fhirVersion);
     }
 
     @Test
-    public void testGetFhirVersionUnknownClass() {
+    void getFhirVersionUnknownClass() {
         Library library = new Library();
         FhirVersionEnum fhirVersion = FhirVersions.forClass(library.getClass());
 

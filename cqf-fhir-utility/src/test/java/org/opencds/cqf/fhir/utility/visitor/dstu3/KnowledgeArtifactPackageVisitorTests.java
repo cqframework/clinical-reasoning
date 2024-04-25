@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,13 +40,13 @@ import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
 
-public class KnowledgeArtifactPackageVisitorTests {
+class KnowledgeArtifactPackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private Repository spyRepository;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         doAnswer(new Answer<Bundle>() {
                     @Override
@@ -72,7 +73,7 @@ public class KnowledgeArtifactPackageVisitorTests {
 
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
         assertNotNull(packagedBundle);
-        assertTrue(packagedBundle.getEntry().size() == loadedBundle.getEntry().size());
+        assertEquals(packagedBundle.getEntry().size(), loadedBundle.getEntry().size());
     }
 
     @Test
@@ -134,9 +135,9 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .map(entry -> (MetadataResource) entry.getResource())
                 .filter(resource -> resource.getUrl().contains("to-add-missing-version"))
                 .collect(Collectors.toList());
-        assertTrue(updatedResources.size() == 2);
+        assertEquals(2, updatedResources.size());
         for (MetadataResource updatedResource : updatedResources) {
-            assertTrue(updatedResource.getVersion().equals(versionToUpdateTo));
+            assertEquals(updatedResource.getVersion(), versionToUpdateTo);
         }
         params = parameters(part(
                 "checkArtifactVersion", new UriType("http://to-check-version/Library/SpecificationLibrary|1.3.1")));
@@ -157,7 +158,7 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .filter(resource -> resource.getUrl().contains("to-check-version"))
                 .findFirst();
         assertTrue(checkedVersionResource.isPresent());
-        assertTrue(checkedVersionResource.get().getVersion().equals(correctCheckVersion));
+        assertEquals(checkedVersionResource.get().getVersion(), correctCheckVersion);
         String versionToForceTo = "1.1.9.23";
         params = parameters(
                 part("forceArtifactVersion", new UriType("http://to-force-version/Library/rctc|" + versionToForceTo)));
@@ -167,7 +168,7 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .filter(resource -> resource.getUrl().contains("to-force-version"))
                 .findFirst();
         assertTrue(forcedVersionResource.isPresent());
-        assertTrue(forcedVersionResource.get().getVersion().equals(versionToForceTo));
+        assertEquals(forcedVersionResource.get().getVersion(), versionToForceTo);
     }
 
     @Test
@@ -183,29 +184,29 @@ public class KnowledgeArtifactPackageVisitorTests {
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, countZeroParams);
         // when count = 0 only show the total
-        assertTrue(countZeroBundle.getEntry().size() == 0);
-        assertTrue(countZeroBundle.getTotal() == 6);
+        assertEquals(0, countZeroBundle.getEntry().size());
+        assertEquals(6, countZeroBundle.getTotal());
         Parameters count2Params = parameters(part("count", new IntegerType(2)));
         Bundle count2Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, count2Params);
-        assertTrue(count2Bundle.getEntry().size() == 2);
+        assertEquals(2, count2Bundle.getEntry().size());
         Parameters count2Offset2Params =
                 parameters(part("count", new IntegerType(2)), part("offset", new IntegerType(2)));
         Bundle count2Offset2Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, count2Offset2Params);
-        assertTrue(count2Offset2Bundle.getEntry().size() == 2);
+        assertEquals(2, count2Offset2Bundle.getEntry().size());
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offset4Params);
-        assertTrue(offset4Bundle.getEntry().size() == (countZeroBundle.getTotal() - 4));
+        assertEquals(offset4Bundle.getEntry().size(), (countZeroBundle.getTotal() - 4));
         assertTrue(offset4Bundle.getType() == BundleType.COLLECTION);
-        assertTrue(offset4Bundle.hasTotal() == false);
+        assertFalse(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offsetMaxParams);
-        assertTrue(offsetMaxBundle.getEntry().size() == 0);
+        assertEquals(0, offsetMaxBundle.getEntry().size());
         Parameters offsetMaxRandomCountParams = parameters(
                 part("offset", new IntegerType(countZeroBundle.getTotal())),
                 part("count", new IntegerType(ThreadLocalRandom.current().nextInt(3, 20))));
         Bundle offsetMaxRandomCountBundle =
                 (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offsetMaxRandomCountParams);
-        assertTrue(offsetMaxRandomCountBundle.getEntry().size() == 0);
+        assertEquals(0, offsetMaxRandomCountBundle.getEntry().size());
     }
 
     @Test
@@ -263,7 +264,7 @@ public class KnowledgeArtifactPackageVisitorTests {
             String ifNoneExist = component.getRequest().getIfNoneExist();
             String url = ((MetadataResource) component.getResource()).getUrl();
             String version = ((MetadataResource) component.getResource()).getVersion();
-            assertTrue(ifNoneExist.equals("url=" + url + "&version=" + version));
+            assertEquals(ifNoneExist, "url=" + url + "&version=" + version);
         }
     }
 

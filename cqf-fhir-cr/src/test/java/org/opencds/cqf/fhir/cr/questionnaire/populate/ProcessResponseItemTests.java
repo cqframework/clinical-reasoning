@@ -30,7 +30,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessResponseItemTests {
+class ProcessResponseItemTests {
     @Mock
     private Repository repository;
 

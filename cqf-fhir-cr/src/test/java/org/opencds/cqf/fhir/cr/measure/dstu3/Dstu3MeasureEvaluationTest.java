@@ -57,14 +57,14 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 
-public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
+class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     public String getFhirVersion() {
         return "3.0.0";
     }
 
     @Test
-    public void testCohortMeasureEvaluation() throws Exception {
+    void cohortMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -93,7 +93,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testProportionMeasureEvaluation() throws Exception {
+    void proportionMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -124,7 +124,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testContinuosVariableMeasureEvaluation() throws Exception {
+    void continuosVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -154,7 +154,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testStratifiedMeasureEvaluation() throws Exception {
+    void stratifiedMeasureEvaluation() throws Exception {
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
         when(retrieveProvider.retrieve(
                         isNull(),
@@ -252,7 +252,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         String listRef = report.getEvaluatedResources().getReference();
 
         // The Observation for the SDE and the list of references
-        assertEquals(report.getContained().size(), 2);
+        assertEquals(2, report.getContained().size());
         Map<String, Resource> contained = report.getContained().stream()
                 .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
 
@@ -260,13 +260,13 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         assertEquals(list.getIdElement().getIdPart(), listRef);
 
         Observation obs = (Observation) contained.get("Observation");
-        assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
+        assertEquals(OMB_CATEGORY_RACE_BLACK, obs.getValueCodeableConcept().getCodingFirstRep().getCode());
     }
 
     private void checkStratification(MeasureReport report) {
         MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
-        assertEquals(mrgsc.getId(), "patient-gender");
-        assertEquals(mrgsc.getStratum().size(), 2);
+        assertEquals("patient-gender", mrgsc.getId());
+        assertEquals(2, mrgsc.getStratum().size());
 
         StratifierGroupComponent sgc = mrgsc.getStratum().stream()
                 .filter(x -> x.hasValue() && x.getValue().equals("male"))
@@ -280,7 +280,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .findFirst()
                 .get();
 
-        assertEquals(sgpc.getCount(), 1);
+        assertEquals(1, sgpc.getCount());
 
         sgc = mrgsc.getStratum().stream()
                 .filter(x -> x.hasValue() && x.getValue().equals("female"))
@@ -294,7 +294,7 @@ public class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .findFirst()
                 .get();
 
-        assertEquals(sgpc.getCount(), 1);
+        assertEquals(1, sgpc.getCount());
     }
 
     private Measure cohort_measure() {

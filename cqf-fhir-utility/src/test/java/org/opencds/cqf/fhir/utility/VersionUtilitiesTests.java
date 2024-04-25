@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.Test;
 
-public class VersionUtilitiesTests {
+class VersionUtilitiesTests {
 
     @Test
-    public void TestDstu3Versions() {
+    void TestDstu3Versions() {
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("dstu3"));
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("DSTU3"));
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("3"));
@@ -18,7 +18,7 @@ public class VersionUtilitiesTests {
     }
 
     @Test
-    public void TestR4Versions() {
+    void TestR4Versions() {
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("r4"));
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("R4"));
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("4"));
@@ -27,7 +27,7 @@ public class VersionUtilitiesTests {
     }
 
     @Test
-    public void TestR5Versions() {
+    void TestR5Versions() {
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("r5"));
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("R5"));
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5"));
@@ -36,21 +36,21 @@ public class VersionUtilitiesTests {
     }
 
     @Test
-    public void TestNull() {
+    void TestNull() {
         assertThrows(IllegalArgumentException.class, () -> {
             VersionUtilities.enumForVersion(null);
         });
     }
 
     @Test
-    public void TestMalformed() {
+    void TestMalformed() {
         assertThrows(IllegalArgumentException.class, () -> {
             VersionUtilities.enumForVersion("bubba");
         });
     }
 
     @Test
-    public void TestUnsupported() {
+    void TestUnsupported() {
         assertThrows(IllegalArgumentException.class, () -> {
             VersionUtilities.enumForVersion("R6");
         });

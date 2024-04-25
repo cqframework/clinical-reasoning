@@ -64,7 +64,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testCohortMeasureEvaluation() throws Exception {
+    void cohortMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -92,7 +92,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testSDEInMeasureEvaluation() throws Exception {
+    void sdeInMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -120,7 +120,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testProportionMeasureEvaluation() throws Exception {
+    void proportionMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -151,7 +151,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testProportionMeasureEvaluationWithDate() throws Exception {
+    void proportionMeasureEvaluationWithDate() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -181,7 +181,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testContinuousVariableMeasureEvaluation() throws Exception {
+    void continuousVariableMeasureEvaluation() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -211,7 +211,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testStratifiedMeasureEvaluation() throws Exception {
+    void stratifiedMeasureEvaluation() throws Exception {
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
         when(retrieveProvider.retrieve(
                         isNull(),
@@ -269,7 +269,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     @Test
-    public void testEvaluatePopulationCriteriaNullResult() throws Exception {
+    void evaluatePopulationCriteriaNullResult() throws Exception {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -306,8 +306,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private void checkStratification(MeasureReport report) {
         MeasureReportGroupStratifierComponent mrgsc = report.getGroupFirstRep().getStratifierFirstRep();
-        assertEquals(mrgsc.getId(), "patient-gender");
-        assertEquals(mrgsc.getStratum().size(), 2);
+        assertEquals("patient-gender", mrgsc.getId());
+        assertEquals(2, mrgsc.getStratum().size());
 
         StratifierGroupComponent sgc = mrgsc.getStratum().stream()
                 .filter(x -> x.hasValue() && x.getValue().getText().equals("male"))
@@ -321,7 +321,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .findFirst()
                 .get();
 
-        assertEquals(sgpc.getCount(), 1);
+        assertEquals(1, sgpc.getCount());
 
         sgc = mrgsc.getStratum().stream()
                 .filter(x -> x.hasValue() && x.getValue().getText().equals("female"))
@@ -335,7 +335,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .findFirst()
                 .get();
 
-        assertEquals(sgpc.getCount(), 1);
+        assertEquals(1, sgpc.getCount());
     }
 
     private MeasureReport runTest(
@@ -378,11 +378,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Map<String, Resource> contained = report.getContained().stream()
                 .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
 
-        assertEquals(contained.size(), 1);
+        assertEquals(1, contained.size());
 
         Observation obs = (Observation) contained.get("Observation");
         assertNotNull(obs);
-        assertEquals(obs.getValueCodeableConcept().getCodingFirstRep().getCode(), OMB_CATEGORY_RACE_BLACK);
+        assertEquals(OMB_CATEGORY_RACE_BLACK, obs.getValueCodeableConcept().getCodingFirstRep().getCode());
 
         Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream()
                 .filter(x -> x.getReference().contains(obs.getId()))

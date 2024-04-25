@@ -20,7 +20,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 class LibraryEngineTests {
 
     @Test
-    void testFhirPath() {
+    void fhirPath() {
         var patientId = "Patient/Patient1";
         var repository =
                 new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
@@ -46,7 +46,7 @@ class LibraryEngineTests {
     }
 
     @Test
-    void testFhirPathWithResource() {
+    void fhirPathWithResource() {
         var patientId = "Patient/Patient1";
         var repository =
                 new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));

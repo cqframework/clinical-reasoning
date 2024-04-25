@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessRequestTests {
+class ProcessRequestTests {
     @Mock
     Repository repository;
 
@@ -41,7 +41,7 @@ public class ProcessRequestTests {
     }
 
     @Test
-    void testDstu3Request() {
+    void dstu3Request() {
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
@@ -52,7 +52,7 @@ public class ProcessRequestTests {
     }
 
     @Test
-    void testR4Request() {
+    void r4Request() {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
@@ -63,7 +63,7 @@ public class ProcessRequestTests {
     }
 
     @Test
-    void testR5Request() {
+    void r5Request() {
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
         var requestOrchestration = fixture.generateRequestOrchestration(request);

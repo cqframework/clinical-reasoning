@@ -32,13 +32,13 @@ class R4RepositoryTest {
     }
 
     @Test
-    void testRead() {
+    void read() {
         IBaseResource res = repository.read(Patient.class, new IdType("Patient/example"), null);
         assertEquals("example", res.getIdElement().getIdPart());
     }
 
     @Test
-    void testReadLibrary() throws IOException {
+    void readLibrary() throws IOException {
         Library res = repository.read(Library.class, new IdType("Library/dependency-example"), null);
         assertEquals("dependency-example", res.getIdElement().getIdPart());
         assertTrue(IOUtils.toString(
@@ -58,7 +58,7 @@ class R4RepositoryTest {
      */
 
     @Test
-    void testSearch() {
+    void search() {
         IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, null, null);
         assertEquals(6, ((Bundle) bundle).getEntry().size());
     }

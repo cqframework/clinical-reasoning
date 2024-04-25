@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,32 +34,29 @@ import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentDisp
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatus;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory;
 
-public class ArtifactAssessmentTest {
+class ArtifactAssessmentTest {
     @Test
-    void test_constructors() {
+    void constructors() {
         var referenceString = "Library/123";
         ArtifactAssessment artifactAssessment = new ArtifactAssessment(new Reference(referenceString));
-        assertTrue(((Reference) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                        .getValue())
-                .getReference()
-                .equals(referenceString));
+        assertEquals(((Reference) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                .getValue())
+                .getReference(), referenceString);
         artifactAssessment = new ArtifactAssessment(new UriType(referenceString));
-        assertTrue(((UriType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                        .getValue())
-                .getValue()
-                .equals(referenceString));
+        assertEquals(((UriType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                .getValue())
+                .getValue(), referenceString);
         artifactAssessment = new ArtifactAssessment(new CanonicalType(referenceString));
-        assertTrue(((CanonicalType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                        .getValue())
-                .getValue()
-                .equals(referenceString));
+        assertEquals(((CanonicalType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                .getValue())
+                .getValue(), referenceString);
     }
 
     @Test
-    void test_code() {
+    void code() {
 
         var infoTypeSystem = "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
         var infoTypeCodes = List.of("comment", "classifier", "rating", "container", "response", "change-request");
@@ -74,13 +72,12 @@ public class ArtifactAssessmentTest {
         for (var i = 0; i < infoTypesList.size(); i++) {
             var infoType = infoTypesList.get(i);
             if (infoType != ArtifactAssessmentContentInformationType.NULL) {
-                assertTrue(infoType.getSystem().equals(infoTypeSystem));
-                assertTrue(infoType.toCode().equals(infoTypeCodes.get(i)));
-                assertTrue(infoType.getDefinition().equals(infoTypeDefinitions.get(i)));
-                assertTrue(infoType.getDisplay().equals(infoTypeDisplays.get(i)));
-                assertTrue(new ArtifactAssessmentContentInformationTypeEnumFactory()
-                        .toCode(infoType)
-                        .equals(infoTypeCodes.get(i)));
+                assertEquals(infoType.getSystem(), infoTypeSystem);
+                assertEquals(infoType.toCode(), infoTypeCodes.get(i));
+                assertEquals(infoType.getDefinition(), infoTypeDefinitions.get(i));
+                assertEquals(infoType.getDisplay(), infoTypeDisplays.get(i));
+                assertEquals(new ArtifactAssessmentContentInformationTypeEnumFactory()
+                        .toCode(infoType), infoTypeCodes.get(i));
             }
         }
         infoTypeCodes.forEach(code -> {
@@ -92,7 +89,7 @@ public class ArtifactAssessmentTest {
             } catch (FHIRException e) {
                 invalidCodeException = e.getMessage();
             }
-            assertTrue(invalidCodeException.equals(""));
+            assertEquals("", invalidCodeException);
         });
         var contentClassifierCodes = List.of(
                 "high",
@@ -150,13 +147,12 @@ public class ArtifactAssessmentTest {
         for (var i = 0; i < contentClassifiersList.size(); i++) {
             var classifier = contentClassifiersList.get(i);
             if (classifier != ArtifactAssessmentContentClassifier.NULL) {
-                assertTrue(classifier.getSystem().equals(contentClassifierSystem));
-                assertTrue(classifier.toCode().equals(contentClassifierCodes.get(i)));
-                assertTrue(classifier.getDefinition().equals(contentClassifierDefinitions.get(i)));
-                assertTrue(classifier.getDisplay().equals(contentClassifierDisplays.get(i)));
-                assertTrue(new ArtifactAssessmentContentClassifierEnumFactory()
-                        .toCode(classifier)
-                        .equals(contentClassifierCodes.get(i)));
+                assertEquals(classifier.getSystem(), contentClassifierSystem);
+                assertEquals(classifier.toCode(), contentClassifierCodes.get(i));
+                assertEquals(classifier.getDefinition(), contentClassifierDefinitions.get(i));
+                assertEquals(classifier.getDisplay(), contentClassifierDisplays.get(i));
+                assertEquals(new ArtifactAssessmentContentClassifierEnumFactory()
+                        .toCode(classifier), contentClassifierCodes.get(i));
             }
         }
         contentClassifierCodes.forEach(code -> {
@@ -168,7 +164,7 @@ public class ArtifactAssessmentTest {
             } catch (FHIRException e) {
                 invalidCodeException = e.getMessage();
             }
-            assertTrue(invalidCodeException.equals(""));
+            assertEquals("", invalidCodeException);
         });
         var workflowStatusSystem = "http://hl7.org/fhir/artifactassessment-workflow-status";
         var workflowStatusCodes = List.of(
@@ -205,13 +201,12 @@ public class ArtifactAssessmentTest {
         for (var i = 0; i < workflowStatusesList.size(); i++) {
             var workflowStatus = workflowStatusesList.get(i);
             if (workflowStatus != ArtifactAssessmentWorkflowStatus.NULL) {
-                assertTrue(workflowStatus.getSystem().equals(workflowStatusSystem));
-                assertTrue(workflowStatus.toCode().equals(workflowStatusCodes.get(i)));
-                assertTrue(workflowStatus.getDefinition().equals(workflowStatusDefinitions.get(i)));
-                assertTrue(workflowStatus.getDisplay().equals(workflowStatusDisplays.get(i)));
-                assertTrue(new ArtifactAssessmentWorkflowStatusEnumFactory()
-                        .toCode(workflowStatus)
-                        .equals(workflowStatusCodes.get(i)));
+                assertEquals(workflowStatus.getSystem(), workflowStatusSystem);
+                assertEquals(workflowStatus.toCode(), workflowStatusCodes.get(i));
+                assertEquals(workflowStatus.getDefinition(), workflowStatusDefinitions.get(i));
+                assertEquals(workflowStatus.getDisplay(), workflowStatusDisplays.get(i));
+                assertEquals(new ArtifactAssessmentWorkflowStatusEnumFactory()
+                        .toCode(workflowStatus), workflowStatusCodes.get(i));
             }
         }
         workflowStatusCodes.forEach(code -> {
@@ -223,7 +218,7 @@ public class ArtifactAssessmentTest {
             } catch (FHIRException e) {
                 invalidCodeException = e.getMessage();
             }
-            assertTrue(invalidCodeException.equals(""));
+            assertEquals("", invalidCodeException);
         });
         var dispositionCodes = List.of(
                 "unresolved",
@@ -248,13 +243,12 @@ public class ArtifactAssessmentTest {
         for (var i = 0; i < dispositionsList.size(); i++) {
             var disposition = dispositionsList.get(i);
             if (disposition != ArtifactAssessmentDisposition.NULL) {
-                assertTrue(disposition.getSystem().equals(dispositionSystem));
-                assertTrue(disposition.toCode().equals(dispositionCodes.get(i)));
-                assertTrue(disposition.getDefinition().equals(dispositionDefinitions.get(i)));
-                assertTrue(disposition.getDisplay().equals(dispositionDisplays.get(i)));
-                assertTrue(new ArtifactAssessmentDispositionEnumFactory()
-                        .toCode(disposition)
-                        .equals(dispositionCodes.get(i)));
+                assertEquals(disposition.getSystem(), dispositionSystem);
+                assertEquals(disposition.toCode(), dispositionCodes.get(i));
+                assertEquals(disposition.getDefinition(), dispositionDefinitions.get(i));
+                assertEquals(disposition.getDisplay(), dispositionDisplays.get(i));
+                assertEquals(new ArtifactAssessmentDispositionEnumFactory()
+                        .toCode(disposition), dispositionCodes.get(i));
             }
         }
         dispositionCodes.forEach(code -> {
@@ -265,12 +259,12 @@ public class ArtifactAssessmentTest {
             } catch (FHIRException e) {
                 invalidCodeException = e.getMessage();
             }
-            assertTrue(invalidCodeException.equals(""));
+            assertEquals("", invalidCodeException);
         });
     }
 
     @Test
-    void test_valid_comment() {
+    void valid_comment() {
         var referenceString = "Library/123";
         ArtifactAssessment artifactAssessment = new ArtifactAssessment();
         artifactAssessment.createArtifactComment(
@@ -302,73 +296,64 @@ public class ArtifactAssessmentTest {
     }
 
     @Test
-    void test_setters() {
+    void setters() {
         ArtifactAssessment artifactAssessment = new ArtifactAssessment();
         var testDate = new Date();
         artifactAssessment.setApprovalDateExtension(new DateType(testDate));
-        assertTrue(((DateType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
-                        .getValue())
-                .getValue()
-                .equals(testDate));
+        assertEquals(((DateType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
+                .getValue())
+                .getValue(), testDate);
         var testReviewDate = new Date();
         artifactAssessment.setLastReviewDateExtension(new DateType(testReviewDate));
-        assertTrue(((DateType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.LAST_REVIEW_DATE)
-                        .getValue())
-                .getValue()
-                .equals(testReviewDate));
+        assertEquals(((DateType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.LAST_REVIEW_DATE)
+                .getValue())
+                .getValue(), testReviewDate);
         var testApprovalDate = new Date();
         artifactAssessment.setApprovalDateExtension(new DateType(testApprovalDate));
-        assertTrue(((DateType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
-                        .getValue())
-                .getValue()
-                .equals(testApprovalDate));
+        assertEquals(((DateType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
+                .getValue())
+                .getValue(), testApprovalDate);
         var title = new MarkdownType("title");
         artifactAssessment.setTitleExtension(title);
-        assertTrue(((MarkdownType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.TITLE)
-                        .getValue())
-                .equals(title));
+        assertEquals(((MarkdownType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.TITLE)
+                .getValue()), title);
         var copyright = new MarkdownType("copyright");
         artifactAssessment.setCopyrightExtension(copyright);
-        assertTrue(((MarkdownType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.COPYRIGHT)
-                        .getValue())
-                .equals(copyright));
+        assertEquals(((MarkdownType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.COPYRIGHT)
+                .getValue()), copyright);
         var citeAs = new MarkdownType("citeAs");
         artifactAssessment.setCiteAsExtension(citeAs);
-        assertTrue(((MarkdownType) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.CITEAS)
-                        .getValue())
-                .equals(citeAs));
+        assertEquals(((MarkdownType) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.CITEAS)
+                .getValue()), citeAs);
         var citeAsRef = new Reference("Library/citeAs");
         artifactAssessment.setCiteAsExtension(citeAsRef);
-        assertTrue(((Reference) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.CITEAS)
-                        .getValue())
-                .equals(citeAsRef));
+        assertEquals(((Reference) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.CITEAS)
+                .getValue()), citeAsRef);
         var workflowStatusCode = ArtifactAssessmentWorkflowStatus.PUBLISHED;
         var workflowStatus = new Enumeration<ArtifactAssessmentWorkflowStatus>(
                 new ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory());
         workflowStatus.setValue(workflowStatusCode);
         artifactAssessment.setArtifactAssessmentWorkflowStatusExtension(workflowStatus);
-        assertTrue(((Enumeration<ArtifactAssessmentWorkflowStatus>) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
-                        .getValue())
-                .getValue()
-                .equals(workflowStatusCode));
+        assertEquals(((Enumeration<ArtifactAssessmentWorkflowStatus>) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
+                .getValue())
+                .getValue(), workflowStatusCode);
         var dispositionCode = ArtifactAssessmentDisposition.PERSUASIVE;
         var disposition = new Enumeration<ArtifactAssessmentDisposition>(
                 new ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory());
         disposition.setValue(dispositionCode);
         artifactAssessment.setArtifactAssessmentDispositionExtension(disposition);
-        assertTrue(((Enumeration<ArtifactAssessmentDisposition>) artifactAssessment
-                        .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
-                        .getValue())
-                .getValue()
-                .equals(dispositionCode));
+        assertEquals(((Enumeration<ArtifactAssessmentDisposition>) artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
+                .getValue())
+                .getValue(), dispositionCode);
         var contentExtension = artifactAssessment.new ArtifactAssessmentContentExtension();
         artifactAssessment.addExtension(contentExtension);
         var authorReference = new Reference("Practitioner/author");
@@ -377,30 +362,29 @@ public class ArtifactAssessmentTest {
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.AUTHOR));
         assertTrue(contentAuthorExtension.isPresent());
-        assertTrue(((Reference) contentAuthorExtension.get().getValue()).equals(authorReference));
+        assertEquals(((Reference) contentAuthorExtension.get().getValue()), authorReference);
         var summary = new MarkdownType("summary");
         contentExtension.setSummary(summary);
         Optional<Extension> contentSummaryExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.SUMMARY));
         assertTrue(contentSummaryExtension.isPresent());
-        assertTrue(((MarkdownType) contentSummaryExtension.get().getValue()).equals(summary));
+        assertEquals(((MarkdownType) contentSummaryExtension.get().getValue()), summary);
         var relatedArtifactCanonical = new CanonicalType("canonical");
         contentExtension.addRelatedArtifact(relatedArtifactCanonical, RelatedArtifactType.CITATION);
         Optional<Extension> contentRelatedArtifactExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.RELATEDARTIFACT));
         assertTrue(contentRelatedArtifactExtension.isPresent());
-        assertTrue(((RelatedArtifact) contentRelatedArtifactExtension.get().getValue())
-                .getResourceElement()
-                .equals(relatedArtifactCanonical));
+        assertEquals(((RelatedArtifact) contentRelatedArtifactExtension.get().getValue())
+                .getResourceElement(), relatedArtifactCanonical);
         var quantity = new Quantity(4);
         contentExtension.setQuantityExtension(quantity);
         Optional<Extension> contentQuantityExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.QUANTITY));
         assertTrue(contentQuantityExtension.isPresent());
-        assertTrue(((Quantity) contentQuantityExtension.get().getValue()).equals(quantity));
+        assertEquals(((Quantity) contentQuantityExtension.get().getValue()), quantity);
         var typeCoding = new Coding(
                 "http://hl7.org/fhir/ValueSet/certainty-type",
                 "LargeEffect",
@@ -412,14 +396,14 @@ public class ArtifactAssessmentTest {
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.TYPE));
         assertTrue(contentTypeExtension.isPresent());
-        assertTrue(((CodeableConcept) contentTypeExtension.get().getValue()).equals(type));
+        assertEquals(((CodeableConcept) contentTypeExtension.get().getValue()), type);
         var freeToShare = new BooleanType(true);
         contentExtension.setFreeToShareExtension(freeToShare);
         Optional<Extension> contentFreeToShareExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.FREETOSHARE));
         assertTrue(contentFreeToShareExtension.isPresent());
-        assertTrue(((BooleanType) contentFreeToShareExtension.get().getValue()).equals(freeToShare));
+        assertEquals(((BooleanType) contentFreeToShareExtension.get().getValue()), freeToShare);
         var classifierCoding = new Coding(
                 "http://hl7.org/fhir/ValueSet/certainty-type",
                 "LargeEffect",
@@ -431,19 +415,19 @@ public class ArtifactAssessmentTest {
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.CLASSIFIER));
         assertTrue(contentClassifierExtension.isPresent());
-        assertTrue(((CodeableConcept) contentClassifierExtension.get().getValue()).equals(classifer));
+        assertEquals(((CodeableConcept) contentClassifierExtension.get().getValue()), classifer);
         var path = new UriType("path/test/thing");
         contentExtension.addPathExtension(path);
         Optional<Extension> contentPathExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.PATH));
         assertTrue(contentPathExtension.isPresent());
-        assertTrue(((UriType) contentPathExtension.get().getValue()).equals(path));
+        assertEquals(((UriType) contentPathExtension.get().getValue()), path);
 
         var derivedFrom = new CanonicalType("Library/derived-from");
         artifactAssessment.setDerivedFromContentRelatedArtifact(derivedFrom);
         var derivedFromContentRelatedArtifact = artifactAssessment.getDerivedFromContentRelatedArtifact();
         assertTrue(derivedFromContentRelatedArtifact.isPresent());
-        assertTrue(derivedFromContentRelatedArtifact.get().getResourceElement().equals(derivedFrom));
+        assertEquals(derivedFromContentRelatedArtifact.get().getResourceElement(), derivedFrom);
     }
 }

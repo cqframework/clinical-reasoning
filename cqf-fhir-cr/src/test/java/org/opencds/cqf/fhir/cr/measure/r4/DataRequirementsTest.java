@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 
-public class DataRequirementsTest {
+class DataRequirementsTest {
     @Test
-    public void dataRequirements_resourceBasisMeasure_withMeasurementPeriod() {
+    void dataRequirements_resourceBasisMeasure_withMeasurementPeriod() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -22,7 +22,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_resourceBasisMeasure_partialMeasurementPeriod() {
+    void dataRequirements_resourceBasisMeasure_partialMeasurementPeriod() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -36,7 +36,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_resourceBasisMeasure_noPeriod() {
+    void dataRequirements_resourceBasisMeasure_noPeriod() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -49,7 +49,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_booleanBasisMeasure_noPeriod() {
+    void dataRequirements_booleanBasisMeasure_noPeriod() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
@@ -62,7 +62,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_booleanBasisMeasure_Period() {
+    void dataRequirements_booleanBasisMeasure_Period() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
@@ -77,7 +77,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_booleanBasisMeasure_badLibraryUrl() {
+    void dataRequirements_booleanBasisMeasure_badLibraryUrl() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
         var when = given.when()
                 .measureId("MinimalCohortBooleanBasisSingleGroup_badLibraryUrl")
@@ -89,7 +89,7 @@ public class DataRequirementsTest {
     }
 
     @Test
-    public void dataRequirements_booleanBasisMeasure_Canonical() {
+    void dataRequirements_booleanBasisMeasure_Canonical() {
         DataRequirements.Given given = DataRequirements.given().repositoryFor("MinimalMeasureEvaluation");
         given.when()
                 .measureId("MinimalCohortBooleanBasisSingleGroupCanonical")

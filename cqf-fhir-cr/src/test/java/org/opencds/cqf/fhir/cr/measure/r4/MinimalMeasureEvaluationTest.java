@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MinimalMeasureEvaluationTest {
+class MinimalMeasureEvaluationTest {
     private static final Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test

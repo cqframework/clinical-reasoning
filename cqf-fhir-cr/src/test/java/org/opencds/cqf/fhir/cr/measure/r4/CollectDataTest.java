@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.CollectData.Given;
 
-public class CollectDataTest {
+class CollectDataTest {
 
     @Test
     void collectData_booleanBasisMeasure_subject() {
@@ -24,7 +24,7 @@ public class CollectDataTest {
     }
 
     @Test
-    public void collectData_booleanBasisMeasure_population() {
+    void collectData_booleanBasisMeasure_population() {
         // only one patient, no subject specified
         CollectData.Given given = CollectData.given().repositoryFor("CaseRepresentation101");
         given.when()
@@ -39,7 +39,7 @@ public class CollectDataTest {
     }
 
     @Test
-    public void collectData_resourceBasisMeasure_subject() {
+    void collectData_resourceBasisMeasure_subject() {
         CollectData.Given given = CollectData.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -57,7 +57,7 @@ public class CollectDataTest {
     }
 
     @Test
-    public void collectData_resourceBasisMeasure_population() {
+    void collectData_resourceBasisMeasure_population() {
         CollectData.Given given = CollectData.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
@@ -71,7 +71,7 @@ public class CollectDataTest {
     }
 
     @Test
-    public void collectData_resourceBasisMeasure_practitioner() {
+    void collectData_resourceBasisMeasure_practitioner() {
         CollectData.Given given = CollectData.given().repositoryFor("MinimalMeasureEvaluation");
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
@@ -86,7 +86,7 @@ public class CollectDataTest {
     }
 
     @Test
-    public void collectData_resourceBasisMeasure_practitioner_noPatients() {
+    void collectData_resourceBasisMeasure_practitioner_noPatients() {
         CollectData.Given given = CollectData.given().repositoryFor("MinimalMeasureEvaluation");
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")

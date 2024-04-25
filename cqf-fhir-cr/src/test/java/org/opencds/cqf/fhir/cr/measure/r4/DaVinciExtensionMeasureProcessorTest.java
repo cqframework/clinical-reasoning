@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class DaVinciExtensionMeasureProcessorTest {
+class DaVinciExtensionMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("BreastCancerScreeningFHIR");
 
-    @Test
     // TODO: Huh. Why is patient not showing up in the 'initial-population' list?
-    public void exm125_numerator() {
+    @Test
+    void exm125_numerator() {
         given.when()
                 .measureId("BreastCancerScreeningFHIR")
                 .periodStart("2019-01-01")

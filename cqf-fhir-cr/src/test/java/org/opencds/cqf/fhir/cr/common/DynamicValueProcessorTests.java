@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 
 @ExtendWith(MockitoExtension.class)
-public class DynamicValueProcessorTests {
+class DynamicValueProcessorTests {
     @Mock
     private LibraryEngine libraryEngine;
 
@@ -31,14 +31,14 @@ public class DynamicValueProcessorTests {
     DynamicValueProcessor fixture = new DynamicValueProcessor();
 
     @Test
-    void testUnsupportedFhirVersion() {
+    void unsupportedFhirVersion() {
         var request =
                 RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, inputParameterResolver);
         assertNull(fixture.getDynamicValueExpression(request, null));
     }
 
     @Test
-    void testDstu3PriorityExt() {
+    void dstu3PriorityExt() {
         // works in dstu3, throws in other versions
         var cqfExpression = new CqfExpression();
         var requestDstu3 = RequestHelpers.newPDApplyRequestForVersion(

@@ -29,12 +29,12 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
-public class CqlFhirParametersConverterTests {
+class CqlFhirParametersConverterTests {
 
     protected static CqlFhirParametersConverter cqlFhirParametersConverter;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
         AdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
@@ -45,7 +45,7 @@ public class CqlFhirParametersConverterTests {
     }
 
     @Test
-    public void TestEvaluationResultToParameters() {
+    void TestEvaluationResultToParameters() {
         Parameters expected = new Parameters();
         expected.addParameter().setName("Patient").setResource(new Patient());
         expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
@@ -60,7 +60,7 @@ public class CqlFhirParametersConverterTests {
     }
 
     @Test
-    public void TestFhirParametersToCqlParameters() {
+    void TestFhirParametersToCqlParameters() {
         Map<String, Object> expected = new HashMap<>();
         expected.put("Measurement Period", new Interval(new Date("2020-01-01"), true, new Date("2021-01-01"), true));
         expected.put("Product Line", "Medicare");
@@ -85,7 +85,7 @@ public class CqlFhirParametersConverterTests {
     }
 
     @Test
-    public void TestFhirParametersListToCqlParameters() {
+    void TestFhirParametersListToCqlParameters() {
 
         Parameters testData = new Parameters();
         testData.addParameter().setName("%encounters").setResource(new Encounter().setId("1"));
@@ -93,7 +93,7 @@ public class CqlFhirParametersConverterTests {
 
         Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-        assertEquals(actual.size(), 1);
+        assertEquals(1, actual.size());
         assertTrue(actual.containsKey("%encounters"));
 
         Object value = actual.get("%encounters");
@@ -103,11 +103,11 @@ public class CqlFhirParametersConverterTests {
         @SuppressWarnings("unchecked")
         List<Encounter> encounters = (List<Encounter>) value;
 
-        assertEquals(encounters.size(), 2);
+        assertEquals(2, encounters.size());
     }
 
     @Test
-    public void TestMaxParameterDefinitionCreatesList() {
+    void TestMaxParameterDefinitionCreatesList() {
 
         Parameters testData = new Parameters();
         ParametersParameterComponent ppc = testData.addParameter();
@@ -118,7 +118,7 @@ public class CqlFhirParametersConverterTests {
 
         Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-        assertEquals(actual.size(), 1);
+        assertEquals(1, actual.size());
         assertTrue(actual.containsKey("%encounters"));
 
         Object value = actual.get("%encounters");
@@ -128,11 +128,11 @@ public class CqlFhirParametersConverterTests {
         @SuppressWarnings("unchecked")
         List<Encounter> encounters = (List<Encounter>) value;
 
-        assertEquals(encounters.size(), 1);
+        assertEquals(1, encounters.size());
     }
 
     @Test
-    public void TestMinParameterDefinitionCreatesList() {
+    void TestMinParameterDefinitionCreatesList() {
         Parameters testData = new Parameters();
         ParametersParameterComponent ppc = testData.addParameter();
 
@@ -146,7 +146,7 @@ public class CqlFhirParametersConverterTests {
 
         Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-        assertEquals(actual.size(), 1);
+        assertEquals(1, actual.size());
         assertTrue(actual.containsKey("%encounters"));
 
         Object value = actual.get("%encounters");
@@ -156,11 +156,11 @@ public class CqlFhirParametersConverterTests {
         @SuppressWarnings("unchecked")
         List<Encounter> encounters = (List<Encounter>) value;
 
-        assertEquals(encounters.size(), 1);
+        assertEquals(1, encounters.size());
     }
 
     @Test
-    public void TestInvalidParameterDefinitionThrowsException() {
+    void TestInvalidParameterDefinitionThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> {
             Parameters testData = new Parameters();
             ParametersParameterComponent ppc = testData.addParameter();
@@ -178,7 +178,7 @@ public class CqlFhirParametersConverterTests {
     }
 
     @Test
-    public void TestParameterDefinitionCreatesList() {
+    void TestParameterDefinitionCreatesList() {
         Parameters testData = new Parameters();
         ParametersParameterComponent ppc = testData.addParameter();
         ppc.setName("%encounters");
@@ -188,7 +188,7 @@ public class CqlFhirParametersConverterTests {
 
         Map<String, Object> actual = cqlFhirParametersConverter.toCqlParameters(testData);
 
-        assertEquals(actual.size(), 1);
+        assertEquals(1, actual.size());
         assertTrue(actual.containsKey("%encounters"));
 
         Object value = actual.get("%encounters");
@@ -198,6 +198,6 @@ public class CqlFhirParametersConverterTests {
         @SuppressWarnings("unchecked")
         List<Encounter> encounters = (List<Encounter>) value;
 
-        assertEquals(encounters.size(), 0);
+        assertEquals(0, encounters.size());
     }
 }

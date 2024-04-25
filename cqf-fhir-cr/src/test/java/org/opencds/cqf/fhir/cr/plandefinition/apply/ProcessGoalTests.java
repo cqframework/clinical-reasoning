@@ -18,7 +18,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessGoalTests {
+class ProcessGoalTests {
     @Mock
     Repository repository;
 
@@ -42,7 +42,7 @@ public class ProcessGoalTests {
     }
 
     @Test
-    void testConvertDstu3Goal() {
+    void convertDstu3Goal() {
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
         var goalElement = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionGoalComponent()
@@ -55,7 +55,7 @@ public class ProcessGoalTests {
     }
 
     @Test
-    void testConvertR4Goal() {
+    void convertR4Goal() {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var goalElement = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionGoalComponent()
@@ -67,7 +67,7 @@ public class ProcessGoalTests {
     }
 
     @Test
-    void testConvertR5Goal() {
+    void convertR5Goal() {
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
         var goalElement = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionGoalComponent()

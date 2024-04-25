@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +51,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
-public class KnowledgeArtifactReleaseVisitorTests {
+class KnowledgeArtifactReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -72,7 +73,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
             null);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         SearchParameter sp = (SearchParameter)
                 jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "SearchParameter-artifactAssessment.json"));
@@ -116,7 +117,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
         // versionBehaviour == 'default' so version should be
         // existingVersion and not the new version provided in
         // the parameters
-        assertTrue(releasedLibrary.getVersion().equals(existingVersion));
+        assertEquals(releasedLibrary.getVersion(), existingVersion);
         List<String> ersdTestArtifactDependencies = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
@@ -179,7 +180,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
         }
         // TODO: update the list of dependencies to be in line with $data-requirements
         // assertTrue(ersdTestArtifactDependencies.size() == dependenciesOnReleasedArtifact.size());
-        assertTrue(ersdTestArtifactComponents.size() == componentsOnReleasedArtifact.size());
+        assertEquals(ersdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
     }
 
     @Test
@@ -206,7 +207,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         Library releasedLibrary = spyRepository.read(
                 Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        assertTrue(releasedLibrary.getVersion().equals(newVersionToForce));
+        assertEquals(releasedLibrary.getVersion(), newVersionToForce);
     }
 
     @Test
@@ -300,7 +301,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                 part("requireNonExperimental", new CodeType("warn")));
         libraryAdapter.accept(releaseVisitor, spyRepository, params);
         // no warning if the root is Experimental
-        assertTrue(warningMessages.size() == 0);
+        assertEquals(0, warningMessages.size());
 
         libraryAdapter2.accept(releaseVisitor, spyRepository, params);
 
@@ -345,7 +346,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
                         String startString = year + "-" + month + "-" + day;
-                        assertTrue(startString.equals(effectivePeriodToPropagate));
+                        assertEquals(startString, effectivePeriodToPropagate);
                     }
                 },
                 spyRepository);
@@ -452,7 +453,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                 .filter(ext -> ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
-        assertTrue(((StringType) maybeReleaseLabel.get().getValue()).getValue().equals(releaseLabel));
+        assertEquals(((StringType) maybeReleaseLabel.get().getValue()).getValue(), releaseLabel);
     }
 
     @Test

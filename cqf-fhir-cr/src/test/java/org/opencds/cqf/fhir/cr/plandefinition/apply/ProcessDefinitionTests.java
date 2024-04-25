@@ -24,7 +24,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessDefinitionTests {
+class ProcessDefinitionTests {
     private final String ACTIVITYDEFINITION = "http://test.fhir.org/fhir/ActivityDefinition/test";
     private final String PLANDEFINITION = "http://test.fhir.org/fhir/PlanDefinition/test";
     private final String QUESTIONNAIRE = "http://test.fhir.org/fhir/Questionnaire/test";

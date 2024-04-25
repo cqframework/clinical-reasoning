@@ -12,10 +12,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.Test;
 
-public class ReflectionsTest {
+class ReflectionsTest {
 
     @Test
-    public void testAccessor() {
+    void accessor() {
         Library library = new Library().setName("test");
 
         IAccessor accessor = Reflections.getAccessor(library.getClass(), "name");
@@ -28,7 +28,7 @@ public class ReflectionsTest {
     }
 
     @Test
-    public void testGetName() {
+    void getName() {
         Library library = new Library().setName("test");
 
         Function<Library, String> getName = Reflections.getNameFunction(library.getClass());
@@ -39,7 +39,7 @@ public class ReflectionsTest {
     }
 
     @Test
-    public void testGetNameLiteral() {
+    void getNameLiteral() {
         Library library = new Library().setName("test");
 
         Function<Library, String> getName = Reflections.getNameFunction(Library.class);
@@ -50,14 +50,14 @@ public class ReflectionsTest {
     }
 
     @Test
-    public void testGetNameNotExists() {
+    void getNameNotExists() {
         assertThrows(RuntimeException.class, () -> {
             Reflections.getNameFunction(Observation.class);
         });
     }
 
     @Test
-    public void testGetVersion() {
+    void getVersion() {
         Library library = new Library().setVersion("test");
 
         Function<Library, String> getVersion = Reflections.getVersionFunction(library.getClass());
@@ -68,7 +68,7 @@ public class ReflectionsTest {
     }
 
     @Test
-    public void testGetUrl() {
+    void getUrl() {
         Library library = new Library().setUrl("http://test.com");
 
         Function<Library, String> getVersion = Reflections.getUrlFunction(library.getClass());

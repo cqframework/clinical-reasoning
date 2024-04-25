@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class VersionedIdentifiersTests {
     @Test
-    void testExceptions() {
+    void exceptions() {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> VersionedIdentifiers.forUrl("http://fhir.org/guides/cdc/opioid-cds/Binary/HelloWorld"));
@@ -20,7 +20,7 @@ class VersionedIdentifiersTests {
     }
 
     @Test
-    void testUrl() {
+    void url() {
         var url = "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld";
         var id = VersionedIdentifiers.forUrl(url);
         assertEquals("HelloWorld", id.getId());
@@ -28,7 +28,7 @@ class VersionedIdentifiersTests {
     }
 
     @Test
-    void testCanonical() {
+    void canonical() {
         var url = "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld|1.0.0";
         var id = VersionedIdentifiers.forUrl(url);
         assertEquals("HelloWorld", id.getId());
@@ -36,7 +36,7 @@ class VersionedIdentifiersTests {
     }
 
     @Test
-    void testReference() {
+    void reference() {
         var reference = "Library/HelloWorld";
         var id = VersionedIdentifiers.forUrl(reference);
         assertEquals("HelloWorld", id.getId());

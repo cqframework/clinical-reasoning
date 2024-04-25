@@ -113,7 +113,7 @@ public class MeasureValidationUtils {
         List<Reference> resourceReferences = measureReferences.stream()
                 .filter(x -> x.getReference().equals(resourceId))
                 .collect(Collectors.toList());
-        assertEquals(resourceReferences.size(), 1);
+        assertEquals(1, resourceReferences.size());
     }
 
     protected static void validateListEquality(ListResource actual, ListResource expected) {

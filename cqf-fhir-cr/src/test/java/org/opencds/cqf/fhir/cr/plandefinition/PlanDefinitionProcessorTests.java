@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
@@ -20,13 +20,13 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class PlanDefinitionProcessorTests {
+class PlanDefinitionProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
     @Test
-    void testDefaultSettings() {
+    void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new PlanDefinitionProcessor(repository);
@@ -34,7 +34,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testProcessor() {
+    void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
@@ -65,7 +65,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testChildRoutineVisitDstu3() {
+    void childRoutineVisitDstu3() {
         var planDefinitionID = "ChildRoutineVisit-PlanDefinition-1.0.0";
         var patientID = "Patient/ChildRoutine-Reportable";
         var data = "dstu3/child-routine-visit/child_routine_visit_patient.json";
@@ -82,7 +82,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testChildRoutineVisitR4() {
+    void childRoutineVisitR4() {
         var planDefinitionID = "ChildRoutineVisit-PlanDefinition-1.0.0";
         var patientID = "Patient/ChildRoutine-Reportable";
         var data = "r4/child-routine-visit/child_routine_visit_patient.json";
@@ -108,7 +108,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testChildRoutineVisitR5() {
+    void childRoutineVisitR5() {
         var planDefinitionID = "ChildRoutineVisit-PlanDefinition-1.0.0";
         var patientID = "Patient/ChildRoutine-Reportable";
         var data = "r5/child-routine-visit/child_routine_visit_patient.json";
@@ -125,7 +125,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testAncVisitContainedActivityDefinition() {
+    void ancVisitContainedActivityDefinition() {
         var planDefinitionID = "AncVisit-PlanDefinition";
         var patientID = "Patient/TEST_PATIENT";
         var data = "r4/anc-visit/anc_visit_patient.json";
@@ -151,7 +151,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testANCDT17() {
+    void ancdt17() {
         var planDefinitionId = "ANCDT17";
         var patientId = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterId = "Encounter/helloworld-patient-1-encounter-1";
@@ -178,7 +178,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testANCDT17WithElm() {
+    void ancdt17WithElm() {
         var patientId = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterId = "Encounter/ANCDT17-encounter";
         given().repositoryFor(fhirContextR4, "r4")
@@ -197,7 +197,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testFhirPath() {
+    void fhirPath() {
         var planDefinitionID = "DischargeInstructionsPlan";
         var patientID = "Patient/Patient1";
         var practitionerID = "Practitioner/Practitioner1";
@@ -213,7 +213,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testHelloWorld() {
+    void helloWorld() {
         var planDefinitionID = "hello-world-patient-view";
         var patientID = "helloworld-patient-1";
         var encounterID = "helloworld-patient-1-encounter-1";
@@ -234,7 +234,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testOpioidRec10PatientView() {
+    void opioidRec10PatientView() {
         var planDefinitionID = "opioidcds-10-patient-view";
         var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
         var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
@@ -255,7 +255,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testCDSHooksMultipleActions() {
+    void cdsHooksMultipleActions() {
         var planDefinitionID = "CdsHooksMultipleActions-PlanDefinition-1.0.0";
         var patientID = "patient-CdsHooksMultipleActions";
         var data = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
@@ -281,7 +281,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testMultipleActionsUsingSameActivity() {
+    void multipleActionsUsingSameActivity() {
         var planDefinitionID = "multi-action-activity";
         var patientID = "OPA-Patient1";
         var result = given().repositoryFor(fhirContextR4, "r4")
@@ -295,11 +295,11 @@ public class PlanDefinitionProcessorTests {
         var resource2 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(2);
         assertNotNull(resource1);
         assertNotNull(resource2);
-        assertFalse(resource1.getId().equals(resource2.getId()));
+        assertNotEquals(resource1.getId(), resource2.getId());
     }
 
     @Test
-    void testQuestionnaireTask() {
+    void questionnaireTask() {
         var planDefinitionID = "prepopulate";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
@@ -314,7 +314,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testQuestionnaireResponseDstu3() {
+    void questionnaireResponseDstu3() {
         // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
         // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
         // expected.
@@ -336,7 +336,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testQuestionnaireResponseR4() {
+    void questionnaireResponseR4() {
         // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
         // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
         // expected.
@@ -365,7 +365,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testQuestionnaireResponseR5() {
+    void questionnaireResponseR5() {
         // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
         // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
         // expected.
@@ -387,7 +387,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testGenerateQuestionnaireDstu3() {
+    void generateQuestionnaireDstu3() {
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
@@ -403,7 +403,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testGenerateQuestionnaireR4() {
+    void generateQuestionnaireR4() {
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
@@ -419,7 +419,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testGenerateQuestionnaireSleepStudy() {
+    void generateQuestionnaireSleepStudy() {
         var planDefinitionID = "ASLPA1";
         var patientID = "positive";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
@@ -437,7 +437,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testGenerateQuestionnaireR5() {
+    void generateQuestionnaireR5() {
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
@@ -453,7 +453,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testPackageDstu3() {
+    void packageDstu3() {
         given().repositoryFor(fhirContextDstu3, "dstu3")
                 .when()
                 .planDefinitionId("generate-questionnaire")
@@ -468,7 +468,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testPackageR4() {
+    void packageR4() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .planDefinitionId("ASLPA1")
@@ -484,7 +484,7 @@ public class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void testPackageR5() {
+    void packageR5() {
         given().repositoryFor(fhirContextR5, "r5")
                 .when()
                 .planDefinitionId("generate-questionnaire")

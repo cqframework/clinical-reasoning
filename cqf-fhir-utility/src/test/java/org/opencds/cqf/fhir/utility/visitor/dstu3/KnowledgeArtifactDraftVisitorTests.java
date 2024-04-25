@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,7 +44,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactDraftVisitor;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class KnowledgeArtifactDraftVisitorTests {
+class KnowledgeArtifactDraftVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -66,7 +67,7 @@ public class KnowledgeArtifactDraftVisitorTests {
             null);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         doAnswer(new Answer<Bundle>() {
                     @Override
@@ -111,12 +112,12 @@ public class KnowledgeArtifactDraftVisitorTests {
                 Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         assertNotNull(lib);
         assertTrue(lib.getStatus() == Enumerations.PublicationStatus.DRAFT);
-        assertTrue(lib.getVersion().equals(draftedVersion));
+        assertEquals(lib.getVersion(), draftedVersion);
         assertFalse(lib.hasApprovalDate());
         assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
         assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
         List<RelatedArtifact> relatedArtifacts = lib.getRelatedArtifact();
-        assertTrue(!relatedArtifacts.isEmpty());
+        assertFalse(relatedArtifacts.isEmpty());
         MetadataResourceHelper.forEachMetadataResource(
                 returnedBundle.getEntry(),
                 resource -> {
@@ -126,9 +127,8 @@ public class KnowledgeArtifactDraftVisitorTests {
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
                             if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
-                                assertTrue(Canonicals.getVersion(
-                                                relatedArtifact.getResource().getReference())
-                                        .equals(draftedVersion));
+                                assertEquals(Canonicals.getVersion(
+                                        relatedArtifact.getResource().getReference()), draftedVersion);
                             }
                         }
                     }

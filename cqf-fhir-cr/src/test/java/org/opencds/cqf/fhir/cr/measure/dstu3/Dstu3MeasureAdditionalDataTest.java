@@ -5,12 +5,12 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.Given;
 
-public class Dstu3MeasureAdditionalDataTest {
+class Dstu3MeasureAdditionalDataTest {
 
     protected static Given given = Measure.given().repositoryFor("EXM105FHIR3MeasurePartBundle");
 
     @Test
-    public void testMeasureAdditionalData() {
+    void measureAdditionalData() {
 
         var parser = FhirContext.forDstu3Cached().newJsonParser();
         var additionalData = (Bundle) parser.parseResource(Dstu3MeasureAdditionalDataTest.class.getResourceAsStream(

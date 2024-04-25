@@ -12,10 +12,10 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-public class DirectoryBundlerTests {
+class DirectoryBundlerTests {
 
     @Test
-    public void test_directoryBundler() {
+    void directory_bundler() {
 
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         DirectoryBundler bundler = new DirectoryBundler(fhirContext);

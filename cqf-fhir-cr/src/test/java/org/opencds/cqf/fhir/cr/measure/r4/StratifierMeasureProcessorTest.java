@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class StratifierMeasureProcessorTest {
+class StratifierMeasureProcessorTest {
 
     protected static Given given =
             Measure.given().repositoryFor("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
 
     @Test
-    public void exm74_singlePatient_denominator() {
+    void exm74_singlePatient_denominator() {
 
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
@@ -45,7 +45,7 @@ public class StratifierMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_singlePatient_numerator() {
+    void exm74_singlePatient_numerator() {
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
                 .periodStart("2019-01-01")
@@ -77,7 +77,7 @@ public class StratifierMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_subject_list() {
+    void exm74_subject_list() {
 
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
@@ -127,7 +127,7 @@ public class StratifierMeasureProcessorTest {
     }
 
     @Test
-    public void exm74_population() {
+    void exm74_population() {
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
                 .periodStart("2019-01-01")

@@ -5,10 +5,10 @@ import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValue
 
 import org.junit.jupiter.api.Test;
 
-public class ItemValueTransformerTests {
+class ItemValueTransformerTests {
 
     @Test
-    void testTransformValueToItemDstu3() {
+    void transformValueToItemDstu3() {
         var coding = new org.hl7.fhir.dstu3.model.Coding("test", "test", "test");
         var code = new org.hl7.fhir.dstu3.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValueToItem(code);
@@ -24,7 +24,7 @@ public class ItemValueTransformerTests {
     }
 
     @Test
-    void testTransformValueToItemR4() {
+    void transformValueToItemR4() {
         var coding = new org.hl7.fhir.r4.model.Coding("test", "test", "test");
         var code = new org.hl7.fhir.r4.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValueToItem(code);
@@ -40,7 +40,7 @@ public class ItemValueTransformerTests {
     }
 
     @Test
-    void testTransformValueToItemR5() {
+    void transformValueToItemR5() {
         var coding = new org.hl7.fhir.r5.model.Coding("test", "test", "test");
         var code = new org.hl7.fhir.r5.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValueToItem(code);

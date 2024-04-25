@@ -3,12 +3,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class ContinuousVariableMeasureProcessorTest {
+class ContinuousVariableMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("CMS111");
 
     @Test
-    public void cms111_singlePatient() {
+    void cms111_singlePatient() {
         given.when()
                 .measureId("CMS111")
                 .periodStart("2019-01-01")

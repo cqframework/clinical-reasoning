@@ -14,7 +14,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-public class BenchmarksIT {
+class BenchmarksIT {
 
     private static final DecimalFormat df = new DecimalFormat("0.000");
 
@@ -44,7 +44,7 @@ public class BenchmarksIT {
 
     @Test
     @Disabled("Test fails during package due to test-jar not working as expected ")
-    public void benchmark() throws Exception {
+    void benchmark() throws Exception {
         Options opt = new OptionsBuilder()
                 .include(Questionnaires.class.getSimpleName())
                 .include(Measures.class.getSimpleName())

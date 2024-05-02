@@ -44,8 +44,7 @@ public class MeasuresAdditionalData {
 
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()
-                .parseResource(
-                       this.getClass().getResourceAsStream("CaseRepresentation101/generated.json"));
+                .parseResource(this.getClass().getResourceAsStream("CaseRepresentation101/generated.json"));
 
         this.when = Measure.given()
                 .repositoryFor("CaseRepresentation101")

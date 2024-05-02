@@ -6,7 +6,7 @@
       "extension": [
         {
           "url": "dateLastUpdated",
-          "valueDateTime": "2022-04-28"
+          "valueDateTime": "2023-04-28"
         },
         {
           "url": "frequency",
@@ -74,7 +74,7 @@
   "dispenseRequest": {
     "validityPeriod": {
       "start": "2022-01-28",
-      "end": "2022-04-28"
+      "end": "2023-04-28"
     },
     "numberOfRepeatsAllowed": 3,
     "expectedSupplyDuration": {

@@ -6,7 +6,7 @@
       "extension": [
         {
           "url": "dateLastUpdated",
-          "valueDateTime": "2022-04-28"
+          "valueDateTime": "2023-04-28"
         },
         {
           "url": "frequency",
@@ -48,7 +48,7 @@
   "encounter": {
     "reference": "Encounter/example-rec-10-patient-view-POS-Cocaine-drugs-prefetch"
   },
-  "authoredOn": "2022-04-28",
+  "authoredOn": "2023-04-28",
   "dosageInstruction": [
     {
       "timing": {
@@ -73,8 +73,8 @@
   ],
   "dispenseRequest": {
     "validityPeriod": {
-      "start": "2022-04-28",
-      "end": "2022-07-28"
+      "start": "2023-04-28",
+      "end": "2023-07-28"
     },
     "numberOfRepeatsAllowed": 3,
     "expectedSupplyDuration": {

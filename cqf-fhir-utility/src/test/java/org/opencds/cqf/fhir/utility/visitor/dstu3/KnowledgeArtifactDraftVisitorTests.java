@@ -127,8 +127,10 @@ class KnowledgeArtifactDraftVisitorTests {
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
                             if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
-                                assertEquals(Canonicals.getVersion(
-                                        relatedArtifact.getResource().getReference()), draftedVersion);
+                                assertEquals(
+                                        Canonicals.getVersion(
+                                                relatedArtifact.getResource().getReference()),
+                                        draftedVersion);
                             }
                         }
                     }

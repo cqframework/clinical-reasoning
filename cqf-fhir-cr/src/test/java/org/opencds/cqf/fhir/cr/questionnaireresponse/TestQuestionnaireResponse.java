@@ -107,20 +107,25 @@ public class TestQuestionnaireResponse {
         }
 
         public Extract isEqualsTo(String expectedBundleAssetName) {
-            assertDoesNotThrow(() -> {
-                JSONAssert.assertEquals(load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
-            }, "Unable to compare Jsons: ");
+            assertDoesNotThrow(
+                    () -> {
+                        JSONAssert.assertEquals(
+                                load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
+                    },
+                    "Unable to compare Jsons: ");
             return this;
         }
 
         public Extract isEqualsToExpected(IIdType expectedBundleId) {
             var expectedBundle = repository.read(bundle.getClass(), expectedBundleId);
-            assertDoesNotThrow(() -> {
-                JSONAssert.assertEquals(
-                        jsonParser.encodeResourceToString(expectedBundle),
-                        jsonParser.encodeResourceToString(bundle),
-                        true);
-            }, "Unable to compare Jsons: ");
+            assertDoesNotThrow(
+                    () -> {
+                        JSONAssert.assertEquals(
+                                jsonParser.encodeResourceToString(expectedBundle),
+                                jsonParser.encodeResourceToString(bundle),
+                                true);
+                    },
+                    "Unable to compare Jsons: ");
             return this;
         }
 

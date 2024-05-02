@@ -30,9 +30,11 @@ class MeasureScorerTest {
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
-        assertEquals("1.0",
+        assertEquals(
+                "1.0",
                 measureReport.getGroup().get(0).getMeasureScore().getValue().toString());
-        assertEquals("1.0",
+        assertEquals(
+                "1.0",
                 measureReport.getGroup().get(1).getMeasureScore().getValue().toString());
     }
 

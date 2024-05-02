@@ -382,7 +382,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Observation obs = (Observation) contained.get("Observation");
         assertNotNull(obs);
-        assertEquals(OMB_CATEGORY_RACE_BLACK, obs.getValueCodeableConcept().getCodingFirstRep().getCode());
+        assertEquals(
+                OMB_CATEGORY_RACE_BLACK,
+                obs.getValueCodeableConcept().getCodingFirstRep().getCode());
 
         Optional<org.hl7.fhir.r4.model.Reference> optional = report.getEvaluatedResource().stream()
                 .filter(x -> x.getReference().contains(obs.getId()))

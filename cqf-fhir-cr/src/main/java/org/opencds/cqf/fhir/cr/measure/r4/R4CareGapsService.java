@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.HtmlConstants.HTML_DIV_PA
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -589,17 +590,6 @@ public class R4CareGapsService {
 
     protected Parameters initializeResult() {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
-    }
-
-    protected static String getFullUrl(String serverAddress, IBaseResource resource) {
-        checkArgument(
-                resource.getIdElement().hasIdPart(),
-                "Cannot generate a fullUrl because the resource does not have an id.");
-        return getFullUrl(serverAddress, resource.fhirType(), Ids.simplePart(resource));
-    }
-
-    protected static String getFullUrl(String serverAddress, String fhirType, String elementId) {
-        return String.format("%s%s/%s", serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
     }
 
     protected void checkValidStatusCode(List<String> statuses) {

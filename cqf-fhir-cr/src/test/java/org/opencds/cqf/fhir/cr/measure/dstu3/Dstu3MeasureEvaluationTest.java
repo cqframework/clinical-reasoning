@@ -260,7 +260,9 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         assertEquals(list.getIdElement().getIdPart(), listRef);
 
         Observation obs = (Observation) contained.get("Observation");
-        assertEquals(OMB_CATEGORY_RACE_BLACK, obs.getValueCodeableConcept().getCodingFirstRep().getCode());
+        assertEquals(
+                OMB_CATEGORY_RACE_BLACK,
+                obs.getValueCodeableConcept().getCodingFirstRep().getCode());
     }
 
     private void checkStratification(MeasureReport report) {

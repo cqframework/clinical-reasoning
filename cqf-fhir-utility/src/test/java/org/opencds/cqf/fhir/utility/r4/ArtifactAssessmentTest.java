@@ -39,20 +39,26 @@ class ArtifactAssessmentTest {
     void constructors() {
         var referenceString = "Library/123";
         ArtifactAssessment artifactAssessment = new ArtifactAssessment(new Reference(referenceString));
-        assertEquals(((Reference) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                .getValue())
-                .getReference(), referenceString);
+        assertEquals(
+                ((Reference) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                                .getValue())
+                        .getReference(),
+                referenceString);
         artifactAssessment = new ArtifactAssessment(new UriType(referenceString));
-        assertEquals(((UriType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                .getValue())
-                .getValue(), referenceString);
+        assertEquals(
+                ((UriType) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                                .getValue())
+                        .getValue(),
+                referenceString);
         artifactAssessment = new ArtifactAssessment(new CanonicalType(referenceString));
-        assertEquals(((CanonicalType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
-                .getValue())
-                .getValue(), referenceString);
+        assertEquals(
+                ((CanonicalType) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.ARTIFACT)
+                                .getValue())
+                        .getValue(),
+                referenceString);
     }
 
     @Test
@@ -76,8 +82,9 @@ class ArtifactAssessmentTest {
                 assertEquals(infoType.toCode(), infoTypeCodes.get(i));
                 assertEquals(infoType.getDefinition(), infoTypeDefinitions.get(i));
                 assertEquals(infoType.getDisplay(), infoTypeDisplays.get(i));
-                assertEquals(new ArtifactAssessmentContentInformationTypeEnumFactory()
-                        .toCode(infoType), infoTypeCodes.get(i));
+                assertEquals(
+                        new ArtifactAssessmentContentInformationTypeEnumFactory().toCode(infoType),
+                        infoTypeCodes.get(i));
             }
         }
         infoTypeCodes.forEach(code -> {
@@ -151,8 +158,9 @@ class ArtifactAssessmentTest {
                 assertEquals(classifier.toCode(), contentClassifierCodes.get(i));
                 assertEquals(classifier.getDefinition(), contentClassifierDefinitions.get(i));
                 assertEquals(classifier.getDisplay(), contentClassifierDisplays.get(i));
-                assertEquals(new ArtifactAssessmentContentClassifierEnumFactory()
-                        .toCode(classifier), contentClassifierCodes.get(i));
+                assertEquals(
+                        new ArtifactAssessmentContentClassifierEnumFactory().toCode(classifier),
+                        contentClassifierCodes.get(i));
             }
         }
         contentClassifierCodes.forEach(code -> {
@@ -205,8 +213,9 @@ class ArtifactAssessmentTest {
                 assertEquals(workflowStatus.toCode(), workflowStatusCodes.get(i));
                 assertEquals(workflowStatus.getDefinition(), workflowStatusDefinitions.get(i));
                 assertEquals(workflowStatus.getDisplay(), workflowStatusDisplays.get(i));
-                assertEquals(new ArtifactAssessmentWorkflowStatusEnumFactory()
-                        .toCode(workflowStatus), workflowStatusCodes.get(i));
+                assertEquals(
+                        new ArtifactAssessmentWorkflowStatusEnumFactory().toCode(workflowStatus),
+                        workflowStatusCodes.get(i));
             }
         }
         workflowStatusCodes.forEach(code -> {
@@ -247,8 +256,8 @@ class ArtifactAssessmentTest {
                 assertEquals(disposition.toCode(), dispositionCodes.get(i));
                 assertEquals(disposition.getDefinition(), dispositionDefinitions.get(i));
                 assertEquals(disposition.getDisplay(), dispositionDisplays.get(i));
-                assertEquals(new ArtifactAssessmentDispositionEnumFactory()
-                        .toCode(disposition), dispositionCodes.get(i));
+                assertEquals(
+                        new ArtifactAssessmentDispositionEnumFactory().toCode(disposition), dispositionCodes.get(i));
             }
         }
         dispositionCodes.forEach(code -> {
@@ -300,60 +309,78 @@ class ArtifactAssessmentTest {
         ArtifactAssessment artifactAssessment = new ArtifactAssessment();
         var testDate = new Date();
         artifactAssessment.setApprovalDateExtension(new DateType(testDate));
-        assertEquals(((DateType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
-                .getValue())
-                .getValue(), testDate);
+        assertEquals(
+                ((DateType) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
+                                .getValue())
+                        .getValue(),
+                testDate);
         var testReviewDate = new Date();
         artifactAssessment.setLastReviewDateExtension(new DateType(testReviewDate));
-        assertEquals(((DateType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.LAST_REVIEW_DATE)
-                .getValue())
-                .getValue(), testReviewDate);
+        assertEquals(
+                ((DateType) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.LAST_REVIEW_DATE)
+                                .getValue())
+                        .getValue(),
+                testReviewDate);
         var testApprovalDate = new Date();
         artifactAssessment.setApprovalDateExtension(new DateType(testApprovalDate));
-        assertEquals(((DateType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
-                .getValue())
-                .getValue(), testApprovalDate);
+        assertEquals(
+                ((DateType) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.APPROVAL_DATE)
+                                .getValue())
+                        .getValue(),
+                testApprovalDate);
         var title = new MarkdownType("title");
         artifactAssessment.setTitleExtension(title);
-        assertEquals(((MarkdownType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.TITLE)
-                .getValue()), title);
+        assertEquals(
+                ((MarkdownType) artifactAssessment
+                        .getExtensionByUrl(ArtifactAssessment.TITLE)
+                        .getValue()),
+                title);
         var copyright = new MarkdownType("copyright");
         artifactAssessment.setCopyrightExtension(copyright);
-        assertEquals(((MarkdownType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.COPYRIGHT)
-                .getValue()), copyright);
+        assertEquals(
+                ((MarkdownType) artifactAssessment
+                        .getExtensionByUrl(ArtifactAssessment.COPYRIGHT)
+                        .getValue()),
+                copyright);
         var citeAs = new MarkdownType("citeAs");
         artifactAssessment.setCiteAsExtension(citeAs);
-        assertEquals(((MarkdownType) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.CITEAS)
-                .getValue()), citeAs);
+        assertEquals(
+                ((MarkdownType) artifactAssessment
+                        .getExtensionByUrl(ArtifactAssessment.CITEAS)
+                        .getValue()),
+                citeAs);
         var citeAsRef = new Reference("Library/citeAs");
         artifactAssessment.setCiteAsExtension(citeAsRef);
-        assertEquals(((Reference) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.CITEAS)
-                .getValue()), citeAsRef);
+        assertEquals(
+                ((Reference) artifactAssessment
+                        .getExtensionByUrl(ArtifactAssessment.CITEAS)
+                        .getValue()),
+                citeAsRef);
         var workflowStatusCode = ArtifactAssessmentWorkflowStatus.PUBLISHED;
         var workflowStatus = new Enumeration<ArtifactAssessmentWorkflowStatus>(
                 new ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory());
         workflowStatus.setValue(workflowStatusCode);
         artifactAssessment.setArtifactAssessmentWorkflowStatusExtension(workflowStatus);
-        assertEquals(((Enumeration<ArtifactAssessmentWorkflowStatus>) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
-                .getValue())
-                .getValue(), workflowStatusCode);
+        assertEquals(
+                ((Enumeration<ArtifactAssessmentWorkflowStatus>) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
+                                .getValue())
+                        .getValue(),
+                workflowStatusCode);
         var dispositionCode = ArtifactAssessmentDisposition.PERSUASIVE;
         var disposition = new Enumeration<ArtifactAssessmentDisposition>(
                 new ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory());
         disposition.setValue(dispositionCode);
         artifactAssessment.setArtifactAssessmentDispositionExtension(disposition);
-        assertEquals(((Enumeration<ArtifactAssessmentDisposition>) artifactAssessment
-                .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
-                .getValue())
-                .getValue(), dispositionCode);
+        assertEquals(
+                ((Enumeration<ArtifactAssessmentDisposition>) artifactAssessment
+                                .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
+                                .getValue())
+                        .getValue(),
+                dispositionCode);
         var contentExtension = artifactAssessment.new ArtifactAssessmentContentExtension();
         artifactAssessment.addExtension(contentExtension);
         var authorReference = new Reference("Practitioner/author");
@@ -376,8 +403,9 @@ class ArtifactAssessmentTest {
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.RELATEDARTIFACT));
         assertTrue(contentRelatedArtifactExtension.isPresent());
-        assertEquals(((RelatedArtifact) contentRelatedArtifactExtension.get().getValue())
-                .getResourceElement(), relatedArtifactCanonical);
+        assertEquals(
+                ((RelatedArtifact) contentRelatedArtifactExtension.get().getValue()).getResourceElement(),
+                relatedArtifactCanonical);
         var quantity = new Quantity(4);
         contentExtension.setQuantityExtension(quantity);
         Optional<Extension> contentQuantityExtension = Optional.of(

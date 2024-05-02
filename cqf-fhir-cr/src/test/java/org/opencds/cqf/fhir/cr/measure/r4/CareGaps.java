@@ -84,7 +84,7 @@ public class CareGaps {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
-        private String serverBase;
+        private final String serverBase;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -103,8 +103,8 @@ public class CareGaps {
 
             this.careGapsProperties.setCareGapsReporter("alphora");
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
-
             this.serverBase = "http://localhost";
+            this.careGapsProperties.setMyFhirBaseUrl(this.serverBase);
         }
 
         public CareGaps.Given repository(Repository repository) {

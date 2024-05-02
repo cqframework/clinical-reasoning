@@ -110,8 +110,14 @@ public class R4MeasureServiceUtils {
                 && (measureReport.getType().name().equals(MeasureReportType.SUMMARY.name())
                         || measureReport.getType().name().equals(MeasureReportType.SUBJECTLIST.name()))) {
             if (StringUtils.isNotBlank(practitioner)) {
+                if (!practitioner.contains("/")) {
+                    practitioner = "Practitioner/".concat(practitioner);
+                }
                 measureReport.setSubject(new Reference(practitioner));
             } else {
+                if (!subjectId.contains("/")) {
+                    subjectId = "Patient/".concat(subjectId);
+                }
                 measureReport.setSubject(new Reference(subjectId));
             }
         }

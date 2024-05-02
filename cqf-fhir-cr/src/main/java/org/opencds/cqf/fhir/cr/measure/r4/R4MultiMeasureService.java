@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Strings;
 import java.util.List;
 import java.util.UUID;
@@ -67,15 +66,9 @@ public class R4MultiMeasureService {
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, subjectProvider);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        try {
-            r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-        } catch (NotImplementedOperationException e) {
-            log.warn(
-                    "Error creating supplemental data search parameter. This may be due to the server not supporting transactions.",
-                    e);
-        }
+        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
-        log.info("multi-evaluate-measure, measures to evaluate: " + measures.size());
+        log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
         var evalType = MeasureEvalType.fromCode(reportType)
                 .orElse(
@@ -111,7 +104,7 @@ public class R4MultiMeasureService {
             // progress feedback
             var measureUrl = measureReport.getMeasure();
             if (!measureUrl.isEmpty()) {
-                log.info("MeasureReport complete for Measure: " + measureUrl);
+                log.info("MeasureReport complete for Measure: {}", measureUrl);
             }
         }
 

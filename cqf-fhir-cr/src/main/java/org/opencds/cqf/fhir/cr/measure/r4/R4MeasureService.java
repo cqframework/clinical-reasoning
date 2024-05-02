@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -17,7 +16,6 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureService.class);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
@@ -45,13 +43,7 @@ public class R4MeasureService {
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        try {
-            r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-        } catch (NotImplementedOperationException e) {
-            log.warn(
-                    "Error creating supplemental data search parameter. This may be due to the server not supporting transactions.",
-                    e);
-        }
+        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
         MeasureReport measureReport = null;
 

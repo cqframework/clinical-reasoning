@@ -826,4 +826,38 @@ class MinimalMeasureEvaluationTest {
         // continuous-variable
         assertThrows(NullPointerException.class, () -> when.then().report());
     }
+
+    @Test
+    void MinimalProportionNoBasisSingleGroup_Practitioner() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .practitioner("tester")
+                .evaluate();
+
+        when.then()
+                .hasReportType("Summary")
+                .hasSubjectReference("Practitioner/tester")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(0)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(0);
+    }
 }

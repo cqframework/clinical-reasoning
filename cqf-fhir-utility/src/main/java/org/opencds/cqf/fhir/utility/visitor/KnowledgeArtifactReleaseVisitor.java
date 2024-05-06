@@ -127,7 +127,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     KnowledgeArtifactAdapter.setRelatedArtifactReference(component, updatedReference);
                 }
                 var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion, "depends-on", relatedArtifactReference);
+                        fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component));
                 rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
             }
 

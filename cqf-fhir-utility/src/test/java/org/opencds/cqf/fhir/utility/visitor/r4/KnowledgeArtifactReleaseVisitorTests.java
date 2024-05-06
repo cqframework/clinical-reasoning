@@ -118,69 +118,82 @@ class KnowledgeArtifactReleaseVisitorTests {
         // existingVersion and not the new version provided in
         // the parameters
         assertEquals(releasedLibrary.getVersion(), existingVersion);
-        List<String> ersdTestArtifactDependencies = Arrays.asList(
-                "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-dxtc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-ostc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-lotc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-lrtc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-mrtc|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdtc|" + existingVersion,
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.120|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.362|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1866|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1906|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19",
-                "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1",
-                "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1",
-                "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1");
-        List<String> ersdTestArtifactComponents = Arrays.asList(
-                "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
-                "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
-        List<String> dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
-                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
-        List<String> componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
-                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
-        // check that the released artifact has all the required dependencies
-        for (String dependency : ersdTestArtifactDependencies) {
-            assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
-        }
-        // and components
-        for (String component : ersdTestArtifactComponents) {
-            assertTrue(componentsOnReleasedArtifact.contains(component));
-        }
-        // TODO: update the list of dependencies to be in line with $data-requirements
-        // assertTrue(ersdTestArtifactDependencies.size() == dependenciesOnReleasedArtifact.size());
-        assertEquals(ersdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
+        var expectedErsdTestArtifactDependencies = Arrays.asList(
+			"http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-dxtc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-ostc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-lotc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-lrtc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-mrtc|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/ValueSet/release-sdtc|" + existingVersion,
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.120|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.362|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1866|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1906|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|2022-10-19",
+			"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19",
+			"http://notOwnedTest.com/Library/notOwnedRoot|0.1.1",
+			"http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1",
+			"http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
+			"http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
+			"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
+			"http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+		);
+		var expectedErsdTestArtifactComponents = Arrays.asList(
+			"http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
+			"http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
+			"http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+		);
+		var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact()
+			.stream()
+			.filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+			.map(ra -> ra.getResource())
+			.collect(Collectors.toList());
+		var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact()
+			.stream()
+			.filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+			.map(ra -> ra.getResource())
+			.collect(Collectors.toList());
+		// check that the released artifact has all the required dependencies
+		for(var dependency: expectedErsdTestArtifactDependencies){
+			assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
+		}
+		// and components
+		for(var component: expectedErsdTestArtifactComponents){
+			assertTrue(componentsOnReleasedArtifact.contains(component));
+		}
+		// ensure it only has the expected components and dependencies
+		assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
+		assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
     }
 
     @Test

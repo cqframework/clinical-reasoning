@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,9 @@ import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -62,7 +65,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void visitLibraryTest() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         spyRepository.transaction(loadedBundle);
         KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
         Library library = spyRepository
@@ -74,6 +77,42 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
         assertNotNull(packagedBundle);
         assertEquals(packagedBundle.getEntry().size(), loadedBundle.getEntry().size());
+
+        List<ValueSet> leafValueSets = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.ValueSet)
+                .map(entry -> ((ValueSet) entry.getResource()))
+                .filter(valueSet -> !valueSet.hasCompose()
+                        || (valueSet.hasCompose()
+                                && valueSet.getCompose()
+                                                .getIncludeFirstRep()
+                                                .getValueSet()
+                                                .size()
+                                        == 0))
+                .collect(Collectors.toList());
+
+        // Ensure expansion is populated for all leaf value sets
+        leafValueSets.forEach(valueSet -> assertNotNull(valueSet.getExpansion()));
+    }
+
+    @Test
+    void packageOperation_should_fail_no_credentials() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without credentials: "));
     }
 
     @Test

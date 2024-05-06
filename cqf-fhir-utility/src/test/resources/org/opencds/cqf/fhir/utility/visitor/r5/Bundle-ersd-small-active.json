@@ -121,6 +121,18 @@
                   ],
                   "text": "Infection caused by Acanthamoeba (disorder)"
                 }
+              },
+              {
+                "url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+                      "code": "emergent"
+                    }
+                  ],
+                  "text": "Emergent"
+                }
               }
             ],
             "type": "depends-on",
@@ -245,6 +257,12 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.6",
+        "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }]
+        },
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
         "identifier": [
           {
@@ -387,6 +405,12 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "123-this-will-be-routine",
+        "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }]
+        },
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
         "identifier": [
           {

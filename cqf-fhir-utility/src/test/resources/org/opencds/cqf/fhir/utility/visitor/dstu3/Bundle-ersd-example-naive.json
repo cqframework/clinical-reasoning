@@ -94,7 +94,9 @@
               }
             ],
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example|0.1"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example|0.1"
+            }
           },
           {
             "extension": [
@@ -104,55 +106,81 @@
               }
             ],
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            }
           },
           {
             "type": "composed-of",
-            "resource": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example|0.1"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example|0.1"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/ostc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/ostc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/lotc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/lotc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/lrtc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/lrtc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc|1.0.0"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc|1.0.0"
+            }
           },
           {
             "type": "depends-on",
-            "resource": "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1"
+            }
           },
           {
             "extension": [
@@ -193,7 +221,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506|1.0.0"
+            }
           },
           {
             "extension": [
@@ -222,7 +252,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1505|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1505|1.0.0"
+            }
           },
           {
             "extension": [
@@ -251,7 +283,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1508|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1508|1.0.0"
+            }
           },
           {
             "extension": [
@@ -280,7 +314,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1507|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1507|1.0.0"
+            }
           },
           {
             "extension": [
@@ -309,7 +345,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|1.0.0"
+            }
           },
           {
             "extension": [
@@ -338,7 +376,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|1.0.0"
+            }
           },
           {
             "extension": [
@@ -367,7 +407,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|1.0.0"
+            }
           },
           {
             "extension": [
@@ -396,7 +438,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|1.0.0"
+            }
           },
           {
             "extension": [
@@ -425,7 +469,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|1.0.0"
+            }
           },
           {
             "extension": [
@@ -454,7 +500,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1468|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1468|1.0.0"
+            }
           },
           {
             "extension": [
@@ -483,7 +531,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|1.0.0"
+            }
           },
           {
             "extension": [
@@ -512,7 +562,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|1.0.0"
+            }
           },
           {
             "extension": [
@@ -541,7 +593,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|1.0.0"
+            }
           },
           {
             "extension": [
@@ -570,7 +624,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|1.0.0"
+            }
           },
           {
             "extension": [
@@ -599,7 +655,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.762|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.762|1.0.0"
+            }
           },
           {
             "extension": [
@@ -628,7 +686,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|1.0.0"
+            }
           },
           {
             "extension": [
@@ -657,7 +717,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|1.0.0"
+            }
           },
           {
             "extension": [
@@ -686,7 +748,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|1.0.0"
+            }
           },
           {
             "extension": [
@@ -715,7 +779,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|1.0.0"
+            }
           },
           {
             "extension": [
@@ -744,7 +810,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|1.0.0"
+            }
           },
           {
             "extension": [
@@ -773,7 +841,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|1.0.0"
+            }
           },
           {
             "extension": [
@@ -802,7 +872,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|1.0.0"
+            }
           },
           {
             "extension": [
@@ -831,7 +903,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|1.0.0"
+            }
           },
           {
             "extension": [
@@ -860,7 +934,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|1.0.0"
+            }
           },
           {
             "extension": [
@@ -889,7 +965,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|1.0.0"
+            }
           },
           {
             "extension": [
@@ -918,7 +996,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|1.0.0"
+            }
           },
           {
             "extension": [
@@ -947,7 +1027,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|1.0.0"
+            }
           },
           {
             "extension": [
@@ -976,7 +1058,9 @@
               }
             ],
             "type": "depends-on",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|1.0.0"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|1.0.0"
+            }
           }
         ]
       },
@@ -1046,11 +1130,15 @@
           {
             "type": "depends-on",
             "label": "RCTC Value Set Library of Trigger Codes",
-            "resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2019-06-17"
+            }
           },
           {
             "type": "composed-of",
-            "resource": "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1"
+            }
           }
         ],
         "action": [
@@ -2102,7 +2190,9 @@
         "relatedArtifact": [
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2112,7 +2202,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/ostc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/ostc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2122,7 +2214,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/lotc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/lotc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2132,7 +2226,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/lrtc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/lrtc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2142,7 +2238,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2152,7 +2250,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc|1.0.0",
+            "resource": {
+              "reference": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc|1.0.0"
+            },
             "extension": [
               {
                 "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
@@ -2162,7 +2262,9 @@
           },
           {
             "type": "composed-of",
-            "resource": "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1"
+            "resource": {
+              "reference": "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1"
+            }
           }
         ]
       },
@@ -4699,6 +4801,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1506",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -4825,6 +4931,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1505",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -5023,6 +5133,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1508",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -5212,6 +5326,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1507",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -5500,6 +5618,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.6",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -5815,6 +5937,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.480",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -5977,6 +6103,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.481",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -6193,6 +6323,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.761",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -6319,6 +6453,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1223",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -6445,6 +6583,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.762",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -6589,6 +6731,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1182",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -6832,6 +6978,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1181",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -7183,6 +7333,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1184",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8029,6 +8183,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1601",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8227,6 +8385,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1600",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8533,6 +8695,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1603",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8659,6 +8825,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1602",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8785,6 +8955,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1082",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -8911,6 +9085,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.528",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -9145,6 +9323,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.408",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -9457,6 +9639,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.409",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -9835,6 +10021,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1469",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10069,6 +10259,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1468",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10204,6 +10398,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1439",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10330,6 +10528,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1436",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10447,6 +10649,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1435",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10564,6 +10770,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1446",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]
@@ -10681,6 +10891,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.1438",
         "meta": {
+          "tag" : [{
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "code" : "vsm-authored"
+          }],
           "profile": [
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
           ]

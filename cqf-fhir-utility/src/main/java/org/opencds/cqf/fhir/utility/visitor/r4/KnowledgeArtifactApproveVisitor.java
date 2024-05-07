@@ -8,7 +8,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
-import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 
 public class KnowledgeArtifactApproveVisitor {
 

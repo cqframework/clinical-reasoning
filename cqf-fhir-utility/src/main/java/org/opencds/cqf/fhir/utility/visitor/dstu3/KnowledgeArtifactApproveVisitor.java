@@ -8,7 +8,6 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.dstu3.ArtifactAssessment;
-import org.opencds.cqf.fhir.utility.dstu3.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 
 public class KnowledgeArtifactApproveVisitor {
 

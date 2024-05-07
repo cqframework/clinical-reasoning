@@ -1173,8 +1173,7 @@ public class ArtifactAssessment extends Basic {
             int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
             if (infoTypeIndex != -1) {
                 var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect =
-                        ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
+                infoTypeCorrect = ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
             }
             int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
             if (summaryIndex != -1) {
@@ -1435,8 +1434,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(String infoType)
-                throws FHIRException {
+        ArtifactAssessmentContentExtension setInfoType(String infoType) throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {

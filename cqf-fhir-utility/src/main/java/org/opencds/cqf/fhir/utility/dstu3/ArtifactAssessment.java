@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Configuration;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -27,7 +28,6 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu3.model.CodeType;
 
 @ResourceDef(
         id = "ArtifactAssessment",
@@ -1134,9 +1134,8 @@ public class ArtifactAssessment extends Basic {
             int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
             if (infoTypeIndex != -1) {
                 Extension infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect = ((CodeType) infoTypeExt.getValue())
-                        .getValueAsString()
-                        .equals(artifactAssessmentType);
+                infoTypeCorrect =
+                        ((CodeType) infoTypeExt.getValue()).getValueAsString().equals(artifactAssessmentType);
             }
             int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
             if (summaryIndex != -1) {
@@ -1387,8 +1386,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(String infoType)
-                throws FHIRException {
+        ArtifactAssessmentContentExtension setInfoType(String infoType) throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {

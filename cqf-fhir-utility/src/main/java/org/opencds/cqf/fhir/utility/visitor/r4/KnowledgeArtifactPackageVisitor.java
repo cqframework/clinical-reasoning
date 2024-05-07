@@ -367,7 +367,7 @@ public class KnowledgeArtifactPackageVisitor {
                 && valueSet.getMeta().hasTag()
                 && valueSet.getMeta()
                                 .getTag(
-                                        KnowledgeArtifactAdapter.vsmValueSetTagCodeSystemUrl,
+                                        KnowledgeArtifactAdapter.vsmWorkflowCodesCodeSystemUrl,
                                         KnowledgeArtifactAdapter.vsmValueSetTagVSMAuthoredCode)
                         != null;
     }

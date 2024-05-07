@@ -202,7 +202,7 @@
         "id": "2.16.840.1.113762.1.4.1146.6",
         "meta": {
           "tag" : [{
-            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag",
+            "system" : "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes",
             "code" : "vsm-authored"
           }]
         },

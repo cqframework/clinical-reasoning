@@ -256,6 +256,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             Collections.unmodifiableList(Arrays.asList(valueSetPriorityUrl, valueSetConditionUrl));
 
     String authoritativeSourceUrl = "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
-    String vsmValueSetTagCodeSystemUrl = "http://aphl.org/fhir/vsm/CodeSystem/vsm-valueset-tag";
+    String vsmWorkflowCodesCodeSystemUrl = "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes";
     String vsmValueSetTagVSMAuthoredCode = "vsm-authored";
 }

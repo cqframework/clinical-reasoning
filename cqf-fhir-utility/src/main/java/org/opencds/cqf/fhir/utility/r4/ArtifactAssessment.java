@@ -1011,7 +1011,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            String type,
+            CodeType type,
             Reference targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1044,7 +1044,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            String type,
+            CodeType type,
             CanonicalType targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1077,7 +1077,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            String type,
+            CodeType type,
             UriType targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1434,7 +1434,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(String infoType) throws FHIRException {
+        ArtifactAssessmentContentExtension setInfoType(CodeType infoType) throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {
@@ -1551,11 +1551,11 @@ public class ArtifactAssessment extends Basic {
                 isSpecialization = true,
                 profileOf = Extension.class)
         private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
-            public ArtifactAssessmentContentInformationTypeExtension(String informationTypeCode) {
+            public ArtifactAssessmentContentInformationTypeExtension(CodeType informationTypeCode) {
                 super(INFOTYPE);
                 // validate code
-                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode);
-                this.setValue(new CodeType(informationTypeCode));
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.getValue());
+                this.setValue(informationTypeCode);
             }
         }
 

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.MarkdownType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -13,7 +14,7 @@ public class KnowledgeArtifactApproveVisitor {
 
     public static ArtifactAssessment createApprovalAssessment(
             IIdType id,
-            String artifactAssessmentType,
+            CodeType artifactAssessmentType,
             Optional<MarkdownType> artifactAssessmentSummary,
             Optional<UriType> artifactAssessmentTargetCanonical,
             Optional<UriType> artifactAssessmentRelatedArtifact,

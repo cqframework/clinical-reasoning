@@ -118,7 +118,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         // existingVersion and not the new version provided in
         // the parameters
         assertEquals(releasedLibrary.getVersion(), existingVersion);
-        List<String> ersdTestArtifactDependencies = Arrays.asList(
+        var expectedErsdTestArtifactDependencies = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-dxtc|" + existingVersion,
@@ -157,30 +157,39 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19",
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1",
                 "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1",
-                "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1");
-        List<String> ersdTestArtifactComponents = Arrays.asList(
+                "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
+                "http://hl7.org/fhir/StructureDefinition/ServiceRequest");
+        var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
-        List<String> dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
-        List<String> componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
         // check that the released artifact has all the required dependencies
-        for (String dependency : ersdTestArtifactDependencies) {
+        for (var dependency : expectedErsdTestArtifactDependencies) {
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
         }
         // and components
-        for (String component : ersdTestArtifactComponents) {
+        for (var component : expectedErsdTestArtifactComponents) {
             assertTrue(componentsOnReleasedArtifact.contains(component));
         }
-        // TODO: update the list of dependencies to be in line with $data-requirements
-        // assertTrue(ersdTestArtifactDependencies.size() == dependenciesOnReleasedArtifact.size());
-        assertEquals(ersdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
+        // ensure it only has the expected components and dependencies
+        assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
+        assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
     }
 
     @Test

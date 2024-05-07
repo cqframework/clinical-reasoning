@@ -269,7 +269,7 @@ class ArtifactAssessmentTest {
         var referenceString = "Library/123";
         ArtifactAssessment artifactAssessment = new ArtifactAssessment();
         artifactAssessment.createArtifactComment(
-                ArtifactAssessmentContentInformationType.fromCode("comment"),
+                "comment",
                 new Reference(referenceString),
                 Optional.ofNullable(null),
                 Optional.ofNullable(null),
@@ -287,7 +287,7 @@ class ArtifactAssessmentTest {
         assertFalse(artifactAssessment.isValidArtifactComment());
         artifactAssessment = new ArtifactAssessment();
         artifactAssessment.createArtifactComment(
-                ArtifactAssessmentContentInformationType.fromCode("comment"),
+                "comment",
                 new Reference((String) null),
                 Optional.ofNullable(null),
                 Optional.ofNullable(null),

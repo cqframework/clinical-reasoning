@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.model.CodeType;
 
 @ResourceDef(
         id = "ArtifactAssessment",
@@ -1004,7 +1005,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            String type,
             Reference targetReference,
             Optional<UriType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1037,7 +1038,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            String type,
             UriType targetReference,
             Optional<UriType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1133,7 +1134,7 @@ public class ArtifactAssessment extends Basic {
             int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
             if (infoTypeIndex != -1) {
                 Extension infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect = ((Enumeration<?>) infoTypeExt.getValue())
+                infoTypeCorrect = ((CodeType) infoTypeExt.getValue())
                         .getValueAsString()
                         .equals(artifactAssessmentType);
             }
@@ -1386,7 +1387,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(ArtifactAssessmentContentInformationType infoType)
+        ArtifactAssessmentContentExtension setInfoType(String infoType)
                 throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
@@ -1504,14 +1505,11 @@ public class ArtifactAssessment extends Basic {
                 isSpecialization = true,
                 profileOf = Extension.class)
         private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
-            public ArtifactAssessmentContentInformationTypeExtension(
-                    ArtifactAssessmentContentInformationType informationTypeCode) {
+            public ArtifactAssessmentContentInformationTypeExtension(String informationTypeCode) {
                 super(INFOTYPE);
-                Enumeration<ArtifactAssessmentContentInformationType> informationType =
-                        new Enumeration<ArtifactAssessmentContentInformationType>(
-                                new ArtifactAssessmentContentInformationTypeEnumFactory());
-                informationType.setValue(informationTypeCode);
-                this.setValue(informationType);
+                // validate code
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode);
+                this.setValue(new CodeType(informationTypeCode));
             }
         }
 

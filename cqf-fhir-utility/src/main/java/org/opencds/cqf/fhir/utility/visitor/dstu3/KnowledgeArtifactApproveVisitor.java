@@ -26,7 +26,7 @@ public class KnowledgeArtifactApproveVisitor {
         try {
             artifactAssessment = new ArtifactAssessment(new Reference(id));
             artifactAssessment.createArtifactComment(
-                    ArtifactAssessmentContentInformationType.fromCode(artifactAssessmentType),
+                    artifactAssessmentType,
                     artifactTargetReference,
                     artifactAssessmentTargetCanonical,
                     artifactAssessmentSummary,

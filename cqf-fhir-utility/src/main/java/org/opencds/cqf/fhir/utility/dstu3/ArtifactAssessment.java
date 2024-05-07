@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Configuration;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -1004,7 +1005,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            CodeType type,
             Reference targetReference,
             Optional<UriType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1037,7 +1038,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            CodeType type,
             UriType targetReference,
             Optional<UriType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1133,9 +1134,8 @@ public class ArtifactAssessment extends Basic {
             int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
             if (infoTypeIndex != -1) {
                 Extension infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect = ((Enumeration<?>) infoTypeExt.getValue())
-                        .getValueAsString()
-                        .equals(artifactAssessmentType);
+                infoTypeCorrect =
+                        ((CodeType) infoTypeExt.getValue()).getValueAsString().equals(artifactAssessmentType);
             }
             int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
             if (summaryIndex != -1) {
@@ -1386,8 +1386,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(ArtifactAssessmentContentInformationType infoType)
-                throws FHIRException {
+        ArtifactAssessmentContentExtension setInfoType(CodeType infoType) throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {
@@ -1504,14 +1503,11 @@ public class ArtifactAssessment extends Basic {
                 isSpecialization = true,
                 profileOf = Extension.class)
         private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
-            public ArtifactAssessmentContentInformationTypeExtension(
-                    ArtifactAssessmentContentInformationType informationTypeCode) {
+            public ArtifactAssessmentContentInformationTypeExtension(CodeType informationTypeCode) {
                 super(INFOTYPE);
-                Enumeration<ArtifactAssessmentContentInformationType> informationType =
-                        new Enumeration<ArtifactAssessmentContentInformationType>(
-                                new ArtifactAssessmentContentInformationTypeEnumFactory());
-                informationType.setValue(informationTypeCode);
-                this.setValue(informationType);
+                // validate code
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.getValue());
+                this.setValue(informationTypeCode);
             }
         }
 

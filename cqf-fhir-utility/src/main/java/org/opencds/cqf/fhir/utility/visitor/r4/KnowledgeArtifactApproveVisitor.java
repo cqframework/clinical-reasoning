@@ -5,16 +5,16 @@ import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
-import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment.ArtifactAssessmentContentInformationType;
 
 public class KnowledgeArtifactApproveVisitor {
 
     public static ArtifactAssessment createApprovalAssessment(
             IIdType id,
-            String artifactAssessmentType,
+            CodeType artifactAssessmentType,
             Optional<MarkdownType> artifactAssessmentSummary,
             Optional<CanonicalType> artifactAssessmentTargetCanonical,
             Optional<CanonicalType> artifactAssessmentRelatedArtifact,
@@ -26,7 +26,7 @@ public class KnowledgeArtifactApproveVisitor {
         try {
             artifactAssessment = new ArtifactAssessment(new Reference(id));
             artifactAssessment.createArtifactComment(
-                    ArtifactAssessmentContentInformationType.fromCode(artifactAssessmentType),
+                    artifactAssessmentType,
                     artifactTargetReference,
                     artifactAssessmentTargetCanonical,
                     artifactAssessmentSummary,

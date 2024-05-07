@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
@@ -277,7 +278,7 @@ class ArtifactAssessmentTest {
         var referenceString = "Library/123";
         ArtifactAssessment artifactAssessment = new ArtifactAssessment();
         artifactAssessment.createArtifactComment(
-                ArtifactAssessmentContentInformationType.fromCode("comment"),
+                new CodeType("comment"),
                 new Reference(referenceString),
                 Optional.ofNullable(null),
                 Optional.ofNullable(null),
@@ -295,7 +296,7 @@ class ArtifactAssessmentTest {
         assertFalse(artifactAssessment.isValidArtifactComment());
         artifactAssessment = new ArtifactAssessment();
         artifactAssessment.createArtifactComment(
-                ArtifactAssessmentContentInformationType.fromCode("comment"),
+                new CodeType("comment"),
                 new Reference((String) null),
                 Optional.ofNullable(null),
                 Optional.ofNullable(null),

@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Configuration;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -1010,7 +1011,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            CodeType type,
             Reference targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1043,7 +1044,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            CodeType type,
             CanonicalType targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1076,7 +1077,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-            ArtifactAssessmentContentInformationType type,
+            CodeType type,
             UriType targetReference,
             Optional<CanonicalType> derivedFromUri,
             Optional<MarkdownType> text,
@@ -1168,38 +1169,37 @@ public class ArtifactAssessment extends Basic {
         boolean artifactCorrect = false;
         int contentIndex = findIndex(CONTENT, null, this.getExtension());
         if (contentIndex != -1) {
-            Extension contentExt = this.getExtension().get(contentIndex);
+            var contentExt = this.getExtension().get(contentIndex);
             int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
             if (infoTypeIndex != -1) {
-                Extension infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect =
-                        ((Enumeration<?>) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
+                var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
+                infoTypeCorrect = ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
             }
             int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
             if (summaryIndex != -1) {
-                Extension summaryExt = contentExt.getExtension().get(summaryIndex);
+                var summaryExt = contentExt.getExtension().get(summaryIndex);
                 summaryCorrect = ((StringType) summaryExt.getValue()).getValue().equals(artifactAssessmentSummary);
             }
-            List<Extension> relatedArtifactList = contentExt.getExtension().stream()
+            var relatedArtifactList = contentExt.getExtension().stream()
                     .filter(e -> e.getUrl().equals(ArtifactAssessmentContentExtension.RELATEDARTIFACT))
                     .collect(Collectors.toList());
             if (relatedArtifactList.size() > 0) {
-                Optional<Extension> maybeCitation = relatedArtifactList.stream()
+                var maybeCitation = relatedArtifactList.stream()
                         .filter(ext ->
                                 ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
                         .findAny();
-                Optional<Extension> maybeDerivedFrom = relatedArtifactList.stream()
+                var maybeDerivedFrom = relatedArtifactList.stream()
                         .filter(ext ->
                                 ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
                         .findAny();
                 if (maybeCitation.isPresent()) {
-                    Extension citation = maybeCitation.get();
+                    var citation = maybeCitation.get();
                     citationRelatedArtifactCorrect = ((RelatedArtifact) citation.getValue())
                             .getResource()
                             .equals(artifactAssessmentRelatedArtifact);
                 }
                 if (maybeDerivedFrom.isPresent()) {
-                    Extension derivedFrom = maybeDerivedFrom.get();
+                    var derivedFrom = maybeDerivedFrom.get();
                     derivedFromRelatedArtifactCorrect = ((RelatedArtifact) derivedFrom.getValue())
                             .getResource()
                             .equals(derivedFromRelatedArtifactUrl);
@@ -1207,14 +1207,14 @@ public class ArtifactAssessment extends Basic {
             }
             int authorIndex = findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
             if (authorIndex != -1) {
-                Extension authorExt = contentExt.getExtension().get(authorIndex);
+                var authorExt = contentExt.getExtension().get(authorIndex);
                 authorCorrect =
                         ((Reference) authorExt.getValue()).getReference().equals(artifactAssessmentAuthor);
             }
         }
         int artifactIndex = findIndex(ARTIFACT, null, this.getExtension());
         if (artifactIndex != -1) {
-            Extension artifactExt = this.getExtension().get(artifactIndex);
+            var artifactExt = this.getExtension().get(artifactIndex);
             artifactCorrect =
                     ((Reference) artifactExt.getValue()).getReference().equals(artifactAssessmentTargetReference);
         }
@@ -1235,7 +1235,7 @@ public class ArtifactAssessment extends Basic {
         boolean artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1;
         int contentIndex = findIndex(CONTENT, null, this.getExtension());
         if (contentIndex != -1) {
-            Extension content = this.getExtension().get(contentIndex);
+            var content = this.getExtension().get(contentIndex);
             infoTypeExists = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, content.getExtension()) != -1;
             summaryExists = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, content.getExtension()) != -1;
             relatedArtifactExists =
@@ -1434,8 +1434,7 @@ public class ArtifactAssessment extends Basic {
             super(CONTENT);
         }
 
-        ArtifactAssessmentContentExtension setInfoType(ArtifactAssessmentContentInformationType infoType)
-                throws FHIRException {
+        ArtifactAssessmentContentExtension setInfoType(CodeType infoType) throws FHIRException {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {
@@ -1552,14 +1551,11 @@ public class ArtifactAssessment extends Basic {
                 isSpecialization = true,
                 profileOf = Extension.class)
         private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
-            public ArtifactAssessmentContentInformationTypeExtension(
-                    ArtifactAssessmentContentInformationType informationTypeCode) {
+            public ArtifactAssessmentContentInformationTypeExtension(CodeType informationTypeCode) {
                 super(INFOTYPE);
-                Enumeration<ArtifactAssessmentContentInformationType> informationType =
-                        new Enumeration<ArtifactAssessmentContentInformationType>(
-                                new ArtifactAssessmentContentInformationTypeEnumFactory());
-                informationType.setValue(informationTypeCode);
-                this.setValue(informationType);
+                // validate code
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.getValue());
+                this.setValue(informationTypeCode);
             }
         }
 

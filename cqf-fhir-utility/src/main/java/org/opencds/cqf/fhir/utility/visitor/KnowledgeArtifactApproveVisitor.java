@@ -89,7 +89,7 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                 return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactApproveVisitor
                         .createApprovalAssessment(
                                 id,
-                                artifactAssessmentType,
+                                new org.hl7.fhir.dstu3.model.CodeType(artifactAssessmentType),
                                 artifactAssessmentSummary.map(t -> new org.hl7.fhir.dstu3.model.MarkdownType(t)),
                                 artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
                                 artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
@@ -98,7 +98,7 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
             case R4:
                 return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactApproveVisitor.createApprovalAssessment(
                         id,
-                        artifactAssessmentType,
+                        new org.hl7.fhir.r4.model.CodeType(artifactAssessmentType),
                         artifactAssessmentSummary.map(t -> new org.hl7.fhir.r4.model.MarkdownType(t)),
                         artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.r4.model.CanonicalType(t)),
                         artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.r4.model.CanonicalType(t)),

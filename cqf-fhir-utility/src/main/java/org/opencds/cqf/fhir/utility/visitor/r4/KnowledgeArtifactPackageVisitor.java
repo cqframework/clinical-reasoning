@@ -372,38 +372,15 @@ public class KnowledgeArtifactPackageVisitor {
                         != null;
     }
 
+    // A simple compose element of a ValueSet must have a compose without an exclude element. Each
+    // element of the include cannot reference a value set or have a filter, and must have a system
+    // and enumerate concepts
     public boolean hasSimpleCompose(ValueSet valueSet) {
-        if (valueSet.hasCompose()) {
-            if (valueSet.getCompose().hasExclude()) {
-                return false;
-            }
-            for (ValueSet.ConceptSetComponent csc : valueSet.getCompose().getInclude()) {
-                if (csc.hasValueSet()) {
-                    // Cannot expand a compose that references a value set
-                    return false;
-                }
-
-                if (!csc.hasSystem()) {
-                    // Cannot expand a compose that does not have a system
-                    return false;
-                }
-
-                if (csc.hasFilter()) {
-                    // Cannot expand a compose that has a filter
-                    return false;
-                }
-
-                if (!csc.hasConcept()) {
-                    // Cannot expand a compose that does not enumerate concepts
-                    return false;
-                }
-            }
-
-            // If all includes are simple, the compose can be expanded
-            return true;
-        }
-
-        return false;
+        return valueSet.hasCompose()
+                && !valueSet.getCompose().hasExclude()
+                && valueSet.getCompose().getInclude().stream()
+                        .noneMatch(
+                                csc -> csc.hasValueSet() || csc.hasFilter() || !csc.hasSystem() || !csc.hasConcept());
     }
 
     private List<RelatedArtifact> getRelatedArtifactsWithPreservedExtensions(List<RelatedArtifact> deps) {
@@ -476,10 +453,9 @@ public class KnowledgeArtifactPackageVisitor {
             boolean isLeaf = !valueSet.hasCompose()
                     || (valueSet.hasCompose()
                             && valueSet.getCompose()
-                                            .getIncludeFirstRep()
-                                            .getValueSet()
-                                            .size()
-                                    == 0);
+                                    .getIncludeFirstRep()
+                                    .getValueSet()
+                                    .isEmpty());
             Optional<Extension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
                     .map(RelatedArtifact::getExtension)
                     .map(list -> {
@@ -555,7 +531,7 @@ public class KnowledgeArtifactPackageVisitor {
     }
 
     /**
-     * Removes any existing UsageContexts corresponding the the VSM specific extensions
+     * Removes any existing UsageContexts corresponding to the VSM specific extensions
      * @param usageContexts the list of usage contexts to modify
      */
     private List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {

@@ -57,7 +57,8 @@ public class R4MultiMeasureService {
             Bundle additionalData,
             Parameters parameters,
             String productLine,
-            String practitioner) {
+            String practitioner,
+            String reporter) {
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
@@ -95,6 +96,11 @@ public class R4MultiMeasureService {
 
             // add subject reference for non-individual reportTypes
             measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
+
+            // add reporter if available
+            if (reporter != null && !reporter.isEmpty()) {
+                measureReport.setReporter(r4MeasureServiceUtils.getReporter(reporter));
+            }
             // add id to measureReport
             initializeReport(measureReport);
 

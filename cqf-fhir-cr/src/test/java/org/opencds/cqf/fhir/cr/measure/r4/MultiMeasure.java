@@ -167,6 +167,7 @@ public class MultiMeasure {
         private Supplier<Bundle> operation;
         private String practitioner;
         private String productLine;
+        private String reporter;
 
         public MultiMeasure.When measureId(String measureId) {
             Either3<CanonicalType, IdType, Measure> eitherMeasure =
@@ -220,6 +221,11 @@ public class MultiMeasure {
             return this;
         }
 
+        public MultiMeasure.When reporter(String reporter) {
+            this.reporter = reporter;
+            return this;
+        }
+
         public MultiMeasure.When evaluate() {
             this.operation = () -> service.evaluate(
                     measureIds,
@@ -233,7 +239,8 @@ public class MultiMeasure {
                     additionalData,
                     parameters,
                     productLine,
-                    practitioner);
+                    practitioner,
+                    reporter);
             return this;
         }
 
@@ -390,6 +397,12 @@ public class MultiMeasure {
         public SelectedMeasureReport hasReportType(String reportType) {
             var ref = this.report().getType();
             assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
+
+        public SelectedMeasureReport hasReporter(String reporter) {
+            var ref = this.report().getReporter().getReference();
+            assertEquals(reporter, ref);
             return this;
         }
     }

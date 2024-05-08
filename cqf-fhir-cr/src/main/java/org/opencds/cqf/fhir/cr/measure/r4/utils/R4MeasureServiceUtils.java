@@ -33,6 +33,11 @@ public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final Repository repository;
 
+    private final String RESOURCE_TYPE_PRACTITIONER = "Practitioner";
+    private final String RESOURCE_TYPE_PRACTITIONER_ROLE = "PractitionerRole";
+    private final String RESOURCE_TYPE_ORGANIZATION = "Organization";
+    private final String RESOURCE_TYPE_LOCATION = "Location";
+
     public R4MeasureServiceUtils(Repository repository) {
         this.repository = repository;
     }
@@ -122,5 +127,28 @@ public class R4MeasureServiceUtils {
             }
         }
         return measureReport;
+    }
+
+    public Reference getReporter(String reporter) {
+        if (!reporter.isEmpty() && !reporter.contains("/")) {
+            throw new IllegalArgumentException(
+                    "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
+        }
+        Reference reference = null;
+        if (!reporter.isEmpty()) {
+            if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
+            } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
+            } else if (reporter.startsWith(RESOURCE_TYPE_ORGANIZATION)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_ORGANIZATION));
+            } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
+            } else {
+                throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
+            }
+        }
+
+        return reference;
     }
 }

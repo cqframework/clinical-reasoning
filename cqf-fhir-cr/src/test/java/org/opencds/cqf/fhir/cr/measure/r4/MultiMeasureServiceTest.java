@@ -512,7 +512,7 @@ public class MultiMeasureServiceTest {
     }
 
     @Test
-    void MultiMeasure_EightMeasures_Practitioner() {
+    void MultiMeasure_EightMeasures_PractitionerJustId() {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
@@ -545,6 +545,42 @@ public class MultiMeasureServiceTest {
                 .up()
                 .population("numerator")
                 .hasCount(0);
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_Practitioner() {
+        var when = GIVEN_REPO
+            .when()
+            .measureId("MinimalProportionNoBasisSingleGroup")
+            .periodStart("2024-01-01")
+            .periodEnd("2024-12-31")
+            .reportType("population")
+            .practitioner("Practitioner/tester")
+            .evaluate();
+
+        when.then()
+            .hasMeasureReportCount(1)
+            .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+            .hasReportType("Summary")
+            .hasSubjectReference("Practitioner/tester")
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1)
+            .up()
+            .population("denominator")
+            .hasCount(0)
+            .up()
+            .population("denominator-exclusion")
+            .hasCount(0)
+            .up()
+            .population("denominator-exception")
+            .hasCount(1)
+            .up()
+            .population("numerator-exclusion")
+            .hasCount(0)
+            .up()
+            .population("numerator")
+            .hasCount(0);
     }
 
     @Test

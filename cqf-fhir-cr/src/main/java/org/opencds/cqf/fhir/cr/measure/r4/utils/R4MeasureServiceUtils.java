@@ -135,10 +135,10 @@ public class R4MeasureServiceUtils {
         }
         Reference reference = null;
         if (!reporter.isEmpty()) {
-            if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
-                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
-            } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
+            if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
                 reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
+            } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
             } else if (reporter.startsWith(RESOURCE_TYPE_ORGANIZATION)) {
                 reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_ORGANIZATION));
             } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {

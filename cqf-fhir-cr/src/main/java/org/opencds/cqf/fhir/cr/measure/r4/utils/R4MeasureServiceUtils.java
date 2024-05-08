@@ -7,6 +7,10 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_LOCATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER_ROLE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
@@ -32,11 +36,6 @@ import org.opencds.cqf.fhir.utility.Ids;
 public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final Repository repository;
-
-    private final String RESOURCE_TYPE_PRACTITIONER = "Practitioner";
-    private final String RESOURCE_TYPE_PRACTITIONER_ROLE = "PractitionerRole";
-    private final String RESOURCE_TYPE_ORGANIZATION = "Organization";
-    private final String RESOURCE_TYPE_LOCATION = "Location";
 
     public R4MeasureServiceUtils(Repository repository) {
         this.repository = repository;

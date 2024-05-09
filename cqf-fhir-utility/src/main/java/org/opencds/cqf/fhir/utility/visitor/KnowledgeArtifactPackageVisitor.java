@@ -121,7 +121,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         // what is dependency, where did it originate? potentially the package?
     }
 
-    private void handleValueSetReferenceExtensions(
+    protected void handleValueSetReferenceExtensions(
             IDomainResource resource,
             IBaseBundle packagedBundle,
             Repository repository,
@@ -154,6 +154,10 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         repository,
                         terminologyEndpoint);
                 break;
+            default:
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported FHIR version: %s",
+                        resource.getStructureFhirVersionEnum().getFhirVersionString()));
         }
     }
 

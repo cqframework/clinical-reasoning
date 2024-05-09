@@ -1,18 +1,13 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -36,8 +31,10 @@ import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.ResourceClassMapHelper;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
@@ -229,7 +226,7 @@ public class KnowledgeArtifactPackageVisitor {
         Library rootSpecificationLibrary = getRootSpecificationLibrary(bundleEntries);
         if (rootSpecificationLibrary != null) {
             Extension expansionParamsExtension =
-                    rootSpecificationLibrary.getExtensionByUrl(KnowledgeArtifactAdapter.expansionParametersUrl);
+                    rootSpecificationLibrary.getExtensionByUrl(Constants.EXPANSION_PARAMETERS_URL);
             if (expansionParamsExtension != null && expansionParamsExtension.hasValue()) {
                 Reference expansionReference = (Reference) expansionParamsExtension.getValue();
                 expansionParams = getExpansionParams(rootSpecificationLibrary, expansionReference.getReference());
@@ -263,19 +260,16 @@ public class KnowledgeArtifactPackageVisitor {
                                     exts -> {
                                         exts.stream()
                                                 .filter(ext -> ext.getUrl()
-                                                        .equalsIgnoreCase(
-                                                                KnowledgeArtifactAdapter.valueSetConditionUrl))
+                                                        .equalsIgnoreCase(Constants.VALUE_SET_CONDITION_URL))
                                                 .forEach(ext -> tryAddCondition(
                                                         usageContexts, (CodeableConcept) ext.getValue()));
                                     });
                 }
                 // update Priority
                 UsageContext priority = getOrCreateUsageContext(
-                        usageContexts,
-                        KnowledgeArtifactAdapter.usPhContextTypeUrl,
-                        KnowledgeArtifactAdapter.valueSetPriorityCode);
-                Optional<Extension> ext = maybeVSRelatedArtifact.map(
-                        ra -> ra.getExtensionByUrl(KnowledgeArtifactAdapter.valueSetPriorityUrl));
+                        usageContexts, KnowledgeArtifactAdapter.usPhContextTypeUrl, Constants.VALUE_SET_PRIORITY_CODE);
+                Optional<Extension> ext =
+                        maybeVSRelatedArtifact.map(ra -> ra.getExtensionByUrl(Constants.VALUE_SET_PRIORITY_URL));
                 if (ext.isPresent()) {
                     priority.setValue(ext.get().getValue());
                 } else {
@@ -288,10 +282,10 @@ public class KnowledgeArtifactPackageVisitor {
         });
     }
 
-    public void expandValueSet(
+    protected void expandValueSet(
             ValueSet valueSet, Parameters expansionParameters, Optional<IBaseResource> terminologyEndpoint) {
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
-        Extension authoritativeSource = valueSet.getExtensionByUrl(KnowledgeArtifactAdapter.authoritativeSourceUrl);
+        Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);
         String authoritativeSourceUrl = authoritativeSource != null && authoritativeSource.hasValue()
                 ? authoritativeSource.getValue().primitiveValue()
                 : valueSet.getUrl();
@@ -353,20 +347,20 @@ public class KnowledgeArtifactPackageVisitor {
         }
     }
 
-    public boolean isVSMAuthoredValueSet(ValueSet valueSet) {
+    protected boolean isVSMAuthoredValueSet(ValueSet valueSet) {
         return valueSet.hasMeta()
                 && valueSet.getMeta().hasTag()
                 && valueSet.getMeta()
                                 .getTag(
-                                        KnowledgeArtifactAdapter.vsmWorkflowCodesCodeSystemUrl,
-                                        KnowledgeArtifactAdapter.vsmValueSetTagVSMAuthoredCode)
+                                        Constants.VSM_WORKFLOW_CODES_CODE_SYSTEM_URL,
+                                        Constants.VSM_VALUE_SET_TAG_VSM_AUTHORED_CODE)
                         != null;
     }
 
     // A simple compose element of a ValueSet must have a compose without an exclude element. Each
     // element of the include cannot reference a value set or have a filter, and must have a system
     // and enumerate concepts
-    public boolean hasSimpleCompose(ValueSet valueSet) {
+    protected boolean hasSimpleCompose(ValueSet valueSet) {
         return valueSet.hasCompose()
                 && !valueSet.getCompose().hasExclude()
                 && valueSet.getCompose().getInclude().stream()
@@ -374,21 +368,18 @@ public class KnowledgeArtifactPackageVisitor {
                                 csc -> csc.hasValueSet() || csc.hasFilter() || !csc.hasSystem() || !csc.hasConcept());
     }
 
-    private List<RelatedArtifact> getRelatedArtifactsWithPreservedExtensions(List<RelatedArtifact> deps) {
+    protected List<RelatedArtifact> getRelatedArtifactsWithPreservedExtensions(List<RelatedArtifact> deps) {
         return deps.stream()
-                .filter(ra -> KnowledgeArtifactAdapter.preservedExtensionUrls.stream()
-                        .anyMatch(url -> ra.getExtension().stream()
-                                .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
+                .filter(ra -> Constants.PRESERVED_EXTENSION_URLS.stream().anyMatch(url -> ra.getExtension().stream()
+                        .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
                 .collect(Collectors.toList());
     }
 
-    private static Library getRootSpecificationLibrary(List<Bundle.BundleEntryComponent> bundleEntries) {
+    protected static Library getRootSpecificationLibrary(List<Bundle.BundleEntryComponent> bundleEntries) {
         Optional<Library> rootSpecLibrary = bundleEntries.stream()
                 .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
                 .map(entry -> ((Library) entry.getResource()))
-                .filter(entry -> entry.getType()
-                                .hasCoding(
-                                        KnowledgeArtifactAdapter.libraryType, KnowledgeArtifactAdapter.assetCollection)
+                .filter(entry -> entry.getType().hasCoding(Constants.LIBRARY_TYPE, Constants.ASSET_COLLECTION)
                         && entry.getUseContext().stream()
                                 .allMatch(useContext -> (useContext
                                                         .getCode()
@@ -400,8 +391,7 @@ public class KnowledgeArtifactPackageVisitor {
                                                         .equals("reporting")
                                                 && useContext
                                                         .getValueCodeableConcept()
-                                                        .hasCoding(
-                                                                KnowledgeArtifactAdapter.usPhContextUrl, "triggering"))
+                                                        .hasCoding(Constants.US_PH_CONTEXT_URL, "triggering"))
                                         || (useContext
                                                         .getCode()
                                                         .getSystem()
@@ -412,48 +402,46 @@ public class KnowledgeArtifactPackageVisitor {
                                                         .equals("specification-type")
                                                 && useContext
                                                         .getValueCodeableConcept()
-                                                        .hasCoding(
-                                                                KnowledgeArtifactAdapter.usPhContextUrl, "program"))))
+                                                        .hasCoding(Constants.US_PH_CONTEXT_URL, "program"))))
                 .findFirst();
         return rootSpecLibrary.orElse(null);
     }
 
-    private static Parameters getExpansionParams(Library rootSpecificationLibrary, String reference) {
+    protected static Parameters getExpansionParams(Library rootSpecificationLibrary, String reference) {
         Optional<Resource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
                 .filter(contained -> contained.getId().equals(reference))
                 .findFirst();
         return (Parameters) expansionParamResource.orElse(null);
     }
 
-    private void checkIfValueSetNeedsCondition(
-            MetadataResource resource, RelatedArtifact relatedArtifact, Repository repository)
+    protected void checkIfValueSetNeedsCondition(
+            IBaseResource resource, RelatedArtifact relatedArtifact, Repository repository)
             throws UnprocessableEntityException {
         if (resource == null
                 && relatedArtifact != null
                 && relatedArtifact.hasResource()
                 && Canonicals.getResourceType(relatedArtifact.getResource().getReference())
-                        .equals("ValueSet")) {
-            List<MetadataResource> searchResults = getResourcesFromBundle(
-                    searchResourceByUrl(relatedArtifact.getResource().getReference(), repository));
-            if (searchResults.size() > 0) {
+                        .equals(ResourceType.ValueSet.name())) {
+            List<IBaseResource> searchResults =
+                    BundleHelper.getEntryResources(SearchHelper.searchRepositoryByCanonicalWithPaging(
+                            repository, relatedArtifact.getResource().getReference()));
+            if (!searchResults.isEmpty()) {
                 resource = searchResults.get(0);
             }
         }
-        if (resource != null && resource.getResourceType() == ResourceType.ValueSet) {
+        if (resource != null && resource.fhirType().equals(ResourceType.ValueSet.name())) {
             ValueSet valueSet = (ValueSet) resource;
             boolean isLeaf = !valueSet.hasCompose()
                     || (valueSet.hasCompose()
                             && valueSet.getCompose()
-                                            .getIncludeFirstRep()
-                                            .getValueSet()
-                                            .size()
-                                    == 0);
+                                    .getIncludeFirstRep()
+                                    .getValueSet()
+                                    .isEmpty());
             Optional<Extension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
                     .map(RelatedArtifact::getExtension)
                     .map(list -> {
                         return list.stream()
-                                .filter(ext ->
-                                        ext.getUrl().equalsIgnoreCase(KnowledgeArtifactAdapter.valueSetConditionUrl))
+                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_CONDITION_URL))
                                 .findFirst()
                                 .orElse(null);
                     });
@@ -461,8 +449,7 @@ public class KnowledgeArtifactPackageVisitor {
                     .map(RelatedArtifact::getExtension)
                     .map(list -> {
                         return list.stream()
-                                .filter(ext ->
-                                        ext.getUrl().equalsIgnoreCase(KnowledgeArtifactAdapter.valueSetPriorityUrl))
+                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_PRIORITY_URL))
                                 .findFirst()
                                 .orElse(null);
                     });
@@ -481,54 +468,13 @@ public class KnowledgeArtifactPackageVisitor {
         }
     }
 
-    private List<MetadataResource> getResourcesFromBundle(Bundle bundle) {
-        List<MetadataResource> resourceList = new ArrayList<>();
-
-        if (!bundle.getEntryFirstRep().isEmpty()) {
-            List<Bundle.BundleEntryComponent> referencedResourceEntries = bundle.getEntry();
-            for (Bundle.BundleEntryComponent entry : referencedResourceEntries) {
-                if (entry.hasResource() && entry.getResource() instanceof MetadataResource) {
-                    MetadataResource referencedResource = (MetadataResource) entry.getResource();
-                    resourceList.add(referencedResource);
-                }
-            }
-        }
-
-        return resourceList;
-    }
-
-    /**
-     * search by versioned Canonical URL
-     * @param url canonical URL of the form www.example.com/Patient/123|0.1
-     * @param repository to do the searching
-     * @return a bundle of results
-     */
-    private Bundle searchResourceByUrl(String url, Repository repository) {
-        Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-
-        List<IQueryParameterType> urlList = new ArrayList<>();
-        urlList.add(new UriParam(Canonicals.getUrl(url)));
-        searchParams.put("url", urlList);
-
-        List<IQueryParameterType> versionList = new ArrayList<>();
-        String version = Canonicals.getVersion(url);
-        if (version != null && !version.isEmpty()) {
-            versionList.add(new TokenParam(Canonicals.getVersion((url))));
-            searchParams.put("version", versionList);
-        }
-
-        Bundle searchResultsBundle = (Bundle) repository.search(
-                Bundle.class, ResourceClassMapHelper.getClass(Canonicals.getResourceType(url)), searchParams);
-        return searchResultsBundle;
-    }
-
     /**
      * Removes any existing UsageContexts corresponding to the VSM specific extensions
      * @param usageContexts the list of usage contexts to modify
      */
-    private List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
-        List<String> useContextCodesToReplace = Collections.unmodifiableList(Arrays.asList(
-                KnowledgeArtifactAdapter.valueSetConditionCode, KnowledgeArtifactAdapter.valueSetPriorityCode));
+    protected List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
+        List<String> useContextCodesToReplace = Collections.unmodifiableList(
+                Arrays.asList(Constants.VALUE_SET_CONDITION_CODE, Constants.VALUE_SET_PRIORITY_CODE));
         return usageContexts.stream()
                 // remove any useContexts which need to be replaced
                 .filter(useContext -> !useContextCodesToReplace.stream()
@@ -536,18 +482,17 @@ public class KnowledgeArtifactPackageVisitor {
                 .collect(Collectors.toList());
     }
 
-    private void tryAddCondition(List<UsageContext> usageContexts, CodeableConcept condition) {
+    protected void tryAddCondition(List<UsageContext> usageContexts, CodeableConcept condition) {
         boolean focusAlreadyExists = usageContexts.stream()
                 .anyMatch(u -> u.getCode().getSystem().equals(KnowledgeArtifactAdapter.contextTypeUrl)
-                        && u.getCode().getCode().equals(KnowledgeArtifactAdapter.valueSetConditionCode)
+                        && u.getCode().getCode().equals(Constants.VALUE_SET_CONDITION_CODE)
                         && u.getValueCodeableConcept()
                                 .hasCoding(
                                         condition.getCoding().get(0).getSystem(),
                                         condition.getCoding().get(0).getCode()));
         if (!focusAlreadyExists) {
             UsageContext newFocus = new UsageContext(
-                    new Coding(
-                            KnowledgeArtifactAdapter.contextUrl, KnowledgeArtifactAdapter.valueSetConditionCode, null),
+                    new Coding(KnowledgeArtifactAdapter.contextUrl, Constants.VALUE_SET_CONDITION_CODE, null),
                     condition);
             newFocus.setValue(condition);
             usageContexts.add(newFocus);
@@ -563,7 +508,7 @@ public class KnowledgeArtifactPackageVisitor {
      * @param code the usage.code.code to find / create
      * @return the found / created usageContext
      */
-    private UsageContext getOrCreateUsageContext(List<UsageContext> usageContexts, String system, String code) {
+    protected UsageContext getOrCreateUsageContext(List<UsageContext> usageContexts, String system, String code) {
         return usageContexts.stream()
                 .filter(useContext -> useContext.getCode().getSystem().equals(system)
                         && useContext.getCode().getCode().equals(code))

@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -238,24 +236,8 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
-    String usPhContextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
     String contextTypeUrl = "http://terminology.hl7.org/CodeSystem/usage-context-type";
     String contextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
-    String valueSetConditionCode = "focus";
-    String valueSetPriorityCode = "priority";
-    String valueSetConditionUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
-    String valueSetPriorityUrl = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
-    String libraryType = "http://terminology.hl7.org/CodeSystem/library-type";
-    String assetCollection = "asset-collection";
-    String expansionParametersUrl = "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
-
-    // can't use List.of for Android 26 compatibility
-    List<String> preservedExtensionUrls =
-            Collections.unmodifiableList(Arrays.asList(valueSetPriorityUrl, valueSetConditionUrl));
-
-    String authoritativeSourceUrl = "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
-    String vsmWorkflowCodesCodeSystemUrl = "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes";
-    String vsmValueSetTagVSMAuthoredCode = "vsm-authored";
 }

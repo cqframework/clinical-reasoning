@@ -31,10 +31,8 @@ import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
@@ -243,7 +241,7 @@ public class KnowledgeArtifactPackageVisitor {
                         .filter(ra -> Canonicals.getUrl(ra.getResource().getReference())
                                 .equals(valueSet.getUrl()))
                         .findFirst();
-                checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact.orElse(null), repository);
+                checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact.orElse(null));
                 // If leaf valueset
                 if (!valueSet.hasCompose()
                         || (valueSet.hasCompose()
@@ -414,21 +412,8 @@ public class KnowledgeArtifactPackageVisitor {
         return (Parameters) expansionParamResource.orElse(null);
     }
 
-    protected void checkIfValueSetNeedsCondition(
-            IBaseResource resource, RelatedArtifact relatedArtifact, Repository repository)
+    protected void checkIfValueSetNeedsCondition(IBaseResource resource, RelatedArtifact relatedArtifact)
             throws UnprocessableEntityException {
-        if (resource == null
-                && relatedArtifact != null
-                && relatedArtifact.hasResource()
-                && Canonicals.getResourceType(relatedArtifact.getResource().getReference())
-                        .equals(ResourceType.ValueSet.name())) {
-            List<IBaseResource> searchResults =
-                    BundleHelper.getEntryResources(SearchHelper.searchRepositoryByCanonicalWithPaging(
-                            repository, relatedArtifact.getResource().getReference()));
-            if (!searchResults.isEmpty()) {
-                resource = searchResults.get(0);
-            }
-        }
         if (resource != null && resource.fhirType().equals(ResourceType.ValueSet.name())) {
             ValueSet valueSet = (ValueSet) resource;
             boolean isLeaf = !valueSet.hasCompose()

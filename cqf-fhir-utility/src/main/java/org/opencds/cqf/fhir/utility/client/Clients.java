@@ -7,13 +7,17 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class provides utility functions for creating IGenericClients and setting up authentication
@@ -242,6 +246,20 @@ public class Clients {
         if (token != null) {
             BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(token);
             client.registerInterceptor(authInterceptor);
+        }
+    }
+
+    public static void registerAdditionalRequestHeadersAuth(IGenericClient client, String username, String apiKey) {
+        checkNotNull(client, "client is required");
+
+        if (username != null && apiKey != null) {
+            String authString = StringUtils.join(
+                    "Basic ",
+                    Base64.getEncoder()
+                            .encodeToString(
+                                    StringUtils.join(username, ":", apiKey).getBytes(StandardCharsets.UTF_8)));
+            AdditionalRequestHeadersInterceptor authInterceptor = new AdditionalRequestHeadersInterceptor();
+            authInterceptor.addHeaderValue("Authorization", authString);
         }
     }
 

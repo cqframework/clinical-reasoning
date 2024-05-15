@@ -177,14 +177,14 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
             eventData.getProfile().stream()
-            .filter(profile -> profile.hasValue())
-            .forEach(profile -> {
-                references.add(new DependencyInfo(
-                        referenceSource,
-                        profile.getValue(),
-                        profile.getExtension(),
-                        (reference) -> profile.setValue(reference)));
-            });
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> {
+                        references.add(new DependencyInfo(
+                                referenceSource,
+                                profile.getValue(),
+                                profile.getExtension(),
+                                (reference) -> profile.setValue(reference)));
+                    });
             // trigger[].dataRequirement[].codeFilter[].valueSet
             eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
                 references.add(new DependencyInfo(
@@ -222,14 +222,14 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
             // ..input[].profile[]
             // ..output[].profile[]
             inputOrOutput.getProfile().stream()
-            .filter(profile -> profile.hasValue())
-            .forEach(profile -> {
-                references.add(new DependencyInfo(
-                        referenceSource,
-                        profile.getValue(),
-                        profile.getExtension(),
-                        (reference) -> profile.setValue(reference)));
-            });
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> {
+                        references.add(new DependencyInfo(
+                                referenceSource,
+                                profile.getValue(),
+                                profile.getExtension(),
+                                (reference) -> profile.setValue(reference)));
+                    });
             // input[].codeFilter[].valueSet
             // output[].codeFilter[].valueSet
             inputOrOutput.getCodeFilter().stream()

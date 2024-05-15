@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -173,18 +171,16 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
             eventData.getProfile().stream()
-            .filter(profile -> profile.hasValue())
-            .forEach(profile -> {
-                references.add(new DependencyInfo(
-                        referenceSource,
-                        profile.getValue(),
-                        profile.getExtension(),
-                        (reference) -> profile.setValue(reference)));
-            });
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> {
+                        references.add(new DependencyInfo(
+                                referenceSource,
+                                profile.getValue(),
+                                profile.getExtension(),
+                                (reference) -> profile.setValue(reference)));
+                    });
             // trigger[].dataRequirement[].codeFilter[].valueSet
-            eventData.getCodeFilter().stream()
-            .filter(cf -> cf.hasValueSet())
-            .forEach(cf -> {
+            eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         cf.getValueSet(),
@@ -223,14 +219,14 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     // ..input[].profile[]
                     // ..output[].profile[]
                     inputOrOutput.getProfile().stream()
-                    .filter(profile -> profile.hasValue())
-                    .forEach(profile -> {
-                        references.add(new DependencyInfo(
-                                referenceSource,
-                                profile.getValue(),
-                                profile.getExtension(),
-                                (reference) -> profile.setValue(reference)));
-                    });
+                            .filter(profile -> profile.hasValue())
+                            .forEach(profile -> {
+                                references.add(new DependencyInfo(
+                                        referenceSource,
+                                        profile.getValue(),
+                                        profile.getExtension(),
+                                        (reference) -> profile.setValue(reference)));
+                            });
                     // input[].codeFilter[].valueSet
                     // output[].codeFilter[].valueSet
                     inputOrOutput.getCodeFilter().stream()

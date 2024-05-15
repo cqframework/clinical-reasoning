@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -34,15 +33,13 @@ public class R4MultiMeasureService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
-    private final CareGapsProperties careGapsProperties;
+    private String serverBase;
 
     public R4MultiMeasureService(
-            Repository repository,
-            MeasureEvaluationOptions measureEvaluationOptions,
-            CareGapsProperties careGapsProperties) {
+            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, String serverBase) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
-        this.careGapsProperties = careGapsProperties;
+        this.serverBase = serverBase;
     }
 
     public Bundle evaluate(
@@ -57,7 +54,8 @@ public class R4MultiMeasureService {
             Bundle additionalData,
             Parameters parameters,
             String productLine,
-            String practitioner) {
+            String practitioner,
+            String reporter) {
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
@@ -95,11 +93,16 @@ public class R4MultiMeasureService {
 
             // add subject reference for non-individual reportTypes
             measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
+
+            // add reporter if available
+            if (reporter != null && !reporter.isEmpty()) {
+                measureReport.setReporter(r4MeasureServiceUtils.getReporter(reporter));
+            }
             // add id to measureReport
             initializeReport(measureReport);
 
             // add report to bundle
-            bundle.addEntry(getBundleEntry(careGapsProperties.getMyFhirBaseUrl(), measureReport));
+            bundle.addEntry(getBundleEntry(serverBase, measureReport));
 
             // progress feedback
             var measureUrl = measureReport.getMeasure();

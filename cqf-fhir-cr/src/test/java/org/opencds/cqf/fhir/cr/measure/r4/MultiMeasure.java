@@ -34,7 +34,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -89,7 +88,7 @@ public class MultiMeasure {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
-        private CareGapsProperties careGapsProperties;
+        private String serverBase;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -104,11 +103,7 @@ public class MultiMeasure {
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
-            this.careGapsProperties = new CareGapsProperties();
-
-            this.careGapsProperties.setCareGapsReporter("alphora");
-            this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
-            this.careGapsProperties.setMyFhirBaseUrl("http://localhost");
+            this.serverBase = "http://localhost";
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -128,8 +123,8 @@ public class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.Given careGapsProperties(CareGapsProperties careGapsProperties) {
-            this.careGapsProperties = careGapsProperties;
+        public MultiMeasure.Given serverBase(String serverBase) {
+            this.serverBase = serverBase;
             return this;
         }
 
@@ -138,7 +133,7 @@ public class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, careGapsProperties);
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase);
         }
 
         public MultiMeasure.When when() {
@@ -167,6 +162,7 @@ public class MultiMeasure {
         private Supplier<Bundle> operation;
         private String practitioner;
         private String productLine;
+        private String reporter;
 
         public MultiMeasure.When measureId(String measureId) {
             Either3<CanonicalType, IdType, Measure> eitherMeasure =
@@ -220,6 +216,11 @@ public class MultiMeasure {
             return this;
         }
 
+        public MultiMeasure.When reporter(String reporter) {
+            this.reporter = reporter;
+            return this;
+        }
+
         public MultiMeasure.When evaluate() {
             this.operation = () -> service.evaluate(
                     measureIds,
@@ -233,7 +234,8 @@ public class MultiMeasure {
                     additionalData,
                     parameters,
                     productLine,
-                    practitioner);
+                    practitioner,
+                    reporter);
             return this;
         }
 
@@ -390,6 +392,12 @@ public class MultiMeasure {
         public SelectedMeasureReport hasReportType(String reportType) {
             var ref = this.report().getType();
             assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
+
+        public SelectedMeasureReport hasReporter(String reporter) {
+            var ref = this.report().getReporter().getReference();
+            assertEquals(reporter, ref);
             return this;
         }
     }

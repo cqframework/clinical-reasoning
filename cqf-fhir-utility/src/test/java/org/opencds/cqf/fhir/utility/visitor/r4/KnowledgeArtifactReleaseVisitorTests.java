@@ -127,6 +127,8 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-lrtc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-mrtc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdtc|" + existingVersion,
+                "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdltc",
+                "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdmtc",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",

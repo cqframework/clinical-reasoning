@@ -173,7 +173,9 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
             String referenceSource) {
         action.getTriggerDefinition().stream().map(t -> t.getEventData()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
-            eventData.getProfile().forEach(profile -> {
+            eventData.getProfile().stream()
+            .filter(UriType::hasValue)
+            .forEach(profile -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         profile.getValue(),
@@ -188,7 +190,9 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         Stream.concat(action.getInput().stream(), action.getOutput().stream()).forEach(inputOrOutput -> {
             // ..input[].profile[]
             // ..output[].profile[]
-            inputOrOutput.getProfile().forEach(profile -> {
+            inputOrOutput.getProfile().stream()
+            .filter(UriType::hasValue)
+            .forEach(profile -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         profile.getValue(),
@@ -197,7 +201,9 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
             });
             // input[].codeFilter[].valueSet
             // output[].codeFilter[].valueSet
-            inputOrOutput.getCodeFilter().forEach(cf -> {
+            inputOrOutput.getCodeFilter().stream()
+            .filter(cf -> cf.hasValueSet())
+            .forEach(cf -> {
                 references.add(dependencyFromDataRequirementCodeFilter(cf));
             });
         });

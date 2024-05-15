@@ -176,7 +176,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
             String referenceSource) {
         action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
-            eventData.getProfile().forEach(profile -> {
+            eventData.getProfile().stream()
+            .filter(profile -> profile.hasValue())
+            .forEach(profile -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         profile.getValue(),
@@ -219,7 +221,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         Stream.concat(action.getInput().stream(), action.getOutput().stream()).forEach(inputOrOutput -> {
             // ..input[].profile[]
             // ..output[].profile[]
-            inputOrOutput.getProfile().forEach(profile -> {
+            inputOrOutput.getProfile().stream()
+            .filter(profile -> profile.hasValue())
+            .forEach(profile -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         profile.getValue(),

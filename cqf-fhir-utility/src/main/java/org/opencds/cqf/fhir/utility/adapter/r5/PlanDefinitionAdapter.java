@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -170,7 +172,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
             String referenceSource) {
         action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
-            eventData.getProfile().forEach(profile -> {
+            eventData.getProfile().stream()
+            .filter(profile -> profile.hasValue())
+            .forEach(profile -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         profile.getValue(),
@@ -178,7 +182,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                         (reference) -> profile.setValue(reference)));
             });
             // trigger[].dataRequirement[].codeFilter[].valueSet
-            eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
+            eventData.getCodeFilter().stream()
+            .filter(cf -> cf.hasValueSet())
+            .forEach(cf -> {
                 references.add(new DependencyInfo(
                         referenceSource,
                         cf.getValueSet(),
@@ -216,7 +222,9 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                 .forEach(inputOrOutput -> {
                     // ..input[].profile[]
                     // ..output[].profile[]
-                    inputOrOutput.getProfile().forEach(profile -> {
+                    inputOrOutput.getProfile().stream()
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> {
                         references.add(new DependencyInfo(
                                 referenceSource,
                                 profile.getValue(),

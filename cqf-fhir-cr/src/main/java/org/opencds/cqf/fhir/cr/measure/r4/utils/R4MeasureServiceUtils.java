@@ -7,6 +7,10 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_LOCATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER_ROLE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
@@ -122,5 +126,28 @@ public class R4MeasureServiceUtils {
             }
         }
         return measureReport;
+    }
+
+    public Reference getReporter(String reporter) {
+        if (!reporter.isEmpty() && !reporter.contains("/")) {
+            throw new IllegalArgumentException(
+                    "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
+        }
+        Reference reference = null;
+        if (!reporter.isEmpty()) {
+            if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
+            } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
+            } else if (reporter.startsWith(RESOURCE_TYPE_ORGANIZATION)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_ORGANIZATION));
+            } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {
+                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
+            } else {
+                throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
+            }
+        }
+
+        return reference;
     }
 }

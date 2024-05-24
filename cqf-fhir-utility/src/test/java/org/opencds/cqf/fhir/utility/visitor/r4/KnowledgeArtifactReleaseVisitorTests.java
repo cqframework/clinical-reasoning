@@ -517,11 +517,11 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_preserves_extensions() {
         var bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                "Bundle-small-approved-draft.json.json"));
+                "Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         var releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         var orginalLibrary = spyRepository
-                .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         var testLibrary = orginalLibrary.copy();
         var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
@@ -529,7 +529,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
         var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
-                .filter(entry -> entry.getResponse().getLocation().contains("Library/ReleaseSpecificationLibrary"))
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
         var releasedLibrary = spyRepository.read(

@@ -516,8 +516,8 @@ class KnowledgeArtifactReleaseVisitorTests {
 
     @Test
     void release_preserves_extensions() {
-        var bundle = (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                "Bundle-small-approved-draft.json"));
+        var bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         var releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         var orginalLibrary = spyRepository

@@ -117,7 +117,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                                     new InternalErrorException("Owned resource reference not found during release"));
                     var adapter = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                             .createKnowledgeArtifactAdapter(resource);
-                    String reference = String.format("%s|%s", adapter.getUrl(), adapter.getVersion());
+                    var reference = String.format("%s|%s", adapter.getUrl(), adapter.getVersion());
                     KnowledgeArtifactAdapter.setRelatedArtifactReference(component, reference);
                 } else if (Canonicals.getVersion(relatedArtifactReference) == null
                         || Canonicals.getVersion(relatedArtifactReference).isEmpty()) {
@@ -142,14 +142,11 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             ? String.format("%s|%s", adapter.getUrl(), adapter.getVersion())
                             : adapter.getUrl();
                     dependency.setReference(updatedReference);
-                } else {
-                    if (Canonicals.getVersion(dependency.getReference()) == null
-                            || Canonicals.getVersion(dependency.getReference()).isEmpty()) {
-                        // TODO: update when we support expansionParameters and requireVersionedDependencies
-                        String updatedReference = tryUpdateReferenceToLatestActiveVersion(
-                                dependency.getReference(), repository, artifactAdapter.getUrl());
-                        dependency.setReference(updatedReference);
-                    }
+                } else if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
+                    // TODO: update when we support expansionParameters and requireVersionedDependencies
+                    String updatedReference = tryUpdateReferenceToLatestActiveVersion(
+                            dependency.getReference(), repository, artifactAdapter.getUrl());
+                    dependency.setReference(updatedReference);
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact
                 if (!artifactAdapter.getUrl().equals(rootLibraryAdapter.getUrl())) {
@@ -177,7 +174,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 distinctResolvedRelatedArtifacts.add(resolvedRelatedArtifact);
                 // preserve Extensions if found
                 originalDependenciesWithExtensions.stream()
-                        .filter(originalDep -> originalDep.getReference().equals(relatedArtifactReference))
+                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference()).equals(Canonicals.getUrl(relatedArtifactReference)) && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact).equalsIgnoreCase("depends-on"))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())

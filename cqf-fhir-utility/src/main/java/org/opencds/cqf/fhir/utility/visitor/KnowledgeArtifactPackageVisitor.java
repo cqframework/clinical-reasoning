@@ -81,7 +81,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         && !endpointUri.get().isEmpty())
                 || endpoint.isPresent()) {
             throw new NotImplementedOperationException(
-                    "This repository is not implementing custom Content and Terminology endpoints at this time");
+                    "This repository is not implementing custom Content and endpoints at this time");
         }
         if (packageOnly.isPresent()) {
             throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
@@ -134,7 +134,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         (org.hl7.fhir.dstu3.model.MetadataResource) resource,
                         ((org.hl7.fhir.dstu3.model.Bundle) packagedBundle).getEntry(),
                         repository,
-                        terminologyEndpoint);
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.dstu3.model.Endpoint) te));
                 break;
             case R4:
                 org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor packageVisitorR4 =
@@ -143,7 +143,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         (org.hl7.fhir.r4.model.MetadataResource) resource,
                         ((org.hl7.fhir.r4.model.Bundle) packagedBundle).getEntry(),
                         repository,
-                        terminologyEndpoint);
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.r4.model.Endpoint) te));
                 break;
             case R5:
                 org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor packageVisitorR5 =
@@ -152,7 +152,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         (org.hl7.fhir.r5.model.MetadataResource) resource,
                         ((org.hl7.fhir.r5.model.Bundle) packagedBundle).getEntry(),
                         repository,
-                        terminologyEndpoint);
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.r5.model.Endpoint) te));
                 break;
             default:
                 throw new IllegalArgumentException(String.format(

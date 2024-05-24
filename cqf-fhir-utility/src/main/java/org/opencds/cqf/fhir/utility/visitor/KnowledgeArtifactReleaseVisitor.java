@@ -174,7 +174,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 distinctResolvedRelatedArtifacts.add(resolvedRelatedArtifact);
                 // preserve Extensions if found
                 originalDependenciesWithExtensions.stream()
-                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference()).equals(Canonicals.getUrl(relatedArtifactReference)) && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact).equalsIgnoreCase("depends-on"))
+                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
+                                        .equals(Canonicals.getUrl(relatedArtifactReference))
+                                && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
+                                        .equalsIgnoreCase("depends-on"))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())

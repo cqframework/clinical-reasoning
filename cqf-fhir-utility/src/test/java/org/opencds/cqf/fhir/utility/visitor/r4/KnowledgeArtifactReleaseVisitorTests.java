@@ -517,7 +517,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_preserves_extensions() {
         var bundle = (Bundle) jsonParser.parseResource(
-            KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
         spyRepository.transaction(bundle);
         var releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         var orginalLibrary = spyRepository
@@ -531,18 +531,27 @@ class KnowledgeArtifactReleaseVisitorTests {
                 parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
         var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
-            .filter(entry -> entry.getResponse().getLocation().contains("Library/ReleaseSpecificationLibrary"))
-            .findFirst();
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/ReleaseSpecificationLibrary"))
+                .findFirst();
         assertTrue(maybeLib.isPresent());
         var releasedLibrary = spyRepository.read(
-            Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        for (final var originalRelatedArtifact: orginalLibrary.getRelatedArtifact()) {
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        for (final var originalRelatedArtifact : orginalLibrary.getRelatedArtifact()) {
             releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
-                if (Canonicals.getUrl(releasedRelatedArtifact.getResource()).equals(Canonicals.getUrl(originalRelatedArtifact.getResource())) 
-                && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
-                    assertEquals(releasedRelatedArtifact.getExtension().size(), originalRelatedArtifact.getExtension().size());
+                if (Canonicals.getUrl(releasedRelatedArtifact.getResource())
+                                .equals(Canonicals.getUrl(originalRelatedArtifact.getResource()))
+                        && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
+                    assertEquals(
+                            releasedRelatedArtifact.getExtension().size(),
+                            originalRelatedArtifact.getExtension().size());
                     releasedRelatedArtifact.getExtension().forEach(ext -> {
-                        assertEquals(originalRelatedArtifact.getExtensionsByUrl(ext.getUrl()).size(),releasedRelatedArtifact.getExtensionsByUrl(ext.getUrl()).size());
+                        assertEquals(
+                                originalRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size(),
+                                releasedRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size());
                     });
                 }
             });

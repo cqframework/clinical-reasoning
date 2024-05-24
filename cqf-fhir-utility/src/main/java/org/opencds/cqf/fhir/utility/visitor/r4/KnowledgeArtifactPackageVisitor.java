@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -25,14 +26,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.EndpointCredentials;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
@@ -326,12 +325,12 @@ public class KnowledgeArtifactPackageVisitor {
             }
             valueSet.setExpansion(expansion);
         } else {
-            Optional<StringType> username = Optional.empty();
-            Optional<StringType> apiKey = Optional.empty();
+            Optional<String> username = Optional.empty();
+            Optional<String> apiKey = Optional.empty();
             if (terminologyEndpoint.isPresent()) {
-                EndpointCredentials endPnt = (EndpointCredentials) terminologyEndpoint.get();
-                username = Optional.of(endPnt.getVsacUsername());
-                apiKey = Optional.of(endPnt.getApiKey());
+                Endpoint endPnt = (Endpoint) terminologyEndpoint.get();
+                username = Optional.of(endPnt.getExtensionByUrl(Constants.VSAC_USERNAME).getValue().toString());
+                apiKey = Optional.of(endPnt.getExtensionByUrl(Constants.APIKEY).getValue().toString());
             }
 
             if (!username.isPresent() || !apiKey.isPresent()) {
@@ -343,8 +342,8 @@ public class KnowledgeArtifactPackageVisitor {
                         valueSet,
                         authoritativeSourceUrl,
                         expansionParameters,
-                        username.get().getValue(),
-                        apiKey.get().getValue());
+                        username.get(),
+                        apiKey.get());
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
                 System.out.println("Terminology Server expansion failed: {"

@@ -314,16 +314,12 @@ public class KnowledgeArtifactPackageVisitor {
             }
             valueSet.setExpansion(expansion);
         } else {
-            Optional<StringType> username = Optional.empty();
-            Optional<StringType> apiKey = Optional.empty();
+            Optional<String> username = Optional.empty();
+            Optional<String> apiKey = Optional.empty();
             if (terminologyEndpoint.isPresent()) {
                 Endpoint endPnt = (Endpoint) terminologyEndpoint.get();
-                username = endPnt.getHeader().stream()
-                        .filter(h -> h.getId().equals("username"))
-                        .findFirst();
-                apiKey = endPnt.getHeader().stream()
-                        .filter(h -> h.getId().equals("apiKey"))
-                        .findFirst();
+                username = Optional.of(endPnt.getExtensionByUrl(Constants.VSAC_USERNAME).getValue().toString());
+                apiKey = Optional.of(endPnt.getExtensionByUrl(Constants.APIKEY).getValue().toString());
             }
 
             if (!username.isPresent() || !apiKey.isPresent()) {
@@ -335,8 +331,8 @@ public class KnowledgeArtifactPackageVisitor {
                         valueSet,
                         authoritativeSourceUrl,
                         expansionParameters,
-                        username.get().getValue(),
-                        apiKey.get().getValue());
+                        username.get(),
+                        apiKey.get());
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
                 System.out.println("Terminology Server expansion failed: {"

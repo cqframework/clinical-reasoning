@@ -136,4 +136,8 @@ public class Constants {
     public static final String VSM_WORKFLOW_CODES_CODE_SYSTEM_URL =
             "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes";
     public static final String VSM_VALUE_SET_TAG_VSM_AUTHORED_CODE = "vsm-authored";
+
+    public static final String VSAC_USERNAME = "vsacUsername";
+
+    public static final String APIKEY = "apiKey";
 }

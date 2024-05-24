@@ -25,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
@@ -214,7 +213,7 @@ public class KnowledgeArtifactPackageVisitor {
             MetadataResource manifest,
             List<BundleEntryComponent> bundleEntries,
             Repository repository,
-            Optional<IBaseResource> terminologyEndpoint)
+            Optional<Endpoint> terminologyEndpoint)
             throws UnprocessableEntityException, IllegalArgumentException {
         KnowledgeArtifactAdapter adapter = AdapterFactory.forFhirVersion(manifest.getStructureFhirVersionEnum())
                 .createKnowledgeArtifactAdapter(manifest);
@@ -281,7 +280,7 @@ public class KnowledgeArtifactPackageVisitor {
     }
 
     protected void expandValueSet(
-            ValueSet valueSet, Parameters expansionParameters, Optional<IBaseResource> terminologyEndpoint) {
+            ValueSet valueSet, Parameters expansionParameters, Optional<Endpoint> terminologyEndpoint) {
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
         Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);
         String authoritativeSourceUrl = authoritativeSource != null && authoritativeSource.hasValue()
@@ -314,29 +313,27 @@ public class KnowledgeArtifactPackageVisitor {
             }
             valueSet.setExpansion(expansion);
         } else {
-            Optional<StringType> username = Optional.empty();
-            Optional<StringType> apiKey = Optional.empty();
+            String username;
+            String apiKey;
             if (terminologyEndpoint.isPresent()) {
-                Endpoint endPnt = (Endpoint) terminologyEndpoint.get();
-                username = endPnt.getHeader().stream()
-                        .filter(h -> h.getId().equals("username"))
-                        .findFirst();
-                apiKey = endPnt.getHeader().stream()
-                        .filter(h -> h.getId().equals("apiKey"))
-                        .findFirst();
-            }
-
-            if (!username.isPresent() || !apiKey.isPresent()) {
+                username = terminologyEndpoint.get().getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
+                        .findFirst()
+                        .map(ext -> ext.getValue().toString())
+                        .orElseThrow(() -> new UnprocessableEntityException(
+                                "Cannot expand ValueSet without VSAC Username: " + valueSet.getId()));
+                apiKey = terminologyEndpoint.get().getExtensionsByUrl(Constants.APIKEY).stream()
+                        .findFirst()
+                        .map(ext -> ext.getValue().toString())
+                        .orElseThrow(() -> new UnprocessableEntityException(
+                                "Cannot expand ValueSet without VSAC API Key: " + valueSet.getId()));
+            } else {
                 throw new UnprocessableEntityException(
                         "Cannot expand ValueSet without credentials: " + valueSet.getId());
             }
+
             try {
                 expandedValueSet = terminologyServerClient.expand(
-                        valueSet,
-                        authoritativeSourceUrl,
-                        expansionParameters,
-                        username.get().getValue(),
-                        apiKey.get().getValue());
+                        valueSet, authoritativeSourceUrl, expansionParameters, username, apiKey);
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
                 System.out.println("Terminology Server expansion failed: {"

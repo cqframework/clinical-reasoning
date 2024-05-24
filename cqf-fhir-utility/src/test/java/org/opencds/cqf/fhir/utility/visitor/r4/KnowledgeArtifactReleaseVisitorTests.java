@@ -517,16 +517,14 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_preserves_extensions() {
         var bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json.json"));
         spyRepository.transaction(bundle);
         var releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         var orginalLibrary = spyRepository
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
-        var library = spyRepository
-                .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
-                .copy();
-        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var testLibrary = orginalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
         var params =
                 parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
         var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);

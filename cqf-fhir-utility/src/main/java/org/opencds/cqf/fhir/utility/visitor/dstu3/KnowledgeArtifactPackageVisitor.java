@@ -336,8 +336,8 @@ public class KnowledgeArtifactPackageVisitor {
                         valueSet, authoritativeSourceUrl, expansionParameters, username, apiKey);
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
-                System.out.println("Terminology Server expansion failed: {"
-                        + valueSet.getIdElement().getValue() + "}");
+                throw new UnprocessableEntityException(
+                        "Terminology Server expansion failed for: " + valueSet.getId(), ex.getMessage());
             }
         }
     }

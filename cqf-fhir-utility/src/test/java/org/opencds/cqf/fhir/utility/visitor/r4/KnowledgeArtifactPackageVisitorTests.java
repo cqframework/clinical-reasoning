@@ -121,12 +121,12 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_fail_credentials_missing_username() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-            KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
         Library library = spyRepository
-            .read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
@@ -146,12 +146,12 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_fail_credentials_missing_apiyey() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-            KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
         Library library = spyRepository
-            .read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();

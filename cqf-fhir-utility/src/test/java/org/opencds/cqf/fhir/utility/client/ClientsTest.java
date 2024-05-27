@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import java.util.Collections;
 import java.util.List;
@@ -66,5 +67,19 @@ class ClientsTest {
 
         Object interceptor = interceptors.get(0);
         assertTrue(interceptor instanceof HeaderInjectionInterceptor);
+    }
+
+    @Test
+    void registerAdditionalRequestHeadersAuth() {
+        IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
+        String userName = "someUser";
+        String apiKey = "some-api-key";
+
+        Clients.registerAdditionalRequestHeadersAuth(client, userName, apiKey);
+
+        List<Object> interceptors = client.getInterceptorService().getAllRegisteredInterceptors();
+
+        Object interceptor = interceptors.get(0);
+        assertTrue(interceptor instanceof AdditionalRequestHeadersInterceptor);
     }
 }

@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -32,7 +33,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
 
     private PlanDefinition planDefinition;
 
-    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+    public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
 
         if (!(planDefinition instanceof PlanDefinition)) {
@@ -40,7 +41,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
 
-        this.planDefinition = planDefinition;
+        this.planDefinition = (PlanDefinition) planDefinition;
     }
 
     @Override

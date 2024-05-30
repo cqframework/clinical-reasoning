@@ -103,7 +103,8 @@ public class PlanDefinitionAdapterTest {
             // no dependency test for action.condition.expression.reference and action.dynamicValue.expression.reference since these are not defined in DSTU3
             //"actionConditionExpressionReference",
             //"actionDynamicValueExpressionRef",
-            "cpgPartOfExtRef"
+            "cpgPartOfExtRef",
+            "nestedActionDefinitionReference"
         );
         var planDef = new PlanDefinition();
         planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(0)));
@@ -120,6 +121,7 @@ public class PlanDefinitionAdapterTest {
             .getCodeFilterFirstRep().setValueSet(new StringType(dependencies.get(7)));
         action.getDefinition().setReference(dependencies.get(8));
         planDef.addExtension(new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf",new UriType(dependencies.get(9))));
+        action.addAction().getDefinition().setReference(dependencies.get(10));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());

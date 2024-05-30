@@ -103,7 +103,8 @@ public class PlanDefinitionAdapterTest {
             "actionDefinitionRef",
             "actionConditionExpressionReference",
             "actionDynamicValueExpressionRef",
-            "cpgPartOfExtRef"
+            "cpgPartOfExtRef",
+            "nestedActionDefinitionRef"
         );
         var planDef = new PlanDefinition();
         planDef.getRelatedArtifactFirstRep().setResource(dependencies.get(0));
@@ -122,6 +123,7 @@ public class PlanDefinitionAdapterTest {
         action.getConditionFirstRep().getExpression().setReference(dependencies.get(9));
         action.getDynamicValueFirstRep().getExpression().setReference(dependencies.get(10));
         planDef.addExtension(new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf",new CanonicalType(dependencies.get(11))));
+        action.addAction().setDefinition(new CanonicalType(dependencies.get(12)));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());

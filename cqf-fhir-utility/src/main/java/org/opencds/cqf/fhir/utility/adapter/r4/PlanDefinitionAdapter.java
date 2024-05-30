@@ -246,10 +246,10 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         var definition = action.getDefinitionCanonicalType();
         if (definition != null && definition.hasValue()) {
             references.add(new DependencyInfo(
-                        referenceSource,
-                        definition.getValue(),
-                        definition.getExtension(),
-                        (reference) -> definition.setValue(reference)));
+                    referenceSource,
+                    definition.getValue(),
+                    definition.getExtension(),
+                    (reference) -> definition.setValue(reference)));
         }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }

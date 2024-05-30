@@ -207,10 +207,10 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         var definition = action.getDefinition();
         if (definition != null && definition.hasReference()) {
             references.add(new DependencyInfo(
-                        referenceSource,
-                        definition.getReference(),
-                        definition.getExtension(),
-                        (reference) -> definition.setReference(reference)));
+                    referenceSource,
+                    definition.getReference(),
+                    definition.getExtension(),
+                    (reference) -> definition.setReference(reference)));
         }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }

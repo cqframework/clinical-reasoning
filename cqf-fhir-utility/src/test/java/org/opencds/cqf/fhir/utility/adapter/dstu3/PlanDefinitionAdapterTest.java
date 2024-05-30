@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Date;
 import java.util.List;
-
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
@@ -24,7 +23,7 @@ import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
 
 public class PlanDefinitionAdapterTest {
     @Test
-    void adapter_accepts_visitor(){
+    void adapter_accepts_visitor() {
         var spyVisitor = spy(new KnowledgeArtifactPackageVisitor());
         doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
         IDomainResource planDef = new PlanDefinition();
@@ -32,6 +31,7 @@ public class PlanDefinitionAdapterTest {
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any(), any());
     }
+
     @Test
     void adapter_get_and_set_name() {
         var planDef = new PlanDefinition();
@@ -91,36 +91,41 @@ public class PlanDefinitionAdapterTest {
     @Test
     void adapter_get_all_dependencies() {
         var dependencies = List.of(
-            "relatedArtifactRef",
-            "libraryRef",
-            "actionTriggerDataReqProfile",
-            "actionTriggerDataReqCodeFilterValueSet",
-            "actionInputProfile",
-            "actionInputCodeFilterValueSet",
-            "actionOutputProfile",
-            "actionOutputCodeFilterValueSet",
-            "actionDefinitionRef",
-            // no dependency test for action.condition.expression.reference and action.dynamicValue.expression.reference since these are not defined in DSTU3
-            //"actionConditionExpressionReference",
-            //"actionDynamicValueExpressionRef",
-            "cpgPartOfExtRef",
-            "nestedActionDefinitionReference"
-        );
+                "relatedArtifactRef",
+                "libraryRef",
+                "actionTriggerDataReqProfile",
+                "actionTriggerDataReqCodeFilterValueSet",
+                "actionInputProfile",
+                "actionInputCodeFilterValueSet",
+                "actionOutputProfile",
+                "actionOutputCodeFilterValueSet",
+                "actionDefinitionRef",
+                // no dependency test for action.condition.expression.reference and
+                // action.dynamicValue.expression.reference since these are not defined in DSTU3
+                // "actionConditionExpressionReference",
+                // "actionDynamicValueExpressionRef",
+                "cpgPartOfExtRef",
+                "nestedActionDefinitionReference");
         var planDef = new PlanDefinition();
         planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(0)));
         planDef.getLibraryFirstRep().setReference(dependencies.get(1));
         var action = planDef.getActionFirstRep();
-        action.getTriggerDefinitionFirstRep().getEventData()
-            .setProfile(List.of(new UriType(dependencies.get(2))))
-            .getCodeFilterFirstRep().setValueSet(new StringType(dependencies.get(3)));
+        action.getTriggerDefinitionFirstRep()
+                .getEventData()
+                .setProfile(List.of(new UriType(dependencies.get(2))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(3)));
         action.getInputFirstRep()
-            .setProfile(List.of(new UriType(dependencies.get(4))))
-            .getCodeFilterFirstRep().setValueSet(new StringType(dependencies.get(5)));
+                .setProfile(List.of(new UriType(dependencies.get(4))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(5)));
         action.getOutputFirstRep()
-            .setProfile(List.of(new UriType(dependencies.get(6))))
-            .getCodeFilterFirstRep().setValueSet(new StringType(dependencies.get(7)));
+                .setProfile(List.of(new UriType(dependencies.get(6))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(7)));
         action.getDefinition().setReference(dependencies.get(8));
-        planDef.addExtension(new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf",new UriType(dependencies.get(9))));
+        planDef.addExtension(new Extension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new UriType(dependencies.get(9))));
         action.addAction().getDefinition().setReference(dependencies.get(10));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();

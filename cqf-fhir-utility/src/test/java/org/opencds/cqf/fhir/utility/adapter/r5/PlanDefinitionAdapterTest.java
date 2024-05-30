@@ -10,22 +10,18 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Date;
 import java.util.List;
-
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition;
-import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.StringType;
-import org.hl7.fhir.r5.model.UriType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
 
 public class PlanDefinitionAdapterTest {
     @Test
-    void adapter_accepts_visitor(){
+    void adapter_accepts_visitor() {
         var spyVisitor = spy(new KnowledgeArtifactPackageVisitor());
         doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
         IDomainResource planDef = new PlanDefinition();
@@ -33,6 +29,7 @@ public class PlanDefinitionAdapterTest {
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any(), any());
     }
+
     @Test
     void adapter_get_and_set_name() {
         var planDef = new PlanDefinition();
@@ -92,39 +89,43 @@ public class PlanDefinitionAdapterTest {
     @Test
     void adapter_get_all_dependencies() {
         var dependencies = List.of(
-            "relatedArtifactRef",
-            "libraryRef",
-            "actionTriggerDataReqProfile",
-            "actionTriggerDataReqCodeFilterValueSet",
-            "actionInputProfile",
-            "actionInputCodeFilterValueSet",
-            "actionOutputProfile",
-            "actionOutputCodeFilterValueSet",
-            "actionDefinitionRef",
-            "actionConditionExpressionReference",
-            "actionDynamicValueExpressionRef",
-            "cpgPartOfExtRef",
-            "nestedActionDefinitionRef"
-        );
+                "relatedArtifactRef",
+                "libraryRef",
+                "actionTriggerDataReqProfile",
+                "actionTriggerDataReqCodeFilterValueSet",
+                "actionInputProfile",
+                "actionInputCodeFilterValueSet",
+                "actionOutputProfile",
+                "actionOutputCodeFilterValueSet",
+                "actionDefinitionRef",
+                "actionConditionExpressionReference",
+                "actionDynamicValueExpressionRef",
+                "cpgPartOfExtRef",
+                "nestedActionDefinitionRef");
         var planDef = new PlanDefinition();
         planDef.getRelatedArtifactFirstRep().setResource(dependencies.get(0));
         planDef.getLibrary().add(new CanonicalType(dependencies.get(1)));
         var action = planDef.getActionFirstRep();
-        action.getTriggerFirstRep().getDataFirstRep()
-            .setProfile(List.of(new CanonicalType(dependencies.get(2))))
-            .getCodeFilterFirstRep().setValueSet(dependencies.get(3));
+        action.getTriggerFirstRep()
+                .getDataFirstRep()
+                .setProfile(List.of(new CanonicalType(dependencies.get(2))))
+                .getCodeFilterFirstRep()
+                .setValueSet(dependencies.get(3));
         action.getInputFirstRep()
-            .getRequirement()
-            .setProfile(List.of(new CanonicalType(dependencies.get(4))))
-            .getCodeFilterFirstRep().setValueSet(dependencies.get(5));
+                .getRequirement()
+                .setProfile(List.of(new CanonicalType(dependencies.get(4))))
+                .getCodeFilterFirstRep()
+                .setValueSet(dependencies.get(5));
         action.getOutputFirstRep()
-            .getRequirement()
-            .setProfile(List.of(new CanonicalType(dependencies.get(6))))
-            .getCodeFilterFirstRep().setValueSet(dependencies.get(7));
+                .getRequirement()
+                .setProfile(List.of(new CanonicalType(dependencies.get(6))))
+                .getCodeFilterFirstRep()
+                .setValueSet(dependencies.get(7));
         action.setDefinition(new CanonicalType(dependencies.get(8)));
         action.getConditionFirstRep().getExpression().setReference(dependencies.get(9));
         action.getDynamicValueFirstRep().getExpression().setReference(dependencies.get(10));
-        planDef.addExtension(new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf",new CanonicalType(dependencies.get(11))));
+        planDef.addExtension(new Extension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new CanonicalType(dependencies.get(11))));
         action.addAction().setDefinition(new CanonicalType(dependencies.get(12)));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();

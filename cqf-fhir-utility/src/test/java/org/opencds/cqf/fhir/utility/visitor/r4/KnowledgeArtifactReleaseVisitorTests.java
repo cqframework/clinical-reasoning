@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
@@ -515,44 +516,45 @@ class KnowledgeArtifactReleaseVisitorTests {
         }
     }
 
-    // @Test
-    // void release_test_artifactComment_updated() {
-    //     Bundle bundle = (Bundle)
-    // jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
-    //     spyRepository.transaction(bundle);
-    //     KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
-    //     Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-    //     r4LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-    // 	String versionData = "1.2.3";
-    // 	Parameters approveParams = parameters(
-    // 		part("approvalDate", new DateType(new Date(),TemporalPrecisionEnum.DAY))
-    // 	);
-    //     Bundle approvedBundle = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
-
-    // 	Optional<BundleEntryComponent> maybeArtifactAssessment = approvedBundle.getEntry().stream().filter(entry ->
-    // entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeArtifactAssessment.isPresent());
-    // 	ArtifactAssessment artifactAssessment =
-    // spyRepository.read(ArtifactAssessment.class,maybeArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(artifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3-draft"));
-    // 	Parameters releaseParams = parameters(
-    // 		part("version", versionData),
-    // 		part("versionBehavior", new CodeType("default"))
-    // 	);
-    // 	Bundle releasedBundle = getClient().operation()
-    // 			.onInstance("Library/ReleaseSpecificationLibrary")
-    // 			.named("$release")
-    // 			.withParameters(releaseParams)
-    // 			.useHttpGet()
-    // 			.returnResourceType(Bundle.class)
-    // 			.execute();
-    // 	Optional<BundleEntryComponent> maybeReleasedArtifactAssessment = releasedBundle.getEntry().stream().filter(entry
-    // -> entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeReleasedArtifactAssessment.isPresent());
-    // 	ArtifactAssessment releasedArtifactAssessment =
-    // getClient().fetchResourceFromUrl(ArtifactAssessment.class,maybeReleasedArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(releasedArtifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3"));
-    // }
+    @Test
+    void release_preserves_extensions() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        spyRepository.transaction(bundle);
+        var releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        var orginalLibrary = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = orginalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        for (final var originalRelatedArtifact : orginalLibrary.getRelatedArtifact()) {
+            releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
+                if (Canonicals.getUrl(releasedRelatedArtifact.getResource())
+                                .equals(Canonicals.getUrl(originalRelatedArtifact.getResource()))
+                        && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
+                    assertEquals(
+                            releasedRelatedArtifact.getExtension().size(),
+                            originalRelatedArtifact.getExtension().size());
+                    releasedRelatedArtifact.getExtension().forEach(ext -> {
+                        assertEquals(
+                                originalRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size(),
+                                releasedRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size());
+                    });
+                }
+            });
+        }
+    }
 }

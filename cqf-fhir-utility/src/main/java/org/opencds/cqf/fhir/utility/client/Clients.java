@@ -260,6 +260,7 @@ public class Clients {
                                     StringUtils.join(username, ":", apiKey).getBytes(StandardCharsets.UTF_8)));
             AdditionalRequestHeadersInterceptor authInterceptor = new AdditionalRequestHeadersInterceptor();
             authInterceptor.addHeaderValue("Authorization", authString);
+            client.registerInterceptor(authInterceptor);
         }
     }
 

@@ -26,18 +26,21 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -113,6 +116,82 @@ class KnowledgeArtifactPackageVisitorTests {
             maybeException = e;
         }
         assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without credentials: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_missing_username() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_missing_apikey() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_invalid() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for: "));
+        assertTrue(maybeException.getAdditionalMessages().stream().allMatch(msg -> msg.contains("HTTP 401")));
     }
 
     @Test

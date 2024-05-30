@@ -203,6 +203,15 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
                         references.add(dependencyFromDataRequirementCodeFilter(cf));
                     });
         });
+        // action..definition
+        var definition = action.getDefinition();
+        if (definition != null && definition.hasReference()) {
+            references.add(new DependencyInfo(
+                        referenceSource,
+                        definition.getReference(),
+                        definition.getExtension(),
+                        (reference) -> definition.setReference(reference)));
+        }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }
 

@@ -242,6 +242,15 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                                 (reference) -> cf.setValueSet(reference)));
                     });
         });
+        // action..definitionCanonical
+        var definition = action.getDefinitionCanonicalType();
+        if (definition != null && definition.hasValue()) {
+            references.add(new DependencyInfo(
+                        referenceSource,
+                        definition.getValue(),
+                        definition.getExtension(),
+                        (reference) -> definition.setValue(reference)));
+        }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }
 

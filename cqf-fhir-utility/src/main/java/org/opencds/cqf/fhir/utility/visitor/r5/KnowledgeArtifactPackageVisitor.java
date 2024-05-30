@@ -287,7 +287,7 @@ public class KnowledgeArtifactPackageVisitor {
         });
     }
 
-    protected void expandValueSet(
+    public void expandValueSet(
             ValueSet valueSet, Parameters expansionParameters, Optional<Endpoint> terminologyEndpoint) {
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
         Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);

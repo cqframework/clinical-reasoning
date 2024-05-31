@@ -66,6 +66,8 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     String getStatus();
 
+    String getPurpose();
+
     void setStatus(String status);
 
     ICompositeType getEffectivePeriod();

@@ -130,6 +130,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     }
 
     @Override
+    public String getPurpose() {
+        return this.get().getPurpose();
+    }
+
+    @Override
     public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }

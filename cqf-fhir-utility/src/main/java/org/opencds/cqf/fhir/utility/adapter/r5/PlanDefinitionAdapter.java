@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -32,7 +33,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
 
     private PlanDefinition planDefinition;
 
-    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
+    public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
 
         if (!(planDefinition instanceof PlanDefinition)) {
@@ -40,7 +41,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
 
-        this.planDefinition = planDefinition;
+        this.planDefinition = (PlanDefinition) planDefinition;
     }
 
     @Override
@@ -147,77 +148,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
             references.add(dependency);
         }
         // action[]
-        this.planDefinition.getAction().forEach(action -> {
-            action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
-                // trigger[].dataRequirement[].profile[]
-                eventData.getProfile().forEach(profile -> {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            profile.getValue(),
-                            profile.getExtension(),
-                            (reference) -> profile.setValue(reference)));
-                });
-                // trigger[].dataRequirement[].codeFilter[].valueSet
-                eventData.getCodeFilter().stream()
-                        .filter(cf -> cf.hasValueSet())
-                        .forEach(cf -> {
-                            references.add(new DependencyInfo(
-                                    referenceSource,
-                                    cf.getValueSet(),
-                                    cf.getExtension(),
-                                    (reference) -> cf.setValueSet(reference)));
-                        });
-            });
-            // condition[].expression.reference
-            action.getCondition().stream()
-                    .filter(c -> c.hasExpression())
-                    .map(c -> c.getExpression())
-                    .filter(e -> e.hasReference())
-                    .forEach(expression -> {
-                        references.add(new DependencyInfo(
-                                referenceSource,
-                                expression.getReference(),
-                                expression.getExtension(),
-                                (reference) -> expression.setReference(reference)));
-                    });
-            // dynamicValue[].expression.reference
-            action.getDynamicValue().stream()
-                    .filter(dv -> dv.hasExpression())
-                    .map(dv -> dv.getExpression())
-                    .filter(e -> e.hasReference())
-                    .forEach(expression -> {
-                        references.add(new DependencyInfo(
-                                referenceSource,
-                                expression.getReference(),
-                                expression.getExtension(),
-                                (reference) -> expression.setReference(reference)));
-                    });
-            Stream.concat(
-                            action.getInput().stream().map(i -> i.getRequirement()),
-                            action.getOutput().stream().map(o -> o.getRequirement()))
-                    .forEach(inputOrOutput -> {
-                        // ..input[].profile[]
-                        // ..output[].profile[]
-                        inputOrOutput.getProfile().forEach(profile -> {
-                            references.add(new DependencyInfo(
-                                    referenceSource,
-                                    profile.getValue(),
-                                    profile.getExtension(),
-                                    (reference) -> profile.setValue(reference)));
-                        });
-                        // input[].codeFilter[].valueSet
-                        // output[].codeFilter[].valueSet
-                        inputOrOutput.getCodeFilter().stream()
-                                .filter(cf -> cf.hasValueSet())
-                                .forEach(cf -> {
-                                    references.add(new DependencyInfo(
-                                            referenceSource,
-                                            cf.getValueSet(),
-                                            cf.getExtension(),
-                                            (reference) -> cf.setValueSet(reference)));
-                                });
-                    });
-        });
+        this.planDefinition.getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
         this.getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
                 .filter(ext -> ext.hasValue())
@@ -232,6 +163,93 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         // TODO: Ideally use $data-requirements code
 
         return references;
+    }
+
+    private void getDependenciesOfAction(
+            PlanDefinition.PlanDefinitionActionComponent action,
+            List<IDependencyInfo> references,
+            String referenceSource) {
+        action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
+            // trigger[].dataRequirement[].profile[]
+            eventData.getProfile().stream()
+                    .filter(profile -> profile.hasValue())
+                    .forEach(profile -> {
+                        references.add(new DependencyInfo(
+                                referenceSource,
+                                profile.getValue(),
+                                profile.getExtension(),
+                                (reference) -> profile.setValue(reference)));
+                    });
+            // trigger[].dataRequirement[].codeFilter[].valueSet
+            eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
+                references.add(new DependencyInfo(
+                        referenceSource,
+                        cf.getValueSet(),
+                        cf.getExtension(),
+                        (reference) -> cf.setValueSet(reference)));
+            });
+        });
+        // condition[].expression.reference
+        action.getCondition().stream()
+                .filter(c -> c.hasExpression())
+                .map(c -> c.getExpression())
+                .filter(e -> e.hasReference())
+                .forEach(expression -> {
+                    references.add(new DependencyInfo(
+                            referenceSource,
+                            expression.getReference(),
+                            expression.getExtension(),
+                            (reference) -> expression.setReference(reference)));
+                });
+        // dynamicValue[].expression.reference
+        action.getDynamicValue().stream()
+                .filter(dv -> dv.hasExpression())
+                .map(dv -> dv.getExpression())
+                .filter(e -> e.hasReference())
+                .forEach(expression -> {
+                    references.add(new DependencyInfo(
+                            referenceSource,
+                            expression.getReference(),
+                            expression.getExtension(),
+                            (reference) -> expression.setReference(reference)));
+                });
+        Stream.concat(
+                        action.getInput().stream().map(i -> i.getRequirement()),
+                        action.getOutput().stream().map(o -> o.getRequirement()))
+                .forEach(inputOrOutput -> {
+                    // ..input[].profile[]
+                    // ..output[].profile[]
+                    inputOrOutput.getProfile().stream()
+                            .filter(profile -> profile.hasValue())
+                            .forEach(profile -> {
+                                references.add(new DependencyInfo(
+                                        referenceSource,
+                                        profile.getValue(),
+                                        profile.getExtension(),
+                                        (reference) -> profile.setValue(reference)));
+                            });
+                    // input[].codeFilter[].valueSet
+                    // output[].codeFilter[].valueSet
+                    inputOrOutput.getCodeFilter().stream()
+                            .filter(cf -> cf.hasValueSet())
+                            .forEach(cf -> {
+                                references.add(new DependencyInfo(
+                                        referenceSource,
+                                        cf.getValueSet(),
+                                        cf.getExtension(),
+                                        (reference) -> cf.setValueSet(reference)));
+                            });
+                });
+        // action..definitionCanonical
+        var definition = action.getDefinitionCanonicalType();
+        if (definition != null && definition.hasValue()) {
+            references.add(new DependencyInfo(
+                    referenceSource,
+                    definition.getValue(),
+                    definition.getExtension(),
+                    (reference) -> definition.setValue(reference)));
+        }
+        action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }
 
     @Override

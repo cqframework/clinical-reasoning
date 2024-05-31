@@ -150,41 +150,7 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
             references.add(dependency);
         }
         // action[]
-        this.planDefinition.getAction().forEach(action -> {
-            action.getTriggerDefinition().stream().map(t -> t.getEventData()).forEach(eventData -> {
-                // trigger[].dataRequirement[].profile[]
-                eventData.getProfile().forEach(profile -> {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            profile.getValue(),
-                            profile.getExtension(),
-                            (reference) -> profile.setValue(reference)));
-                });
-                // trigger[].dataRequirement[].codeFilter[].valueSet
-                eventData.getCodeFilter().stream()
-                        .filter(cf -> cf.hasValueSet())
-                        .forEach(cf -> {
-                            references.add(dependencyFromDataRequirementCodeFilter(cf));
-                        });
-            });
-            Stream.concat(action.getInput().stream(), action.getOutput().stream())
-                    .forEach(inputOrOutput -> {
-                        // ..input[].profile[]
-                        // ..output[].profile[]
-                        inputOrOutput.getProfile().forEach(profile -> {
-                            references.add(new DependencyInfo(
-                                    referenceSource,
-                                    profile.getValue(),
-                                    profile.getExtension(),
-                                    (reference) -> profile.setValue(reference)));
-                        });
-                        // input[].codeFilter[].valueSet
-                        // output[].codeFilter[].valueSet
-                        inputOrOutput.getCodeFilter().forEach(cf -> {
-                            references.add(dependencyFromDataRequirementCodeFilter(cf));
-                        });
-                    });
-        });
+        this.planDefinition.getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
         this.getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
                 .filter(ext -> ext.hasValue())
@@ -199,6 +165,54 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         // TODO: Ideally use $data-requirements code
 
         return references;
+    }
+
+    private void getDependenciesOfAction(
+            PlanDefinition.PlanDefinitionActionComponent action,
+            List<IDependencyInfo> references,
+            String referenceSource) {
+        action.getTriggerDefinition().stream().map(t -> t.getEventData()).forEach(eventData -> {
+            // trigger[].dataRequirement[].profile[]
+            eventData.getProfile().stream().filter(UriType::hasValue).forEach(profile -> {
+                references.add(new DependencyInfo(
+                        referenceSource,
+                        profile.getValue(),
+                        profile.getExtension(),
+                        (reference) -> profile.setValue(reference)));
+            });
+            // trigger[].dataRequirement[].codeFilter[].valueSet
+            eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
+                references.add(dependencyFromDataRequirementCodeFilter(cf));
+            });
+        });
+        Stream.concat(action.getInput().stream(), action.getOutput().stream()).forEach(inputOrOutput -> {
+            // ..input[].profile[]
+            // ..output[].profile[]
+            inputOrOutput.getProfile().stream().filter(UriType::hasValue).forEach(profile -> {
+                references.add(new DependencyInfo(
+                        referenceSource,
+                        profile.getValue(),
+                        profile.getExtension(),
+                        (reference) -> profile.setValue(reference)));
+            });
+            // input[].codeFilter[].valueSet
+            // output[].codeFilter[].valueSet
+            inputOrOutput.getCodeFilter().stream()
+                    .filter(cf -> cf.hasValueSet())
+                    .forEach(cf -> {
+                        references.add(dependencyFromDataRequirementCodeFilter(cf));
+                    });
+        });
+        // action..definition
+        var definition = action.getDefinition();
+        if (definition != null && definition.hasReference()) {
+            references.add(new DependencyInfo(
+                    referenceSource,
+                    definition.getReference(),
+                    definition.getExtension(),
+                    (reference) -> definition.setReference(reference)));
+        }
+        action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }
 
     private DependencyInfo dependencyFromDataRequirementCodeFilter(DataRequirementCodeFilterComponent cf) {

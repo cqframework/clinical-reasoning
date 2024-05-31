@@ -389,6 +389,9 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             IDependencyInfo artifactToUpdate, List<IDomainResource> resourceList) {
         Optional<IDomainResource> updatedReference = Optional.ofNullable(null);
         for (var resource : resourceList) {
+            if (artifactToUpdate == null) {
+                throw new UnprocessableEntityException("Could not resolve missing RelatedArtifact reference");
+            }
             String referenceURL = Canonicals.getUrl(artifactToUpdate.getReference());
             String currentResourceURL = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                     .createKnowledgeArtifactAdapter(resource)

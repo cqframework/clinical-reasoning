@@ -23,7 +23,7 @@ class MeasureScorerTest {
     List<MeasureReport> myMeasureReports = getMyMeasureReports();
 
     @Test
-    void testScore_onlyPopulationIdMultiRateMeasure() {
+    void scoreOnlyPopulationIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -31,9 +31,11 @@ class MeasureScorerTest {
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
         assertEquals(
-                measureReport.getGroup().get(0).getMeasureScore().getValue().toString(), "1.0");
+                "1.0",
+                measureReport.getGroup().get(0).getMeasureScore().getValue().toString());
         assertEquals(
-                measureReport.getGroup().get(1).getMeasureScore().getValue().toString(), "1.0");
+                "1.0",
+                measureReport.getGroup().get(1).getMeasureScore().getValue().toString());
     }
 
     @Test
@@ -46,7 +48,7 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_populationIdMultiRate() {
+    void scorePopulationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -66,7 +68,7 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_error_noIds() {
+    void scoreErrorNoIds() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -76,7 +78,7 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_zeroDenominator() {
+    void scoreZeroDenominator() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -88,7 +90,7 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_noExtension() {
+    void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
@@ -100,7 +102,7 @@ class MeasureScorerTest {
     }
 
     @Test
-    void testScore_groupIdMultiStratum() {
+    void scoreGroupIdMultiStratum() {
         var measureUrl =
                 "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR";
         var measureScoringDef = getMeasureScoringDef(measureUrl);

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,7 +21,6 @@ import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -45,59 +46,59 @@ class RequestResourceResolverTests {
                 .practitionerId(practitionerId)
                 .organizationId(organizationId)
                 .resolve();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(expectedClass, (Class<R>) result.getClass());
+        assertNotNull(result);
+        assertEquals(expectedClass, (Class<R>) result.getClass());
 
         return (R) result;
     }
 
     @Test
-    void testCommunicationRequestResolver() {
+    void communicationRequestResolver() {
         testResolver("communicationrequest-test", CommunicationRequest.class);
     }
 
     @Test
-    void testCommunicationResolver() {
+    void communicationResolver() {
         testResolver("communication-test", Communication.class);
     }
 
     @Test
-    void testDiagnosticReportResolver() {
+    void diagnosticReportResolver() {
         testResolver("diagnosticreport-test", DiagnosticReport.class);
     }
 
     @Test
-    void testMedicationRequestResolver() {
+    void medicationRequestResolver() {
         testResolver("medicationrequest-test", MedicationRequest.class);
     }
 
     @Test
-    void testProcedureRequestResolver() {
+    void procedureRequestResolver() {
         testResolver("procedurerequest-test", ProcedureRequest.class);
     }
 
     @Test
-    void testProcedureResolver() {
+    void procedureResolver() {
         testResolver("procedure-test", Procedure.class);
     }
 
     @Test
-    void testReferralRequestResolver() {
+    void referralRequestResolver() {
         testResolver("referralrequest-test", ReferralRequest.class);
     }
 
     @Test
-    void testSupplyRequestResolver() {
+    void supplyRequestResolver() {
         testResolver("supplyrequest-test", SupplyRequest.class);
     }
 
     @Test
-    void testTaskResolver() {
+    void taskResolver() {
         testResolver("task-test", Task.class);
     }
 
     @Test
-    void testUnsupported() {
+    void unsupported() {
         assertThrows(FHIRException.class, () -> {
             testResolver("unsupported-test", Task.class);
         });

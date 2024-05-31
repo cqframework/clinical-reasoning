@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
-public class LibraryEvaluationServiceTest {
+class LibraryEvaluationServiceTest {
     @Test
     void libraryEvaluationService_inlineAsthma() {
         Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -14,7 +14,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
@@ -108,24 +107,25 @@ public class TestQuestionnaireResponse {
         }
 
         public Extract isEqualsTo(String expectedBundleAssetName) {
-            try {
-                JSONAssert.assertEquals(load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
-            } catch (JSONException | IOException e) {
-                fail("Unable to compare Jsons: " + e.getMessage());
-            }
+            assertDoesNotThrow(
+                    () -> {
+                        JSONAssert.assertEquals(
+                                load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
+                    },
+                    "Unable to compare Jsons: ");
             return this;
         }
 
         public Extract isEqualsToExpected(IIdType expectedBundleId) {
             var expectedBundle = repository.read(bundle.getClass(), expectedBundleId);
-            try {
-                JSONAssert.assertEquals(
-                        jsonParser.encodeResourceToString(expectedBundle),
-                        jsonParser.encodeResourceToString(bundle),
-                        true);
-            } catch (JSONException e) {
-                fail("Unable to compare Jsons: " + e.getMessage());
-            }
+            assertDoesNotThrow(
+                    () -> {
+                        JSONAssert.assertEquals(
+                                jsonParser.encodeResourceToString(expectedBundle),
+                                jsonParser.encodeResourceToString(bundle),
+                                true);
+                    },
+                    "Unable to compare Jsons: ");
             return this;
         }
 

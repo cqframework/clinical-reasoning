@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +51,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
-public class KnowledgeArtifactReleaseVisitorTests {
+class KnowledgeArtifactReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -72,7 +73,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
             null);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         SearchParameter sp = (SearchParameter)
                 jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
                         "SearchParameter-artifactAssessment.json"));
@@ -116,8 +117,8 @@ public class KnowledgeArtifactReleaseVisitorTests {
         // versionBehaviour == 'default' so version should be
         // existingVersion and not the new version provided in
         // the parameters
-        assertTrue(releasedLibrary.getVersion().equals(existingVersion));
-        List<String> ersdTestArtifactDependencies = Arrays.asList(
+        assertEquals(releasedLibrary.getVersion(), existingVersion);
+        var expectedErsdTestArtifactDependencies = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-dxtc|" + existingVersion,
@@ -156,30 +157,39 @@ public class KnowledgeArtifactReleaseVisitorTests {
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19",
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1",
                 "http://notOwnedTest.com/Library/notOwnedLeaf|0.1.1",
-                "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1");
-        List<String> ersdTestArtifactComponents = Arrays.asList(
+                "http://notOwnedTest.com/Library/notOwnedLeaf1|0.1.1",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
+                "http://hl7.org/fhir/StructureDefinition/ServiceRequest");
+        var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
-        List<String> dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
-        List<String> componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
         // check that the released artifact has all the required dependencies
-        for (String dependency : ersdTestArtifactDependencies) {
+        for (var dependency : expectedErsdTestArtifactDependencies) {
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
         }
         // and components
-        for (String component : ersdTestArtifactComponents) {
+        for (var component : expectedErsdTestArtifactComponents) {
             assertTrue(componentsOnReleasedArtifact.contains(component));
         }
-        // TODO: update the list of dependencies to be in line with $data-requirements
-        // assertTrue(ersdTestArtifactDependencies.size() == dependenciesOnReleasedArtifact.size());
-        assertTrue(ersdTestArtifactComponents.size() == componentsOnReleasedArtifact.size());
+        // has extra groupers and rctc dependencies
+        assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
+        assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
     }
 
     @Test
@@ -206,7 +216,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         Library releasedLibrary = spyRepository.read(
                 Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        assertTrue(releasedLibrary.getVersion().equals(newVersionToForce));
+        assertEquals(releasedLibrary.getVersion(), newVersionToForce);
     }
 
     @Test
@@ -300,7 +310,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                 part("requireNonExperimental", new CodeType("warn")));
         libraryAdapter.accept(releaseVisitor, spyRepository, params);
         // no warning if the root is Experimental
-        assertTrue(warningMessages.size() == 0);
+        assertEquals(0, warningMessages.size());
 
         libraryAdapter2.accept(releaseVisitor, spyRepository, params);
 
@@ -345,7 +355,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
                         String startString = year + "-" + month + "-" + day;
-                        assertTrue(startString.equals(effectivePeriodToPropagate));
+                        assertEquals(startString, effectivePeriodToPropagate);
                     }
                 },
                 spyRepository);
@@ -452,7 +462,7 @@ public class KnowledgeArtifactReleaseVisitorTests {
                 .filter(ext -> ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
-        assertTrue(((StringType) maybeReleaseLabel.get().getValue()).getValue().equals(releaseLabel));
+        assertEquals(((StringType) maybeReleaseLabel.get().getValue()).getValue(), releaseLabel);
     }
 
     @Test

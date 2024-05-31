@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class QuestionnaireProcessorTests {
+class QuestionnaireProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
@@ -33,7 +33,7 @@ public class QuestionnaireProcessorTests {
             new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
     @Test
-    void testPrePopulateDstu3() {
+    void prePopulateDstu3() {
         given().repository(repositoryDstu3)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -45,7 +45,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPrePopulateR4() {
+    void prePopulateR4() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -56,7 +56,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPrePopulateR5() {
+    void prePopulateR5() {
         // R5 CQL evaluation is failing with model errors from the engine
         // Using this to test building the request in the processor
         given().repository(repositoryR5)
@@ -69,7 +69,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPrePopulate_NoLibrary() {
+    void prePopulateNoLibrary() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(
@@ -81,7 +81,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPrePopulate_HasErrors() {
+    void prePopulateHasErrors() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(
@@ -93,7 +93,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPrePopulate_noQuestionnaire_throwsException() {
+    void prePopulateNoQuestionnaireThrowsException() {
         assertThrows(ResourceNotFoundException.class, () -> {
             given().repository(repositoryR4)
                     .when()
@@ -103,7 +103,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulateDstu3() {
+    void populateDstu3() {
         given().repository(repositoryDstu3)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -115,7 +115,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulateR4() {
+    void populateR4() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
@@ -126,7 +126,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulateR5() {
+    void populateR5() {
         // R5 CQL evaluation is failing with model errors from the engine
         // Using this to test building the request in the processor
         given().repository(repositoryR5)
@@ -139,7 +139,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulate_NoLibrary() {
+    void populateNoLibrary() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(
@@ -151,7 +151,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulate_HasErrors() {
+    void populateHasErrors() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(
@@ -163,7 +163,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPopulate_noQuestionnaire_throwsException() {
+    void populateNoQuestionnaireThrowsException() {
         assertThrows(ResourceNotFoundException.class, () -> {
             given().repository(repositoryR4)
                     .when()
@@ -173,40 +173,40 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testQuestionnairePackageDstu3() {
+    void questionnairePackageDstu3() {
         var bundle = (org.hl7.fhir.dstu3.model.Bundle) given().repository(repositoryDstu3)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenPackage();
 
-        assertEquals(bundle.getEntry().size(), 3);
-        assertEquals(bundle.getEntry().get(0).getResource().fhirType(), "Questionnaire");
+        assertEquals(3, bundle.getEntry().size());
+        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
     }
 
     @Test
-    void testQuestionnairePackageR4() {
+    void questionnairePackageR4() {
         var bundle = (org.hl7.fhir.r4.model.Bundle) given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenPackage();
 
-        assertEquals(bundle.getEntry().size(), 3);
-        assertEquals(bundle.getEntry().get(0).getResource().fhirType(), "Questionnaire");
+        assertEquals(3, bundle.getEntry().size());
+        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
     }
 
     @Test
-    void testQuestionnairePackageR5() {
+    void questionnairePackageR5() {
         var bundle = (org.hl7.fhir.r5.model.Bundle) given().repository(repositoryR5)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenPackage();
 
-        assertEquals(bundle.getEntry().size(), 3);
-        assertEquals(bundle.getEntry().get(0).getResource().fhirType(), "Questionnaire");
+        assertEquals(3, bundle.getEntry().size());
+        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
     }
 
     @Test
-    void testPA_ASLP_PrePopulate() {
+    void pa_aslp_PrePopulate() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
@@ -222,7 +222,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPA_ASLP_Populate() {
+    void pa_aslp_Populate() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
@@ -240,7 +240,7 @@ public class QuestionnaireProcessorTests {
     }
 
     @Test
-    void testPA_ASLP_Package() {
+    void pa_aslp_Package() {
         var bundle = (org.hl7.fhir.r4.model.Bundle) given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
@@ -248,11 +248,11 @@ public class QuestionnaireProcessorTests {
                 .thenPackage();
 
         assertFalse(bundle.getEntry().isEmpty());
-        assertEquals(bundle.getEntry().size(), 11);
+        assertEquals(11, bundle.getEntry().size());
     }
 
     @Test
-    void testProcessors() {
+    void processors() {
         var bundle = given().repository(repositoryR4)
                 .generateProcessor(new GenerateProcessor(repositoryR4))
                 .packageProcessor(new PackageProcessor(repositoryR4))

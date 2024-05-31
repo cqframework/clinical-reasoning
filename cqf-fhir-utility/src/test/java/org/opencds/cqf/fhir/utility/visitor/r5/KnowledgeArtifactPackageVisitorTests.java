@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,6 +13,7 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,28 +26,33 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
 
-public class KnowledgeArtifactPackageVisitorTests {
+class KnowledgeArtifactPackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private Repository spyRepository;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         doAnswer(new Answer<Bundle>() {
                     @Override
@@ -61,7 +68,7 @@ public class KnowledgeArtifactPackageVisitorTests {
     @Test
     void visitLibraryTest() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         spyRepository.transaction(loadedBundle);
         KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
         Library library = spyRepository
@@ -72,7 +79,119 @@ public class KnowledgeArtifactPackageVisitorTests {
 
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
         assertNotNull(packagedBundle);
-        assertTrue(packagedBundle.getEntry().size() == loadedBundle.getEntry().size());
+        assertEquals(packagedBundle.getEntry().size(), loadedBundle.getEntry().size());
+
+        List<ValueSet> leafValueSets = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.ValueSet)
+                .map(entry -> ((ValueSet) entry.getResource()))
+                .filter(valueSet -> !valueSet.hasCompose()
+                        || (valueSet.hasCompose()
+                                && valueSet.getCompose()
+                                                .getIncludeFirstRep()
+                                                .getValueSet()
+                                                .size()
+                                        == 0))
+                .collect(Collectors.toList());
+
+        // Ensure expansion is populated for all leaf value sets
+        leafValueSets.forEach(valueSet -> assertNotNull(valueSet.getExpansion()));
+    }
+
+    @Test
+    void packageOperation_should_fail_no_credentials() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without credentials: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_missing_username() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_missing_apikey() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key: "));
+    }
+
+    @Test
+    void packageOperation_should_fail_credentials_invalid() {
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        spyRepository.transaction(loadedBundle);
+        KnowledgeArtifactPackageVisitor packageVisitor = new KnowledgeArtifactPackageVisitor();
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
+        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+
+        UnprocessableEntityException maybeException = null;
+        try {
+            libraryAdapter.accept(packageVisitor, spyRepository, params);
+        } catch (UnprocessableEntityException e) {
+            maybeException = e;
+        }
+        assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for: "));
+        assertTrue(maybeException.getAdditionalMessages().stream().allMatch(msg -> msg.contains("HTTP 401")));
     }
 
     @Test
@@ -134,9 +253,9 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .map(entry -> (MetadataResource) entry.getResource())
                 .filter(resource -> resource.getUrl().contains("to-add-missing-version"))
                 .collect(Collectors.toList());
-        assertTrue(updatedResources.size() == 2);
+        assertEquals(2, updatedResources.size());
         for (MetadataResource updatedResource : updatedResources) {
-            assertTrue(updatedResource.getVersion().equals(versionToUpdateTo));
+            assertEquals(updatedResource.getVersion(), versionToUpdateTo);
         }
         params = parameters(part(
                 "checkArtifactVersion",
@@ -158,7 +277,7 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .filter(resource -> resource.getUrl().contains("to-check-version"))
                 .findFirst();
         assertTrue(checkedVersionResource.isPresent());
-        assertTrue(checkedVersionResource.get().getVersion().equals(correctCheckVersion));
+        assertEquals(checkedVersionResource.get().getVersion(), correctCheckVersion);
         String versionToForceTo = "1.1.9.23";
         params = parameters(part(
                 "forceArtifactVersion", new CanonicalType("http://to-force-version/Library/rctc|" + versionToForceTo)));
@@ -168,7 +287,7 @@ public class KnowledgeArtifactPackageVisitorTests {
                 .filter(resource -> resource.getUrl().contains("to-force-version"))
                 .findFirst();
         assertTrue(forcedVersionResource.isPresent());
-        assertTrue(forcedVersionResource.get().getVersion().equals(versionToForceTo));
+        assertEquals(forcedVersionResource.get().getVersion(), versionToForceTo);
     }
 
     @Test
@@ -184,29 +303,29 @@ public class KnowledgeArtifactPackageVisitorTests {
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, countZeroParams);
         // when count = 0 only show the total
-        assertTrue(countZeroBundle.getEntry().size() == 0);
-        assertTrue(countZeroBundle.getTotal() == 6);
+        assertEquals(0, countZeroBundle.getEntry().size());
+        assertEquals(6, countZeroBundle.getTotal());
         Parameters count2Params = parameters(part("count", new IntegerType(2)));
         Bundle count2Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, count2Params);
-        assertTrue(count2Bundle.getEntry().size() == 2);
+        assertEquals(2, count2Bundle.getEntry().size());
         Parameters count2Offset2Params =
                 parameters(part("count", new IntegerType(2)), part("offset", new IntegerType(2)));
         Bundle count2Offset2Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, count2Offset2Params);
-        assertTrue(count2Offset2Bundle.getEntry().size() == 2);
+        assertEquals(2, count2Offset2Bundle.getEntry().size());
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offset4Params);
-        assertTrue(offset4Bundle.getEntry().size() == (countZeroBundle.getTotal() - 4));
+        assertEquals(offset4Bundle.getEntry().size(), (countZeroBundle.getTotal() - 4));
         assertTrue(offset4Bundle.getType() == BundleType.COLLECTION);
-        assertTrue(offset4Bundle.hasTotal() == false);
+        assertFalse(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offsetMaxParams);
-        assertTrue(offsetMaxBundle.getEntry().size() == 0);
+        assertEquals(0, offsetMaxBundle.getEntry().size());
         Parameters offsetMaxRandomCountParams = parameters(
                 part("offset", new IntegerType(countZeroBundle.getTotal())),
                 part("count", new IntegerType(ThreadLocalRandom.current().nextInt(3, 20))));
         Bundle offsetMaxRandomCountBundle =
                 (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, offsetMaxRandomCountParams);
-        assertTrue(offsetMaxRandomCountBundle.getEntry().size() == 0);
+        assertEquals(0, offsetMaxRandomCountBundle.getEntry().size());
     }
 
     @Test
@@ -264,7 +383,7 @@ public class KnowledgeArtifactPackageVisitorTests {
             String ifNoneExist = component.getRequest().getIfNoneExist();
             String url = ((MetadataResource) component.getResource()).getUrl();
             String version = ((MetadataResource) component.getResource()).getVersion();
-            assertTrue(ifNoneExist.equals("url=" + url + "&version=" + version));
+            assertEquals(ifNoneExist, "url=" + url + "&version=" + version);
         }
     }
 

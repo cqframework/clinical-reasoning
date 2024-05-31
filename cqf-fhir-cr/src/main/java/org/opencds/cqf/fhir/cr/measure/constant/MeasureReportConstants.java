@@ -21,4 +21,9 @@ public class MeasureReportConstants {
     public static final String COUNTRY_CODING_SYSTEM_CODE = "urn:iso:std:iso:3166";
     public static final String US_COUNTRY_CODE = "US";
     public static final String US_COUNTRY_DISPLAY = "United States of America";
+
+    public static final String RESOURCE_TYPE_PRACTITIONER = "Practitioner";
+    public static final String RESOURCE_TYPE_PRACTITIONER_ROLE = "PractitionerRole";
+    public static final String RESOURCE_TYPE_ORGANIZATION = "Organization";
+    public static final String RESOURCE_TYPE_LOCATION = "Location";
 }

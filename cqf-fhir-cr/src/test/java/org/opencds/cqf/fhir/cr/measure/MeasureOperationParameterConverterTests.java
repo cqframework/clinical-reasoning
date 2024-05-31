@@ -20,12 +20,12 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class MeasureOperationParameterConverterTests {
+class MeasureOperationParameterConverterTests {
 
     static MeasureOperationParameterConverter measureOperationParameterConverter;
 
     @BeforeAll
-    public void setup() {
+    void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
         AdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter =
@@ -36,7 +36,7 @@ public class MeasureOperationParameterConverterTests {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testAddProductLine() {
+    void addProductLine() {
         Parameters parameters = new Parameters();
 
         measureOperationParameterConverter.addProductLine(parameters, "Medicare");
@@ -50,11 +50,11 @@ public class MeasureOperationParameterConverterTests {
         IPrimitiveType<String> actual = (IPrimitiveType<String>) ppc.getValue();
         assertNotNull(actual);
 
-        assertTrue(actual.getValue().equals("Medicare"));
+        assertEquals("Medicare", actual.getValue());
     }
 
     @Test
-    public void testNullProductLine() {
+    void nullProductLine() {
         Parameters parameters = new Parameters();
 
         measureOperationParameterConverter.addProductLine(parameters, null);
@@ -67,7 +67,7 @@ public class MeasureOperationParameterConverterTests {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testOverrideProductLine() {
+    void overrideProductLine() {
         Parameters parameters = new Parameters();
         parameters.addParameter("Product Line", "Bubba");
 
@@ -87,11 +87,11 @@ public class MeasureOperationParameterConverterTests {
         IPrimitiveType<String> actualValue = (IPrimitiveType<String>) ppc.getValue();
         assertNotNull(actualValue);
 
-        assertTrue(actualValue.getValue().equals("Medicare"));
+        assertEquals("Medicare", actualValue.getValue());
     }
 
     @Test
-    public void testAddMeasurementPeriod() {
+    void addMeasurementPeriod() {
         Parameters parameters = new Parameters();
 
         Period expected = new Period();
@@ -113,7 +113,7 @@ public class MeasureOperationParameterConverterTests {
     }
 
     @Test
-    public void testOverrideMeasurementPeriod() {
+    void overrideMeasurementPeriod() {
         Parameters parameters = new Parameters();
 
         Period initial = new Period();
@@ -146,7 +146,7 @@ public class MeasureOperationParameterConverterTests {
     }
 
     @Test
-    public void testNullMeasurementPeriod() {
+    void nullMeasurementPeriod() {
 
         Parameters parameters = new Parameters();
 

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.inputparameters;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -21,6 +23,7 @@ public interface IInputParameterResolver {
             IBaseParameters parameters,
             Boolean useServerData,
             IBaseBundle bundle) {
+        checkNotNull(repository, "expected non-null value for repository");
         var fhirVersion = repository.fhirContext().getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:

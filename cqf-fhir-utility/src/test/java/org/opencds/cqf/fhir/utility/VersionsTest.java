@@ -9,10 +9,10 @@ import java.util.function.Function;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 
-public class VersionsTest {
+class VersionsTest {
 
     @Test
-    public void testVersionCompare() {
+    void versionCompare() {
         int result = Versions.compareVersions("1.0.0", "0.9.9");
         assertEquals(1, result);
 
@@ -39,7 +39,7 @@ public class VersionsTest {
     }
 
     @Test
-    public void testSelectFromList() {
+    void selectFromList() {
         List<Library> libraries =
                 Arrays.asList(new Library().setVersion("1.0.0"), new Library().setVersion("0.0.1"), new Library());
 

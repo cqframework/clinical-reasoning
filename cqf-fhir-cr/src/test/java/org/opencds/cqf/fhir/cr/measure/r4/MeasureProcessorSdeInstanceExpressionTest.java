@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasureProcessorSdeInstanceExpressionTest {
+class MeasureProcessorSdeInstanceExpressionTest {
 
     protected static Given given = Measure.given().repositoryFor("ConditionCategoryPoc");
 
@@ -13,7 +13,7 @@ public class MeasureProcessorSdeInstanceExpressionTest {
     @Disabled("The is supposed to fail because some resource is missing, but it's failing for a missing\n"
             + "id on a generated (i.e. inline in the CQL) Encounter is missing an Id. Bug in the CQL engine\n"
             + "not setting the id?")
-    public void measure_eval_missing_resource() {
+    void measure_eval_missing_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
                 .periodStart("2022-01-01")
@@ -26,7 +26,7 @@ public class MeasureProcessorSdeInstanceExpressionTest {
     }
 
     @Test
-    public void measure_eval_non_retrieve_resource() {
+    void measure_eval_non_retrieve_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
                 .periodStart("2022-01-01")

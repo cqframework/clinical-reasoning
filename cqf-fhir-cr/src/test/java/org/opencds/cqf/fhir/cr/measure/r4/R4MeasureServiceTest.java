@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class R4MeasureServiceTest {
+class R4MeasureServiceTest {
     protected static Given given = Measure.given().repositoryFor("EXM108");
 
     @Test
-    public void exm108_individualPractitionerParam() {
+    void exm108_individualPractitionerParam() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
                 .periodStart("2018-12-31")
@@ -42,7 +42,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_groupPatientsParam() {
+    void exm108_groupPatientsParam() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -62,7 +62,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_allPatients() {
+    void exm108_allPatients() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -82,7 +82,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_noReportTypePopulation() {
+    void exm108_noReportTypePopulation() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -99,7 +99,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_noReportTypeIndividual() {
+    void exm108_noReportTypeIndividual() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -118,7 +118,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_noReportTypeSummary() {
+    void exm108_noReportTypeSummary() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -135,7 +135,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_wrongReportTypePassed1() {
+    void exm108_wrongReportTypePassed1() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
@@ -153,7 +153,7 @@ public class R4MeasureServiceTest {
     }
 
     @Test
-    public void exm108_wrongReportTypePassed2() {
+    void exm108_wrongReportTypePassed2() {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")

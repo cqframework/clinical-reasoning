@@ -15,7 +15,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Task;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -27,7 +26,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class ActivityDefinitionProcessorTests {
+class ActivityDefinitionProcessorTests {
     private Repository repositoryDstu3;
     private Repository repositoryR4;
     private Repository repositoryR5;
@@ -56,7 +55,7 @@ public class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    void testActivityDefinitionApplyDstu3() throws FHIRException {
+    void activityDefinitionApplyDstu3() throws FHIRException {
         var result = this.activityDefinitionProcessorDstu3.apply(
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorDstu3.fhirContext(),
@@ -77,7 +76,7 @@ public class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    void testActivityDefinitionApplyR4() throws FHIRException {
+    void activityDefinitionApplyR4() throws FHIRException {
         var result = activityDefinitionProcessorR4.apply(
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "activityDefinition-test")),
@@ -96,7 +95,7 @@ public class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    void testDynamicValueWithNestedPathR4() {
+    void dynamicValueWithNestedPathR4() {
         var result = activityDefinitionProcessorR4.apply(
                 Eithers.forMiddle3(
                         Ids.newId(activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "ASLPCrd")),
@@ -125,7 +124,7 @@ public class ActivityDefinitionProcessorTests {
 
     @Test
     // @Disabled // Unable to load R5 packages and run CQL
-    void testActivityDefinitionApplyR5() throws FHIRException {
+    void activityDefinitionApplyR5() throws FHIRException {
         var result = this.activityDefinitionProcessorR5.apply(
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorR5.fhirContext(), "ActivityDefinition", "medicationrequest-test")),
@@ -144,14 +143,14 @@ public class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    void testUnsupportedFhirVersion() throws IllegalArgumentException {
+    void unsupportedFhirVersion() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> {
             IRequestResolverFactory.getDefault(FhirVersionEnum.R4B);
         });
     }
 
     @Test
-    void testSendMessageActivityWithFhirPath() {
+    void sendMessageActivityWithFhirPath() {
         var result = activityDefinitionProcessorR4.apply(
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "SendMessageActivity")),
@@ -171,7 +170,7 @@ public class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    void testGenerateReportActivityWithFhirPath() {
+    void generateReportActivityWithFhirPath() {
         var result = activityDefinitionProcessorR4.apply(
                 Eithers.forMiddle3(Ids.newId(
                         activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "GenerateReportActivity")),
@@ -186,7 +185,7 @@ public class ActivityDefinitionProcessorTests {
                 null);
         assertNotNull(result);
         var task = (Task) result;
-        Assertions.assertTrue(task.hasInput());
+        assertTrue(task.hasInput());
         var input = task.getInput().get(0);
         assertEquals("generate-report", input.getType().getCoding().get(0).getCode());
         assertEquals(

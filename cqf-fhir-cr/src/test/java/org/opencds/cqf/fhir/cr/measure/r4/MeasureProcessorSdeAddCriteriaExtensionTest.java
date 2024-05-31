@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasureProcessorSdeAddCriteriaExtensionTest {
+class MeasureProcessorSdeAddCriteriaExtensionTest {
 
     protected static Given given = Measure.given().repositoryFor("InitialInpatientPopulation");
 
     @Test
-    public void exm124_subject_list() {
+    void exm124_subject_list() {
         var report = given.when()
                 .measureId("InitialInpatientPopulation")
                 .periodStart("2019-01-01")

@@ -13,6 +13,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,9 +21,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessDefinitionTests {
+class ProcessDefinitionTests {
     private final String ACTIVITYDEFINITION = "http://test.fhir.org/fhir/ActivityDefinition/test";
     private final String PLANDEFINITION = "http://test.fhir.org/fhir/PlanDefinition/test";
     private final String QUESTIONNAIRE = "http://test.fhir.org/fhir/Questionnaire/test";
@@ -34,15 +36,24 @@ public class ProcessDefinitionTests {
     Repository repository;
 
     @Mock
+    LibraryEngine libraryEngine;
+
+    @Mock
     ApplyProcessor applyProcessor;
 
     @Spy
     @InjectMocks
     ProcessDefinition fixture;
 
+    @BeforeEach
+    void setup() {
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+    }
+
     @Test
     void applyActivityDefinitionShouldReturnNullOnException() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType(ACTIVITYDEFINITION);
         doReturn(fhirContextR4).when(repository).fhirContext();
         var result = fixture.applyActivityDefinition(request, definition);
@@ -53,7 +64,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void applyNestedPlanDefinitionShouldReturnNullOnException() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType(PLANDEFINITION);
         doReturn(fhirContextR4).when(repository).fhirContext();
         var result = fixture.applyNestedPlanDefinition(request, definition);
@@ -64,7 +75,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionShouldReturnQuestionnaire() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType(QUESTIONNAIRE);
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
         doReturn(expectedQuestionnaire).when(fixture).resolveRepository(definition);
@@ -76,7 +87,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void applyQuestionnaireDefinitionShouldReturnContainedQuestionnaire() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType("#Questionnaire/test");
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
         doReturn(expectedQuestionnaire).when(fixture).resolveContained(request, definition.getValue());
@@ -88,7 +99,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void applyQuestionnaireDefinitionShouldReturnNullOnException() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType(QUESTIONNAIRE);
         doReturn(fhirContextR4).when(repository).fhirContext();
         var result = fixture.applyQuestionnaireDefinition(request, definition);
@@ -99,7 +110,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionShouldFailOnInvalidAction() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var definition = new CanonicalType(TASK);
         doReturn("Task").when(fixture).resolveResourceName(request, definition);
         assertThrows(FHIRException.class, () -> {
@@ -109,7 +120,7 @@ public class ProcessDefinitionTests {
 
     @Test
     void resolveResourceNameShouldFailIfCanonicalHasNoValue() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         assertThrows(FHIRException.class, () -> {
             fixture.resolveResourceName(request, new CanonicalType());
         });

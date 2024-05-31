@@ -1,6 +1,7 @@
 {
   "id": "MinimalCohortResourceBasisSingleGroup",
   "resourceType": "Measure",
+  "url": "http://example.com/Measure/MinimalCohortResourceBasisSingleGroup",
   "library": [
     "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
   ],

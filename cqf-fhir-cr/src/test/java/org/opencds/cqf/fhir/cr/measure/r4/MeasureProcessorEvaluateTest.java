@@ -18,7 +18,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
-public class MeasureProcessorEvaluateTest {
+class MeasureProcessorEvaluateTest {
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -115,7 +115,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    void test_with_custom_options() {
+    void with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions
@@ -147,7 +147,7 @@ public class MeasureProcessorEvaluateTest {
     }
 
     @Test
-    void test_additional_data_with_custom_options() {
+    void additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
         evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
         evaluationOptions

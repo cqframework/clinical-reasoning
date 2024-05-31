@@ -25,13 +25,13 @@ class InMemoryRepositoryTest {
     }
 
     @Test
-    void testRead() {
+    void read() {
         IBaseResource res = repository.read(Library.class, new IdType("Library/example1"), null);
         assertEquals("example1", res.getIdElement().getIdPart());
     }
 
     @Test
-    void testSearchWithId() {
+    void searchWithId() {
 
         var search = Searches.byId("example1");
         var resources = repository.search(Bundle.class, Library.class, search);
@@ -56,7 +56,7 @@ class InMemoryRepositoryTest {
     }
 
     @Test
-    void testSearchWithUrl() {
+    void searchWithUrl() {
         var resources = repository.search(Bundle.class, Library.class, Searches.byUrl("http://example.com/123"));
         assertEquals(1, resources.getEntry().size());
     }

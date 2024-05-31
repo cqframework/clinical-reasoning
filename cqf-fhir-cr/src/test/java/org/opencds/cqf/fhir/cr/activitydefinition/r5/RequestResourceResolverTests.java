@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,7 +32,6 @@ import org.hl7.fhir.r5.model.SupplyRequest;
 import org.hl7.fhir.r5.model.Task;
 import org.hl7.fhir.r5.model.Transport;
 import org.hl7.fhir.r5.model.VisionPrescription;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -38,7 +39,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class RequestResourceResolverTests {
+class RequestResourceResolverTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final IIdType subjectId = Ids.newId(Patient.class, "patient123");
     private final IIdType practitionerId = Ids.newId(Practitioner.class, "practitioner123");
@@ -56,64 +57,64 @@ public class RequestResourceResolverTests {
                 .practitionerId(practitionerId)
                 .organizationId(organizationId)
                 .resolve();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(expectedClass, (Class<R>) result.getClass());
+        assertNotNull(result);
+        assertEquals(expectedClass, (Class<R>) result.getClass());
 
         return (R) result;
     }
 
     @Test
-    public void testAppointmentResolver() {
+    void appointmentResolver() {
         testResolver("appointment-test", Appointment.class);
     }
 
     @Test
-    public void testAppointmentResponseResolver() {
+    void appointmentResponseResolver() {
         testResolver("appointmentresponse-test", AppointmentResponse.class);
     }
 
     @Test
-    public void testCarePlanResolver() {
+    void carePlanResolver() {
         testResolver("careplan-test", CarePlan.class);
     }
 
     @Test
-    public void testClaimResolver() {
+    void claimResolver() {
         testResolver("claim-test", Claim.class);
     }
 
     @Test
-    public void testCommunicationRequestResolver() {
+    void communicationRequestResolver() {
         testResolver("communicationrequest-test", CommunicationRequest.class);
     }
 
     @Test
-    public void testCommunicationResolver() {
+    void communicationResolver() {
         testResolver("communication-test", Communication.class);
     }
 
     @Test
-    public void testCoverageEligibilityRequestResolver() {
+    void coverageEligibilityRequestResolver() {
         testResolver("coverageeligibilityrequest-test", CoverageEligibilityRequest.class);
     }
 
     @Test
-    public void testDeviceRequestResolver() {
+    void deviceRequestResolver() {
         testResolver("devicerequest-test", DeviceRequest.class);
     }
 
     @Test
-    public void testDiagnosticReportResolver() {
+    void diagnosticReportResolver() {
         testResolver("diagnosticreport-test", DiagnosticReport.class);
     }
 
     @Test
-    public void testEnrollmentRequestResolver() {
+    void enrollmentRequestResolver() {
         testResolver("enrollmentrequest-test", EnrollmentRequest.class);
     }
 
     @Test
-    public void testImmunizationRecommendationResolver() {
+    void immunizationRecommendationResolver() {
         assertThrows(FHIRException.class, () -> {
             testResolver("immunizationrecommendation-test", ImmunizationRecommendation.class);
         });
@@ -121,52 +122,52 @@ public class RequestResourceResolverTests {
     }
 
     @Test
-    public void testMedicationRequestResolver() {
+    void medicationRequestResolver() {
         testResolver("medicationrequest-test", MedicationRequest.class);
     }
 
     @Test
-    public void testNutritionOrderResolver() {
+    void nutritionOrderResolver() {
         testResolver("nutritionorder-test", NutritionOrder.class);
     }
 
     @Test
-    public void testProcedureResolver() {
+    void procedureResolver() {
         testResolver("procedure-test", Procedure.class);
     }
 
     @Test
-    public void testRequestOrchestrationResolver() {
+    void requestOrchestrationResolver() {
         testResolver("requestorchestration-test", RequestOrchestration.class);
     }
 
     @Test
-    public void testServiceRequestResolver() {
+    void serviceRequestResolver() {
         testResolver("servicerequest-test", ServiceRequest.class);
     }
 
     @Test
-    public void testSupplyRequestResolver() {
+    void supplyRequestResolver() {
         testResolver("supplyrequest-test", SupplyRequest.class);
     }
 
     @Test
-    public void testTaskResolver() {
+    void taskResolver() {
         testResolver("task-test", Task.class);
     }
 
     @Test
-    public void testTransportResolver() {
+    void transportResolver() {
         testResolver("transport-test", Transport.class);
     }
 
     @Test
-    public void testVisionPrescriptionResolver() {
+    void visionPrescriptionResolver() {
         testResolver("visionprescription-test", VisionPrescription.class);
     }
 
     @Test
-    public void testUnsupported() {
+    void unsupported() {
         assertThrows(FHIRException.class, () -> {
             testResolver("unsupported-test", Task.class);
         });

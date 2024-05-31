@@ -9,10 +9,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 
-public class IdsTest {
+class IdsTest {
 
     @Test
-    public void testAllVersionsSupported() {
+    void allVersionsSupported() {
         assertDoesNotThrow(() -> {
             for (FhirVersionEnum fhirVersionEnum : FhirVersionEnum.values()) {
                 Ids.newId(fhirVersionEnum, "Patient/123");
@@ -21,13 +21,13 @@ public class IdsTest {
     }
 
     @Test
-    public void testContextSupported() {
+    void contextSupported() {
         IIdType id = Ids.newId(FhirContext.forDstu3Cached(), "Patient/123");
         assertTrue(id instanceof org.hl7.fhir.dstu3.model.IdType);
     }
 
     @Test
-    public void testPartsSupported() {
+    void partsSupported() {
         IIdType id = Ids.newId(FhirVersionEnum.DSTU3, "Patient", "123");
         assertTrue(id instanceof org.hl7.fhir.dstu3.model.IdType);
 
@@ -36,7 +36,7 @@ public class IdsTest {
     }
 
     @Test
-    public void testClassSupported() {
+    void classSupported() {
         IIdType id = Ids.newId(org.hl7.fhir.dstu3.model.Library.class, "123");
         assertTrue(id instanceof org.hl7.fhir.dstu3.model.IdType);
         assertEquals("Library", id.getResourceType());

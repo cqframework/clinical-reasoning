@@ -129,6 +129,7 @@ public class TestQuestionnaire {
                     Ids.newId(fhirContext(), "Patient", subjectId),
                     parameters,
                     bundle,
+                    true,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }

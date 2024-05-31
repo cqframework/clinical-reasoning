@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,16 +19,21 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnsw
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessResponseItemTests {
+class ProcessResponseItemTests {
+    @Mock
+    private Repository repository;
+
     @Mock
     private LibraryEngine libraryEngine;
 
@@ -36,6 +42,11 @@ public class ProcessResponseItemTests {
 
     private final ProcessResponseItem processResponseItem = new ProcessResponseItem();
 
+    @BeforeEach
+    void setup() {
+        doReturn(repository).when(libraryEngine).getRepository();
+    }
+
     @Test
     void processResponseItemShouldSetBasePropertiesOnQuestionnaireResponseItemComponent() {
         // setup
@@ -43,6 +54,7 @@ public class ProcessResponseItemTests {
         final String definition = "definition";
         final StringType textElement = new StringType("textElement");
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final IBaseBackboneElement questionnaireItem = new QuestionnaireItemComponent()
                 .setLinkId(linkId)
@@ -61,6 +73,7 @@ public class ProcessResponseItemTests {
     void processResponseItemShouldProcessResponseItemsRecursivelyIfQuestionnaireItemHasItems() {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItem = new QuestionnaireItemComponent();
         final List<QuestionnaireItemComponent> nestedQuestionnaireItems = List.of(
@@ -89,6 +102,7 @@ public class ProcessResponseItemTests {
         // setup
         final FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
         final org.hl7.fhir.dstu3.model.Questionnaire questionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
+        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
         final List<IBaseDatatype> expectedValues = withTypeValues(fhirVersion);
         final IBaseBackboneElement questionnaireItemComponent =
@@ -105,6 +119,7 @@ public class ProcessResponseItemTests {
         // setup
         final FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
         final List<IBaseDatatype> expectedValues = withTypeValues(fhirVersion);
         final IBaseBackboneElement questionnaireItemComponent =
@@ -121,6 +136,7 @@ public class ProcessResponseItemTests {
         // setup
         final FhirVersionEnum fhirVersion = FhirVersionEnum.R5;
         final org.hl7.fhir.r5.model.Questionnaire questionnaire = new org.hl7.fhir.r5.model.Questionnaire();
+        doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
         final List<IBaseDatatype> expectedValues = withTypeValues(fhirVersion);
         final IBaseBackboneElement questionnaireItemComponent =
@@ -137,6 +153,7 @@ public class ProcessResponseItemTests {
         // setup
         final FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
         final var expectedValues = withTypeValues(fhirVersion);
         final IBaseBackboneElement questionnaireItemComponent =
@@ -190,6 +207,7 @@ public class ProcessResponseItemTests {
     void processResponseItemShouldAddExtensionIfResponseExtensionPresent() {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         final Extension extension = new Extension(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR, new StringType("theAuthor"));

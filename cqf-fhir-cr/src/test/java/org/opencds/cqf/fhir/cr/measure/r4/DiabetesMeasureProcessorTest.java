@@ -6,12 +6,12 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class DiabetesMeasureProcessorTest {
+class DiabetesMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
 
     @Test
-    public void a1c_singlePatient_numerator() {
+    void a1c_singlePatient_numerator() {
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
                 .periodStart("2019-01-01")
@@ -29,7 +29,7 @@ public class DiabetesMeasureProcessorTest {
     }
 
     @Test
-    public void a1c_population() throws IOException {
+    void a1c_population() throws IOException {
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
                 .periodStart("2019-01-01")
@@ -46,7 +46,7 @@ public class DiabetesMeasureProcessorTest {
     }
 
     @Test
-    public void a1c_additionalData() {
+    void a1c_additionalData() {
 
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()

@@ -9,7 +9,7 @@ import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.Test;
 
-public class OperationOutcomesTests {
+class OperationOutcomesTests {
 
     @Test
     void unsupportedVersionShouldReturnNull() {
@@ -17,7 +17,7 @@ public class OperationOutcomesTests {
     }
 
     @Test
-    void testDstu3() {
+    void dstu3() {
         var oc = newOperationOutcome(FhirVersionEnum.DSTU3);
         addExceptionToOperationOutcome(oc, "Test exception");
         var expected = (org.hl7.fhir.dstu3.model.OperationOutcome) oc;
@@ -26,7 +26,7 @@ public class OperationOutcomesTests {
     }
 
     @Test
-    void testR4() {
+    void r4() {
         var oc = newOperationOutcome(FhirVersionEnum.R4);
         addExceptionToOperationOutcome(oc, "Test exception");
         var expected = (org.hl7.fhir.r4.model.OperationOutcome) oc;
@@ -35,7 +35,7 @@ public class OperationOutcomesTests {
     }
 
     @Test
-    void testR5() {
+    void r5() {
         var oc = newOperationOutcome(FhirVersionEnum.R5);
         addExceptionToOperationOutcome(oc, "Test exception");
         var expected = (org.hl7.fhir.r5.model.OperationOutcome) oc;

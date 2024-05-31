@@ -24,7 +24,7 @@ class ExtensionResolverTests {
     private final Extension expressionExtension = new Extension(Constants.CQF_EXPRESSION, expression);
 
     @Test
-    void testExtensionResolution() {
+    void extensionResolution() {
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
         var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), "Patient/Patient1");

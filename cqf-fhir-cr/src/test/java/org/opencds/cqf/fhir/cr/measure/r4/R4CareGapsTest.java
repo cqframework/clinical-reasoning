@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
@@ -218,7 +219,7 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_wrongSubjectParam() {
-        assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             given.when()
                     .subject("Patient/numer-EXM124")
                     .periodStart("2019-01-01")
@@ -287,5 +288,123 @@ class R4CareGapsTest {
                     .getCareGapsReport()
                     .then();
         });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupported() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    // .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("BreastCancerScreeningFHIR")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupportedIdentifier() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .measureIdentifiers("cms125")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupportedProgram() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .programs("program")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupportedPractitioner() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .practitioner("Practitioner/error")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupportedTopic() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .topics("Practitioner/error")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notSupportedOrg() {
+        assertThrows(NotImplementedOperationException.class, () -> {
+            given.when()
+                    .organization("Organization/error")
+                    .subject("Patient/numer-EXM125")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_invalidPatient() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            given.when()
+                    .subject("Patient/numer-EXM126") // invali
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("BreastCancerScreeningFHIR")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_invalidGroup() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            given.when()
+                    .subject("Group/numer-EXM126") // invalid
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("BreastCancerScreeningFHIR")
+                    .getCareGapsReport()
+                    .then();
+        });
+    }
+
+    @Test
+    void exm125_careGaps_error_notPersonOrGroup() {
+        given.when()
+                .subject("Practitioner/error") // invalid
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("BreastCancerScreeningFHIR")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(0); // no results
     }
 }

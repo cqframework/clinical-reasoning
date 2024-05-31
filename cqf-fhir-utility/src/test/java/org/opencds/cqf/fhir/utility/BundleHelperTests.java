@@ -17,7 +17,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
-public class BundleHelperTests {
+class BundleHelperTests {
     @Test
     void unsupportedVersionShouldThrow() {
         var fhirVersion = FhirVersionEnum.DSTU2;
@@ -50,7 +50,7 @@ public class BundleHelperTests {
     }
 
     @Test
-    void testDstu3() {
+    void dstu3() {
         var fhirVersion = FhirVersionEnum.DSTU3;
         var bundle = newBundle(fhirVersion);
         assertTrue(bundle instanceof org.hl7.fhir.dstu3.model.Bundle);
@@ -70,7 +70,7 @@ public class BundleHelperTests {
     }
 
     @Test
-    void testR4() {
+    void r4() {
         var fhirVersion = FhirVersionEnum.R4;
         var bundle = newBundle(fhirVersion);
         assertTrue(bundle instanceof org.hl7.fhir.r4.model.Bundle);
@@ -89,7 +89,7 @@ public class BundleHelperTests {
     }
 
     @Test
-    void testR5() {
+    void r5() {
         var fhirVersion = FhirVersionEnum.R5;
         var bundle = newBundle(fhirVersion);
         assertTrue(bundle instanceof org.hl7.fhir.r5.model.Bundle);

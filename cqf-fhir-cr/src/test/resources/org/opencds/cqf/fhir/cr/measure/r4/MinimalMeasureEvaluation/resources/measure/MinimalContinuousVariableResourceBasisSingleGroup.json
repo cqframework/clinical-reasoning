@@ -1,6 +1,7 @@
 {
   "id": "MinimalContinuousVariableResourceBasisSingleGroup",
   "resourceType": "Measure",
+  "url": "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup",
   "library": [
     "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
   ],

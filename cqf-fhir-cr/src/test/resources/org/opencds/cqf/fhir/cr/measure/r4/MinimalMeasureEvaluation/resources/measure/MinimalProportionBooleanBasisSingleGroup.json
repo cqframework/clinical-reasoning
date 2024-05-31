@@ -1,6 +1,7 @@
 {
   "id": "MinimalProportionBooleanBasisSingleGroup",
   "resourceType": "Measure",
+  "url": "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup",
   "library": [
     "http://example.com/Library/MinimalProportionBooleanBasisSingleGroup"
   ],

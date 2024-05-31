@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MinimalMeasureEvaluationTest {
+class MinimalMeasureEvaluationTest {
     private static final Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test
@@ -825,5 +825,39 @@ public class MinimalMeasureEvaluationTest {
         // `Initial Population` & `Measure Population` are required Population Definitions for Measure Scoring Type:
         // continuous-variable
         assertThrows(NullPointerException.class, () -> when.then().report());
+    }
+
+    @Test
+    void MinimalProportionNoBasisSingleGroup_Practitioner() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .practitioner("tester")
+                .evaluate();
+
+        when.then()
+                .hasReportType("Summary")
+                .hasSubjectReference("Practitioner/tester")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(0)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(0);
     }
 }

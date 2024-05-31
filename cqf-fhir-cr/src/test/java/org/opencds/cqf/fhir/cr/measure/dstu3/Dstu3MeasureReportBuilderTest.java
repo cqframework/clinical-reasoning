@@ -14,19 +14,19 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class Dstu3MeasureReportBuilderTest {
+class Dstu3MeasureReportBuilderTest {
 
     protected Dstu3MeasureReportBuilder measureReportBuilder;
     protected FhirContext fhirContext;
 
     @BeforeAll
-    public void setup() {
+    void setup() {
         this.measureReportBuilder = new Dstu3MeasureReportBuilder();
         this.fhirContext = FhirContext.forCached(FhirVersionEnum.DSTU3);
     }
 
     @Test
-    public void checkIfNotBooleanBasedMeasure() {
+    void checkIfNotBooleanBasedMeasure() {
         IParser parser = fhirContext.newJsonParser();
         Measure measureEncounterBias = (Measure)
                 parser.parseResource(Dstu3MeasureReportBuilderTest.class.getResourceAsStream("EXM105FHIR3Sample.json"));

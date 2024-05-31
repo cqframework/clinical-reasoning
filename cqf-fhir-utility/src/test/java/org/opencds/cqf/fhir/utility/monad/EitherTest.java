@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
-public class EitherTest {
+class EitherTest {
 
     @Test
-    public void equals() {
+    void equals() {
         var first = Eithers.forLeft(1);
         var second = Eithers.forLeft(1);
         assertEquals(first, second);
@@ -30,7 +30,7 @@ public class EitherTest {
     }
 
     @Test
-    public void properties() {
+    void properties() {
         var one = Eithers.forLeft(1);
         assertTrue(one.isLeft());
         assertFalse(one.isRight());
@@ -48,7 +48,7 @@ public class EitherTest {
     }
 
     @Test
-    public void swap() {
+    void swap() {
         var one = Eithers.forLeft(1);
         var two = Eithers.forRight(1);
         assertEquals(one, two.swap());

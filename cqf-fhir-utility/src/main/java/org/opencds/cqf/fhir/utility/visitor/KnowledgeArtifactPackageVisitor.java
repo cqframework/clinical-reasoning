@@ -79,10 +79,9 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                 || (endpointUri.isPresent()
                         && !StringUtils.isBlank(endpointUri.get())
                         && !endpointUri.get().isEmpty())
-                || endpoint.isPresent()
-                || terminologyEndpoint.isPresent()) {
+                || endpoint.isPresent()) {
             throw new NotImplementedOperationException(
-                    "This repository is not implementing custom Content and Terminology endpoints at this time");
+                    "This repository is not implementing custom Content and endpoints at this time");
         }
         if (packageOnly.isPresent()) {
             throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
@@ -114,11 +113,52 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         }
         setCorrectBundleType(count, offset, packagedBundle, fhirVersion);
         pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
+        handleValueSetReferenceExtensions(resource, packagedBundle, repository, terminologyEndpoint);
         return packagedBundle;
 
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
         // dependency is in.
         // what is dependency, where did it originate? potentially the package?
+    }
+
+    protected void handleValueSetReferenceExtensions(
+            IDomainResource resource,
+            IBaseBundle packagedBundle,
+            Repository repository,
+            Optional<IBaseResource> terminologyEndpoint) {
+        switch (resource.getStructureFhirVersionEnum()) {
+            case DSTU3:
+                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor packageVisitorDstu3 =
+                        new org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor();
+                packageVisitorDstu3.handleValueSetReferenceExtensions(
+                        (org.hl7.fhir.dstu3.model.MetadataResource) resource,
+                        ((org.hl7.fhir.dstu3.model.Bundle) packagedBundle).getEntry(),
+                        repository,
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.dstu3.model.Endpoint) te));
+                break;
+            case R4:
+                org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor packageVisitorR4 =
+                        new org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor();
+                packageVisitorR4.handleValueSetReferenceExtensions(
+                        (org.hl7.fhir.r4.model.MetadataResource) resource,
+                        ((org.hl7.fhir.r4.model.Bundle) packagedBundle).getEntry(),
+                        repository,
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.r4.model.Endpoint) te));
+                break;
+            case R5:
+                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor packageVisitorR5 =
+                        new org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor();
+                packageVisitorR5.handleValueSetReferenceExtensions(
+                        (org.hl7.fhir.r5.model.MetadataResource) resource,
+                        ((org.hl7.fhir.r5.model.Bundle) packagedBundle).getEntry(),
+                        repository,
+                        terminologyEndpoint.map(te -> (org.hl7.fhir.r5.model.Endpoint) te));
+                break;
+            default:
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported FHIR version: %s",
+                        resource.getStructureFhirVersionEnum().getFhirVersionString()));
+        }
     }
 
     void recursivePackage(

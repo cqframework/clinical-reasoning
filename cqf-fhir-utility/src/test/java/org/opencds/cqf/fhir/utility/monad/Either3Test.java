@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
-public class Either3Test {
+class Either3Test {
 
     @Test
-    public void equals() {
+    void equals() {
         var first = Eithers.forLeft3(1);
         var second = Eithers.forLeft3(1);
         assertEquals(first, second);
@@ -38,7 +38,7 @@ public class Either3Test {
     }
 
     @Test
-    public void properties() {
+    void properties() {
         var one = Eithers.forLeft3(1);
         assertTrue(one.isLeft());
         assertFalse(one.isMiddle());
@@ -69,7 +69,7 @@ public class Either3Test {
     }
 
     @Test
-    public void swap() {
+    void swap() {
         var one = Eithers.forLeft3(1);
         var two = Eithers.forRight3(1);
         var three = Eithers.forMiddle3(1);

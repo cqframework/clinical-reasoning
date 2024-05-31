@@ -29,7 +29,7 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
-public class ElementProcessorTests {
+class ElementProcessorTests {
     private final FhirContext fhirContextDstu2 = FhirContext.forDstu2Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR4B = FhirContext.forR4BCached();
@@ -56,14 +56,14 @@ public class ElementProcessorTests {
     org.opencds.cqf.fhir.cr.questionnaire.generate.r5.ElementProcessor elementProcessorR5;
 
     @Test
-    void testNullElementTypeThrows() {
+    void nullElementTypeThrows() {
         assertThrows(IllegalArgumentException.class, () -> elementProcessorDstu3.parseItemType(null, false));
         assertThrows(IllegalArgumentException.class, () -> elementProcessorR4.parseItemType(null, false));
         assertThrows(IllegalArgumentException.class, () -> elementProcessorR5.parseItemType(null, false));
     }
 
     @Test
-    void testDstu3ItemTypes() {
+    void dstu3ItemTypes() {
         assertEquals(
                 org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE,
                 elementProcessorDstu3.parseItemType("code", false));
@@ -109,7 +109,7 @@ public class ElementProcessorTests {
     }
 
     @Test
-    void testR4ItemTypes() {
+    void r4ItemTypes() {
         assertEquals(
                 org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.CHOICE,
                 elementProcessorR4.parseItemType("code", false));
@@ -158,7 +158,7 @@ public class ElementProcessorTests {
     }
 
     @Test
-    void testR5ItemTypes() {
+    void r5ItemTypes() {
         assertEquals(
                 org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUESTION,
                 elementProcessorR5.parseItemType("code", false));
@@ -222,7 +222,7 @@ public class ElementProcessorTests {
     }
 
     @Test
-    void testElementWithCqfExpressionWithResourceResult() {
+    void elementWithCqfExpressionWithResourceResult() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(fhirContextR4).when(repository).fhirContext();
         var request = newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);

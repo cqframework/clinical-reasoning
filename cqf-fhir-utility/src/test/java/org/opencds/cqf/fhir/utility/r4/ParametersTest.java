@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test;
 
 class ParametersTest {
     @Test
-    void testParametersPartTypes() {
+    void parametersPartTypes() {
         org.hl7.fhir.r4.model.Parameters parameters = parameters(
                 base64BinaryPart("r4Base64BinaryPart", "SGVsbG8gV29ybGQh"),
                 booleanPart("r4BooleanPart", true),

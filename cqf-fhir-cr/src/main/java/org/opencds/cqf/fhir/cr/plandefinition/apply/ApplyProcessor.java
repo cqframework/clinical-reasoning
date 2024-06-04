@@ -7,9 +7,13 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -43,6 +48,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final ModelResolver modelResolver;
     protected final ExtensionProcessor extensionProcessor;
     protected final GenerateProcessor generateProcessor;
+    protected final PopulateProcessor populateProcessor;
     protected final QuestionnaireResponseProcessor extractProcessor;
     protected final ProcessRequest processRequest;
     protected final ProcessGoal processGoal;
@@ -58,8 +64,9 @@ public class ApplyProcessor implements IApplyProcessor {
         this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
         generateProcessor = new GenerateProcessor(this.repository);
+        populateProcessor = new PopulateProcessor();
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
-        processRequest = new ProcessRequest();
+        processRequest = new ProcessRequest(populateProcessor);
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);
     }
@@ -104,19 +111,47 @@ public class ApplyProcessor implements IApplyProcessor {
         for (var resource : request.getRequestResources()) {
             addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), resource));
         }
-        for (var resource : request.getExtractedResources()) {
-            addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), resource));
-        }
+        // for (var resource : request.getExtractedResources()) {
+        //     addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), resource));
+        // }
         if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
-            addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), request.getQuestionnaire()));
+            // var populateRequest = request.toPopulateRequest();
+            // var questionnaireResponse = populateProcessor.processResponse(populateRequest,
+            // request.getItems(request.getQuestionnaire()));
+            // var responseItems = populateProcessor.processResponseItems(populateRequest,
+            // request.getItems(request.getQuestionnaire()));
+            addEntry(
+                    resultBundle,
+                    newEntryWithResource(
+                            request.getFhirVersion(),
+                            populateProcessor.processResponse(
+                                    request.toPopulateRequest(), request.getItems(request.getQuestionnaire()))));
         }
 
         return resultBundle;
     }
 
     protected void initApply(ApplyRequest request) {
-        request.setQuestionnaire(generateProcessor.generate(
-                request.getPlanDefinition().getIdElement().getIdPart()));
+        var questionnaire = generateProcessor.generate(
+                request.getPlanDefinition().getIdElement().getIdPart());
+        var url = request.resolvePathString(request.getPlanDefinition(), "url");
+        if (url != null) {
+            request.getModelResolver().setValue(questionnaire, "url", uriTypeForVersion(request.getFhirVersion(), url));
+        }
+        var version = request.resolvePathString(request.getPlanDefinition(), "version");
+        if (version != null) {
+            var subject = request.getSubjectId().getValue();
+            subject = subject.contains("/") ? subject.split("/")[1] : subject;
+            var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ssZ");
+            request.getModelResolver()
+                    .setValue(
+                            questionnaire,
+                            "version",
+                            stringTypeForVersion(
+                                    request.getFhirVersion(),
+                                    version.concat(String.format("-%s-%s", subject, formatter.format(new Date())))));
+        }
+        request.setQuestionnaire(questionnaire);
         extractQuestionnaireResponse(request);
     }
 
@@ -136,7 +171,7 @@ public class ApplyProcessor implements IApplyProcessor {
                             request.getParameters(),
                             request.getBundle(),
                             request.getLibraryEngine());
-                    request.getExtractedResources().add(questionnaireResponse);
+                    // request.getExtractedResources().add(questionnaireResponse);
                     for (var entry : getEntry(extractBundle)) {
                         addEntry(request.getBundle(), entry);
                         // Not adding extracted resources back into the response to reduce size of payload

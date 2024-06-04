@@ -353,7 +353,7 @@ class PlanDefinitionProcessorTests {
                 .additionalDataId(dataId)
                 .parameters(parameters)
                 .thenApply()
-                .hasContained(3);
+                .hasContained(2);
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
@@ -361,7 +361,7 @@ class PlanDefinitionProcessorTests {
                 .additionalDataId(dataId)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3);
+                .hasEntry(2);
     }
 
     @Test
@@ -383,7 +383,7 @@ class PlanDefinitionProcessorTests {
                 .content(content)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3);
+                .hasEntry(2);
     }
 
     @Test
@@ -398,7 +398,7 @@ class PlanDefinitionProcessorTests {
                 .subjectId(patientID)
                 .parameters(parameters)
                 .thenApply()
-                .hasContained(3)
+                .hasContained(4)
                 .hasQuestionnaire();
     }
 

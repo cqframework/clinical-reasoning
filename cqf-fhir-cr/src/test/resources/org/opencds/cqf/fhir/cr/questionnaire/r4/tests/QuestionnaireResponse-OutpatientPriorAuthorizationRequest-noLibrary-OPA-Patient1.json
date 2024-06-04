@@ -674,12 +674,6 @@
       "valueReference": {
         "reference": "#populate-outcome-OutpatientPriorAuthorizationRequest-noLibrary-OPA-Patient1"
       }
-    },
-    {
-      "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
-      "valueReference": {
-        "reference": "#OutpatientPriorAuthorizationRequest-noLibrary"
-      }
     }
   ],
   "questionnaire": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest-noLibrary",

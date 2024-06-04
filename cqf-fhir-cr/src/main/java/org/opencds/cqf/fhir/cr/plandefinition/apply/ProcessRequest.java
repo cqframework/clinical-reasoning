@@ -3,11 +3,16 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class ProcessRequest {
-    public ProcessRequest() {}
+    protected final IPopulateProcessor populateProcessor;
+
+    public ProcessRequest(IPopulateProcessor populateProcessor) {
+        this.populateProcessor = populateProcessor;
+    }
 
     public IBaseResource generateRequestOrchestration(ApplyRequest request) {
         switch (request.getFhirVersion()) {
@@ -188,7 +193,8 @@ public class ProcessRequest {
 
         var questionnaire = (org.hl7.fhir.dstu3.model.Questionnaire) request.getQuestionnaire();
         if (questionnaire != null && questionnaire.hasItem()) {
-            carePlan.addContained(questionnaire);
+            carePlan.addContained((org.hl7.fhir.dstu3.model.Resource)
+                    populateProcessor.processResponse(request.toPopulateRequest(), request.getItems(questionnaire)));
         }
 
         return carePlan;
@@ -242,7 +248,8 @@ public class ProcessRequest {
 
         var questionnaire = (org.hl7.fhir.r4.model.Questionnaire) request.getQuestionnaire();
         if (questionnaire != null && questionnaire.hasItem()) {
-            carePlan.addContained(questionnaire);
+            carePlan.addContained((org.hl7.fhir.r4.model.Resource)
+                    populateProcessor.processResponse(request.toPopulateRequest(), request.getItems(questionnaire)));
         }
 
         return carePlan;
@@ -296,7 +303,8 @@ public class ProcessRequest {
 
         var questionnaire = (org.hl7.fhir.r5.model.Questionnaire) request.getQuestionnaire();
         if (questionnaire != null && questionnaire.hasItem()) {
-            carePlan.addContained(questionnaire);
+            carePlan.addContained((org.hl7.fhir.r5.model.Resource)
+                    populateProcessor.processResponse(request.toPopulateRequest(), request.getItems(questionnaire)));
         }
 
         return carePlan;

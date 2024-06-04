@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
-import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +47,10 @@ public class ProcessAction {
             IBaseResource requestOrchestration,
             Map<String, IBaseBackboneElement> metConditions,
             IBaseBackboneElement action) {
-        if (request.hasExtension(request.getPlanDefinition(), Constants.CPG_QUESTIONNAIRE_GENERATE)) {
-            addQuestionnaireItemForInput(request, action);
-        }
+        // Create Questionnaire items for any input profiles that are present on the action
+        // if (request.hasExtension(request.getPlanDefinition(), Constants.CPG_QUESTIONNAIRE_GENERATE)) {
+        addQuestionnaireItemForInput(request, action);
+        // }
 
         if (Boolean.TRUE.equals(meetsConditions(request, action, requestOrchestration))) {
             // TODO: Figure out why this was here and what it was trying to do

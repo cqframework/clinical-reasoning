@@ -170,25 +170,26 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
-            if (buildRequest) {
-                var populateRequest = buildRequest("prepopulate");
-                return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
-            } else {
-                return new GeneratedQuestionnaire(
-                        repository,
-                        null,
-                        processor.prePopulate(
-                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
-                                subjectId,
-                                parameters,
-                                bundle,
-                                true,
-                                (IBaseResource) null,
-                                null,
-                                null));
-            }
-        }
+        // public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
+        //     if (buildRequest) {
+        //         var populateRequest = buildRequest("prepopulate");
+        //         return new GeneratedQuestionnaire(repository, populateRequest,
+        // processor.prePopulate(populateRequest));
+        //     } else {
+        //         return new GeneratedQuestionnaire(
+        //                 repository,
+        //                 null,
+        //                 processor.prePopulate(
+        //                         Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
+        //                         subjectId,
+        //                         parameters,
+        //                         bundle,
+        //                         true,
+        //                         (IBaseResource) null,
+        //                         null,
+        //                         null));
+        //     }
+        // }
 
         public IBaseResource runPopulate() {
             return processor.populate(

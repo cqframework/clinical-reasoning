@@ -159,4 +159,14 @@ class ItemGeneratorTests {
                 .then()
                 .hasItemCount(2);
     }
+
+    @Test
+    void generateItem() {
+        var item = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "ActiveSulfasalazineFeature"))
+                .subjectId(ROUTE_ONE_PATIENT)
+                .then();
+        assertNotNull(item);
+    }
 }

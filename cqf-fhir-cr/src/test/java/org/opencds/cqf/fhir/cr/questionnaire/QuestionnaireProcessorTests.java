@@ -30,75 +30,75 @@ class QuestionnaireProcessorTests {
     private final Repository repositoryR5 =
             new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
-    @Test
-    void prePopulateDstu3() {
-        given().repository(repositoryDstu3)
-                .when()
-                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .subjectId("OPA-Patient1")
-                .parameters(org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                        org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.dstu3.model.Questionnaire.class);
-    }
+    // @Test
+    // void prePopulateDstu3() {
+    //     given().repository(repositoryDstu3)
+    //             .when()
+    //             .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+    //             .subjectId("OPA-Patient1")
+    //             .parameters(org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
+    //                     org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+    //             .thenPrepopulate(true)
+    //             .isEqualsToExpected(org.hl7.fhir.dstu3.model.Questionnaire.class);
+    // }
 
-    @Test
-    void prePopulateR4() {
-        given().repository(repositoryR4)
-                .when()
-                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
-    }
+    // @Test
+    // void prePopulateR4() {
+    //     given().repository(repositoryR4)
+    //             .when()
+    //             .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+    //             .subjectId("OPA-Patient1")
+    //             .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+    //             .thenPrepopulate(true)
+    //             .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
+    // }
 
-    @Test
-    void prePopulateR5() {
-        // R5 CQL evaluation is failing with model errors from the engine
-        // Using this to test building the request in the processor
-        given().repository(repositoryR5)
-                .when()
-                .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .subjectId("OPA-Patient1")
-                .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
-                        org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(false);
-    }
+    // @Test
+    // void prePopulateR5() {
+    //     // R5 CQL evaluation is failing with model errors from the engine
+    //     // Using this to test building the request in the processor
+    //     given().repository(repositoryR5)
+    //             .when()
+    //             .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+    //             .subjectId("OPA-Patient1")
+    //             .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
+    //                     org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+    //             .thenPrepopulate(false);
+    // }
 
-    @Test
-    void prePopulateNoLibrary() {
-        given().repository(repositoryR4)
-                .when()
-                .questionnaireId(
-                        Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
-                .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
-    }
+    // @Test
+    // void prePopulateNoLibrary() {
+    //     given().repository(repositoryR4)
+    //             .when()
+    //             .questionnaireId(
+    //                     Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
+    //             .subjectId("OPA-Patient1")
+    //             .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+    //             .thenPrepopulate(true)
+    //             .isEqualsToExpected(org.hl7.fhir.r4.model.Questionnaire.class);
+    // }
 
-    @Test
-    void prePopulateHasErrors() {
-        given().repository(repositoryR4)
-                .when()
-                .questionnaireId(
-                        Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
-                .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
-                .thenPrepopulate(true)
-                .hasErrors();
-    }
+    // @Test
+    // void prePopulateHasErrors() {
+    //     given().repository(repositoryR4)
+    //             .when()
+    //             .questionnaireId(
+    //                     Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
+    //             .subjectId("OPA-Patient1")
+    //             .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+    //             .thenPrepopulate(true)
+    //             .hasErrors();
+    // }
 
-    @Test
-    void prePopulateNoQuestionnaireThrowsException() {
-        assertThrows(ResourceNotFoundException.class, () -> {
-            given().repository(repositoryR4)
-                    .when()
-                    .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"))
-                    .thenPrepopulate(true);
-        });
-    }
+    // @Test
+    // void prePopulateNoQuestionnaireThrowsException() {
+    //     assertThrows(ResourceNotFoundException.class, () -> {
+    //         given().repository(repositoryR4)
+    //                 .when()
+    //                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"))
+    //                 .thenPrepopulate(true);
+    //     });
+    // }
 
     @Test
     void populateDstu3() {
@@ -210,21 +210,21 @@ class QuestionnaireProcessorTests {
                 .firstEntryIsType(org.hl7.fhir.r5.model.Questionnaire.class);
     }
 
-    @Test
-    void pa_aslp_PrePopulate() {
-        given().repositoryFor(fhirContextR4, "r4/pa-aslp")
-                .when()
-                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
-                .subjectId("positive")
-                .parameters(parameters(
-                        stringPart("Service Request Id", "SleepStudy"),
-                        stringPart("Service Request Id", "SleepStudy2"),
-                        stringPart("Coverage Id", "Coverage-positive")))
-                .thenPrepopulate(true)
-                .hasItems(13)
-                .itemHasInitial("1")
-                .itemHasInitial("2");
-    }
+    // @Test
+    // void pa_aslp_PrePopulate() {
+    //     given().repositoryFor(fhirContextR4, "r4/pa-aslp")
+    //             .when()
+    //             .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
+    //             .subjectId("positive")
+    //             .parameters(parameters(
+    //                     stringPart("Service Request Id", "SleepStudy"),
+    //                     stringPart("Service Request Id", "SleepStudy2"),
+    //                     stringPart("Coverage Id", "Coverage-positive")))
+    //             .thenPrepopulate(true)
+    //             .hasItems(13)
+    //             .itemHasInitial("1")
+    //             .itemHasInitial("2");
+    // }
 
     @Test
     void pa_aslp_Populate() {

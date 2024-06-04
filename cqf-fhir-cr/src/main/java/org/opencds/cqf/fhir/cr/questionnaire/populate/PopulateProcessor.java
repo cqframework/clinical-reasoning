@@ -1,9 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.dtrQuestionnaireResponseExtension;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.prepopulateSubjectExtension;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,52 +30,55 @@ public class PopulateProcessor implements IPopulateProcessor {
         this.processResponseItem = processResponseItem;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
-        final String questionnaireId = request.getQuestionnaire().getIdElement().getIdPart() + "-"
-                + request.getSubjectId().getIdPart();
-        final IBaseResource populatedQuestionnaire = Resources.clone(request.getQuestionnaire());
-        request.getModelResolver().setValue(populatedQuestionnaire, "item", null);
-        populatedQuestionnaire.setId(questionnaireId);
-        request.getModelResolver()
-                .setValue(
-                        populatedQuestionnaire,
-                        "extension",
-                        Collections.singletonList(buildReferenceExt(
-                                request.getFhirVersion(),
-                                prepopulateSubjectExtension(
-                                        "Patient", request.getSubjectId().getIdPart()),
-                                false)));
-        var items = request.getItems(request.getQuestionnaire());
-        final List<IBaseBackboneElement> processedItems = processItems(request, items);
-        request.getModelResolver().setValue(populatedQuestionnaire, "item", processedItems);
-        request.resolveOperationOutcome(populatedQuestionnaire);
-        return (R) populatedQuestionnaire;
-    }
+    // @Override
+    // @SuppressWarnings("unchecked")
+    // public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
+    //     final String questionnaireId = request.getQuestionnaire().getIdElement().getIdPart() + "-"
+    //             + request.getSubjectId().getIdPart();
+    //     final IBaseResource populatedQuestionnaire = Resources.clone(request.getQuestionnaire());
+    //     request.getModelResolver().setValue(populatedQuestionnaire, "item", null);
+    //     populatedQuestionnaire.setId(questionnaireId);
+    //     request.getModelResolver()
+    //             .setValue(
+    //                     populatedQuestionnaire,
+    //                     "extension",
+    //                     Collections.singletonList(buildReferenceExt(
+    //                             request.getFhirVersion(),
+    //                             prepopulateSubjectExtension(
+    //                                     "Patient", request.getSubjectId().getIdPart()),
+    //                             false)));
+    //     var items = request.getItems(request.getQuestionnaire());
+    //     final List<IBaseBackboneElement> processedItems = processItems(request, items);
+    //     request.getModelResolver().setValue(populatedQuestionnaire, "item", processedItems);
+    //     request.resolveOperationOutcome(populatedQuestionnaire);
+    //     return (R) populatedQuestionnaire;
+    // }
 
     @Override
     public IBaseResource populate(PopulateRequest request) {
+        return processResponse(request, processItems(request, request.getItems(request.getQuestionnaire())));
+    }
+
+    @Override
+    public IBaseResource processResponse(PopulateRequest request, List<IBaseBackboneElement> items) {
         final IBaseResource response = createQuestionnaireResponse(request);
         response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-"
                 + request.getSubjectId().getIdPart());
-        var items = request.getItems(request.getQuestionnaire());
-        var processedItems = processItems(request, items);
-        var responseItems = processResponseItems(request, processedItems);
+        var responseItems = processResponseItems(request, items);
         request.getModelResolver().setValue(response, "item", responseItems);
         request.resolveOperationOutcome(response);
         request.getModelResolver()
                 .setValue(response, "contained", Collections.singletonList(request.getQuestionnaire()));
-        request.getModelResolver()
-                .setValue(
-                        response,
-                        "extension",
-                        Collections.singletonList(buildReferenceExt(
-                                request.getFhirVersion(),
-                                dtrQuestionnaireResponseExtension(request.getQuestionnaire()
-                                        .getIdElement()
-                                        .getIdPart()),
-                                true)));
+        // request.getModelResolver()
+        //         .setValue(
+        //                 response,
+        //                 "extension",
+        //                 Collections.singletonList(buildReferenceExt(
+        //                         request.getFhirVersion(),
+        //                         dtrQuestionnaireResponseExtension(request.getQuestionnaire()
+        //                                 .getIdElement()
+        //                                 .getIdPart()),
+        //                         true)));
         return response;
     }
 

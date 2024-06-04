@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource planDefinition;
@@ -148,6 +149,11 @@ public class ApplyRequest implements ICpgRequest {
         return new GenerateRequest(profile, false, true, subjectId, parameters, bundle, libraryEngine, modelResolver)
                 .setDefaultLibraryUrl(defaultLibraryUrl)
                 .setQuestionnaire(questionnaire);
+    }
+
+    public PopulateRequest toPopulateRequest() {
+        return new PopulateRequest(
+                "populate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {

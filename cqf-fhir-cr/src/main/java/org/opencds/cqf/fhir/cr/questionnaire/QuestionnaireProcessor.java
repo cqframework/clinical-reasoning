@@ -214,71 +214,71 @@ public class QuestionnaireProcessor {
                 modelResolver);
     }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            IBaseResource dataEndpoint,
-            IBaseResource contentEndpoint,
-            IBaseResource terminologyEndpoint) {
-        return prePopulate(
-                questionnaire,
-                patientId,
-                parameters,
-                bundle,
-                useServerData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
+    // public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+    //         Either3<C, IIdType, R> questionnaire,
+    //         String patientId,
+    //         IBaseParameters parameters,
+    //         IBaseBundle bundle,
+    //         Boolean useServerData,
+    //         IBaseResource dataEndpoint,
+    //         IBaseResource contentEndpoint,
+    //         IBaseResource terminologyEndpoint) {
+    //     return prePopulate(
+    //             questionnaire,
+    //             patientId,
+    //             parameters,
+    //             bundle,
+    //             useServerData,
+    //             createRestRepository(repository.fhirContext(), dataEndpoint),
+    //             createRestRepository(repository.fhirContext(), contentEndpoint),
+    //             createRestRepository(repository.fhirContext(), terminologyEndpoint));
+    // }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
-        return prePopulate(
-                questionnaire,
-                patientId,
-                parameters,
-                bundle,
-                useServerData,
-                new LibraryEngine(repository, evaluationSettings));
-    }
+    // public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+    //         Either3<C, IIdType, R> questionnaire,
+    //         String patientId,
+    //         IBaseParameters parameters,
+    //         IBaseBundle bundle,
+    //         Boolean useServerData,
+    //         Repository dataRepository,
+    //         Repository contentRepository,
+    //         Repository terminologyRepository) {
+    //     repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+    //     return prePopulate(
+    //             questionnaire,
+    //             patientId,
+    //             parameters,
+    //             bundle,
+    //             useServerData,
+    //             new LibraryEngine(repository, evaluationSettings));
+    // }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            LibraryEngine libraryEngine) {
-        return prePopulate(
-                resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
-    }
+    // public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+    //         Either3<C, IIdType, R> questionnaire,
+    //         String patientId,
+    //         IBaseParameters parameters,
+    //         IBaseBundle bundle,
+    //         Boolean useServerData,
+    //         LibraryEngine libraryEngine) {
+    //     return prePopulate(
+    //             resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
+    // }
 
-    public <R extends IBaseResource> R prePopulate(
-            IBaseResource questionnaire,
-            String subjectId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            LibraryEngine libraryEngine) {
-        return prePopulate(buildPopulateRequest(
-                "prepopulate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
-    }
+    // public <R extends IBaseResource> R prePopulate(
+    //         IBaseResource questionnaire,
+    //         String subjectId,
+    //         IBaseParameters parameters,
+    //         IBaseBundle bundle,
+    //         Boolean useServerData,
+    //         LibraryEngine libraryEngine) {
+    //     return prePopulate(buildPopulateRequest(
+    //             "prepopulate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
+    // }
 
-    @SuppressWarnings("unchecked")
-    public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
-        return (R) populateProcessor.prePopulate(request);
-    }
+    // @SuppressWarnings("unchecked")
+    // public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
+    //     return (R) populateProcessor.prePopulate(request);
+    // }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,

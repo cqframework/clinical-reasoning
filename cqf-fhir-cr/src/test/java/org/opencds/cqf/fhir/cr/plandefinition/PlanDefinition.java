@@ -325,9 +325,14 @@ public class PlanDefinition {
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaire() {
             assertTrue(getEntryResources(generatedBundle).stream()
-                    .anyMatch(r -> r.fhirType().equals("Questionnaire")));
+                    .anyMatch(r -> r.fhirType().equals("QuestionnaireResponse")));
+            assertTrue(getEntryResources(generatedBundle).stream()
+                    .anyMatch(r -> r.fhirType().equals("QuestionnaireResponse")
+                            && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
+                                    .stream().anyMatch(c -> c.fhirType().equals("Questionnaire"))));
             return this;
         }
 

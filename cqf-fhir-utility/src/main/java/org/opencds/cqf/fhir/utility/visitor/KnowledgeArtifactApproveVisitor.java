@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.visitor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import java.util.Optional;
@@ -17,15 +16,12 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 
 public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor {
     @Override
-    public IBaseResource visit(LibraryAdapter library, Repository repository, IBaseParameters approveParameters) {
+    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters approveParameters) {
         Date currentDate = new Date();
-        var fhirVersion = library.get().getStructureFhirVersionEnum();
+        var fhirVersion = adapter.get().getStructureFhirVersionEnum();
         Date approvalDate = VisitorHelper.getParameter("approvalDate", approveParameters, IPrimitiveType.class)
                 .map(d -> (Date) d.getValue())
                 .orElse(currentDate);
@@ -40,12 +36,12 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                         "artifactAssessmentTarget", approveParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
         if (artifactAssessmentTarget.isPresent()) {
-            if (!Canonicals.getUrl(artifactAssessmentTarget.get()).equals(library.getUrl())) {
+            if (!Canonicals.getUrl(artifactAssessmentTarget.get()).equals(adapter.getUrl())) {
                 throw new UnprocessableEntityException(
                         "ArtifactCommentTarget URL does not match URL of resource being approved.");
             }
-            if (library.hasVersion()) {
-                if (!Canonicals.getVersion(artifactAssessmentTarget.get()).equals(library.getVersion())) {
+            if (adapter.hasVersion()) {
+                if (!Canonicals.getVersion(artifactAssessmentTarget.get()).equals(adapter.getVersion())) {
                     throw new UnprocessableEntityException(
                             "ArtifactCommentTarget version does not match version of resource being approved.");
                 }
@@ -59,18 +55,18 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
         var returnBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");
 
         var assessment = createApprovalAssessment(
-                library.getId(),
+                adapter.getId(),
                 artifactAssessmentType,
                 artifactAssessmentSummary,
                 artifactAssessmentTarget,
                 artifactAssessmentRelatedArtifact,
                 artifactAssessmentAuthor,
-                library.get().getIdElement(),
+                adapter.get().getIdElement(),
                 fhirVersion);
-        library.setApprovalDate(approvalDate);
-        setDateElement(library, currentDate, fhirVersion);
+        adapter.setApprovalDate(approvalDate);
+        setDateElement(adapter, currentDate, fhirVersion);
         BundleHelper.addEntry(returnBundle, PackageHelper.createEntry(assessment, false));
-        BundleHelper.addEntry(returnBundle, PackageHelper.createEntry(library.get(), true));
+        BundleHelper.addEntry(returnBundle, PackageHelper.createEntry(adapter.get(), true));
         return repository.transaction(returnBundle);
     }
 
@@ -122,17 +118,17 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
         }
     }
 
-    private void setDateElement(LibraryAdapter library, Date currentDate, FhirVersionEnum fhirVersion) {
+    private void setDateElement(KnowledgeArtifactAdapter adapter, Date currentDate, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
-                library.setDateElement(
+                adapter.setDateElement(
                         new org.hl7.fhir.dstu3.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case R4:
-                library.setDateElement(new org.hl7.fhir.r4.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
+                adapter.setDateElement(new org.hl7.fhir.r4.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case R5:
-                library.setDateElement(new org.hl7.fhir.r5.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
+                adapter.setDateElement(new org.hl7.fhir.r5.model.DateTimeType(currentDate, TemporalPrecisionEnum.DAY));
                 break;
             case DSTU2:
             case DSTU2_1:
@@ -141,21 +137,5 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                 throw new UnprocessableEntityException(
                         String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
-    }
-
-    @Override
-    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
     }
 }

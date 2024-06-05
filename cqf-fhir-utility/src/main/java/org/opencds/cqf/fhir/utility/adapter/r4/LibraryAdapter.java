@@ -6,10 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -21,10 +19,8 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.LibraryAdapter {
 
@@ -126,7 +122,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
 
     @Override
     public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> retval = new ArrayList<IDependencyInfo>();
+        List<IDependencyInfo> references = new ArrayList<IDependencyInfo>();
         final String referenceSource =
                 this.hasVersion() ? this.getUrl() + "|" + this.getLibrary().getVersion() : this.getUrl();
 
@@ -134,24 +130,24 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
         this.getRelatedArtifact().stream()
                 .filter(ra -> ra.hasResource())
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(ra -> retval.add(ra));
+                .forEach(ra -> references.add(ra));
         this.getLibrary().getDataRequirement().stream().forEach(dr -> {
             dr.getProfile().stream()
                     .filter(profile -> profile.hasValue())
-                    .forEach(profile -> retval.add(new DependencyInfo(
+                    .forEach(profile -> references.add(new DependencyInfo(
                             referenceSource,
                             profile.getValue(),
                             profile.getExtension(),
                             (reference) -> profile.setValue(reference))));
             dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
-                    .forEach(cf -> retval.add(new DependencyInfo(
+                    .forEach(cf -> references.add(new DependencyInfo(
                             referenceSource,
                             cf.getValueSet(),
                             cf.getExtension(),
                             (reference) -> cf.setValueSet(reference))));
         });
-        return retval;
+        return references;
     }
 
     @Override
@@ -168,11 +164,6 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
                             }
                         })
                         .collect(Collectors.toList()));
-    }
-
-    @Override
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
-        return visitor.visit(this, repository, operationParameters);
     }
 
     @Override

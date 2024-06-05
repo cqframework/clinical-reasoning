@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.PlanDefinition;
@@ -37,9 +39,12 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
             if (resource instanceof MetadataResource) {
                 retval = new org.opencds.cqf.fhir.utility.adapter.r5.KnowledgeArtifactAdapter(
                         (MetadataResource) resource);
+            } else if (resource instanceof CanonicalResource) {
+                // TODO: StructureDefinition is a CanonicalResource in R5. Other resources may be as well?
+                throw new NotImplementedException("CanonicalResource instances are not currently supported.");
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resouce must be instance of %s", MetadataResource.class.getName()));
+                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
             }
         }
         return retval;

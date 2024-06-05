@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.engine.utility;
+package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;

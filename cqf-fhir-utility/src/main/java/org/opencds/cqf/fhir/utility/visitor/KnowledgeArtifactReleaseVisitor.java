@@ -32,9 +32,6 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +40,8 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
     @SuppressWarnings("unchecked")
     @Override
-    public IBase visit(LibraryAdapter rootLibraryAdapter, Repository repository, IBaseParameters operationParameters) {
+    public IBase visit(
+            KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
         // boolean latestFromTxServer = operationParameters.getParameterBool("latestFromTxServer");
         Optional<Boolean> latestFromTxServer = VisitorHelper.getParameter(
                         "latestFromTxServer", operationParameters, IPrimitiveType.class)
@@ -65,38 +63,37 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                         "requireNonExperimental", operationParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
         checkReleaseVersion(version, versionBehavior);
-        var rootLibrary = rootLibraryAdapter.get();
+        var rootLibrary = rootAdapter.get();
         var fhirVersion = rootLibrary.getStructureFhirVersionEnum();
-        var currentApprovalDate = rootLibraryAdapter.getApprovalDate();
-        checkReleasePreconditions(rootLibraryAdapter, currentApprovalDate);
+        var currentApprovalDate = rootAdapter.getApprovalDate();
+        checkReleasePreconditions(rootAdapter, currentApprovalDate);
 
         // Determine which version should be used.
-        var existingVersion = rootLibraryAdapter.hasVersion()
-                ? rootLibraryAdapter.getVersion().replace("-draft", "")
-                : null;
+        var existingVersion =
+                rootAdapter.hasVersion() ? rootAdapter.getVersion().replace("-draft", "") : null;
         var releaseVersion = getReleaseVersion(version, versionBehavior, existingVersion, fhirVersion)
                 .orElseThrow(
                         () -> new UnprocessableEntityException("Could not resolve a version for the root artifact."));
-        var rootEffectivePeriod = rootLibraryAdapter.getEffectivePeriod();
+        var rootEffectivePeriod = rootAdapter.getEffectivePeriod();
         // if the root artifact is experimental then we don't need to check for experimental children
-        if (rootLibraryAdapter.getExperimental()) {
+        if (rootAdapter.getExperimental()) {
             requireNonExpermimental = Optional.of("none");
         }
         var releasedResources = internalRelease(
-                rootLibraryAdapter,
+                rootAdapter,
                 releaseVersion,
                 rootEffectivePeriod,
                 latestFromTxServer.orElse(false),
                 requireNonExpermimental,
                 repository);
         updateReleaseLabel(rootLibrary, releaseLabel);
-        var rootArtifactOriginalDependencies = new ArrayList<IDependencyInfo>(rootLibraryAdapter.getDependencies());
+        var rootArtifactOriginalDependencies = new ArrayList<IDependencyInfo>(rootAdapter.getDependencies());
         // Get list of extensions which need to be preserved
         var originalDependenciesWithExtensions = rootArtifactOriginalDependencies.stream()
                 .filter(dep -> dep.getExtension() != null && dep.getExtension().size() > 0)
                 .collect(Collectors.toList());
         // once iteration is complete, delete all depends-on RAs in the root artifact
-        rootLibraryAdapter.getRelatedArtifact().removeIf(ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra)
+        rootAdapter.getRelatedArtifact().removeIf(ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra)
                 .equalsIgnoreCase("depends-on"));
 
         var transactionBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");
@@ -128,7 +125,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 }
                 var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component));
-                rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
+                rootAdapter.getRelatedArtifact().add(componentToDependency);
             }
 
             var dependencies = artifactAdapter.getDependencies();
@@ -149,15 +146,15 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     dependency.setReference(updatedReference);
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact
-                if (!artifactAdapter.getUrl().equals(rootLibraryAdapter.getUrl())) {
+                if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                     var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion, "depends-on", dependency.getReference());
-                    rootLibraryAdapter.getRelatedArtifact().add(newDep);
+                    rootAdapter.getRelatedArtifact().add(newDep);
                 }
             }
         }
         // removed duplicates and add
-        var relatedArtifacts = rootLibraryAdapter.getRelatedArtifact();
+        var relatedArtifacts = rootAdapter.getRelatedArtifact();
         var distinctResolvedRelatedArtifacts = new ArrayList<>(relatedArtifacts);
         distinctResolvedRelatedArtifacts.clear();
         for (var resolvedRelatedArtifact : relatedArtifacts) {
@@ -191,7 +188,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         findArtifactCommentsToUpdate(rootLibrary, releaseVersion, repository).forEach(entry -> {
             BundleHelper.addEntry(transactionBundle, entry);
         });
-        rootLibraryAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
+        rootAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
         return repository.transaction(transactionBundle);
     }
@@ -484,23 +481,5 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             throw new UnprocessableEntityException(
                     "The version must be in the format MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH.REVISION");
         }
-    }
-
-    @Override
-    public IBase visit(PlanDefinitionAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            KnowledgeArtifactAdapter knowledgeArtifactAdapter,
-            Repository repository,
-            IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
     }
 }

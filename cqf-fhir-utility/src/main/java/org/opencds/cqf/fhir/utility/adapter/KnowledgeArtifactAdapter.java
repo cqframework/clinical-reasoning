@@ -207,7 +207,9 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts);
 
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters);
+    default IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
+        return visitor.visit(this, repository, operationParameters);
+    }
 
     @SuppressWarnings("unchecked")
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getOwnedRelatedArtifacts() {

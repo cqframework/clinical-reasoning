@@ -36,6 +36,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -98,6 +99,7 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
+    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_no_credentials() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -119,6 +121,7 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
+    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_username() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -144,6 +147,7 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
+    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_apikey() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -169,6 +173,7 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
+    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_invalid() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));

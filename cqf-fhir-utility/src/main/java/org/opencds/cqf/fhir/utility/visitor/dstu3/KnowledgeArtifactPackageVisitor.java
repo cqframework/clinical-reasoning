@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
+import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.Instant;
@@ -14,7 +16,6 @@ import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -22,24 +23,22 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class KnowledgeArtifactPackageVisitor {
 
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+
     public KnowledgeArtifactPackageVisitor() {
-        this.terminologyServerClient = new TerminologyServerClient(FhirContext.forDstu3());
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext);
     }
 
     private TerminologyServerClient terminologyServerClient;
@@ -209,21 +208,17 @@ public class KnowledgeArtifactPackageVisitor {
      * @param manifest the resource containing all RelatedArtifact references
      * @param bundleEntries the list of packaged resources to modify according to the extensions on the manifest relatedArtifact references
      */
-    public void handleValueSetReferenceExtensions(
+    public void handleValueSets(
             MetadataResource manifest,
             List<BundleEntryComponent> bundleEntries,
             Repository repository,
             Optional<Endpoint> terminologyEndpoint)
             throws UnprocessableEntityException, IllegalArgumentException {
-        KnowledgeArtifactAdapter adapter = AdapterFactory.forFhirVersion(manifest.getStructureFhirVersionEnum())
-                .createKnowledgeArtifactAdapter(manifest);
-        List<RelatedArtifact> relatedArtifactsWithPreservedExtension =
-                getRelatedArtifactsWithPreservedExtensions(adapter.getRelatedArtifact());
         Parameters expansionParams = new Parameters();
         Library rootSpecificationLibrary = getRootSpecificationLibrary(bundleEntries);
         if (rootSpecificationLibrary != null) {
             Extension expansionParamsExtension =
-                    rootSpecificationLibrary.getExtensionByUrl(Constants.EXPANSION_PARAMETERS_URL);
+                    rootSpecificationLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
             if (expansionParamsExtension != null && expansionParamsExtension.hasValue()) {
                 Reference expansionReference = (Reference) expansionParamsExtension.getValue();
                 expansionParams = getExpansionParams(rootSpecificationLibrary, expansionReference.getReference());
@@ -233,48 +228,7 @@ public class KnowledgeArtifactPackageVisitor {
         bundleEntries.stream().forEach(entry -> {
             if (entry.getResource().getResourceType().equals(ResourceType.ValueSet)) {
                 ValueSet valueSet = (ValueSet) entry.getResource();
-                // remove any existing Priority and Conditions
-                List<UsageContext> usageContexts = removeExistingReferenceExtensionData(valueSet.getUseContext());
-                valueSet.setUseContext(usageContexts);
-                Optional<RelatedArtifact> maybeVSRelatedArtifact = relatedArtifactsWithPreservedExtension.stream()
-                        .filter(ra -> Canonicals.getUrl(ra.getResource().getReference())
-                                .equals(valueSet.getUrl()))
-                        .findFirst();
-                checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact.orElse(null));
-                // If leaf valueset
-                if (!valueSet.hasCompose()
-                        || (valueSet.hasCompose()
-                                && valueSet.getCompose()
-                                        .getIncludeFirstRep()
-                                        .getValueSet()
-                                        .isEmpty())) {
-                    expandValueSet(valueSet, params, terminologyEndpoint);
-                    // If Condition extension is present
-                    maybeVSRelatedArtifact
-                            .map(ra -> ra.getExtension())
-                            .ifPresent(
-                                    // add Conditions
-                                    exts -> {
-                                        exts.stream()
-                                                .filter(ext -> ext.getUrl()
-                                                        .equalsIgnoreCase(Constants.VALUE_SET_CONDITION_URL))
-                                                .forEach(ext -> tryAddCondition(
-                                                        usageContexts, (CodeableConcept) ext.getValue()));
-                                    });
-                }
-                // update Priority
-                UsageContext priority = getOrCreateUsageContext(
-                        usageContexts, KnowledgeArtifactAdapter.usPhContextTypeUrl, Constants.VALUE_SET_PRIORITY_CODE);
-                Optional<Extension> ext =
-                        maybeVSRelatedArtifact.map(ra -> ra.getExtensionByUrl(Constants.VALUE_SET_PRIORITY_URL));
-                if (ext.isPresent()) {
-                    priority.setValue(ext.get().getValue());
-                } else {
-                    CodeableConcept routine = new CodeableConcept(
-                                    new Coding(KnowledgeArtifactAdapter.contextUrl, "routine", null))
-                            .setText("Routine");
-                    priority.setValue(routine);
-                }
+                expandValueSet(valueSet, params, terminologyEndpoint);
             }
         });
     }
@@ -288,7 +242,7 @@ public class KnowledgeArtifactPackageVisitor {
                 : valueSet.getUrl();
 
         ValueSet expandedValueSet;
-        if (isVSMAuthoredValueSet(valueSet) && hasSimpleCompose(valueSet)) {
+        if (hasSimpleCompose(valueSet)) {
             // Perform naive expansion independent of terminology servers. Copy all codes from compose into expansion.
             ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
             expansion.setTimestamp(Date.from(Instant.now()));
@@ -301,15 +255,13 @@ public class KnowledgeArtifactPackageVisitor {
             expansionParams.add(parameterNaive);
             expansion.setParameter(expansionParams);
 
-            for (ValueSet.ConceptSetComponent csc : valueSet.getCompose().getInclude()) {
-                for (ValueSet.ConceptReferenceComponent crc : csc.getConcept()) {
-                    expansion
-                            .addContains()
-                            .setCode(crc.getCode())
-                            .setSystem(csc.getSystem())
-                            .setVersion(csc.getVersion())
-                            .setDisplay(crc.getDisplay());
-                }
+            for (var code : getCodesInCompose(fhirContext, valueSet)) {
+                expansion
+                        .addContains()
+                        .setCode(code.getCode())
+                        .setSystem(code.getSystem())
+                        .setVersion(code.getVersion())
+                        .setDisplay(code.getDisplay());
             }
             valueSet.setExpansion(expansion);
         } else {
@@ -328,7 +280,7 @@ public class KnowledgeArtifactPackageVisitor {
                                 "Cannot expand ValueSet without VSAC API Key: " + valueSet.getId()));
             } else {
                 throw new UnprocessableEntityException(
-                        "Cannot expand ValueSet without credentials: " + valueSet.getId());
+                        "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
             }
 
             try {
@@ -342,32 +294,14 @@ public class KnowledgeArtifactPackageVisitor {
         }
     }
 
-    protected boolean isVSMAuthoredValueSet(ValueSet valueSet) {
-        return valueSet.hasMeta()
-                && valueSet.getMeta().hasTag()
-                && valueSet.getMeta()
-                                .getTag(
-                                        Constants.VSM_WORKFLOW_CODES_CODE_SYSTEM_URL,
-                                        Constants.VSM_VALUE_SET_TAG_VSM_AUTHORED_CODE)
-                        != null;
-    }
-
-    // A simple compose element of a ValueSet must have a compose without an exclude element. Each
-    // element of the include cannot reference a value set or have a filter, and must have a system
-    // and enumerate concepts
+    // A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
+    // include cannot have a filter, and must reference a ValueSet or have a system and enumerate concepts
     protected boolean hasSimpleCompose(ValueSet valueSet) {
         return valueSet.hasCompose()
                 && !valueSet.getCompose().hasExclude()
                 && valueSet.getCompose().getInclude().stream()
-                        .noneMatch(
-                                csc -> csc.hasValueSet() || csc.hasFilter() || !csc.hasSystem() || !csc.hasConcept());
-    }
-
-    protected List<RelatedArtifact> getRelatedArtifactsWithPreservedExtensions(List<RelatedArtifact> deps) {
-        return deps.stream()
-                .filter(ra -> Constants.PRESERVED_EXTENSION_URLS.stream().anyMatch(url -> ra.getExtension().stream()
-                        .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
-                .collect(Collectors.toList());
+                        .noneMatch(csc ->
+                                csc.hasFilter() || (!csc.hasValueSet() && (!csc.hasSystem() && !csc.hasConcept())));
     }
 
     protected static Library getRootSpecificationLibrary(List<Bundle.BundleEntryComponent> bundleEntries) {
@@ -409,77 +343,6 @@ public class KnowledgeArtifactPackageVisitor {
         return (Parameters) expansionParamResource.orElse(null);
     }
 
-    protected void checkIfValueSetNeedsCondition(IBaseResource resource, RelatedArtifact relatedArtifact)
-            throws UnprocessableEntityException {
-        if (resource != null && resource.fhirType().equals(ResourceType.ValueSet.name())) {
-            ValueSet valueSet = (ValueSet) resource;
-            boolean isLeaf = !valueSet.hasCompose()
-                    || (valueSet.hasCompose()
-                            && valueSet.getCompose()
-                                    .getIncludeFirstRep()
-                                    .getValueSet()
-                                    .isEmpty());
-            Optional<Extension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
-                    .map(RelatedArtifact::getExtension)
-                    .map(list -> {
-                        return list.stream()
-                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_CONDITION_URL))
-                                .findFirst()
-                                .orElse(null);
-                    });
-            Optional<Extension> maybePriorityExtension = Optional.ofNullable(relatedArtifact)
-                    .map(RelatedArtifact::getExtension)
-                    .map(list -> {
-                        return list.stream()
-                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_PRIORITY_URL))
-                                .findFirst()
-                                .orElse(null);
-                    });
-            if (isLeaf && (!maybeConditionExtension.isPresent() || !maybePriorityExtension.isPresent())) {
-                if (!maybeConditionExtension.isPresent() && !maybePriorityExtension.isPresent()) {
-                    throw new UnprocessableEntityException(
-                            "Missing condition and priority references on ValueSet : " + valueSet.getUrl());
-                } else if (!maybeConditionExtension.isPresent()) {
-                    throw new UnprocessableEntityException(
-                            "Missing condition reference on ValueSet : " + valueSet.getUrl());
-                } else {
-                    throw new UnprocessableEntityException(
-                            "Missing priority reference on ValueSet : " + valueSet.getUrl());
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes any existing UsageContexts corresponding to the VSM specific extensions
-     * @param usageContexts the list of usage contexts to modify
-     */
-    protected List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {
-        List<String> useContextCodesToReplace = Collections.unmodifiableList(
-                Arrays.asList(Constants.VALUE_SET_CONDITION_CODE, Constants.VALUE_SET_PRIORITY_CODE));
-        return usageContexts.stream()
-                // remove any useContexts which need to be replaced
-                .filter(useContext -> !useContextCodesToReplace.stream()
-                        .anyMatch(code -> useContext.getCode().getCode().equals(code)))
-                .collect(Collectors.toList());
-    }
-
-    protected void tryAddCondition(List<UsageContext> usageContexts, CodeableConcept condition) {
-        boolean focusAlreadyExists = usageContexts.stream()
-                .anyMatch(u -> u.getCode().getSystem().equals(KnowledgeArtifactAdapter.contextTypeUrl)
-                        && u.getCode().getCode().equals(Constants.VALUE_SET_CONDITION_CODE)
-                        && u.getValueCodeableConcept()
-                                .hasCoding(
-                                        condition.getCoding().get(0).getSystem(),
-                                        condition.getCoding().get(0).getCode()));
-        if (!focusAlreadyExists) {
-            UsageContext newFocus = new UsageContext(
-                    new Coding(KnowledgeArtifactAdapter.contextUrl, Constants.VALUE_SET_CONDITION_CODE, null),
-                    condition);
-            newFocus.setValue(condition);
-            usageContexts.add(newFocus);
-        }
-    }
     /**
      *
      * Either finds a usageContext with the same system and code or creates an empty one

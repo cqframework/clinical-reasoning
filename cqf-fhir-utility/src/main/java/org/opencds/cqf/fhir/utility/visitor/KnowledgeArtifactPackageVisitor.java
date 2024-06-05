@@ -24,19 +24,17 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
 public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor {
 
     @Override
-    public IBaseResource visit(LibraryAdapter library, Repository repository, IBaseParameters packageParameters) {
-        var fhirVersion = library.get().getStructureFhirVersionEnum();
+    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters packageParameters) {
+        var fhirVersion = adapter.get().getStructureFhirVersionEnum();
+
         Optional<String> artifactRoute = VisitorHelper.getParameter(
                         "artifactRoute", packageParameters, IPrimitiveType.class)
                 .map(r -> (String) r.getValue());
@@ -89,13 +87,13 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         if (count.isPresent() && count.get() < 0) {
             throw new UnprocessableEntityException("'count' must be non-negative");
         }
-        var resource = library.get();
+        var resource = adapter.get();
         // TODO: In the case of a released (active) root Library we can depend on the relatedArtifacts as a
         // comprehensive manifest
         var packagedBundle = BundleHelper.newBundle(fhirVersion);
         if (include.size() == 1 && include.stream().anyMatch((includedType) -> includedType.equals("artifact"))) {
-            findUnsupportedCapability(library, capability);
-            processCanonicals(library, artifactVersion, checkArtifactVersion, forceArtifactVersion);
+            findUnsupportedCapability(adapter, capability);
+            processCanonicals(adapter, artifactVersion, checkArtifactVersion, forceArtifactVersion);
             var entry = PackageHelper.createEntry(resource, false);
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
@@ -130,7 +128,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             case DSTU3:
                 org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor packageVisitorDstu3 =
                         new org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor();
-                packageVisitorDstu3.handleValueSetReferenceExtensions(
+                packageVisitorDstu3.handleValueSets(
                         (org.hl7.fhir.dstu3.model.MetadataResource) resource,
                         ((org.hl7.fhir.dstu3.model.Bundle) packagedBundle).getEntry(),
                         repository,
@@ -179,9 +177,9 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             boolean entryExists = BundleHelper.getEntryResources(bundle).stream()
                     .map(e -> AdapterFactory.forFhirVersion(fhirVersion)
                             .createKnowledgeArtifactAdapter((IDomainResource) e))
-                    .filter(mr -> mr.getUrl() != null && mr.getVersion() != null)
+                    .filter(mr -> mr.getUrl() != null)
                     .anyMatch(mr -> mr.getUrl().equals(adapter.getUrl())
-                            && mr.getVersion().equals(adapter.getVersion()));
+                            && (!mr.hasVersion() || mr.getVersion().equals(adapter.getVersion())));
             if (!entryExists) {
                 var entry = PackageHelper.createEntry(resource, false);
                 BundleHelper.addEntry(bundle, entry);
@@ -216,22 +214,6 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                             checkArtifactVersion,
                             forceArtifactVersion));
         }
-    }
-
-    @Override
-    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
     }
 
     private void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)

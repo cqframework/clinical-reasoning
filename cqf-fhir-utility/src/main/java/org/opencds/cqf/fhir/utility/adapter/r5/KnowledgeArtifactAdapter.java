@@ -6,10 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -20,9 +18,7 @@ import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter
         implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
@@ -132,11 +128,6 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public String getPurpose() {
         return this.get().getPurpose();
-    }
-
-    @Override
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
-        return visitor.visit(this, repository, operationParameters);
     }
 
     @Override

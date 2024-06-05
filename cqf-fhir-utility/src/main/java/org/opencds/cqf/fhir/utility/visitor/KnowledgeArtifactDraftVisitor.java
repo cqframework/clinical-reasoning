@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -26,19 +24,16 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.PlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
 public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
     @Override
-    public IBaseBundle visit(LibraryAdapter library, Repository repository, IBaseParameters draftParameters) {
-        var fhirVersion = library.get().getStructureFhirVersionEnum();
+    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters draftParameters) {
+        var fhirVersion = adapter.get().getStructureFhirVersionEnum();
         String version = VisitorHelper.getParameter("version", draftParameters, IPrimitiveType.class)
                 .map(r -> (String) r.getValue())
                 .orElseThrow(() -> new UnprocessableEntityException("The version argument is required"));
-        var libRes = library.get();
+        var libRes = adapter.get();
         // check valid semverversion
         checkVersionValidSemver(version);
 
@@ -47,28 +42,28 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
                 .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
                         && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .collect(Collectors.toList());
-        library.setExtension(removeReleaseLabelAndDescription);
+        adapter.setExtension(removeReleaseLabelAndDescription);
         // remove approval date
-        library.setApprovalDate(null);
+        adapter.setApprovalDate(null);
         // new draft version
         String draftVersion = version + "-draft";
-        String draftVersionUrl = Canonicals.getUrl(library.getUrl()) + "|" + draftVersion;
+        String draftVersionUrl = Canonicals.getUrl(adapter.getUrl()) + "|" + draftVersion;
 
         // Root artifact must NOT have status of 'Active'. Existing drafts of
         // reference artifacts with the right verison number will be adopted.
         // This check is performed here to facilitate that different treatment
         // for the root artifact and those referenced by it.
-        if (library.getStatus() != "active") {
+        if (adapter.getStatus() != "active") {
             throw new PreconditionFailedException(String.format(
                     "Drafts can only be created from artifacts with status of 'active'. Resource '%s' has a status of: '%s'",
-                    library.getUrl(), library.getStatus()));
+                    adapter.getUrl(), adapter.getStatus()));
         }
         // Ensure only one resource exists with this URL
         var existingArtifactsForUrl = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, draftVersionUrl);
         if (BundleHelper.getEntry(existingArtifactsForUrl).size() != 0) {
             throw new PreconditionFailedException(String.format(
                     "A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time.",
-                    library.getUrl(), draftVersionUrl));
+                    adapter.getUrl(), draftVersionUrl));
         }
         // create draft resources
         List<IDomainResource> resourcesToCreate =
@@ -93,22 +88,6 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
         // dependency is in.
         // what is dependency, where did it originate? potentially the package?
-    }
-
-    @Override
-    public IBase visit(KnowledgeArtifactAdapter library, Repository repository, IBaseParameters draftParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(
-            PlanDefinitionAdapter planDefinition, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
-    }
-
-    @Override
-    public IBase visit(ValueSetAdapter valueSet, Repository repository, IBaseParameters operationParameters) {
-        throw new NotImplementedOperationException("Not implemented");
     }
 
     private List<IDomainResource> createDraftsOfArtifactAndRelated(

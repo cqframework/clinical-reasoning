@@ -70,6 +70,8 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         "forceArtifactVersion", packageParameters, IPrimitiveType.class)
                 .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
                 .orElseGet(() -> new ArrayList<>());
+        Optional<Boolean> isPut = VisitorHelper.getParameter("isPut", packageParameters, IBaseBooleanDatatype.class)
+                .map(r -> r.getValue());
 
         if ((artifactRoute.isPresent()
                         && !StringUtils.isBlank(artifactRoute.get())

@@ -1,9 +1,13 @@
 package org.opencds.cqf.fhir.cr.library;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -51,11 +55,26 @@ public class LibraryProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageLibrary(
             Either3<C, IIdType, R> library) {
-        return packageProcessor.packageResource(resolveLibrary(library));
+        return packageLibrary(library, false);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageLibrary(
             Either3<C, IIdType, R> library, boolean isPut) {
-        return packageProcessor.packageResource(resolveLibrary(library), isPut ? "PUT" : "POST");
+        IBase[] parts = {};
+        return packageLibrary(
+                library,
+                newParameters(
+                        repository.fhirContext(),
+                        "package-parameters",
+                        newBooleanPart(repository.fhirContext(), "isPut", isPut, parts)));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageLibrary(
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        return packageLibrary(resolveLibrary(library), parameters);
+    }
+
+    public IBaseBundle packageLibrary(IBaseResource questionnaire, IBaseParameters parameters) {
+        return packageProcessor.packageResource(questionnaire, parameters);
     }
 }

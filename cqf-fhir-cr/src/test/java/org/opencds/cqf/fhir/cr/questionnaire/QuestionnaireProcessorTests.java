@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
@@ -15,8 +13,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.packages.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -174,35 +172,32 @@ class QuestionnaireProcessorTests {
 
     @Test
     void questionnairePackageDstu3() {
-        var bundle = (org.hl7.fhir.dstu3.model.Bundle) given().repository(repositoryDstu3)
+        given().repository(repositoryDstu3)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .thenPackage();
-
-        assertEquals(3, bundle.getEntry().size());
-        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
+                .thenPackage()
+                .hasEntry(3)
+                .firstEntryIsType(org.hl7.fhir.dstu3.model.Questionnaire.class);
     }
 
     @Test
     void questionnairePackageR4() {
-        var bundle = (org.hl7.fhir.r4.model.Bundle) given().repository(repositoryR4)
+        given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .thenPackage();
-
-        assertEquals(3, bundle.getEntry().size());
-        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
+                .thenPackage()
+                .hasEntry(3)
+                .firstEntryIsType(org.hl7.fhir.r4.model.Questionnaire.class);
     }
 
     @Test
     void questionnairePackageR5() {
-        var bundle = (org.hl7.fhir.r5.model.Bundle) given().repository(repositoryR5)
+        given().repository(repositoryR5)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .thenPackage();
-
-        assertEquals(3, bundle.getEntry().size());
-        assertEquals("Questionnaire", bundle.getEntry().get(0).getResource().fhirType());
+                .thenPackage()
+                .hasEntry(3)
+                .firstEntryIsType(org.hl7.fhir.r5.model.Questionnaire.class);
     }
 
     @Test
@@ -241,14 +236,13 @@ class QuestionnaireProcessorTests {
 
     @Test
     void pa_aslp_Package() {
-        var bundle = (org.hl7.fhir.r4.model.Bundle) given().repositoryFor(fhirContextR4, "r4/pa-aslp")
+        given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
                 .isPut(Boolean.TRUE)
-                .thenPackage();
-
-        assertFalse(bundle.getEntry().isEmpty());
-        assertEquals(11, bundle.getEntry().size());
+                .thenPackage()
+                .hasEntry(11)
+                .firstEntryIsType(org.hl7.fhir.r4.model.Questionnaire.class);
     }
 
     @Test
@@ -260,7 +254,8 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .isPut(Boolean.FALSE)
-                .thenPackage();
+                .thenPackage()
+                .getBundle();
         assertNotNull(bundle);
     }
 }

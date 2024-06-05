@@ -485,13 +485,11 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void packageR5() {
-        // Due to StructureDefinition no longer being a MetaDataResource in R5 it will need an adapter created before
-        // $package will work with StructureDefinitions.
-        // given().repositoryFor(fhirContextR5, "r5")
-        //         .when()
-        //         .planDefinitionId("generate-questionnaire")
-        //         .thenPackage()
-        //         .hasEntry(8);
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .planDefinitionId("generate-questionnaire")
+                .thenPackage()
+                .hasEntry(9);
 
         given().repositoryFor(fhirContextR5, "r5")
                 .when()

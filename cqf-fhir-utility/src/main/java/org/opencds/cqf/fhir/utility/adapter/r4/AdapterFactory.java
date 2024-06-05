@@ -9,6 +9,8 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
@@ -26,23 +28,28 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
 
     @Override
     public KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(IDomainResource resource) {
-        KnowledgeArtifactAdapter retval;
+        KnowledgeArtifactAdapter adapter;
         if (resource instanceof Library) {
-            retval = createLibrary(resource);
+            adapter = createLibrary(resource);
         } else if (resource instanceof PlanDefinition) {
-            retval = new org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionAdapter((PlanDefinition) resource);
+            adapter = new org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionAdapter((PlanDefinition) resource);
+        } else if (resource instanceof Questionnaire) {
+            adapter = new org.opencds.cqf.fhir.utility.adapter.r4.QuestionnaireAdapter((Questionnaire) resource);
+        } else if (resource instanceof StructureDefinition) {
+            adapter = new org.opencds.cqf.fhir.utility.adapter.r4.StructureDefinitionAdapter(
+                    (StructureDefinition) resource);
         } else if (resource instanceof ValueSet) {
-            retval = new org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter((ValueSet) resource);
+            adapter = new org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter((ValueSet) resource);
         } else {
             if (resource != null && resource instanceof MetadataResource) {
-                retval = new org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter(
+                adapter = new org.opencds.cqf.fhir.utility.adapter.r4.KnowledgeArtifactAdapter(
                         (MetadataResource) resource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resouce must be instance of %s", MetadataResource.class.getName()));
+                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
             }
         }
-        return retval;
+        return adapter;
     }
 
     @Override

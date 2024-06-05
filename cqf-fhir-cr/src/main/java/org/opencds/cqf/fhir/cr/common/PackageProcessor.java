@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
@@ -30,13 +31,20 @@ public class PackageProcessor implements IPackageProcessor {
 
     @Override
     public IBaseBundle packageResource(IBaseResource resource, String method) {
-        var adapter =
-                AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter((IDomainResource) resource);
         IBase[] parts = {};
-        var parameters = newParameters(
-                repository.fhirContext(),
-                "package-parameters",
-                newBooleanPart(repository.fhirContext(), "isPut", false, parts));
-        return (IBaseBundle) adapter.accept(packageVisitor, repository, parameters);
+        return packageResource(
+                resource,
+                newParameters(
+                        repository.fhirContext(),
+                        "package-parameters",
+                        newBooleanPart(repository.fhirContext(), "isPut", method.equals("PUT"), parts)));
+    }
+
+    @Override
+    public IBaseBundle packageResource(IBaseResource resource, IBaseParameters parameters) {
+        return (IBaseBundle) packageVisitor.visit(
+                AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter((IDomainResource) resource),
+                repository,
+                parameters);
     }
 }

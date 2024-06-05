@@ -33,11 +33,11 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
-public class KnowledgeArtifactPackageVisitor {
+public class PackageVisitor {
 
     private final FhirContext fhirContext = FhirContext.forR5Cached();
 
-    public KnowledgeArtifactPackageVisitor() {
+    public PackageVisitor() {
         this.terminologyServerClient = new TerminologyServerClient(fhirContext);
     }
 
@@ -216,7 +216,7 @@ public class KnowledgeArtifactPackageVisitor {
      * @param manifest the resource containing all RelatedArtifact references
      * @param bundleEntries the list of packaged resources to modify according to the extensions on the manifest relatedArtifact references
      */
-    public void handleValueSetReferenceExtensions(
+    public void handleValueSets(
             MetadataResource manifest,
             List<Bundle.BundleEntryComponent> bundleEntries,
             Repository repository,

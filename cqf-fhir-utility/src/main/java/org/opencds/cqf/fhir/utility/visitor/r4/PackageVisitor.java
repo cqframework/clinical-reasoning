@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.visitor.dstu3;
+package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
 
@@ -12,45 +12,52 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.UsageContext;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UsageContext;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
-public class KnowledgeArtifactPackageVisitor {
+public class PackageVisitor {
+    // private Logger logger = LoggerFactory.getLogger(KnowledgeArtifactPackageVisitor.class);
 
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
 
-    public KnowledgeArtifactPackageVisitor() {
+    public PackageVisitor() {
         this.terminologyServerClient = new TerminologyServerClient(fhirContext);
     }
 
     private TerminologyServerClient terminologyServerClient;
 
-    // as per http://hl7.org/fhir/dstu3/resource.html#canonical
+    // as per http://hl7.org/fhir/R4/resource.html#canonical
     public static final List<ResourceType> canonicalResourceTypes =
             // can't use List.of for Android 26 compatibility
             Collections.unmodifiableList(new ArrayList<ResourceType>(Arrays.asList(
                     ResourceType.ActivityDefinition,
                     ResourceType.CapabilityStatement,
+                    ResourceType.ChargeItemDefinition,
                     ResourceType.CompartmentDefinition,
                     ResourceType.ConceptMap,
+                    ResourceType.EffectEvidenceSynthesis,
+                    ResourceType.EventDefinition,
+                    ResourceType.Evidence,
+                    ResourceType.EvidenceVariable,
+                    ResourceType.ExampleScenario,
                     ResourceType.GraphDefinition,
                     ResourceType.ImplementationGuide,
                     ResourceType.Library,
@@ -60,9 +67,13 @@ public class KnowledgeArtifactPackageVisitor {
                     ResourceType.OperationDefinition,
                     ResourceType.PlanDefinition,
                     ResourceType.Questionnaire,
+                    ResourceType.ResearchDefinition,
+                    ResourceType.ResearchElementDefinition,
+                    ResourceType.RiskEvidenceSynthesis,
                     ResourceType.SearchParameter,
                     ResourceType.StructureDefinition,
                     ResourceType.StructureMap,
+                    ResourceType.TerminologyCapabilities,
                     ResourceType.TestScript,
                     ResourceType.ValueSet)));
 
@@ -77,7 +88,8 @@ public class KnowledgeArtifactPackageVisitor {
                     ResourceType.OperationDefinition,
                     ResourceType.CompartmentDefinition,
                     ResourceType.StructureMap,
-                    ResourceType.GraphDefinition)));
+                    ResourceType.GraphDefinition,
+                    ResourceType.ExampleScenario)));
 
     public static final List<ResourceType> knowledgeArtifactResourceTypes =
             // can't use List.of for Android 26 compatibility
@@ -93,7 +105,8 @@ public class KnowledgeArtifactPackageVisitor {
                     ResourceType.CodeSystem,
                     ResourceType.ValueSet,
                     ResourceType.ConceptMap,
-                    ResourceType.NamingSystem)));
+                    ResourceType.NamingSystem,
+                    ResourceType.TerminologyCapabilities)));
 
     public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, Bundle bundle) {
         // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
@@ -242,7 +255,7 @@ public class KnowledgeArtifactPackageVisitor {
                 : valueSet.getUrl();
 
         ValueSet expandedValueSet;
-        if (hasSimpleCompose(valueSet)) {
+        if (!terminologyEndpoint.isPresent() && hasSimpleCompose(valueSet)) {
             // Perform naive expansion independent of terminology servers. Copy all codes from compose into expansion.
             ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
             expansion.setTimestamp(Date.from(Instant.now()));
@@ -304,7 +317,7 @@ public class KnowledgeArtifactPackageVisitor {
                                 csc.hasFilter() || (!csc.hasValueSet() && (!csc.hasSystem() && !csc.hasConcept())));
     }
 
-    protected static Library getRootSpecificationLibrary(List<Bundle.BundleEntryComponent> bundleEntries) {
+    protected static Library getRootSpecificationLibrary(List<BundleEntryComponent> bundleEntries) {
         Optional<Library> rootSpecLibrary = bundleEntries.stream()
                 .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
                 .map(entry -> ((Library) entry.getResource()))

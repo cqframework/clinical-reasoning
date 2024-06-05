@@ -1,24 +1,30 @@
-package org.opencds.cqf.fhir.utility.visitor.r5;
+package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
 import java.util.List;
 import java.util.Optional;
-import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.MetadataResource;
-import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.UsageContext;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MetadataResource;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.UsageContext;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 
-public class KnowledgeArtifactDraftVisitor {
+public class DraftVisitor {
 
     public static Optional<MetadataResource> processReferencedResourceForDraft(
             Repository repository, RelatedArtifact ra, String version) {
         Optional<MetadataResource> referencedResource = Optional.empty();
-        if (ra.hasResource()) {
-            Bundle referencedResourceBundle =
-                    (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getResourceElement());
+        if (ra.hasUrl() || ra.hasResource()) {
+            Bundle referencedResourceBundle;
+            if (ra.hasUrl()) {
+                referencedResourceBundle =
+                        (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getUrl());
+            } else {
+                referencedResourceBundle = (Bundle) SearchHelper.searchRepositoryByCanonicalWithPaging(
+                        repository, ra.getResource().getReference());
+            }
             if (!referencedResourceBundle.getEntryFirstRep().isEmpty()) {
                 var referencedResourceEntry = referencedResourceBundle.getEntryFirstRep();
                 if (referencedResourceEntry.hasResource()
@@ -37,8 +43,8 @@ public class KnowledgeArtifactDraftVisitor {
         List<UsageContext> useContexts = newResource.getUseContext();
         for (UsageContext useContext : useContexts) {
             // TODO: will we ever need to resolve these references?
-            if (useContext.hasValueReference()) {
-                Reference useContextRef = useContext.getValueReference();
+            if (useContext.hasValue() && useContext.getValue() instanceof Reference) {
+                Reference useContextRef = (Reference) useContext.getValue();
                 if (useContextRef != null) {
                     resourceListWithOriginalIds.stream()
                             .filter(resource -> (resource.getClass().getSimpleName() + "/"

@@ -37,7 +37,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.dstu3.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactApproveVisitor;
+import org.opencds.cqf.fhir.utility.visitor.ApproveVisitor;
 
 class KnowledgeArtifactApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
@@ -66,7 +66,7 @@ class KnowledgeArtifactApproveVisitorTest {
         var artifactAssessmentTarget = "Library/This-Library-Does-Not-Exist|1.0.0";
         var params = parameters(part("artifactAssessmentTarget", new UriType(artifactAssessmentTarget)));
         UnprocessableEntityException maybeException = null;
-        var releaseVisitor = new KnowledgeArtifactApproveVisitor();
+        var releaseVisitor = new ApproveVisitor();
         var lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -96,7 +96,7 @@ class KnowledgeArtifactApproveVisitorTest {
         String artifactAssessmentType = "this-type-does-not-exist";
         Parameters params = parameters(part("artifactAssessmentType", new CodeType(artifactAssessmentType)));
         UnprocessableEntityException maybeException = null;
-        KnowledgeArtifactApproveVisitor releaseVisitor = new KnowledgeArtifactApproveVisitor();
+        ApproveVisitor releaseVisitor = new ApproveVisitor();
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -130,7 +130,7 @@ class KnowledgeArtifactApproveVisitorTest {
                 part("artifactAssessmentTarget", new UriType(artifactAssessmentTarget)),
                 part("artifactAssessmentRelatedArtifact", new UriType(artifactAssessmentRelatedArtifact)),
                 part("artifactAssessmentAuthor", new Reference(artifactAssessmentAuthor)));
-        KnowledgeArtifactApproveVisitor approveVisitor = new KnowledgeArtifactApproveVisitor();
+        ApproveVisitor approveVisitor = new ApproveVisitor();
         Library lib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();

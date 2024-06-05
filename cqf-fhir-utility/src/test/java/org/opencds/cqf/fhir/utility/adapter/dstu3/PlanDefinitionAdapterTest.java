@@ -19,12 +19,12 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
+import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class PlanDefinitionAdapterTest {
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new KnowledgeArtifactPackageVisitor());
+        var spyVisitor = spy(new PackageVisitor());
         doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
         IDomainResource planDef = new PlanDefinition();
         var adapter = new PlanDefinitionAdapter(planDef);

@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor {
+public class ApproveVisitor implements KnowledgeArtifactVisitor {
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters approveParameters) {
         Date currentDate = new Date();
@@ -82,17 +82,16 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
             throws UnprocessableEntityException {
         switch (fhirVersion) {
             case DSTU3:
-                return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactApproveVisitor
-                        .createApprovalAssessment(
-                                id,
-                                new org.hl7.fhir.dstu3.model.CodeType(artifactAssessmentType),
-                                artifactAssessmentSummary.map(t -> new org.hl7.fhir.dstu3.model.MarkdownType(t)),
-                                artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
-                                artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
-                                artifactAssessmentAuthor.map(t -> (org.hl7.fhir.dstu3.model.Reference) t),
-                                new org.hl7.fhir.dstu3.model.Reference(artifactTargetReference));
+                return org.opencds.cqf.fhir.utility.visitor.dstu3.ApproveVisitor.createApprovalAssessment(
+                        id,
+                        new org.hl7.fhir.dstu3.model.CodeType(artifactAssessmentType),
+                        artifactAssessmentSummary.map(t -> new org.hl7.fhir.dstu3.model.MarkdownType(t)),
+                        artifactAssessmentTargetCanonical.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
+                        artifactAssessmentRelatedArtifact.map(t -> new org.hl7.fhir.dstu3.model.UriType(t)),
+                        artifactAssessmentAuthor.map(t -> (org.hl7.fhir.dstu3.model.Reference) t),
+                        new org.hl7.fhir.dstu3.model.Reference(artifactTargetReference));
             case R4:
-                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactApproveVisitor.createApprovalAssessment(
+                return org.opencds.cqf.fhir.utility.visitor.r4.ApproveVisitor.createApprovalAssessment(
                         id,
                         new org.hl7.fhir.r4.model.CodeType(artifactAssessmentType),
                         artifactAssessmentSummary.map(t -> new org.hl7.fhir.r4.model.MarkdownType(t)),
@@ -101,7 +100,7 @@ public class KnowledgeArtifactApproveVisitor implements KnowledgeArtifactVisitor
                         artifactAssessmentAuthor.map(t -> (org.hl7.fhir.r4.model.Reference) t),
                         new org.hl7.fhir.r4.model.Reference(artifactTargetReference));
             case R5:
-                return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactApproveVisitor.createApprovalAssessment(
+                return org.opencds.cqf.fhir.utility.visitor.r5.ApproveVisitor.createApprovalAssessment(
                         id,
                         artifactAssessmentType,
                         artifactAssessmentSummary.map(t -> new org.hl7.fhir.r5.model.MarkdownType(t)),

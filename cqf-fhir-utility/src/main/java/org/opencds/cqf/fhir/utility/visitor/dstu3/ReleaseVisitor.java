@@ -30,7 +30,7 @@ import org.opencds.cqf.fhir.utility.dstu3.CRMIReleaseExperimentalBehavior.CRMIRe
 import org.opencds.cqf.fhir.utility.dstu3.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.slf4j.Logger;
 
-public class KnowledgeArtifactReleaseVisitor {
+public class ReleaseVisitor {
 
     public static void checkNonExperimental(
             MetadataResource resource,

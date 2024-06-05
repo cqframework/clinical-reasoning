@@ -10,7 +10,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.dstu3.ArtifactAssessment;
 
-public class KnowledgeArtifactApproveVisitor {
+public class ApproveVisitor {
 
     public static ArtifactAssessment createApprovalAssessment(
             IIdType id,

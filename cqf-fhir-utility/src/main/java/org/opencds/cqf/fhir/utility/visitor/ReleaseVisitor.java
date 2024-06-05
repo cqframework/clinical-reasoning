@@ -35,8 +35,8 @@ import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor {
-    private Logger log = LoggerFactory.getLogger(KnowledgeArtifactReleaseVisitor.class);
+public class ReleaseVisitor implements KnowledgeArtifactVisitor {
+    private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -266,7 +266,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.utility.dstu3.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
-            org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor.checkNonExperimental(
+            org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.checkNonExperimental(
                     (org.hl7.fhir.dstu3.model.MetadataResource) resource, code, repository, log);
         } else if (resource instanceof org.hl7.fhir.r4.model.MetadataResource) {
             var code = experimentalBehavior.isPresent()
@@ -274,7 +274,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.utility.r4.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
-            org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.checkNonExperimental(
+            org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.checkNonExperimental(
                     (org.hl7.fhir.r4.model.MetadataResource) resource, code, repository, log);
         } else if (resource instanceof org.hl7.fhir.r5.model.MetadataResource) {
             var code = experimentalBehavior.isPresent()
@@ -282,7 +282,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.utility.r5.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
-            org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.checkNonExperimental(
+            org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.checkNonExperimental(
                     (org.hl7.fhir.r5.model.MetadataResource) resource, code, repository, log);
         } else {
             throw new UnprocessableEntityException(resource.getClass().getName() + " not supported");
@@ -292,13 +292,13 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     private void propagageEffectivePeriod(
             ICompositeType rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
         if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.propagageEffectivePeriod(
                     (org.hl7.fhir.dstu3.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r4.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.propagageEffectivePeriod(
                     (org.hl7.fhir.r4.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r5.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.propagageEffectivePeriod(
                     (org.hl7.fhir.r5.model.Period) rootEffectivePeriod, artifactAdapter);
         } else {
             throw new UnprocessableEntityException(
@@ -335,13 +335,13 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             throws UnprocessableEntityException {
         switch (fhirVersion) {
             case DSTU3:
-                return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor.getReleaseVersion(
+                return org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.getReleaseVersion(
                         version, versionBehavior, existingVersion);
             case R4:
-                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.getReleaseVersion(
+                return org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.getReleaseVersion(
                         version, versionBehavior, existingVersion);
             case R5:
-                return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.getReleaseVersion(
+                return org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.getReleaseVersion(
                         version, versionBehavior, existingVersion);
             case DSTU2:
             case DSTU2_1:
@@ -354,13 +354,13 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
     private void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
         if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-            org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactReleaseVisitor.updateReleaseLabel(
+            org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(
                     (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseLabel);
         } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
-            org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.updateReleaseLabel(
+            org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.updateReleaseLabel(
                     (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseLabel);
         } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
-            org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.updateReleaseLabel(
+            org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.updateReleaseLabel(
                     (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseLabel);
         } else {
             throw new UnprocessableEntityException(artifact.getClass().getName() + " not supported");
@@ -425,27 +425,19 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
     private List<IBaseBackboneElement> findArtifactCommentsToUpdate(
             IBaseResource artifact, String releaseVersion, Repository repository) {
         if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-            return org
-                    .opencds
-                    .cqf
-                    .fhir
-                    .utility
-                    .visitor
-                    .dstu3
-                    .KnowledgeArtifactReleaseVisitor
-                    .findArtifactCommentsToUpdate(
+            return org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.findArtifactCommentsToUpdate(
                             (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
         } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
-            return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactReleaseVisitor.findArtifactCommentsToUpdate(
+            return org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.findArtifactCommentsToUpdate(
                             (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
         } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
-            return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactReleaseVisitor.findArtifactCommentsToUpdate(
+            return org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.findArtifactCommentsToUpdate(
                             (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)

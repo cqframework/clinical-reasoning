@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 
-public class KnowledgeArtifactApproveVisitor {
+public class ApproveVisitor {
 
     public static ArtifactAssessment createApprovalAssessment(
             IIdType id,

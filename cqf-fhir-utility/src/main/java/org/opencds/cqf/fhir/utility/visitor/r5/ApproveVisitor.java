@@ -12,7 +12,7 @@ import org.hl7.fhir.r5.model.MarkdownType;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 
-public class KnowledgeArtifactApproveVisitor {
+public class ApproveVisitor {
 
     public static ArtifactAssessment createApprovalAssessment(
             IIdType id,

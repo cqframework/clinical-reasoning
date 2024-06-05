@@ -11,17 +11,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactPackageVisitor;
+import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;
     protected final FhirVersionEnum fhirVersion;
-    protected final KnowledgeArtifactPackageVisitor packageVisitor;
+    protected final PackageVisitor packageVisitor;
 
     public PackageProcessor(Repository repository) {
         this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
-        packageVisitor = new KnowledgeArtifactPackageVisitor();
+        packageVisitor = new PackageVisitor();
     }
 
     @Override

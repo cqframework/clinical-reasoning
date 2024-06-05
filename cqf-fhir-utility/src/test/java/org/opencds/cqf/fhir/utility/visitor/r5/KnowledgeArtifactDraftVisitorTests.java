@@ -41,7 +41,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactDraftVisitor;
+import org.opencds.cqf.fhir.utility.visitor.DraftVisitor;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 class KnowledgeArtifactDraftVisitorTests {
@@ -85,7 +85,7 @@ class KnowledgeArtifactDraftVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(bundle);
-        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -144,7 +144,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         PlanDefinition planDef = spyRepository
                 .read(PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
                 .copy();
@@ -177,7 +177,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .read(Library.class, new IdType(specificationLibReference))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
 
         try {
             libraryAdapter.accept(draftVisitor, spyRepository, params);
@@ -200,7 +200,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         try {
             libraryAdapter.accept(draftVisitor, spyRepository, params);
         } catch (PreconditionFailedException e) {
@@ -219,7 +219,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        KnowledgeArtifactVisitor draftVisitor = new KnowledgeArtifactDraftVisitor();
+        KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
 
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;

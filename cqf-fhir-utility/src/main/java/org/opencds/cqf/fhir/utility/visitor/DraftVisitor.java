@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
-public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
+public class DraftVisitor implements KnowledgeArtifactVisitor {
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters draftParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
@@ -157,22 +157,19 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         switch (fhirVersion) {
             case DSTU3:
                 referencedResource =
-                        org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor
-                                .processReferencedResourceForDraft(
+                        org.opencds.cqf.fhir.utility.visitor.dstu3.DraftVisitor.processReferencedResourceForDraft(
                                         repository, (org.hl7.fhir.dstu3.model.RelatedArtifact) ra, version)
                                 .map(r -> (IDomainResource) r);
                 break;
             case R4:
                 referencedResource =
-                        org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor
-                                .processReferencedResourceForDraft(
+                        org.opencds.cqf.fhir.utility.visitor.r4.DraftVisitor.processReferencedResourceForDraft(
                                         repository, (org.hl7.fhir.r4.model.RelatedArtifact) ra, version)
                                 .map(r -> (IDomainResource) r);
                 break;
             case R5:
                 referencedResource =
-                        org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor
-                                .processReferencedResourceForDraft(
+                        org.opencds.cqf.fhir.utility.visitor.r5.DraftVisitor.processReferencedResourceForDraft(
                                         repository, (org.hl7.fhir.r5.model.RelatedArtifact) ra, version)
                                 .map(r -> (IDomainResource) r);
                 break;
@@ -226,37 +223,34 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
             FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
-                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactDraftVisitor
-                        .updateUsageContextReferencesWithUrns(
-                                (org.hl7.fhir.dstu3.model.MetadataResource) newResource,
-                                resourceListWithOriginalIds.stream()
-                                        .map(ra -> (org.hl7.fhir.dstu3.model.MetadataResource) ra)
-                                        .collect(Collectors.toList()),
-                                idListForTransactionBundle.stream()
-                                        .map(id -> new org.hl7.fhir.dstu3.model.IdType(id))
-                                        .collect(Collectors.toList()));
+                org.opencds.cqf.fhir.utility.visitor.dstu3.DraftVisitor.updateUsageContextReferencesWithUrns(
+                        (org.hl7.fhir.dstu3.model.MetadataResource) newResource,
+                        resourceListWithOriginalIds.stream()
+                                .map(ra -> (org.hl7.fhir.dstu3.model.MetadataResource) ra)
+                                .collect(Collectors.toList()),
+                        idListForTransactionBundle.stream()
+                                .map(id -> new org.hl7.fhir.dstu3.model.IdType(id))
+                                .collect(Collectors.toList()));
                 break;
             case R4:
-                org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactDraftVisitor
-                        .updateUsageContextReferencesWithUrns(
-                                (org.hl7.fhir.r4.model.MetadataResource) newResource,
-                                resourceListWithOriginalIds.stream()
-                                        .map(ra -> (org.hl7.fhir.r4.model.MetadataResource) ra)
-                                        .collect(Collectors.toList()),
-                                idListForTransactionBundle.stream()
-                                        .map(id -> new org.hl7.fhir.r4.model.IdType(id))
-                                        .collect(Collectors.toList()));
+                org.opencds.cqf.fhir.utility.visitor.r4.DraftVisitor.updateUsageContextReferencesWithUrns(
+                        (org.hl7.fhir.r4.model.MetadataResource) newResource,
+                        resourceListWithOriginalIds.stream()
+                                .map(ra -> (org.hl7.fhir.r4.model.MetadataResource) ra)
+                                .collect(Collectors.toList()),
+                        idListForTransactionBundle.stream()
+                                .map(id -> new org.hl7.fhir.r4.model.IdType(id))
+                                .collect(Collectors.toList()));
                 break;
             case R5:
-                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactDraftVisitor
-                        .updateUsageContextReferencesWithUrns(
-                                (org.hl7.fhir.r5.model.MetadataResource) newResource,
-                                resourceListWithOriginalIds.stream()
-                                        .map(ra -> (org.hl7.fhir.r5.model.MetadataResource) ra)
-                                        .collect(Collectors.toList()),
-                                idListForTransactionBundle.stream()
-                                        .map(id -> new org.hl7.fhir.r5.model.IdType(id))
-                                        .collect(Collectors.toList()));
+                org.opencds.cqf.fhir.utility.visitor.r5.DraftVisitor.updateUsageContextReferencesWithUrns(
+                        (org.hl7.fhir.r5.model.MetadataResource) newResource,
+                        resourceListWithOriginalIds.stream()
+                                .map(ra -> (org.hl7.fhir.r5.model.MetadataResource) ra)
+                                .collect(Collectors.toList()),
+                        idListForTransactionBundle.stream()
+                                .map(id -> new org.hl7.fhir.r5.model.IdType(id))
+                                .collect(Collectors.toList()));
                 break;
 
             case DSTU2:

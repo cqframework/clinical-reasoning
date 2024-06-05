@@ -48,7 +48,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.dstu3.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
+import org.opencds.cqf.fhir.utility.visitor.ReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
 class KnowledgeArtifactReleaseVisitorTests {
@@ -95,7 +95,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
         spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
@@ -201,7 +201,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         spyRepository.transaction(bundle);
         // Existing version should be "1.2.3";
         String newVersionToForce = "1.2.7.23";
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -239,7 +239,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 part("requireNonExperimental", new CodeType("error")));
         Exception notExpectingAnyException = null;
         // no Exception if root is experimental
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -278,7 +278,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                         "Bundle-small-approved-draft-experimental-children.json"));
         spyRepository.transaction(bundle2);
 
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -336,7 +336,7 @@ class KnowledgeArtifactReleaseVisitorTests {
 
         Parameters params =
                 parameters(part("version", new StringType("1.2.7")), part("versionBehavior", new CodeType("default")));
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -375,7 +375,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 part("version", "1.2.3"),
                 part("versionBehavior", new CodeType("default")),
                 part("latestFromTxServer", new BooleanType(true)));
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -400,7 +400,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         String actualErrorMessage = "";
 
         Parameters params1 = parameters(part("version", versionData), part("versionBehavior", new CodeType("default")));
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
@@ -418,7 +418,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -443,7 +443,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         String releaseLabel = "release label test";
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -472,7 +472,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -494,7 +494,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();

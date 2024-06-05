@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.utility.visitor;
 
+import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.findUnsupportedCapability;
+import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.processCanonicals;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -15,7 +18,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,7 +31,7 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor {
+public class PackageVisitor implements KnowledgeArtifactVisitor {
 
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters packageParameters) {
@@ -70,8 +72,9 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         "forceArtifactVersion", packageParameters, IPrimitiveType.class)
                 .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
                 .orElseGet(() -> new ArrayList<>());
-        Optional<Boolean> isPut = VisitorHelper.getParameter("isPut", packageParameters, IBaseBooleanDatatype.class)
-                .map(r -> r.getValue());
+        boolean isPut = VisitorHelper.getParameter("isPut", packageParameters, IBaseBooleanDatatype.class)
+                .map(r -> r.getValue())
+                .orElse(false);
 
         if ((artifactRoute.isPresent()
                         && !StringUtils.isBlank(artifactRoute.get())
@@ -96,7 +99,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         if (include.size() == 1 && include.stream().anyMatch((includedType) -> includedType.equals("artifact"))) {
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, artifactVersion, checkArtifactVersion, forceArtifactVersion);
-            var entry = PackageHelper.createEntry(resource, false);
+            var entry = PackageHelper.createEntry(resource, isPut);
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
             recursivePackage(
@@ -107,13 +110,14 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                     include,
                     artifactVersion,
                     checkArtifactVersion,
-                    forceArtifactVersion);
+                    forceArtifactVersion,
+                    isPut);
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, fhirVersion);
             BundleHelper.setEntry(packagedBundle, included);
         }
         setCorrectBundleType(count, offset, packagedBundle, fhirVersion);
         pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
-        handleValueSetReferenceExtensions(resource, packagedBundle, repository, terminologyEndpoint);
+        handleValueSets(resource, packagedBundle, repository, terminologyEndpoint);
         return packagedBundle;
 
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
@@ -121,15 +125,15 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
         // what is dependency, where did it originate? potentially the package?
     }
 
-    protected void handleValueSetReferenceExtensions(
+    protected void handleValueSets(
             IDomainResource resource,
             IBaseBundle packagedBundle,
             Repository repository,
             Optional<IBaseResource> terminologyEndpoint) {
         switch (resource.getStructureFhirVersionEnum()) {
             case DSTU3:
-                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor packageVisitorDstu3 =
-                        new org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor();
+                org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor packageVisitorDstu3 =
+                        new org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor();
                 packageVisitorDstu3.handleValueSets(
                         (org.hl7.fhir.dstu3.model.MetadataResource) resource,
                         ((org.hl7.fhir.dstu3.model.Bundle) packagedBundle).getEntry(),
@@ -137,18 +141,18 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                         terminologyEndpoint.map(te -> (org.hl7.fhir.dstu3.model.Endpoint) te));
                 break;
             case R4:
-                org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor packageVisitorR4 =
-                        new org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor();
-                packageVisitorR4.handleValueSetReferenceExtensions(
+                org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor packageVisitorR4 =
+                        new org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor();
+                packageVisitorR4.handleValueSets(
                         (org.hl7.fhir.r4.model.MetadataResource) resource,
                         ((org.hl7.fhir.r4.model.Bundle) packagedBundle).getEntry(),
                         repository,
                         terminologyEndpoint.map(te -> (org.hl7.fhir.r4.model.Endpoint) te));
                 break;
             case R5:
-                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor packageVisitorR5 =
-                        new org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor();
-                packageVisitorR5.handleValueSetReferenceExtensions(
+                org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor packageVisitorR5 =
+                        new org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor();
+                packageVisitorR5.handleValueSets(
                         (org.hl7.fhir.r5.model.MetadataResource) resource,
                         ((org.hl7.fhir.r5.model.Bundle) packagedBundle).getEntry(),
                         repository,
@@ -169,7 +173,8 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             List<String> include,
             List<String> artifactVersion,
             List<String> checkArtifactVersion,
-            List<String> forceArtifactVersion)
+            List<String> forceArtifactVersion,
+            boolean isPut)
             throws PreconditionFailedException {
         if (resource != null) {
             var fhirVersion = resource.getStructureFhirVersionEnum();
@@ -183,7 +188,7 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                     .anyMatch(mr -> mr.getUrl().equals(adapter.getUrl())
                             && (!mr.hasVersion() || mr.getVersion().equals(adapter.getVersion())));
             if (!entryExists) {
-                var entry = PackageHelper.createEntry(resource, false);
+                var entry = PackageHelper.createEntry(resource, isPut);
                 BundleHelper.addEntry(bundle, entry);
             }
 
@@ -214,78 +219,80 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
                             include,
                             artifactVersion,
                             checkArtifactVersion,
-                            forceArtifactVersion));
+                            forceArtifactVersion,
+                            isPut));
         }
     }
 
-    private void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)
-            throws PreconditionFailedException {
-        if (capability != null && !capability.isEmpty()) {
-            List<IBaseExtension<?, ?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
-                    .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
-                    .collect(Collectors.toList());
-            if (knowledgeCapabilityExtension.isEmpty()) {
-                // consider resource unsupported if it's knowledgeCapability is undefined
-                throw new PreconditionFailedException(
-                        String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
-            }
-            knowledgeCapabilityExtension.stream()
-                    .filter(ext -> !capability.contains(((IPrimitiveType<?>) ext.getValue()).getValue()))
-                    .findAny()
-                    .ifPresent((ext) -> {
-                        throw new PreconditionFailedException(String.format(
-                                "Resource with url: '%s' is not one of '%s'.",
-                                resource.getUrl(), String.join(", ", capability)));
-                    });
-        }
-    }
+    // private void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)
+    //         throws PreconditionFailedException {
+    //     if (capability != null && !capability.isEmpty()) {
+    //         List<IBaseExtension<?, ?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
+    //                 .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
+    //                 .collect(Collectors.toList());
+    //         if (knowledgeCapabilityExtension.isEmpty()) {
+    //             // consider resource unsupported if it's knowledgeCapability is undefined
+    //             throw new PreconditionFailedException(
+    //                     String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
+    //         }
+    //         knowledgeCapabilityExtension.stream()
+    //                 .filter(ext -> !capability.contains(((IPrimitiveType<?>) ext.getValue()).getValue()))
+    //                 .findAny()
+    //                 .ifPresent((ext) -> {
+    //                     throw new PreconditionFailedException(String.format(
+    //                             "Resource with url: '%s' is not one of '%s'.",
+    //                             resource.getUrl(), String.join(", ", capability)));
+    //                 });
+    //     }
+    // }
 
-    private void processCanonicals(
-            KnowledgeArtifactAdapter resource,
-            List<String> canonicalVersion,
-            List<String> checkArtifactVersion,
-            List<String> forceArtifactVersion)
-            throws PreconditionFailedException {
-        if (checkArtifactVersion != null && !checkArtifactVersion.isEmpty()) {
-            // check throws an error
-            findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent((version) -> {
-                if (!resource.getVersion().equals(version)) {
-                    throw new PreconditionFailedException(String.format(
-                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
-                            resource.getUrl(), resource.getVersion(), version));
-                }
-            });
-        } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
-            // force just does a silent override
-            findVersionInListMatchingResource(forceArtifactVersion, resource)
-                    .ifPresent((version) -> resource.setVersion(version));
-        } else if (canonicalVersion != null && !canonicalVersion.isEmpty() && !resource.hasVersion()) {
-            // canonicalVersion adds a version if it's missing
-            findVersionInListMatchingResource(canonicalVersion, resource)
-                    .ifPresent((version) -> resource.setVersion(version));
-        }
-    }
+    // private void processCanonicals(
+    //         KnowledgeArtifactAdapter resource,
+    //         List<String> canonicalVersion,
+    //         List<String> checkArtifactVersion,
+    //         List<String> forceArtifactVersion)
+    //         throws PreconditionFailedException {
+    //     if (checkArtifactVersion != null && !checkArtifactVersion.isEmpty()) {
+    //         // check throws an error
+    //         findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent((version) -> {
+    //             if (!resource.getVersion().equals(version)) {
+    //                 throw new PreconditionFailedException(String.format(
+    //                         "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
+    //                         resource.getUrl(), resource.getVersion(), version));
+    //             }
+    //         });
+    //     } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
+    //         // force just does a silent override
+    //         findVersionInListMatchingResource(forceArtifactVersion, resource)
+    //                 .ifPresent((version) -> resource.setVersion(version));
+    //     } else if (canonicalVersion != null && !canonicalVersion.isEmpty() && !resource.hasVersion()) {
+    //         // canonicalVersion adds a version if it's missing
+    //         findVersionInListMatchingResource(canonicalVersion, resource)
+    //                 .ifPresent((version) -> resource.setVersion(version));
+    //     }
+    // }
 
-    private Optional<String> findVersionInListMatchingResource(List<String> list, KnowledgeArtifactAdapter resource) {
-        return list.stream()
-                .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
-                .map((canonical) -> Canonicals.getVersion(canonical))
-                .findAny();
-    }
+    // private Optional<String> findVersionInListMatchingResource(List<String> list, KnowledgeArtifactAdapter resource)
+    // {
+    //     return list.stream()
+    //             .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
+    //             .map((canonical) -> Canonicals.getVersion(canonical))
+    //             .findAny();
+    // }
 
     private void setCorrectBundleType(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
-                org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor.setCorrectBundleType(
+                org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor.setCorrectBundleType(
                         count, offset, (org.hl7.fhir.dstu3.model.Bundle) bundle);
                 break;
             case R4:
-                org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor.setCorrectBundleType(
+                org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor.setCorrectBundleType(
                         count, offset, (org.hl7.fhir.r4.model.Bundle) bundle);
                 break;
             case R5:
-                org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor.setCorrectBundleType(
+                org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor.setCorrectBundleType(
                         count, offset, (org.hl7.fhir.r5.model.Bundle) bundle);
                 break;
             case DSTU2:
@@ -331,14 +338,13 @@ public class KnowledgeArtifactPackageVisitor implements KnowledgeArtifactVisitor
             List<? extends IBaseBackboneElement> entries, List<String> include, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
-                return org.opencds.cqf.fhir.utility.visitor.dstu3.KnowledgeArtifactPackageVisitor
-                        .findUnsupportedInclude(
-                                (List<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent>) entries, include);
+                return org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor.findUnsupportedInclude(
+                        (List<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent>) entries, include);
             case R4:
-                return org.opencds.cqf.fhir.utility.visitor.r4.KnowledgeArtifactPackageVisitor.findUnsupportedInclude(
+                return org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor.findUnsupportedInclude(
                         (List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent>) entries, include);
             case R5:
-                return org.opencds.cqf.fhir.utility.visitor.r5.KnowledgeArtifactPackageVisitor.findUnsupportedInclude(
+                return org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor.findUnsupportedInclude(
                         (List<org.hl7.fhir.r5.model.Bundle.BundleEntryComponent>) entries, include);
             case DSTU2:
             case DSTU2_1:

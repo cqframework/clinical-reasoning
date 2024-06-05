@@ -23,7 +23,7 @@
         <cql.version>3.10.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>5.3.32</spring.version>
-        <hapi.version>7.0.2</hapi.version>
+        <hapi.version>7.2.1</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>32.1.2-jre</guava.version>
         <error-prone.version>2.24.1</error-prone.version>

@@ -12,6 +12,9 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
@@ -264,5 +267,38 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     @Override
     public void setExtension(List<IBaseExtension<?, ?>> extensions) {
         this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    }
+
+    @Override
+    public ICompositeType getType() {
+        return library.getType();
+    }
+
+    @Override
+    public LibraryAdapter setType(String type) {
+        if (LIBRARY_TYPES.contains(type)) {
+            library.setType(new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/library-type", type, "")));
+        } else {
+            throw new UnprocessableEntityException("Invalid type: {}", type);
+        }
+        return this;
+    }
+
+    @Override
+    public List<DataRequirement> getDataRequirement() {
+        return library.getDataRequirement();
+    }
+
+    @Override
+    public LibraryAdapter addDataRequirement(ICompositeType dataRequirement) {
+        library.addDataRequirement((DataRequirement) dataRequirement);
+        return this;
+    }
+
+    @Override
+    public <T extends ICompositeType> LibraryAdapter setDataRequirements(List<T> dataRequirements) {
+        library.setDataRequirement(
+                dataRequirements.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
+        return this;
     }
 }

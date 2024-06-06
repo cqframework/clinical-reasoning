@@ -7,7 +7,6 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -175,13 +174,12 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
             Either3<C, IIdType, IBaseResource> questionnaire, boolean isPut) {
-        IBase[] parts = {};
         return packageQuestionnaire(
                 questionnaire,
                 newParameters(
                         repository.fhirContext(),
                         "package-parameters",
-                        newBooleanPart(repository.fhirContext(), "isPut", isPut, parts)));
+                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
     }
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(

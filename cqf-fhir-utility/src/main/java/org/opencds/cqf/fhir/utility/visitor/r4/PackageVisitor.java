@@ -7,16 +7,20 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
@@ -237,34 +241,81 @@ public class PackageVisitor {
                 expansionParams = getExpansionParams(rootSpecificationLibrary, expansionReference.getReference());
             }
         }
-        Parameters params = expansionParams;
-        bundleEntries.stream().forEach(entry -> {
-            if (entry.getResource().getResourceType().equals(ResourceType.ValueSet)) {
-                ValueSet valueSet = (ValueSet) entry.getResource();
-                expandValueSet(valueSet, params, terminologyEndpoint);
-            }
+        var params = expansionParams;
+        var expandedList = new ArrayList<String>();
+
+        var valueSets = bundleEntries.stream()
+                .filter(e -> e.hasResource() && e.getResource().fhirType().equals("ValueSet"))
+                .map(e -> (ValueSet) e.getResource())
+                .collect(Collectors.toList());
+
+        valueSets.stream().forEach(valueSet -> {
+            expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList);
         });
     }
 
     public void expandValueSet(
-            ValueSet valueSet, Parameters expansionParameters, Optional<Endpoint> terminologyEndpoint) {
-        // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
-        Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);
-        String authoritativeSourceUrl = authoritativeSource != null && authoritativeSource.hasValue()
-                ? authoritativeSource.getValue().primitiveValue()
-                : valueSet.getUrl();
+            ValueSet valueSet,
+            Parameters expansionParameters,
+            Optional<Endpoint> terminologyEndpoint,
+            List<ValueSet> valueSets,
+            List<String> expandedList) {
+        // Have we already expanded this ValueSet?
+        if (expandedList.contains(valueSet.getUrl())) {
+            // Nothing to do here
+            return;
+        }
 
-        ValueSet expandedValueSet;
-        if (!terminologyEndpoint.isPresent() && hasSimpleCompose(valueSet)) {
+        // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
+        var authoritativeSource = ((IBaseHasExtensions) valueSet)
+                .getExtension().stream()
+                        .filter(e -> e.getUrl().equals(Constants.AUTHORITATIVE_SOURCE_URL))
+                        .findFirst()
+                        .orElse(null);
+        @SuppressWarnings("unchecked")
+        var authoritativeSourceUrl = authoritativeSource == null
+                ? null
+                : ((IPrimitiveType<String>) authoritativeSource.getValue()).getValueAsString();
+
+        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
+        // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
+        if (terminologyEndpoint.isPresent()
+                && (authoritativeSourceUrl == null
+                        || authoritativeSourceUrl.equals(
+                                terminologyEndpoint.get().getAddressElement().asStringValue()))) {
+            var username = terminologyEndpoint.get().getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
+                    .findFirst()
+                    .map(ext -> ext.getValue().toString())
+                    .orElseThrow(() -> new UnprocessableEntityException(
+                            "Cannot expand ValueSet without VSAC Username: " + valueSet.getId()));
+            var apiKey = terminologyEndpoint.get().getExtensionsByUrl(Constants.APIKEY).stream()
+                    .findFirst()
+                    .map(ext -> ext.getValue().toString())
+                    .orElseThrow(() -> new UnprocessableEntityException(
+                            "Cannot expand ValueSet without VSAC API Key: " + valueSet.getId()));
+
+            try {
+                var expandedValueSet = terminologyServerClient.expand(
+                        valueSet,
+                        terminologyEndpoint.get().getAddressElement().asStringValue(),
+                        expansionParameters,
+                        username,
+                        apiKey);
+                valueSet.setExpansion(expandedValueSet.getExpansion());
+            } catch (Exception ex) {
+                throw new UnprocessableEntityException(
+                        "Terminology Server expansion failed for: " + valueSet.getId(), ex.getMessage());
+            }
+        }
+        // Else if the ValueSet has a simple compose then we will perform naive expansion.
+        else if (hasSimpleCompose(valueSet)) {
             // Perform naive expansion independent of terminology servers. Copy all codes from compose into expansion.
-            ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
-            expansion.setTimestamp(Date.from(Instant.now()));
+            var expansion = new ValueSet.ValueSetExpansionComponent(new DateTimeType(Date.from(Instant.now())));
 
             ArrayList<ValueSet.ValueSetExpansionParameterComponent> expansionParams = new ArrayList<>();
-            ValueSet.ValueSetExpansionParameterComponent parameterNaive =
-                    new ValueSet.ValueSetExpansionParameterComponent();
-            parameterNaive.setName("naive");
-            parameterNaive.setValue(new BooleanType(true));
+            var parameterNaive = new ValueSet.ValueSetExpansionParameterComponent()
+                    .setName("naive")
+                    .setValue(new BooleanType(true));
             expansionParams.add(parameterNaive);
             expansion.setParameter(expansionParams);
 
@@ -277,44 +328,74 @@ public class PackageVisitor {
                         .setDisplay(code.getDisplay());
             }
             valueSet.setExpansion(expansion);
-        } else {
-            String username;
-            String apiKey;
-            if (terminologyEndpoint.isPresent()) {
-                username = terminologyEndpoint.get().getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
-                        .findFirst()
-                        .map(ext -> ext.getValue().toString())
-                        .orElseThrow(() -> new UnprocessableEntityException(
-                                "Cannot expand ValueSet without VSAC Username: " + valueSet.getId()));
-                apiKey = terminologyEndpoint.get().getExtensionsByUrl(Constants.APIKEY).stream()
-                        .findFirst()
-                        .map(ext -> ext.getValue().toString())
-                        .orElseThrow(() -> new UnprocessableEntityException(
-                                "Cannot expand ValueSet without VSAC API Key: " + valueSet.getId()));
-            } else {
-                throw new UnprocessableEntityException(
-                        "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
-            }
-
-            try {
-                expandedValueSet = terminologyServerClient.expand(
-                        valueSet, authoritativeSourceUrl, expansionParameters, username, apiKey);
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-            } catch (Exception ex) {
-                throw new UnprocessableEntityException(
-                        "Terminology Server expansion failed for: " + valueSet.getId(), ex.getMessage());
-            }
         }
+        // Else if the ValueSet has a grouping compose then we will attempt to group.
+        else if (hasGroupingCompose(valueSet)) {
+            var expansion = new ValueSet.ValueSetExpansionComponent(new DateTimeType(Date.from(Instant.now())));
+            var includes = valueSet.getCompose().getInclude().stream()
+                    .map(i -> i.getValueSet())
+                    .flatMap(Collection::stream)
+                    .map(c -> c.asStringValue())
+                    .distinct()
+                    .collect(Collectors.toList());
+            includes.forEach(reference -> {
+                // Grab the ValueSet
+                var split = reference.split("\\|");
+                var url = split.length == 1 ? reference : split[0];
+                var version = split.length == 1 ? null : split[1];
+                var vs = valueSets.stream()
+                        .filter(v -> v.getUrl().equals(url)
+                                && (version == null || v.getVersion().equals(version)))
+                        .findFirst()
+                        .orElse(null);
+                // Expand the ValueSet if we haven't already
+                if (!expandedList.contains(url)) {
+                    expandValueSet(vs, expansionParameters, terminologyEndpoint, valueSets, expandedList);
+                }
+                vs.getExpansion().getContains().forEach(code -> {
+                    // Add the code if not already present
+                    if (expansion.getContains().stream()
+                            .noneMatch(expandedCode -> code.getSystem().equals(expandedCode.getSystem())
+                                    && code.getCode().equals(expandedCode.getCode())
+                                    && (!code.hasVersion() || code.getVersion().equals(expandedCode.getVersion())))) {
+                        expansion.addContains(code);
+                    }
+                });
+                // If any included expansion is naive it makes the expansion naive
+                var naiveParam = vs.getExpansion().getParameter().stream()
+                        .filter(p -> p.getName().equals("naive"))
+                        .findFirst()
+                        .orElse(null);
+                if (naiveParam != null
+                        && valueSet.getExpansion().getParameter().stream()
+                                .noneMatch(p -> p.getName().equals("naive"))) {
+                    expansion.addParameter(naiveParam);
+                }
+            });
+            valueSet.setExpansion(expansion);
+        } else {
+            throw new UnprocessableEntityException(
+                    "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
+        }
+        expandedList.add(valueSet.getUrl());
     }
 
     // A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
-    // include cannot have a filter, and must reference a ValueSet or have a system and enumerate concepts
+    // include cannot have a filter or reference a ValueSet and must have a system and enumerate concepts.
     protected boolean hasSimpleCompose(ValueSet valueSet) {
         return valueSet.hasCompose()
                 && !valueSet.getCompose().hasExclude()
                 && valueSet.getCompose().getInclude().stream()
-                        .noneMatch(csc ->
-                                csc.hasFilter() || (!csc.hasValueSet() && (!csc.hasSystem() && !csc.hasConcept())));
+                        .noneMatch(
+                                csc -> csc.hasFilter() || csc.hasValueSet() || !csc.hasSystem() || !csc.hasConcept());
+    }
+
+    // A grouping compose element of a ValueSet must have a compose without an exclude element and each element of the
+    // include must reference a ValueSet.
+    protected boolean hasGroupingCompose(ValueSet valueSet) {
+        return valueSet.hasCompose()
+                && !valueSet.getCompose().hasExclude()
+                && valueSet.getCompose().getInclude().stream().noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
     }
 
     protected static Library getRootSpecificationLibrary(List<BundleEntryComponent> bundleEntries) {

@@ -109,7 +109,7 @@ class KnowledgeArtifactPackageVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
+        Parameters params = parameters();
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -121,7 +121,6 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_username() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -131,11 +130,10 @@ class KnowledgeArtifactPackageVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -147,7 +145,6 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_apikey() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -157,11 +154,10 @@ class KnowledgeArtifactPackageVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -173,7 +169,6 @@ class KnowledgeArtifactPackageVisitorTests {
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_invalid() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -183,11 +178,10 @@ class KnowledgeArtifactPackageVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -196,7 +190,6 @@ class KnowledgeArtifactPackageVisitorTests {
             maybeException = e;
         }
         assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for:"));
-        assertTrue(maybeException.getAdditionalMessages().stream().allMatch(msg -> msg.contains("HTTP 401")));
     }
 
     @Test

@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -60,13 +59,12 @@ public class LibraryProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageLibrary(
             Either3<C, IIdType, R> library, boolean isPut) {
-        IBase[] parts = {};
         return packageLibrary(
                 library,
                 newParameters(
                         repository.fhirContext(),
                         "package-parameters",
-                        newBooleanPart(repository.fhirContext(), "isPut", isPut, parts)));
+                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageLibrary(

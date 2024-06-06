@@ -4,7 +4,6 @@ import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.findUnsupported
 import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.processCanonicals;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -115,9 +114,9 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, fhirVersion);
             BundleHelper.setEntry(packagedBundle, included);
         }
+        handleValueSets(resource, packagedBundle, repository, terminologyEndpoint);
         setCorrectBundleType(count, offset, packagedBundle, fhirVersion);
         pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
-        handleValueSets(resource, packagedBundle, repository, terminologyEndpoint);
         return packagedBundle;
 
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
@@ -165,7 +164,7 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
         }
     }
 
-    void recursivePackage(
+    protected void recursivePackage(
             IDomainResource resource,
             IBaseBundle bundle,
             Repository repository,
@@ -192,21 +191,17 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
                 BundleHelper.addEntry(bundle, entry);
             }
 
-            adapter.combineComponentsAndDependencies().stream()
-                    // sometimes VS dependencies aren't FHIR resources
-                    .filter(ra -> !StringUtils.isBlank(Canonicals.getResourceType(ra.getReference())))
+            var dependencies = adapter.combineComponentsAndDependencies();
+            dependencies.stream()
+                    // sometimes VS dependencies aren't FHIR resources, only include references that are
                     .filter(ra -> {
                         try {
-                            var resourceDef = repository
-                                    .fhirContext()
-                                    .getResourceDefinition(Canonicals.getResourceType(ra.getReference()));
-                            return resourceDef != null;
-                        } catch (DataFormatException e) {
-                            if (e.getMessage().contains("1684")) {
-                                return false;
-                            } else {
-                                throw new DataFormatException(e.getMessage());
-                            }
+                            return null
+                                    != repository
+                                            .fhirContext()
+                                            .getResourceDefinition(Canonicals.getResourceType(ra.getReference()));
+                        } catch (Exception e) {
+                            return false;
                         }
                     })
                     .map(ra -> SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getReference()))
@@ -224,63 +219,7 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
         }
     }
 
-    // private void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)
-    //         throws PreconditionFailedException {
-    //     if (capability != null && !capability.isEmpty()) {
-    //         List<IBaseExtension<?, ?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
-    //                 .filter(ext -> ext.getUrl().contains("cqf-knowledgeCapability"))
-    //                 .collect(Collectors.toList());
-    //         if (knowledgeCapabilityExtension.isEmpty()) {
-    //             // consider resource unsupported if it's knowledgeCapability is undefined
-    //             throw new PreconditionFailedException(
-    //                     String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
-    //         }
-    //         knowledgeCapabilityExtension.stream()
-    //                 .filter(ext -> !capability.contains(((IPrimitiveType<?>) ext.getValue()).getValue()))
-    //                 .findAny()
-    //                 .ifPresent((ext) -> {
-    //                     throw new PreconditionFailedException(String.format(
-    //                             "Resource with url: '%s' is not one of '%s'.",
-    //                             resource.getUrl(), String.join(", ", capability)));
-    //                 });
-    //     }
-    // }
-
-    // private void processCanonicals(
-    //         KnowledgeArtifactAdapter resource,
-    //         List<String> canonicalVersion,
-    //         List<String> checkArtifactVersion,
-    //         List<String> forceArtifactVersion)
-    //         throws PreconditionFailedException {
-    //     if (checkArtifactVersion != null && !checkArtifactVersion.isEmpty()) {
-    //         // check throws an error
-    //         findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent((version) -> {
-    //             if (!resource.getVersion().equals(version)) {
-    //                 throw new PreconditionFailedException(String.format(
-    //                         "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
-    //                         resource.getUrl(), resource.getVersion(), version));
-    //             }
-    //         });
-    //     } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
-    //         // force just does a silent override
-    //         findVersionInListMatchingResource(forceArtifactVersion, resource)
-    //                 .ifPresent((version) -> resource.setVersion(version));
-    //     } else if (canonicalVersion != null && !canonicalVersion.isEmpty() && !resource.hasVersion()) {
-    //         // canonicalVersion adds a version if it's missing
-    //         findVersionInListMatchingResource(canonicalVersion, resource)
-    //                 .ifPresent((version) -> resource.setVersion(version));
-    //     }
-    // }
-
-    // private Optional<String> findVersionInListMatchingResource(List<String> list, KnowledgeArtifactAdapter resource)
-    // {
-    //     return list.stream()
-    //             .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
-    //             .map((canonical) -> Canonicals.getVersion(canonical))
-    //             .findAny();
-    // }
-
-    private void setCorrectBundleType(
+    protected void setCorrectBundleType(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
@@ -310,7 +249,7 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
      * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
      * @param bundle the bundle to page
      */
-    private void pageBundleBasedOnCountAndOffset(
+    protected void pageBundleBasedOnCountAndOffset(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         if (offset.isPresent()) {
             var entries = BundleHelper.getEntry(bundle);
@@ -334,7 +273,7 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    private List<? extends IBaseBackboneElement> findUnsupportedInclude(
+    protected List<? extends IBaseBackboneElement> findUnsupportedInclude(
             List<? extends IBaseBackboneElement> entries, List<String> include, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:

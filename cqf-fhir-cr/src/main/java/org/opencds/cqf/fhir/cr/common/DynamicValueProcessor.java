@@ -92,6 +92,9 @@ public class DynamicValueProcessor {
         if (path != null && cqfExpression != null) {
             var result = getDynamicValueExpressionResult(request, cqfExpression, context, resource);
             if (result == null || result.isEmpty()) {
+                logger.warn(String.format(
+                        "Null value received when evaluating dynamic value expression: %s",
+                        cqfExpression.getExpression()));
                 return;
             }
             var value = result.size() == 1 ? result.get(0) : result;

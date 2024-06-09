@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
@@ -20,12 +21,15 @@ class ApplyRequestTests {
     private LibraryEngine libraryEngine;
 
     @Mock
+    private ModelResolver modelResolver;
+
+    @Mock
     private IInputParameterResolver inputParameterResolver;
 
     @Test
     void invalidVersionReturnsNull() {
-        var request =
-                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, inputParameterResolver);
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4B, libraryEngine, modelResolver, inputParameterResolver);
         var activityDef = new org.hl7.fhir.r4.model.ActivityDefinition();
         assertNull(request.transformRequestParameters(activityDef));
     }
@@ -36,8 +40,8 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.dstu3.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.DSTU3, libraryEngine, inputParameterResolver)
-                .setBundle(bundle);
+                        FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver)
+                .setData(bundle);
         var activityDef = new org.hl7.fhir.dstu3.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
         var result = request.transformRequestParameters(activityDef);
@@ -50,8 +54,8 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.r4.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, inputParameterResolver)
-                .setBundle(bundle);
+                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
+                .setData(bundle);
         var activityDef = new org.hl7.fhir.r4.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
         var result = request.transformRequestParameters(activityDef);
@@ -64,8 +68,8 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.r5.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R5, libraryEngine, inputParameterResolver)
-                .setBundle(bundle);
+                        FhirVersionEnum.R5, libraryEngine, null, inputParameterResolver)
+                .setData(bundle);
         var activityDef = new org.hl7.fhir.r5.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
         var result = request.transformRequestParameters(activityDef);

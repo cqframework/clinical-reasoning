@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
@@ -30,6 +31,9 @@ class DynamicValueProcessorTests {
     private LibraryEngine libraryEngine;
 
     @Mock
+    private ModelResolver modelResolver;
+
+    @Mock
     private IInputParameterResolver inputParameterResolver;
 
     @Spy
@@ -38,8 +42,8 @@ class DynamicValueProcessorTests {
 
     @Test
     void unsupportedFhirVersion() {
-        var request =
-                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, inputParameterResolver);
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4B, libraryEngine, modelResolver, inputParameterResolver);
         assertNull(fixture.getDynamicValueExpression(request, null));
     }
 
@@ -72,7 +76,7 @@ class DynamicValueProcessorTests {
         // works in dstu3, throws in other versions
         var cqfExpression = new CqfExpression();
         var requestDstu3 = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.DSTU3, libraryEngine, inputParameterResolver);
+                FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver);
         var dvDstu3 = new org.hl7.fhir.dstu3.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression("priority")
@@ -86,8 +90,8 @@ class DynamicValueProcessorTests {
 
         fixture.resolveDynamicValue(requestDstu3, dvDstu3, null, null, raDstu3);
 
-        var requestR4 =
-                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, inputParameterResolver);
+        var requestR4 = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var dvR4 = new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression(new org.hl7.fhir.r4.model.Expression()

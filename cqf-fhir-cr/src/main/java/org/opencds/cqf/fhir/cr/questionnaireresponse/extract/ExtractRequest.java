@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -18,7 +20,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
+    private final boolean useServerData;
+    private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirContext fhirContext;
@@ -31,18 +34,22 @@ public class ExtractRequest implements IQuestionnaireRequest {
             IBaseResource questionnaire,
             IIdType subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             FhirContext fhirContext) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.questionnaireResponse = questionnaireResponse;
         this.subjectId = subjectId;
         this.parameters = parameters;
-        this.bundle = bundle;
+        this.useServerData = useServerData;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.fhirContext = fhirContext;
-        this.fhirVersion = fhirContext.getVersion().getVersion();
+        this.fhirVersion = questionnaireResponse.getStructureFhirVersionEnum();
+        this.fhirContext = FhirContext.forCached(fhirVersion);
         this.questionnaire = questionnaire;
         this.defaultLibraryUrl = "";
     }
@@ -94,8 +101,13 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
+    }
+
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 
     @Override

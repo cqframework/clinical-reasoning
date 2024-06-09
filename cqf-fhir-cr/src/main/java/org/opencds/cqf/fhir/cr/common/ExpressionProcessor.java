@@ -53,7 +53,7 @@ public class ExpressionProcessor {
         return request
                 .getLibraryEngine()
                 .resolveExpression(
-                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getBundle())
+                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData())
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -71,7 +71,7 @@ public class ExpressionProcessor {
             IOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
         return request
                 .getLibraryEngine()
-                .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getBundle())
+                .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getData())
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

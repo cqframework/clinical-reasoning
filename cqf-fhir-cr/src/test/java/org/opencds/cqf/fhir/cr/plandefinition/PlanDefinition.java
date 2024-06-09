@@ -113,14 +113,14 @@ public class PlanDefinition {
         private String encounterId;
         private String practitionerId;
         private String organizationId;
-        private Boolean useServerData;
+        private boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
         private Repository terminologyRepository;
         private IBaseBundle additionalData;
         private IIdType additionalDataId;
         private IBaseParameters parameters;
-        private Boolean isPackagePut;
+        private boolean isPackagePut;
 
         public When(Repository repository, PlanDefinitionProcessor processor) {
             this.repository = repository;
@@ -153,7 +153,7 @@ public class PlanDefinition {
             return this;
         }
 
-        public When useServerData(Boolean value) {
+        public When useServerData(boolean value) {
             useServerData = value;
             return this;
         }
@@ -199,7 +199,7 @@ public class PlanDefinition {
             return this;
         }
 
-        public When isPut(Boolean value) {
+        public When isPut(boolean value) {
             isPackagePut = value;
             return this;
         }
@@ -259,7 +259,7 @@ public class PlanDefinition {
         }
 
         public GeneratedPackage thenPackage() {
-            if (isPackagePut == null) {
+            if (!isPackagePut) {
                 return new GeneratedPackage(
                         processor.packagePlanDefinition(Eithers.forMiddle3(
                                 Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))),

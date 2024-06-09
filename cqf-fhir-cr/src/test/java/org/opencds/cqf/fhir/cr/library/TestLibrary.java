@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cr.library;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -11,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,6 +29,9 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.Reflections;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -99,7 +107,8 @@ public class TestLibrary {
 
         private String libraryId;
 
-        private String subjectId;
+        private String subject;
+        private List<String> expression;
         private Boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
@@ -120,8 +129,13 @@ public class TestLibrary {
             return this;
         }
 
-        public When subjectId(String id) {
-            subjectId = id;
+        public When subject(String value) {
+            subject = value;
+            return this;
+        }
+
+        public When expression(List<String> value) {
+            expression = value;
             return this;
         }
 
@@ -189,6 +203,52 @@ public class TestLibrary {
                                 isPackagePut),
                         repository.fhirContext());
             }
+        }
+
+        public EvaluationResult thenEvaluate() {
+            if (additionalDataId != null) {
+                loadAdditionalData(readRepository(repository, additionalDataId));
+            }
+            return new EvaluationResult(processor.evaluate(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                    subject,
+                    expression,
+                    parameters,
+                    useServerData,
+                    additionalData,
+                    null,
+                    dataRepository,
+                    contentRepository,
+                    terminologyRepository));
+        }
+    }
+
+    public static class EvaluationResult {
+        private final ParametersAdapter adapter;
+
+        public EvaluationResult(IBaseParameters result) {
+            adapter = AdapterFactory.forFhirVersion(result.getStructureFhirVersionEnum())
+                    .createParameters(result);
+        }
+
+        protected IBase expressionResult(String expression) {
+            return adapter.getParameter(expression);
+        }
+
+        public EvaluationResult hasErrors(boolean hasErrors) {
+            var errorsExist = adapter.getParameter().stream().anyMatch(p -> {
+                var resource = Reflections.getAccessor(p.getClass(), "resource")
+                        .getFirstValueOrNull(p)
+                        .orElse(null);
+                return resource != null && resource.fhirType().equals("OperationOutcome");
+            });
+            assertEquals(hasErrors, errorsExist);
+            return this;
+        }
+
+        public EvaluationResult hasExpression(String expression) {
+            assertNotNull(expressionResult(expression));
+            return this;
         }
     }
 }

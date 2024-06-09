@@ -9,19 +9,19 @@ import org.hl7.fhir.instance.model.api.IIdType;
 public interface ICpgRequest extends IQuestionnaireRequest {
     IIdType getEncounterId();
 
-    default Boolean hasEncounterId() {
+    default boolean hasEncounterId() {
         return getEncounterId() != null && !getEncounterId().isEmpty();
     }
 
     IIdType getPractitionerId();
 
-    default Boolean hasPractitionerId() {
+    default boolean hasPractitionerId() {
         return getPractitionerId() != null && !getPractitionerId().isEmpty();
     }
 
     IIdType getOrganizationId();
 
-    default Boolean hasOrganizationId() {
+    default boolean hasOrganizationId() {
         return getOrganizationId() != null && !getOrganizationId().isEmpty();
     }
 
@@ -34,8 +34,6 @@ public interface ICpgRequest extends IQuestionnaireRequest {
     IBaseDatatype getSetting();
 
     IBaseDatatype getSettingContext();
-
-    Boolean getUseServerData();
 
     default List<IBaseBackboneElement> getDynamicValues(IElement element) {
         return resolvePathList(element, "dynamicValue", IBaseBackboneElement.class);

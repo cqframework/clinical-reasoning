@@ -156,11 +156,11 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void extractQuestionnaireResponse(ApplyRequest request) {
-        if (request.getBundle() == null) {
+        if (request.getData() == null) {
             return;
         }
 
-        var questionnaireResponses = getEntryResources(request.getBundle()).stream()
+        var questionnaireResponses = getEntryResources(request.getData()).stream()
                 .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
                 .collect(Collectors.toList());
         if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
@@ -169,11 +169,11 @@ public class ApplyProcessor implements IApplyProcessor {
                     var extractBundle = extractProcessor.extract(
                             Eithers.forRight(questionnaireResponse),
                             request.getParameters(),
-                            request.getBundle(),
+                            request.getData(),
                             request.getLibraryEngine());
                     // request.getExtractedResources().add(questionnaireResponse);
                     for (var entry : getEntry(extractBundle)) {
-                        addEntry(request.getBundle(), entry);
+                        addEntry(request.getData(), entry);
                         // Not adding extracted resources back into the response to reduce size of payload
                         // $extract can be called on the QuestionnaireResponse if these are desired
                         // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry));

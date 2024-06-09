@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -31,8 +32,10 @@ public class LibraryProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var evaluationSettings = EvaluationSettings.getDefault();
         var packageProcessor = new PackageProcessor(repository);
-        var processor = new LibraryProcessor(repository, EvaluationSettings.getDefault(), packageProcessor);
+        var evaluationService = new EvaluateProcessor(repository, evaluationSettings);
+        var processor = new LibraryProcessor(repository, evaluationSettings, packageProcessor, evaluationService);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));
@@ -72,5 +75,41 @@ public class LibraryProcessorTests {
                 .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(2);
+    }
+
+    @Test
+    void evaluateDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .libraryId("HelloWorld")
+                .subject("helloworld-patient-1")
+                .useServerData(false)
+                .thenEvaluate()
+                .hasErrors(false)
+                .hasExpression("Get Title");
+    }
+
+    @Test
+    void evaluateR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("HelloWorld")
+                .subject("helloworld-patient-1")
+                .useServerData(false)
+                .thenEvaluate()
+                .hasErrors(false)
+                .hasExpression("Get Title");
+    }
+
+    @Test
+    void evaluateR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .libraryId("HelloWorld")
+                .subject("helloworld-patient-1")
+                .useServerData(false)
+                .thenEvaluate()
+                .hasErrors(false)
+                .hasExpression("Get Title");
     }
 }

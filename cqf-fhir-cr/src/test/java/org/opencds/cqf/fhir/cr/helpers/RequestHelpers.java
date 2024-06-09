@@ -23,8 +23,20 @@ public class RequestHelpers {
     public static final String PROFILE_ID = "profileId";
     public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
+    public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+        return newPDApplyRequestForVersion(fhirVersion, libraryEngine, null, null);
+    }
+
     public static ApplyRequest newPDApplyRequestForVersion(
-            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IInputParameterResolver inputParameterResolver) {
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, ModelResolver modelResolver) {
+        return newPDApplyRequestForVersion(fhirVersion, libraryEngine, modelResolver, null);
+    }
+
+    public static ApplyRequest newPDApplyRequestForVersion(
+            FhirVersionEnum fhirVersion,
+            LibraryEngine libraryEngine,
+            ModelResolver modelResolver,
+            IInputParameterResolver inputParameterResolver) {
         var fhirContext = FhirContext.forCached(fhirVersion);
         IBaseResource planDefinition = null;
         try {
@@ -35,17 +47,20 @@ public class RequestHelpers {
         } catch (Exception e) {
             // TODO: handle exception
         }
-        return newPDApplyRequestForVersion(fhirVersion, planDefinition, libraryEngine, inputParameterResolver);
+        return newPDApplyRequestForVersion(
+                fhirVersion, planDefinition, libraryEngine, modelResolver, inputParameterResolver);
     }
 
     public static ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion,
             IBaseResource planDefinition,
             LibraryEngine libraryEngine,
+            ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
-        ModelResolver modelResolver = null;
         try {
-            modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+            if (modelResolver == null) {
+                modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+            }
             var planDefinitionUrl = modelResolver.resolvePath(planDefinition, "url");
             if (planDefinitionUrl == null) {
                 var url = PLANDEFINITION_URL + planDefinition.getIdElement().getIdPart();
@@ -131,6 +146,7 @@ public class RequestHelpers {
                 true,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
+                true,
                 null,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));

@@ -78,7 +78,7 @@ public class TestItemGenerator {
         private IBaseResource profile;
         private String id;
         private String subjectId;
-        private IBaseBundle bundle;
+        private IBaseBundle data;
         private IBaseParameters parameters;
 
         When(Repository repository, QuestionnaireProcessor itemGenerator) {
@@ -112,7 +112,7 @@ public class TestItemGenerator {
         }
 
         public When bundle(IBaseBundle bundle) {
-            this.bundle = bundle;
+            this.data = bundle;
             return this;
         }
 
@@ -123,14 +123,15 @@ public class TestItemGenerator {
 
         public GeneratedItem then() {
             IBaseResource result;
-            if (subjectId != null || parameters != null || bundle != null) {
+            if (subjectId != null || parameters != null || data != null) {
                 result = processor.generateQuestionnaire(
                         Eithers.for3(profileUrl, profileId, profile),
                         false,
                         true,
                         subjectId,
                         parameters,
-                        bundle,
+                        true,
+                        data,
                         null,
                         id);
             } else if (profileUrl != null || profileId != null || profile != null) {

@@ -21,12 +21,12 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
+    private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
-    private final Boolean useServerData;
+    private final boolean useServerData;
     private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
 
@@ -35,16 +35,17 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IBaseResource questionnaire,
             IIdType subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
         this.parameters = parameters;
-        this.bundle = bundle;
+        this.data = data;
         this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
@@ -57,7 +58,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 null,
                 this.parameters,
                 this.useServerData,
-                this.bundle);
+                this.data);
     }
 
     @Override
@@ -76,8 +77,13 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
+    }
+
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 
     @Override

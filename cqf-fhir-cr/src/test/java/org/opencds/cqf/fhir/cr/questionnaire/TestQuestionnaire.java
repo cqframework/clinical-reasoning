@@ -110,7 +110,7 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
-        private IBaseBundle bundle;
+        private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
 
@@ -129,7 +129,7 @@ public class TestQuestionnaire {
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
                     parameters,
-                    bundle,
+                    data,
                     true,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
@@ -156,7 +156,7 @@ public class TestQuestionnaire {
         }
 
         public When additionalData(IBaseBundle bundle) {
-            this.bundle = bundle;
+            this.data = bundle;
             return this;
         }
 
@@ -196,7 +196,7 @@ public class TestQuestionnaire {
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
                     parameters,
-                    bundle,
+                    data,
                     true,
                     (IBaseResource) null,
                     null,

@@ -121,12 +121,12 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             String subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository,
@@ -138,18 +138,20 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 subjectId,
                 parameters,
-                bundle,
+                useServerData,
+                data,
                 new LibraryEngine(repository, evaluationSettings),
                 id);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             String subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             String id) {
         var request = new GenerateRequest(
@@ -158,7 +160,8 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
-                bundle,
+                useServerData,
+                data,
                 libraryEngine == null ? new LibraryEngine(repository, evaluationSettings) : libraryEngine,
                 modelResolver);
         return generateQuestionnaire(request, id);

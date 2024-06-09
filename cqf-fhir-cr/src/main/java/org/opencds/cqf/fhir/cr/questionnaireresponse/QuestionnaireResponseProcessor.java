@@ -105,6 +105,7 @@ public class QuestionnaireResponseProcessor {
                 questionnaire,
                 subject == null ? null : subject.getReferenceElement(),
                 parameters,
+                true,
                 bundle,
                 libraryEngine,
                 modelResolver,

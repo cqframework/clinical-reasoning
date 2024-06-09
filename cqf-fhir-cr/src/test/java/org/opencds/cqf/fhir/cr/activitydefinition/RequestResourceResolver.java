@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -106,10 +107,11 @@ public class RequestResourceResolver {
                     null,
                     null,
                     null,
-                    null,
+                    true,
                     null,
                     new LibraryEngine(repository, EvaluationSettings.getDefault()),
-                    null));
+                    FhirModelResolverCache.resolverForVersion(
+                            repository.fhirContext().getVersion().getVersion())));
         }
     }
 }

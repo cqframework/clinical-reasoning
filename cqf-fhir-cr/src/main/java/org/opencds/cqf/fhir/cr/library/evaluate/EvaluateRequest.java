@@ -1,78 +1,74 @@
-package org.opencds.cqf.fhir.cr.questionnaire.populate;
+package org.opencds.cqf.fhir.cr.library.evaluate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 
-public class PopulateRequest implements IQuestionnaireRequest {
-    private final String operationName;
-    private final IBaseResource questionnaire;
+public class EvaluateRequest implements IOperationRequest {
+    private final IBaseResource library;
     private final IIdType subjectId;
+    private final Set<String> expression;
     private final IBaseParameters parameters;
+    private final Boolean useServerData;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
-    private final boolean useServerData;
-    private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
 
-    public PopulateRequest(
-            String operationName,
-            IBaseResource questionnaire,
+    public EvaluateRequest(
+            IBaseResource library,
             IIdType subjectId,
+            List<String> expression,
             IBaseParameters parameters,
+            Boolean useServerData,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.operationName = operationName;
-        this.questionnaire = questionnaire;
+        this.library = library;
         this.subjectId = subjectId;
+        this.expression = expression == null ? null : new HashSet<>(expression);
         this.parameters = parameters;
-        this.data = data;
         this.useServerData = useServerData;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
-        this.defaultLibraryUrl = resolveDefaultLibraryUrl();
-        inputParameterResolver = IInputParameterResolver.createResolver(
-                libraryEngine.getRepository(),
-                this.subjectId,
-                null,
-                null,
-                this.parameters,
-                this.useServerData,
-                this.data);
+        fhirVersion = library.getStructureFhirVersionEnum();
+    }
+
+    public IBaseResource getLibrary() {
+        return library;
+    }
+
+    public Set<String> getExpression() {
+        return expression;
     }
 
     @Override
     public String getOperationName() {
-        return operationName;
-    }
-
-    @Override
-    public IBaseResource getQuestionnaire() {
-        return questionnaire;
+        return "evaluate";
     }
 
     @Override
     public IIdType getSubjectId() {
         return subjectId;
+    }
+
+    public String getSubject() {
+        return subjectId == null ? null : subjectId.getValueAsString();
     }
 
     @Override
@@ -81,13 +77,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public boolean getUseServerData() {
-        return useServerData;
-    }
-
-    @Override
     public IBaseParameters getParameters() {
-        return inputParameterResolver.getParameters();
+        return parameters;
     }
 
     @Override
@@ -107,7 +98,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @Override
     public String getDefaultLibraryUrl() {
-        return defaultLibraryUrl;
+        return resolvePathString(library, "url");
     }
 
     @Override
@@ -120,12 +111,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.operationOutcome = operationOutcome;
     }
 
-    @SuppressWarnings("unchecked")
-    protected final String resolveDefaultLibraryUrl() {
-        var libraryExt = getExtensions(questionnaire).stream()
-                .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
-                .findFirst()
-                .orElse(null);
-        return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 }

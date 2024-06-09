@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -23,6 +24,9 @@ class ProcessRequestTests {
 
     @Mock
     LibraryEngine libraryEngine;
+
+    @Mock
+    ModelResolver modelResolver;
 
     @Mock
     IPopulateProcessor populateProcessor;
@@ -37,7 +41,7 @@ class ProcessRequestTests {
     @Test
     void unsupportedVersionShouldReturnNull() {
         doReturn(FhirContext.forR4BCached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, modelResolver);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertNull(requestOrchestration);
         var carePlan = fixture.generateCarePlan(request, requestOrchestration);
@@ -47,7 +51,7 @@ class ProcessRequestTests {
     @Test
     void dstu3Request() {
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertTrue(requestOrchestration instanceof org.hl7.fhir.dstu3.model.RequestGroup);
 
@@ -58,7 +62,7 @@ class ProcessRequestTests {
     @Test
     void r4Request() {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertTrue(requestOrchestration instanceof org.hl7.fhir.r4.model.RequestGroup);
 
@@ -69,7 +73,7 @@ class ProcessRequestTests {
     @Test
     void r5Request() {
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertTrue(requestOrchestration instanceof org.hl7.fhir.r5.model.RequestOrchestration);
 

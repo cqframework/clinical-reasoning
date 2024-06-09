@@ -32,7 +32,7 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
         if (request.hasPractitionerId()) {
             referralRequest.setRequester(
                     new ReferralRequestRequesterComponent(new Reference(request.getPractitionerId())));
-        } else if (request.hasOrganizationId() != null) {
+        } else if (request.hasOrganizationId()) {
             referralRequest.setRequester(
                     new ReferralRequestRequesterComponent(new Reference(request.getOrganizationId())));
         }

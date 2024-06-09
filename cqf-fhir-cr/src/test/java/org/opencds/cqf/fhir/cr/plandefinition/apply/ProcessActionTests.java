@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -25,6 +26,9 @@ class ProcessActionTests {
 
     @Mock
     LibraryEngine libraryEngine;
+
+    @Mock
+    ModelResolver modelResolver;
 
     @Mock
     ApplyProcessor applyProcessor;
@@ -44,7 +48,7 @@ class ProcessActionTests {
     @Test
     void unsupportedVersionShouldReturnNull() {
         doReturn(FhirContext.forR4BCached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, modelResolver);
         var action = new org.hl7.fhir.r4b.model.PlanDefinition.PlanDefinitionActionComponent();
         var requestAction = fixture.generateRequestAction(request, action);
         assertNull(requestAction);
@@ -53,7 +57,7 @@ class ProcessActionTests {
     @Test
     void dstu3Request() {
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
         var action = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent();
         var requestAction = fixture.generateRequestAction(request, action);
         assertTrue(requestAction instanceof org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent);
@@ -62,7 +66,7 @@ class ProcessActionTests {
     @Test
     void r4Request() {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
         var requestAction = fixture.generateRequestAction(request, action);
         assertTrue(requestAction instanceof org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent);
@@ -71,7 +75,7 @@ class ProcessActionTests {
     @Test
     void r5Request() {
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine);
         var action = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent();
         var requestAction = fixture.generateRequestAction(request, action);
         assertTrue(

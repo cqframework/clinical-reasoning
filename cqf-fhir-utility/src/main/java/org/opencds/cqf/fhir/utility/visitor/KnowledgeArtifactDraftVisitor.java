@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -481,8 +480,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         var matcher = pattern.matcher(version);
         boolean matchFound = matcher.find();
         if (!matchFound) {
-            throw new UnprocessableEntityException(
-                    "The version must be in the format MAJOR.MINOR.PATCH");
+            throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
         }
     }
 

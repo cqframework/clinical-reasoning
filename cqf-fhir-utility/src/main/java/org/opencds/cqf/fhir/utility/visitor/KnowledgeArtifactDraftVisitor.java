@@ -218,12 +218,11 @@ public class KnowledgeArtifactDraftVisitor implements KnowledgeArtifactVisitor {
         if (version.contains("/") || version.contains("\\") || version.contains("|")) {
             throw new UnprocessableEntityException("The version contains illegal characters");
         }
-        Pattern pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(version);
+        var pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
+        var matcher = pattern.matcher(version);
         boolean matchFound = matcher.find();
         if (!matchFound) {
-            throw new UnprocessableEntityException(
-                    "The version must be in the format MAJOR.MINOR.PATCH");
+            throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
         }
     }
 

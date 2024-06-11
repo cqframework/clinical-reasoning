@@ -71,6 +71,7 @@ class KnowledgeArtifactReleaseVisitorTests {
             "1.",
             "3.ad.2.",
             "",
+            "1.0.0.1",
             null);
 
     @BeforeEach
@@ -101,7 +102,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        String version = "1.0.1.23";
+        String version = "1.0.1";
         String existingVersion = "1.2.3";
         Parameters params = new Parameters();
         params.addParameter("version", version);
@@ -201,7 +202,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                 KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         // Existing version should be "1.2.3";
-        String newVersionToForce = "1.2.7.23";
+        String newVersionToForce = "1.2.7";
         KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -397,7 +398,7 @@ class KnowledgeArtifactReleaseVisitorTests {
                         "Bundle-release-missing-approvalDate.json"));
         spyRepository.transaction(bundle);
 
-        String versionData = "1.2.3.23";
+        String versionData = "1.2.3";
         String actualErrorMessage = "";
 
         Parameters params1 = parameters(part("version", versionData), part("versionBehavior", new CodeType("default")));
@@ -451,7 +452,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("releaseLabel", new StringType(releaseLabel)),
-                part("version", "1.2.3.23"),
+                part("version", "1.2.3"),
                 part("versionBehavior", new CodeType("default")));
         Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
 

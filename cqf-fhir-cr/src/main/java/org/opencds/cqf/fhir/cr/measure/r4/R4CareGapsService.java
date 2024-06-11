@@ -155,12 +155,7 @@ public class R4CareGapsService {
         Parameters result = initializeResult();
         patients.forEach(patient -> {
             Parameters.ParametersParameterComponent patientReports = patientReports(
-                    periodStart.getValueAsString(),
-                    periodEnd.getValueAsString(),
-                    patient,
-                    statuses,
-                    measures,
-                    organization);
+                    periodStart.getValueAsString(), periodEnd.getValueAsString(), patient, statuses, measures);
             if (patientReports != null) {
                 result.addParameter(patientReports);
             }
@@ -320,25 +315,18 @@ public class R4CareGapsService {
 
     protected List<Measure> ensureMeasures(List<Measure> measures) {
         measures.forEach(measure -> {
-            if (!measure.hasScoring()) {
-                ourLog.info("Measure does not specify a scoring so skipping: {}.", measure.getId());
-                measures.remove(measure);
-            }
             if (!measure.hasImprovementNotation()) {
-                ourLog.info("Measure does not specify an improvement notation so skipping: {}.", measure.getId());
-                measures.remove(measure);
+                ourLog.info(
+                        "Measure '{}' does not specify an improvement notation, defaulting to: '{}'.",
+                        measure.getId(),
+                        "increase");
             }
         });
         return measures;
     }
 
     protected Parameters.ParametersParameterComponent patientReports(
-            String periodStart,
-            String periodEnd,
-            Patient patient,
-            List<String> statuses,
-            List<Measure> measures,
-            String organization) {
+            String periodStart, String periodEnd, Patient patient, List<String> statuses, List<Measure> measures) {
         // TODO: add organization to report, if it exists.
         Composition composition = getComposition(patient);
         List<DetectedIssue> detectedIssues = new ArrayList<>();
@@ -417,8 +405,6 @@ public class R4CareGapsService {
         }
         Reference reporter = new Reference().setReference(careGapsProperties.getCareGapsReporter());
         // TODO: figure out what this extension is for
-        // reporter.addExtension(new
-        // Extension().setUrl(CARE_GAPS_MEASUREREPORT_REPORTER_EXTENSION));
         measureReport.setReporter(reporter);
         if (measureReport.hasMeta()) {
             measureReport.getMeta().addProfile(CARE_GAPS_REPORT_PROFILE);
@@ -465,16 +451,21 @@ public class R4CareGapsService {
                 inDenominator.setValue(true);
             }
         }));
+        // default improvementNotation
+        boolean isPositive = true;
 
-        boolean isPositive =
-                measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
+        // if value is present, set value from measure if populated
+        if (measure.hasImprovementNotation()) {
+            isPositive =
+                    measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
+        }
 
-        if (!inDenominator.getValue()) {
+        if (Boolean.FALSE.equals(inDenominator.getValue())) {
             // patient is not in eligible population
             return CareGapsStatusCode.NOT_APPLICABLE;
         }
 
-        if (inDenominator.getValue()
+        if (Boolean.TRUE.equals(inDenominator.getValue())
                 && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
             return CareGapsStatusCode.OPEN_GAP;
         }

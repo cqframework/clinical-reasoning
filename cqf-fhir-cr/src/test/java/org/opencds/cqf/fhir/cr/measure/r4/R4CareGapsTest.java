@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
 
 class R4CareGapsTest {
     private static final Given given = CareGaps.given().repositoryFor("BreastCancerScreeningFHIR");
+    private static final Given GIVEN_REPO = CareGaps.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test
     void exm125_careGaps_closedGap() {
@@ -406,5 +407,37 @@ class R4CareGapsTest {
                 .getCareGapsReport()
                 .then()
                 .hasBundleCount(0); // no results
+    }
+
+    // Issue #466 concurrent modification exception when improvementNotation is not populated on measure.
+    @Test
+    void ProportionBooleanBasisSingleGroup_Subject_noImprovementNotation() {
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988") // invalid
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisSingleGroup")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1); // no results
+    }
+
+    // Issue #466 unable to process group level scoring definition
+    @Test
+    void ProportionBooleanBasisSingleGroup_Subject_groupScoringDef() {
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988") // invalid
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisSingleGroupGroupScoringDef")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1); // no results
     }
 }

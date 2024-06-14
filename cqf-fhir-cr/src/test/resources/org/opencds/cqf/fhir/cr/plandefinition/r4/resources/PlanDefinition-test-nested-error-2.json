@@ -3,13 +3,13 @@
   "id": "test-nested-error-2",
   "meta": {
     "profile": [
-      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategydefinition"
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
     ]
   },
   "url": "http://fhir.org/test/PlanDefinition/test-nested-error-2",
   "version": "1.0.0",
-  "name": "Test Nested Error 1",
-  "title": "Test Nested Error 1",
+  "name": "Test Nested Error 2",
+  "title": "Test Nested Error 2",
   "type": {
     "coding": [
       {
@@ -22,13 +22,13 @@
   "status": "draft",
   "experimental": true,
   "date": "2024-06-13T00:00:00-08:00",
-  "description": "This PlanDefinition defines a simple strategy to test nested dynamic value errors.",
+  "description": "This PlanDefinition defines a simple recommendation to test nested dynamic value errors.",
   "library": [
     "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld"
   ],
   "action": [
     {
-      "id": "apply-nested-error-2",
+      "id": "dynamic-value-error",
       "dynamicValue": [
         {
           "path": "title",

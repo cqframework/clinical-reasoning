@@ -22,14 +22,28 @@ public class TerminologyServerClient {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
 
-        // Invoke by Value Set ID
-        return fhirClient
-                .operation()
-                .onInstance(valueSet.getId())
-                .named("$expand")
-                .withParameters(expansionParameters)
-                .returnResourceType(org.hl7.fhir.dstu3.model.ValueSet.class)
-                .execute();
+        if (expansionParameters != null
+                && expansionParameters.hasParameter()
+                && expansionParameters.getParameter().stream()
+                        .anyMatch(p -> p.getName().equals("url"))) {
+            // Invoke on the type using the url parameter
+            return fhirClient
+                    .operation()
+                    .onType("ValueSet")
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.dstu3.model.ValueSet.class)
+                    .execute();
+        } else {
+            // Invoke by Value Set ID
+            return fhirClient
+                    .operation()
+                    .onInstance(valueSet.getId())
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.dstu3.model.ValueSet.class)
+                    .execute();
+        }
     }
 
     public org.hl7.fhir.r4.model.ValueSet expand(
@@ -40,15 +54,25 @@ public class TerminologyServerClient {
             String apiKey) {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
-
-        // Invoke by Value Set ID
-        return fhirClient
-                .operation()
-                .onInstance(valueSet.getId())
-                .named("$expand")
-                .withParameters(expansionParameters)
-                .returnResourceType(org.hl7.fhir.r4.model.ValueSet.class)
-                .execute();
+        if (expansionParameters != null && expansionParameters.hasParameter("url")) {
+            // Invoke on the type using the url parameter
+            return fhirClient
+                    .operation()
+                    .onType("ValueSet")
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.r4.model.ValueSet.class)
+                    .execute();
+        } else {
+            // Invoke by Value Set ID
+            return fhirClient
+                    .operation()
+                    .onInstance(valueSet.getId())
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.r4.model.ValueSet.class)
+                    .execute();
+        }
     }
 
     public org.hl7.fhir.r5.model.ValueSet expand(
@@ -60,14 +84,25 @@ public class TerminologyServerClient {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
 
-        // Invoke by Value Set ID
-        return fhirClient
-                .operation()
-                .onInstance(valueSet.getId())
-                .named("$expand")
-                .withParameters(expansionParameters)
-                .returnResourceType(org.hl7.fhir.r5.model.ValueSet.class)
-                .execute();
+        if (expansionParameters != null && expansionParameters.hasParameter("url")) {
+            // Invoke on the type using the url parameter
+            return fhirClient
+                    .operation()
+                    .onType("ValueSet")
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.r5.model.ValueSet.class)
+                    .execute();
+        } else {
+            // Invoke by Value Set ID
+            return fhirClient
+                    .operation()
+                    .onInstance(valueSet.getId())
+                    .named("$expand")
+                    .withParameters(expansionParameters)
+                    .returnResourceType(org.hl7.fhir.r5.model.ValueSet.class)
+                    .execute();
+        }
     }
 
     // Strips resource and id from the authoritative source URL, these are not needed as the client constructs the URL.

@@ -127,8 +127,8 @@ public class TerminologyServerClientTest {
                 url,
                 ((org.hl7.fhir.dstu3.model.UriType) params.getParameter().stream()
                                 .filter(p -> p.getName().equals(urlParamName))
-                                .findFirst()
-                                .orElse(null)
+                                .findAny()
+                                .orElseThrow()
                                 .getValue())
                         .getValue());
         assertTrue(!params.getParameter().stream().anyMatch(p -> p.getName().equals(versionParamName)));
@@ -142,7 +142,7 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.dstu3.model.StringType) params.getParameter().stream()
                                 .filter(p -> p.getName().equals(versionParamName))
                                 .findFirst()
-                                .orElse(null)
+                                .orElseThrow()
                                 .getValue())
                         .getValue());
     }

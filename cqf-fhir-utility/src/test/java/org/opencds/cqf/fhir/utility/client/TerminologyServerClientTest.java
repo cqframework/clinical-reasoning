@@ -61,6 +61,18 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.r4.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.r4.model.Parameters();
+        urlAndVersionParams.addParameter("url", new org.hl7.fhir.r4.model.UriType(url));
+        urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r4.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -100,6 +112,18 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.r5.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.r5.model.Parameters();
+        urlAndVersionParams.addParameter("url", new org.hl7.fhir.r5.model.UriType(url));
+        urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r5.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -145,5 +169,20 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.dstu3.model.Parameters();
+        urlAndVersionParams.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(url));
+        urlAndVersionParams
+                .addParameter()
+                .setName("valueSetVersion")
+                .setValue(new org.hl7.fhir.dstu3.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 }

@@ -68,6 +68,8 @@ public class TerminologyServerClientTest {
         urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r4.model.StringType(null));
         Exception noException = null;
         try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.r4.model.Parameters) null, username, password, url, version);
             client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
         } catch (Exception e) {
             noException = e;
@@ -119,6 +121,8 @@ public class TerminologyServerClientTest {
         urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r5.model.StringType(null));
         Exception noException = null;
         try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.r5.model.Parameters) null, username, password, url, version);
             client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
         } catch (Exception e) {
             noException = e;
@@ -179,6 +183,8 @@ public class TerminologyServerClientTest {
                 .setValue(new org.hl7.fhir.dstu3.model.StringType(null));
         Exception noException = null;
         try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.dstu3.model.Parameters) null, username, password, url, version);
             client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
         } catch (Exception e) {
             noException = e;

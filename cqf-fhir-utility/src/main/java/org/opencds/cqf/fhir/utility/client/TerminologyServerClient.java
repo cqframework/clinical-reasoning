@@ -14,6 +14,54 @@ public class TerminologyServerClient {
     }
 
     public org.hl7.fhir.dstu3.model.ValueSet expand(
+            String authoritativeSource,
+            org.hl7.fhir.dstu3.model.Parameters expansionParameters,
+            String username,
+            String apiKey,
+            String url,
+            String version) {
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.dstu3.model.Parameters();
+        }
+        expansionParameters.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(url));
+        expansionParameters
+                .addParameter()
+                .setName("valueSetVersion")
+                .setValue(new org.hl7.fhir.dstu3.model.StringType(version));
+        return expand(null, authoritativeSource, expansionParameters, username, apiKey);
+    }
+
+    public org.hl7.fhir.r4.model.ValueSet expand(
+            String authoritativeSource,
+            org.hl7.fhir.r4.model.Parameters expansionParameters,
+            String username,
+            String apiKey,
+            String url,
+            String version) {
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.r4.model.Parameters();
+        }
+        expansionParameters.addParameter("url", new org.hl7.fhir.r4.model.UriType(url));
+        expansionParameters.addParameter("valueSetVersion", new org.hl7.fhir.r4.model.StringType(version));
+        return expand(null, authoritativeSource, expansionParameters, username, apiKey);
+    }
+
+    public org.hl7.fhir.r5.model.ValueSet expand(
+            String authoritativeSource,
+            org.hl7.fhir.r5.model.Parameters expansionParameters,
+            String username,
+            String apiKey,
+            String url,
+            String version) {
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.r5.model.Parameters();
+        }
+        expansionParameters.addParameter("url", new org.hl7.fhir.r5.model.UriType(url));
+        expansionParameters.addParameter("valueSetVersion", new org.hl7.fhir.r5.model.StringType(version));
+        return expand(null, authoritativeSource, expansionParameters, username, apiKey);
+    }
+
+    public org.hl7.fhir.dstu3.model.ValueSet expand(
             org.hl7.fhir.dstu3.model.ValueSet valueSet,
             String authoritativeSource,
             org.hl7.fhir.dstu3.model.Parameters expansionParameters,

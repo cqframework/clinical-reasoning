@@ -95,7 +95,8 @@ public class TerminologyServerClient {
         if (valueSet.hasVersion() && !expansionParameters.hasParameter("valueSetVersion")) {
             expansionParameters.addParameter(
                     "valueSetVersion", new org.hl7.fhir.r5.model.StringType(valueSet.getVersion()));
-        } // Invoke on the type using the url parameter
+        }
+        // Invoke on the type using the url parameter
         return fhirClient
                 .operation()
                 .onType("ValueSet")

@@ -63,6 +63,7 @@ class KnowledgeArtifactDraftVisitorTests {
             "3.2",
             "1.",
             "3.ad.2.",
+            "1.0.0.1",
             "",
             null);
 
@@ -90,7 +91,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        String version = "1.0.1.23";
+        String version = "1.0.1";
         String draftedVersion = version + "-draft";
         Parameters params = new Parameters();
         var newParam = params.addParameter();
@@ -153,7 +154,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 .read(PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
                 .copy();
         assertTrue(planDef.hasEffectivePeriod());
-        String version = "1.01.21.273";
+        String version = "1.01.21";
         Parameters params = parameters(part("version", version));
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, spyRepository, params);
 
@@ -175,7 +176,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.transaction(bundle);
         spyRepository.update(versionConflictLibrary);
-        Parameters params = parameters(part("version", "1.0.0.23"));
+        Parameters params = parameters(part("version", "1.0.0"));
         String maybeException = null;
         Library baseLib = spyRepository
                 .read(Library.class, new IdType(specificationLibReference))
@@ -198,10 +199,10 @@ class KnowledgeArtifactDraftVisitorTests {
         Library versionConflictLibrary = (Library) jsonParser.parseResource(
                 KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.update(versionConflictLibrary);
-        Parameters params = parameters(part("version", "1.2.1.23"));
+        Parameters params = parameters(part("version", "1.2.1"));
         String maybeException = "";
         Library baseLib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
+                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
@@ -220,7 +221,7 @@ class KnowledgeArtifactDraftVisitorTests {
                 KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.update(versionConflictLibrary);
         Library baseLib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
+                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();

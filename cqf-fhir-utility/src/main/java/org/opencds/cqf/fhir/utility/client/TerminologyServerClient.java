@@ -21,11 +21,28 @@ public class TerminologyServerClient {
             String apiKey) {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
-
-        // Invoke by Value Set ID
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.dstu3.model.Parameters();
+        }
+        if (!expansionParameters.getParameter().stream()
+                .anyMatch(p -> p.getName().equals("url"))) {
+            expansionParameters
+                    .addParameter()
+                    .setName("url")
+                    .setValue(new org.hl7.fhir.dstu3.model.UriType(valueSet.getUrl()));
+        }
+        if (valueSet.hasVersion()
+                && !expansionParameters.getParameter().stream()
+                        .anyMatch(p -> p.getName().equals("valueSetVersion"))) {
+            expansionParameters
+                    .addParameter()
+                    .setName("valueSetVersion")
+                    .setValue(new org.hl7.fhir.dstu3.model.StringType(valueSet.getVersion()));
+        }
+        // Invoke on the type using the url parameter
         return fhirClient
                 .operation()
-                .onInstance(valueSet.getId())
+                .onType("ValueSet")
                 .named("$expand")
                 .withParameters(expansionParameters)
                 .returnResourceType(org.hl7.fhir.dstu3.model.ValueSet.class)
@@ -40,11 +57,20 @@ public class TerminologyServerClient {
             String apiKey) {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
-
-        // Invoke by Value Set ID
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.r4.model.Parameters();
+        }
+        if (!expansionParameters.hasParameter("url")) {
+            expansionParameters.addParameter("url", new org.hl7.fhir.r4.model.UriType(valueSet.getUrl()));
+        }
+        if (valueSet.hasVersion() && !expansionParameters.hasParameter("valueSetVersion")) {
+            expansionParameters.addParameter(
+                    "valueSetVersion", new org.hl7.fhir.r4.model.StringType(valueSet.getVersion()));
+        }
+        // Invoke on the type using the url parameter
         return fhirClient
                 .operation()
-                .onInstance(valueSet.getId())
+                .onType("ValueSet")
                 .named("$expand")
                 .withParameters(expansionParameters)
                 .returnResourceType(org.hl7.fhir.r4.model.ValueSet.class)
@@ -60,10 +86,20 @@ public class TerminologyServerClient {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAuthoritativeSourceBase(authoritativeSource));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
 
-        // Invoke by Value Set ID
+        if (expansionParameters == null) {
+            expansionParameters = new org.hl7.fhir.r5.model.Parameters();
+        }
+        if (!expansionParameters.hasParameter("url")) {
+            expansionParameters.addParameter("url", new org.hl7.fhir.r5.model.UriType(valueSet.getUrl()));
+        }
+        if (valueSet.hasVersion() && !expansionParameters.hasParameter("valueSetVersion")) {
+            expansionParameters.addParameter(
+                    "valueSetVersion", new org.hl7.fhir.r5.model.StringType(valueSet.getVersion()));
+        }
+        // Invoke on the type using the url parameter
         return fhirClient
                 .operation()
-                .onInstance(valueSet.getId())
+                .onType("ValueSet")
                 .named("$expand")
                 .withParameters(expansionParameters)
                 .returnResourceType(org.hl7.fhir.r5.model.ValueSet.class)

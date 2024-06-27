@@ -128,6 +128,7 @@ public class TerminologyServerClientTest {
             noException = e;
         }
         assertNull(noException);
+
     }
 
     @Test
@@ -190,5 +191,6 @@ public class TerminologyServerClientTest {
             noException = e;
         }
         assertNull(noException);
+
     }
 }

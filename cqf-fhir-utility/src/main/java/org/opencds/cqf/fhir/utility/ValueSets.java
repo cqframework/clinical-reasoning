@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
+import static org.opencds.cqf.fhir.utility.Resources.newBackboneElement;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.context.FhirContext;
@@ -7,9 +9,11 @@ import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -172,9 +176,7 @@ public class ValueSets {
         return expansion.get(0);
     }
 
-    public static List<IBase> getContains(FhirContext fhirContext, IBaseResource valueSet) {
-        IBase expansion = getExpansion(fhirContext, valueSet);
-
+    public static List<IBase> getContainsInExpansion(FhirContext fhirContext, IBase expansion) {
         if (expansion == null) {
             return null;
         }
@@ -188,6 +190,10 @@ public class ValueSets {
         }
 
         return contains;
+    }
+
+    public static List<IBase> getContains(FhirContext fhirContext, IBaseResource valueSet) {
+        return getContainsInExpansion(fhirContext, getExpansion(fhirContext, valueSet));
     }
 
     public static List<Code> getCodesInCompose(FhirContext fhirContext, IBaseResource valueSet) {
@@ -228,9 +234,7 @@ public class ValueSets {
         return codes;
     }
 
-    public static List<Code> getCodesInExpansion(FhirContext fhirContext, IBaseResource valueSet) {
-        List<IBase> contains = getContains(fhirContext, valueSet);
-
+    public static List<Code> getCodesInContains(FhirContext fhirContext, List<IBase> contains) {
         if (contains == null) {
             return null;
         }
@@ -256,6 +260,67 @@ public class ValueSets {
         }
 
         return codes;
+    }
+
+    public static List<Code> getCodesInExpansion(FhirContext fhirContext, IBase expansion) {
+        return getCodesInContains(fhirContext, getContainsInExpansion(fhirContext, expansion));
+    }
+
+    public static List<Code> getCodesInExpansion(FhirContext fhirContext, IBaseResource valueSet) {
+        return getCodesInContains(fhirContext, getContains(fhirContext, valueSet));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void addCodeToExpansion(FhirContext fhirContext, IBase expansion, Code code)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                    NoSuchMethodException, SecurityException {
+        var containsDef = getContainsDefinition(fhirContext);
+        var systemDef = getSystemDefinition(fhirContext);
+        var codeDef = getCodeDefinition(fhirContext);
+        var displayDef = getDisplayDefinition(fhirContext);
+        var versionDef = getVersionDefinition(fhirContext);
+        var newCode = newBackboneElement((Class<? extends IBaseBackboneElement>)
+                containsDef.getChildByName("contains").getImplementingClass());
+        systemDef
+                .getMutator()
+                .addValue(
+                        newCode,
+                        systemDef
+                                .getChildByName("system")
+                                .getImplementingClass()
+                                .getConstructor(String.class)
+                                .newInstance(code.getSystem()));
+        codeDef.getMutator()
+                .addValue(
+                        newCode,
+                        codeDef.getChildByName("code")
+                                .getImplementingClass()
+                                .getConstructor(String.class)
+                                .newInstance(code.getCode()));
+        displayDef
+                .getMutator()
+                .addValue(
+                        newCode,
+                        displayDef
+                                .getChildByName("display")
+                                .getImplementingClass()
+                                .getConstructor(String.class)
+                                .newInstance(code.getDisplay()));
+        versionDef
+                .getMutator()
+                .addValue(
+                        newCode,
+                        versionDef
+                                .getChildByName("version")
+                                .getImplementingClass()
+                                .getConstructor(String.class)
+                                .newInstance(code.getVersion()));
+        containsDef.getMutator().addValue(expansion, newCode);
+    }
+
+    public static void addParameterToExpansion(
+            FhirContext fhirContext, IBase expansion, IBaseBackboneElement parameter) {
+        getParameterDefinition(fhirContext).getMutator().addValue(expansion, parameter);
     }
 
     public static String getUrl(FhirContext fhirContext, IBaseResource valueSet) {
@@ -368,6 +433,17 @@ public class ValueSets {
     private static BaseRuntimeChildDefinition getExpansionDefinition(FhirContext fhirContext) {
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition("ValueSet");
         return def.getChildByName("expansion");
+    }
+
+    private static BaseRuntimeChildDefinition getParameterDefinition(FhirContext fhirContext) {
+        BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
+        RuntimeResourceBlockDefinition expansionBlockChild =
+                (RuntimeResourceBlockDefinition) expansionChild.getChildByName("expansion");
+        return getParameterDefinition(expansionBlockChild);
+    }
+
+    private static BaseRuntimeChildDefinition getParameterDefinition(RuntimeResourceBlockDefinition expansionChild) {
+        return expansionChild.getChildByName("parameter");
     }
 
     private static BaseRuntimeChildDefinition getContainsDefinition(FhirContext fhirContext) {

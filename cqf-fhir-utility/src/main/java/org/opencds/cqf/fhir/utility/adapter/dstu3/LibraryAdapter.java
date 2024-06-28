@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -309,5 +310,10 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
         library.setDataRequirement(
                 dataRequirements.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
         return this;
+    }
+
+    @Override
+    public List<UsageContext> getUseContext() {
+        return library.getUseContext();
     }
 }

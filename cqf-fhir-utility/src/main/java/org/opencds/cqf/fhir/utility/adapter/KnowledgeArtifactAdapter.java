@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,8 +72,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     ICompositeType getEffectivePeriod();
 
     boolean getExperimental();
-
-    void setExtension(List<IBaseExtension<?, ?>> extensions);
 
     @SuppressWarnings("unchecked")
     static <T extends ICompositeType & IBaseHasExtensions> T newRelatedArtifact(

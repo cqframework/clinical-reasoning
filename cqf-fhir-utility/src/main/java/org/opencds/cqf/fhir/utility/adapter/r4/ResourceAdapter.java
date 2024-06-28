@@ -1,10 +1,19 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import static java.util.Optional.ofNullable;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Resource;
 
 class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAdapter {
@@ -25,6 +34,14 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
 
     protected Resource getResource() {
         return this.resource;
+    }
+
+    protected boolean isDomainResource() {
+        return getDomainResource().isPresent();
+    }
+
+    protected Optional<DomainResource> getDomainResource() {
+        return ofNullable(resource instanceof DomainResource ? (DomainResource) resource : null);
     }
 
     public IBaseResource get() {
@@ -94,5 +111,47 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
     @Override
     public boolean equalsShallow(IBase other) {
         return this.getResource().equalsShallow((Base) other);
+    }
+
+    @Override
+    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+        getDomainResource()
+                .ifPresent(r -> r.setExtension(
+                        extensions.stream().map(e -> (Extension) e).collect(Collectors.toList())));
+    }
+
+    @Override
+    public <T extends IBaseExtension<?, ?>> void addExtension(T extension) {
+        getDomainResource().ifPresent(r -> r.addExtension((Extension) extension));
+    }
+
+    @Override
+    public List<Extension> getExtension() {
+        return isDomainResource() ? getDomainResource().get().getExtension() : new ArrayList<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Extension getExtensionByUrl(String url) {
+        return isDomainResource()
+                ? getDomainResource().get().getExtension().stream()
+                        .filter(e -> e.getUrl().equals(url))
+                        .findFirst()
+                        .orElse(null)
+                : null;
+    }
+
+    @Override
+    public List<Extension> getExtensionsByUrl(String url) {
+        return isDomainResource()
+                ? getDomainResource().get().getExtension().stream()
+                        .filter(e -> e.getUrl().equals(url))
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
+    }
+
+    @Override
+    public List<Resource> getContained() {
+        return isDomainResource() ? getDomainResource().get().getContained() : new ArrayList<>();
     }
 }

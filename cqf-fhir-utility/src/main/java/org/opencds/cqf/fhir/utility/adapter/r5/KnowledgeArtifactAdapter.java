@@ -6,14 +6,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
@@ -198,10 +196,5 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public boolean getExperimental() {
         return this.get().getExperimental();
-    }
-
-    @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

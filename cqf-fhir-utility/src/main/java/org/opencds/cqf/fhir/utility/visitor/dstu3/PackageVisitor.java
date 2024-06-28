@@ -1,14 +1,9 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
-import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,20 +12,11 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UsageContext;
-import org.hl7.fhir.dstu3.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class PackageVisitor {
@@ -201,146 +187,6 @@ public class PackageVisitor {
             }
         }
         return distinctFilteredEntries;
-    }
-
-    /**
-     * ValueSets can be part of multiple artifacts at the same time. Certain properties are tracked/managed in the manifest to avoid conflicts with other artifacts. This function sets those properties on the ValueSets themselves at export / $package time
-     * @param manifest the resource containing all RelatedArtifact references
-     * @param bundleEntries the list of packaged resources to modify according to the extensions on the manifest relatedArtifact references
-     */
-    public void handleValueSets(
-            MetadataResource manifest,
-            List<BundleEntryComponent> bundleEntries,
-            Repository repository,
-            Optional<Endpoint> terminologyEndpoint)
-            throws UnprocessableEntityException, IllegalArgumentException {
-        Parameters expansionParams = new Parameters();
-        Library rootSpecificationLibrary = getRootSpecificationLibrary(bundleEntries);
-        if (rootSpecificationLibrary != null) {
-            Extension expansionParamsExtension =
-                    rootSpecificationLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
-            if (expansionParamsExtension != null && expansionParamsExtension.hasValue()) {
-                Reference expansionReference = (Reference) expansionParamsExtension.getValue();
-                expansionParams = getExpansionParams(rootSpecificationLibrary, expansionReference.getReference());
-            }
-        }
-        Parameters params = expansionParams;
-        bundleEntries.stream().forEach(entry -> {
-            if (entry.getResource().getResourceType().equals(ResourceType.ValueSet)) {
-                ValueSet valueSet = (ValueSet) entry.getResource();
-                expandValueSet(valueSet, params, terminologyEndpoint);
-            }
-        });
-    }
-
-    public void expandValueSet(
-            ValueSet valueSet, Parameters expansionParameters, Optional<Endpoint> terminologyEndpoint) {
-        // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
-        Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);
-        String authoritativeSourceUrl = authoritativeSource != null && authoritativeSource.hasValue()
-                ? authoritativeSource.getValue().primitiveValue()
-                : valueSet.getUrl();
-
-        ValueSet expandedValueSet;
-        if (hasSimpleCompose(valueSet)) {
-            // Perform naive expansion independent of terminology servers. Copy all codes from compose into expansion.
-            ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
-            expansion.setTimestamp(Date.from(Instant.now()));
-
-            ArrayList<ValueSet.ValueSetExpansionParameterComponent> expansionParams = new ArrayList<>();
-            ValueSet.ValueSetExpansionParameterComponent parameterNaive =
-                    new ValueSet.ValueSetExpansionParameterComponent();
-            parameterNaive.setName("naive");
-            parameterNaive.setValue(new BooleanType(true));
-            expansionParams.add(parameterNaive);
-            expansion.setParameter(expansionParams);
-
-            for (var code : getCodesInCompose(fhirContext, valueSet)) {
-                expansion
-                        .addContains()
-                        .setCode(code.getCode())
-                        .setSystem(code.getSystem())
-                        .setVersion(code.getVersion())
-                        .setDisplay(code.getDisplay());
-            }
-            valueSet.setExpansion(expansion);
-        } else {
-            String username;
-            String apiKey;
-            if (terminologyEndpoint.isPresent()) {
-                username = terminologyEndpoint.get().getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
-                        .findFirst()
-                        .map(ext -> ext.getValue().toString())
-                        .orElseThrow(() -> new UnprocessableEntityException(
-                                "Cannot expand ValueSet without VSAC Username: " + valueSet.getId()));
-                apiKey = terminologyEndpoint.get().getExtensionsByUrl(Constants.APIKEY).stream()
-                        .findFirst()
-                        .map(ext -> ext.getValue().toString())
-                        .orElseThrow(() -> new UnprocessableEntityException(
-                                "Cannot expand ValueSet without VSAC API Key: " + valueSet.getId()));
-            } else {
-                throw new UnprocessableEntityException(
-                        "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
-            }
-
-            try {
-                expandedValueSet = terminologyServerClient.expand(
-                        valueSet, authoritativeSourceUrl, expansionParameters, username, apiKey);
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-            } catch (Exception ex) {
-                throw new UnprocessableEntityException(
-                        "Terminology Server expansion failed for: " + valueSet.getId(), ex.getMessage());
-            }
-        }
-    }
-
-    // A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
-    // include cannot have a filter, and must reference a ValueSet or have a system and enumerate concepts
-    protected boolean hasSimpleCompose(ValueSet valueSet) {
-        return valueSet.hasCompose()
-                && !valueSet.getCompose().hasExclude()
-                && valueSet.getCompose().getInclude().stream()
-                        .noneMatch(csc ->
-                                csc.hasFilter() || (!csc.hasValueSet() && (!csc.hasSystem() && !csc.hasConcept())));
-    }
-
-    protected static Library getRootSpecificationLibrary(List<Bundle.BundleEntryComponent> bundleEntries) {
-        Optional<Library> rootSpecLibrary = bundleEntries.stream()
-                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
-                .map(entry -> ((Library) entry.getResource()))
-                .filter(entry -> entry.getType().hasCoding(Constants.LIBRARY_TYPE, Constants.ASSET_COLLECTION)
-                        && entry.getUseContext().stream()
-                                .allMatch(useContext -> (useContext
-                                                        .getCode()
-                                                        .getSystem()
-                                                        .equals(KnowledgeArtifactAdapter.usPhContextTypeUrl)
-                                                && useContext
-                                                        .getCode()
-                                                        .getCode()
-                                                        .equals("reporting")
-                                                && useContext
-                                                        .getValueCodeableConcept()
-                                                        .hasCoding(Constants.US_PH_CONTEXT_URL, "triggering"))
-                                        || (useContext
-                                                        .getCode()
-                                                        .getSystem()
-                                                        .equals(KnowledgeArtifactAdapter.usPhContextTypeUrl)
-                                                && useContext
-                                                        .getCode()
-                                                        .getCode()
-                                                        .equals("specification-type")
-                                                && useContext
-                                                        .getValueCodeableConcept()
-                                                        .hasCoding(Constants.US_PH_CONTEXT_URL, "program"))))
-                .findFirst();
-        return rootSpecLibrary.orElse(null);
-    }
-
-    protected static Parameters getExpansionParams(Library rootSpecificationLibrary, String reference) {
-        Optional<Resource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
-                .filter(contained -> contained.getId().equals(reference))
-                .findFirst();
-        return (Parameters) expansionParamResource.orElse(null);
     }
 
     /**

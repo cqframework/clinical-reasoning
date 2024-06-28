@@ -22,6 +22,7 @@ import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -294,5 +295,10 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
         library.setDataRequirement(
                 dataRequirements.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
         return this;
+    }
+
+    @Override
+    public List<UsageContext> getUseContext() {
+        return library.getUseContext();
     }
 }

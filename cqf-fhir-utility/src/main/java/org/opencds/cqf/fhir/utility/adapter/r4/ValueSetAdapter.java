@@ -1,25 +1,31 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
+
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -244,8 +250,82 @@ public class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.
         // do nothing
     }
 
+    // @Override
+    // public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+    //     this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    // }
+
     @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    public <T extends IBaseBackboneElement> void setExpansion(T expansion) {
+        valueSet.setExpansion((ValueSetExpansionComponent) expansion);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ValueSetExpansionComponent getExpansion() {
+        return valueSet.getExpansion();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ValueSetExpansionComponent newExpansion() {
+        var expansion = new ValueSet.ValueSetExpansionComponent(new DateTimeType(Date.from(Instant.now())));
+        expansion.getContains();
+        return expansion;
+    }
+
+    @Override
+    public List<String> getValueSetIncludes() {
+        return valueSet.getCompose().getInclude().stream()
+                .map(i -> i.getValueSet())
+                .flatMap(Collection::stream)
+                .map(c -> c.asStringValue())
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasSimpleCompose() {
+        return valueSet.hasCompose()
+                && !valueSet.getCompose().hasExclude()
+                && valueSet.getCompose().getInclude().stream()
+                        .noneMatch(
+                                csc -> csc.hasFilter() || csc.hasValueSet() || !csc.hasSystem() || !csc.hasConcept());
+    }
+
+    @Override
+    public boolean hasGroupingCompose() {
+        return valueSet.hasCompose()
+                && !valueSet.getCompose().hasExclude()
+                && valueSet.getCompose().getInclude().stream().noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
+    }
+
+    @Override
+    public boolean hasNaiveParameter() {
+        return valueSet.getExpansion().getParameter().stream()
+                .anyMatch(p -> p.getName().equals("naive"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ValueSet.ValueSetExpansionParameterComponent createNaiveParameter() {
+        return new ValueSet.ValueSetExpansionParameterComponent()
+                .setName("naive")
+                .setValue(new BooleanType(true));
+    }
+
+    @Override
+    public void naiveExpand() {
+        var expansion = newExpansion().addParameter(createNaiveParameter());
+
+        for (var code : getCodesInCompose(FhirContext.forR4Cached(), valueSet)) {
+            expansion
+                    .addContains()
+                    .setCode(code.getCode())
+                    .setSystem(code.getSystem())
+                    .setVersion(code.getVersion())
+                    .setDisplay(code.getDisplay());
+        }
+        valueSet.setExpansion(expansion);
     }
 }

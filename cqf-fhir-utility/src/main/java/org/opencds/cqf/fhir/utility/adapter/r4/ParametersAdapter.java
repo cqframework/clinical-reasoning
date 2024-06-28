@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
@@ -47,6 +48,25 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
                 .setParameter(parametersParameterComponents.stream()
                         .map(x -> (ParametersParameterComponent) x)
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addParameter(String name, IBase value) {
+        if (value instanceof Type) {
+            getParameters().addParameter(name, (Type) value);
+        } else {
+            throw new IllegalArgumentException("element passed as value argument is not a valid type");
+        }
+    }
+
+    @Override
+    public void addParameter(IBase parameter) {
+        if (parameter instanceof ParametersParameterComponent) {
+            getParameters().addParameter((ParametersParameterComponent) parameter);
+        } else {
+            throw new IllegalArgumentException(
+                    "element passed as parameter argument is not a valid parameter component");
+        }
     }
 
     @Override

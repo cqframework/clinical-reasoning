@@ -71,7 +71,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         spyRepository.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -104,7 +104,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -126,7 +126,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -152,7 +152,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -178,7 +178,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -206,7 +206,7 @@ class KnowledgeArtifactPackageVisitorTests {
                         "Bundle-ersd-package-capabilities.json"));
         spyRepository.transaction(bundle);
         List<String> capabilities = Arrays.asList("computable", "publishable", "executable");
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -238,7 +238,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-active-no-versions.json"));
         spyRepository.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -299,7 +299,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -337,7 +337,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -376,7 +376,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -396,7 +396,7 @@ class KnowledgeArtifactPackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor();
+        PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();

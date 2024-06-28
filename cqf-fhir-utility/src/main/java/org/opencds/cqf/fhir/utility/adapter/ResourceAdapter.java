@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ResourceAdapter extends Adapter<IBaseResource> {
@@ -29,4 +31,16 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
     public boolean equalsDeep(IBase other);
 
     public boolean equalsShallow(IBase other);
+
+    public void setExtension(List<IBaseExtension<?, ?>> extensions);
+
+    public <T extends IBaseExtension<?, ?>> void addExtension(T extension);
+
+    public List<? extends IBaseExtension<?, ?>> getExtension();
+
+    public <T extends IBaseExtension<?, ?>> T getExtensionByUrl(String url);
+
+    public List<? extends IBaseExtension<?, ?>> getExtensionsByUrl(String url);
+
+    public List<? extends IBaseResource> getContained();
 }

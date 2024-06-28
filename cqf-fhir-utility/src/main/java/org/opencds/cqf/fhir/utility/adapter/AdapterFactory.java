@@ -24,6 +24,10 @@ public interface AdapterFactory {
         }
     }
 
+    public static ResourceAdapter createAdapterForResource(IBaseResource resource) {
+        return forFhirVersion(resource.getStructureFhirVersionEnum()).createResource(resource);
+    }
+
     /**
      * Creates an adapter that exposes common resource operations across multiple versions of FHIR
      *
@@ -73,4 +77,12 @@ public interface AdapterFactory {
      */
     public ParametersParameterComponentAdapter createParametersParameters(
             IBaseBackboneElement parametersParametersComponent);
+
+    /**
+     * Creates an adapter that exposes common Attachment operations across multiple versions of FHIR
+     *
+     * @param endpoint a FHIR Endpoint Resource
+     * @return an adapter exposing common api calls
+     */
+    public EndpointAdapter createEndpoint(IBaseResource endpoint);
 }

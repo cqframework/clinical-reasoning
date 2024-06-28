@@ -19,8 +19,8 @@ public class PackageProcessor implements IPackageProcessor {
 
     public PackageProcessor(Repository repository) {
         this.repository = repository;
-        this.fhirVersion = repository.fhirContext().getVersion().getVersion();
-        packageVisitor = new PackageVisitor();
+        this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        packageVisitor = new PackageVisitor(this.repository.fhirContext());
     }
 
     @Override

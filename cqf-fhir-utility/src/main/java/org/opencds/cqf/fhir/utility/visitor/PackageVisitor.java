@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.utility.visitor;
 
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.adapter.AdapterFactory.createAdapterForResource;
 import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.findUnsupportedCapability;
 import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.processCanonicals;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -19,18 +22,35 @@ import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.ExpandHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class PackageVisitor implements KnowledgeArtifactVisitor {
+    protected final FhirContext fhirContext;
+    protected final TerminologyServerClient terminologyServerClient;
+    protected final ExpandHelper expandHelper;
+
+    public PackageVisitor(FhirContext fhirContext) {
+        this.fhirContext = fhirContext;
+        this.terminologyServerClient = new TerminologyServerClient(this.fhirContext);
+        expandHelper = new ExpandHelper(fhirContext, terminologyServerClient);
+    }
 
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters packageParameters) {
@@ -129,39 +149,36 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
             IBaseBundle packagedBundle,
             Repository repository,
             Optional<IBaseResource> terminologyEndpoint) {
-        switch (resource.getStructureFhirVersionEnum()) {
-            case DSTU3:
-                org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor packageVisitorDstu3 =
-                        new org.opencds.cqf.fhir.utility.visitor.dstu3.PackageVisitor();
-                packageVisitorDstu3.handleValueSets(
-                        (org.hl7.fhir.dstu3.model.MetadataResource) resource,
-                        ((org.hl7.fhir.dstu3.model.Bundle) packagedBundle).getEntry(),
-                        repository,
-                        terminologyEndpoint.map(te -> (org.hl7.fhir.dstu3.model.Endpoint) te));
-                break;
-            case R4:
-                org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor packageVisitorR4 =
-                        new org.opencds.cqf.fhir.utility.visitor.r4.PackageVisitor();
-                packageVisitorR4.handleValueSets(
-                        (org.hl7.fhir.r4.model.MetadataResource) resource,
-                        ((org.hl7.fhir.r4.model.Bundle) packagedBundle).getEntry(),
-                        repository,
-                        terminologyEndpoint.map(te -> (org.hl7.fhir.r4.model.Endpoint) te));
-                break;
-            case R5:
-                org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor packageVisitorR5 =
-                        new org.opencds.cqf.fhir.utility.visitor.r5.PackageVisitor();
-                packageVisitorR5.handleValueSets(
-                        (org.hl7.fhir.r5.model.MetadataResource) resource,
-                        ((org.hl7.fhir.r5.model.Bundle) packagedBundle).getEntry(),
-                        repository,
-                        terminologyEndpoint.map(te -> (org.hl7.fhir.r5.model.Endpoint) te));
-                break;
-            default:
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported FHIR version: %s",
-                        resource.getStructureFhirVersionEnum().getFhirVersionString()));
+        var expansionParams = newParameters(repository.fhirContext());
+        var rootSpecificationLibrary = getRootSpecificationLibrary(packagedBundle);
+        if (rootSpecificationLibrary != null) {
+            var expansionParamsExtension =
+                    rootSpecificationLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+            if (expansionParamsExtension != null && expansionParamsExtension.getValue() != null) {
+                // Reference expansionReference = (Reference) expansionParamsExtension.getValue();
+                expansionParams = getExpansionParams(
+                        rootSpecificationLibrary,
+                        ((IBaseReference) expansionParamsExtension.getValue())
+                                .getReferenceElement()
+                                .getValueAsString());
+            }
         }
+        var params = (ParametersAdapter) createAdapterForResource(expansionParams);
+        var expandedList = new ArrayList<String>();
+
+        var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
+                .filter(r -> r.fhirType().equals("ValueSet"))
+                .map(v -> (ValueSetAdapter) createAdapterForResource(v))
+                .collect(Collectors.toList());
+
+        valueSets.stream().forEach(valueSet -> {
+            expandHelper.expandValueSet(
+                    valueSet,
+                    params,
+                    terminologyEndpoint.map(e -> (EndpointAdapter) createAdapterForResource(e)),
+                    valueSets,
+                    expandedList);
+        });
     }
 
     protected void recursivePackage(
@@ -292,5 +309,45 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
                 throw new UnprocessableEntityException(
                         String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
+    }
+
+    protected static LibraryAdapter getRootSpecificationLibrary(IBaseBundle bundle) {
+        Optional<LibraryAdapter> rootSpecLibrary = BundleHelper.getEntryResources(bundle).stream()
+                .filter(r -> r.fhirType().equals("Library"))
+                .map(r -> AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                        .createLibrary(r))
+                // .filter(a -> a.getType().hasCoding(Constants.LIBRARY_TYPE, Constants.ASSET_COLLECTION)
+                //         && a.getUseContext().stream()
+                //                 .allMatch(useContext -> (useContext
+                //                                         .getCode()
+                //                                         .getSystem()
+                //                                         .equals(KnowledgeArtifactAdapter.usPhContextTypeUrl)
+                //                                 && useContext
+                //                                         .getCode()
+                //                                         .getCode()
+                //                                         .equals("reporting")
+                //                                 && useContext
+                //                                         .getValueCodeableConcept()
+                //                                         .hasCoding(Constants.US_PH_CONTEXT_URL, "triggering"))
+                //                         || (useContext
+                //                                         .getCode()
+                //                                         .getSystem()
+                //                                         .equals(KnowledgeArtifactAdapter.usPhContextTypeUrl)
+                //                                 && useContext
+                //                                         .getCode()
+                //                                         .getCode()
+                //                                         .equals("specification-type")
+                //                                 && useContext
+                //                                         .getValueCodeableConcept()
+                //                                         .hasCoding(Constants.US_PH_CONTEXT_URL, "program"))))
+                .findFirst();
+        return rootSpecLibrary.orElse(null);
+    }
+
+    protected static IBaseParameters getExpansionParams(LibraryAdapter rootSpecificationLibrary, String reference) {
+        Optional<? extends IBaseResource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
+                .filter(contained -> contained.getIdElement().getValue().equals(reference))
+                .findFirst();
+        return (IBaseParameters) expansionParamResource.orElse(null);
     }
 }

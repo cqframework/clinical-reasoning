@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -137,5 +138,9 @@ public class VisitorHelper {
                 .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
                 .map((canonical) -> Canonicals.getVersion(canonical))
                 .findAny();
+    }
+
+    public static boolean typeHasCoding(ICompositeType type, String system, String code) {
+        return false;
     }
 }

@@ -653,7 +653,7 @@ public class Measure {
         }
 
         public SelectedStratumPopulation hasCount(int count) {
-            assertEquals(this.value().getCount(), count);
+            assertEquals(count, this.value().getCount());
             return this;
         }
     }

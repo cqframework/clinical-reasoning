@@ -487,7 +487,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return;
         }
 
+        // temporarily adding prefix of resourceType to match pattern in build population
+        // TODO: do Stratum receive resource based subjects?
+        if (bc.measureDef.isBooleanBasis()) {
+            subjectIds = subjectIds.stream()
+                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .collect(Collectors.toList());
+        }
+
         Set<String> intersection = new HashSet<>(subjectIds);
+
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
@@ -542,12 +551,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior
-        if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST) {
-            if (!populationSet.isEmpty()) {
-                ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
-                bc.addContained(subjectList);
-                reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
-            }
+        if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST
+                && !populationSet.isEmpty()) {
+            ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
+            bc.addContained(subjectList);
+            reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
 
         // Population Type behavior
@@ -728,10 +736,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cd.setDisplay(c.display());
 
         return cd;
-    }
-
-    private String createResourceReference(String resourceType, String id) {
-        return new StringBuilder(resourceType).append("/").append(id).toString();
     }
 
     protected Period getPeriod(Interval measurementPeriod) {

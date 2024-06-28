@@ -3,10 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -14,14 +17,18 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -30,6 +37,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -104,6 +112,7 @@ public class Measure {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+
             return this;
         }
 
@@ -307,6 +316,165 @@ public class Measure {
         public SelectedReport hasReportType(String reportType) {
             var ref = this.report().getType();
             assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
+
+        public SelectedContained contained(Selector<Resource, MeasureReport> containedSelector) {
+            var c = containedSelector.select(value());
+            return new SelectedContained(c, this);
+        }
+
+        public SelectedContained contained(ResourceType theResourceType, String theId) {
+            /*
+             * SelectedContained will only be useful for Observation resources
+             * Explanation: Contained resourceIds are randomly generated at runtime and are not searchable or known before testing.
+             * List resources can only be verified from population reference id, which is generated at runtime.
+             * There are no other unique references on List to Measure Report population, so it is not reverse searchable.
+             * Observation resources will leverage sde-code reference to isolate contained resources.
+             */
+            return this.contained(t -> getContainedResources(t).stream()
+                    .filter(x -> x.getResourceType().equals(theResourceType))
+                    .filter(y -> y.getId().equals(theId))
+                    .findFirst()
+                    .orElseThrow());
+        }
+
+        private List<Resource> getContainedResources(MeasureReport theMeasureReport) {
+            return ContainedHelper.getAllContainedResources(theMeasureReport);
+        }
+
+        public SelectedReport containedObservationsHaveMatchingExtension() {
+            List<String> contained = getContainedIdsPerResourceType(ResourceType.Observation);
+            List<String> extIds = getExtensionIds();
+
+            // contained Observations have a matching reference
+            for (String s : contained) {
+                assertTrue(extIds.contains(s));
+            }
+            // extension references have a matching Observation
+            for (String extId : extIds) {
+                // inline resource references concat prefix '#' to indicate they are not persisted
+                assertTrue(contained.contains(extId.replace("#", "")));
+            }
+            return this;
+        }
+
+        public SelectedReport containedListHasCorrectResourceType(String theResourceType) {
+            var resourceType = ContainedHelper.getAllContainedResources(value()).stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.List))
+                    .map(x -> (ListResource) x)
+                    .findFirst()
+                    .orElseThrow()
+                    .getEntryFirstRep()
+                    .getItem()
+                    .getReference();
+            assertTrue(resourceType.contains(theResourceType));
+            return this;
+        }
+
+        private List<String> getContainedIdsPerResourceType(ResourceType theResourceType) {
+            List<String> containedIds = new ArrayList<>();
+            List<Resource> resources = ContainedHelper.getAllContainedResources(value());
+            for (Resource resource : resources) {
+                if (resource.getResourceType().equals(theResourceType)) {
+                    containedIds.add(resource.getId());
+                }
+            }
+            return containedIds;
+        }
+
+        private List<String> getExtensionIds() {
+            List<String> extReferences = new ArrayList<>();
+            List<Extension> exts = value().getExtensionsByUrl(EXT_SDE_REFERENCE_URL);
+            for (Extension ext : exts) {
+                extReferences.add(ext.getValue().toString());
+            }
+            return extReferences;
+        }
+
+        public SelectedReport subjectResultsValidation() {
+            List<String> contained = getContainedIdsPerResourceType(ResourceType.List);
+            List<String> subjectRefs = subjectResultReferences();
+            // where lists are contained resources
+            if (!contained.isEmpty()) {
+                // all contained List resources have a matching population referencing it
+                for (String s : contained) {
+                    assertTrue(subjectRefs.stream().anyMatch(t -> t.contains(s)));
+                    // validate matching counts for resource and MeasureReport population count
+                    var listEntryCount = getListEntrySize(value(), s);
+                    var populationCount = getPopulationCount(value(), s);
+                    assertEquals(populationCount, listEntryCount);
+                }
+                // all referenced resources are found in contained array
+                for (String subjectRef : subjectRefs) {
+                    // inline resource references concat prefix '#' to indicate they are not persisted
+                    assertTrue(contained.contains(subjectRef.replace("#", "")));
+                }
+            }
+            // TODO: check for correct search syntax for persisted Lists
+            // subjectRefs should be search for List? with extension search Parameters for report, group, popid
+
+            return this;
+        }
+
+        private int getPopulationCount(MeasureReport theMeasureReport, String theSubjectResultId) {
+            return theMeasureReport.getGroup().stream()
+                    .map(t -> t.getPopulation().stream()
+                            .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
+                            .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
+                            .findFirst()
+                            .orElseThrow())
+                    .findFirst()
+                    .orElseThrow()
+                    .getCount();
+        }
+
+        private int getListEntrySize(MeasureReport theMeasureReport, String theResourceId) {
+            var entry = (ListResource) ContainedHelper.getAllContainedResources(theMeasureReport).stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.List))
+                    .filter(x -> x.getId().equals(theResourceId))
+                    .findAny()
+                    .orElseThrow();
+            return entry.getEntry().size();
+        }
+
+        private List<String> subjectResultReferences() {
+            List<String> refs = new ArrayList<>();
+            // loop through all groups and populations
+            var groupPops = value().getGroup();
+            for (MeasureReportGroupComponent groupPop : groupPops) {
+                var pops = groupPop.getPopulation();
+                for (MeasureReportGroupPopulationComponent pop : pops) {
+                    if (pop.getSubjectResults().hasReference()) {
+                        refs.add(pop.getSubjectResults().getReference());
+                    }
+                }
+            }
+            return refs;
+        }
+    }
+
+    static class SelectedContained extends Selected<Resource, SelectedReport> {
+
+        public SelectedContained(Resource value, SelectedReport parent) {
+            super(value, parent);
+        }
+
+        public SelectedContained observationHasExtensionUrl() {
+            var obs = (Observation) value();
+            assertEquals(EXT_URL, obs.getExtension().get(0).getUrl());
+            return this;
+        }
+
+        public SelectedContained observationHasCode(String theCode) {
+            var obs = (Observation) value();
+            assertEquals(theCode, obs.getCode().getCoding().get(0).getCode());
+            return this;
+        }
+
+        public SelectedContained observationCount(int theCount) {
+            var obs = (Observation) value();
+            assertEquals(theCount, obs.getValueIntegerType().getValue());
             return this;
         }
     }

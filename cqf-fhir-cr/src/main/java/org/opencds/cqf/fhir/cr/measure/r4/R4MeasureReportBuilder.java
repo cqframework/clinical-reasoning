@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -498,6 +499,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    protected String getPopulationResourceIds(Object resourceObject) {
+        var resource = (Resource) resourceObject;
+        return resource.getId();
+    }
+
     protected void buildPopulation(
             BuilderContext bc,
             MeasureGroupPopulationComponent measurePopulation,
@@ -522,7 +528,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         addEvaluatedResourceReferences(bc, populationDef.id(), populationDef.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
-        Set<String> populationSet = populationDef.getSubjects();
+        // subjectResult set defined by basis of Measure
+        Set<String> populationSet;
+        if (bc.measureDef.isBooleanBasis()) {
+            populationSet = populationDef.getSubjects().stream()
+                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .collect(Collectors.toSet());
+        } else {
+            populationSet = populationDef.getResources().stream()
+                    .map(this::getPopulationResourceIds)
+                    .collect(Collectors.toSet());
+        }
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior

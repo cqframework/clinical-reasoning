@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -8,6 +9,10 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 
 public interface AdapterFactory {
+
+    public static AdapterFactory forFhirContext(FhirContext fhirContext) {
+        return forFhirVersion(fhirContext.getVersion().getVersion());
+    }
 
     public static AdapterFactory forFhirVersion(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {

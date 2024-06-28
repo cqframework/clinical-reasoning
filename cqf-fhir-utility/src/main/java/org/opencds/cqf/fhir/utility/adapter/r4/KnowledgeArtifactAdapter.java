@@ -6,13 +6,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -22,6 +21,15 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 public class KnowledgeArtifactAdapter extends ResourceAdapter
         implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
+
+    public KnowledgeArtifactAdapter(IDomainResource resource) {
+        super(resource);
+        if (!(resource instanceof MetadataResource)) {
+            throw new IllegalArgumentException(
+                    "resource passed as resource argument is not a MetadataResource resource");
+        }
+        this.adaptedResource = (MetadataResource) resource;
+    }
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {
         super(resource);
@@ -178,10 +186,5 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public boolean getExperimental() {
         return this.get().getExperimental();
-    }
-
-    @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

@@ -16,12 +16,22 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter
         implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
+
+    public KnowledgeArtifactAdapter(IDomainResource resource) {
+        super(resource);
+        if (!(resource instanceof MetadataResource)) {
+            throw new IllegalArgumentException(
+                    "resource passed as resource argument is not a MetadataResource resource");
+        }
+        this.adaptedResource = (MetadataResource) resource;
+    }
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {
         super(resource);

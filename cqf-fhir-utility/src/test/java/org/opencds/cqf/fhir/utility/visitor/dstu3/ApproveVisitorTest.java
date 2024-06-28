@@ -39,15 +39,15 @@ import org.opencds.cqf.fhir.utility.dstu3.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.ApproveVisitor;
 
-class KnowledgeArtifactApproveVisitorTest {
+class ApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach
     void setup() {
-        var lib = (Library) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
+        var lib = (Library)
+                jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(lib);
         doAnswer(new Answer<Bundle>() {
@@ -112,8 +112,8 @@ class KnowledgeArtifactApproveVisitorTest {
 
     @Test
     void approveOperation_test() {
-        var practitioner = (Practitioner) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Practitioner-minimal.json"));
+        var practitioner = (Practitioner)
+                jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream("Practitioner-minimal.json"));
         spyRepository.update(practitioner);
         Date today = new Date();
         // get today's date in the form "2023-05-11"

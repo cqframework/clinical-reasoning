@@ -9,6 +9,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -26,6 +27,15 @@ import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 public class StructureDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
 
     private StructureDefinition structureDefinition;
+
+    public StructureDefinitionAdapter(IDomainResource structureDefinition) {
+        super(structureDefinition);
+        if (!(structureDefinition instanceof StructureDefinition)) {
+            throw new IllegalArgumentException(
+                    "resource passed as planDefinition argument is not a StructureDefinition resource");
+        }
+        this.structureDefinition = (StructureDefinition) structureDefinition;
+    }
 
     public StructureDefinitionAdapter(StructureDefinition structureDefinition) {
         super(structureDefinition);

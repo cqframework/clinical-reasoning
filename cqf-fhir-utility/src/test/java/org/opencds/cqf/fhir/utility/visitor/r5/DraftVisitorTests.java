@@ -44,7 +44,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.DraftVisitor;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-class KnowledgeArtifactDraftVisitorTests {
+class DraftVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -83,8 +83,8 @@ class KnowledgeArtifactDraftVisitorTests {
 
     @Test
     void library_draft_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(bundle);
         KnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         Library library = spyRepository
@@ -137,8 +137,8 @@ class KnowledgeArtifactDraftVisitorTests {
 
     @Test
     void draftOperation_no_effectivePeriod_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(bundle);
         Library baseLib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -166,10 +166,10 @@ class KnowledgeArtifactDraftVisitorTests {
 
     @Test
     void draftOperation_version_conflict_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
-        Library versionConflictLibrary = (Library) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Library versionConflictLibrary = (Library)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.transaction(bundle);
         spyRepository.update(versionConflictLibrary);
         Parameters params = parameters(part("version", "1.0.0"));
@@ -192,8 +192,8 @@ class KnowledgeArtifactDraftVisitorTests {
 
     @Test
     void draftOperation_cannot_create_draft_of_draft_test() {
-        Library versionConflictLibrary = (Library) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
+        Library versionConflictLibrary = (Library)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.update(versionConflictLibrary);
         Parameters params = parameters(part("version", "1.2.1"));
         String maybeException = "";
@@ -213,8 +213,8 @@ class KnowledgeArtifactDraftVisitorTests {
 
     @Test
     void draftOperation_version_format_test() {
-        Library versionConflictLibrary = (Library) jsonParser.parseResource(
-                KnowledgeArtifactDraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
+        Library versionConflictLibrary = (Library)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         spyRepository.update(versionConflictLibrary);
         Library baseLib = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))

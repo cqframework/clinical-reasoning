@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.visitor.dstu3;
+package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -25,34 +25,35 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
-import org.opencds.cqf.fhir.utility.dstu3.MetadataResourceHelper;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.ReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
-class KnowledgeArtifactReleaseVisitorTests {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class ReleaseVisitorTests {
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final List<String> badVersionList = Arrays.asList(
@@ -69,15 +70,14 @@ class KnowledgeArtifactReleaseVisitorTests {
             "3.2",
             "1.",
             "3.ad.2.",
-            "1.0.0.1",
             "",
+            "1.0.0.1",
             null);
 
     @BeforeEach
     void setup() {
-        SearchParameter sp = (SearchParameter)
-                jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "SearchParameter-artifactAssessment.json"));
+        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(sp);
         doAnswer(new Answer<Bundle>() {
@@ -94,7 +94,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void visitLibraryTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
         spyRepository.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
@@ -104,10 +104,8 @@ class KnowledgeArtifactReleaseVisitorTests {
         String version = "1.0.1";
         String existingVersion = "1.2.3";
         Parameters params = new Parameters();
-        var versionParam = params.addParameter();
-        versionParam.setName("version").setValue(new StringType(version));
-        var versionBehaviorParam = params.addParameter();
-        versionBehaviorParam.setName("versionBehavior").setValue(new CodeType("default"));
+        params.addParameter("version", version);
+        params.addParameter("versionBehavior", new CodeType("default"));
 
         Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
         assertNotNull(returnResource);
@@ -130,6 +128,8 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-lrtc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-mrtc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdtc|" + existingVersion,
+                "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdltc",
+                "http://ersd.aimsplatform.org/fhir/ValueSet/release-sdmtc",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
@@ -176,11 +176,11 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .map(ra -> ra.getResource().getReference())
+                .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .map(ra -> ra.getResource().getReference())
+                .map(ra -> ra.getResource())
                 .collect(Collectors.toList());
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
@@ -190,7 +190,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         for (var component : expectedErsdTestArtifactComponents) {
             assertTrue(componentsOnReleasedArtifact.contains(component));
         }
-        // has extra groupers and rctc dependencies
+        // ensure it only has the expected components and dependencies
         assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
         assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
     }
@@ -198,7 +198,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void releaseResource_force_version() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         // Existing version should be "1.2.3";
         String newVersionToForce = "1.2.7";
@@ -225,14 +225,12 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void releaseResource_require_non_experimental_error() {
         // SpecificationLibrary - root is experimentalbut HAS experimental children
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft-experimental.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
         spyRepository.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
-        Bundle bundle2 =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft-experimental-children.json"));
+        Bundle bundle2 = (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
+                "Bundle-small-approved-draft-experimental-children.json"));
         spyRepository.transaction(bundle2);
         Parameters params = parameters(
                 part("version", new StringType("1.2.3")),
@@ -269,14 +267,12 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void releaseResource_require_non_experimental_warn() {
         // SpecificationLibrary - root is experimentalbut HAS experimental children
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft-experimental.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
         spyRepository.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
-        Bundle bundle2 =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-small-approved-draft-experimental-children.json"));
+        Bundle bundle2 = (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
+                "Bundle-small-approved-draft-experimental-children.json"));
         spyRepository.transaction(bundle2);
 
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
@@ -329,9 +325,8 @@ class KnowledgeArtifactReleaseVisitorTests {
 
     @Test
     void releaseResource_propagate_effective_period() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ersd-no-child-effective-period.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-no-child-effective-period.json"));
         spyRepository.transaction(bundle);
         String effectivePeriodToPropagate = "2020-12-11";
 
@@ -367,7 +362,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void releaseResource_latestFromTx_NotSupported_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
 
         String actualErrorMessage = "";
@@ -392,9 +387,8 @@ class KnowledgeArtifactReleaseVisitorTests {
 
     @Test
     void release_missing_approvalDate_validation_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-release-missing-approvalDate.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
         spyRepository.transaction(bundle);
 
         String versionData = "1.2.3";
@@ -417,7 +411,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_version_format_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
@@ -441,7 +435,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_releaseLabel_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         String releaseLabel = "release label test";
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
@@ -471,7 +465,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_version_active_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
@@ -493,7 +487,7 @@ class KnowledgeArtifactReleaseVisitorTests {
     @Test
     void release_versionBehaviour_format_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         spyRepository.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = spyRepository
@@ -516,44 +510,45 @@ class KnowledgeArtifactReleaseVisitorTests {
         }
     }
 
-    // @Test
-    // void release_test_artifactComment_updated() {
-    //     Bundle bundle = (Bundle)
-    // jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
-    //     spyRepository.transaction(bundle);
-    //     KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
-    //     Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-    //     dstu3LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-    // 	String versionData = "1.2.3";
-    // 	Parameters approveParams = parameters(
-    // 		part("approvalDate", new DateType(new Date(),TemporalPrecisionEnum.DAY))
-    // 	);
-    //     Bundle approvedBundle = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
-
-    // 	Optional<BundleEntryComponent> maybeArtifactAssessment = approvedBundle.getEntry().stream().filter(entry ->
-    // entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeArtifactAssessment.isPresent());
-    // 	ArtifactAssessment artifactAssessment =
-    // spyRepository.read(ArtifactAssessment.class,maybeArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(artifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3-draft"));
-    // 	Parameters releaseParams = parameters(
-    // 		part("version", versionData),
-    // 		part("versionBehavior", new CodeType("default"))
-    // 	);
-    // 	Bundle releasedBundle = getClient().operation()
-    // 			.onInstance("Library/ReleaseSpecificationLibrary")
-    // 			.named("$release")
-    // 			.withParameters(releaseParams)
-    // 			.useHttpGet()
-    // 			.returnResourceType(Bundle.class)
-    // 			.execute();
-    // 	Optional<BundleEntryComponent> maybeReleasedArtifactAssessment = releasedBundle.getEntry().stream().filter(entry
-    // -> entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeReleasedArtifactAssessment.isPresent());
-    // 	ArtifactAssessment releasedArtifactAssessment =
-    // getClient().fetchResourceFromUrl(ArtifactAssessment.class,maybeReleasedArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(releasedArtifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3"));
-    // }
+    @Test
+    void release_preserves_extensions() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        spyRepository.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor();
+        var orginalLibrary = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = orginalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        for (final var originalRelatedArtifact : orginalLibrary.getRelatedArtifact()) {
+            releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
+                if (Canonicals.getUrl(releasedRelatedArtifact.getResource())
+                                .equals(Canonicals.getUrl(originalRelatedArtifact.getResource()))
+                        && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
+                    assertEquals(
+                            releasedRelatedArtifact.getExtension().size(),
+                            originalRelatedArtifact.getExtension().size());
+                    releasedRelatedArtifact.getExtension().forEach(ext -> {
+                        assertEquals(
+                                originalRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size(),
+                                releasedRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size());
+                    });
+                }
+            });
+        }
+    }
 }

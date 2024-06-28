@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.visitor.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,24 +10,12 @@ import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.UsageContext;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class PackageVisitor {
-
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-
-    public PackageVisitor() {
-        this.terminologyServerClient = new TerminologyServerClient(fhirContext);
-    }
-
-    private TerminologyServerClient terminologyServerClient;
-
     // as per http://hl7.org/fhir/dstu3/resource.html#canonical
     public static final List<ResourceType> canonicalResourceTypes =
             // can't use List.of for Android 26 compatibility
@@ -187,30 +174,5 @@ public class PackageVisitor {
             }
         }
         return distinctFilteredEntries;
-    }
-
-    /**
-     *
-     * Either finds a usageContext with the same system and code or creates an empty one
-     * and appends it
-     *
-     * @param usageContexts the list of usageContexts to search and/or append to
-     * @param system the usageContext.code.system to find / create
-     * @param code the usage.code.code to find / create
-     * @return the found / created usageContext
-     */
-    protected UsageContext getOrCreateUsageContext(List<UsageContext> usageContexts, String system, String code) {
-        return usageContexts.stream()
-                .filter(useContext -> useContext.getCode().getSystem().equals(system)
-                        && useContext.getCode().getCode().equals(code))
-                .findFirst()
-                .orElseGet(() -> {
-                    // create the UseContext if it doesn't exist
-                    Coding c = new Coding(system, code, null);
-                    UsageContext n = new UsageContext(c, null);
-                    // add it to the ValueSet before returning
-                    usageContexts.add(n);
-                    return n;
-                });
     }
 }

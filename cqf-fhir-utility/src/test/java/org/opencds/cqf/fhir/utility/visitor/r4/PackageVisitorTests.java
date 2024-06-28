@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.visitor.dstu3;
+package org.opencds.cqf.fhir.utility.visitor.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -22,19 +22,19 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.IntegerType;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -43,12 +43,12 @@ import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-class KnowledgeArtifactPackageVisitorTests {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class PackageVisitorTests {
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private Repository spyRepository;
 
@@ -69,7 +69,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void visitLibraryTest() {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         spyRepository.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
@@ -101,15 +101,15 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_no_credentials() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle)
+                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
+        Parameters params = parameters();
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -117,25 +117,23 @@ class KnowledgeArtifactPackageVisitorTests {
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without credentials: "));
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without a terminology server: "));
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_username() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle)
+                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -143,25 +141,23 @@ class KnowledgeArtifactPackageVisitorTests {
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username: "));
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username."));
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_missing_apikey() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle)
+                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -169,25 +165,23 @@ class KnowledgeArtifactPackageVisitorTests {
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key: "));
+        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key."));
     }
 
     @Test
-    @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_credentials_invalid() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle)
+                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         spyRepository.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         UnprocessableEntityException maybeException = null;
         try {
@@ -195,15 +189,13 @@ class KnowledgeArtifactPackageVisitorTests {
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
-        assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for: "));
-        assertTrue(maybeException.getAdditionalMessages().stream().allMatch(msg -> msg.contains("HTTP 401")));
+        assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for ValueSet "));
     }
 
     @Test
     void packageOperation_should_fail_non_matching_capability() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream(
-                        "Bundle-ersd-package-capabilities.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-package-capabilities.json"));
         spyRepository.transaction(bundle);
         List<String> capabilities = Arrays.asList("computable", "publishable", "executable");
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
@@ -236,7 +228,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_apply_check_force_canonicalVersions() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-active-no-versions.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-active-no-versions.json"));
         spyRepository.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
@@ -247,11 +239,11 @@ class KnowledgeArtifactPackageVisitorTests {
         Parameters params = parameters(
                 part(
                         "artifactVersion",
-                        new UriType("http://to-add-missing-version/PlanDefinition/us-ecr-specification|"
+                        new CanonicalType("http://to-add-missing-version/PlanDefinition/us-ecr-specification|"
                                 + versionToUpdateTo)),
                 part(
                         "artifactVersion",
-                        new UriType("http://to-add-missing-version/ValueSet/dxtc|" + versionToUpdateTo)));
+                        new CanonicalType("http://to-add-missing-version/ValueSet/dxtc|" + versionToUpdateTo)));
         Bundle updatedCanonicalVersionPackage = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
 
         List<MetadataResource> updatedResources = updatedCanonicalVersionPackage.getEntry().stream()
@@ -263,7 +255,8 @@ class KnowledgeArtifactPackageVisitorTests {
             assertEquals(updatedResource.getVersion(), versionToUpdateTo);
         }
         params = parameters(part(
-                "checkArtifactVersion", new UriType("http://to-check-version/Library/SpecificationLibrary|1.3.1")));
+                "checkArtifactVersion",
+                new CanonicalType("http://to-check-version/Library/SpecificationLibrary|1.3.1")));
         String correctCheckVersion = "2022-10-19";
         PreconditionFailedException checkCanonicalThrewError = null;
         try {
@@ -274,7 +267,7 @@ class KnowledgeArtifactPackageVisitorTests {
         assertNotNull(checkCanonicalThrewError);
         params = parameters(part(
                 "checkArtifactVersion",
-                new UriType("http://to-check-version/Library/SpecificationLibrary|" + correctCheckVersion)));
+                new CanonicalType("http://to-check-version/Library/SpecificationLibrary|" + correctCheckVersion)));
         Bundle noErrorCheckCanonicalPackage = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
         Optional<MetadataResource> checkedVersionResource = noErrorCheckCanonicalPackage.getEntry().stream()
                 .map(entry -> (MetadataResource) entry.getResource())
@@ -283,8 +276,8 @@ class KnowledgeArtifactPackageVisitorTests {
         assertTrue(checkedVersionResource.isPresent());
         assertEquals(checkedVersionResource.get().getVersion(), correctCheckVersion);
         String versionToForceTo = "1.1.9.23";
-        params = parameters(
-                part("forceArtifactVersion", new UriType("http://to-force-version/Library/rctc|" + versionToForceTo)));
+        params = parameters(part(
+                "forceArtifactVersion", new CanonicalType("http://to-force-version/Library/rctc|" + versionToForceTo)));
         Bundle forcedVersionPackage = (Bundle) libraryAdapter.accept(packageVisitor, spyRepository, params);
         Optional<MetadataResource> forcedVersionResource = forcedVersionPackage.getEntry().stream()
                 .map(entry -> (MetadataResource) entry.getResource())
@@ -297,7 +290,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_respect_count_offset() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
@@ -335,7 +328,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_different_bundle_types() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
@@ -374,7 +367,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_conditionally_create() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository
@@ -394,7 +387,7 @@ class KnowledgeArtifactPackageVisitorTests {
     @Test
     void packageOperation_should_respect_include() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                KnowledgeArtifactPackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         spyRepository.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = spyRepository

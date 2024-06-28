@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -11,6 +12,17 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
 
     private Questionnaire questionnaire;
+
+    public QuestionnaireAdapter(IDomainResource questionnaire) {
+        super(questionnaire);
+
+        if (!(questionnaire instanceof Questionnaire)) {
+            throw new IllegalArgumentException(
+                    "resource passed as questionnaire argument is not a Questionnaire resource");
+        }
+
+        this.questionnaire = (Questionnaire) questionnaire;
+    }
 
     public QuestionnaireAdapter(Questionnaire questionnaire) {
         super(questionnaire);

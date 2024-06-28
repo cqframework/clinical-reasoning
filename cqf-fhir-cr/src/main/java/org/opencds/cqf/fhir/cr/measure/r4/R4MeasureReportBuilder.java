@@ -489,11 +489,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // temporarily adding prefix of resourceType to match pattern in build population
         // TODO: do Stratum receive resource based subjects?
-        if (bc.measureDef.isBooleanBasis()) {
-            subjectIds = subjectIds.stream()
+
+        subjectIds = subjectIds.stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toList());
-        }
+
 
         Set<String> intersection = new HashSet<>(subjectIds);
 

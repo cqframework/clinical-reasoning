@@ -411,8 +411,6 @@ public class Measure {
                     assertTrue(contained.contains(subjectRef.replace("#", "")));
                 }
             }
-            // TODO: check for correct search syntax for persisted Lists
-            // subjectRefs should be search for List? with extension search Parameters for report, group, popid
 
             return this;
         }

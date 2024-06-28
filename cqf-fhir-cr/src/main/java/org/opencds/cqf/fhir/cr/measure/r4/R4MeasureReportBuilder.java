@@ -491,9 +491,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // TODO: do Stratum receive resource based subjects?
 
         subjectIds = subjectIds.stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                    .collect(Collectors.toList());
-
+                .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                .collect(Collectors.toList());
 
         Set<String> intersection = new HashSet<>(subjectIds);
 

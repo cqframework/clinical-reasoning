@@ -545,9 +545,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getResources().stream()
+                    .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }
+
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -62,6 +63,17 @@ class PlanDefinitionProcessorTests {
                 null,
                 null);
         assertNotNull(result);
+    }
+
+    @Test
+    void applyNoSubjectThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            var planDefinitionID = "hello-world-patient-view";
+            given().repositoryFor(fhirContextR4, "r4")
+                    .when()
+                    .planDefinitionId(planDefinitionID)
+                    .thenApply();
+        });
     }
 
     @Test

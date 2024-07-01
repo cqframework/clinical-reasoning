@@ -55,6 +55,26 @@ class ActivityDefinitionProcessorTests {
     }
 
     @Test
+    void applyNoSubjectThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            activityDefinitionProcessorR4.apply(
+                    Eithers.forMiddle3(Ids.newId(
+                            activityDefinitionProcessorR4.fhirContext(),
+                            "ActivityDefinition",
+                            "activityDefinition-test")),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
+        });
+    }
+
+    @Test
     void activityDefinitionApplyDstu3() throws FHIRException {
         var result = this.activityDefinitionProcessorDstu3.apply(
                 Eithers.forMiddle3(Ids.newId(

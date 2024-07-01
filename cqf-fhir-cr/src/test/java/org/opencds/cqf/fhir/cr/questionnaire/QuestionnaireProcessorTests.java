@@ -171,6 +171,16 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
+    void populateNoSubjectThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            given().repository(repositoryR4)
+                    .when()
+                    .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                    .thenPopulate(false);
+        });
+    }
+
+    @Test
     void questionnairePackageDstu3() {
         given().repository(repositoryDstu3)
                 .when()

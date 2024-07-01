@@ -42,7 +42,7 @@ public class TerminologyServerClientTest {
                 .thenReturn(vs);
 
         var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r4.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -54,13 +54,27 @@ public class TerminologyServerClientTest {
 
         // when the valueset has a version it should be in params
         vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r4.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,
                 ((org.hl7.fhir.r4.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.r4.model.Parameters();
+        urlAndVersionParams.addParameter("url", new org.hl7.fhir.r4.model.UriType(url));
+        urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r4.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.r4.model.Parameters) null, username, password, url, version);
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -81,7 +95,7 @@ public class TerminologyServerClientTest {
                 .thenReturn(vs);
 
         var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r5.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -93,13 +107,27 @@ public class TerminologyServerClientTest {
 
         // when the valueset has a version it should be in params
         vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r5.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,
                 ((org.hl7.fhir.r5.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.r5.model.Parameters();
+        urlAndVersionParams.addParameter("url", new org.hl7.fhir.r5.model.UriType(url));
+        urlAndVersionParams.addParameter("valueSetVersion", new org.hl7.fhir.r5.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.r5.model.Parameters) null, username, password, url, version);
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -120,7 +148,7 @@ public class TerminologyServerClientTest {
                 .thenReturn(vs);
 
         var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.dstu3.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -135,7 +163,7 @@ public class TerminologyServerClientTest {
 
         // when the valueset has a version it should be in params
         vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.dstu3.model.Parameters(), username, password);
+        client.expand(vs, authoritativeSource, null, username, password);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,
@@ -145,5 +173,22 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
+
+        // if url and version are provided valueset can be null
+        var urlAndVersionParams = new org.hl7.fhir.dstu3.model.Parameters();
+        urlAndVersionParams.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(url));
+        urlAndVersionParams
+                .addParameter()
+                .setName("valueSetVersion")
+                .setValue(new org.hl7.fhir.dstu3.model.StringType(null));
+        Exception noException = null;
+        try {
+            client.expand(
+                    authoritativeSource, (org.hl7.fhir.dstu3.model.Parameters) null, username, password, url, version);
+            client.expand(null, authoritativeSource, urlAndVersionParams, username, password);
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 }

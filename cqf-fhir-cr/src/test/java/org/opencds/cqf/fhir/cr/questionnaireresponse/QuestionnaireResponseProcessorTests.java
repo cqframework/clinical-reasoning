@@ -27,7 +27,7 @@ class QuestionnaireResponseProcessorTests {
     void test() {
         testExtract(fhirContextDstu3, "dstu3", "QRSharonDecision");
         testExtract(fhirContextR4, "r4", "QRSharonDecision");
-        testExtract(fhirContextR4, "r5", "QRSharonDecision");
+        testExtract(fhirContextR5, "r5", "QRSharonDecision");
     }
 
     @Test

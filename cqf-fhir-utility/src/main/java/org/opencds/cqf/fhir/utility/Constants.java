@@ -95,6 +95,10 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-parameter";
     public static final String SDC_QUESTIONNAIRE_SHORT_TEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-shortText";
+    public static final String SDC_QUESTIONNAIRE_OBSERVATION_EXTRACT_CATEGORY =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observation-extract-category";
+    public static final String SDC_OBSERVATION_CATEGORY = "http://hl7.org/fhir/observation-category";
+    public static final String SDC_CATEGORY_SURVEY = "survey";
 
     // $apply parameter names
     public static final String APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition";

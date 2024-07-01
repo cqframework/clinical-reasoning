@@ -174,6 +174,7 @@ public class ProcessDefinition {
                                             .getIdPart()
                                             .replaceFirst("#", ""))
                             : activityDefinition.getIdElement().withResourceType(result.fhirType())));
+            activityRequest.resolveOperationOutcome(result);
         } catch (Exception e) {
             var message = String.format(
                     "ERROR: ActivityDefinition %s could not be applied and threw exception %s",
@@ -193,6 +194,7 @@ public class ProcessDefinition {
                     : resolveRepository(definition));
             var nestedRequest = request.copy(nextPlanDefinition);
             var result = applyProcessor.applyPlanDefinition(nestedRequest);
+            nestedRequest.resolveOperationOutcome(result);
             request.getRequestResources().addAll(nestedRequest.getRequestResources());
             request.getExtractedResources().addAll(nestedRequest.getExtractedResources());
             request.setQuestionnaire(nestedRequest.getQuestionnaire());

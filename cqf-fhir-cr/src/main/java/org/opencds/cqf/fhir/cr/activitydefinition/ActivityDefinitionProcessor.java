@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -182,6 +183,9 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             Boolean useServerData,
             IBaseBundle bundle,
             LibraryEngine libraryEngine) {
+        if (StringUtils.isBlank(subjectId)) {
+            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+        }
         final ApplyRequest request = new ApplyRequest(
                 resolveActivityDefinition(activityDefinition),
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, "Patient")),

@@ -14,7 +14,7 @@ import org.hl7.fhir.r5.model.Questionnaire;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-public class QuestionnaireAdapaterTest {
+public class QuestionnaireAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     @Test

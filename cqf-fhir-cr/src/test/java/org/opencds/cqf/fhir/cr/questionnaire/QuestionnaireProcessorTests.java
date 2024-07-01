@@ -173,6 +173,16 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
+    void populateNoSubjectThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            given().repository(repositoryR4)
+                    .when()
+                    .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                    .thenPopulate(false);
+        });
+    }
+
+    @Test
     void questionnairePackageDstu3() {
         var bundle = (org.hl7.fhir.dstu3.model.Bundle) given().repository(repositoryDstu3)
                 .when()

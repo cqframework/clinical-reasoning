@@ -6,14 +6,20 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 
 public class TerminologyServerClientTest {
     private static final String url = "www.test.com";
@@ -24,14 +30,23 @@ public class TerminologyServerClientTest {
     private static final String urlParamName = "url";
     private static final String versionParamName = "valueSetVersion";
 
+    private FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
+    private FhirContext fhirContextR4 = FhirContext.forR4Cached();
+    private FhirContext fhirContextR5 = FhirContext.forR5Cached();
+
     @Test
     void testR4UrlAndVersion() {
-        var vs = new org.hl7.fhir.r4.model.ValueSet();
-        vs.setUrl(url);
+        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+        var valueSet = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.ValueSet());
+        valueSet.setUrl(url);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.r4.model.StringType(username)));
+        endpoint.addExtension(
+                new org.hl7.fhir.r4.model.Extension(Constants.APIKEY, new org.hl7.fhir.r4.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r4.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -39,10 +54,13 @@ public class TerminologyServerClientTest {
                         .withParameters(capt.capture())
                         .returnResourceType(any())
                         .execute())
-                .thenReturn(vs);
+                .thenReturn(valueSet.get());
+        var contextSpy = spy(fhirContextR4);
+        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
 
-        var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r4.model.Parameters(), username, password);
+        var client = new TerminologyServerClient(contextSpy);
+        var parameters = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+        client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -53,8 +71,8 @@ public class TerminologyServerClientTest {
         assertNull(params.getParameter(versionParamName));
 
         // when the valueset has a version it should be in params
-        vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r4.model.Parameters(), username, password);
+        valueSet.setVersion(version);
+        client.expand(valueSet, endpoint, parameters);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,
@@ -65,12 +83,17 @@ public class TerminologyServerClientTest {
 
     @Test
     void testR5UrlAndVersion() {
-        var vs = new org.hl7.fhir.r5.model.ValueSet();
-        vs.setUrl(url);
+        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R5);
+        var valueSet = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.ValueSet());
+        valueSet.setUrl(url);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r5.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.r5.model.StringType(username)));
+        endpoint.addExtension(
+                new org.hl7.fhir.r5.model.Extension(Constants.APIKEY, new org.hl7.fhir.r5.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r5.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -78,10 +101,13 @@ public class TerminologyServerClientTest {
                         .withParameters(capt.capture())
                         .returnResourceType(any())
                         .execute())
-                .thenReturn(vs);
+                .thenReturn(valueSet.get());
+        var contextSpy = spy(fhirContextR5);
+        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
 
-        var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r5.model.Parameters(), username, password);
+        var client = new TerminologyServerClient(contextSpy);
+        var parameters = factory.createParameters(new org.hl7.fhir.r5.model.Parameters());
+        client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -92,8 +118,8 @@ public class TerminologyServerClientTest {
         assertNull(params.getParameter(versionParamName));
 
         // when the valueset has a version it should be in params
-        vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.r5.model.Parameters(), username, password);
+        valueSet.setVersion(version);
+        client.expand(valueSet, endpoint, parameters);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,
@@ -104,12 +130,18 @@ public class TerminologyServerClientTest {
 
     @Test
     void testDstu3UrlAndVersion() {
-        var vs = new org.hl7.fhir.dstu3.model.ValueSet();
-        vs.setUrl(url);
+        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
+        var valueSet =
+                (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.dstu3.model.ValueSet());
+        valueSet.setUrl(url);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.dstu3.model.StringType(username)));
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.dstu3.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -117,10 +149,13 @@ public class TerminologyServerClientTest {
                         .withParameters(capt.capture())
                         .returnResourceType(any())
                         .execute())
-                .thenReturn(vs);
+                .thenReturn(valueSet.get());
+        var contextSpy = spy(fhirContextDstu3);
+        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
 
-        var client = new TerminologyServerClient(contextMock);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.dstu3.model.Parameters(), username, password);
+        var client = new TerminologyServerClient(contextSpy);
+        var parameters = factory.createParameters(new org.hl7.fhir.dstu3.model.Parameters());
+        client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
         var params = capt.getValue();
         assertEquals(
@@ -134,8 +169,8 @@ public class TerminologyServerClientTest {
         assertTrue(!params.getParameter().stream().anyMatch(p -> p.getName().equals(versionParamName)));
 
         // when the valueset has a version it should be in params
-        vs.setVersion(version);
-        client.expand(vs, authoritativeSource, new org.hl7.fhir.dstu3.model.Parameters(), username, password);
+        valueSet.setVersion(version);
+        client.expand(valueSet, endpoint, parameters);
         params = capt.getAllValues().get(1);
         assertEquals(
                 version,

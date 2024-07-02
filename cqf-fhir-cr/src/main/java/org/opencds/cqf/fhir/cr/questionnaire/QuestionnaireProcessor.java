@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
@@ -15,17 +17,17 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
-import org.opencds.cqf.fhir.cr.questionnaire.packages.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 public class QuestionnaireProcessor {
@@ -168,20 +170,26 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
             Either3<C, IIdType, IBaseResource> questionnaire) {
-        return packageQuestionnaire(resolveQuestionnaire(questionnaire));
-    }
-
-    public IBaseBundle packageQuestionnaire(IBaseResource questionnaire) {
-        return packageProcessor.packageResource(questionnaire);
+        return packageQuestionnaire(questionnaire, false);
     }
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
             Either3<C, IIdType, IBaseResource> questionnaire, boolean isPut) {
-        return packageQuestionnaire(resolveQuestionnaire(questionnaire), isPut);
+        return packageQuestionnaire(
+                questionnaire,
+                newParameters(
+                        repository.fhirContext(),
+                        "package-parameters",
+                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
     }
 
-    public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, boolean isPut) {
-        return packageProcessor.packageResource(questionnaire, isPut ? "PUT" : "POST");
+    public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
+            Either3<C, IIdType, IBaseResource> questionnaire, IBaseParameters parameters) {
+        return packageQuestionnaire(resolveQuestionnaire(questionnaire), parameters);
+    }
+
+    public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, IBaseParameters parameters) {
+        return packageProcessor.packageResource(questionnaire, parameters);
     }
 
     public PopulateRequest buildPopulateRequest(

@@ -2,9 +2,6 @@ package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.model.api.Tag;
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class Constants {
@@ -55,6 +52,8 @@ public class Constants {
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
     public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
 
+    public static final String CQF_EXPANSION_PARAMETERS =
+            "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     // This is only for dstu3 since the Expression type does not exist in that version
     public static final String CQF_EXPRESSION_LANGUAGE =
@@ -115,29 +114,14 @@ public class Constants {
     public static final String APPLY_PARAMETER_DATA_ENDPOINT = "dataEndpoint";
     public static final String APPLY_PARAMETER_CONTENT_ENDPOINT = "contentEndpoint";
     public static final String APPLY_PARAMETER_TERMINOLOGY_ENDPOINT = "terminologyEndpoint";
+
     public static final String US_PH_CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    public static final String VALUE_SET_CONDITION_CODE = "focus";
-    public static final String VALUE_SET_PRIORITY_CODE = "priority";
-    public static final String VALUE_SET_CONDITION_URL =
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
-    public static final String VALUE_SET_PRIORITY_URL =
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
     public static final String LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     public static final String ASSET_COLLECTION = "asset-collection";
-    public static final String EXPANSION_PARAMETERS_URL =
-            "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
-
-    // can't use List.of for Android 26 compatibility
-    public static final List<String> PRESERVED_EXTENSION_URLS =
-            Collections.unmodifiableList(Arrays.asList(VALUE_SET_PRIORITY_URL, VALUE_SET_CONDITION_URL));
 
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
-    public static final String VSM_WORKFLOW_CODES_CODE_SYSTEM_URL =
-            "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes";
-    public static final String VSM_VALUE_SET_TAG_VSM_AUTHORED_CODE = "vsm-authored";
 
     public static final String VSAC_USERNAME = "vsacUsername";
-
     public static final String APIKEY = "apiKey";
 }

@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
@@ -211,9 +212,13 @@ public class TestQuestionnaire {
             }
         }
 
-        public IBaseBundle thenPackage() {
+        public GeneratedPackage thenPackage() {
             var param = Eithers.for3(questionnaireUrl, questionnaireId, questionnaire);
-            return isPut == null ? processor.packageQuestionnaire(param) : processor.packageQuestionnaire(param, isPut);
+            return new GeneratedPackage(
+                    isPut == null
+                            ? processor.packageQuestionnaire(param)
+                            : processor.packageQuestionnaire(param, isPut),
+                    fhirContext());
         }
     }
 

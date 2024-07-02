@@ -6,12 +6,12 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public class RequestHelpers {
     public static final String PATIENT_ID = "patientId";

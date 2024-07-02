@@ -39,7 +39,6 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -92,7 +91,6 @@ class ReleaseVisitorTests {
     }
 
     @Test
-    @Disabled("currently failing")
     void visitLibraryTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
@@ -223,7 +221,7 @@ class ReleaseVisitorTests {
 
     @Test
     void releaseResource_require_non_experimental_error() {
-        // SpecificationLibrary - root is experimentalbut HAS experimental children
+        // SpecificationLibrary - root is experimental but HAS experimental children
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
         spyRepository.transaction(bundle);

@@ -65,7 +65,7 @@ public class ReleaseVisitor {
         }
     }
 
-    public static void propagageEffectivePeriod(Period rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
+    public static void propagateEffectivePeriod(Period rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
         Period effectivePeriod = (Period) artifactAdapter.getEffectivePeriod();
         // if the root artifact period is NOT null AND HAS a start or an end date
         if ((rootEffectivePeriod != null && (rootEffectivePeriod.hasStart() || rootEffectivePeriod.hasEnd()))

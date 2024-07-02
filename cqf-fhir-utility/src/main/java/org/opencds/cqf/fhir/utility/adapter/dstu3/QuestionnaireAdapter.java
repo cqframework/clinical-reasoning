@@ -11,8 +11,6 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
 
-    private Questionnaire questionnaire;
-
     public QuestionnaireAdapter(IDomainResource questionnaire) {
         super(questionnaire);
 
@@ -20,26 +18,32 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
             throw new IllegalArgumentException(
                     "resource passed as questionnaire argument is not a Questionnaire resource");
         }
-
-        this.questionnaire = (Questionnaire) questionnaire;
     }
 
     public QuestionnaireAdapter(Questionnaire questionnaire) {
         super(questionnaire);
-        this.questionnaire = questionnaire;
     }
 
     protected Questionnaire getQuestionnaire() {
-        return this.questionnaire;
+        return (Questionnaire) resource;
+    }
+
+    @Override
+    public Questionnaire get() {
+        return (Questionnaire) resource;
+    }
+
+    @Override
+    public Questionnaire copy() {
+        return get().copy();
     }
 
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = this.getQuestionnaire().hasVersion()
-                ? this.getQuestionnaire().getUrl() + "|"
-                        + this.getQuestionnaire().getVersion()
-                : this.getQuestionnaire().getUrl();
+        final String referenceSource = getQuestionnaire().hasVersion()
+                ? getQuestionnaire().getUrl() + "|" + getQuestionnaire().getVersion()
+                : getQuestionnaire().getUrl();
         /*
            derivedFrom
            item[]..definition // NOTE: This is not a simple canonical, it will have a fragment to identify the specific element
@@ -61,7 +65,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
            item[]..extension[sdc-questionnaire-subQuestionnaire]
         */
 
-        var libraryExtensions = questionnaire.getExtensionsByUrl(Constants.CQF_LIBRARY);
+        var libraryExtensions = getQuestionnaire().getExtensionsByUrl(Constants.CQF_LIBRARY);
         for (var libraryExt : libraryExtensions) {
             DependencyInfo dependency = new DependencyInfo(
                     referenceSource,

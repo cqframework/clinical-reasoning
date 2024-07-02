@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.engine.model;
+package org.opencds.cqf.fhir.utility.model;
 
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 public class ReleaseVisitor implements KnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
 
-    @SuppressWarnings("unchecked")
     @Override
     public IBase visit(
             KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
@@ -58,7 +56,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
         Optional<String> versionBehavior = VisitorHelper.getParameter(
                         "versionBehavior", operationParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
-        Optional<String> requireNonExpermimental = VisitorHelper.getParameter(
+        Optional<String> requireNonExperimental = VisitorHelper.getParameter(
                         "requireNonExperimental", operationParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
         checkReleaseVersion(version, versionBehavior);
@@ -76,14 +74,14 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
         var rootEffectivePeriod = rootAdapter.getEffectivePeriod();
         // if the root artifact is experimental then we don't need to check for experimental children
         if (rootAdapter.getExperimental()) {
-            requireNonExpermimental = Optional.of("none");
+            requireNonExperimental = Optional.of("none");
         }
         var releasedResources = internalRelease(
                 rootAdapter,
                 releaseVersion,
                 rootEffectivePeriod,
                 latestFromTxServer.orElse(false),
-                requireNonExpermimental,
+                requireNonExperimental,
                 repository);
         updateReleaseLabel(rootLibrary, releaseLabel);
         var rootArtifactOriginalDependencies = new ArrayList<IDependencyInfo>(rootAdapter.getDependencies());
@@ -176,8 +174,8 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                                         .equalsIgnoreCase("depends-on"))
                         .findFirst()
                         .ifPresent(dep -> {
-                            ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
-                                    .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
+                            // ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
+                            //         .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
                             originalDependenciesWithExtensions.removeIf(
                                     ra -> ra.getReference().equals(relatedArtifactReference));
                         });
@@ -208,7 +206,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
         artifactAdapter.setStatus("active");
         artifactAdapter.setVersion(version);
         // Step 2: propagate effectivePeriod if it doesn't exist
-        propagageEffectivePeriod(rootEffectivePeriod, artifactAdapter);
+        propagateEffectivePeriod(rootEffectivePeriod, artifactAdapter);
 
         resourcesToUpdate.add(artifactAdapter.get());
         var ownedRelatedArtifacts = artifactAdapter.getOwnedRelatedArtifacts();
@@ -288,16 +286,16 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
         }
     }
 
-    private void propagageEffectivePeriod(
+    private void propagateEffectivePeriod(
             ICompositeType rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
         if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.propagateEffectivePeriod(
                     (org.hl7.fhir.dstu3.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r4.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.propagateEffectivePeriod(
                     (org.hl7.fhir.r4.model.Period) rootEffectivePeriod, artifactAdapter);
         } else if (rootEffectivePeriod instanceof org.hl7.fhir.r5.model.Period) {
-            org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.propagageEffectivePeriod(
+            org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.propagateEffectivePeriod(
                     (org.hl7.fhir.r5.model.Period) rootEffectivePeriod, artifactAdapter);
         } else {
             throw new UnprocessableEntityException(

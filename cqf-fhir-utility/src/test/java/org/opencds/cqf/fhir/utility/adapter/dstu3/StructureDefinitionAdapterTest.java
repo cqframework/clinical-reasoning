@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -23,6 +24,7 @@ public class StructureDefinitionAdapterTest {
         doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
         IDomainResource structureDef = new StructureDefinition();
         var adapter = new StructureDefinitionAdapter(structureDef);
+        assertEquals(structureDef, adapter.get());
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
     }
@@ -45,11 +47,35 @@ public class StructureDefinitionAdapterTest {
         var url = "www.url.com";
         structureDef.setUrl(url);
         var adapter = new StructureDefinitionAdapter(structureDef);
+        assertTrue(adapter.hasUrl());
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
         adapter.setUrl(newUrl);
+        assertTrue(adapter.hasUrl());
         assertEquals(newUrl, structureDef.getUrl());
     }
+
+    @Test
+    void adapter_get_and_set_version() {
+        var structureDef = new StructureDefinition();
+        var version = "1.0.0";
+        structureDef.setVersion(version);
+        var adapter = new StructureDefinitionAdapter(structureDef);
+        assertTrue(adapter.hasVersion());
+        assertEquals(version, adapter.getVersion());
+        var newVersion = "1.0.1";
+        adapter.setVersion(newVersion);
+        assertEquals(newVersion, structureDef.getVersion());
+    }
+
+    @Test
+    void adapter_get_and_set_status() {}
+
+    @Test
+    void adapter_get_and_set_dates() {}
+
+    @Test
+    void adapter_get_and_set_related() {}
 
     @Test
     void adapter_get_experimental() {
@@ -59,6 +85,9 @@ public class StructureDefinitionAdapterTest {
         var adapter = new StructureDefinitionAdapter(structureDef);
         assertEquals(experimental, adapter.getExperimental());
     }
+
+    @Test
+    void adapter_copy() {}
 
     @Test
     void adapter_get_all_dependencies() {}

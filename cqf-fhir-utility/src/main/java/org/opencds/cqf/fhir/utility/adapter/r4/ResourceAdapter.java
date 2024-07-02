@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import static java.util.Optional.ofNullable;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,10 +14,12 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
 
-class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAdapter {
+class ResourceAdapter extends BaseResourceAdapter {
 
     ResourceAdapter(IBaseResource resource) {
+        super(resource);
         if (resource == null) {
             throw new IllegalArgumentException("resource can not be null");
         }
@@ -26,14 +27,10 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R4)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
-
-        this.resource = (Resource) resource;
     }
 
-    private Resource resource;
-
     protected Resource getResource() {
-        return this.resource;
+        return (Resource) resource;
     }
 
     protected boolean isDomainResource() {
@@ -44,23 +41,19 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
         return ofNullable(resource instanceof DomainResource ? (DomainResource) resource : null);
     }
 
-    public IBaseResource get() {
-        return this.resource;
-    }
-
     @Override
     public IBase setProperty(String name, IBase value) throws FHIRException {
-        return this.getResource().setProperty(name, (Base) value);
+        return getResource().setProperty(name, (Base) value);
     }
 
     @Override
     public IBase addChild(String name) throws FHIRException {
-        return this.getResource().addChild(name);
+        return getResource().addChild(name);
     }
 
     @Override
     public IBase getSingleProperty(String name) throws FHIRException {
-        IBase[] values = this.getProperty(name, true);
+        IBase[] values = getProperty(name, true);
 
         if (values == null || values.length == 0) {
             return null;
@@ -75,42 +68,42 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
 
     @Override
     public IBase[] getProperty(String name) throws FHIRException {
-        return this.getProperty(name, true);
+        return getProperty(name, true);
     }
 
     @Override
     public IBase[] getProperty(String name, boolean checkValid) throws FHIRException {
-        return this.getResource().getProperty(name.hashCode(), name, checkValid);
+        return getResource().getProperty(name.hashCode(), name, checkValid);
     }
 
     @Override
     public IBase makeProperty(String name) throws FHIRException {
-        return this.getResource().makeProperty(name.hashCode(), name);
+        return getResource().makeProperty(name.hashCode(), name);
     }
 
     @Override
     public String[] getTypesForProperty(String name) throws FHIRException {
-        return this.getResource().getTypesForProperty(name.hashCode(), name);
+        return getResource().getTypesForProperty(name.hashCode(), name);
     }
 
     @Override
     public IBaseResource copy() {
-        return this.getResource().copy();
+        return getResource().copy();
     }
 
     @Override
     public void copyValues(IBaseResource dst) {
-        this.getResource().copyValues((Resource) dst);
+        getResource().copyValues((Resource) dst);
     }
 
     @Override
     public boolean equalsDeep(IBase other) {
-        return this.getResource().equalsDeep((Base) other);
+        return getResource().equalsDeep((Base) other);
     }
 
     @Override
     public boolean equalsShallow(IBase other) {
-        return this.getResource().equalsShallow((Base) other);
+        return getResource().equalsShallow((Base) other);
     }
 
     @Override
@@ -123,35 +116,5 @@ class ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ResourceAd
     @Override
     public <T extends IBaseExtension<?, ?>> void addExtension(T extension) {
         getDomainResource().ifPresent(r -> r.addExtension((Extension) extension));
-    }
-
-    @Override
-    public List<Extension> getExtension() {
-        return isDomainResource() ? getDomainResource().get().getExtension() : new ArrayList<>();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Extension getExtensionByUrl(String url) {
-        return isDomainResource()
-                ? getDomainResource().get().getExtension().stream()
-                        .filter(e -> e.getUrl().equals(url))
-                        .findFirst()
-                        .orElse(null)
-                : null;
-    }
-
-    @Override
-    public List<Extension> getExtensionsByUrl(String url) {
-        return isDomainResource()
-                ? getDomainResource().get().getExtension().stream()
-                        .filter(e -> e.getUrl().equals(url))
-                        .collect(Collectors.toList())
-                : new ArrayList<>();
-    }
-
-    @Override
-    public List<Resource> getContained() {
-        return isDomainResource() ? getDomainResource().get().getContained() : new ArrayList<>();
     }
 }

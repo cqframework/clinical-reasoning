@@ -1,118 +1,51 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
-
-    private PlanDefinition planDefinition;
-
+class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
     public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
-
         if (!(planDefinition instanceof PlanDefinition)) {
             throw new IllegalArgumentException(
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
-
-        this.planDefinition = (PlanDefinition) planDefinition;
     }
 
     public PlanDefinitionAdapter(PlanDefinition planDefinition) {
         super(planDefinition);
-        this.planDefinition = planDefinition;
     }
 
     protected PlanDefinition getPlanDefinition() {
-        return this.planDefinition;
+        return (PlanDefinition) resource;
     }
 
     @Override
     public PlanDefinition get() {
-        return this.planDefinition;
+        return getPlanDefinition();
     }
 
     @Override
     public PlanDefinition copy() {
-        return this.get().copy();
-    }
-
-    @Override
-    public String getName() {
-        return this.getPlanDefinition().getName();
-    }
-
-    @Override
-    public String getPurpose() {
-        return this.getPlanDefinition().getPurpose();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.getPlanDefinition().setName(name);
-    }
-
-    @Override
-    public String getUrl() {
-        return this.getPlanDefinition().getUrl();
-    }
-
-    @Override
-    public boolean hasUrl() {
-        return this.getPlanDefinition().hasUrl();
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.getPlanDefinition().setUrl(url);
-    }
-
-    @Override
-    public String getVersion() {
-        return this.getPlanDefinition().getVersion();
-    }
-
-    @Override
-    public boolean hasVersion() {
-        return this.getPlanDefinition().hasVersion();
-    }
-
-    @Override
-    public void setVersion(String version) {
-        this.getPlanDefinition().setVersion(version);
+        return get().copy();
     }
 
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = this.hasVersion()
-                ? this.getPlanDefinition().getUrl() + "|"
-                        + this.getPlanDefinition().getVersion()
-                : this.getPlanDefinition().getUrl();
+        final String referenceSource = hasVersion()
+                ? getPlanDefinition().getUrl() + "|" + getPlanDefinition().getVersion()
+                : getPlanDefinition().getUrl();
         /*
          https://build.fhir.org/ig/HL7/crmi-ig/distribution.html#package-and-data-requirements
          relatedArtifact[].resource
@@ -130,12 +63,12 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         */
 
         // relatedArtifact[].resource
-        references.addAll(this.getRelatedArtifact().stream()
+        references.addAll(getRelatedArtifact().stream()
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .collect(Collectors.toList()));
 
         // library[]
-        List<Reference> libraries = this.planDefinition.getLibrary();
+        List<Reference> libraries = getPlanDefinition().getLibrary();
         for (Reference ref : libraries) {
             // TODO: Account for reference.identifier?
             DependencyInfo dependency = new DependencyInfo(
@@ -146,8 +79,8 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
             references.add(dependency);
         }
         // action[]
-        this.planDefinition.getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
-        this.getPlanDefinition().getExtension().stream()
+        getPlanDefinition().getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
+        getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
                 .filter(ext -> ext.hasValue())
                 .findAny()
@@ -215,127 +148,17 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
         var vs = cf.getValueSet();
         if (vs instanceof StringType) {
             return new DependencyInfo(
-                    this.planDefinition.getUrl(),
+                    getPlanDefinition().getUrl(),
                     ((StringType) vs).getValue(),
                     vs.getExtension(),
                     (reference) -> ((StringType) vs).setValue(reference));
         } else if (vs instanceof Reference) {
             return new DependencyInfo(
-                    this.planDefinition.getUrl(),
+                    getPlanDefinition().getUrl(),
                     ((Reference) vs).getReference(),
                     vs.getExtension(),
                     (reference) -> ((Reference) vs).setReference(reference));
         }
         return null;
-    }
-
-    @Override
-    public Date getApprovalDate() {
-        return this.getPlanDefinition().getApprovalDate();
-    }
-
-    @Override
-    public void setApprovalDate(Date approvalDate) {
-        this.getPlanDefinition().setApprovalDate(approvalDate);
-    }
-
-    @Override
-    public Date getDate() {
-        return this.getPlanDefinition().getDate();
-    }
-
-    @Override
-    public void setDate(Date date) {
-        this.getPlanDefinition().setDate(date);
-    }
-
-    @Override
-    public void setDateElement(IPrimitiveType<Date> date) {
-        if (date != null && !(date instanceof DateTimeType)) {
-            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
-        }
-        this.getPlanDefinition().setDateElement((DateTimeType) date);
-    }
-
-    @Override
-    public Period getEffectivePeriod() {
-        return this.getPlanDefinition().getEffectivePeriod();
-    }
-
-    @Override
-    public boolean hasRelatedArtifact() {
-        return this.getPlanDefinition().hasRelatedArtifact();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifact() {
-        return this.getPlanDefinition().getRelatedArtifact();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
-        try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
-        }
-        return this.getRelatedArtifact().stream()
-                .filter(ra -> ra.getType() == type)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws UnprocessableEntityException {
-        this.getPlanDefinition()
-                .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> {
-                            try {
-                                return (RelatedArtifact) ra;
-                            } catch (ClassCastException e) {
-                                throw new UnprocessableEntityException(
-                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
-                            }
-                        })
-                        .collect(Collectors.toList()));
-    }
-
-    @Override
-    public void setEffectivePeriod(ICompositeType effectivePeriod) {
-        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be " + Period.class.getName());
-        }
-        this.getPlanDefinition().setEffectivePeriod((Period) effectivePeriod);
-    }
-
-    @Override
-    public void setStatus(String statusCodeString) {
-        PublicationStatus status;
-        try {
-            status = PublicationStatus.fromCode(statusCodeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid status code");
-        }
-        this.getPlanDefinition().setStatus(status);
-    }
-
-    @Override
-    public String getStatus() {
-        return this.getPlanDefinition().getStatus() == null
-                ? null
-                : this.getPlanDefinition().getStatus().toCode();
-    }
-
-    @Override
-    public boolean getExperimental() {
-        return this.getPlanDefinition().getExperimental();
-    }
-
-    @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -28,50 +29,168 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     IDomainResource copy();
 
     default IIdType getId() {
-        return this.get().getIdElement();
+        return get().getIdElement();
     }
 
     default void setId(IIdType id) {
-        this.get().setId(id);
+        get().setId(id);
     }
 
-    String getName();
+    default String getName() {
+        return resolvePathString(get(), "name");
+    }
 
-    void setName(String name);
+    default void setName(String name) {
+        getModelResolver().setValue(get(), "name", newStringType(get().getStructureFhirVersionEnum(), name));
+    }
 
-    boolean hasUrl();
+    default boolean hasUrl() {
+        return StringUtils.isNotBlank(getUrl());
+    }
 
-    String getUrl();
+    default String getUrl() {
+        return resolvePathString(get(), "url");
+    }
 
-    void setUrl(String url);
+    default void setUrl(String url) {
+        getModelResolver().setValue(get(), "url", newUriType(get().getStructureFhirVersionEnum(), url));
+    }
 
-    boolean hasVersion();
+    default boolean hasVersion() {
+        return StringUtils.isNotBlank(getVersion());
+    }
 
-    String getVersion();
+    default String getVersion() {
+        return resolvePathString(get(), "version");
+    }
 
-    void setVersion(String version);
+    default void setVersion(String version) {
+        getModelResolver().setValue(get(), "version", newStringType(get().getStructureFhirVersionEnum(), version));
+    }
 
     List<IDependencyInfo> getDependencies();
 
-    Date getApprovalDate();
+    @SuppressWarnings("unchecked")
+    default Date getApprovalDate() {
+        IPrimitiveType<Date> approvalDate = resolvePath(get(), "approvalDate", IPrimitiveType.class);
+        return approvalDate == null ? null : approvalDate.getValue();
+    }
 
-    void setApprovalDate(Date approvalDate);
+    default void setApprovalDate(Date approvalDate) {
+        getModelResolver()
+                .setValue(get(), "approvalDate", newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+    }
 
-    Date getDate();
+    @SuppressWarnings("unchecked")
+    default Date getDate() {
+        IPrimitiveType<Date> date = resolvePath(get(), "date", IPrimitiveType.class);
+        return date == null ? null : date.getValue();
+    }
 
-    void setDate(Date date);
+    default void setDate(Date date) {
+        getModelResolver().setValue(get(), "date", newDateTimeType(get().getStructureFhirVersionEnum(), date));
+    }
 
-    void setDateElement(IPrimitiveType<Date> approvalDate);
+    default void setDateElement(IPrimitiveType<Date> date) {
+        getModelResolver().setValue(get(), "date", date);
+    }
+
+    default String getPurpose() {
+        return resolvePathString(get(), "purpose");
+    }
 
     String getStatus();
 
-    String getPurpose();
-
     void setStatus(String status);
 
-    ICompositeType getEffectivePeriod();
+    default ICompositeType getEffectivePeriod() {
+        var effectivePeriod = resolvePath(get(), "effectivePeriod", ICompositeType.class);
+        return effectivePeriod == null ? newPeriod(get().getStructureFhirVersionEnum()) : effectivePeriod;
+    }
 
-    boolean getExperimental();
+    default void setEffectivePeriod(ICompositeType period) {
+        try {
+            getModelResolver().setValue(get(), "effectivePeriod", period);
+        } catch (Exception e) {
+            // Do nothing
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    default boolean getExperimental() {
+        var experimental = (IPrimitiveType<Boolean>) resolvePath(get(), "experimental", IPrimitiveType.class);
+        return experimental == null ? false : experimental.getValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.Period();
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.Period();
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.Period();
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<String>> T newStringType(FhirVersionEnum version, String string) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.StringType(string);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.StringType(string);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.StringType(string);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<String>> T newUriType(FhirVersionEnum version, String string) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.UriType(string);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.UriType(string);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.UriType(string);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<Date>> T newDateType(FhirVersionEnum version, Date date) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.DateType(date);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.DateType(date);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.DateType(date);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<Date>> T newDateTimeType(FhirVersionEnum version, Date date) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.DateTimeType(date);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.DateTimeType(date);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.DateTimeType(date);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
 
     @SuppressWarnings("unchecked")
     static <T extends ICompositeType & IBaseHasExtensions> T newRelatedArtifact(
@@ -94,97 +213,83 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                 return (T) r5;
 
             default:
-                throw new UnprocessableEntityException("Upsupported version: " + version.toString());
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
         }
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactReference(T relatedArtifact) {
         if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            return getRelatedArtifactReference((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
+                    .getResource()
+                    .getReference();
         } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            return getRelatedArtifactReference((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact).getResource();
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            return getRelatedArtifactReference((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact).getResource();
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
-    }
-
-    private static String getRelatedArtifactReference(org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getResource().getReference();
-    }
-
-    private static String getRelatedArtifactReference(org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getResource();
-    }
-
-    private static String getRelatedArtifactReference(org.hl7.fhir.r5.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getResource();
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactType(T relatedArtifact) {
         if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            return getRelatedArtifactType((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
+                    .getType()
+                    .toCode();
         } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            return getRelatedArtifactType((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact)
+                    .getType()
+                    .toCode();
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            return getRelatedArtifactType((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact);
+            return ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact)
+                    .getType()
+                    .toCode();
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
-    }
-
-    private static String getRelatedArtifactType(org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getType().toCode();
-    }
-
-    private static String getRelatedArtifactType(org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getType().toCode();
-    }
-
-    private static String getRelatedArtifactType(org.hl7.fhir.r5.model.RelatedArtifact relatedArtifact) {
-        return relatedArtifact.getType().toCode();
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifactReference(
             T relatedArtifact, String reference) {
         if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            setRelatedArtifactReference((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact, reference);
+            ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
+                    .getResource()
+                    .setReference(reference);
         } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            setRelatedArtifactReference((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact, reference);
+            ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact).setResource(reference);
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            setRelatedArtifactReference((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact, reference);
+            ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact).setResource(reference);
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }
     }
-    ;
 
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact, String reference) {
-        relatedArtifact.getResource().setReference(reference);
+    default boolean hasRelatedArtifact() {
+        return !getRelatedArtifact().isEmpty();
     }
 
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact, String reference) {
-        relatedArtifact.setResource(reference);
+    @SuppressWarnings("unchecked")
+    default <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
+        return resolvePathList(get(), "relatedArtifact").stream()
+                .map(r -> (T) r)
+                .collect(Collectors.toList());
     }
 
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.r5.model.RelatedArtifact relatedArtifact, String reference) {
-        relatedArtifact.setResource(reference);
+    default <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
+        try {
+            getModelResolver().setValue(get(), "relatedArtifact", null);
+            getModelResolver().setValue(get(), "relatedArtifact", relatedArtifacts);
+        } catch (Exception e) {
+            // Do nothing
+            throw new IllegalAccessError(
+                    "Encountered error trying to access field 'relatedArtifact': " + e.getMessage());
+        }
     }
-
-    void setEffectivePeriod(ICompositeType effectivePeriod);
-
-    boolean hasRelatedArtifact();
-
-    <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact();
 
     <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString);
 
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getComponents() {
-        return this.getRelatedArtifactsOfType("composed-of");
+        return getRelatedArtifactsOfType("composed-of");
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> boolean checkIfRelatedArtifactIsOwned(T relatedArtifact) {
@@ -193,7 +298,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     }
 
     default List<IDependencyInfo> combineComponentsAndDependencies() {
-        final String referenceSource = this.hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
+        final String referenceSource = hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
         return Stream.concat(
                         getComponents().stream()
                                 .filter(ra -> ra != null)
@@ -201,8 +306,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                         getDependencies().stream())
                 .collect(Collectors.toList());
     }
-
-    <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts);
 
     default IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);

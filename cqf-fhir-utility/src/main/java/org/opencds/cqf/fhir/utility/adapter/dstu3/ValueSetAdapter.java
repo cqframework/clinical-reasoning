@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,112 +10,47 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
-class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
-
-    private ValueSet valueSet;
+public class ValueSetAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
 
     public ValueSetAdapter(IDomainResource valueSet) {
         super(valueSet);
-
         if (!(valueSet instanceof ValueSet)) {
             throw new IllegalArgumentException("resource passed as valueSet argument is not a ValueSet resource");
         }
-
-        this.valueSet = (ValueSet) valueSet;
     }
 
     public ValueSetAdapter(ValueSet valueSet) {
         super(valueSet);
-        this.valueSet = valueSet;
     }
 
     protected ValueSet getValueSet() {
-        return this.valueSet;
+        return (ValueSet) resource;
     }
 
     @Override
     public ValueSet get() {
-        return this.valueSet;
+        return (ValueSet) resource;
     }
 
     @Override
     public ValueSet copy() {
-        return this.get().copy();
-    }
-
-    @Override
-    public void setId(IIdType id) {
-        this.getValueSet().setId(id);
-    }
-
-    @Override
-    public String getName() {
-        return this.getValueSet().getName();
-    }
-
-    @Override
-    public String getPurpose() {
-        return this.getValueSet().getPurpose();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.getValueSet().setName(name);
-    }
-
-    @Override
-    public String getUrl() {
-        return this.getValueSet().getUrl();
-    }
-
-    @Override
-    public boolean hasUrl() {
-        return this.getValueSet().hasUrl();
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.getValueSet().setUrl(url);
-    }
-
-    @Override
-    public String getVersion() {
-        return this.getValueSet().getVersion();
-    }
-
-    @Override
-    public boolean hasVersion() {
-        return this.getValueSet().hasVersion();
-    }
-
-    @Override
-    public void setVersion(String version) {
-        this.getValueSet().setVersion(version);
+        return get().copy();
     }
 
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = this.getValueSet().hasVersion()
-                ? this.getValueSet().getUrl() + "|" + this.getValueSet().getVersion()
-                : this.getValueSet().getUrl();
+        final String referenceSource = getValueSet().hasVersion()
+                ? getValueSet().getUrl() + "|" + getValueSet().getVersion()
+                : getValueSet().getUrl();
 
         /*
           compose.include[].valueSet
@@ -126,16 +59,16 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
           compose.exclude[].system
         */
         Stream.concat(
-                        this.valueSet.getCompose().getInclude().stream(),
-                        this.valueSet.getCompose().getExclude().stream())
+                        getValueSet().getCompose().getInclude().stream(),
+                        getValueSet().getCompose().getExclude().stream())
                 .forEach(component -> {
                     if (component.hasValueSet()) {
-                        component.getValueSet().forEach(uri -> {
+                        component.getValueSet().forEach(ct -> {
                             references.add(new DependencyInfo(
                                     referenceSource,
-                                    uri.getValue(),
-                                    uri.getExtension(),
-                                    (reference) -> uri.setValue(reference)));
+                                    ct.getValue(),
+                                    ct.getExtension(),
+                                    (reference) -> ct.setValue(reference)));
                         });
                     }
                     if (component.hasSystem()) {
@@ -152,137 +85,27 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     }
 
     @Override
-    public Date getApprovalDate() {
-        return null;
-    }
-
-    @Override
-    public void setApprovalDate(Date date) {
-        // do nothing;
-    }
-
-    @Override
-    public Date getDate() {
-        return this.getValueSet().getDate();
-    }
-
-    @Override
-    public void setDate(Date date) {
-        this.getValueSet().setDate(date);
-    }
-
-    @Override
-    public void setDateElement(IPrimitiveType<Date> date) {
-        if (date != null && !(date instanceof DateTimeType)) {
-            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
-        }
-        this.getValueSet().setDateElement((DateTimeType) date);
-    }
-
-    @Override
-    public Period getEffectivePeriod() {
-        return new Period();
-    }
-
-    @Override
-    public boolean hasRelatedArtifact() {
-        return false;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifact() {
-        return new ArrayList<>();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getComponents() {
-        return this.getRelatedArtifactsOfType("composed-of");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
-        try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
-        }
-        return this.getRelatedArtifact().stream()
-                .filter(ra -> ra.getType() == type)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws UnprocessableEntityException {
-        relatedArtifacts.stream().forEach(ra -> {
-            if (ra != null && !(ra instanceof RelatedArtifact)) {
-                throw new UnprocessableEntityException(
-                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
-            }
-        });
-        // do nothing
-    }
-
-    @Override
-    public void setEffectivePeriod(ICompositeType effectivePeriod) {
-        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
-        }
-        // do nothing
-    }
-
-    @Override
-    public void setStatus(String statusCodeString) {
-        PublicationStatus status;
-        try {
-            status = PublicationStatus.fromCode(statusCodeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid status code");
-        }
-        this.getValueSet().setStatus(status);
-    }
-
-    @Override
-    public String getStatus() {
-        return this.getValueSet().getStatus() == null
-                ? null
-                : this.getValueSet().getStatus().toCode();
-    }
-
-    @Override
-    public boolean getExperimental() {
-        return this.getValueSet().getExperimental();
-    }
-
-    // @Override
-    // public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-    //     this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
-    // }
-
-    @Override
     public <T extends IBaseBackboneElement> void setExpansion(T expansion) {
-        valueSet.setExpansion((ValueSetExpansionComponent) expansion);
+        getValueSet().setExpansion((ValueSetExpansionComponent) expansion);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ValueSetExpansionComponent getExpansion() {
-        return valueSet.getExpansion();
+        return getValueSet().getExpansion();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ValueSetExpansionComponent newExpansion() {
-        return new ValueSetExpansionComponent().setTimestamp(Date.from(Instant.now()));
+        var expansion = new ValueSet.ValueSetExpansionComponent().setTimestamp(Date.from(Instant.now()));
+        expansion.getContains();
+        return expansion;
     }
 
     @Override
     public List<String> getValueSetIncludes() {
-        return valueSet.getCompose().getInclude().stream()
+        return getValueSet().getCompose().getInclude().stream()
                 .map(i -> i.getValueSet())
                 .flatMap(Collection::stream)
                 .map(c -> c.asStringValue())
@@ -292,23 +115,24 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
 
     @Override
     public boolean hasSimpleCompose() {
-        return valueSet.hasCompose()
-                && !valueSet.getCompose().hasExclude()
-                && valueSet.getCompose().getInclude().stream()
+        return getValueSet().hasCompose()
+                && !getValueSet().getCompose().hasExclude()
+                && getValueSet().getCompose().getInclude().stream()
                         .noneMatch(
                                 csc -> csc.hasFilter() || csc.hasValueSet() || !csc.hasSystem() || !csc.hasConcept());
     }
 
     @Override
     public boolean hasGroupingCompose() {
-        return valueSet.hasCompose()
-                && !valueSet.getCompose().hasExclude()
-                && valueSet.getCompose().getInclude().stream().noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
+        return getValueSet().hasCompose()
+                && !getValueSet().getCompose().hasExclude()
+                && getValueSet().getCompose().getInclude().stream()
+                        .noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
     }
 
     @Override
     public boolean hasNaiveParameter() {
-        return valueSet.getExpansion().getParameter().stream()
+        return getValueSet().getExpansion().getParameter().stream()
                 .anyMatch(p -> p.getName().equals("naive"));
     }
 
@@ -324,7 +148,7 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     public void naiveExpand() {
         var expansion = newExpansion().addParameter(createNaiveParameter());
 
-        for (var code : getCodesInCompose(FhirContext.forDstu3Cached(), valueSet)) {
+        for (var code : getCodesInCompose(fhirContext, getValueSet())) {
             expansion
                     .addContains()
                     .setCode(code.getCode())
@@ -332,6 +156,6 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
                     .setVersion(code.getVersion())
                     .setDisplay(code.getDisplay());
         }
-        valueSet.setExpansion(expansion);
+        getValueSet().setExpansion(expansion);
     }
 }

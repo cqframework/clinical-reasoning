@@ -1,5 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newDateTimeType;
+import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newDateType;
+import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newPeriod;
+import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newStringType;
+import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newUriType;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
@@ -129,76 +135,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     default boolean getExperimental() {
         var experimental = (IPrimitiveType<Boolean>) resolvePath(get(), "experimental", IPrimitiveType.class);
         return experimental == null ? false : experimental.getValue();
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {
-        switch (version) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.Period();
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.Period();
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.Period();
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<String>> T newStringType(FhirVersionEnum version, String string) {
-        switch (version) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.StringType(string);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.StringType(string);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.StringType(string);
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<String>> T newUriType(FhirVersionEnum version, String string) {
-        switch (version) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.UriType(string);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.UriType(string);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.UriType(string);
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<Date>> T newDateType(FhirVersionEnum version, Date date) {
-        switch (version) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.DateType(date);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.DateType(date);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.DateType(date);
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<Date>> T newDateTimeType(FhirVersionEnum version, Date date) {
-        switch (version) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.DateTimeType(date);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.DateTimeType(date);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.DateTimeType(date);
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
-        }
     }
 
     @SuppressWarnings("unchecked")

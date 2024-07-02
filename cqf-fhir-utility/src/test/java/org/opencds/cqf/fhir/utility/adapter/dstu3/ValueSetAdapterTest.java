@@ -20,75 +20,75 @@ import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-public class StructureDefinitionAdapterTest {
+public class ValueSetAdapterTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(new Library()));
+        assertThrows(IllegalArgumentException.class, () -> new ValueSetAdapter(new Library()));
     }
 
     @Test
     void adapter_accepts_visitor() {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
-        IDomainResource structureDef = new StructureDefinition();
-        var adapter = new StructureDefinitionAdapter(structureDef);
-        assertEquals(structureDef, adapter.get());
+        doReturn(new Bundle()).when(spyVisitor).visit(any(ValueSetAdapter.class), any(), any());
+        IDomainResource valueSet = new ValueSet();
+        var adapter = new ValueSetAdapter(valueSet);
+        assertEquals(valueSet, adapter.get());
         adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
+        verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any(), any());
     }
 
     @Test
     void adapter_get_and_set_name() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var name = "name";
-        structureDef.setName(name);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setName(name);
+        var adapter = new ValueSetAdapter(valueSet);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
-        assertEquals(newName, structureDef.getName());
+        assertEquals(newName, valueSet.getName());
     }
 
     @Test
     void adapter_get_and_set_url() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var url = "www.url.com";
-        structureDef.setUrl(url);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setUrl(url);
+        var adapter = new ValueSetAdapter(valueSet);
         assertTrue(adapter.hasUrl());
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
         adapter.setUrl(newUrl);
         assertTrue(adapter.hasUrl());
-        assertEquals(newUrl, structureDef.getUrl());
+        assertEquals(newUrl, valueSet.getUrl());
     }
 
     @Test
     void adapter_get_and_set_version() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var version = "1.0.0";
-        structureDef.setVersion(version);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setVersion(version);
+        var adapter = new ValueSetAdapter(valueSet);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
         adapter.setVersion(newVersion);
-        assertEquals(newVersion, structureDef.getVersion());
+        assertEquals(newVersion, valueSet.getVersion());
     }
 
     @Test
     void adapter_get_and_set_status() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var status = PublicationStatus.DRAFT;
-        structureDef.setStatus(status);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setStatus(status);
+        var adapter = new ValueSetAdapter(valueSet);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -98,21 +98,21 @@ public class StructureDefinitionAdapterTest {
 
     @Test
     void adapter_get_and_set_dates() {
-        // StructureDefinition does not have fields approvalDate and effectivePeriod
-        var structureDef = new StructureDefinition();
+        // ValueSet does not have fields approvalDate and effectivePeriod
+        var valueSet = new ValueSet();
         var date = new Date();
         var effectivePeriod = new Period()
                 .setStart(java.sql.Date.valueOf(LocalDate.parse("2020-01-01")))
                 .setEnd(java.sql.Date.valueOf(LocalDate.parse("2020-12-31")));
-        structureDef.setDate(date);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setDate(date);
+        var adapter = new ValueSetAdapter(valueSet);
         assertEquals(date, adapter.getDate());
         assertEquals(null, adapter.getApprovalDate());
         assertNotEquals(effectivePeriod, adapter.getEffectivePeriod());
         var newDate = new Date();
         newDate.setTime(100);
         adapter.setDate(newDate);
-        assertEquals(newDate, structureDef.getDate());
+        assertEquals(newDate, valueSet.getDate());
         var newApprovalDate = new Date();
         newApprovalDate.setTime(100);
         adapter.setApprovalDate(newApprovalDate);
@@ -126,31 +126,31 @@ public class StructureDefinitionAdapterTest {
 
     @Test
     void adapter_get_experimental() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var experimental = true;
-        structureDef.setExperimental(experimental);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        valueSet.setExperimental(experimental);
+        var adapter = new ValueSetAdapter(valueSet);
         assertEquals(experimental, adapter.getExperimental());
     }
 
     @Test
     void adapter_set_relatedArtifact() {
-        var structureDef = new StructureDefinition();
+        var valueSet = new ValueSet();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = new ValueSetAdapter(valueSet);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
     }
 
     @Test
     void adapter_copy() {
-        var structureDef = new StructureDefinition().setStatus(PublicationStatus.DRAFT);
-        structureDef.setId("plan-1");
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var valueSet = new ValueSet().setStatus(PublicationStatus.DRAFT);
+        valueSet.setId("valueset-1");
+        var adapter = new ValueSetAdapter(valueSet);
         var copy = adapter.copy();
-        copy.setId("plan-2");
-        assertNotEquals(structureDef.getId(), copy.getId());
-        structureDef.setStatus(PublicationStatus.ACTIVE);
+        copy.setId("valueset-2");
+        assertNotEquals(valueSet.getId(), copy.getId());
+        valueSet.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus());
     }
 

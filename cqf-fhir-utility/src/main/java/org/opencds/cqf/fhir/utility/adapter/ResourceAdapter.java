@@ -1,12 +1,17 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
@@ -60,6 +65,8 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
         return hasContained(get());
     }
 
+    public FhirContext fhirContext();
+
     public ModelResolver getModelResolver();
 
     @SuppressWarnings("unchecked")
@@ -111,5 +118,89 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
     @SuppressWarnings("unchecked")
     public default <T extends IBase> T resolvePath(IBase base, String path, Class<T> clazz) {
         return (T) resolvePath(base, path);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.Period();
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.Period();
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.Period();
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<String>> T newStringType(FhirVersionEnum version, String string) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.StringType(string);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.StringType(string);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.StringType(string);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<String>> T newUriType(FhirVersionEnum version, String string) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.UriType(string);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.UriType(string);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.UriType(string);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<String>> T newUrlType(FhirVersionEnum version, String string) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.UriType(string);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.UrlType(string);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.UrlType(string);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<Date>> T newDateType(FhirVersionEnum version, Date date) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.DateType(date);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.DateType(date);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.DateType(date);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<Date>> T newDateTimeType(FhirVersionEnum version, Date date) {
+        switch (version) {
+            case DSTU3:
+                return (T) new org.hl7.fhir.dstu3.model.DateTimeType(date);
+            case R4:
+                return (T) new org.hl7.fhir.r4.model.DateTimeType(date);
+            case R5:
+                return (T) new org.hl7.fhir.r5.model.DateTimeType(date);
+            default:
+                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+        }
     }
 }

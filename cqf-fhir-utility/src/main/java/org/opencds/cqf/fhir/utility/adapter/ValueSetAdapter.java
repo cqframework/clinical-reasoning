@@ -15,6 +15,16 @@ public interface ValueSetAdapter extends KnowledgeArtifactAdapter {
 
     public List<String> getValueSetIncludes();
 
+    // TODO: lots of duplicate code across version adapters
+    // public default List<String> getValueSetIncludes() {
+    //     return ValueSets.getIncludes(fhirContext(), get()).stream().map(i ->
+    //                 (List<IPrimitiveType>) resolvePathList(i, "valueSet", IPrimitiveType.class)
+    //             )
+    //             .flatMap(Collection::stream)
+    //             .map(i -> i.getValueAsString())
+    //             .collect(Collectors.toList());
+    // }
+
     /**
      * A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
      * include cannot have a filter or reference a ValueSet and must have a system and enumerate concepts.

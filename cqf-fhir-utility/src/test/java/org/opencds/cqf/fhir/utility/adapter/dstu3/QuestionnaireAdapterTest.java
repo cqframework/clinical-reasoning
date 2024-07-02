@@ -105,7 +105,7 @@ public class QuestionnaireAdapterTest {
         questionnaire.setApprovalDate(approvalDate);
         questionnaire.setEffectivePeriod(effectivePeriod);
         var adapter = new QuestionnaireAdapter(questionnaire);
-        assertEquals(date, questionnaire.getDate());
+        assertEquals(date, adapter.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
         assertEquals(effectivePeriod, adapter.getEffectivePeriod());
         var newDate = new Date();

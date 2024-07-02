@@ -106,7 +106,7 @@ public class StructureDefinitionAdapterTest {
                 .setEnd(java.sql.Date.valueOf(LocalDate.parse("2020-12-31")));
         structureDef.setDate(date);
         var adapter = new StructureDefinitionAdapter(structureDef);
-        assertEquals(date, structureDef.getDate());
+        assertEquals(date, adapter.getDate());
         assertEquals(null, adapter.getApprovalDate());
         assertNotEquals(effectivePeriod, adapter.getEffectivePeriod());
         var newDate = new Date();

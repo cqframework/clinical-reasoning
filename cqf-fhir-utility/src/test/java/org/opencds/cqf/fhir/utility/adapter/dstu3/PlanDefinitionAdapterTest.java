@@ -110,7 +110,7 @@ public class PlanDefinitionAdapterTest {
         planDef.setApprovalDate(approvalDate);
         planDef.setEffectivePeriod(effectivePeriod);
         var adapter = new PlanDefinitionAdapter(planDef);
-        assertEquals(date, planDef.getDate());
+        assertEquals(date, adapter.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
         assertEquals(effectivePeriod, adapter.getEffectivePeriod());
         var newDate = new Date();

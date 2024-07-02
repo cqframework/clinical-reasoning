@@ -20,6 +20,10 @@ public abstract class BaseResourceAdapter implements ResourceAdapter {
                 fhirContext.getVersion().getVersion());
     }
 
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
     public ModelResolver getModelResolver() {
         return modelResolver;
     }

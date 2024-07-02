@@ -122,7 +122,9 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 }
                 var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component));
-                rootAdapter.getRelatedArtifact().add(componentToDependency);
+                var relatedArtifacts = rootAdapter.getRelatedArtifact();
+                relatedArtifacts.add(componentToDependency);
+                rootAdapter.setRelatedArtifact(relatedArtifacts);
             }
 
             var dependencies = artifactAdapter.getDependencies();
@@ -146,7 +148,9 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                     var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion, "depends-on", dependency.getReference());
-                    rootAdapter.getRelatedArtifact().add(newDep);
+                    var relatedArtifacts = rootAdapter.getRelatedArtifact();
+                    relatedArtifacts.add(newDep);
+                    rootAdapter.setRelatedArtifact(relatedArtifacts);
                 }
             }
         }

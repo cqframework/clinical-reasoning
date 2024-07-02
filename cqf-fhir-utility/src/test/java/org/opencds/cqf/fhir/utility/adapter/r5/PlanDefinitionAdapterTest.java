@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -9,12 +11,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
@@ -22,6 +30,11 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class PlanDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
+
+    @Test
+    void invalid_object_fails() {
+        assertThrows(IllegalArgumentException.class, () -> new PlanDefinitionAdapter(new Library()));
+    }
 
     @Test
     void adapter_accepts_visitor() {
@@ -58,16 +71,59 @@ public class PlanDefinitionAdapterTest {
     }
 
     @Test
-    void adapter_get_and_set_approvalDate() {
+    void adapter_get_and_set_version() {
         var planDef = new PlanDefinition();
-        var approvalDate = new Date();
-        planDef.setApprovalDate(approvalDate);
+        var version = "1.0.0";
+        planDef.setVersion(version);
         var adapter = new PlanDefinitionAdapter(planDef);
+        assertTrue(adapter.hasVersion());
+        assertEquals(version, adapter.getVersion());
+        var newVersion = "1.0.1";
+        adapter.setVersion(newVersion);
+        assertEquals(newVersion, planDef.getVersion());
+    }
+
+    @Test
+    void adapter_get_and_set_status() {
+        var planDef = new PlanDefinition();
+        var status = PublicationStatus.DRAFT;
+        planDef.setStatus(status);
+        var adapter = new PlanDefinitionAdapter(planDef);
+        assertEquals(status.toCode(), adapter.getStatus());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
+        var newStatus = PublicationStatus.ACTIVE;
+        adapter.setStatus(newStatus.toCode());
+        assertEquals(newStatus, PublicationStatus.fromCode(adapter.getStatus()));
+    }
+
+    @Test
+    void adapter_get_and_set_dates() {
+        var planDef = new PlanDefinition();
+        var date = new Date();
+        var approvalDate = new Date();
+        var effectivePeriod = new Period()
+                .setStart(java.sql.Date.valueOf(LocalDate.parse("2020-01-01")))
+                .setEnd(java.sql.Date.valueOf(LocalDate.parse("2020-12-31")));
+        planDef.setDate(date);
+        planDef.setApprovalDate(approvalDate);
+        planDef.setEffectivePeriod(effectivePeriod);
+        var adapter = new PlanDefinitionAdapter(planDef);
+        assertEquals(date, planDef.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
+        assertEquals(effectivePeriod, adapter.getEffectivePeriod());
+        var newDate = new Date();
+        newDate.setTime(100);
+        adapter.setDate(newDate);
+        assertEquals(newDate, planDef.getDate());
         var newApprovalDate = new Date();
         newApprovalDate.setTime(100);
         adapter.setApprovalDate(newApprovalDate);
         assertEquals(newApprovalDate, planDef.getApprovalDate());
+        var newEffectivePeriod = new Period()
+                .setStart(java.sql.Date.valueOf(LocalDate.parse("2021-01-01")))
+                .setEnd(java.sql.Date.valueOf(LocalDate.parse("2021-12-31")));
+        adapter.setEffectivePeriod(newEffectivePeriod);
+        assertEquals(newEffectivePeriod, adapter.getEffectivePeriod());
     }
 
     @Test
@@ -87,6 +143,19 @@ public class PlanDefinitionAdapterTest {
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(relatedArtifactList, planDef.getRelatedArtifact());
         assertEquals(relatedArtifactList, adapter.getRelatedArtifact());
+    }
+
+    @Test
+    void adapter_copy() {
+        var planDef = new PlanDefinition().setStatus(PublicationStatus.DRAFT);
+        planDef.setId("plan-1");
+        var adapter = new PlanDefinitionAdapter(planDef);
+        var copy = adapter.copy();
+        var adapterCopy = new PlanDefinitionAdapter(copy);
+        adapterCopy.setId(new IdDt("PlanDefinition", "plan-2"));
+        assertNotEquals(planDef.getId(), copy.getId());
+        planDef.setStatus(PublicationStatus.ACTIVE);
+        assertNotEquals(adapter.getStatus(), copy.getStatus());
     }
 
     @Test

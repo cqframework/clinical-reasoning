@@ -21,8 +21,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface KnowledgeArtifactAdapter extends ResourceAdapter {
+    public static final Logger logger = LoggerFactory.getLogger(KnowledgeArtifactAdapter.class);
 
     IDomainResource get();
 
@@ -77,8 +80,13 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     }
 
     default void setApprovalDate(Date approvalDate) {
-        getModelResolver()
-                .setValue(get(), "approvalDate", newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+        try {
+            getModelResolver()
+                    .setValue(get(), "approvalDate", newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+        } catch (Exception e) {
+            // Do nothing
+            logger.debug("Field 'approvalDate' does not exist on Resource type {}", get().fhirType());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -113,6 +121,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             getModelResolver().setValue(get(), "effectivePeriod", period);
         } catch (Exception e) {
             // Do nothing
+            logger.debug("Field 'effectivePeriod' does not exist on Resource type {}", get().fhirType());
         }
     }
 
@@ -281,8 +290,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             getModelResolver().setValue(get(), "relatedArtifact", relatedArtifacts);
         } catch (Exception e) {
             // Do nothing
-            throw new IllegalAccessError(
-                    "Encountered error trying to access field 'relatedArtifact': " + e.getMessage());
+            logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
         }
     }
 

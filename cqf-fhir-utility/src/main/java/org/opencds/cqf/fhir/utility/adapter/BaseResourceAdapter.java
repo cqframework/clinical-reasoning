@@ -13,6 +13,9 @@ public abstract class BaseResourceAdapter implements ResourceAdapter {
     protected final ModelResolver modelResolver;
 
     public BaseResourceAdapter(IBaseResource resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("resource can not be null");
+        }
         this.resource = resource;
         fhirContext = FhirContext.forCached(resource.getStructureFhirVersionEnum());
         elementDefinition = fhirContext.getElementDefinition(this.resource.getClass());

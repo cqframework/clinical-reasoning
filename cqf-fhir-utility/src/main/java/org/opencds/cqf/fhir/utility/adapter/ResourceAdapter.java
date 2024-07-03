@@ -41,7 +41,7 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
 
     public boolean equalsShallow(IBase other);
 
-    public void setExtension(List<IBaseExtension<?, ?>> extensions);
+    public void setExtension(List<? extends IBaseExtension<?, ?>> extensions);
 
     public <T extends IBaseExtension<?, ?>> void addExtension(T extension);
 

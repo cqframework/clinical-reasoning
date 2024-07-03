@@ -20,10 +20,6 @@ class ResourceAdapter extends BaseResourceAdapter {
 
     ResourceAdapter(IBaseResource resource) {
         super(resource);
-        if (resource == null) {
-            throw new IllegalArgumentException("resource can not be null");
-        }
-
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R4)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
@@ -107,7 +103,7 @@ class ResourceAdapter extends BaseResourceAdapter {
     }
 
     @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+    public void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         getDomainResource()
                 .ifPresent(r -> r.setExtension(
                         extensions.stream().map(e -> (Extension) e).collect(Collectors.toList())));

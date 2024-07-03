@@ -111,7 +111,7 @@ class ResourceAdapter extends BaseResourceAdapter {
     }
 
     @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
+    public void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         getDomainResource()
                 .ifPresent(r -> r.setExtension(
                         extensions.stream().map(e -> (Extension) e).collect(Collectors.toList())));

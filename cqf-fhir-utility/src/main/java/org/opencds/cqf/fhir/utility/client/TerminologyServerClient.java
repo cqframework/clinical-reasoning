@@ -34,7 +34,12 @@ public class TerminologyServerClient {
         checkNotNull(valueSet, "expected non-null value for valueSet");
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
-        return expand(endpoint, parameters, valueSet.getUrl(), valueSet.getVersion(), valueSet.get().getStructureFhirVersionEnum());
+        return expand(
+                endpoint,
+                parameters,
+                valueSet.getUrl(),
+                valueSet.getVersion(),
+                valueSet.get().getStructureFhirVersionEnum());
     }
 
     public IBaseResource expand(EndpointAdapter endpoint, ParametersAdapter parameters, FhirVersionEnum fhirVersion) {
@@ -42,10 +47,15 @@ public class TerminologyServerClient {
         checkNotNull(parameters, "expected non-null value for parameters");
         checkNotNull(fhirVersion, "expected non-null value for fhirVersion");
         checkNotNull(parameters.getParameter(urlParamName), "expected non-null value for 'url' expansion parameter");
-        return expand(endpoint, parameters, null,null, fhirVersion);
+        return expand(endpoint, parameters, null, null, fhirVersion);
     }
 
-    public IBaseResource expand(EndpointAdapter endpoint, ParametersAdapter parameters, String url, String valueSetVersion, FhirVersionEnum fhirVersion) {
+    public IBaseResource expand(
+            EndpointAdapter endpoint,
+            ParametersAdapter parameters,
+            String url,
+            String valueSetVersion,
+            FhirVersionEnum fhirVersion) {
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
         var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
@@ -81,7 +91,7 @@ public class TerminologyServerClient {
                 .execute();
     }
 
-    private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) { 
+    private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
                 return org.hl7.fhir.dstu3.model.ValueSet.class;

@@ -28,7 +28,8 @@ public class TerminologyServerClientTest {
     private static final String username = "username";
     private static final String password = "password";
     private static final String urlParamName = TerminologyServerClient.urlParamName;
-    private static final String versionParamName = TerminologyServerClient.versionParamName;;
+    private static final String versionParamName = TerminologyServerClient.versionParamName;
+    ;
 
     private FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -79,7 +80,7 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.r4.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
-        
+
         // if url is provided we don't need to pass in a ValueSet
         var urlAndVersionParams = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
         urlAndVersionParams.addParameter(urlParamName, new org.hl7.fhir.r4.model.UrlType(url));
@@ -206,7 +207,7 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
-        
+
         // if url is provided we don't need to pass in a ValueSet
         var urlAndVersionParams = factory.createParameters(new org.hl7.fhir.dstu3.model.Parameters());
         urlAndVersionParams.addParameter(urlParamName, new org.hl7.fhir.dstu3.model.UriType(url));

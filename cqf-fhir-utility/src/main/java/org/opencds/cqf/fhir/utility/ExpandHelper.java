@@ -38,14 +38,12 @@ public class ExpandHelper {
         }
 
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
-        var authoritativeSource = valueSet.getExtension().stream()
+        @SuppressWarnings("unchecked")
+        var authoritativeSourceUrl = valueSet.getExtension().stream()
                 .filter(e -> e.getUrl().equals(Constants.AUTHORITATIVE_SOURCE_URL))
                 .findFirst()
+                .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .orElse(null);
-        @SuppressWarnings("unchecked")
-        var authoritativeSourceUrl = authoritativeSource == null
-                ? null
-                : ((IPrimitiveType<String>) authoritativeSource.getValue()).getValueAsString();
 
         // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
         // terminologyEndpoint address then we will use the terminologyEndpoint for expansion

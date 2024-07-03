@@ -14,6 +14,9 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
 
 public class ResourceAdapterTest {
@@ -64,10 +67,19 @@ public class ResourceAdapterTest {
     @Test
     void adapter_get_and_set_extension() {
         var resource = new Patient();
-        var extensionList = List.of(new Extension());
+        var extensionList = List.of(new Extension().setUrl("test-extension-url").setValue(new BooleanType(true)));
         var adapter = new ResourceAdapter(resource);
         adapter.setExtension(extensionList);
         assertEquals(extensionList, resource.getExtension());
         assertEquals(extensionList, adapter.getExtension());
+        assertTrue(adapter.hasExtension("test-extension-url"));
+    }
+
+    @Test
+    void adapter_get_contained() {
+        var resource = new PlanDefinition();
+        resource.addContained(new Library());
+        var adapter = new ResourceAdapter(resource);
+        assertTrue(adapter.hasContained());
     }
 }

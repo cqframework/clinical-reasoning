@@ -45,6 +45,10 @@ public interface ResourceAdapter extends Adapter<IBaseResource> {
 
     public <T extends IBaseExtension<?, ?>> void addExtension(T extension);
 
+    public default boolean hasExtension(String url) {
+        return hasExtension(get(), url);
+    }
+
     public default List<? extends IBaseExtension<?, ?>> getExtension() {
         return getExtension(get());
     }

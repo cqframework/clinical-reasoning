@@ -48,6 +48,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -486,7 +487,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return;
         }
 
+        // temporarily adding prefix of resourceType to match pattern in build population
+        // TODO: do Stratum receive resource based subjects?
+
+        subjectIds = subjectIds.stream()
+                .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                .collect(Collectors.toList());
+
         Set<String> intersection = new HashSet<>(subjectIds);
+
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 
@@ -496,6 +505,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
+    }
+
+    protected String getPopulationResourceIds(Object resourceObject) {
+        var resource = (Resource) resourceObject;
+        return resource.getId();
     }
 
     protected void buildPopulation(
@@ -522,16 +536,27 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         addEvaluatedResourceReferences(bc, populationDef.id(), populationDef.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
-        Set<String> populationSet = populationDef.getSubjects();
+        // subjectResult set defined by basis of Measure
+        Set<String> populationSet;
+        if (bc.measureDef.isBooleanBasis()) {
+            populationSet = populationDef.getSubjects().stream()
+                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .collect(Collectors.toSet());
+        } else {
+            populationSet = populationDef.getResources().stream()
+                    .filter(Resource.class::isInstance)
+                    .map(this::getPopulationResourceIds)
+                    .collect(Collectors.toSet());
+        }
+
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior
-        if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST) {
-            if (!populationSet.isEmpty()) {
-                ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
-                bc.addContained(subjectList);
-                reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
-            }
+        if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST
+                && !populationSet.isEmpty()) {
+            ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
+            bc.addContained(subjectList);
+            reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
 
         // Population Type behavior
@@ -712,10 +737,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cd.setDisplay(c.display());
 
         return cd;
-    }
-
-    private String createResourceReference(String resourceType, String id) {
-        return new StringBuilder(resourceType).append("/").append(id).toString();
     }
 
     protected Period getPeriod(Interval measurementPeriod) {

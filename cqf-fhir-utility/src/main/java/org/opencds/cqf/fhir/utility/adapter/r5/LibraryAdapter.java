@@ -130,11 +130,10 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     }
 
     @Override
-    public <T extends ICompositeType> LibraryAdapter setDataRequirements(List<T> dataRequirements) {
+    public <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement) {
         getLibrary()
-                .setDataRequirement(dataRequirements.stream()
-                        .map(dr -> (DataRequirement) dr)
-                        .collect(Collectors.toList()));
+                .setDataRequirement(
+                        dataRequirement.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
         return this;
     }
 

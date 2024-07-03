@@ -186,11 +186,11 @@ public class LibraryAdapterTest {
     @Test
     void adapter_get_and_set_dataRequirement() {
         var library = new Library();
+        var adapter = new LibraryAdapter(library);
         var dataRequirements = new ArrayList<DataRequirement>();
         dataRequirements.add(new DataRequirement().setType(FHIRTypes.PATIENT));
-        library.setDataRequirement(dataRequirements);
-        var adapter = new LibraryAdapter(library);
-        assertEquals(dataRequirements, adapter.getDataRequirement());
+        adapter.setDataRequirement(dataRequirements);
+        assertEquals(dataRequirements, library.getDataRequirement());
         adapter.addDataRequirement(new DataRequirement().setType(FHIRTypes.OBSERVATION));
         assertEquals(library.getDataRequirement(), adapter.getDataRequirement());
         assertEquals(2, adapter.getDataRequirement().size());

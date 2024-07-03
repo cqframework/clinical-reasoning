@@ -28,7 +28,7 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
 
     LibraryAdapter addDataRequirement(ICompositeType dataRequirement);
 
-    <T extends ICompositeType> LibraryAdapter setDataRequirements(List<T> dataRequirements);
+    <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement);
 
     List<? extends ICompositeType> getUseContext();
 }

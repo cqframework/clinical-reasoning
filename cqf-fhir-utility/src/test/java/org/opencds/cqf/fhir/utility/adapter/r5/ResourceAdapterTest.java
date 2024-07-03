@@ -49,7 +49,9 @@ public class ResourceAdapterTest {
         var adapter = new ResourceAdapter(resource);
         var copy = (Patient) adapter.copy();
         assertTrue(adapter.equalsDeep(copy));
-        copy.setMeta(new Meta().setLastUpdated(new Date()));
+        var newDate = new Date();
+        newDate.setTime(100);
+        copy.setMeta(new Meta().setLastUpdated(newDate));
         assertFalse(adapter.equalsDeep(copy));
         assertTrue(adapter.equalsShallow(copy));
         copy.setId("patient-2");

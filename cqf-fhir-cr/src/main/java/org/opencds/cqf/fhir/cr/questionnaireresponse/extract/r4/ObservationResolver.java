@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -21,6 +22,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnsw
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
+import org.opencds.cqf.fhir.utility.Constants;
 
 public class ObservationResolver {
     public IBaseResource resolve(
@@ -28,7 +30,8 @@ public class ObservationResolver {
             IBaseBackboneElement baseAnswer,
             String linkId,
             IBaseReference subject,
-            Map<String, List<IBaseCoding>> questionnaireCodeMap) {
+            Map<String, List<IBaseCoding>> questionnaireCodeMap,
+            IBaseExtension<?, ?> categoryExt) {
         var questionnaireResponse = (QuestionnaireResponse) request.getQuestionnaireResponse();
         var answer = (QuestionnaireResponseItemAnswerComponent) baseAnswer;
         var obs = new Observation();
@@ -37,10 +40,13 @@ public class ObservationResolver {
         obs.setPartOf(questionnaireResponse.getPartOf());
         obs.setStatus(Observation.ObservationStatus.FINAL);
 
-        var qrCategoryCoding = new Coding();
-        qrCategoryCoding.setCode("survey");
-        qrCategoryCoding.setSystem("http://hl7.org/fhir/observation-category");
-        obs.setCategory(Collections.singletonList(new CodeableConcept().addCoding(qrCategoryCoding)));
+        var qrCategoryCode = categoryExt == null
+                ? new CodeableConcept()
+                        .addCoding(new Coding()
+                                .setSystem(Constants.SDC_OBSERVATION_CATEGORY)
+                                .setCode(Constants.SDC_CATEGORY_SURVEY))
+                : (CodeableConcept) categoryExt.getValue();
+        obs.setCategory(Collections.singletonList(qrCategoryCode));
 
         obs.setCode(new CodeableConcept()
                 .setCoding(questionnaireCodeMap.get(linkId).stream()

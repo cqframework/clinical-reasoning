@@ -23,6 +23,8 @@ import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 public class TerminologyServerClient {
 
     private final FhirContext ctx;
+    public static final String versionParamName = "valueSetVersion";
+    public static final String urlParamName = "url";
 
     public TerminologyServerClient(FhirContext ctx) {
         this.ctx = ctx;
@@ -30,6 +32,30 @@ public class TerminologyServerClient {
 
     public IBaseResource expand(ValueSetAdapter valueSet, EndpointAdapter endpoint, ParametersAdapter parameters) {
         checkNotNull(valueSet, "expected non-null value for valueSet");
+        checkNotNull(endpoint, "expected non-null value for endpoint");
+        checkNotNull(parameters, "expected non-null value for parameters");
+        return expand(
+                endpoint,
+                parameters,
+                valueSet.getUrl(),
+                valueSet.getVersion(),
+                valueSet.get().getStructureFhirVersionEnum());
+    }
+
+    public IBaseResource expand(EndpointAdapter endpoint, ParametersAdapter parameters, FhirVersionEnum fhirVersion) {
+        checkNotNull(endpoint, "expected non-null value for endpoint");
+        checkNotNull(parameters, "expected non-null value for parameters");
+        checkNotNull(fhirVersion, "expected non-null value for fhirVersion");
+        checkNotNull(parameters.getParameter(urlParamName), "expected non-null value for 'url' expansion parameter");
+        return expand(endpoint, parameters, null, null, fhirVersion);
+    }
+
+    public IBaseResource expand(
+            EndpointAdapter endpoint,
+            ParametersAdapter parameters,
+            String url,
+            String valueSetVersion,
+            FhirVersionEnum fhirVersion) {
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
         var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
@@ -43,14 +69,17 @@ public class TerminologyServerClient {
         IGenericClient fhirClient = ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
 
-        if (parameters.getParameter("url") == null) {
+        if (parameters.getParameter(urlParamName) == null) {
+            if (url == null) {
+                throw new UnprocessableEntityException("No '" + urlParamName + "' expansion parameter present");
+            }
             parameters.addParameter(
-                    valueSet.get().getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)
-                            ? Parameters.newUriPart(ctx, "url", valueSet.getUrl())
-                            : Parameters.newUrlPart(ctx, "url", valueSet.getUrl()));
+                    fhirVersion == FhirVersionEnum.DSTU3
+                            ? Parameters.newUriPart(ctx, urlParamName, url)
+                            : Parameters.newUrlPart(ctx, urlParamName, url));
         }
-        if (valueSet.hasVersion() && parameters.getParameter("valueSetVersion") == null) {
-            parameters.addParameter(Parameters.newStringPart(ctx, "valueSetVersion", valueSet.getVersion()));
+        if (parameters.getParameter(versionParamName) == null && valueSetVersion != null) {
+            parameters.addParameter(Parameters.newStringPart(ctx, versionParamName, valueSetVersion));
         }
         // Invoke on the type using the url parameter
         return fhirClient
@@ -58,8 +87,21 @@ public class TerminologyServerClient {
                 .onType("ValueSet")
                 .named("$expand")
                 .withParameters((IBaseParameters) parameters.get())
-                .returnResourceType(valueSet.get().getClass())
+                .returnResourceType(getValueSetClass(fhirVersion))
                 .execute();
+    }
+
+    private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return org.hl7.fhir.dstu3.model.ValueSet.class;
+            case R4:
+                return org.hl7.fhir.r4.model.ValueSet.class;
+            case R5:
+                return org.hl7.fhir.r5.model.ValueSet.class;
+            default:
+                throw new UnprocessableEntityException("Unknown ValueSet version");
+        }
     }
 
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.

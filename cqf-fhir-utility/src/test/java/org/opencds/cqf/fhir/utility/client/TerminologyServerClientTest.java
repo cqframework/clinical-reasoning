@@ -27,8 +27,9 @@ public class TerminologyServerClientTest {
     private static final String authoritativeSource = "www.source.com/ValueSet";
     private static final String username = "username";
     private static final String password = "password";
-    private static final String urlParamName = "url";
-    private static final String versionParamName = "valueSetVersion";
+    private static final String urlParamName = TerminologyServerClient.urlParamName;
+    private static final String versionParamName = TerminologyServerClient.versionParamName;
+    ;
 
     private FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -79,6 +80,19 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.r4.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url is provided we don't need to pass in a ValueSet
+        var urlAndVersionParams = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+        urlAndVersionParams.addParameter(urlParamName, new org.hl7.fhir.r4.model.UrlType(url));
+        urlAndVersionParams.addParameter(versionParamName, new org.hl7.fhir.r4.model.StringType(version));
+        Exception noException = null;
+        try {
+            var expanded = client.expand(endpoint, urlAndVersionParams, FhirVersionEnum.R4);
+            assertEquals(expanded.getClass(), valueSet.get().getClass());
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -126,6 +140,19 @@ public class TerminologyServerClientTest {
                 ((org.hl7.fhir.r5.model.StringType)
                                 params.getParameter(versionParamName).getValue())
                         .getValue());
+
+        // if url is provided we don't need to pass in a ValueSet
+        var urlAndVersionParams = factory.createParameters(new org.hl7.fhir.r5.model.Parameters());
+        urlAndVersionParams.addParameter(urlParamName, new org.hl7.fhir.r5.model.UrlType(url));
+        urlAndVersionParams.addParameter(versionParamName, new org.hl7.fhir.r5.model.StringType(version));
+        Exception noException = null;
+        try {
+            var expanded = client.expand(endpoint, urlAndVersionParams, FhirVersionEnum.R5);
+            assertEquals(expanded.getClass(), valueSet.get().getClass());
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 
     @Test
@@ -180,5 +207,18 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
+
+        // if url is provided we don't need to pass in a ValueSet
+        var urlAndVersionParams = factory.createParameters(new org.hl7.fhir.dstu3.model.Parameters());
+        urlAndVersionParams.addParameter(urlParamName, new org.hl7.fhir.dstu3.model.UriType(url));
+        urlAndVersionParams.addParameter(versionParamName, new org.hl7.fhir.dstu3.model.StringType(version));
+        Exception noException = null;
+        try {
+            var expanded = client.expand(endpoint, urlAndVersionParams, FhirVersionEnum.DSTU3);
+            assertEquals(expanded.getClass(), valueSet.get().getClass());
+        } catch (Exception e) {
+            noException = e;
+        }
+        assertNull(noException);
     }
 }

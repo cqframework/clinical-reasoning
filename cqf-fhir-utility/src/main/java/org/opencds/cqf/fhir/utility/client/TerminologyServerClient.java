@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
@@ -121,7 +122,7 @@ public class TerminologyServerClient {
         }
         // check if URL is in the format [base URL]/[resource type]/[id]
         var maybeFhirType = Canonicals.getResourceType(authoritativeSource);
-        if (maybeFhirType != null && !maybeFhirType.isBlank()) {
+        if (maybeFhirType != null && StringUtils.isNotBlank(maybeFhirType)) {
             IBaseEnumFactory<?> factory = getEnumFactory();
             try {
                 factory.fromCode(maybeFhirType);

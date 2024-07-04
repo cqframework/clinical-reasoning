@@ -9,7 +9,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -145,5 +147,24 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
+    }
+
+    @Test
+    void authoritativeSourceUrlParsing() {
+        var supportedVersions = List.of(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
+        for (final var version: supportedVersions) {
+            var ts = new TerminologyServerClient(new FhirContext(version));
+            var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
+            // remove the FHIR type and the ID if included
+            assertEquals(theCorrectBaseServerUrl,ts.getAuthoritativeSourceBase(theCorrectBaseServerUrl + "/ValueSet/1"));
+            // remove a FHIR type if one was included
+            assertEquals(theCorrectBaseServerUrl,ts.getAuthoritativeSourceBase(theCorrectBaseServerUrl + "/ValueSet"));
+            // don't break on the actual base url
+            assertEquals(theCorrectBaseServerUrl,ts.getAuthoritativeSourceBase(theCorrectBaseServerUrl));
+            // ensure it's forcing https
+            assertEquals(theCorrectBaseServerUrl,ts.getAuthoritativeSourceBase(theCorrectBaseServerUrl.replace("https","http")));
+            // remove trailing slashes
+            assertEquals(theCorrectBaseServerUrl,ts.getAuthoritativeSourceBase(theCorrectBaseServerUrl + "/"));
+        }
     }
 }

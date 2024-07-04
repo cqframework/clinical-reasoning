@@ -32,8 +32,10 @@ public class TerminologyServerClientTest {
         vs.setUrl(url);
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r4.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
         when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
+
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -71,8 +73,9 @@ public class TerminologyServerClientTest {
         vs.setUrl(url);
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r5.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
         when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R5);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -110,8 +113,9 @@ public class TerminologyServerClientTest {
         vs.setUrl(url);
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.dstu3.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class);
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
         when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.DSTU3);
         when(clientMock
                         .operation()
                         .onType(anyString())

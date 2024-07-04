@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
-import java.util.List;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
@@ -151,7 +151,7 @@ public class TerminologyServerClientTest {
 
     @Test
     void authoritativeSourceUrlParsing() {
-        var supportedVersions = List.of(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
+        var supportedVersions = Arrays.asList(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
         for (final var version : supportedVersions) {
             var ts = new TerminologyServerClient(new FhirContext(version));
             var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";

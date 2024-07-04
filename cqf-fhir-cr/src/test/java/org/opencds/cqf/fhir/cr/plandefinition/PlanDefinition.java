@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
@@ -336,6 +337,16 @@ public class PlanDefinition {
                     .anyMatch(r -> r.fhirType().equals("Questionnaire")
                             && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
                                     .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome"))));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedBundle entryHasOperationOutcome(int entry) {
+            var resource = getEntryResource(
+                    generatedBundle.getStructureFhirVersionEnum(),
+                    getEntry(generatedBundle).get(entry));
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(resource, "contained"))
+                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome")));
             return this;
         }
     }

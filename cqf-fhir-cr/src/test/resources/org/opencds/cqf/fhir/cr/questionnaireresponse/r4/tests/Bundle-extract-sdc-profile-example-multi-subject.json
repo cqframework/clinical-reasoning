@@ -24,7 +24,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }
@@ -79,7 +79,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }
@@ -134,7 +134,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }
@@ -189,7 +189,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }
@@ -244,7 +244,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }
@@ -299,7 +299,7 @@
             "coding": [
               {
                 "system": "http://hl7.org/fhir/observation-category",
-                "code": "survey"
+                "code": "exam"
               }
             ]
           }

@@ -510,4 +510,17 @@ class PlanDefinitionProcessorTests {
                 .thenPackage()
                 .hasEntry(2);
     }
+
+    @Test
+    void nestedDefinitionErrorShouldReturnOperationOutcome() {
+        var planDefinitionID = "test-nested-error-1";
+        var patientID = "helloworld-patient-1";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .thenApplyR5()
+                .hasEntry(2)
+                .entryHasOperationOutcome(1);
+    }
 }

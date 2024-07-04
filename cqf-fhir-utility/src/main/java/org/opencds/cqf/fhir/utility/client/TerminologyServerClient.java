@@ -129,37 +129,35 @@ public class TerminologyServerClient {
                 // check if URL is in the format [base URL]/[resource type]
                 var lastSlashIndex = authoritativeSource.lastIndexOf("/");
                 if (lastSlashIndex > 0) {
-                    maybeFhirType = authoritativeSource.substring(
-                        lastSlashIndex + 1,
-                        authoritativeSource.length());
-                        try {
-                            factory.fromCode(maybeFhirType);
-                        } catch (IllegalArgumentException e2) {
-                            return authoritativeSource;
-                        }  
+                    maybeFhirType = authoritativeSource.substring(lastSlashIndex + 1, authoritativeSource.length());
+                    try {
+                        factory.fromCode(maybeFhirType);
+                    } catch (IllegalArgumentException e2) {
+                        return authoritativeSource;
+                    }
                 } else {
                     return authoritativeSource;
                 }
             }
-            authoritativeSource = authoritativeSource.substring(
-                0,
-                authoritativeSource.indexOf(maybeFhirType) - 1);
+            authoritativeSource = authoritativeSource.substring(0, authoritativeSource.indexOf(maybeFhirType) - 1);
         }
         return authoritativeSource;
     }
+
     private IBaseEnumFactory<?> getEnumFactory() {
-            switch (this.ctx.getVersion().getVersion()) {
-                case DSTU3:
-                    return new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
-                    
-                case R4:
-                    return new org.hl7.fhir.r4.model.Enumerations.ResourceTypeEnumFactory();
-                    
-                case R5:
-                    return new org.hl7.fhir.r5.model.Enumerations.ResourceTypeEnumEnumFactory();
-                    
-                default:
-                    throw new UnprocessableEntityException("unsupported FHIR version: " + this.ctx.getVersion().getVersion().toString());
-            }
+        switch (this.ctx.getVersion().getVersion()) {
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
+
+            case R4:
+                return new org.hl7.fhir.r4.model.Enumerations.ResourceTypeEnumFactory();
+
+            case R5:
+                return new org.hl7.fhir.r5.model.Enumerations.ResourceTypeEnumEnumFactory();
+
+            default:
+                throw new UnprocessableEntityException("unsupported FHIR version: "
+                        + this.ctx.getVersion().getVersion().toString());
+        }
     }
 }

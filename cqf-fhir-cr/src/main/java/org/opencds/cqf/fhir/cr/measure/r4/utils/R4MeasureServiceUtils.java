@@ -185,6 +185,7 @@ public class R4MeasureServiceUtils {
 
     public Measure resolveByIdentifier(String identifier) {
         List<IQueryParameterType> params = new ArrayList<>();
+        Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         Bundle bundle;
         if (identifier.contains("|")) {
             // system & value
@@ -196,8 +197,7 @@ public class R4MeasureServiceUtils {
             // value only
             params.add(new TokenParam(identifier));
         }
-
-        Map<String, List<IQueryParameterType>> searchParams = Map.of("identifier", params);
+        searchParams.put("identifier", params);
         bundle = this.repository.search(Bundle.class, Measure.class, searchParams);
 
         if (bundle != null && !bundle.getEntry().isEmpty()) {
@@ -244,7 +244,7 @@ public class R4MeasureServiceUtils {
                 measureList.add(measureByIdentifier);
             }*/
             // TODO: resolve IGRepository search for identifier
-            throw new UnsupportedOperationException("search for identifier not implemented.");
+            throw new NotImplementedOperationException("search for identifier not implemented.");
         }
 
         Map<String, Measure> result = new HashMap<>();

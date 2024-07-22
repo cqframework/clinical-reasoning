@@ -183,6 +183,8 @@ public class R4MeasureServiceUtils {
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
+    /*
+    TODO: stubbing for future identifier search implementation
     public Measure resolveByIdentifier(String identifier) {
         List<IQueryParameterType> params = new ArrayList<>();
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
@@ -211,7 +213,7 @@ public class R4MeasureServiceUtils {
             var msg = String.format("Measure Identifier: %s, found no matching measure resources", identifier);
             throw new IllegalArgumentException(msg);
         }
-    }
+    }*/
 
     public List<Measure> getMeasures(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {

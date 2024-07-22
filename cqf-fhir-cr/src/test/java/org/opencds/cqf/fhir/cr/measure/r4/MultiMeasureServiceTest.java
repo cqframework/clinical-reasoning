@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
-public class MultiMeasureServiceTest {
+class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test
-    void MultiMeasure_EightMeasures_AllSubjects() {
+    void MultiMeasure_EightMeasures_AllSubjects_MeasureId() {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
@@ -155,6 +155,290 @@ public class MultiMeasureServiceTest {
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(2);
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_AllSubjects_MeasureUrl() {
+        var when = GIVEN_REPO
+                .when()
+                .measureUrl("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .measureUrl("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(8)
+                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasReportType("Summary")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .population("denominator")
+                .hasCount(5)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(3)
+                .up()
+                .hasScore("0.6")
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .hasReportType("Summary")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .population("denominator")
+                .hasCount(5)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(3)
+                .up()
+                .hasScore("0.6")
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .population("denominator")
+                .hasCount(6)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(3)
+                .up()
+                .hasScore("0.5")
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(9)
+                .up()
+                .population("denominator")
+                .hasCount(7)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(3)
+                .up()
+                .hasScore("0.42857142857142855")
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(9)
+                .up()
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(9)
+                .up()
+                .population("measure-population")
+                .hasCount(7)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(2)
+                .up()
+                .population("measure-observation")
+                .hasCount(7)
+                .up()
+                .up()
+                .up()
+                .measureReport("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(8)
+                .up()
+                .population("measure-population")
+                .hasCount(6)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(2);
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_SubjectEvalType_AllSubjects() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .measureId("MinimalRatioBooleanBasisSingleGroup")
+                .measureId("MinimalRatioResourceBasisSingleGroup")
+                .measureId("MinimalCohortResourceBasisSingleGroup")
+                .measureId("MinimalCohortBooleanBasisSingleGroup")
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
+                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(64)
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        8, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        8, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .getFirstMeasureReport()
+                .hasReportType("Individual");
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_SubjectEvalType_GroupPatients() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .measureId("MinimalRatioBooleanBasisSingleGroup")
+                .measureId("MinimalRatioResourceBasisSingleGroup")
+                .measureId("MinimalCohortResourceBasisSingleGroup")
+                .measureId("MinimalCohortBooleanBasisSingleGroup")
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
+                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .subject("Group/group-patients-1")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(64)
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        8, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        8, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .getFirstMeasureReport()
+                .hasReportType("Individual");
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_SubjectEvalType_GroupPractitioner() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .measureId("MinimalRatioBooleanBasisSingleGroup")
+                .measureId("MinimalRatioResourceBasisSingleGroup")
+                .measureId("MinimalCohortResourceBasisSingleGroup")
+                .measureId("MinimalCohortBooleanBasisSingleGroup")
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
+                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .subject("Group/group-practitioners-1")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(8)
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        1, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        1, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .getFirstMeasureReport()
+                .hasReportType("Individual");
+    }
+
+    @Test
+    void MultiMeasure_EightMeasures_SubjectEvalType_Practitioner() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .measureId("MinimalRatioBooleanBasisSingleGroup")
+                .measureId("MinimalRatioResourceBasisSingleGroup")
+                .measureId("MinimalCohortResourceBasisSingleGroup")
+                .measureId("MinimalCohortBooleanBasisSingleGroup")
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
+                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .subject("Practitioner/tester")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(8)
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        1, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportCountPerUrl(
+                        1, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
+                .getFirstMeasureReport()
+                .hasReportType("Individual");
     }
 
     @Test
@@ -512,42 +796,6 @@ public class MultiMeasureServiceTest {
     }
 
     @Test
-    void MultiMeasure_EightMeasures_PractitionerJustId() {
-        var when = GIVEN_REPO
-                .when()
-                .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
-                .reportType("population")
-                .practitioner("tester")
-                .evaluate();
-
-        when.then()
-                .hasMeasureReportCount(1)
-                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
-                .hasReportType("Summary")
-                .hasSubjectReference("Practitioner/tester")
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(1)
-                .up()
-                .population("denominator")
-                .hasCount(0)
-                .up()
-                .population("denominator-exclusion")
-                .hasCount(0)
-                .up()
-                .population("denominator-exception")
-                .hasCount(1)
-                .up()
-                .population("numerator-exclusion")
-                .hasCount(0)
-                .up()
-                .population("numerator")
-                .hasCount(0);
-    }
-
-    @Test
     void MultiMeasure_EightMeasures_Practitioner() {
         var when = GIVEN_REPO
                 .when()
@@ -555,7 +803,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("Practitioner/tester")
+                .subject("Practitioner/tester")
                 .evaluate();
 
         when.then()
@@ -591,7 +839,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("Practitioner/empty")
                 .evaluate();
 
@@ -611,7 +859,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("PractitionerRole/test")
                 .evaluate();
 
@@ -631,7 +879,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("Location/office")
                 .evaluate();
 
@@ -651,7 +899,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("Organization/payer")
                 .evaluate();
 
@@ -671,7 +919,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("payer")
                 .evaluate();
 
@@ -691,7 +939,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter(null)
                 .evaluate();
 
@@ -711,7 +959,7 @@ public class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .practitioner("tester")
+                .subject("Practitioner/tester")
                 .reporter("Patient/male-2022")
                 .evaluate();
 

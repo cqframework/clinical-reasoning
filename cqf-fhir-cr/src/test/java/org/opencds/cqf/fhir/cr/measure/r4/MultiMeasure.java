@@ -16,10 +16,8 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -36,8 +34,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
-import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class MultiMeasure {
@@ -149,8 +145,8 @@ public class MultiMeasure {
             this.service = service;
         }
 
-        private List<Either3<CanonicalType, IdType, Measure>> measureIds = new ArrayList<>();
-        ;
+        private List<IdType> measureId = new ArrayList<>();
+        private List<String> measureUrl = new ArrayList<>();
         private String periodStart;
         private String periodEnd;
         private List<String> subjectIds;
@@ -160,14 +156,16 @@ public class MultiMeasure {
         private Parameters parameters;
 
         private Supplier<Bundle> operation;
-        private String practitioner;
         private String productLine;
         private String reporter;
 
         public MultiMeasure.When measureId(String measureId) {
-            Either3<CanonicalType, IdType, Measure> eitherMeasure =
-                    Eithers.forMiddle3(new IdType("Measure", measureId));
-            this.measureIds.add(eitherMeasure);
+            this.measureId.add(new IdType("Measure", measureId));
+            return this;
+        }
+
+        public MultiMeasure.When measureUrl(String measureUrl) {
+            this.measureUrl.add(measureUrl);
             return this;
         }
 
@@ -206,11 +204,6 @@ public class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.When practitioner(String practitioner) {
-            this.practitioner = practitioner;
-            return this;
-        }
-
         public MultiMeasure.When productLine(String productLine) {
             this.productLine = productLine;
             return this;
@@ -223,7 +216,8 @@ public class MultiMeasure {
 
         public MultiMeasure.When evaluate() {
             this.operation = () -> service.evaluate(
-                    measureIds,
+                    measureId,
+                    measureUrl,
                     periodStart,
                     periodEnd,
                     reportType,
@@ -234,7 +228,6 @@ public class MultiMeasure {
                     additionalData,
                     parameters,
                     productLine,
-                    practitioner,
                     reporter);
             return this;
         }
@@ -264,6 +257,18 @@ public class MultiMeasure {
             return this;
         }
 
+        public MultiMeasure.SelectedReport hasMeasureReportCountPerUrl(int count, String measureUrl) {
+            var reports = report().getEntry().stream()
+                    .map(t -> (MeasureReport) t.getResource())
+                    .filter(x -> x.getMeasure().equals(measureUrl))
+                    .collect(Collectors.toList());
+            var msg = String.format(
+                    "measureReport count: %s, does not match for measure url: %s", reports.size(), measureUrl);
+            assertEquals(count, reports.size(), msg);
+
+            return this;
+        }
+
         public SelectedMeasureReport measureReport(MultiMeasure.Selector<MeasureReport, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
             return new SelectedMeasureReport(p, this);
@@ -277,7 +282,11 @@ public class MultiMeasure {
                             .collect(Collectors.toList()),
                     measureUrl));
         }
-        ;
+
+        public SelectedMeasureReport getFirstMeasureReport() {
+            var mr = (MeasureReport) report().getEntryFirstRep().getResource();
+            return this.measureReport(g -> mr);
+        }
 
         public MeasureReport resourceToMeasureReport(List<BundleEntryComponent> entries, String measureUrl) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();

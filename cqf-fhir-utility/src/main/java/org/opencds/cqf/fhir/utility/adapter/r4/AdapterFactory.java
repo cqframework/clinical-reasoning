@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -29,6 +30,8 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         KnowledgeArtifactAdapter retval;
         if (resource instanceof Library) {
             retval = createLibrary(resource);
+        } else if (resource instanceof Measure) {
+            retval = new org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter((Measure)resource);
         } else if (resource instanceof PlanDefinition) {
             retval = new org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionAdapter((PlanDefinition) resource);
         } else if (resource instanceof ValueSet) {
@@ -39,7 +42,7 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
                         (MetadataResource) resource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resouce must be instance of %s", MetadataResource.class.getName()));
+                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
             }
         }
         return retval;

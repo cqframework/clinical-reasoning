@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,12 +52,78 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
             Repository repository, CanonicalType canonical) {
-        var resourceType = repository
+
+        var resourceType = getResourceType(repository, canonical);
+        return searchRepositoryByCanonical(repository, canonical, resourceType);
+    }
+
+    /**
+     * Gets the resource type for the given canonical, based on the convention that canonical
+     * URLs are of the form [base]/[resourceType]/[tail]
+     *
+     * If the URL does not conform to the convention, the cqf-resourceType extension is used
+     * to determine the type of the resource, if present.
+     *
+     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
+     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     *
+     * @param <CanonicalType>
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @return
+     */
+    private static <CanonicalType extends IPrimitiveType<String>> Class<? extends IBaseResource> getResourceType(Repository repository, CanonicalType canonical) {
+        Class<? extends IBaseResource> resourceType = null;
+        try {
+            resourceType = repository
                 .fhirContext()
                 .getResourceDefinition(Canonicals.getResourceType(canonical))
                 .getImplementingClass();
+        }
+        catch (DataFormatException e) {
+            // TODO: Use the "cqf-resourceType" extension to figure this out, if it's present
+            // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
+            resourceType = repository
+                .fhirContext()
+                .getResourceDefinition("CodeSystem")
+                .getImplementingClass();
+        }
 
-        return searchRepositoryByCanonical(repository, canonical, resourceType);
+        return resourceType;
+    }
+
+    /**
+     * Gets the resource type for the given canonical, based on the convention that canonical
+     * URLs are of the form [base]/[resourceType]/[tail]
+     *
+     * If the URL does not conform to the convention, the cqf-resourceType extension is used
+     * to determine the type of the resource, if present.
+     *
+     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
+     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     *
+     * @param repository
+     * @param canonical
+     * @return
+     */
+    private static Class<? extends IBaseResource> getResourceType(Repository repository, String canonical) {
+        Class<? extends IBaseResource> resourceType = null;
+        try {
+            resourceType = repository
+                .fhirContext()
+                .getResourceDefinition(Canonicals.getResourceType(canonical))
+                .getImplementingClass();
+        }
+        catch (RuntimeException e) {
+            // TODO: Use the "cqf-resourceType" extension to figure this out, if it's present
+            // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
+            resourceType = repository
+                .fhirContext()
+                .getResourceDefinition("CodeSystem")
+                .getImplementingClass();
+        }
+
+        return resourceType;
     }
 
     /**
@@ -95,11 +162,7 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
             Repository repository, CanonicalType canonical) {
-        var resourceType = repository
-                .fhirContext()
-                .getResourceDefinition(Canonicals.getResourceType(canonical))
-                .getImplementingClass();
-
+        var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
     }
 
@@ -113,11 +176,7 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
             Repository repository, String canonical) {
-        var resourceType = repository
-                .fhirContext()
-                .getResourceDefinition(Canonicals.getResourceType(canonical))
-                .getImplementingClass();
-
+        var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
     }
 

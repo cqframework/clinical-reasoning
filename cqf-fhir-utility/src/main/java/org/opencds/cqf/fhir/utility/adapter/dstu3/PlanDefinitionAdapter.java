@@ -76,6 +76,16 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
     }
 
     @Override
+    public boolean hasTitle() {
+        return this.getPlanDefinition().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getPlanDefinition().getTitle();
+    }
+
+    @Override
     public String getPurpose() {
         return this.getPlanDefinition().getPurpose();
     }
@@ -83,6 +93,11 @@ class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifact
     @Override
     public void setName(String name) {
         this.getPlanDefinition().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.getPlanDefinition().setTitle(title);
     }
 
     @Override

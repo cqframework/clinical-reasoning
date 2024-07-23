@@ -80,6 +80,16 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     }
 
     @Override
+    public boolean hasTitle() {
+        return this.getLibrary().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getLibrary().getTitle();
+    }
+
+    @Override
     public String getPurpose() {
         return this.getLibrary().getPurpose();
     }
@@ -87,6 +97,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     @Override
     public void setName(String name) {
         this.getLibrary().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.getLibrary().setTitle(title);
     }
 
     @Override

@@ -1,6 +1,23 @@
 {
   "id": "MinimalProportionNoBasisSingleGroup",
   "resourceType": "Measure",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+    "value": "test123"
+  },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/us/cqfmeasures/CodeSystem/identifier-type",
+            "code": "publisher"
+          }
+        ]
+      },
+      "value": "123"
+    } ],
   "url": "http://example.com/Measure/MinimalProportionNoBasisSingleGroup",
   "library": [
     "http://example.com/Library/MinimalProportionBooleanBasisSingleGroup"

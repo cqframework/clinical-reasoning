@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,6 +50,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
@@ -56,7 +58,7 @@ import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
-import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -66,7 +68,6 @@ import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,8 @@ public class R4CareGapsService {
 
     protected final Map<String, Resource> configuredResources = new HashMap<>();
 
+    private final R4MeasureServiceUtils r4MeasureServiceUtils;
+
     public R4CareGapsService(
             CareGapsProperties careGapsProperties,
             Repository repository,
@@ -101,6 +104,8 @@ public class R4CareGapsService {
         this.careGapsProperties = careGapsProperties;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.serverBase = serverBase;
+
+        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
 
     /**
@@ -135,7 +140,14 @@ public class R4CareGapsService {
 
         validateConfiguration();
 
-        List<Measure> measures = ensureMeasures(getMeasures(measureIds, measureIdentifiers, measureUrls));
+        List<Measure> measures = ensureMeasures(r4MeasureServiceUtils.getMeasures(
+                measureIds.stream().map(IdType::new).collect(Collectors.toList()),
+                measureIdentifiers,
+                measureUrls.stream()
+                        .map(PrimitiveType::toString)
+                        .map(x -> x.replace("CanonicalType[", ""))
+                        .map(x -> x.replace("]", ""))
+                        .collect(Collectors.toList())));
 
         List<Patient> patients;
         if (!Strings.isNullOrEmpty(subject)) {
@@ -254,54 +266,6 @@ public class R4CareGapsService {
         }
 
         return patient;
-    }
-
-    protected List<Measure> getMeasures(
-            List<String> measureIds, List<String> measureIdentifiers, List<CanonicalType> measureCanonicals) {
-        boolean hasMeasureIds = measureIds != null && !measureIds.isEmpty();
-        boolean hasMeasureIdentifiers = measureIdentifiers != null && !measureIdentifiers.isEmpty();
-        boolean hasMeasureUrls = measureCanonicals != null && !measureCanonicals.isEmpty();
-        if (!hasMeasureIds && !hasMeasureIdentifiers && !hasMeasureUrls) {
-            return Collections.emptyList();
-        }
-
-        List<Measure> measureList = new ArrayList<>();
-
-        if (hasMeasureIds) {
-            for (String measureId : measureIds) {
-                Measure measureById = resolveById(new IdType("Measure", measureId));
-                measureList.add(measureById);
-            }
-        }
-
-        if (hasMeasureUrls) {
-            for (CanonicalType measureCanonical : measureCanonicals) {
-                Measure measureByUrl = resolveByUrl(measureCanonical);
-                measureList.add(measureByUrl);
-            }
-        }
-
-        // TODO: implement searching by measure identifiers
-        if (hasMeasureIdentifiers) {
-            throw new NotImplementedOperationException(
-                    Msg.code(2278) + "Measure identifiers have not yet been implemented.");
-        }
-
-        Map<String, Measure> result = new HashMap<>();
-        measureList.forEach(measure -> result.putIfAbsent(measure.getUrl(), measure));
-
-        return new ArrayList<>(result.values());
-    }
-
-    protected Measure resolveByUrl(CanonicalType url) {
-        Canonicals.CanonicalParts parts = Canonicals.getParts(url);
-        Bundle result = this.repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
-    }
-
-    protected Measure resolveById(IdType id) {
-        return this.repository.read(Measure.class, id);
     }
 
     protected <T extends Resource> T addConfiguredResource(Class<T> resourceClass, String id, String key) {

@@ -14,17 +14,26 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RE
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -149,5 +158,100 @@ public class R4MeasureServiceUtils {
         }
 
         return reference;
+    }
+
+    public Measure resolveById(IdType id) {
+        return this.repository.read(Measure.class, id);
+    }
+
+    public Measure resolveByUrl(String url) {
+        Bundle bundle;
+        Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
+        if (url.contains("|")) {
+            // uri & version
+            var splitId = url.split("\\|");
+            var uri = splitId[0];
+            var version = splitId[1];
+            searchParameters.put("url", Collections.singletonList(new UriParam(uri)));
+            searchParameters.put("version", Collections.singletonList(new TokenParam(version)));
+        } else {
+            // uri only
+            searchParameters.put("url", Collections.singletonList(new UriParam(url)));
+        }
+
+        Bundle result = this.repository.search(Bundle.class, Measure.class, searchParameters);
+        return (Measure) result.getEntryFirstRep().getResource();
+    }
+
+    /*
+    TODO: stubbing for future identifier search implementation
+    public Measure resolveByIdentifier(String identifier) {
+        List<IQueryParameterType> params = new ArrayList<>();
+        Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+        Bundle bundle;
+        if (identifier.contains("|")) {
+            // system & value
+            var splitId = identifier.split("\\|");
+            var system = splitId[0];
+            var code = splitId[1];
+            params.add(new TokenParam(system, code));
+        } else {
+            // value only
+            params.add(new TokenParam(identifier));
+        }
+        searchParams.put("identifier", params);
+        bundle = this.repository.search(Bundle.class, Measure.class, searchParams);
+
+        if (bundle != null && !bundle.getEntry().isEmpty()) {
+            if (bundle.getEntry().size() > 1) {
+                var msg = String.format(
+                        "Measure Identifier: %s, found more than one matching measure resource", identifier);
+                throw new IllegalArgumentException(msg);
+            }
+            return (Measure) bundle.getEntryFirstRep().getResource();
+        } else {
+            var msg = String.format("Measure Identifier: %s, found no matching measure resources", identifier);
+            throw new IllegalArgumentException(msg);
+        }
+    }*/
+
+    public List<Measure> getMeasures(
+            List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
+        boolean hasMeasureIds = measureIds != null && !measureIds.isEmpty();
+        boolean hasMeasureIdentifiers = measureIdentifiers != null && !measureIdentifiers.isEmpty();
+        boolean hasMeasureUrls = measureCanonicals != null && !measureCanonicals.isEmpty();
+        if (!hasMeasureIds && !hasMeasureIdentifiers && !hasMeasureUrls) {
+            return Collections.emptyList();
+        }
+
+        List<Measure> measureList = new ArrayList<>();
+
+        if (hasMeasureIds) {
+            for (IdType measureId : measureIds) {
+                Measure measureById = resolveById(measureId);
+                measureList.add(measureById);
+            }
+        }
+
+        if (hasMeasureUrls) {
+            for (String measureCanonical : measureCanonicals) {
+                Measure measureByUrl = resolveByUrl(measureCanonical);
+                measureList.add(measureByUrl);
+            }
+        }
+
+        if (hasMeasureIdentifiers) {
+            /*for (String measureIdentifier : measureIdentifiers) {
+                Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
+                measureList.add(measureByIdentifier);
+            }*/
+            // TODO: resolve IGRepository search for identifier
+            throw new NotImplementedOperationException("search for identifier not implemented.");
+        }
+
+        Map<String, Measure> result = new HashMap<>();
+        measureList.forEach(measure -> result.putIfAbsent(measure.getUrl(), measure));
+
+        return new ArrayList<>(result.values());
     }
 }

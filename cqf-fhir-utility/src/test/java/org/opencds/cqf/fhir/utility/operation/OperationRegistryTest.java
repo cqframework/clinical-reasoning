@@ -57,8 +57,7 @@ class OperationRegistryTest {
         // Internally, the operation registry passes an instance of the repository to the operation
         // factory and constructs the operation provider on the fly.
         var repository = new IgRepository(FhirContext.forR4Cached(), root);
-        var result = operationRegistry.execute(repository, "example", null, null, null);
-
+        var result = operationRegistry.buildOperation(repository, "example").execute();
         var p = assertInstanceOf(Parameters.class, result);
         var num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
                 .getValue();

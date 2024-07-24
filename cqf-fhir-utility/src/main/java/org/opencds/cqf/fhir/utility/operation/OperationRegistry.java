@@ -19,6 +19,64 @@ import org.opencds.cqf.fhir.api.Repository;
  * operations by name.
  */
 public class OperationRegistry {
+   public class OperationInvocationParams {
+
+        private final Repository repository;
+        private final String name;
+        private IBaseParameters parameters;
+        private IIdType id;
+        private Class<? extends IBaseResource> resourceType;
+
+        OperationInvocationParams(
+                Repository repository,
+                String name) {
+            this.repository = requireNonNull(repository, "Repository cannot be null");
+            this.name = requireNonNull(name, "Operation name cannot be null");
+        }
+
+        public Repository repository() {
+            return repository;
+        }
+
+        public OperationInvocationParams id(IIdType id) {
+            this.id = id;
+            return this;
+        }
+
+        public IIdType id() {
+            return id;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public IBaseParameters parameters() {
+            return parameters;
+        }
+
+        public OperationInvocationParams parameters(IBaseParameters parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
+        public OperationInvocationParams resourceType(Class<? extends IBaseResource> resourceType) {
+            this.resourceType = resourceType;
+            return this;
+        }
+
+        Scope scope() {
+            return id != null ? Scope.INSTANCE : (resourceType != null ? Scope.TYPE : Scope.SERVER);
+        }
+
+        String typeName() {
+            return resourceType != null ? resourceType.getSimpleName() : (id != null ? id.getResourceType() : null);
+        }
+
+        public IBaseResource execute() {
+            return OperationRegistry.this.execute(this);
+        }
+    }
 
     private final Multimap<String, OperationClosure> operationMap;
 
@@ -43,26 +101,22 @@ public class OperationRegistry {
         }
     }
 
-    public IBaseResource execute(
-            Repository repository,
-            String name,
-            Class<? extends IBaseResource> resourceType,
-            IIdType id,
-            IBaseParameters parameters) {
-        requireNonNull(repository, "Repository cannot be null");
-        requireNonNull(name, "Operation name cannot be null");
+    public OperationInvocationParams buildOperation(Repository repository, String operationName) {
+        return new OperationInvocationParams(repository, operationName);
+    }
 
-        var scope = id != null ? Scope.INSTANCE : (resourceType != null ? Scope.TYPE : Scope.SERVER);
-        var typeName = resourceType != null ? resourceType.getSimpleName() : null;
-        var closure = findOperation(scope, name, typeName);
 
-        var instance = closure.factory().apply(repository);
-        var callable = closure.methodBinder().bind(instance, id, parameters);
+    IBaseResource execute(OperationInvocationParams params) {
+        requireNonNull(params, "Operation invocation parameters cannot be null");
+        var closure = findOperation(params.scope(), params.name(), params.typeName());
+
+        var instance = closure.factory().apply(params.repository);
+        var callable = closure.methodBinder().bind(instance, params.id(), params.parameters());
 
         try {
             return callable.call();
         } catch (Exception e) {
-            throw new RuntimeException("Error invoking operation " + name, e);
+            throw new RuntimeException("Error invoking operation " + params.name(), e);
         }
     }
 

@@ -12,6 +12,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,7 @@ class DynamicValueProcessorTests {
         logger.addAppender(listAppender);
         var cqfExpression = new CqfExpression().setExpression("NullTest");
         var request =
-                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, inputParameterResolver);
+                RequestHelpers.newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, modelResolver, inputParameterResolver);
         var dynamicValue = new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression(new org.hl7.fhir.r4.model.Expression()
@@ -64,6 +65,7 @@ class DynamicValueProcessorTests {
         var requestAction = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent();
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(request, dynamicValue);
         doReturn(null).when(fixture).getDynamicValueExpressionResult(request, cqfExpression, null, null);
+        doReturn(new StringType("action.extension")).when(modelResolver).resolvePath(dynamicValue, "path");
         fixture.resolveDynamicValue(request, dynamicValue, null, null, requestAction);
         assertEquals(Level.WARN, listAppender.list.get(0).getLevel());
         assertEquals(

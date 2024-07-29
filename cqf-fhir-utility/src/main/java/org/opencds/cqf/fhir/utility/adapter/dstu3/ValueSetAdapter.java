@@ -48,9 +48,8 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getValueSet().hasVersion()
-                ? getValueSet().getUrl() + "|" + getValueSet().getVersion()
-                : getValueSet().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
 
         /*
           compose.include[].valueSet

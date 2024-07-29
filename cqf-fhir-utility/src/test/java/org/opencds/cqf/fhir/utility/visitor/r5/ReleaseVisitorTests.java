@@ -166,7 +166,13 @@ class ReleaseVisitorTests {
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
-                "http://hl7.org/fhir/StructureDefinition/ServiceRequest");
+                "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset-library",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-plandefinition",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset",
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset");
         var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,

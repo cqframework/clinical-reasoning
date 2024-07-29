@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -8,13 +10,16 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 class ParametersParameterComponentAdapter
         implements org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter {
 
-    private Parameters.ParametersParameterComponent parametersParametersComponent;
+    private final Parameters.ParametersParameterComponent parametersParametersComponent;
+    private final FhirContext fhirContext;
+    private final ModelResolver modelResolver;
 
     public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
         if (parametersParametersComponent == null) {
@@ -27,6 +32,9 @@ class ParametersParameterComponentAdapter
         }
 
         this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+        fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     @Override
@@ -102,13 +110,12 @@ class ParametersParameterComponentAdapter
     }
 
     @Override
-    public Boolean hasExtension() {
-        return this.parametersParametersComponent.hasExtension();
+    public FhirContext fhirContext() {
+        return fhirContext;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<IBaseExtension<?, ?>> getExtension() {
-        return (List<IBaseExtension<?, ?>>) (List<?>) this.parametersParametersComponent.getExtension();
+    public ModelResolver getModelResolver() {
+        return modelResolver;
     }
 }

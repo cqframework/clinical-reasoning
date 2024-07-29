@@ -17,12 +17,15 @@ import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class StructureDefinitionAdapterTest {
@@ -155,5 +158,35 @@ public class StructureDefinitionAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of(
+                "profileRef",
+                "baseDefinition",
+                "cpgAssertionRef",
+                "cpgFeatureRef",
+                "cpgInferenceRef",
+                "elementProfileRef",
+                "elementTargetProfileRef",
+                "elementValueSetBindingRef");
+        var structureDef = new StructureDefinition();
+        structureDef.getMeta().addProfile(dependencies.get(0));
+        structureDef.setBaseDefinition(dependencies.get(1));
+        structureDef.addExtension(
+                Constants.CPG_ASSERTION_EXPRESSION, new Expression().setReference(dependencies.get(2)));
+        structureDef.addExtension(Constants.CPG_FEATURE_EXPRESSION, new Expression().setReference(dependencies.get(3)));
+        structureDef.addExtension(
+                Constants.CPG_INFERENCE_EXPRESSION, new Expression().setReference(dependencies.get(4)));
+        structureDef.getDifferential().addElement().addType().addProfile(dependencies.get(5));
+        structureDef.getDifferential().addElement().addType().addTargetProfile(dependencies.get(6));
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setBinding(new ElementDefinitionBindingComponent().setValueSet(dependencies.get(7)));
+        var adapter = new StructureDefinitionAdapter(structureDef);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(dependencies.size(), extractedDependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
 }

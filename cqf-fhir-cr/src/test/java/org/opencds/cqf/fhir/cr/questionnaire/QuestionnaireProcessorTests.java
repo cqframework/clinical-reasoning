@@ -251,7 +251,7 @@ class QuestionnaireProcessorTests {
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
                 .isPut(Boolean.TRUE)
                 .thenPackage()
-                .hasEntry(11)
+                .hasEntry(18)
                 .firstEntryIsType(org.hl7.fhir.r4.model.Questionnaire.class);
     }
 

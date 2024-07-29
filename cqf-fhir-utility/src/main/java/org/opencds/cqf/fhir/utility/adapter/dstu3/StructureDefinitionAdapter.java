@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -30,10 +30,9 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter {
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getStructureDefinition().hasVersion()
-                ? getStructureDefinition().getUrl() + "|"
-                        + getStructureDefinition().getVersion()
-                : getStructureDefinition().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
         /*
            extension[].url
            modifierExtension[].url
@@ -49,17 +48,46 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter {
            extension[cpg-featureExpression].reference
         */
 
-        var libraryExtensions = getStructureDefinition().getExtensionsByUrl(Constants.CQF_LIBRARY);
-        for (var libraryExt : libraryExtensions) {
-            DependencyInfo dependency = new DependencyInfo(
+        if (get().hasBaseDefinition()) {
+            references.add(new DependencyInfo(
                     referenceSource,
-                    ((StringType) libraryExt.getValue()).asStringValue(),
-                    libraryExt.getExtension(),
-                    (reference) -> libraryExt.setValue(new StringType(reference)));
-            references.add(dependency);
+                    get().getBaseDefinition(),
+                    get().getBaseDefinitionElement().getExtension(),
+                    (reference) -> get().setBaseDefinition(reference)));
         }
 
+        get().getDifferential()
+                .getElement()
+                .forEach(element -> getDependenciesOfDifferential(element, references, referenceSource));
+
         return references;
+    }
+
+    private void getDependenciesOfDifferential(
+            ElementDefinition element, List<IDependencyInfo> references, String referenceSource) {
+        element.getType().forEach(type -> {
+            if (type.hasProfile()) {
+                references.add(new DependencyInfo(
+                        referenceSource,
+                        type.getProfile(),
+                        type.getProfileElement().getExtension(),
+                        (reference) -> type.setProfile(reference)));
+            }
+            if (type.hasTargetProfile()) {
+                references.add(new DependencyInfo(
+                        referenceSource,
+                        type.getTargetProfile(),
+                        type.getTargetProfileElement().getExtension(),
+                        (reference) -> type.setTargetProfile(reference)));
+            }
+        });
+        if (element.getBinding().hasValueSet()) {
+            references.add(new DependencyInfo(
+                    referenceSource,
+                    element.getBinding().getValueSet().primitiveValue(),
+                    element.getBinding().getExtension(),
+                    (reference) -> element.getBinding().setValueSet(new UriType(reference))));
+        }
     }
 
     @Override

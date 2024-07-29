@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newUrlType;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newUrlType;
 
 public interface EndpointAdapter extends ResourceAdapter {
     public default String getAddress() {

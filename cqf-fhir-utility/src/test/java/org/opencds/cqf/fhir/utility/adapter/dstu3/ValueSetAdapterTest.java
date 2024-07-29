@@ -155,5 +155,15 @@ public class ValueSetAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of("profileRef");
+        var valueSet = new ValueSet();
+        valueSet.getMeta().addProfile(dependencies.get(0));
+        var adapter = new ValueSetAdapter(valueSet);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
 }

@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newDateTimeType;
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newDateType;
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newPeriod;
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newStringType;
-import static org.opencds.cqf.fhir.utility.adapter.ResourceAdapter.newUriType;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newDateTimeType;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newDateType;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newPeriod;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newStringType;
+import static org.opencds.cqf.fhir.utility.adapter.Adapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -78,6 +78,20 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     }
 
     List<IDependencyInfo> getDependencies();
+
+    default String getReferenceSource() {
+        return hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
+    }
+
+    default void addProfileReferences(List<IDependencyInfo> references, String referenceSource) {
+        get().getMeta().getProfile().stream()
+                .map(p -> (IBaseHasExtensions & IPrimitiveType<String>) p)
+                .forEach(profile -> references.add(new DependencyInfo(
+                        referenceSource,
+                        profile.getValueAsString(),
+                        profile.getExtension(),
+                        (reference) -> profile.setValue(reference))));
+    }
 
     @SuppressWarnings("unchecked")
     default Date getApprovalDate() {

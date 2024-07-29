@@ -17,12 +17,17 @@ import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class QuestionnaireAdapterTest {
@@ -154,5 +159,68 @@ public class QuestionnaireAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of(
+                "profileRef",
+                "derivedRef",
+                "cqfLibraryRef",
+                "variableRef",
+                "itemDefinitionRef",
+                "answerValueSetRef",
+                // "itemMediaRef",
+                // "itemAnswerMediaRef",
+                "unitValueSetRef",
+                "referenceProfileRef",
+                "candidateExpressionRef",
+                "lookupQuestionnaireRef",
+                "itemVariableRef",
+                "initialExpressionRef",
+                "calculatedExpressionRef",
+                // "calculatedValueRef",
+                "expressionRef",
+                "subQuestionnaireRef");
+        var questionnaire = new Questionnaire();
+        questionnaire.getMeta().addProfile(dependencies.get(0));
+        questionnaire.addDerivedFrom(dependencies.get(1));
+        questionnaire.addExtension(Constants.CQF_LIBRARY, new CanonicalType(dependencies.get(2)));
+        var variableExt = new Extension(Constants.VARIABLE_EXTENSION)
+                .setValue(new Expression().setReference(dependencies.get(3)));
+        questionnaire.addExtension(variableExt);
+        questionnaire.addItem().setDefinition(dependencies.get(4) + "#Observation");
+        questionnaire.addItem().setAnswerValueSet(dependencies.get(5));
+        questionnaire
+                .addItem()
+                .setType(QuestionnaireItemType.QUANTITY)
+                .addExtension(Constants.QUESTIONNAIRE_UNIT_VALUE_SET, new CanonicalType(dependencies.get(6)));
+        questionnaire
+                .addItem()
+                .addExtension(Constants.QUESTIONNAIRE_REFERENCE_PROFILE, new CanonicalType(dependencies.get(7)));
+        var candidateExpressionExt = new Extension(Constants.SDC_QUESTIONNAIRE_CANDIDATE_EXPRESSION)
+                .setValue(new Expression().setReference(dependencies.get(8)));
+        questionnaire.addItem().addExtension(candidateExpressionExt);
+        var lookupQuestionnaireExt = new Extension(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE)
+                .setValue(new CanonicalType(dependencies.get(9)));
+        questionnaire.addItem().addExtension(lookupQuestionnaireExt);
+        var itemVariableExt = new Extension(Constants.VARIABLE_EXTENSION)
+                .setValue(new Expression().setReference(dependencies.get(10)));
+        questionnaire.addItem().addExtension(itemVariableExt);
+        var initialExpressionExt = new Extension(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)
+                .setValue(new Expression().setReference(dependencies.get(11)));
+        questionnaire.addItem().addExtension(initialExpressionExt);
+        var calculatedExpressionExt = new Extension(Constants.SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION)
+                .setValue(new Expression().setReference(dependencies.get(12)));
+        questionnaire.addItem().addExtension(calculatedExpressionExt);
+        var expressionExt =
+                new Extension(Constants.CQF_EXPRESSION).setValue(new Expression().setReference(dependencies.get(13)));
+        questionnaire.addItem().addExtension(expressionExt);
+        questionnaire
+                .addItem()
+                .addExtension(Constants.SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE, new CanonicalType(dependencies.get(14)));
+        var adapter = new QuestionnaireAdapter(questionnaire);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(dependencies.size(), extractedDependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
 }

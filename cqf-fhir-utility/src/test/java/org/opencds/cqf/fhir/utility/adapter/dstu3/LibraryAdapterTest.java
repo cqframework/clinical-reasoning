@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -163,7 +165,35 @@ public class LibraryAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of(
+                "profileRef", "relatedArtifactRef", "dataRequirementProfileRef", "dataRequirementCodeFilterRef");
+        var library = new Library();
+        library.getMeta().addProfile(dependencies.get(0));
+        library.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        library.addDataRequirement().addProfile(dependencies.get(2));
+        library.addDataRequirement().addCodeFilter().setValueSet(new Reference(dependencies.get(3)));
+        var adapter = new LibraryAdapter(library);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
+
+    @Test
+    void adapter_get_and_set_content() {
+        var library = new Library();
+        var adapter = new LibraryAdapter(library);
+        var contentList = new ArrayList<Attachment>();
+        contentList.add(new Attachment().setContentType("text/cql").setData(new byte[10]));
+        adapter.setContent(contentList);
+        assertTrue(adapter.hasContent());
+        assertEquals(contentList, adapter.getContent());
+        adapter.addContent().setContentType("text/xml").setData(new byte[20]);
+        assertEquals(2, adapter.getContent().size());
+        assertEquals("text/xml", adapter.getContent().get(1).getContentType());
+    }
 
     @Test
     void adapter_get_and_set_type() {

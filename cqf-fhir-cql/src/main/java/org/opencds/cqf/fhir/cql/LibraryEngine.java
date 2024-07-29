@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
@@ -20,6 +22,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,8 +165,13 @@ public class LibraryEngine {
             case "text/cql.expression":
             case "text/cql-expression":
             case "text/fhirpath":
+                var libraries = new ArrayList<Pair<String, String>>();
+                if (!StringUtils.isBlank(libraryToBeEvaluated)) {
+                    libraries.add(new ImmutablePair<String, String>(
+                            libraryToBeEvaluated, Canonicals.getIdPart(libraryToBeEvaluated)));
+                }
                 parametersResult = this.evaluateExpression(
-                        expression, parameters, subjectId, null, bundle, contextParameter, resourceParameter);
+                        expression, parameters, subjectId, libraries, bundle, contextParameter, resourceParameter);
                 // The expression is assumed to be the parameter component name
                 // The expression evaluator creates a library with a single expression defined as "return"
                 results = resolveParameterValues(

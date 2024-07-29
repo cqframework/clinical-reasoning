@@ -16,11 +16,13 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
@@ -155,5 +157,27 @@ public class StructureDefinitionAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of(
+                "profileRef",
+                "baseDefinition",
+                "elementProfileRef",
+                "elementTargetProfileRef",
+                "elementValueSetBindingRef");
+        var structureDef = new StructureDefinition();
+        structureDef.getMeta().addProfile(dependencies.get(0));
+        structureDef.setBaseDefinition(dependencies.get(1));
+        structureDef.getDifferential().addElement().addType().setProfile(dependencies.get(2));
+        structureDef.getDifferential().addElement().addType().setTargetProfile(dependencies.get(3));
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setBinding(new ElementDefinitionBindingComponent().setValueSet(new UriType(dependencies.get(4))));
+        var adapter = new StructureDefinitionAdapter(structureDef);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(dependencies.size(), extractedDependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
 }

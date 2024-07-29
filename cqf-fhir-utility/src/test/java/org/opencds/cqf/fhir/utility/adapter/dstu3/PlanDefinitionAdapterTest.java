@@ -163,6 +163,7 @@ public class PlanDefinitionAdapterTest {
     @Test
     void adapter_get_all_dependencies() {
         var dependencies = List.of(
+                "profileRef",
                 "relatedArtifactRef",
                 "libraryRef",
                 "actionTriggerDataReqProfile",
@@ -179,26 +180,27 @@ public class PlanDefinitionAdapterTest {
                 "cpgPartOfExtRef",
                 "nestedActionDefinitionReference");
         var planDef = new PlanDefinition();
-        planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(0)));
-        planDef.getLibraryFirstRep().setReference(dependencies.get(1));
+        planDef.getMeta().addProfile(dependencies.get(0));
+        planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        planDef.getLibraryFirstRep().setReference(dependencies.get(2));
         var action = planDef.getActionFirstRep();
         action.getTriggerDefinitionFirstRep()
                 .getEventData()
-                .setProfile(List.of(new UriType(dependencies.get(2))))
+                .setProfile(List.of(new UriType(dependencies.get(3))))
                 .getCodeFilterFirstRep()
-                .setValueSet(new StringType(dependencies.get(3)));
+                .setValueSet(new StringType(dependencies.get(4)));
         action.getInputFirstRep()
-                .setProfile(List.of(new UriType(dependencies.get(4))))
+                .setProfile(List.of(new UriType(dependencies.get(5))))
                 .getCodeFilterFirstRep()
-                .setValueSet(new StringType(dependencies.get(5)));
+                .setValueSet(new StringType(dependencies.get(6)));
         action.getOutputFirstRep()
-                .setProfile(List.of(new UriType(dependencies.get(6))))
+                .setProfile(List.of(new UriType(dependencies.get(7))))
                 .getCodeFilterFirstRep()
-                .setValueSet(new StringType(dependencies.get(7)));
-        action.getDefinition().setReference(dependencies.get(8));
+                .setValueSet(new StringType(dependencies.get(8)));
+        action.getDefinition().setReference(dependencies.get(9));
         planDef.addExtension(new Extension(
-                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new UriType(dependencies.get(9))));
-        action.addAction().getDefinition().setReference(dependencies.get(10));
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new UriType(dependencies.get(10))));
+        action.addAction().getDefinition().setReference(dependencies.get(11));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());

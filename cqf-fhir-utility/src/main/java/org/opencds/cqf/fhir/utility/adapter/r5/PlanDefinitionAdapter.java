@@ -41,9 +41,9 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getPlanDefinition().hasVersion()
-                ? getPlanDefinition().getUrl() + "|" + getPlanDefinition().getVersion()
-                : getPlanDefinition().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
         /*
          relatedArtifact[].resource
          library[]

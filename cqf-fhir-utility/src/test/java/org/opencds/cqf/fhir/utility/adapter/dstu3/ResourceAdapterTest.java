@@ -81,5 +81,7 @@ public class ResourceAdapterTest {
         resource.addContained(new Library());
         var adapter = new ResourceAdapter(resource);
         assertTrue(adapter.hasContained());
+        assertNotNull(adapter.getContained());
+        assertFalse(adapter.hasContained(adapter.getContained().get(0)));
     }
 }

@@ -501,7 +501,7 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("generate-questionnaire")
                 .thenPackage()
-                .hasEntry(9);
+                .hasEntry(10);
 
         given().repositoryFor(fhirContextR5, "r5")
                 .when()

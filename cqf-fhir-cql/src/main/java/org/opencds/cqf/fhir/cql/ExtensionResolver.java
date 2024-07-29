@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 
 /**
  * This class is used to resolve any CQFExpression extensions that exist on an extension.

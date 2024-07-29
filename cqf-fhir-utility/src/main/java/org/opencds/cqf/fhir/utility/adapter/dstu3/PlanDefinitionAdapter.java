@@ -43,9 +43,9 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = hasVersion()
-                ? getPlanDefinition().getUrl() + "|" + getPlanDefinition().getVersion()
-                : getPlanDefinition().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
         /*
          https://build.fhir.org/ig/HL7/crmi-ig/distribution.html#package-and-data-requirements
          relatedArtifact[].resource

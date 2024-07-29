@@ -20,9 +20,11 @@ import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class QuestionnaireAdapterTest {
@@ -154,5 +156,38 @@ public class QuestionnaireAdapterTest {
     }
 
     @Test
-    void adapter_get_all_dependencies() {}
+    void adapter_get_all_dependencies() {
+        var dependencies = List.of(
+                "profileRef",
+                "cqfLibraryRef",
+                // "variableRef",
+                "itemDefinitionRef"
+                // "answerValueSetRef",
+                // "itemMediaRef",
+                // "itemAnswerMediaRef",
+                // "unitValueSetRef",
+                // "referenceProfileRef",
+                // "candidateExpressionRef",
+                // "lookupQuestionnaireRef",
+                // "itemVariableRef",
+                // "initialExpressionRef",
+                // "calculatedExpressionRef",
+                // "calculatedValueRef",
+                // "expressionRef",
+                // "subQuestionnaireRef"
+                );
+        var questionnaire = new Questionnaire();
+        questionnaire.getMeta().addProfile(dependencies.get(0));
+        questionnaire.addExtension(Constants.CQIF_LIBRARY, new Reference(dependencies.get(1)));
+        // var variableExt = new Extension(Constants.VARIABLE_EXTENSION).setValue(new
+        // Expression().setReference(dependencies.get(2)));
+        // questionnaire.addExtension(variableExt);
+        questionnaire.addItem().setDefinition(dependencies.get(2) + "#Observation");
+        var adapter = new QuestionnaireAdapter(questionnaire);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(dependencies.size(), extractedDependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
 }

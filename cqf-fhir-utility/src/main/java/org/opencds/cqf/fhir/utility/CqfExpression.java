@@ -1,6 +1,7 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.utility;
 
-import org.opencds.cqf.fhir.utility.Constants;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
@@ -14,6 +15,42 @@ public class CqfExpression {
     private String altLanguage;
     private String altExpression;
     private String altLibraryUrl;
+
+    public static CqfExpression of(IBaseExtension<?, ?> extension, String defaultLibraryUrl) {
+        if (extension == null) {
+            return null;
+        }
+        var fhirPackagePath = "org.hl7.fhir.";
+        var className = extension.getClass().getCanonicalName();
+        var modelSplit = className.split(fhirPackagePath);
+        if (modelSplit.length < 2) {
+            throw new IllegalArgumentException();
+        }
+        var model = modelSplit[1];
+        model = model.substring(0, model.indexOf(".")).toUpperCase();
+        var version = FhirVersionEnum.forVersionString(model);
+        switch (version) {
+            case DSTU3:
+                var libraryExtension = extension.getExtension().stream()
+                        .map(e -> (IBaseExtension<?, ?>) e)
+                        .filter(e -> e.getUrl().equals(Constants.CQIF_LIBRARY))
+                        .findFirst()
+                        .orElse(null);
+                return new CqfExpression(
+                        "text/cql.expression",
+                        extension.getValue().toString(),
+                        libraryExtension == null
+                                ? defaultLibraryUrl
+                                : libraryExtension.getValue().toString());
+            case R4:
+                return CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), defaultLibraryUrl);
+            case R5:
+                return CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), defaultLibraryUrl);
+
+            default:
+                return null;
+        }
+    }
 
     public static CqfExpression of(org.hl7.fhir.r4.model.Expression expression, String defaultLibraryUrl) {
         if (expression == null) {

@@ -41,9 +41,9 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getPlanDefinition().hasVersion()
-                ? getPlanDefinition().getUrl() + "|" + getPlanDefinition().getVersion()
-                : getPlanDefinition().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
         /*
          relatedArtifact[].resource
          library[]
@@ -73,6 +73,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
         }
         // action[]
         getPlanDefinition().getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
+        // extension[cpg-partOf]
         getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
                 .filter(ext -> ext.hasValue())

@@ -161,6 +161,7 @@ public class PlanDefinitionAdapterTest {
     @Test
     void adapter_get_all_dependencies() {
         var dependencies = List.of(
+                "profileRef",
                 "relatedArtifactRef",
                 "libraryRef",
                 "actionTriggerDataReqProfile",
@@ -175,28 +176,29 @@ public class PlanDefinitionAdapterTest {
                 "cpgPartOfExtRef",
                 "nestedActionDefinitionRef");
         var planDef = new PlanDefinition();
-        planDef.getRelatedArtifactFirstRep().setResource(dependencies.get(0));
-        planDef.getLibrary().add(new CanonicalType(dependencies.get(1)));
+        planDef.getMeta().addProfile(dependencies.get(0));
+        planDef.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        planDef.getLibrary().add(new CanonicalType(dependencies.get(2)));
         var action = planDef.getActionFirstRep();
         action.getTriggerFirstRep()
                 .getDataFirstRep()
-                .setProfile(List.of(new CanonicalType(dependencies.get(2))))
+                .setProfile(List.of(new CanonicalType(dependencies.get(3))))
                 .getCodeFilterFirstRep()
-                .setValueSet(dependencies.get(3));
+                .setValueSet(dependencies.get(4));
         action.getInputFirstRep()
-                .setProfile(List.of(new CanonicalType(dependencies.get(4))))
+                .setProfile(List.of(new CanonicalType(dependencies.get(5))))
                 .getCodeFilterFirstRep()
-                .setValueSet(dependencies.get(5));
+                .setValueSet(dependencies.get(6));
         action.getOutputFirstRep()
-                .setProfile(List.of(new CanonicalType(dependencies.get(6))))
+                .setProfile(List.of(new CanonicalType(dependencies.get(7))))
                 .getCodeFilterFirstRep()
-                .setValueSet(dependencies.get(7));
-        action.setDefinition(new CanonicalType(dependencies.get(8)));
-        action.getConditionFirstRep().getExpression().setReference(dependencies.get(9));
-        action.getDynamicValueFirstRep().getExpression().setReference(dependencies.get(10));
+                .setValueSet(dependencies.get(8));
+        action.setDefinition(new CanonicalType(dependencies.get(9)));
+        action.getConditionFirstRep().getExpression().setReference(dependencies.get(10));
+        action.getDynamicValueFirstRep().getExpression().setReference(dependencies.get(11));
         planDef.addExtension(new Extension(
-                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new CanonicalType(dependencies.get(11))));
-        action.addAction().setDefinition(new CanonicalType(dependencies.get(12)));
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new CanonicalType(dependencies.get(12))));
+        action.addAction().setDefinition(new CanonicalType(dependencies.get(13)));
         var adapter = new PlanDefinitionAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());

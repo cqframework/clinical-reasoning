@@ -10,9 +10,10 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
@@ -43,10 +44,9 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements Knowl
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getStructureDefinition().hasVersion()
-                ? getStructureDefinition().getUrl() + "|"
-                        + getStructureDefinition().getVersion()
-                : getStructureDefinition().getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
         /*
            extension[].url
            modifierExtension[].url
@@ -62,17 +62,70 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements Knowl
            extension[cpg-featureExpression].reference
         */
 
-        var libraryExtensions = getStructureDefinition().getExtensionsByUrl(Constants.CQF_LIBRARY);
-        for (var libraryExt : libraryExtensions) {
-            DependencyInfo dependency = new DependencyInfo(
+        if (get().hasBaseDefinition()) {
+            references.add(new DependencyInfo(
                     referenceSource,
-                    ((CanonicalType) libraryExt.getValue()).asStringValue(),
-                    libraryExt.getExtension(),
-                    (reference) -> libraryExt.setValue(new CanonicalType(reference)));
-            references.add(dependency);
+                    get().getBaseDefinition(),
+                    get().getBaseDefinitionElement().getExtension(),
+                    (reference) -> get().setBaseDefinition(reference)));
         }
+        get().getExtensionsByUrl(Constants.CPG_ASSERTION_EXPRESSION).stream()
+                .filter(e -> e.getValue() instanceof Expression)
+                .map(e -> (Expression) e.getValue())
+                .filter(e -> e.hasReference())
+                .forEach(expression -> references.add(new DependencyInfo(
+                        referenceSource,
+                        expression.getReference(),
+                        expression.getExtension(),
+                        (reference) -> expression.setReference(reference))));
+        get().getExtensionsByUrl(Constants.CPG_FEATURE_EXPRESSION).stream()
+                .filter(e -> e.getValue() instanceof Expression)
+                .map(e -> (Expression) e.getValue())
+                .filter(e -> e.hasReference())
+                .forEach(expression -> references.add(new DependencyInfo(
+                        referenceSource,
+                        expression.getReference(),
+                        expression.getExtension(),
+                        (reference) -> expression.setReference(reference))));
+        get().getExtensionsByUrl(Constants.CPG_INFERENCE_EXPRESSION).stream()
+                .filter(e -> e.getValue() instanceof Expression)
+                .map(e -> (Expression) e.getValue())
+                .filter(e -> e.hasReference())
+                .forEach(expression -> references.add(new DependencyInfo(
+                        referenceSource,
+                        expression.getReference(),
+                        expression.getExtension(),
+                        (reference) -> expression.setReference(reference))));
+        get().getDifferential()
+                .getElement()
+                .forEach(element -> getDependenciesOfDifferential(element, references, referenceSource));
 
         return references;
+    }
+
+    private void getDependenciesOfDifferential(
+            ElementDefinition element, List<IDependencyInfo> references, String referenceSource) {
+        element.getType().forEach(type -> {
+            type.getProfile()
+                    .forEach(profile -> references.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValueAsString(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference))));
+            type.getTargetProfile()
+                    .forEach(profile -> references.add(new DependencyInfo(
+                            referenceSource,
+                            profile.getValueAsString(),
+                            profile.getExtension(),
+                            (reference) -> profile.setValue(reference))));
+        });
+        if (element.getBinding().hasValueSet()) {
+            references.add(new DependencyInfo(
+                    referenceSource,
+                    element.getBinding().getValueSet(),
+                    element.getBinding().getExtension(),
+                    (reference) -> element.getBinding().setValueSet(reference)));
+        }
     }
 
     @Override

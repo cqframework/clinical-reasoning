@@ -64,7 +64,10 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
 
     @Override
     public List<IDependencyInfo> getDependencies() {
-        return new ArrayList<>();
+        List<IDependencyInfo> references = new ArrayList<>();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+        return references;
     }
 
     @SuppressWarnings("unchecked")

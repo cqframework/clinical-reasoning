@@ -30,8 +30,19 @@ public class Constants {
     public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";
     public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
             "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
+    public static final String QUESTIONNAIRE_REFERENCE_PROFILE =
+            "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile";
+    public static final String QUESTIONNAIRE_UNIT_VALUE_SET =
+            "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet";
+
+    public static final String VARIABLE_EXTENSION = "http://hl7.org/fhir/StructureDefinition/variable";
+
+    public static final String CPG_ASSERTION_EXPRESSION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-assertionExpression";
     public static final String CPG_FEATURE_EXPRESSION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression";
+    public static final String CPG_INFERENCE_EXPRESSION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-inferenceExpression";
     public static final String CPG_KNOWLEDGE_CAPABILITY =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability";
     public static final String CPG_KNOWLEDGE_REPRESENTATION_LEVEL =
@@ -45,20 +56,20 @@ public class Constants {
     public static final String CPG_INPUT_TEXT = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
     public static final String CPG_INPUT_DESCRIPTION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
-    // public static final String CQF_QUESTIONNAIRE =
-    // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
 
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
     public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
 
+    // DSTU3 CQF Extensions
+    public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";
+    public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression";
+
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
-    // This is only for dstu3 since the Expression type does not exist in that version
-    public static final String CQF_EXPRESSION_LANGUAGE =
-            "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+    public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";
 
     public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
@@ -98,6 +109,12 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observation-extract-category";
     public static final String SDC_OBSERVATION_CATEGORY = "http://hl7.org/fhir/observation-category";
     public static final String SDC_CATEGORY_SURVEY = "survey";
+    public static final String SDC_QUESTIONNAIRE_LAUNCH_CONTEXT =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
+    public static final String SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire";
+    public static final String SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression";
 
     // $apply parameter names
     public static final String APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition";

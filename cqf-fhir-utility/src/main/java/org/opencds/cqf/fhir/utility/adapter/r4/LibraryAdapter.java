@@ -68,8 +68,8 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<IDependencyInfo>();
-        final String referenceSource =
-                hasVersion() ? getUrl() + "|" + getLibrary().getVersion() : getUrl();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
 
         // relatedArtifact[].resource
         getRelatedArtifact().stream()

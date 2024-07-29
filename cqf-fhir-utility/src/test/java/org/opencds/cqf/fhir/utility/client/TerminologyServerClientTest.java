@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
@@ -48,6 +49,10 @@ public class TerminologyServerClientTest {
                 new org.hl7.fhir.r4.model.Extension(Constants.APIKEY, new org.hl7.fhir.r4.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r4.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
+        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
+
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -108,6 +113,9 @@ public class TerminologyServerClientTest {
                 new org.hl7.fhir.r5.model.Extension(Constants.APIKEY, new org.hl7.fhir.r5.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r5.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
+        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R5);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -169,6 +177,9 @@ public class TerminologyServerClientTest {
                 Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.dstu3.model.Parameters.class);
         var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
+        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.DSTU3);
         when(clientMock
                         .operation()
                         .onType(anyString())
@@ -220,5 +231,27 @@ public class TerminologyServerClientTest {
             noException = e;
         }
         assertNull(noException);
+    }
+
+    @Test
+    void addressUrlParsing() {
+        var supportedVersions = Arrays.asList(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
+        for (final var version : supportedVersions) {
+            var ts = new TerminologyServerClient(new FhirContext(version));
+            var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
+            // remove the FHIR type and the ID if included
+            assertEquals(
+                    theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1"));
+            // remove a FHIR type if one was included
+            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet"));
+            // don't break on the actual base url
+            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl));
+            // ensure it's forcing https
+            assertEquals(
+                    theCorrectBaseServerUrl,
+                    ts.getAddressBase(theCorrectBaseServerUrl.replace("https", "http")));
+            // remove trailing slashes
+            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/"));
+        }
     }
 }

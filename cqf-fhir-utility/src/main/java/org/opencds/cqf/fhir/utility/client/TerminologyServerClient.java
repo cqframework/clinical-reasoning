@@ -7,6 +7,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -106,11 +108,54 @@ public class TerminologyServerClient {
 
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.
     // Converts http URLs to https
-    private String getAddressBase(String address) {
-        address = address.substring(0, address.indexOf(Objects.requireNonNull(Canonicals.getResourceType(address))));
+    public String getAddressBase(String address) {
+        Objects.requireNonNull(address, "address must not be null");
         if (address.startsWith("http://")) {
             address = address.replaceFirst("http://", "https://");
         }
+        // remove trailing slashes
+        if (address.endsWith("/")) {
+            address = address.substring(0, address.length() - 1);
+        }
+        // check if URL is in the format [base URL]/[resource type]/[id]
+        var maybeFhirType = Canonicals.getResourceType(address);
+        if (maybeFhirType != null && StringUtils.isNotBlank(maybeFhirType)) {
+            IBaseEnumFactory<?> factory = getEnumFactory();
+            try {
+                factory.fromCode(maybeFhirType);
+            } catch (IllegalArgumentException e) {
+                // check if URL is in the format [base URL]/[resource type]
+                var lastSlashIndex = address.lastIndexOf("/");
+                if (lastSlashIndex > 0) {
+                    maybeFhirType = address.substring(lastSlashIndex + 1, address.length());
+                    try {
+                        factory.fromCode(maybeFhirType);
+                    } catch (IllegalArgumentException e2) {
+                        return address;
+                    }
+                } else {
+                    return address;
+                }
+            }
+            address = address.substring(0, address.indexOf(maybeFhirType) - 1);
+        }
         return address;
+    }
+
+    private IBaseEnumFactory<?> getEnumFactory() {
+        switch (this.ctx.getVersion().getVersion()) {
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
+
+            case R4:
+                return new org.hl7.fhir.r4.model.Enumerations.ResourceTypeEnumFactory();
+
+            case R5:
+                return new org.hl7.fhir.r5.model.Enumerations.ResourceTypeEnumEnumFactory();
+
+            default:
+                throw new UnprocessableEntityException("unsupported FHIR version: "
+                        + this.ctx.getVersion().getVersion().toString());
+        }
     }
 }

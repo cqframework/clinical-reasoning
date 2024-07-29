@@ -240,16 +240,13 @@ public class TerminologyServerClientTest {
             var ts = new TerminologyServerClient(new FhirContext(version));
             var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
             // remove the FHIR type and the ID if included
-            assertEquals(
-                    theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1"));
+            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1"));
             // remove a FHIR type if one was included
             assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet"));
             // don't break on the actual base url
             assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl));
             // ensure it's forcing https
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    ts.getAddressBase(theCorrectBaseServerUrl.replace("https", "http")));
+            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl.replace("https", "http")));
             // remove trailing slashes
             assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/"));
         }

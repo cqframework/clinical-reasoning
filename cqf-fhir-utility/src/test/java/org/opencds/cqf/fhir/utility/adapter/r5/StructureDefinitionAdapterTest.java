@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Expression;
@@ -116,6 +117,9 @@ public class StructureDefinitionAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, structureDef.getDate());
+        var newDateElement = new DateTimeType().setValue(new Date());
+        adapter.setDateElement(newDateElement);
+        assertEquals(newDateElement, structureDef.getDateElement());
         var newApprovalDate = new Date();
         newApprovalDate.setTime(100);
         adapter.setApprovalDate(newApprovalDate);
@@ -143,6 +147,8 @@ public class StructureDefinitionAdapterTest {
         var adapter = new StructureDefinitionAdapter(structureDef);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.getRelatedArtifactsOfType("invalid"));
+        assertEquals(0, adapter.getRelatedArtifactsOfType("depends-on").size());
     }
 
     @Test

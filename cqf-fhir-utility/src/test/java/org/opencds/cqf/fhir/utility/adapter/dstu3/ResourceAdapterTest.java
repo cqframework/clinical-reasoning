@@ -70,6 +70,7 @@ public class ResourceAdapterTest {
         var extensionList = List.of(new Extension().setUrl("test-extension-url").setValue(new BooleanType(true)));
         var adapter = new ResourceAdapter(resource);
         adapter.setExtension(extensionList);
+        assertTrue(adapter.hasExtension());
         assertEquals(extensionList, resource.getExtension());
         assertEquals(extensionList, adapter.getExtension());
         assertTrue(adapter.hasExtension("test-extension-url"));

@@ -31,17 +31,8 @@ public class CqfExpression {
         var version = FhirVersionEnum.forVersionString(model);
         switch (version) {
             case DSTU3:
-                var libraryExtension = extension.getExtension().stream()
-                        .map(e -> (IBaseExtension<?, ?>) e)
-                        .filter(e -> e.getUrl().equals(Constants.CQIF_LIBRARY))
-                        .findFirst()
-                        .orElse(null);
                 return new CqfExpression(
-                        "text/cql.expression",
-                        extension.getValue().toString(),
-                        libraryExtension == null
-                                ? defaultLibraryUrl
-                                : libraryExtension.getValue().toString());
+                        "text/cql.expression", extension.getValue().toString(), defaultLibraryUrl);
             case R4:
                 return CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), defaultLibraryUrl);
             case R5:
@@ -65,9 +56,7 @@ public class CqfExpression {
                 expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference()
-                        ? altExpression.getReference()
-                        : defaultLibraryUrl);
+                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null);
     }
 
     public static CqfExpression of(org.hl7.fhir.r5.model.Expression expression, String defaultLibraryUrl) {
@@ -83,9 +72,7 @@ public class CqfExpression {
                 expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference()
-                        ? altExpression.getReference()
-                        : defaultLibraryUrl);
+                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null);
     }
 
     public CqfExpression() {}

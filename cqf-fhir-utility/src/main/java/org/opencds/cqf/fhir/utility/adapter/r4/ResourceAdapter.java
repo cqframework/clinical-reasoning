@@ -3,16 +3,12 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import static java.util.Optional.ofNullable;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
 
@@ -100,17 +96,5 @@ class ResourceAdapter extends BaseResourceAdapter {
     @Override
     public boolean equalsShallow(IBase other) {
         return getResource().equalsShallow((Base) other);
-    }
-
-    @Override
-    public void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
-        getDomainResource()
-                .ifPresent(r -> r.setExtension(
-                        extensions.stream().map(e -> (Extension) e).collect(Collectors.toList())));
-    }
-
-    @Override
-    public <T extends IBaseExtension<?, ?>> void addExtension(T extension) {
-        getDomainResource().ifPresent(r -> r.addExtension((Extension) extension));
     }
 }

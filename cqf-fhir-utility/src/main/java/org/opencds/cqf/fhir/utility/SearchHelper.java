@@ -134,10 +134,7 @@ public class SearchHelper {
      * Gets the resource type for the given canonical, based on the convention that canonical
      * URLs are of the form [base]/[resourceType]/[tail]
      *
-     * If the URL does not conform to the convention, the cqf-resourceType extension is used
-     * to determine the type of the resource, if present.
-     *
-     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
+     * If the URL does not conform to the convention, the type of the canonical is assumed to be CodeSystem, on
      * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
      *
      * @param repository

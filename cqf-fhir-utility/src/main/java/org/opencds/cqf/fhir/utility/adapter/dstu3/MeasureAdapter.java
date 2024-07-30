@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -10,16 +10,15 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -201,10 +200,10 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
             .collect(Collectors.toList()));
 
         // library[]
-        List<CanonicalType> libraries = this.getMeasure().getLibrary();
-        for (CanonicalType ct : libraries) {
+        List<Reference> libraries = this.getMeasure().getLibrary();
+        for (Reference ct : libraries) {
             DependencyInfo dependency = new DependencyInfo(
-                referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
+                referenceSource, ct.getReference(), ct.getExtension(), (reference) -> ct.setReference(reference));
             references.add(dependency);
         }
 

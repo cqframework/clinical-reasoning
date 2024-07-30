@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -10,16 +10,17 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Measure;
+import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
 

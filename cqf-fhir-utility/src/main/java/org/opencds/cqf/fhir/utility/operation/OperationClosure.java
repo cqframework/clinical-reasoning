@@ -7,12 +7,12 @@ import org.opencds.cqf.fhir.api.Repository;
  * An OperationClosure is a wrapper around a method annotated with @Operation. It contains a reference to the method
  * and to a factory for the class that contains this method. This allows instantiating the class as needed
  */
-class OperationClosure {
+class OperationClosure<T> {
 
     private final MethodBinder methodBinder;
-    private final Function<Repository, Object> factory;
+    private final Function<Repository, T> factory;
 
-    OperationClosure(Function<Repository, Object> factory, MethodBinder methodBinder) {
+    OperationClosure(Function<Repository, T> factory, MethodBinder methodBinder) {
         this.methodBinder = methodBinder;
         this.factory = factory;
     }
@@ -21,7 +21,7 @@ class OperationClosure {
         return this.methodBinder;
     }
 
-    Function<Repository, Object> factory() {
+    Function<Repository, T> factory() {
         return this.factory;
     }
 }

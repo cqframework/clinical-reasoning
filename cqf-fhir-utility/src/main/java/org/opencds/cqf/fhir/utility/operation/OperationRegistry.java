@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.api.Repository;
  * operations by name.
  */
 public class OperationRegistry {
-   public class OperationInvocationParams {
+    public class OperationInvocationParams {
 
         private final Repository repository;
         private final String name;
@@ -27,9 +27,7 @@ public class OperationRegistry {
         private IIdType id;
         private Class<? extends IBaseResource> resourceType;
 
-        OperationInvocationParams(
-                Repository repository,
-                String name) {
+        OperationInvocationParams(Repository repository, String name) {
             this.repository = requireNonNull(repository, "Repository cannot be null");
             this.name = requireNonNull(name, "Operation name cannot be null");
         }
@@ -66,19 +64,31 @@ public class OperationRegistry {
         }
 
         Scope scope() {
-            return id != null ? Scope.INSTANCE : (resourceType != null ? Scope.TYPE : Scope.SERVER);
+            if (id != null) {
+                return Scope.INSTANCE;
+            } else if (resourceType != null) {
+                return Scope.TYPE;
+            } else {
+                return Scope.SERVER;
+            }
         }
 
         String typeName() {
-            return resourceType != null ? resourceType.getSimpleName() : (id != null ? id.getResourceType() : null);
+            if (resourceType != null) {
+                return resourceType.getSimpleName();
+            } else if (id != null) {
+                return id.getResourceType();
+            } else {
+                return null;
+            }
         }
 
-        public IBaseResource execute() {
+        public IBaseResource execute() throws Exception {
             return OperationRegistry.this.execute(this);
         }
     }
 
-    private final Multimap<String, OperationClosure> operationMap;
+    private final Multimap<String, OperationClosure<?>> operationMap;
 
     public OperationRegistry() {
         this.operationMap = MultimapBuilder.hashKeys().arrayListValues().build();
@@ -94,9 +104,8 @@ public class OperationRegistry {
             throw new IllegalArgumentException("No operations found on class " + clazz.getName());
         }
 
-        // TODO: additional validation to ensure conflicting functions are not registered
         for (var methodBinder : methodBinders) {
-            var closure = new OperationClosure((Function<Repository, Object>) factory, methodBinder);
+            var closure = new OperationClosure<T>(factory, methodBinder);
             operationMap.put(methodBinder.name(), closure);
         }
     }
@@ -105,22 +114,17 @@ public class OperationRegistry {
         return new OperationInvocationParams(repository, operationName);
     }
 
-
-    IBaseResource execute(OperationInvocationParams params) {
+    IBaseResource execute(OperationInvocationParams params) throws Exception {
         requireNonNull(params, "Operation invocation parameters cannot be null");
         var closure = findOperation(params.scope(), params.name(), params.typeName());
 
         var instance = closure.factory().apply(params.repository);
         var callable = closure.methodBinder().bind(instance, params.id(), params.parameters());
 
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            throw new RuntimeException("Error invoking operation " + params.name(), e);
-        }
+        return callable.call();
     }
 
-    private OperationClosure findOperation(Scope scope, String name, String typeName) {
+    private OperationClosure<?> findOperation(Scope scope, String name, String typeName) {
         requireNonNull(scope, "Scope cannot be null");
         requireNonNull(name, "Operation name cannot be null");
 
@@ -136,7 +140,7 @@ public class OperationRegistry {
             throw new IllegalArgumentException("No operation found with name " + name + " and scope " + scope);
         }
 
-        Predicate<OperationClosure> typePredicate =
+        Predicate<OperationClosure<?>> typePredicate =
                 typeName != null ? c -> c.methodBinder().typeName().equals(typeName) : c -> true;
         var typedClosures = scopedClosures.stream().filter(typePredicate).collect(Collectors.toList());
 

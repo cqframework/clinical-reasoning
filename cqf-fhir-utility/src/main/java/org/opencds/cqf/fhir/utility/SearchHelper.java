@@ -88,7 +88,7 @@ public class SearchHelper {
         }
         catch (DataFormatException e) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
-            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(canonical)
+            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(canonical);
             if (cqfResourceTypeExt.isPresent()) {
                 try {
                     resourceType = repository

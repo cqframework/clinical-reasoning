@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
@@ -57,7 +58,9 @@ class OperationRegistryTest {
         // Internally, the operation registry passes an instance of the repository to the operation
         // factory and constructs the operation provider on the fly.
         var repository = new IgRepository(FhirContext.forR4Cached(), root);
-        var result = operationRegistry.buildOperation(repository, "example").execute();
+        var o = operationRegistry.buildOperation(repository, "example");
+        var result = assertDoesNotThrow(() -> o.execute());
+
         var p = assertInstanceOf(Parameters.class, result);
         var num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
                 .getValue();

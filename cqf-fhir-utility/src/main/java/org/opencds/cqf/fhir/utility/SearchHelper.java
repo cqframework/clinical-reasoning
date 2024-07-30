@@ -2,13 +2,19 @@ package org.opencds.cqf.fhir.utility;
 
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 
+import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -81,15 +87,47 @@ public class SearchHelper {
                 .getImplementingClass();
         }
         catch (DataFormatException e) {
-            // TODO: Use the "cqf-resourceType" extension to figure this out, if it's present
-            // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
-            resourceType = repository
-                .fhirContext()
-                .getResourceDefinition("CodeSystem")
-                .getImplementingClass();
+            // Use the "cqf-resourceType" extension to figure this out, if it's present
+            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(canonical)
+            if (cqfResourceTypeExt.isPresent()) {
+                try {
+                    resourceType = repository
+                        .fhirContext()
+                        .getResourceDefinition(cqfResourceTypeExt.get())
+                        .getImplementingClass();
+                } catch (DataFormatException e) {
+                    throw new UnprocessableEntityException("cqf-resourceType extension contains invalid resource type: " + cqfResourceTypeExt.get());
+                }
+            } else {
+                // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
+                resourceType = repository
+                    .fhirContext()
+                    .getResourceDefinition("CodeSystem")
+                    .getImplementingClass();
+            }
         }
-
         return resourceType;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <CanonicalType extends IPrimitiveType<String>> Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(CanonicalType canonical) {
+        return getExtensions(canonical).stream()
+            .filter(ext -> ext.getUrl().contains("cqf-resourceType"))
+            .findAny()
+            .map(ext -> ((IPrimitiveType<String>)ext.getValue()).getValue());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension> getExtensions(CanonicalType canonical) {
+        if (canonical instanceof org.hl7.fhir.dstu3.model.PrimitiveType) {
+            return ((org.hl7.fhir.dstu3.model.PrimitiveType<String>) canonical).getExtension().stream().map(ext -> (IBaseExtension)ext).toList();
+        } else if (canonical instanceof org.hl7.fhir.r4.model.PrimitiveType) {
+            return ((org.hl7.fhir.r4.model.PrimitiveType<String>) canonical).getExtension().stream().map(ext -> (IBaseExtension)ext).toList();
+        } else if (canonical instanceof org.hl7.fhir.r5.model.PrimitiveType) {
+            return ((org.hl7.fhir.r5.model.PrimitiveType<String>) canonical).getExtension().stream().map(ext -> (IBaseExtension)ext).toList();
+        } else {
+            throw new UnprocessableEntityException("Unsupported FHIR version for canonical: " + canonical.getValue());
+        }
     }
 
     /**
@@ -115,7 +153,7 @@ public class SearchHelper {
                 .getImplementingClass();
         }
         catch (RuntimeException e) {
-            // TODO: Use the "cqf-resourceType" extension to figure this out, if it's present
+            // Can't use the "cqf-resourceType" extension to figure this out because we just get a canonical string
             // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
             resourceType = repository
                 .fhirContext()

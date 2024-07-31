@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,11 +52,6 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
 import org.slf4j.LoggerFactory;
@@ -101,11 +97,17 @@ class KnowledgeArtifactReleaseVisitorTests {
     }
 
     @Test
+    @Disabled
     void visitMeasureCollectionTest() {
-        //IgConventions conventions = new IgConventions(FhirTypeLayout.DIRECTORY_PER_TYPE, CategoryLayout.DIRECTORY_PER_CATEGORY, FilenameMode.ID_ONLY);
-        //Repository repository = new IgRepository(fhirContext, Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset"), conventions, EncodingBehavior.DEFAULT, null);
-        // TODO: This IG repository implementation is built based on the "input" directory being the root, but the parent is usually considered the root...
-        Repository repository = new IgRepository(fhirContext, Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset\\input"));
+        // IgConventions conventions = new IgConventions(FhirTypeLayout.DIRECTORY_PER_TYPE,
+        // CategoryLayout.DIRECTORY_PER_CATEGORY, FilenameMode.ID_ONLY);
+        // Repository repository = new IgRepository(fhirContext,
+        // Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset"), conventions,
+        // EncodingBehavior.DEFAULT, null);
+        // TODO: This IG repository implementation is built based on the "input" directory being the root, but the
+        // parent is usually considered the root...
+        Repository repository = new IgRepository(
+                fhirContext, Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset\\input"));
         Library library = repository.read(Library.class, new IdType("Library/Manifest-Final-Draft"));
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
@@ -116,7 +118,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // Set the ID to Manifest-Release
-        Bundle returnResource = (Bundle)libraryAdapter.accept(releaseVisitor, repository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repository, params);
         library.setId(new IdType("Library/Manifest-Release"));
         repository.create(library);
         assertNotNull(returnResource);
@@ -200,7 +202,11 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
-                "http://hl7.org/fhir/StructureDefinition/ServiceRequest");
+                "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
+                "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "http://loinc.org",
+                "http://hl7.org/fhir/sid/icd-10-cm",
+                "http://snomed.info/sct");
         var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,

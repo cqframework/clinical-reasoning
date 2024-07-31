@@ -31,7 +31,7 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         if (resource instanceof Library) {
             retval = createLibrary(resource);
         } else if (resource instanceof Measure) {
-            retval = new org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter((Measure)resource);
+            retval = new org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter((Measure) resource);
         } else if (resource instanceof PlanDefinition) {
             retval = new org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionAdapter((PlanDefinition) resource);
         } else if (resource instanceof ValueSet) {

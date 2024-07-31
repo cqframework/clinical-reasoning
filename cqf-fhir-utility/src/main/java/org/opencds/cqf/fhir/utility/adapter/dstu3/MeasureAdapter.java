@@ -1,15 +1,10 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -19,15 +14,20 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
 
@@ -37,8 +37,7 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
         super(measure);
 
         if (!(measure instanceof Measure)) {
-            throw new IllegalArgumentException(
-                "resource passed as measure argument is not a Measure resource");
+            throw new IllegalArgumentException("resource passed as measure argument is not a Measure resource");
         }
 
         this.measure = (Measure) measure;
@@ -50,8 +49,7 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
     }
 
     @Override
-    public IBase accept(
-        KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
+    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
         return visitor.visit(this, repository, operationParameters);
     }
 
@@ -146,16 +144,16 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             var edrExtensions = this.getMeasure().getExtension().stream()
-                .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
-                .filter(ext -> ext.hasValue())
-                .collect(Collectors.toList());
+                    .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
+                    .filter(ext -> ext.hasValue())
+                    .collect(Collectors.toList());
 
             var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
             if (edrExtension != null) {
-                var edrReference = ((Reference)edrExtension.getValue()).getReference();
+                var edrReference = ((Reference) edrExtension.getValue()).getReference();
                 for (var c : getMeasure().getContained()) {
                     if (c.hasId() && String.format("#%s", c.getId()).equals(edrReference) && c instanceof Library) {
-                        effectiveDataRequirements = (Library)c;
+                        effectiveDataRequirements = (Library) c;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }
                 }
@@ -176,9 +174,8 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
         // Otherwise, fall back to the relatedArtifact and library
         List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = this.getMeasure().hasVersion()
-            ? this.getMeasure().getUrl() + "|"
-            + this.getMeasure().getVersion()
-            : this.getMeasure().getUrl();
+                ? this.getMeasure().getUrl() + "|" + this.getMeasure().getVersion()
+                : this.getMeasure().getUrl();
         /*
          relatedArtifact[].resource
          library[]
@@ -196,14 +193,14 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
 
         // relatedArtifact[].resource
         references.addAll(this.getRelatedArtifact().stream()
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .collect(Collectors.toList()));
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .collect(Collectors.toList()));
 
         // library[]
         List<Reference> libraries = this.getMeasure().getLibrary();
         for (Reference ct : libraries) {
             DependencyInfo dependency = new DependencyInfo(
-                referenceSource, ct.getReference(), ct.getExtension(), (reference) -> ct.setReference(reference));
+                    referenceSource, ct.getReference(), ct.getExtension(), (reference) -> ct.setReference(reference));
             references.add(dependency);
         }
 
@@ -257,9 +254,9 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
         this.getMeasure()
-            .setRelatedArtifact(relatedArtifacts.stream()
-                .map(ra -> (RelatedArtifact) ra)
-                .collect(Collectors.toList()));
+                .setRelatedArtifact(relatedArtifacts.stream()
+                        .map(ra -> (RelatedArtifact) ra)
+                        .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unchecked")
@@ -272,8 +269,8 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
             throw new UnprocessableEntityException("Invalid related artifact code");
         }
         return this.getRelatedArtifact().stream()
-            .filter(ra -> ra.getType() == type)
-            .collect(Collectors.toList());
+                .filter(ra -> ra.getType() == type)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -298,8 +295,8 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
     @Override
     public String getStatus() {
         return this.getMeasure().getStatus() == null
-            ? null
-            : this.getMeasure().getStatus().toCode();
+                ? null
+                : this.getMeasure().getStatus().toCode();
     }
 
     @Override

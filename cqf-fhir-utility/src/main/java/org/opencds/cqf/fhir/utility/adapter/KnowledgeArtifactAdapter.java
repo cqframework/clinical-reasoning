@@ -47,7 +47,11 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     void setTitle(String title);
 
     default String getDescriptor() {
-        return String.format("%s %s%s", this.get().fhirType(), this.hasTitle() ? this.getTitle() : this.getName(), this.hasVersion() ? ", " + this.getVersion() : "");
+        return String.format(
+                "%s %s%s",
+                this.get().fhirType(),
+                this.hasTitle() ? this.getTitle() : this.getName(),
+                this.hasVersion() ? ", " + this.getVersion() : "");
     }
 
     boolean hasUrl();
@@ -238,6 +242,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                 || resource instanceof org.hl7.fhir.r5.model.MetadataResource;
     }
 
+    // TODO: Make this a semver sort
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> isSupportedMetadataResource(r))

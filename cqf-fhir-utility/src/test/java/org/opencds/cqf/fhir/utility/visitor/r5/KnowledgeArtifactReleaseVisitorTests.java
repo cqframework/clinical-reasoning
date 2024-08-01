@@ -167,7 +167,12 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab",
                 "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab",
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle",
-                "http://hl7.org/fhir/StructureDefinition/ServiceRequest");
+                "http://hl7.org/fhir/StructureDefinition/ServiceRequest",
+                "http://snomed.info/sct",
+                "http://hl7.org/fhir/sid/icd-10-cm",
+                "http://loinc.org",
+                "http://www.nlm.nih.gov/research/umls/rxnorm"
+                );
         var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,

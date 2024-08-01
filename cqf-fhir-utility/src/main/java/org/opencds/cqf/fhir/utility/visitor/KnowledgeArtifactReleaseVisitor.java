@@ -184,7 +184,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 // For composed-of references, if a version is NOT specified in the reference
                 // then the latest version of the referenced artifact should be used.
 
-                //  If a version IS specified then `searchRepositoryByCanonicalWithPaging`
+                //  If a version IS specified then `tryGetLatestVersion`
                 //  will return that version.
 
                 if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
@@ -233,49 +233,57 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
 
         for (var component : artifactAdapter.getComponents()) {
             // all components are already updated to latest as part of release
-            var reference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
-            var componentToDependency =
-                    KnowledgeArtifactAdapter.newRelatedArtifact(fhirVersion, "depends-on", reference, null);
-            rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
-            var res = checkIfReferenceInList(reference, releasedResources);
+            var alreadyUpdatedReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+            var res = checkIfReferenceInList(alreadyUpdatedReference, releasedResources);
             if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !res.isPresent()) {
                 // should never happen since we check all references as part of `internalRelease`
-                throw new InternalErrorException("Owned resource reference not found during release");
+                throw new InternalErrorException("Owned resource reference not found during release: " + alreadyUpdatedReference);
             }
-            if (!alreadyUpdatedDependencies.containsKey(reference) && res.isPresent()) {
-                alreadyUpdatedDependencies.put(reference, res.get());
+            if (!alreadyUpdatedDependencies.containsKey(alreadyUpdatedReference) && res.isPresent()) {
+                alreadyUpdatedDependencies.put(alreadyUpdatedReference, res.get());
             }
+            var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
+                    fhirVersion,
+                    "depends-on",
+                    alreadyUpdatedReference,
+                    res.isPresent()
+                            ? AdapterFactory.forFhirVersion(res.get().getStructureFhirVersionEnum())
+                                    .createKnowledgeArtifactAdapter(res.get())
+                                    .getDescriptor()
+                            : null);
+            rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
         }
         var dependencies = artifactAdapter.getDependencies();
         for (var dependency : dependencies) {
+            KnowledgeArtifactAdapter dependencyAdapter = null;
             if (alreadyUpdatedDependencies.containsKey(dependency.getReference())) {
-                var adapter = AdapterFactory.forFhirVersion(fhirVersion)
+                dependencyAdapter = AdapterFactory.forFhirVersion(fhirVersion)
                         .createKnowledgeArtifactAdapter(alreadyUpdatedDependencies.get(dependency.getReference()));
-                String updatedReference = adapter.hasVersion()
-                        ? String.format("%s|%s", adapter.getUrl(), adapter.getVersion())
-                        : adapter.getUrl();
+                String updatedReference = dependencyAdapter.hasVersion()
+                        ? String.format("%s|%s", dependencyAdapter.getUrl(), dependencyAdapter.getVersion())
+                        : dependencyAdapter.getUrl();
                 dependency.setReference(updatedReference);
 
                 // Recurse into the dependency
                 gatherDependencies(
                         rootLibraryAdapter,
-                        adapter,
+                        dependencyAdapter,
                         releasedResources,
                         fhirVersion,
                         repository,
                         alreadyUpdatedDependencies);
             } else if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                 // TODO: update when we support expansionParameters and requireVersionedDependencies
-                var adapter = tryGetLatestVersionWithStatus(dependency.getReference(), repository, "active");
-                if (adapter.isPresent()) {
-                    String versionedReference = addVersionToReference(dependency.getReference(), adapter.get());
+                var maybeAdapter = tryGetLatestVersionWithStatus(dependency.getReference(), repository, "active");
+                if (maybeAdapter.isPresent()) {
+                    dependencyAdapter = maybeAdapter.get();
+                    String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
                     dependency.setReference(versionedReference);
-                    alreadyUpdatedDependencies.put(
-                            dependency.getReference(), adapter.get().get());
+                    alreadyUpdatedDependencies.put(dependency.getReference(), dependencyAdapter.get());
                     // Recurse into the dependency
                     gatherDependencies(
                             rootLibraryAdapter,
-                            adapter.get(),
+                            dependencyAdapter,
                             releasedResources,
                             fhirVersion,
                             repository,
@@ -283,12 +291,12 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 }
             } else {
                 // This is a versioned reference, get the dependency and trace it
-                var adapter = getArtifactByCanonical(dependency.getReference(), repository);
-                if (adapter != null) {
-                    alreadyUpdatedDependencies.put(dependency.getReference(), adapter.get());
+                dependencyAdapter = getArtifactByCanonical(dependency.getReference(), repository);
+                if (dependencyAdapter != null) {
+                    alreadyUpdatedDependencies.put(dependency.getReference(), dependencyAdapter.get());
                     gatherDependencies(
                             rootLibraryAdapter,
-                            adapter,
+                            dependencyAdapter,
                             releasedResources,
                             fhirVersion,
                             repository,
@@ -298,7 +306,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             // only add the dependency to the manifest if it is from a leaf artifact
             if (!artifactAdapter.getUrl().equals(rootLibraryAdapter.getUrl())) {
                 var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion, "depends-on", dependency.getReference(), null);
+                        fhirVersion,
+                        "depends-on",
+                        dependency.getReference(),
+                        dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
                 rootLibraryAdapter.getRelatedArtifact().add(newDep);
             }
         }

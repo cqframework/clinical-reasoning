@@ -120,7 +120,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 new HashMap<String, IDomainResource>(),
                 systemVersionParams,
                 canonicalVersionParams);
-
+        rootLibraryAdapter.setExpansionParameters(systemVersionParams, canonicalVersionParams);
         // removed duplicates and add
         var relatedArtifacts = rootLibraryAdapter.getRelatedArtifact();
         var distinctResolvedRelatedArtifacts = new ArrayList<>(relatedArtifacts);
@@ -294,15 +294,15 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                         canonicalVersionExpansionParameters);
             } else {
                 // try to get versions from expansion parameters if they are available
+                var resourceType = Canonicals.getResourceType(dependency.getReference());
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                     // TODO: update when we support requireVersionedDependencies
-                    var resourceType = Canonicals.getResourceType(dependency.getReference());
                     Optional<String> expansionParametersVersion = Optional.empty();
                     if (resourceType.equals("CodeSystem")) {
                         expansionParametersVersion = systemVersionExpansionParameters.stream()
                                 .filter(canonical ->
                                         Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                                .findAny();                    
+                                .findAny();
                     } else if (resourceType.equals("ValueSet")) {
                         expansionParametersVersion = canonicalVersionExpansionParameters.stream()
                                 .filter(canonical ->
@@ -310,19 +310,24 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                                 .findAny();
                     }
                     expansionParametersVersion
-                        .map(canonical -> Canonicals.getVersion(canonical))
-                        .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
+                            .map(canonical -> Canonicals.getVersion(canonical))
+                            .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
                 }
                 Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
                 // if not then try to find the latest version and update the dependency
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                     maybeAdapter = tryGetLatestVersionWithStatus(dependency.getReference(), repository, "active")
-                        .map(adapter -> {
-                            String versionedReference = addVersionToReference(dependency.getReference(), adapter);
-                            dependency.setReference(versionedReference);
-                            alreadyUpdatedDependencies.put(dependency.getReference(), adapter.get());    
-                            return adapter;
-                        });
+                            .map(adapter -> {
+                                String versionedReference = addVersionToReference(dependency.getReference(), adapter);
+                                dependency.setReference(versionedReference);
+                                if (resourceType.equals("CodeSystem")) {
+                                    systemVersionExpansionParameters.add(versionedReference);
+                                } else if (resourceType.equals("ValueSet")) {
+                                    canonicalVersionExpansionParameters.add(versionedReference);
+                                }
+                                alreadyUpdatedDependencies.put(dependency.getReference(), adapter.get());
+                                return adapter;
+                            });
                 } else {
                     // This is a versioned reference, just get the dependency
                     maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));

@@ -19,4 +19,7 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
     ICompositeType addContent();
 
     Optional<IBaseParameters> getExpansionParameters();
+
+    void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters);
 }

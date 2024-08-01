@@ -11,10 +11,13 @@ import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -317,5 +320,40 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
                     }
                     return null;
                 });
+    }
+
+    @Override
+    public void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
+        var newParameters = new ArrayList<ParametersParameterComponent>();
+        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
+            for (String parameter : systemVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("system-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
+            for (String parameter : canonicalVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("canonical-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        var existingExpansionParameters = getExpansionParameters();
+        if (existingExpansionParameters.isPresent()) {
+            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        } else {
+            var id = "exp-params";
+            var newExpansionParameters = new Parameters();
+            newExpansionParameters.setParameter(newParameters);
+            newExpansionParameters.setId(id);
+            getLibrary().addContained(newExpansionParameters);
+            var expansionParamsExt = getLibrary().addExtension();
+            expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
+            expansionParamsExt.setValue(new Reference("#" + id));
+        }
     }
 }

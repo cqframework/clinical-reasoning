@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -19,9 +20,11 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -288,5 +291,23 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
     @Override
     public void setExtension(List<IBaseExtension<?, ?>> extensions) {
         this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    }
+
+    @Override
+    public Optional<IBaseParameters> getExpansionParameters() {
+        return getLibrary().getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.EXPANSION_PARAMETERS_URL))
+                .findAny()
+                .map(ext -> ((Reference) ext.getValue()).getReference())
+                .map(ref -> {
+                    if (getLibrary().hasContained()) {
+                        return getLibrary().getContained().stream()
+                                .filter(r -> r.getId().equals(ref))
+                                .findFirst()
+                                .map(r -> (IBaseParameters) r)
+                                .orElse(null);
+                    }
+                    return null;
+                });
     }
 }

@@ -180,7 +180,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         for (var component : artifactAdapter.getComponents()) {
             final var reference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
             if (!StringUtils.isBlank(reference)
-                    && checkIfReferenceInList(reference, resourcesToUpdate).isEmpty()) {
+                    && !checkIfReferenceInList(reference, resourcesToUpdate).isPresent()) {
                 // For composed-of references, if a version is NOT specified in the reference
                 // then the latest version of the referenced artifact should be used.
 
@@ -238,7 +238,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     KnowledgeArtifactAdapter.newRelatedArtifact(fhirVersion, "depends-on", reference, null);
             rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
             var res = checkIfReferenceInList(reference, releasedResources);
-            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && res.isEmpty()) {
+            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !res.isPresent()) {
                 // should never happen since we check all references as part of `internalRelease`
                 throw new InternalErrorException("Owned resource reference not found during release");
             }

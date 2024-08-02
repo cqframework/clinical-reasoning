@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -41,7 +40,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -52,7 +50,6 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
 import org.slf4j.LoggerFactory;
 
@@ -97,18 +94,14 @@ class KnowledgeArtifactReleaseVisitorTests {
     }
 
     @Test
-    @Disabled
     void visitMeasureCollectionTest() {
-        // IgConventions conventions = new IgConventions(FhirTypeLayout.DIRECTORY_PER_TYPE,
-        // CategoryLayout.DIRECTORY_PER_CATEGORY, FilenameMode.ID_ONLY);
-        // Repository repository = new IgRepository(fhirContext,
-        // Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset"), conventions,
-        // EncodingBehavior.DEFAULT, null);
-        // TODO: This IG repository implementation is built based on the "input" directory being the root, but the
-        // parent is usually considered the root...
-        Repository repository = new IgRepository(
-                fhirContext, Path.of("C:\\Users\\Bryn\\Documents\\Src\\CQF\\ecqm-content-qicore-2024-subset\\input"));
-        Library library = repository.read(Library.class, new IdType("Library/Manifest-Final-Draft"));
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter("version", "1.0.0");
@@ -118,10 +111,37 @@ class KnowledgeArtifactReleaseVisitorTests {
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // Set the ID to Manifest-Release
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repository, params);
-        library.setId(new IdType("Library/Manifest-Release"));
-        repository.create(library);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
         assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+        // resolvable resources get descriptors
+        for (final var dependency : dependenciesOnReleasedArtifact) {
+            if (dependency.getResource().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Library BreastCancerScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Measure Breast Cancer ScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Library CervicalCancerScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
+            }
+        }
+        assertEquals(58, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
     @Test

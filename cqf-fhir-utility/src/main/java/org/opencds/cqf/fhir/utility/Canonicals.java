@@ -134,7 +134,7 @@ public class Canonicals {
     public static String getUrl(String canonical) {
         checkNotNull(canonical);
 
-        if (!canonical.contains("/")) {
+        if (!canonical.contains("/") && !canonical.startsWith("urn:uuid") && !canonical.startsWith("urn:oid")) {
             return null;
         }
 

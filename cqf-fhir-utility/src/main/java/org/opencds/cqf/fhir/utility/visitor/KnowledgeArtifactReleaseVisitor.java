@@ -211,20 +211,20 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                     var latest = tryGetLatestVersion(preReleaseReference, repository);
                     if (latest.isPresent()) {
                         checkNonExperimental(latest.get().get(), experimentalBehavior, repository);
-                                        // release components recursively
-                                        resourcesToUpdate.addAll(internalRelease(
-                                                latest.get(),
-                                                version,
-                                                rootEffectivePeriod,
-                                                latestFromTxServer,
-                                                experimentalBehavior,
-                                                repository,
-                                                current));
+                        // release components recursively
+                        resourcesToUpdate.addAll(internalRelease(
+                                latest.get(),
+                                version,
+                                rootEffectivePeriod,
+                                latestFromTxServer,
+                                experimentalBehavior,
+                                repository,
+                                current));
                     } else {
                         // if missing throw because it's an owned resource
                         throw new ResourceNotFoundException(String.format(
-                            "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
-                            preReleaseReference, artifactAdapter.getUrl()));
+                                "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
+                                preReleaseReference, artifactAdapter.getUrl()));
                     }
                 } else if (!alreadyUpdated.isPresent()) {
                     // if it's a not-owned component just try to get the latest active version
@@ -307,17 +307,18 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                         canonicalVersionExpansionParameters);
             } else {
                 // try to get versions from expansion parameters if they are available
-                var resourceType = Canonicals.getResourceType(dependency.getReference());
+                var resourceType = Canonicals.getResourceType(dependency.getReference()) == null ? null : SearchHelper.getResourceType(repository, dependency);
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                     // TODO: update when we support requireVersionedDependencies
                     Optional<String> expansionParametersVersion = Optional.empty();
-                    if (resourceType.equals("CodeSystem")) {
+                    // assume if we can't figure out the resource type it's a CodeSystem
+                    if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
                         expansionParametersVersion = systemVersionExpansionParameters.stream()
                                 .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
                                 .filter(canonical ->
                                         Canonicals.getUrl(canonical).equals(dependency.getReference()))
                                 .findAny();
-                    } else if (resourceType.equals("ValueSet")) {
+                    } else if (resourceType.getSimpleName().equals("ValueSet")) {
                         expansionParametersVersion = canonicalVersionExpansionParameters.stream()
                                 .filter(canonical ->
                                         Canonicals.getUrl(canonical).equals(dependency.getReference()))
@@ -334,9 +335,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
-                                if (resourceType.equals("CodeSystem")) {
+                                // if we don't know the version even at this point then they are missing from the expansion parameters
+                                if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
                                     systemVersionExpansionParameters.add(versionedReference);
-                                } else if (resourceType.equals("ValueSet")) {
+                                } else if (resourceType.getSimpleName().equals("ValueSet")) {
                                     canonicalVersionExpansionParameters.add(versionedReference);
                                 }
                                 alreadyUpdatedDependencies.put(

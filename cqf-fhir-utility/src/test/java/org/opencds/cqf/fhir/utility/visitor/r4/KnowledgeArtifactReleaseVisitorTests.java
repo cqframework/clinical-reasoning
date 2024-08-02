@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -34,6 +35,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -51,6 +53,7 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactReleaseVisitor;
+import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 import org.slf4j.LoggerFactory;
 
 class KnowledgeArtifactReleaseVisitorTests {
@@ -102,6 +105,7 @@ class KnowledgeArtifactReleaseVisitorTests {
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
+
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter("version", "1.0.0");
@@ -139,7 +143,62 @@ class KnowledgeArtifactReleaseVisitorTests {
             if (dependency.getResource().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
             }
+            // expansion params versions should be used
+            if (Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+                assertNotNull(Canonicals.getVersion(dependency.getResource()));
+                assertTrue(Canonicals.getVersion(dependency.getResource()).equals("2.76"));
+            }
+            if (Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+                assertNotNull(Canonicals.getVersion(dependency.getResource()));
+                assertTrue(Canonicals.getVersion(dependency.getResource()).equals("http://snomed.info/sct/731000124108/version/20230901"));
+            }
         }
+        assertEquals(53, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
+    }
+
+    @Test
+    void visitMeasureEffectiveDataRequirementsTest() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+        Measure CervicalCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.0.0");
+        params.addParameter("versionBehavior", new CodeType("default"));
+
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+        // removing the effectiveDataRequirements changes the dependency count
+        CervicalCancerScreeningFHIR.setContained(null);
+        spyRepository.update(CervicalCancerScreeningFHIR);
+        BreastCancerScreeningFHIR.setContained(null);
+        spyRepository.update(BreastCancerScreeningFHIR);
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+
         assertEquals(58, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
@@ -250,6 +309,54 @@ class KnowledgeArtifactReleaseVisitorTests {
         // ensure it only has the expected components and dependencies
         assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
         assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
+
+        var expansionParameters = new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
+        var systemVersionParams = expansionParameters
+                .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
+                        .orElse(null))
+                .map(versions ->
+                        versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
+                .orElse(new ArrayList<String>());
+        var canonicalVersionParams = expansionParameters
+                .map(p -> VisitorHelper.getListParameter("canonical-version", p, IPrimitiveType.class)
+                        .orElse(null))
+                .map(versions ->
+                        versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
+                .orElse(new ArrayList<String>());
+        var expectedNewCanonicalVersionParams =  Arrays.asList(
+            "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.120|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.362|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1866|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1906|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19"
+        );
+        assertEquals(expectedNewCanonicalVersionParams.size(), canonicalVersionParams.size());
+        for (final var expected: expectedNewCanonicalVersionParams) {
+            assertTrue(canonicalVersionParams.stream().anyMatch(p -> p.equals(expected)));
+        }
     }
 
     @Test

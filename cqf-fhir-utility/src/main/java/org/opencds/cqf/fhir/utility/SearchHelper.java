@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -17,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class SearchHelper {
@@ -80,9 +84,13 @@ public class SearchHelper {
             Repository repository, CanonicalType canonical) {
         Class<? extends IBaseResource> resourceType = null;
         try {
+            var resourceTypeString = Canonicals.getResourceType(canonical);
+            if (StringUtils.isEmpty(resourceTypeString)) {
+                throw new DataFormatException();
+            }
             resourceType = repository
                     .fhirContext()
-                    .getResourceDefinition(Canonicals.getResourceType(canonical))
+                    .getResourceDefinition(resourceTypeString)
                     .getImplementingClass();
         } catch (DataFormatException e) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
@@ -93,7 +101,7 @@ public class SearchHelper {
                             .fhirContext()
                             .getResourceDefinition(cqfResourceTypeExt.get())
                             .getImplementingClass();
-                } catch (DataFormatException e2) {
+                } catch (DataFormatException | NullPointerException e2) {
                     throw new UnprocessableEntityException(
                             "cqf-resourceType extension contains invalid resource type: " + cqfResourceTypeExt.get());
                 }
@@ -108,17 +116,72 @@ public class SearchHelper {
         return resourceType;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Gets the resource type for the given canonical, based on the convention that canonical
+     * URLs are of the form [base]/[resourceType]/[tail]
+     *
+     * If the URL does not conform to the convention, the cqf-resourceType extension is used
+     * to determine the type of the resource, if present.
+     *
+     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
+     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     *
+     * @param <CanonicalType>
+     * @param repository the repository to search
+     * @param dependencyInfo the canonical url to search for
+     * @return
+     */
+    public static Class<? extends IBaseResource> getResourceType(
+            Repository repository, IDependencyInfo dependencyInfo) {
+        Class<? extends IBaseResource> resourceType = null;
+        try {
+            var resourceTypeString = Canonicals.getResourceType(dependencyInfo.getReference());
+            if (StringUtils.isEmpty(resourceTypeString)) {
+                throw new DataFormatException();
+            }
+            resourceType = repository
+                    .fhirContext()
+                    .getResourceDefinition(resourceTypeString)
+                    .getImplementingClass();
+        } catch (DataFormatException e) {
+            // Use the "cqf-resourceType" extension to figure this out, if it's present
+            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension());
+            if (cqfResourceTypeExt.isPresent()) {
+                try {
+                    resourceType = repository
+                            .fhirContext()
+                            .getResourceDefinition(cqfResourceTypeExt.get())
+                            .getImplementingClass();
+                } catch (DataFormatException | NullPointerException e2) {
+                    throw new UnprocessableEntityException(
+                            "cqf-resourceType extension contains invalid resource type: " + cqfResourceTypeExt.get());
+                }
+            } else {
+                // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
+                resourceType = repository
+                        .fhirContext()
+                        .getResourceDefinition("CodeSystem")
+                        .getImplementingClass();
+            }
+        }
+        return resourceType;
+    }
+
     private static <CanonicalType extends IPrimitiveType<String>>
             Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(CanonicalType canonical) {
-        return getExtensions(canonical).stream()
+        return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(List<? extends IBaseExtension<?,?>> extensions) {
+        return extensions.stream()
                 .filter(ext -> ext.getUrl().contains("cqf-resourceType"))
                 .findAny()
                 .map(ext -> ((IPrimitiveType<String>) ext.getValue()).getValue());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension> getExtensions(
+    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension<?,?>> getExtensions(
             CanonicalType canonical) {
         if (canonical instanceof org.hl7.fhir.dstu3.model.PrimitiveType) {
             return ((org.hl7.fhir.dstu3.model.PrimitiveType<String>) canonical)

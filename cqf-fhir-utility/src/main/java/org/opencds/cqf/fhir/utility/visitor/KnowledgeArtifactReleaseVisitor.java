@@ -208,26 +208,24 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 var alreadyUpdated = checkIfReferenceInList(preReleaseReference, resourcesToUpdate);
                 if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !alreadyUpdated.isPresent()) {
                     // get the latest version regardless of status because it's owned and we're releasing it
-                    tryGetLatestVersion(preReleaseReference, repository)
-                            .ifPresentOrElse(
-                                    latest -> {
-                                        checkNonExperimental(latest.get(), experimentalBehavior, repository);
+                    var latest = tryGetLatestVersion(preReleaseReference, repository);
+                    if (latest.isPresent()) {
+                        checkNonExperimental(latest.get().get(), experimentalBehavior, repository);
                                         // release components recursively
                                         resourcesToUpdate.addAll(internalRelease(
-                                                latest,
+                                                latest.get(),
                                                 version,
                                                 rootEffectivePeriod,
                                                 latestFromTxServer,
                                                 experimentalBehavior,
                                                 repository,
                                                 current));
-                                    },
-                                    () -> {
-                                        // if missing throw because it's an owned resource
-                                        throw new ResourceNotFoundException(String.format(
-                                                "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
-                                                preReleaseReference, artifactAdapter.getUrl()));
-                                    });
+                    } else {
+                        // if missing throw because it's an owned resource
+                        throw new ResourceNotFoundException(String.format(
+                            "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
+                            preReleaseReference, artifactAdapter.getUrl()));
+                    }
                 } else if (!alreadyUpdated.isPresent()) {
                     // if it's a not-owned component just try to get the latest active version
                     tryGetLatestVersionWithStatus(preReleaseReference, repository, "active")

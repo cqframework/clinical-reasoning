@@ -930,7 +930,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                    }
                   }
                 ]
               },
@@ -950,7 +952,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                    }
                   }
                 ]
               },
@@ -976,10 +980,12 @@
                         "code": "45755-6",
                         "display": "Hospice care [Minimum Data Set]"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   },
                   {
-                    "path": "value"
+                    "path": "value",
+                    "valueSetReference": {}
                   }
                 ]
               },
@@ -1004,7 +1010,8 @@
                         "code": "71007-9",
                         "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   }
                 ]
               },
@@ -1023,7 +1030,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                    }
                   }
                 ]
               },
@@ -1036,7 +1045,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                    }
                   }
                 ]
               },
@@ -1049,7 +1060,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                    }
                   }
                 ]
               },
@@ -1062,7 +1075,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                    }
                   }
                 ]
               },
@@ -1075,7 +1090,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                    }
                   }
                 ]
               },
@@ -1088,7 +1105,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                    }
                   }
                 ]
               },
@@ -1108,7 +1127,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                    }
                   }
                 ]
               },
@@ -1121,7 +1142,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                    }
                   }
                 ]
               },
@@ -1134,7 +1157,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                    }
                   }
                 ]
               },
@@ -1155,7 +1180,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    }
                   }
                 ]
               },
@@ -1168,7 +1195,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    }
                   }
                 ]
               },
@@ -1181,7 +1210,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                    }
                   }
                 ],
                 "dateFilter": [
@@ -1199,7 +1230,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                    }
                   }
                 ]
               },
@@ -1212,7 +1245,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                    }
                   }
                 ]
               },
@@ -1225,7 +1260,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                    }
                   }
                 ]
               },
@@ -1238,7 +1275,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                    }
                   }
                 ]
               }
@@ -1257,6 +1296,31 @@
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
             "valueReference": {
               "reference": "Device/cqf-tooling"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+            "valueReference": {
+              "reference": "Measure/cql-options-test"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters",
+            "valueReference": {
+              "reference": "#exp-params-test-absent"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters",
+            "valueReference": {
+              "reference": "Library/input-parameters-test"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component",
+            "valueRelatedArtifact": {
+              "resource": { "reference": "Library/cqfm-component-test" },
+              "type": "composed-of"
             }
           }
         ],
@@ -1355,7 +1419,9 @@
           }
         ],
         "library": [
-          "https://madie.cms.gov/Library/CervicalCancerScreeningFHIR"
+          {
+            "reference": "https://madie.cms.gov/Library/CervicalCancerScreeningFHIR"
+          }
         ],
         "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.   Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
         "rationale": "All women are at risk for cervical cancer. In 2020, an estimated 13,800 women were diagnosed with cervical cancer in the U.S., resulting in an estimated 4,290 deaths (National Cancer Institute, 2020). Screening can identify precancerous lesions and can detect invasive cancer early, when treatment is more likely to be successful (American Cancer Society, 2020).",
@@ -1813,7 +1879,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                }
               }
             ]
           },
@@ -1826,7 +1894,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                }
               }
             ]
           },
@@ -1839,7 +1909,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                }
               }
             ]
           },
@@ -1852,7 +1924,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                }
               }
             ]
           },
@@ -1865,7 +1939,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                }
               }
             ]
           },
@@ -1878,7 +1954,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                }
               }
             ]
           },
@@ -1898,7 +1976,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                }
               }
             ]
           },
@@ -1911,7 +1991,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                }
               }
             ]
           },
@@ -1924,7 +2006,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                }
               }
             ]
           },
@@ -1937,7 +2021,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                }
               }
             ],
             "dateFilter": [
@@ -1955,7 +2041,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               }
             ]
           },
@@ -1968,7 +2056,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                }
               }
             ]
           },
@@ -1981,7 +2071,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                }
               }
             ]
           },
@@ -1994,7 +2086,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                }
               }
             ]
           },
@@ -2007,7 +2101,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                }
               }
             ]
           },
@@ -2033,10 +2129,12 @@
                     "code": "45755-6",
                     "display": "Hospice care [Minimum Data Set]"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               },
               {
-                "path": "value"
+                "path": "value",
+                "valueSetReference": {}
               }
             ]
           },
@@ -2061,7 +2159,8 @@
                     "code": "71007-9",
                     "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               }
             ]
           },
@@ -2081,7 +2180,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                }
               }
             ]
           },
@@ -2101,7 +2202,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                }
               }
             ]
           },
@@ -2122,7 +2225,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               }
             ]
           },
@@ -2135,7 +2240,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+                }
               }
             ]
           }
@@ -3346,7 +3453,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                    }
                   }
                 ]
               },
@@ -3372,10 +3481,12 @@
                         "code": "45755-6",
                         "display": "Hospice care [Minimum Data Set]"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   },
                   {
-                    "path": "value"
+                    "path": "value",
+                    "valueSetReference": {}
                   }
                 ]
               },
@@ -3401,11 +3512,14 @@
                         "code": "98181-1",
                         "display": "Medical equipment used"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   },
                   {
                     "path": "value",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                    }
                   }
                 ],
                 "dateFilter": [
@@ -3440,7 +3554,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                    }
                   }
                 ]
               },
@@ -3465,7 +3581,8 @@
                         "code": "71802-3",
                         "display": "Housing status"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   }
                 ],
                 "dateFilter": [
@@ -3496,10 +3613,12 @@
                         "code": "71802-3",
                         "display": "Housing status"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   },
                   {
-                    "path": "value"
+                    "path": "value",
+                    "valueSetReference": {}
                   }
                 ],
                 "dateFilter": [
@@ -3529,7 +3648,8 @@
                         "code": "71007-9",
                         "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
                       }
-                    ]
+                    ],
+                    "valueSetReference": {}
                   }
                 ]
               },
@@ -3548,7 +3668,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                    }
                   }
                 ]
               },
@@ -3561,7 +3683,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                    }
                   }
                 ]
               },
@@ -3574,7 +3698,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                    }
                   }
                 ]
               },
@@ -3587,7 +3713,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                    }
                   }
                 ]
               },
@@ -3600,7 +3728,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                    }
                   }
                 ]
               },
@@ -3613,7 +3743,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                    }
                   }
                 ]
               },
@@ -3626,7 +3758,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                    }
                   }
                 ]
               },
@@ -3646,7 +3780,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                    }
                   }
                 ]
               },
@@ -3659,7 +3795,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                    }
                   }
                 ]
               },
@@ -3672,7 +3810,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                    }
                   }
                 ]
               },
@@ -3685,7 +3825,9 @@
                 "codeFilter": [
                   {
                     "path": "type",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                    }
                   }
                 ]
               },
@@ -3706,7 +3848,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    }
                   }
                 ]
               },
@@ -3719,7 +3863,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                    }
                   }
                 ]
               },
@@ -3732,7 +3878,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                    }
                   }
                 ],
                 "dateFilter": [
@@ -3750,7 +3898,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                    }
                   }
                 ],
                 "dateFilter": [
@@ -3768,7 +3918,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                    }
                   }
                 ],
                 "dateFilter": [
@@ -3786,7 +3938,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                    }
                   }
                 ]
               },
@@ -3799,7 +3953,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                    }
                   }
                 ]
               },
@@ -3812,7 +3968,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                    }
                   }
                 ]
               },
@@ -3825,7 +3983,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                    }
                   }
                 ]
               },
@@ -3838,7 +3998,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                    }
                   }
                 ]
               },
@@ -3851,7 +4013,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                    }
                   }
                 ]
               },
@@ -3864,7 +4028,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                    }
                   }
                 ]
               },
@@ -3877,7 +4043,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                    }
                   }
                 ]
               },
@@ -3890,7 +4058,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                    }
                   }
                 ]
               },
@@ -3914,7 +4084,9 @@
                 "codeFilter": [
                   {
                     "path": "code",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                    }
                   }
                 ]
               },
@@ -3942,7 +4114,9 @@
                 "codeFilter": [
                   {
                     "path": "medication",
-                    "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                    "valueSetReference": {
+                      "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                    }
                   }
                 ]
               }
@@ -4058,7 +4232,11 @@
             ]
           }
         ],
-        "library": ["https://madie.cms.gov/Library/BreastCancerScreeningFHIR"],
+        "library": [
+          {
+            "reference": "https://madie.cms.gov/Library/BreastCancerScreeningFHIR"
+          }
+        ],
         "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.   Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
         "rationale": "Breast cancer is one of the most common types of cancers, accounting for 15 percent of all new cancer diagnoses in the U.S. (Noone et al., 2018). In 2015, over 3 million women were estimated to be living with breast cancer in the U.S. and it is estimated that 12 percent of women will be diagnosed with breast cancer at some point during their lifetime (Noone et al., 2018).   While there are other factors that affect a woman's risk of developing breast cancer, advancing age is a primary risk factor. Breast cancer is most frequently diagnosed among women ages 55-64; the median age at diagnosis is 62 years (Noone et al., 2018).  The chance of a woman being diagnosed with breast cancer in a given year increases with age. By age 40, the chances are 1 in 68; by age 50 it becomes 1 in 43; by age 60, it is 1 in 29 (American Cancer Society, 2017).",
         "clinicalRecommendationStatement": "The U.S. Preventive Services Task Force (USPSTF) recommends biennial screening mammography for women aged 50-74 years (B recommendation) (USPSTF, 2016).  The decision to start screening mammography in women prior to age 50 years should be an individual one. Women who place a higher value on the potential benefit than the potential harms may choose to begin biennial screening between the ages of 40 and 49 years (C recommendation) (USPSTF, 2016).  The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of screening mammography in women aged 75 years or older (I statement) (USPSTF, 2016).  The USPSTF concludes that the current evidence is insufficient to assess the benefits and harms of digital breast tomosynthesis (DBT) as a primary screening method for breast cancer (I statement) (USPSTF, 2016).   The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of adjunctive screening for breast cancer using breast ultrasonography, magnetic resonance imaging, DBT, or other methods in women identified to have dense breasts on an otherwise negative screening mammogram (I statement) (USPSTF, 2016).  The National Comprehensive Cancer Network (NCCN) and the American College of Radiology (ACR) recommend using conventional mammography or DBT for screening women at low, intermediate or high risk for breast cancer (NCCN, 2021) (ACR, 2017).",
@@ -4581,7 +4759,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                }
               }
             ]
           },
@@ -4594,7 +4774,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                }
               }
             ]
           },
@@ -4607,7 +4789,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                }
               }
             ]
           },
@@ -4620,7 +4804,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                }
               }
             ]
           },
@@ -4633,7 +4819,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                }
               }
             ]
           },
@@ -4646,7 +4834,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                }
               }
             ]
           },
@@ -4659,7 +4849,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                }
               }
             ]
           },
@@ -4679,7 +4871,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                }
               }
             ]
           },
@@ -4692,7 +4886,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                }
               }
             ]
           },
@@ -4705,7 +4901,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                }
               }
             ]
           },
@@ -4718,7 +4916,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                }
               }
             ]
           },
@@ -4731,7 +4931,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                }
               }
             ]
           },
@@ -4744,7 +4946,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                }
               }
             ]
           },
@@ -4757,7 +4961,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                }
               }
             ]
           },
@@ -4770,7 +4976,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                }
               }
             ]
           },
@@ -4783,7 +4991,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                }
               }
             ]
           },
@@ -4796,7 +5006,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                }
               }
             ]
           },
@@ -4809,7 +5021,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                }
               }
             ]
           },
@@ -4822,7 +5036,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                }
               }
             ]
           },
@@ -4835,7 +5051,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                }
               }
             ],
             "dateFilter": [
@@ -4853,7 +5071,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                }
               }
             ],
             "dateFilter": [
@@ -4871,7 +5091,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                }
               }
             ],
             "dateFilter": [
@@ -4889,7 +5111,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               }
             ]
           },
@@ -4902,7 +5126,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                }
               }
             ]
           },
@@ -4928,10 +5154,12 @@
                     "code": "45755-6",
                     "display": "Hospice care [Minimum Data Set]"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               },
               {
-                "path": "value"
+                "path": "value",
+                "valueSetReference": {}
               }
             ]
           },
@@ -4957,11 +5185,14 @@
                     "code": "98181-1",
                     "display": "Medical equipment used"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               },
               {
                 "path": "value",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                }
               }
             ],
             "dateFilter": [
@@ -4996,7 +5227,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                }
               }
             ]
           },
@@ -5021,7 +5254,8 @@
                     "code": "71802-3",
                     "display": "Housing status"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               }
             ],
             "dateFilter": [
@@ -5052,10 +5286,12 @@
                     "code": "71802-3",
                     "display": "Housing status"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               },
               {
-                "path": "value"
+                "path": "value",
+                "valueSetReference": {}
               }
             ],
             "dateFilter": [
@@ -5085,7 +5321,8 @@
                     "code": "71007-9",
                     "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
                   }
-                ]
+                ],
+                "valueSetReference": {}
               }
             ]
           },
@@ -5104,7 +5341,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                }
               }
             ]
           },
@@ -5125,7 +5364,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               }
             ]
           },
@@ -5149,7 +5390,9 @@
             "codeFilter": [
               {
                 "path": "code",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                }
               }
             ]
           },
@@ -5177,7 +5420,9 @@
             "codeFilter": [
               {
                 "path": "medication",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                }
               }
             ]
           },
@@ -5190,7 +5435,9 @@
             "codeFilter": [
               {
                 "path": "type",
-                "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+                "valueSetReference": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+                }
               }
             ]
           }

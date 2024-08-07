@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
@@ -182,10 +183,10 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
         /*
          relatedArtifact[].resource
          library[]
-         group[].population[].criteria.reference
-         group[].stratifier[].criteria.reference
-         group[].stratifier[].component[].criteria.reference
-         supplementalData[].criteria.reference
+         group[].population[].criteria.reference - no path on dstu3
+         group[].stratifier[].criteria.reference - no path on dstu3
+         group[].stratifier[].component[].criteria.reference - no path on dstu3
+         supplementalData[].criteria.reference - no path on dstu3
          extension[cqfm-inputParameters][]
          extension[cqfm-expansionParameters][]
          extension[cqfm-effectiveDataRequirements]
@@ -206,6 +207,87 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
                     referenceSource, ct.getReference(), ct.getExtension(), (reference) -> ct.setReference(reference));
             references.add(dependency);
         }
+
+        // extension[cqfm-inputParameters][]
+        this.getMeasure()
+                .getExtensionsByUrl(Constants.CQFM_INPUT_PARAMETERS_URL)
+                .forEach(ext -> {
+                    final var ref = (Reference) ext.getValue();
+                    if (ref.hasReference()) {
+                        final var dep = new DependencyInfo(
+                                referenceSource,
+                                ref.getReference(),
+                                ref.getExtension(),
+                                (reference) -> ref.setReference(reference));
+                        references.add(dep);
+                    }
+                });
+        // extension[cqfm-expansionParameters][]
+        this.getMeasure().getExtensionsByUrl(Constants.EXPANSION_PARAMETERS_URL).forEach(ext -> {
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        });
+        // extension[cqfm-effectiveDataRequirements]
+        var cqfmEDRExtensions = this.getMeasure().getExtensionsByUrl(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
+        if (cqfmEDRExtensions.size() > 0) {
+            final var ext = cqfmEDRExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[crmi-effectiveDataRequirements]
+        var crmiEDRExtensions = this.getMeasure().getExtensionsByUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL);
+        if (crmiEDRExtensions.size() > 0) {
+            final var ext = crmiEDRExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[cqfm-cqlOptions]
+        var cqfmCqlOptionsExtensions = this.getMeasure().getExtensionsByUrl(Constants.CQl_OPTIONS_URL);
+        if (cqfmCqlOptionsExtensions.size() > 0) {
+            final var ext = cqfmCqlOptionsExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[cqfm-component][].resource
+        this.getMeasure().getExtensionsByUrl(Constants.CQFM_COMPONENT_URL).forEach(ext -> {
+            final var ref = (RelatedArtifact) ext.getValue();
+            if (ref.hasResource() && ref.getResource().hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getResource().getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.getResource().setReference(reference));
+                references.add(dep);
+            }
+        });
 
         return references;
     }

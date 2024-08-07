@@ -1204,6 +1204,31 @@
             "valueReference": {
               "reference": "Device/cqf-tooling"
             }
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+            "valueReference": {
+              "reference": "Measure/cql-options-test"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters",
+            "valueReference": {
+              "reference": "#exp-params-test-absent"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters",
+            "valueReference": {
+              "reference": "Library/input-parameters-test"
+            }
+          },
+          {
+            "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component",
+            "valueRelatedArtifact": {
+              "resource": "Library/cqfm-component-test",
+              "type": "composed-of"
+            }
           }
         ],
         "url": "https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR",
@@ -1302,6 +1327,13 @@
         ],
         "library": [
           "https://madie.cms.gov/Library/CervicalCancerScreeningFHIR"
+        ],
+        "supplementalData": [
+          {
+            "criteria": {
+              "reference": "Library/supplemental-criteria-reference-test"
+            }
+          }
         ],
         "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.   Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
         "rationale": "All women are at risk for cervical cancer. In 2020, an estimated 13,800 women were diagnosed with cervical cancer in the U.S., resulting in an estimated 4,290 deaths (National Cancer Institute, 2020). Screening can identify precancerous lesions and can detect invasive cancer early, when treatment is more likely to be successful (American Cancer Society, 2020).",
@@ -1422,6 +1454,21 @@
                 "criteria": {
                   "language": "text/cql-identifier",
                   "expression": "Numerator"
+                }
+              },
+              {
+                "criteria": { "reference": "Library/population-criteria-test" }
+              }
+            ],
+            "stratifier": [
+              {
+                "criteria": { "reference": "Library/stratifier-criteria-test" }
+              },
+              {
+                "component": {
+                  "criteria": {
+                    "reference": "Library/stratifier-component-criteria-test"
+                  }
                 }
               }
             ]

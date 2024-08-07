@@ -157,6 +157,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .forEach(ra -> retval.add(ra));
         this.getLibrary().getDataRequirement().stream().forEach(dr -> {
+            // dataRequirement[].profile[]
             dr.getProfile().stream()
                     .filter(profile -> profile.hasValue())
                     .forEach(profile -> retval.add(new DependencyInfo(
@@ -164,6 +165,7 @@ public class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.f
                             profile.getValue(),
                             profile.getExtension(),
                             (reference) -> profile.setValue(reference))));
+            // dataRequirement[].codeFilter[].valueSet
             dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
                     .forEach(cf -> retval.add(new DependencyInfo(

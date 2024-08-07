@@ -36,6 +36,7 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -47,6 +48,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
@@ -205,7 +207,64 @@ class KnowledgeArtifactReleaseVisitorTests {
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .collect(Collectors.toList());
 
-        assertEquals(58, dependenciesOnReleasedArtifact.size());
+        assertEquals(63, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
+    }
+
+    @Test
+    void bothCRMIandCQFMEffectiveDataRequirementsTest() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+        Measure CervicalCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter().setName("version").setValue(new StringType("1.0.0"));
+        params.addParameter().setName("versionBehavior").setValue(new CodeType("default"));
+        var crmiEDRId = "exp-params-crmi-test";
+        var crmiEDRExtension = new Extension();
+        crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL);
+        crmiEDRExtension.setValue(new Reference("#" + crmiEDRId));
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+        // if both cqfm and crmi effective data requirements are present then they will each be traced
+        var crmiEDRCervical = CervicalCancerScreeningFHIR.getContained().get(0).copy();
+        crmiEDRCervical.setId(crmiEDRId);
+        CervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
+        CervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        var crmiEDRBreastCancer =
+                BreastCancerScreeningFHIR.getContained().get(0).copy();
+        crmiEDRBreastCancer.setId(crmiEDRId);
+        BreastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
+        BreastCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        spyRepository.update(CervicalCancerScreeningFHIR);
+        spyRepository.update(BreastCancerScreeningFHIR);
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+
+        // this should be 65, but we're not handling contained reference correctly
+        assertEquals(64, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 

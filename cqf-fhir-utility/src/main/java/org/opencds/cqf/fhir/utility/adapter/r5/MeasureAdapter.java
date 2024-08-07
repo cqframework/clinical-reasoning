@@ -25,6 +25,7 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
@@ -203,10 +204,143 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
         // library[]
         List<CanonicalType> libraries = this.getMeasure().getLibrary();
         for (CanonicalType ct : libraries) {
-            DependencyInfo dependency = new DependencyInfo(
-                    referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
-            references.add(dependency);
+            if (ct.hasValue()) {
+                DependencyInfo dependency = new DependencyInfo(
+                        referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
+                references.add(dependency);
+            }
         }
+        final var groups = this.getMeasure().getGroup();
+        for (final var group : groups) {
+            final var populations = group.getPopulation();
+            for (final var population : populations) {
+                // group[].population[].criteria.reference
+                if (population.getCriteria().hasReference()) {
+                    final var dependency = new DependencyInfo(
+                            referenceSource,
+                            population.getCriteria().getReference(),
+                            population.getCriteria().getExtension(),
+                            (reference) -> population.getCriteria().setReference(reference));
+                    references.add(dependency);
+                }
+            }
+            final var stratifiers = group.getStratifier();
+            for (final var stratifier : stratifiers) {
+                // group[].stratifier[].criteria.reference
+                if (stratifier.getCriteria().hasReference()) {
+                    final var dependency = new DependencyInfo(
+                            referenceSource,
+                            stratifier.getCriteria().getReference(),
+                            stratifier.getCriteria().getExtension(),
+                            (reference) -> stratifier.getCriteria().setReference(reference));
+                    references.add(dependency);
+                }
+                final var components = stratifier.getComponent();
+                for (final var component : components) {
+                    // group[].stratifier[].component[].criteria.reference
+                    if (component.getCriteria().hasReference()) {
+                        final var stratifierComponentDep = new DependencyInfo(
+                                referenceSource,
+                                component.getCriteria().getReference(),
+                                component.getCriteria().getExtension(),
+                                (reference) -> component.getCriteria().setReference(reference));
+                        references.add(stratifierComponentDep);
+                    }
+                }
+            }
+            final var supplementalData = this.getMeasure().getSupplementalData();
+            for (final var supplement : supplementalData) {
+                // supplementalData[].criteria.reference
+                if (supplement.getCriteria().hasReference()) {
+                    final var dependency = new DependencyInfo(
+                            referenceSource,
+                            supplement.getCriteria().getReference(),
+                            supplement.getCriteria().getExtension(),
+                            (reference) -> supplement.getCriteria().setReference(reference));
+                    references.add(dependency);
+                }
+            }
+        }
+        // extension[cqfm-inputParameters][]
+        this.getMeasure()
+                .getExtensionsByUrl(Constants.CQFM_INPUT_PARAMETERS_URL)
+                .forEach(ext -> {
+                    final var ref = (Reference) ext.getValue();
+                    if (ref.hasReference()) {
+                        final var dep = new DependencyInfo(
+                                referenceSource,
+                                ref.getReference(),
+                                ref.getExtension(),
+                                (reference) -> ref.setReference(reference));
+                        references.add(dep);
+                    }
+                });
+        // extension[cqfm-expansionParameters][]
+        this.getMeasure().getExtensionsByUrl(Constants.EXPANSION_PARAMETERS_URL).forEach(ext -> {
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        });
+        // extension[cqfm-effectiveDataRequirements]
+        var cqfmEDRExtensions = this.getMeasure().getExtensionsByUrl(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
+        if (cqfmEDRExtensions.size() > 0) {
+            final var ext = cqfmEDRExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[crmi-effectiveDataRequirements]
+        var crmiEDRExtensions = this.getMeasure().getExtensionsByUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL);
+        if (crmiEDRExtensions.size() > 0) {
+            final var ext = crmiEDRExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[cqfm-cqlOptions]
+        var cqfmCqlOptionsExtensions = this.getMeasure().getExtensionsByUrl(Constants.CQl_OPTIONS_URL);
+        if (cqfmCqlOptionsExtensions.size() > 0) {
+            final var ext = cqfmCqlOptionsExtensions.get(0);
+            final var ref = (Reference) ext.getValue();
+            if (ref.hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.setReference(reference));
+                references.add(dep);
+            }
+        }
+        // extension[cqfm-component][].resource
+        this.getMeasure().getExtensionsByUrl(Constants.CQFM_COMPONENT_URL).forEach(ext -> {
+            final var ref = (RelatedArtifact) ext.getValue();
+            if (ref.hasResource()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getResource(),
+                        ref.getExtension(),
+                        (reference) -> ref.setResource(reference));
+                references.add(dep);
+            }
+        });
 
         return references;
     }

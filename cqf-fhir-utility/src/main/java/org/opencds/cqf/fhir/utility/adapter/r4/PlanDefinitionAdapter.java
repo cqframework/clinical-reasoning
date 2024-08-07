@@ -174,6 +174,7 @@ public class PlanDefinitionAdapter extends ResourceAdapter implements KnowledgeA
         }
         // action[]
         this.planDefinition.getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
+        // extension[cpg-partOf]
         this.getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
                 .filter(ext -> ext.hasValue())

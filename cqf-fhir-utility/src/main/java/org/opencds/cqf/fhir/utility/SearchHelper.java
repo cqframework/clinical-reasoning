@@ -170,9 +170,9 @@ public class SearchHelper {
         return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(
-            List<? extends IBaseExtension<?, ?>> extensions) {
+            List<? extends IBaseExtension> extensions) {
         return extensions.stream()
                 .filter(ext -> ext.getUrl().contains("cqf-resourceType"))
                 .findAny()
@@ -180,7 +180,7 @@ public class SearchHelper {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension<?, ?>> getExtensions(
+    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension> getExtensions(
             CanonicalType canonical) {
         if (canonical instanceof org.hl7.fhir.dstu3.model.PrimitiveType) {
             return ((org.hl7.fhir.dstu3.model.PrimitiveType<String>) canonical)

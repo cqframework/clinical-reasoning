@@ -170,7 +170,7 @@ public class SearchHelper {
         return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(
             List<? extends IBaseExtension> extensions) {
         return extensions.stream()

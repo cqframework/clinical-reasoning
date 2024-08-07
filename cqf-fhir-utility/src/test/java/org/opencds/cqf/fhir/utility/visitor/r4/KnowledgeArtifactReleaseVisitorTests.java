@@ -150,7 +150,8 @@ class KnowledgeArtifactReleaseVisitorTests {
             }
             if (Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
-                assertTrue(Canonicals.getVersion(dependency.getResource()).equals("http://snomed.info/sct/731000124108/version/20230901"));
+                assertTrue(Canonicals.getVersion(dependency.getResource())
+                        .equals("http://snomed.info/sct/731000124108/version/20230901"));
             }
         }
         assertEquals(53, dependenciesOnReleasedArtifact.size());
@@ -310,7 +311,8 @@ class KnowledgeArtifactReleaseVisitorTests {
         assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
         assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
 
-        var expansionParameters = new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
+        var expansionParameters =
+                new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
         var systemVersionParams = expansionParameters
                 .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
                         .orElse(null))
@@ -323,8 +325,8 @@ class KnowledgeArtifactReleaseVisitorTests {
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
                 .orElse(new ArrayList<String>());
-        var expectedNewCanonicalVersionParams =  Arrays.asList(
-            "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
+        var expectedNewCanonicalVersionParams = Arrays.asList(
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.120|2022-10-19",
@@ -351,10 +353,9 @@ class KnowledgeArtifactReleaseVisitorTests {
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|2022-10-19",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|2022-10-19",
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19"
-        );
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19");
         assertEquals(expectedNewCanonicalVersionParams.size(), canonicalVersionParams.size());
-        for (final var expected: expectedNewCanonicalVersionParams) {
+        for (final var expected : expectedNewCanonicalVersionParams) {
             assertTrue(canonicalVersionParams.stream().anyMatch(p -> p.equals(expected)));
         }
     }

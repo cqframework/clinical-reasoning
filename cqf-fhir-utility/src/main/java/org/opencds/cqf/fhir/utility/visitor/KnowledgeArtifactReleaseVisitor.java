@@ -307,7 +307,9 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                         canonicalVersionExpansionParameters);
             } else {
                 // try to get versions from expansion parameters if they are available
-                var resourceType = Canonicals.getResourceType(dependency.getReference()) == null ? null : SearchHelper.getResourceType(repository, dependency);
+                var resourceType = Canonicals.getResourceType(dependency.getReference()) == null
+                        ? null
+                        : SearchHelper.getResourceType(repository, dependency);
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                     // TODO: update when we support requireVersionedDependencies
                     Optional<String> expansionParametersVersion = Optional.empty();
@@ -335,8 +337,10 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
-                                // if we don't know the version even at this point then they are missing from the expansion parameters
-                                if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
+                                // if we don't know the version even at this point then they are missing from the
+                                // expansion parameters
+                                if (resourceType == null
+                                        || resourceType.getSimpleName().equals("CodeSystem")) {
                                     systemVersionExpansionParameters.add(versionedReference);
                                 } else if (resourceType.getSimpleName().equals("ValueSet")) {
                                     canonicalVersionExpansionParameters.add(versionedReference);

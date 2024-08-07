@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -173,7 +171,8 @@ public class SearchHelper {
     }
 
     @SuppressWarnings("unchecked")
-    private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(List<? extends IBaseExtension<?,?>> extensions) {
+    private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(
+            List<? extends IBaseExtension<?, ?>> extensions) {
         return extensions.stream()
                 .filter(ext -> ext.getUrl().contains("cqf-resourceType"))
                 .findAny()
@@ -181,7 +180,7 @@ public class SearchHelper {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension<?,?>> getExtensions(
+    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension<?, ?>> getExtensions(
             CanonicalType canonical) {
         if (canonical instanceof org.hl7.fhir.dstu3.model.PrimitiveType) {
             return ((org.hl7.fhir.dstu3.model.PrimitiveType<String>) canonical)

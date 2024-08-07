@@ -177,12 +177,16 @@
           {
             "type": "composed-of",
             "display": "Measure Cervical Cancer ScreeningFHIR, 0.0.001",
-            "resource": "https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001"
+            "resource": {
+              "reference": "https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001"
+            }
           },
           {
             "type": "composed-of",
             "display": "Measure Breast Cancer ScreeningFHIR, 0.0.001",
-            "resource": "https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001"
+            "resource": {
+              "reference": "https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001"
+            }
           }
         ]
       },
@@ -699,127 +703,177 @@
               {
                 "type": "depends-on",
                 "display": "Library Status",
-                "resource": "Library/Status|1.8.000"
+                "resource": {
+                  "reference": "Library/Status|1.8.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library FHIRHelpers",
-                "resource": "Library/FHIRHelpers|4.4.000"
+                "resource": {
+                  "reference": "Library/FHIRHelpers|4.4.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library QICoreCommon",
-                "resource": "Library/QICoreCommon|2.1.000"
+                "resource": {
+                  "reference": "Library/QICoreCommon|2.1.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library Hospice",
-                "resource": "Library/Hospice|6.12.000"
+                "resource": {
+                  "reference": "Library/Hospice|6.12.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library PalliativeCare",
-                "resource": "Library/PalliativeCare|1.11.000"
+                "resource": {
+                  "reference": "Library/PalliativeCare|1.11.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system ObservationCategoryCodes",
-                "resource": "http://terminology.hl7.org/CodeSystem/observation-category"
+                "resource": {
+                  "reference": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system SNOMEDCT",
-                "resource": "http://snomed.info/sct"
+                "resource": {
+                  "reference": "http://snomed.info/sct"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system LOINC",
-                "resource": "http://loinc.org"
+                "resource": {
+                  "reference": "http://loinc.org"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Pap Test",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1017"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set HPV Test",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1059"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Office Visit",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Preventive Care Services Established Office Visit, 18 and Up",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Preventive Care Services Initial Office Visit, 18 and Up",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Home Healthcare Services",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Telephone Visits",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Virtual Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Encounter Inpatient",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Care Ambulatory",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Diagnosis",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hysterectomy with No Residual Cervix",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Congenital or Acquired Absence of Cervix",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Diagnosis",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Intervention",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                }
               }
             ],
             "parameter": [
@@ -1553,67 +1607,93 @@
           {
             "type": "depends-on",
             "display": "QICore model information",
-            "resource": "http://hl7.org/fhir/Library/QICore-ModelInfo"
+            "resource": {
+              "reference": "http://hl7.org/fhir/Library/QICore-ModelInfo"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library FHIRHelpers",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.4.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.4.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library Hospice",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/Hospice|6.12.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/Hospice|6.12.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library PalliativeCare",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/PalliativeCare|1.11.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/PalliativeCare|1.11.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library Status",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/Status|1.8.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/Status|1.8.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system SNOMEDCT",
-            "resource": "http://snomed.info/sct"
+            "resource": {
+              "reference": "http://snomed.info/sct"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system LOINC",
-            "resource": "http://loinc.org"
+            "resource": {
+              "reference": "http://loinc.org"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system AdministrativeGender",
-            "resource": "http://hl7.org/fhir/administrative-gender"
+            "resource": {
+              "reference": "http://hl7.org/fhir/administrative-gender"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Congenital or Acquired Absence of Cervix",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.111.12.1016"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Hysterectomy with No Residual Cervix",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1014"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Encounter Inpatient",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Palliative Care Diagnosis",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Payer Type",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            }
           }
         ],
         "parameter": [
@@ -2935,197 +3015,275 @@
               {
                 "type": "depends-on",
                 "display": "Library Status",
-                "resource": "Library/Status|1.8.000"
+                "resource": {
+                  "reference": "Library/Status|1.8.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library QICoreCommon",
-                "resource": "Library/QICoreCommon|2.1.000"
+                "resource": {
+                  "reference": "Library/QICoreCommon|2.1.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library FHIRHelpers",
-                "resource": "Library/FHIRHelpers|4.4.000"
+                "resource": {
+                  "reference": "Library/FHIRHelpers|4.4.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library AdultOutpatientEncounters",
-                "resource": "Library/AdultOutpatientEncounters|4.11.000"
+                "resource": {
+                  "reference": "Library/AdultOutpatientEncounters|4.11.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library Hospice",
-                "resource": "Library/Hospice|6.12.000"
+                "resource": {
+                  "reference": "Library/Hospice|6.12.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library AIFrailLTCF",
-                "resource": "Library/AdvancedIllnessandFrailty|1.16.000"
+                "resource": {
+                  "reference": "Library/AdvancedIllnessandFrailty|1.16.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library CMD",
-                "resource": "Library/CumulativeMedicationDuration|4.1.000"
+                "resource": {
+                  "reference": "Library/CumulativeMedicationDuration|4.1.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Library PalliativeCare",
-                "resource": "Library/PalliativeCare|1.11.000"
+                "resource": {
+                  "reference": "Library/PalliativeCare|1.11.000"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system SNOMEDCT",
-                "resource": "http://snomed.info/sct"
+                "resource": {
+                  "reference": "http://snomed.info/sct"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system ObservationCategoryCodes",
-                "resource": "http://terminology.hl7.org/CodeSystem/observation-category"
+                "resource": {
+                  "reference": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Code system LOINC",
-                "resource": "http://loinc.org"
+                "resource": {
+                  "reference": "http://loinc.org"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Mammography",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Office Visit",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Annual Wellness Visit",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Preventive Care Services Established Office Visit, 18 and Up",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Preventive Care Services Initial Office Visit, 18 and Up",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Home Healthcare Services",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Virtual Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Telephone Visits",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Encounter Inpatient",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Care Ambulatory",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Hospice Diagnosis",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Status Post Right Mastectomy",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Unilateral Mastectomy, Unspecified Laterality",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Unilateral Mastectomy Right",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Status Post Left Mastectomy",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Unilateral Mastectomy Left",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set History of bilateral mastectomy",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Bilateral Mastectomy",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Frailty Device",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Frailty Diagnosis",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Frailty Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Frailty Symptom",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Advanced Illness",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Dementia Medications",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Diagnosis",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Encounter",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+                }
               },
               {
                 "type": "depends-on",
                 "display": "Value set Palliative Care Intervention",
-                "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                "resource": {
+                  "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+                }
               }
             ],
             "parameter": [
@@ -4175,77 +4333,107 @@
           {
             "type": "depends-on",
             "display": "QICore model information",
-            "resource": "http://hl7.org/fhir/Library/QICore-ModelInfo"
+            "resource": {
+              "reference": "http://hl7.org/fhir/Library/QICore-ModelInfo"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library FHIRHelpers",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.4.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/FHIRHelpers|4.4.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library SDE",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/SupplementalDataElements|3.5.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/SupplementalDataElements|3.5.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library QICoreCommon",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/QICoreCommon|2.1.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/QICoreCommon|2.1.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Library PalliativeCare",
-            "resource": "http://ecqi.healthit.gov/ecqms/Library/PalliativeCare|1.11.000"
+            "resource": {
+              "reference": "http://ecqi.healthit.gov/ecqms/Library/PalliativeCare|1.11.000"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system AdministrativeGender",
-            "resource": "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender"
+            "resource": {
+              "reference": "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system SNOMEDCT",
-            "resource": "http://snomed.info/sct"
+            "resource": {
+              "reference": "http://snomed.info/sct"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system LOINC",
-            "resource": "http://loinc.org"
+            "resource": {
+              "reference": "http://loinc.org"
+            }
           },
           {
             "type": "depends-on",
             "display": "Code system ObservationCategoryCodes",
-            "resource": "http://terminology.hl7.org/CodeSystem/observation-category"
+            "resource": {
+              "reference": "http://terminology.hl7.org/CodeSystem/observation-category"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Status Post Left Mastectomy",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Status Post Right Mastectomy",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Unilateral Mastectomy Left",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Unilateral Mastectomy Right",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Unilateral Mastectomy, Unspecified Laterality",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            }
           },
           {
             "type": "depends-on",
             "display": "Value set Payer Type",
-            "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            "resource": {
+              "reference": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            }
           }
         ],
         "parameter": [

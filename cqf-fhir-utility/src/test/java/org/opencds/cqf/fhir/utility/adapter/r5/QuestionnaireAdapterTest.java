@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-public class QuestionnaireAdapterTest {
+class QuestionnaireAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
@@ -150,10 +150,10 @@ public class QuestionnaireAdapterTest {
     @Test
     void adapter_copy() {
         var questionnaire = new Questionnaire().setStatus(PublicationStatus.DRAFT);
-        questionnaire.setId("plan-1");
+        questionnaire.setId("question-1");
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         var copy = (Questionnaire) adapter.copy();
-        copy.setId("plan-2");
+        copy.setId("question-2");
         assertNotEquals(questionnaire.getId(), copy.getId());
         questionnaire.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus());

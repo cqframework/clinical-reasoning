@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class ValueSetAdapterTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
@@ -38,7 +39,7 @@ public class ValueSetAdapterTest {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
         doReturn(new Bundle()).when(spyVisitor).visit(any(ValueSetAdapter.class), any(), any());
         IDomainResource valueSet = new ValueSet();
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertEquals(valueSet, adapter.get());
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any(), any());
@@ -49,7 +50,7 @@ public class ValueSetAdapterTest {
         var valueSet = new ValueSet();
         var name = "name";
         valueSet.setName(name);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
@@ -61,7 +62,7 @@ public class ValueSetAdapterTest {
         var valueSet = new ValueSet();
         var url = "www.url.com";
         valueSet.setUrl(url);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertTrue(adapter.hasUrl());
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
@@ -75,7 +76,7 @@ public class ValueSetAdapterTest {
         var valueSet = new ValueSet();
         var version = "1.0.0";
         valueSet.setVersion(version);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
@@ -88,7 +89,7 @@ public class ValueSetAdapterTest {
         var valueSet = new ValueSet();
         var status = PublicationStatus.DRAFT;
         valueSet.setStatus(status);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -105,7 +106,7 @@ public class ValueSetAdapterTest {
                 .setStart(java.sql.Date.valueOf(LocalDate.parse("2020-01-01")))
                 .setEnd(java.sql.Date.valueOf(LocalDate.parse("2020-12-31")));
         valueSet.setDate(date);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertEquals(date, adapter.getDate());
         assertEquals(null, adapter.getApprovalDate());
         assertNotEquals(effectivePeriod, adapter.getEffectivePeriod());
@@ -129,7 +130,7 @@ public class ValueSetAdapterTest {
         var valueSet = new ValueSet();
         var experimental = true;
         valueSet.setExperimental(experimental);
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         assertEquals(experimental, adapter.getExperimental());
     }
 
@@ -137,7 +138,7 @@ public class ValueSetAdapterTest {
     void adapter_set_relatedArtifact() {
         var valueSet = new ValueSet();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
     }
@@ -146,8 +147,8 @@ public class ValueSetAdapterTest {
     void adapter_copy() {
         var valueSet = new ValueSet().setStatus(PublicationStatus.DRAFT);
         valueSet.setId("valueset-1");
-        var adapter = new ValueSetAdapter(valueSet);
-        var copy = adapter.copy();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+        var copy = (ValueSet) adapter.copy();
         copy.setId("valueset-2");
         assertNotEquals(valueSet.getId(), copy.getId());
         valueSet.setStatus(PublicationStatus.ACTIVE);
@@ -159,7 +160,7 @@ public class ValueSetAdapterTest {
         var dependencies = List.of("profileRef");
         var valueSet = new ValueSet();
         valueSet.getMeta().addProfile(dependencies.get(0));
-        var adapter = new ValueSetAdapter(valueSet);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {

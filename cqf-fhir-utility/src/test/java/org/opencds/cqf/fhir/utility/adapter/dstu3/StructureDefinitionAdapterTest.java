@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class StructureDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
@@ -40,7 +41,7 @@ public class StructureDefinitionAdapterTest {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
         doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
         IDomainResource structureDef = new StructureDefinition();
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(structureDef, adapter.get());
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
@@ -51,7 +52,7 @@ public class StructureDefinitionAdapterTest {
         var structureDef = new StructureDefinition();
         var name = "name";
         structureDef.setName(name);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
@@ -63,7 +64,7 @@ public class StructureDefinitionAdapterTest {
         var structureDef = new StructureDefinition();
         var url = "www.url.com";
         structureDef.setUrl(url);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertTrue(adapter.hasUrl());
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
@@ -77,7 +78,7 @@ public class StructureDefinitionAdapterTest {
         var structureDef = new StructureDefinition();
         var version = "1.0.0";
         structureDef.setVersion(version);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
@@ -90,7 +91,7 @@ public class StructureDefinitionAdapterTest {
         var structureDef = new StructureDefinition();
         var status = PublicationStatus.DRAFT;
         structureDef.setStatus(status);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -107,7 +108,7 @@ public class StructureDefinitionAdapterTest {
                 .setStart(java.sql.Date.valueOf(LocalDate.parse("2020-01-01")))
                 .setEnd(java.sql.Date.valueOf(LocalDate.parse("2020-12-31")));
         structureDef.setDate(date);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(date, adapter.getDate());
         assertEquals(null, adapter.getApprovalDate());
         assertNotEquals(effectivePeriod, adapter.getEffectivePeriod());
@@ -131,7 +132,7 @@ public class StructureDefinitionAdapterTest {
         var structureDef = new StructureDefinition();
         var experimental = true;
         structureDef.setExperimental(experimental);
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(experimental, adapter.getExperimental());
     }
 
@@ -139,7 +140,7 @@ public class StructureDefinitionAdapterTest {
     void adapter_set_relatedArtifact() {
         var structureDef = new StructureDefinition();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
     }
@@ -148,8 +149,8 @@ public class StructureDefinitionAdapterTest {
     void adapter_copy() {
         var structureDef = new StructureDefinition().setStatus(PublicationStatus.DRAFT);
         structureDef.setId("plan-1");
-        var adapter = new StructureDefinitionAdapter(structureDef);
-        var copy = adapter.copy();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        var copy = (StructureDefinition) adapter.copy();
         copy.setId("plan-2");
         assertNotEquals(structureDef.getId(), copy.getId());
         structureDef.setStatus(PublicationStatus.ACTIVE);
@@ -173,7 +174,7 @@ public class StructureDefinitionAdapterTest {
                 .getDifferential()
                 .addElement()
                 .setBinding(new ElementDefinitionBindingComponent().setValueSet(new UriType(dependencies.get(4))));
-        var adapter = new StructureDefinitionAdapter(structureDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {

@@ -7,7 +7,7 @@ import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
 
-public class EndpointAdapterTest {
+class EndpointAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test

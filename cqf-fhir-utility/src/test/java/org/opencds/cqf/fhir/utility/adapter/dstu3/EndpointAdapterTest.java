@@ -8,6 +8,8 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
 
 public class EndpointAdapterTest {
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
+
     @Test
     void invalid_object_fails() {
         assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(new PlanDefinition()));
@@ -18,7 +20,7 @@ public class EndpointAdapterTest {
         var endpoint = new Endpoint();
         var address = "123 Test Street";
         endpoint.setAddress(address);
-        var adapter = new EndpointAdapter(endpoint);
+        var adapter = (EndpointAdapter) adapterFactory.createResource(endpoint);
         assertEquals(address, adapter.getAddress());
         var newAddress = "456 Test Street";
         adapter.setAddress(newAddress);

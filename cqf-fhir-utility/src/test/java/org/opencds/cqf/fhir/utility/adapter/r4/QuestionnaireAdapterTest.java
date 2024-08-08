@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class QuestionnaireAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
@@ -43,7 +44,7 @@ public class QuestionnaireAdapterTest {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
         doReturn(new Bundle()).when(spyVisitor).visit(any(QuestionnaireAdapter.class), any(), any());
         IDomainResource questionnaire = new Questionnaire();
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(QuestionnaireAdapter.class), any(), any());
     }
@@ -53,7 +54,7 @@ public class QuestionnaireAdapterTest {
         var questionnaire = new Questionnaire();
         var name = "name";
         questionnaire.setName(name);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
@@ -65,7 +66,7 @@ public class QuestionnaireAdapterTest {
         var questionnaire = new Questionnaire();
         var url = "www.url.com";
         questionnaire.setUrl(url);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
         adapter.setUrl(newUrl);
@@ -77,7 +78,7 @@ public class QuestionnaireAdapterTest {
         var questionnaire = new Questionnaire();
         var version = "1.0.0";
         questionnaire.setVersion(version);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
@@ -90,7 +91,7 @@ public class QuestionnaireAdapterTest {
         var questionnaire = new Questionnaire();
         var status = PublicationStatus.DRAFT;
         questionnaire.setStatus(status);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -109,7 +110,7 @@ public class QuestionnaireAdapterTest {
         questionnaire.setDate(date);
         questionnaire.setApprovalDate(approvalDate);
         questionnaire.setEffectivePeriod(effectivePeriod);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertEquals(date, adapter.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
         assertEquals(effectivePeriod, adapter.getEffectivePeriod());
@@ -133,7 +134,7 @@ public class QuestionnaireAdapterTest {
         var questionnaire = new Questionnaire();
         var experimental = true;
         questionnaire.setExperimental(experimental);
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         assertEquals(experimental, adapter.getExperimental());
     }
 
@@ -141,7 +142,7 @@ public class QuestionnaireAdapterTest {
     void adapter_set_relatedArtifact() {
         var questionnaire = new Questionnaire();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
     }
@@ -150,8 +151,8 @@ public class QuestionnaireAdapterTest {
     void adapter_copy() {
         var questionnaire = new Questionnaire().setStatus(PublicationStatus.DRAFT);
         questionnaire.setId("plan-1");
-        var adapter = new QuestionnaireAdapter(questionnaire);
-        var copy = adapter.copy();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
+        var copy = (Questionnaire) adapter.copy();
         copy.setId("plan-2");
         assertNotEquals(questionnaire.getId(), copy.getId());
         questionnaire.setStatus(PublicationStatus.ACTIVE);
@@ -216,7 +217,7 @@ public class QuestionnaireAdapterTest {
         questionnaire
                 .addItem()
                 .addExtension(Constants.SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE, new CanonicalType(dependencies.get(14)));
-        var adapter = new QuestionnaireAdapter(questionnaire);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {

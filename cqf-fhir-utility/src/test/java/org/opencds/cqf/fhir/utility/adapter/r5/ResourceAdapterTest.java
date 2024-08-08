@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.Adapter;
 import org.slf4j.LoggerFactory;
 
-public class ResourceAdapterTest {
+class ResourceAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test

@@ -25,7 +25,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-public class ValueSetAdapterTest {
+class ValueSetAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 

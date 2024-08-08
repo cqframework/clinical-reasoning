@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
-public class StructureDefinitionAdapterTest {
+class StructureDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 

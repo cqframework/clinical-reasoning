@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class LibraryAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
@@ -46,7 +47,7 @@ public class LibraryAdapterTest {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
         doReturn(new Bundle()).when(spyVisitor).visit(any(LibraryAdapter.class), any(), any());
         IDomainResource library = new Library();
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any(), any());
     }
@@ -56,7 +57,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var name = "name";
         library.setName(name);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
@@ -68,7 +69,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var url = "www.url.com";
         library.setUrl(url);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
         adapter.setUrl(newUrl);
@@ -80,7 +81,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var version = "1.0.0";
         library.setVersion(version);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
@@ -93,7 +94,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var status = PublicationStatus.DRAFT;
         library.setStatus(status);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -112,7 +113,7 @@ public class LibraryAdapterTest {
         library.setDate(date);
         library.setApprovalDate(approvalDate);
         library.setEffectivePeriod(effectivePeriod);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(date, adapter.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
         assertEquals(effectivePeriod, adapter.getEffectivePeriod());
@@ -136,7 +137,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var experimental = true;
         library.setExperimental(experimental);
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(experimental, adapter.getExperimental());
     }
 
@@ -144,7 +145,7 @@ public class LibraryAdapterTest {
     void adapter_set_relatedArtifact() {
         var library = new Library();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(relatedArtifactList, library.getRelatedArtifact());
         assertEquals(relatedArtifactList, adapter.getRelatedArtifact());
@@ -154,8 +155,8 @@ public class LibraryAdapterTest {
     void adapter_copy() {
         var library = new Library().setStatus(PublicationStatus.DRAFT);
         library.setId("library-1");
-        var adapter = new LibraryAdapter(library);
-        var copy = adapter.copy();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
+        var copy = (Library) adapter.copy();
         var adapterCopy = new LibraryAdapter(copy);
         adapterCopy.setId(new IdDt("Library", "library-2"));
         assertNotEquals(library.getId(), copy.getId());
@@ -172,7 +173,7 @@ public class LibraryAdapterTest {
         library.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
         library.addDataRequirement().addProfile(dependencies.get(2));
         library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
-        var adapter = new LibraryAdapter(library);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {
@@ -183,7 +184,7 @@ public class LibraryAdapterTest {
     @Test
     void adapter_get_and_set_content() {
         var library = new Library();
-        var adapter = new LibraryAdapter(library);
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
         var contentList = new ArrayList<Attachment>();
         contentList.add(new Attachment().setContentType("text/cql").setData(new byte[10]));
         adapter.setContent(contentList);
@@ -198,7 +199,7 @@ public class LibraryAdapterTest {
     void adapter_get_and_set_type() {
         var type = new CodeableConcept(new Coding("www.test.com", "test", "Test"));
         var library = new Library().setType(type);
-        var adapter = new LibraryAdapter(library);
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(type, adapter.getType());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setType("test"));
         var newType = new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/library-type", "logic-library", ""));
@@ -214,7 +215,7 @@ public class LibraryAdapterTest {
     @Test
     void adapter_get_and_set_dataRequirement() {
         var library = new Library();
-        var adapter = new LibraryAdapter(library);
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
         var dataRequirements = new ArrayList<DataRequirement>();
         dataRequirements.add(new DataRequirement().setType("Patient"));
         adapter.setDataRequirement(dataRequirements);
@@ -229,7 +230,7 @@ public class LibraryAdapterTest {
         var library = new Library();
         var useContext = new UsageContext().setCode(new Coding("www.test.com", "test", "Test"));
         library.setUseContext(Collections.singletonList(useContext));
-        var adapter = new LibraryAdapter(library);
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
         assertEquals(useContext, adapter.getUseContext().get(0));
     }
 }

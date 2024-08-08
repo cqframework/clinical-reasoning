@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,12 +20,14 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -36,6 +40,7 @@ class StructureDefinitionAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(new Library()));
+        assertNotNull(new StructureDefinitionAdapter((IDomainResource) new StructureDefinition()));
     }
 
     @Test
@@ -118,6 +123,7 @@ class StructureDefinitionAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, structureDef.getDate());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(new DateType()));
         var newDateElement = new DateTimeType().setValue(new Date());
         adapter.setDateElement(newDateElement);
         assertEquals(newDateElement, structureDef.getDateElement());
@@ -144,24 +150,25 @@ class StructureDefinitionAdapterTest {
     @Test
     void adapter_set_relatedArtifact() {
         var structureDef = new StructureDefinition();
-        var relatedArtifactList = List.of(new RelatedArtifact());
+        var relatedArtifactList = List.of(new RelatedArtifact().setType(RelatedArtifactType.DEPENDSON));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        assertFalse(adapter.hasRelatedArtifact());
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
-        assertThrows(UnprocessableEntityException.class, () -> adapter.getRelatedArtifactsOfType("invalid"));
         assertEquals(0, adapter.getRelatedArtifactsOfType("depends-on").size());
     }
 
     @Test
     void adapter_copy() {
-        var structureDef = new StructureDefinition().setStatus(PublicationStatus.DRAFT);
+        var structureDef = new StructureDefinition();
         structureDef.setId("plan-1");
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         var copy = (StructureDefinition) adapter.copy();
         copy.setId("plan-2");
         assertNotEquals(structureDef.getId(), copy.getId());
+        assertEquals(copy.getStatus(), PublicationStatus.fromCode(adapter.getStatus()));
         structureDef.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(PublicationStatus.fromCode(adapter.getStatus()), copy.getStatus());
     }
 
     @Test

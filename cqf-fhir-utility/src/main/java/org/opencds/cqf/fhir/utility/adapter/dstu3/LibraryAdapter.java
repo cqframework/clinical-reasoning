@@ -313,7 +313,8 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
                 .map(ref -> {
                     if (getLibrary().hasContained()) {
                         return getLibrary().getContained().stream()
-                                .filter(containedResource -> containedResource.getId().equals(ref))
+                                .filter(containedResource ->
+                                        containedResource.getId().equals(ref))
                                 .findFirst()
                                 .map(r -> (IBaseParameters) r)
                                 .orElse(null);

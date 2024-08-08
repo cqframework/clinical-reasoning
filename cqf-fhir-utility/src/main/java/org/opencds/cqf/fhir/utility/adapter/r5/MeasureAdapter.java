@@ -155,8 +155,7 @@ public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifact
                 var edrReference = ((Reference) edrExtension.getValue()).getReference();
                 for (var c : getMeasure().getContained()) {
                     if (c.hasId()) {
-                        var adjustedId = c.getId().startsWith("#") ? c.getId() : "#" + c.getId();
-                        if (adjustedId.equals(edrReference) && c instanceof Library) {
+                        if (c.getId().equals(edrReference) && c instanceof Library) {
                             effectiveDataRequirements = (Library) c;
                             effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                         }

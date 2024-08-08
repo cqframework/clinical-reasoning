@@ -196,7 +196,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
         updateMetadata(artifactAdapter, version, rootEffectivePeriod, current);
         // Step 2: add the resource to the list of released resources
         resourcesToUpdate.add(artifactAdapter.get());
-        // Step 3 : Go through all the components, update them and add them to root dependencies
+        // Step 3 : Go through all the components, update them and recursively release them if Owned
         for (var component : artifactAdapter.getComponents()) {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
             if (!StringUtils.isBlank(preReleaseReference)) {
@@ -248,6 +248,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             List<String> systemVersionExpansionParameters,
             List<String> canonicalVersionExpansionParameters) {
 
+        // Step 1: Check components, add them to the cache and convert to dependencies
         for (var component : artifactAdapter.getComponents()) {
             // all components are already updated to latest as part of release
             var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
@@ -264,14 +265,12 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                 res = tryGetLatestVersion(preReleaseReference, repository);
             }
             if (res.isPresent()) {
+                // add to cache if resolvable
                 if (!alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(preReleaseReference))) {
                     alreadyUpdatedDependencies.put(
                             Canonicals.getUrl(preReleaseReference), res.get().get());
                 }
                 // update the reference to latest
-                if (!res.get().hasVersion()) {
-                    var s = res.get().getUrl();
-                }
                 updatedReference = res.get().hasVersion()
                         ? String.format("%s|%s", res.get().getUrl(), res.get().getVersion())
                         : res.get().getUrl();
@@ -286,6 +285,7 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             rootLibraryAdapter.getRelatedArtifact().add(componentToDependency);
         }
         var dependencies = artifactAdapter.getDependencies();
+        // Step 2: update dependencies recursively
         for (var dependency : dependencies) {
             KnowledgeArtifactAdapter dependencyAdapter = null;
             if (alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(dependency.getReference()))) {
@@ -331,14 +331,15 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
                             .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
                 }
                 Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
-                // if not then try to find the latest version and update the dependency
+                // if not available in expansion parameters then try to find the latest version and update the
+                // dependency
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                     maybeAdapter = tryGetLatestVersionWithStatus(dependency.getReference(), repository, "active")
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
                                 // if we don't know the version even at this point then they are missing from the
-                                // expansion parameters
+                                // expansion parameters, hence update the expansion parameters
                                 if (resourceType == null
                                         || resourceType.getSimpleName().equals("CodeSystem")) {
                                     systemVersionExpansionParameters.add(versionedReference);
@@ -369,9 +370,6 @@ public class KnowledgeArtifactReleaseVisitor implements KnowledgeArtifactVisitor
             }
             // only add the dependency to the manifest if it is from a leaf artifact
             if (!artifactAdapter.getUrl().equals(rootLibraryAdapter.getUrl())) {
-                if (Canonicals.getVersion(dependency.getReference()) == null) {
-                    var d = dependency;
-                }
                 var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion,
                         "depends-on",

@@ -354,7 +354,7 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
             getLibrary().addContained(newExpansionParameters);
             var expansionParamsExt = getLibrary().addExtension();
             expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
-            expansionParamsExt.setValue(new Reference("#" + id));
+            expansionParamsExt.setValue(new Reference(id));
         }
     }
 }

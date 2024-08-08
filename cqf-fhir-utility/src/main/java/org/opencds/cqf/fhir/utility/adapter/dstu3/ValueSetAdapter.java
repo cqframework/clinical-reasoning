@@ -75,6 +75,16 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     }
 
     @Override
+    public boolean hasTitle() {
+        return this.getValueSet().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getValueSet().getTitle();
+    }
+
+    @Override
     public String getPurpose() {
         return this.getValueSet().getPurpose();
     }
@@ -82,6 +92,11 @@ class ValueSetAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.ut
     @Override
     public void setName(String name) {
         this.getValueSet().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.getValueSet().setTitle(title);
     }
 
     @Override

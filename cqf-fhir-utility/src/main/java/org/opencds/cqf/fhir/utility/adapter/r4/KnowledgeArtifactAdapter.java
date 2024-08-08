@@ -78,6 +78,16 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     }
 
     @Override
+    public boolean hasTitle() {
+        return this.get().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.get().getTitle();
+    }
+
+    @Override
     public String getPurpose() {
         return null;
     }
@@ -85,6 +95,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public void setName(String name) {
         this.get().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.get().setTitle(title);
     }
 
     @Override

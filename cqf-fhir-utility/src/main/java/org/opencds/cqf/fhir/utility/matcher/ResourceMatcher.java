@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -202,6 +203,10 @@ public interface ResourceMatcher {
         if (pathResult instanceof IIdType) {
             var id = (IIdType) pathResult;
             return param.getValue().equals(id.getIdPart());
+        }
+
+        if (pathResult instanceof IBaseEnumeration) {
+            return param.getValue().equals(((IBaseEnumeration<?>) pathResult).getValueAsString());
         }
 
         if (pathResult instanceof IPrimitiveType) {

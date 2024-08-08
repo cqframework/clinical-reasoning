@@ -62,6 +62,10 @@ public class Searches {
         return builder().withStringParam("name", name).build();
     }
 
+    public static Map<String, List<IQueryParameterType>> byStatus(String status) {
+        return builder().withTokenParam("status", status).build();
+    }
+
     public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
         if (version == null || version.isEmpty()) {
             return builder().withStringParam("name", name).build();

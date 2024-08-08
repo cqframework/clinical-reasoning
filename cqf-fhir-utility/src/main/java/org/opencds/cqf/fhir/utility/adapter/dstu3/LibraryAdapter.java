@@ -4,15 +4,20 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -23,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
@@ -80,6 +86,16 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     }
 
     @Override
+    public boolean hasTitle() {
+        return this.getLibrary().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getLibrary().getTitle();
+    }
+
+    @Override
     public String getPurpose() {
         return this.getLibrary().getPurpose();
     }
@@ -87,6 +103,11 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     @Override
     public void setName(String name) {
         this.getLibrary().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.getLibrary().setTitle(title);
     }
 
     @Override
@@ -281,5 +302,59 @@ class LibraryAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.uti
     @Override
     public void setExtension(List<IBaseExtension<?, ?>> extensions) {
         this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    }
+
+    @Override
+    public Optional<IBaseParameters> getExpansionParameters() {
+        return getLibrary().getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.EXPANSION_PARAMETERS_URL))
+                .findAny()
+                .map(ext -> ((Reference) ext.getValue()).getReference())
+                .map(ref -> {
+                    if (getLibrary().hasContained()) {
+                        return getLibrary().getContained().stream()
+                                .filter(containedResource ->
+                                        containedResource.getId().equals(ref))
+                                .findFirst()
+                                .map(r -> (IBaseParameters) r)
+                                .orElse(null);
+                    }
+                    return null;
+                });
+    }
+
+    @Override
+    public void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
+        var newParameters = new ArrayList<ParametersParameterComponent>();
+        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
+            for (String parameter : systemVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("system-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
+            for (String parameter : canonicalVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("canonical-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        var existingExpansionParameters = getExpansionParameters();
+        if (existingExpansionParameters.isPresent()) {
+            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        } else {
+            var id = "#exp-params";
+            var newExpansionParameters = new Parameters();
+            newExpansionParameters.setParameter(newParameters);
+            newExpansionParameters.setId(id);
+            getLibrary().addContained(newExpansionParameters);
+            var expansionParamsExt = getLibrary().addExtension();
+            expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
+            expansionParamsExt.setValue(new Reference(id));
+        }
     }
 }

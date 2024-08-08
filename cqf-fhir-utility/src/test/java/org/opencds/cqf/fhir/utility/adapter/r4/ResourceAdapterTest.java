@@ -7,10 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
@@ -18,6 +23,8 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.Adapter;
+import org.slf4j.LoggerFactory;
 
 public class ResourceAdapterTest {
     @Test
@@ -66,6 +73,19 @@ public class ResourceAdapterTest {
 
     @Test
     void adapter_get_and_set_extension() {
+        var logger = (Logger) LoggerFactory.getLogger(Adapter.class);
+        var listAppender = new ListAppender<ILoggingEvent>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+        var bundle = new Bundle();
+        var bundleAdapter = new ResourceAdapter(bundle);
+        assertFalse(bundleAdapter.hasExtension());
+        bundleAdapter.setExtension(List.of(new Extension()));
+        assertEquals(1, listAppender.list.size());
+        assertEquals(Level.DEBUG, listAppender.list.get(0).getLevel());
+        bundleAdapter.addExtension(new Extension());
+        assertEquals(2, listAppender.list.size());
+        assertEquals(Level.DEBUG, listAppender.list.get(1).getLevel());
         var resource = new Patient();
         var extensionList = List.of(new Extension().setUrl("test-extension-url").setValue(new BooleanType(true)));
         var adapter = new ResourceAdapter(resource);

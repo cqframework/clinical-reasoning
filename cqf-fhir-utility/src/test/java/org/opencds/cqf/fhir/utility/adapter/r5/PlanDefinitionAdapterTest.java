@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class PlanDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
+    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
@@ -41,7 +42,7 @@ public class PlanDefinitionAdapterTest {
         var spyVisitor = spy(new PackageVisitor(fhirContext));
         doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
         IDomainResource planDef = new PlanDefinition();
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         adapter.accept(spyVisitor, null, null);
         verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any(), any());
     }
@@ -51,7 +52,7 @@ public class PlanDefinitionAdapterTest {
         var planDef = new PlanDefinition();
         var name = "name";
         planDef.setName(name);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);
@@ -63,7 +64,7 @@ public class PlanDefinitionAdapterTest {
         var planDef = new PlanDefinition();
         var url = "www.url.com";
         planDef.setUrl(url);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertEquals(url, adapter.getUrl());
         var newUrl = "www.url2.com";
         adapter.setUrl(newUrl);
@@ -75,7 +76,7 @@ public class PlanDefinitionAdapterTest {
         var planDef = new PlanDefinition();
         var version = "1.0.0";
         planDef.setVersion(version);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertTrue(adapter.hasVersion());
         assertEquals(version, adapter.getVersion());
         var newVersion = "1.0.1";
@@ -88,7 +89,7 @@ public class PlanDefinitionAdapterTest {
         var planDef = new PlanDefinition();
         var status = PublicationStatus.DRAFT;
         planDef.setStatus(status);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertEquals(status.toCode(), adapter.getStatus());
         assertThrows(UnprocessableEntityException.class, () -> adapter.setStatus("invalid-status"));
         var newStatus = PublicationStatus.ACTIVE;
@@ -107,7 +108,7 @@ public class PlanDefinitionAdapterTest {
         planDef.setDate(date);
         planDef.setApprovalDate(approvalDate);
         planDef.setEffectivePeriod(effectivePeriod);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertEquals(date, adapter.getDate());
         assertEquals(approvalDate, adapter.getApprovalDate());
         assertEquals(effectivePeriod, adapter.getEffectivePeriod());
@@ -131,7 +132,7 @@ public class PlanDefinitionAdapterTest {
         var planDef = new PlanDefinition();
         var experimental = true;
         planDef.setExperimental(experimental);
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         assertEquals(experimental, adapter.getExperimental());
     }
 
@@ -139,7 +140,7 @@ public class PlanDefinitionAdapterTest {
     void adapter_set_relatedArtifact() {
         var planDef = new PlanDefinition();
         var relatedArtifactList = List.of(new RelatedArtifact());
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(relatedArtifactList, planDef.getRelatedArtifact());
         assertEquals(relatedArtifactList, adapter.getRelatedArtifact());
@@ -149,8 +150,8 @@ public class PlanDefinitionAdapterTest {
     void adapter_copy() {
         var planDef = new PlanDefinition().setStatus(PublicationStatus.DRAFT);
         planDef.setId("plan-1");
-        var adapter = new PlanDefinitionAdapter(planDef);
-        var copy = adapter.copy();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
+        var copy = (PlanDefinition) adapter.copy();
         var adapterCopy = new PlanDefinitionAdapter(copy);
         adapterCopy.setId(new IdDt("PlanDefinition", "plan-2"));
         assertNotEquals(planDef.getId(), copy.getId());
@@ -201,7 +202,7 @@ public class PlanDefinitionAdapterTest {
         planDef.addExtension(new Extension(
                 "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new CanonicalType(dependencies.get(12))));
         action.addAction().setDefinition(new CanonicalType(dependencies.get(13)));
-        var adapter = new PlanDefinitionAdapter(planDef);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {

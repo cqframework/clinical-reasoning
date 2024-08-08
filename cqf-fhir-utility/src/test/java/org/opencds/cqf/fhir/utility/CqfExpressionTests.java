@@ -3,9 +3,19 @@ package org.opencds.cqf.fhir.utility;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import org.hl7.fhir.dstu2.model.Extension;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.junit.jupiter.api.Test;
 
 class CqfExpressionTests {
+    @Test
+    void testInvalidExtension() {
+        var cqfExpression = CqfExpression.of((IBaseExtension<?, ?>) null, null);
+        assertNull(cqfExpression);
+        var dstu2Expression = CqfExpression.of(new Extension(), null);
+        assertNull(dstu2Expression);
+    }
+
     @Test
     void testDstu3Extension() {
         var expression = new org.hl7.fhir.dstu3.model.StringType("expression");

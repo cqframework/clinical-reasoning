@@ -27,7 +27,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
@@ -35,6 +34,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +106,7 @@ public class Engines {
     }
 
     private static LibrarySourceProvider buildLibrarySource(Repository repository) {
-        AdapterFactory adapterFactory = getAdapterFactory(repository.fhirContext());
+        var adapterFactory = AdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
@@ -186,22 +186,10 @@ public class Engines {
         return dataProviders;
     }
 
-    public static AdapterFactory getAdapterFactory(FhirContext fhirContext) {
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
-            case R4:
-                return new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
-            case R5:
-                return new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
-            default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
-        }
-    }
-
     public static CqlFhirParametersConverter getCqlFhirParametersConverter(FhirContext fhirContext) {
         var fhirTypeConverter =
                 new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
-        return new CqlFhirParametersConverter(fhirContext, getAdapterFactory(fhirContext), fhirTypeConverter);
+        return new CqlFhirParametersConverter(
+                fhirContext, AdapterFactory.forFhirContext(fhirContext), fhirTypeConverter);
     }
 }

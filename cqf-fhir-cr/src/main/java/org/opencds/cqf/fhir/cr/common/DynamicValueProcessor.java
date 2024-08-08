@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.cql.CqfExpression;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -3,8 +3,10 @@
   "id": "OutpatientPriorAuthorizationRequest-OPA-Patient1",
   "extension": [
     {
-      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-      "valueUri": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation|1.0.0"
+      "url": "http://hl7.org/fhir/StructureDefinition/cqif-library",
+      "valueReference": {
+        "reference": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation|1.0.0"
+      }
     },
     {
       "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-prepopulate-subject",
@@ -48,12 +50,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "FacilityName"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.FacilityName"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -71,12 +69,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "FacilityNPI"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.FacilityNPI"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -113,12 +107,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "BeneficiaryFirstName"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryFirstName"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -136,12 +126,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "BeneficiaryLastName"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryLastName"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -159,12 +145,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "BeneficiaryDOB"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryDOB"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -182,12 +164,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "BeneficiaryMedicareID"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryMedicareID"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -205,12 +183,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "BeneficiaryGender"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryGender"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -235,12 +209,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "OperatingPhysicianFirstName"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianFirstName"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -258,12 +228,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "OperatingPhysicianLastName"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianLastName"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -281,12 +247,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "OperatingPhysicianNPI"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianNPI"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -316,12 +278,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "OperatingPhysicianAddress1"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianAddress1"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -339,12 +297,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "OperatingPhysicianAddress2"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianAddress2"
                 }
               ],
               "linkId": "3.5.2",
@@ -355,12 +309,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "OperatingPhysicianAddressCity"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianAddressCity"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -378,12 +328,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "OperatingPhysicianAddressState"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianAddressState"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -401,12 +347,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "OperatingPhysicianAddressZip"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.OperatingPhysicianAddressZip"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -433,12 +375,8 @@
         {
           "extension": [
             {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-              "valueString": "text/cql.identifier"
-            },
-            {
-              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-              "valueString": "AttendingPhysicianSame"
+              "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+              "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianSame"
             },
             {
               "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -467,12 +405,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "AttendingPhysicianFirstName"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianFirstName"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -490,12 +424,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "AttendingPhysicianLastName"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianLastName"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -513,12 +443,8 @@
             {
               "extension": [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                  "valueString": "text/cql.identifier"
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                  "valueString": "AttendingPhysicianNPI"
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                  "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianNPI"
                 },
                 {
                   "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -548,12 +474,8 @@
                 {
                   "extension": [
                     {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                      "valueString": "text/cql.identifier"
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueString": "AttendingPhysicianAddress1"
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                      "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianAddress1"
                     },
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -571,12 +493,8 @@
                 {
                   "extension": [
                     {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                      "valueString": "text/cql.identifier"
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueString": "AttendingPhysicianAddress2"
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                      "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianAddress2"
                     }
                   ],
                   "linkId": "4.2.5.2",
@@ -587,12 +505,8 @@
                 {
                   "extension": [
                     {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                      "valueString": "text/cql.identifier"
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueString": "AttendingPhysicianAddressCity"
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                      "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianAddressCity"
                     },
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -610,12 +524,8 @@
                 {
                   "extension": [
                     {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                      "valueString": "text/cql.identifier"
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueString": "AttendingPhysicianAddressState"
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                      "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianAddressState"
                     },
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
@@ -633,12 +543,8 @@
                 {
                   "extension": [
                     {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-                      "valueString": "text/cql.identifier"
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-                      "valueString": "AttendingPhysicianAddressZip"
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+                      "valueString": "OutpatientPriorAuthorizationPrepopulation.AttendingPhysicianAddressZip"
                     },
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",

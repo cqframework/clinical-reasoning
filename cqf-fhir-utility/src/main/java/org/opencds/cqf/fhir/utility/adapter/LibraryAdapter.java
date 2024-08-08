@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
@@ -8,6 +9,9 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
  */
 public interface LibraryAdapter extends KnowledgeArtifactAdapter {
 
+    List<String> LIBRARY_TYPES =
+            Arrays.asList("logic-library", "model-definition", "asset-collection", "module-definition");
+
     boolean hasContent();
 
     List<? extends ICompositeType> getContent();
@@ -15,4 +19,16 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
     void setContent(List<? extends ICompositeType> attachments);
 
     ICompositeType addContent();
+
+    ICompositeType getType();
+
+    LibraryAdapter setType(String type);
+
+    List<? extends ICompositeType> getDataRequirement();
+
+    LibraryAdapter addDataRequirement(ICompositeType dataRequirement);
+
+    <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement);
+
+    List<? extends ICompositeType> getUseContext();
 }

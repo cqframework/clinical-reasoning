@@ -6,23 +6,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter
         implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
@@ -31,79 +25,25 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     public KnowledgeArtifactAdapter(IDomainResource resource) {
         super(resource);
         if (!(resource instanceof MetadataResource)) {
-            throw new IllegalArgumentException("resource argument is not a MetadataResource resource");
+            throw new IllegalArgumentException(
+                    "resource passed as resource argument is not a MetadataResource resource");
         }
-        this.adaptedResource = (MetadataResource) resource;
+        adaptedResource = (MetadataResource) resource;
     }
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {
         super(resource);
-        this.adaptedResource = resource;
+        adaptedResource = resource;
     }
 
     @Override
     public MetadataResource get() {
-        return this.adaptedResource;
+        return adaptedResource;
     }
 
     @Override
     public MetadataResource copy() {
-        return this.get().copy();
-    }
-
-    @Override
-    public String getUrl() {
-        return this.get().getUrl();
-    }
-
-    @Override
-    public boolean hasUrl() {
-        return this.get().hasUrl();
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.get().setUrl(url);
-    }
-
-    @Override
-    public void setVersion(String version) {
-        this.get().setVersion(version);
-    }
-
-    @Override
-    public String getVersion() {
-        return this.get().getVersion();
-    }
-
-    @Override
-    public boolean hasVersion() {
-        return this.get().hasVersion();
-    }
-
-    @Override
-    public String getName() {
-        return this.get().getName();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.get().setName(name);
-    }
-
-    @Override
-    public Date getApprovalDate() {
-        return this.get().getApprovalDate();
-    }
-
-    @Override
-    public Date getDate() {
-        return this.get().getDate();
-    }
-
-    @Override
-    public void setDate(Date approvalDate) {
-        this.get().setDate(approvalDate);
+        return get().copy();
     }
 
     @Override
@@ -111,32 +51,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         if (date != null && !(date instanceof DateTimeType)) {
             throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
         }
-        this.get().setDateElement((DateTimeType) date);
-    }
-
-    @Override
-    public void setApprovalDate(Date approvalDate) {
-        this.get().setApprovalDate(approvalDate);
-    }
-
-    @Override
-    public Period getEffectivePeriod() {
-        return this.get().getEffectivePeriod();
-    }
-
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public String getPurpose() {
-        return this.get().getPurpose();
-    }
-
-    @Override
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
-        return visitor.visit(this, repository, operationParameters);
+        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setDateElement(date);
     }
 
     @Override
@@ -144,18 +59,15 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
             throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
         }
-        this.get().setEffectivePeriod((Period) effectivePeriod);
+        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setEffectivePeriod(effectivePeriod);
     }
 
     @Override
-    public boolean hasRelatedArtifact() {
-        return this.get().hasRelatedArtifact();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifact() {
-        return this.get().getRelatedArtifact();
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+        return references;
     }
 
     @SuppressWarnings("unchecked")
@@ -167,25 +79,15 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid related artifact code");
         }
-        return this.getRelatedArtifact().stream()
+        return getRelatedArtifact().stream()
+                .map(ra -> (RelatedArtifact) ra)
                 .filter(ra -> ra.getType() == type)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws UnprocessableEntityException {
-        this.get()
-                .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> {
-                            try {
-                                return (RelatedArtifact) ra;
-                            } catch (ClassCastException e) {
-                                throw new UnprocessableEntityException(
-                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
-                            }
-                        })
-                        .collect(Collectors.toList()));
+    public String getStatus() {
+        return get().getStatus() == null ? null : get().getStatus().toCode();
     }
 
     @Override
@@ -196,21 +98,21 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        this.get().setStatus(status);
+        get().setStatus(status);
     }
 
     @Override
-    public String getStatus() {
-        return this.get().getStatus() == null ? null : this.get().getStatus().toCode();
-    }
-
-    @Override
-    public boolean getExperimental() {
-        return this.get().getExperimental();
-    }
-
-    @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
+    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
+            throws UnprocessableEntityException {
+        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setRelatedArtifact(relatedArtifacts.stream()
+                .map(ra -> {
+                    try {
+                        return (RelatedArtifact) ra;
+                    } catch (ClassCastException e) {
+                        throw new UnprocessableEntityException(
+                                "All related artifacts must be of type " + RelatedArtifact.class.getName());
+                    }
+                })
+                .collect(Collectors.toList()));
     }
 }

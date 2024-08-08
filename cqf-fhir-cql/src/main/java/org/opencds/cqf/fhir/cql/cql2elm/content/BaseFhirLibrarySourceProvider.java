@@ -46,6 +46,7 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
             for (ICompositeType attachment : libraryAdapter.getContent()) {
                 AttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
                 if (attachmentAdapter.getContentType().equals(contentType)) {
+                    // get externalized extension if present and add custom load data
                     return new ByteArrayInputStream(attachmentAdapter.getData());
                 }
             }

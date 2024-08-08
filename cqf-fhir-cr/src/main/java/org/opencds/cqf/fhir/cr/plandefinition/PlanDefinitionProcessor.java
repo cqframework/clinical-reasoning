@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
@@ -16,15 +18,15 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.IApplyProcessor;
-import org.opencds.cqf.fhir.cr.plandefinition.packages.PackageProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 @SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
@@ -83,12 +85,26 @@ public class PlanDefinitionProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
             Either3<C, IIdType, R> planDefinition) {
-        return packageProcessor.packageResource(resolvePlanDefinition(planDefinition));
+        return packagePlanDefinition(planDefinition, false);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
             Either3<C, IIdType, R> planDefinition, boolean isPut) {
-        return packageProcessor.packageResource(resolvePlanDefinition(planDefinition), isPut ? "PUT" : "POST");
+        return packagePlanDefinition(
+                planDefinition,
+                newParameters(
+                        repository.fhirContext(),
+                        "package-parameters",
+                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
+            Either3<C, IIdType, R> planDefinition, IBaseParameters parameters) {
+        return packagePlanDefinition(resolvePlanDefinition(planDefinition), parameters);
+    }
+
+    public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
+        return packageProcessor.packageResource(planDefinition, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> ApplyRequest buildApplyRequest(

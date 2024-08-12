@@ -233,8 +233,6 @@ public class MeasureEvaluator {
                 type.toCode(),
                 subjectSize);
 
-        // Map<GroupDef, MeasureScoring> scoring = measureDef.scoring();
-
         // Library/$evaluate
 
         for (String subjectId : subjectIds) {

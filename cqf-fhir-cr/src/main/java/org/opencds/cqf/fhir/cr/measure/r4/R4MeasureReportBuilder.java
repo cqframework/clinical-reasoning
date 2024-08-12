@@ -367,6 +367,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // add extension to group for totalDenominator and totalNumerator
         if (bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.PROPORTION)
                 || bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.RATIO)) {
+
+            // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
                 String doc = null;
                 if (getReportPopulation(groupDef, DATEOFCOMPLIANCE) != null

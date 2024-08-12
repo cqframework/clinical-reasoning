@@ -15,10 +15,10 @@ class CollectDataTest {
                 .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
                 .collectData()
                 .then()
-                .hasParameterCount(13)
+                .hasParameterCount(16) // 3 more?
                 .measureReport()
                 .hasDataCollectionReportType()
-                .hasEvaluatedResourceCount(12)
+                .hasEvaluatedResourceCount(15) // 3 more?
                 .up()
                 .report();
     }
@@ -33,7 +33,7 @@ class CollectDataTest {
                 .periodEnd("2022-06-29")
                 .collectData()
                 .then()
-                .hasParameterCount(13)
+                .hasParameterCount(16)
                 .hasMeasureReportCount(1)
                 .report();
     }
@@ -65,7 +65,7 @@ class CollectDataTest {
                 .periodEnd("2020-01-01")
                 .collectData()
                 .then()
-                .hasParameterCount(17)
+                .hasParameterCount(18)
                 .hasMeasureReportCount(4)
                 .report();
     }

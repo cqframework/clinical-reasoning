@@ -8,7 +8,12 @@
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
     "valueCode": "encounter"
-  } ],
+  },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-compatible",
+      "valueBoolean": "true"
+    }
+    ],
   "scoring": {
     "coding": [
       {
@@ -19,6 +24,10 @@
   },
   "group": [
     {
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression",
+        "valueString": "date of compliance"
+      } ],
       "population": [
         {
           "id": "initial-population",

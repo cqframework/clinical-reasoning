@@ -18,7 +18,10 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +78,8 @@ public class LibraryEngine {
             IBaseBundle additionalData,
             Set<String> expressions) {
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
-        var engine = Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
-        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
+        var result = getEvaluationResult(
+                id, patientId, parameters, additionalData, expressions, cqlFhirParametersConverter, null);
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -280,5 +282,26 @@ public class LibraryEngine {
         }
 
         return result;
+    }
+
+    public EvaluationResult getEvaluationResult(
+            VersionedIdentifier id,
+            String patientId,
+            IBaseParameters parameters,
+            IBaseBundle additionalData,
+            Set<String> expressions,
+            CqlFhirParametersConverter cqlFhirParametersConverter,
+            CqlEngine engine) {
+
+        if (cqlFhirParametersConverter == null) {
+            cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
+        }
+        // engine context built externally of LibraryEngine?
+        if (engine == null) {
+            engine = Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
+        }
+
+        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+        return engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
     }
 }

@@ -584,7 +584,7 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(2)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(2);

@@ -52,6 +52,6 @@ class MeasureProcessorSdeSanityTest {
         var now = OffsetDateTime.now();
 
         assertEquals("2019-01-01", formatter.format(start.toInstant().atOffset(now.getOffset())));
-        assertEquals("2019-12-31", formatter.format(end.toInstant().atOffset(now.getOffset())));
+        assertEquals("2020-01-01", formatter.format(end.toInstant().atOffset(now.getOffset())));
     }
 }

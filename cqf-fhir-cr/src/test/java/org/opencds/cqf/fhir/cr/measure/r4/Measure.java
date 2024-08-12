@@ -347,11 +347,15 @@ public class Measure {
             List<String> contained = getContainedIdsPerResourceType(ResourceType.Observation);
             List<String> extIds = getExtensionIds();
 
-            // contained Observations have a matching reference
+            assertEquals(
+                    contained.size(),
+                    extIds.size(),
+                    "Qty of SDE Observation resources don't match qty of Extension references");
+            // contained Observations have a matching extension reference
             for (String s : contained) {
-                assertTrue(extIds.contains(s));
+                assertTrue(extIds.stream().anyMatch(t -> t.replace("#", "").equals(s)));
             }
-            // extension references have a matching Observation
+            // extension references have a matching contained Observation resource
             for (String extId : extIds) {
                 // inline resource references concat prefix '#' to indicate they are not persisted
                 assertTrue(contained.contains(extId.replace("#", "")));

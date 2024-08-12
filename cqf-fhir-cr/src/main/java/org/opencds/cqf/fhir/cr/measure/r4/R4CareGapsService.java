@@ -157,7 +157,7 @@ public class R4CareGapsService {
         }
         throwNotImplementIfPresent(practitioner, "practitioner");
         throwNotImplementIfPresent(organization, "organization");
-        listThrowNotImplementIfPresent(measureIdentifiers, "measureIdentifier");
+        // listThrowNotImplementIfPresent(measureIdentifiers, "measureIdentifier");
         listThrowNotImplementIfPresent(programs, "program");
         listThrowNotImplementIfPresent(topic, "topic");
         listThrowIllegalArgumentIfEmpty(statuses, "status");

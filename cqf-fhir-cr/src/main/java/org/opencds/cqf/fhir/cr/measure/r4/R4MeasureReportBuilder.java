@@ -4,8 +4,10 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_CRITER
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
@@ -51,8 +54,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.engine.runtime.Date;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
@@ -317,7 +318,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
         // TOTAL-DENOMINATOR), and will not be added to group populations.
         // Subtracting '2' from groupDef to balance with Measure defined Groups
-        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - 2)) {
+        var groupDefSizeDiff = 2;
+        if (groupDef.populations().stream()
+                        .filter(x -> x.type().equals(MeasurePopulationType.DATEOFCOMPLIANCE))
+                        .findFirst()
+                        .orElse(null)
+                != null) {
+            // dateofNonCompliance is another population not calculated
+            groupDefSizeDiff = 3;
+        }
+
+        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
@@ -356,6 +367,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // add extension to group for totalDenominator and totalNumerator
         if (bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.PROPORTION)
                 || bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.RATIO)) {
+            if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
+                String doc = null;
+                if (getReportPopulation(groupDef, DATEOFCOMPLIANCE) != null
+                        && !getReportPopulation(groupDef, DATEOFCOMPLIANCE)
+                                .getResources()
+                                .isEmpty()) {
+                    doc = getReportPopulation(groupDef, DATEOFCOMPLIANCE)
+                            .getResources()
+                            .iterator()
+                            .next()
+                            .toString();
+                }
+                reportGroup
+                        .addExtension()
+                        .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                        .setValue(new StringType(doc));
+            }
+
             if (bc.measureDef.isBooleanBasis()) {
                 reportGroup
                         .addExtension()
@@ -740,7 +769,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected Period getPeriod(Interval measurementPeriod) {
-        if (measurementPeriod.getStart() instanceof DateTime) {
+        Period period = new Period();
+        period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
+        period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
+        /*if (measurementPeriod.getStart() instanceof DateTime) {
             DateTime dtStart = (DateTime) measurementPeriod.getStart();
             DateTime dtEnd = (DateTime) measurementPeriod.getEnd();
 
@@ -752,7 +784,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
-        }
+        }*/
+        return period;
     }
 
     protected MeasureReport createMeasureReport(

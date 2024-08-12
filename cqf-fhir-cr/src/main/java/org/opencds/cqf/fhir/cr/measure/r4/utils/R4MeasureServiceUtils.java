@@ -183,8 +183,7 @@ public class R4MeasureServiceUtils {
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
-    /*
-    TODO: stubbing for future identifier search implementation
+    // TODO: stubbing for future identifier search implementation
     public Measure resolveByIdentifier(String identifier) {
         List<IQueryParameterType> params = new ArrayList<>();
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
@@ -213,7 +212,7 @@ public class R4MeasureServiceUtils {
             var msg = String.format("Measure Identifier: %s, found no matching measure resources", identifier);
             throw new IllegalArgumentException(msg);
         }
-    }*/
+    }
 
     public List<Measure> getMeasures(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
@@ -241,12 +240,12 @@ public class R4MeasureServiceUtils {
         }
 
         if (hasMeasureIdentifiers) {
-            /*for (String measureIdentifier : measureIdentifiers) {
+            for (String measureIdentifier : measureIdentifiers) {
                 Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
                 measureList.add(measureByIdentifier);
-            }*/
+            }
             // TODO: resolve IGRepository search for identifier
-            throw new NotImplementedOperationException("search for identifier not implemented.");
+            // throw new NotImplementedOperationException("search for identifier not implemented.");
         }
 
         Map<String, Measure> result = new HashMap<>();

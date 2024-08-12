@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.constant;
 
+/*
+constants used on Care-Gap returned resources
+ */
 public class CareGapsConstants {
 
     private CareGapsConstants() {

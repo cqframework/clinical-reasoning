@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
+
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,15 +18,18 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -163,9 +168,24 @@ public class R4MeasureProcessor {
                                     ? MeasureEvalType.POPULATION
                                     : MeasureEvalType.SUBJECT);
         }
+        // Library Evaluate
+        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        var params = makeParameters(measurementPeriod);
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id, params);
+        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod, libraryEngine, id, params);
+    }
 
-        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod);
+    public Parameters makeParameters(Interval measurementPeriod) {
+        Parameters parameters = new Parameters();
+        if (measurementPeriod != null) {
+
+            Period period = new Period();
+            period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
+            period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
+
+            parameters.setParameter(MEASUREMENT_PERIOD_PARAMETER_NAME, period);
+        }
+        return parameters;
     }
 
     protected Measure resolveByUrl(CanonicalType url) {

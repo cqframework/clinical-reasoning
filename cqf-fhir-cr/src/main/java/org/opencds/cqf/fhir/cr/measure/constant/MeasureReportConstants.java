@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.constant;
 
 import java.sql.Date;
 
+/*
+constants used on MeasureReport resources
+ */
 public class MeasureReportConstants {
     private MeasureReportConstants() {}
 

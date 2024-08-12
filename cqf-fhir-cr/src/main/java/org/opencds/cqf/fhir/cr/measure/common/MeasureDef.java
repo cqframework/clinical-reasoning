@@ -48,10 +48,6 @@ public class MeasureDef {
         return defaultMeasurementPeriod;
     }
 
-    public void setDefaultMeasurementPeriod(Interval defaultMeasurementPeriod) {
-        this.defaultMeasurementPeriod = defaultMeasurementPeriod;
-    }
-
     public List<SdeDef> sdes() {
         return this.sdes;
     }

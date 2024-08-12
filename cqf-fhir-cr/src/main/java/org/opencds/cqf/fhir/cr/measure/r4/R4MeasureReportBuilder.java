@@ -38,7 +38,6 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -46,8 +45,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -109,7 +106,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         public void addContained(Resource r) {
-            this.contained.computeIfAbsent(this.getId(r), x -> r);
+            this.contained.putIfAbsent(this.getId(r), r);
         }
 
         public Measure measure() {
@@ -235,7 +232,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         addEvaluatedResource(bc);
         addSupplementalData(bc);
-        // addIssues(bc);
 
         for (var r : bc.contained().values()) {
             bc.report().addContained(r);
@@ -262,23 +258,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 report.addEvaluatedResource(r);
             }
         }
-    }
-
-    protected void addIssues(BuilderContext bc) {
-        if (bc.issues().isEmpty()) {
-            return;
-        }
-
-        var report = bc.report();
-        OperationOutcome oc = new OperationOutcome();
-        oc.setId(UUID.randomUUID().toString());
-
-        for (String issue : bc.issues()) {
-            oc.addIssue().setSeverity(IssueSeverity.WARNING).setDiagnostics(issue);
-        }
-
-        bc.addContained(oc);
-        report.addExtension(MeasureConstants.EXT_OPERATION_OUTCOME_REFERENCE_URL, new Reference("#" + oc.getId()));
     }
 
     protected void buildGroups(BuilderContext bc) {
@@ -591,12 +570,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // Population Type behavior
-        switch (populationDef.type()) {
-            case MEASUREOBSERVATION:
-                buildMeasureObservations(bc, populationDef.expression(), populationDef.getResources());
-                break;
-            default:
-                break;
+        if (Objects.requireNonNull(populationDef.type()) == MeasurePopulationType.MEASUREOBSERVATION) {
+            buildMeasureObservations(bc, populationDef.expression(), populationDef.getResources());
         }
     }
 
@@ -657,7 +632,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // Case 5: population - resource types
     // add sde reference with criteria reference extension for each resource
     // if not an evaluated resource, add to contained
-    protected void buildSDE(BuilderContext bc, MeasureSupplementalDataComponent msdc, SdeDef sde) {
+    protected void buildSDE(BuilderContext bc, SdeDef sde) {
         var report = bc.report();
 
         // No SDEs were calculated, do nothing
@@ -680,7 +655,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
                 .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .map(ValueWrapper::new)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
@@ -689,47 +664,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Resource obs;
             if (!(accumulator.getKey().getValue() instanceof Resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
-                String valueKey = accumulator.getKey().getKey();
                 Long valueCount = accumulator.getValue();
 
-                if (valueKey == null) {
-                    valueKey = valueCode;
-                }
-
-                valueKey = this.escapeForFhirId(valueKey);
-
                 Coding valueCoding = new Coding().setCode(valueCode);
-                // if (!sdeCode.equalsIgnoreCase("sde-sex")) {
-                // /**
-                // * Match up the category part of our SDE key (e.g. sde-race has a category of
-                // * race) with a patient extension of the same category (e.g.
-                // * http://hl7.org/fhir/us/core/StructureDefinition/us-core-race) and the same
-                // * code as sdeAccumulatorKey (aka the value extracted from the CQL expression
-                // * named in the Measure SDE metadata) and then record the coding details.
-                // *
-                // * We know that at least one patient matches the sdeAccumulatorKey or else it
-                // * wouldn't show up in the map.
-                // */
 
-                // String coreCategory = sdeCode
-                // .substring(sdeCode.lastIndexOf('-') >= 0 ? sdeCode.lastIndexOf('-') + 1 : 0);
-                // for (DomainResource pt : subjectIds) {
-                // valueCoding = getExtensionCoding(pt, coreCategory, valueCode);
-                // if (valueCoding != null) {
-                // break;
-                // }
-                // }
-                // }
-
-                switch (report.getType()) {
-                    case INDIVIDUAL:
-                        obs = createPatientObservation(
-                                bc, UUID.randomUUID().toString(), sde.id(), valueCoding, concept);
-                        break;
-                    default:
-                        obs = createPopulationObservation(
-                                bc, UUID.randomUUID().toString(), sde.id(), valueCoding, valueCount, concept);
-                        break;
+                if (Objects.requireNonNull(report.getType()) == MeasureReport.MeasureReportType.INDIVIDUAL) {
+                    obs = createPatientObservation(bc, UUID.randomUUID().toString(), sde.id(), valueCoding, concept);
+                } else {
+                    obs = createPopulationObservation(
+                            bc, UUID.randomUUID().toString(), sde.id(), valueCoding, valueCount, concept);
                 }
 
                 bc.addCriteriaExtensionToSupplementalData(obs, sde.id());
@@ -745,9 +688,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var measureDef = bc.measureDef();
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
-            var msdc = measure.getSupplementalData().get(i);
             var sde = measureDef.sdes().get(i);
-            buildSDE(bc, msdc, sde);
+            buildSDE(bc, sde);
         }
     }
 
@@ -774,19 +716,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         Period period = new Period();
         period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
         period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
-        /*if (measurementPeriod.getStart() instanceof DateTime) {
-            DateTime dtStart = (DateTime) measurementPeriod.getStart();
-            DateTime dtEnd = (DateTime) measurementPeriod.getEnd();
-
-            return new Period().setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
-        } else if (measurementPeriod.getStart() instanceof Date) {
-            Date dStart = (Date) measurementPeriod.getStart();
-            Date dEnd = (Date) measurementPeriod.getEnd();
-
-            return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
-        } else {
-            throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
-        }*/
         return period;
     }
 
@@ -820,46 +749,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measure.getDescription()));
         }
 
-        // TODO: Allow a way to pass in or set a default reporter
-        // report.setReporter(value)
-
         return report;
-    }
-    // /**
-    // * Retrieve the coding from an extension that that looks like the following...
-    // *
-    // * { "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-    // * "extension": [ { "url": "ombCategory", "valueCoding": { "system":
-    // * "urn:oid:2.16.840.1.113883.6.238", "code": "2054-5", "display": "Black or
-    // * African American" } } ] }
-    // */
-
-    protected Coding getExtensionCoding(DomainResource patient, String coreCategory, String sdeCode) {
-        Coding valueCoding = new Coding();
-
-        patient.getExtension().forEach((ptExt) -> {
-            if (ptExt.getUrl().contains(coreCategory)) {
-                Coding extCoding = (Coding) ptExt.getExtension().get(0).getValue();
-                String extCode = extCoding.getCode();
-                if (extCode.equalsIgnoreCase(sdeCode)) {
-                    valueCoding.setSystem(extCoding.getSystem());
-                    valueCoding.setCode(extCoding.getCode());
-                    valueCoding.setDisplay(extCoding.getDisplay());
-                }
-            }
-        });
-
-        return valueCoding;
     }
 
     protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
 
         Extension extExtMeasure =
                 new Extension().setUrl(MeasureInfo.MEASURE).setValue(new CanonicalType(measureInfo.getMeasure()));
-
-        Extension extExtPop = new Extension()
-                .setUrl(MeasureInfo.POPULATION_ID)
-                .setValue(new StringType(measureInfo.getPopulationId()));
 
         Extension obsExtension = new Extension().setUrl(MeasureInfo.EXT_URL);
         obsExtension.addExtension(extExtMeasure);
@@ -869,10 +765,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private String getMeasure(Measure measure) {
         if (StringUtils.isNotBlank(measure.getUrl()) && !measure.getUrl().contains("|") && measure.hasVersion()) {
-            return new StringBuffer(measure.getUrl())
-                    .append("|")
-                    .append(measure.getVersion())
-                    .toString();
+            return measure.getUrl() + "|" + measure.getVersion();
         }
         return measure.getUrl();
     }
@@ -968,14 +861,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cc.setText(observationName);
         obs.setCode(cc);
         return obs;
-    }
-
-    protected String escapeForFhirId(String value) {
-        if (value == null) {
-            return null;
-        }
-
-        return value.toLowerCase().trim().replace(" ", "-").replace("_", "-");
     }
 
     // This is some hackery because most of these objects don't implement

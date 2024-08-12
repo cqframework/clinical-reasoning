@@ -62,7 +62,7 @@ public class MeasureEvaluator {
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
     protected CqlEngine context;
-    protected String measurementPeriodParameterName = null;
+    protected String measurementPeriodParameterName;
 
     protected LibraryEngine libraryEngine;
 
@@ -208,9 +208,7 @@ public class MeasureEvaluator {
 
     protected void captureEvaluatedResources(Set<Object> outEvaluatedResources) {
         if (outEvaluatedResources != null && this.context.getState().getEvaluatedResources() != null) {
-            for (Object o : this.context.getState().getEvaluatedResources()) {
-                outEvaluatedResources.add(o);
-            }
+            outEvaluatedResources.addAll(this.context.getState().getEvaluatedResources());
         }
         clearEvaluatedResources();
     }
@@ -296,16 +294,6 @@ public class MeasureEvaluator {
         }
 
         return (Iterable<Object>) expressionResult.value();
-    }
-
-    protected Object evaluateCriteria(String criteriaExpression, Set<Object> outEvaluatedResources) {
-        var ref = Libraries.resolveExpressionRef(
-                criteriaExpression, this.context.getState().getCurrentLibrary());
-        Object result = this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
-
-        captureEvaluatedResources(outEvaluatedResources);
-
-        return result;
     }
 
     protected Object evaluateObservationCriteria(
@@ -570,10 +558,6 @@ public class MeasureEvaluator {
 
     protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
         for (SdeDef sde : sdes) {
-            /*var ref = Libraries.resolveExpressionRef(
-                    sde.expression(), this.context.getState().getCurrentLibrary());
-            Object result = this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
-            */
             var expressionResult = evaluationResult.forExpression(sde.expression());
             Object result = expressionResult.value();
             // TODO: This is a hack-around for an cql engine bug. Need to investigate.
@@ -595,10 +579,6 @@ public class MeasureEvaluator {
             }
 
             // TODO: Handle list values as components?
-            /*var ref = Libraries.resolveExpressionRef(
-                    sd.expression(), this.context.getState().getCurrentLibrary());
-            Object result = this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
-            */
             var expressionResult = evaluationResult.forExpression(sd.expression());
             Object result = expressionResult.value();
             if (result instanceof Iterable) {

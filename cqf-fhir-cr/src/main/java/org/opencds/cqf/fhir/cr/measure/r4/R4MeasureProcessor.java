@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -197,22 +196,6 @@ public class R4MeasureProcessor {
 
     protected Measure resolveById(IdType id) {
         return this.repository.read(Measure.class, id);
-    }
-
-    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-        switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
-                return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
-                return MeasureReportType.PATIENTLIST;
-            case POPULATION:
-                return MeasureReportType.SUMMARY;
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
-        }
     }
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {

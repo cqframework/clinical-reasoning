@@ -12,10 +12,9 @@ class MultiMeasureServiceTest {
     void MultiMeasure_AllSubjects_MeasureIdentifier() {
         var when = GIVEN_REPO
                 .when()
-                // .measureId("MinimalProportionNoBasisSingleGroup")
                 .measureIdentifier("test123")
-                // .measureIdentifier("http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms|test123")
-                // .measureIdentifier("123")
+                .measureIdentifier("124")
+                .measureIdentifier("test126")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")

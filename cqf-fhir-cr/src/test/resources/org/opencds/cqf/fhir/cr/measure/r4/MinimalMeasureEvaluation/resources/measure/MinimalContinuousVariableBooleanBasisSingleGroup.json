@@ -5,6 +5,10 @@
   "library": [
     "http://example.com/Library/MinimalProportionBooleanBasisSingleGroup"
   ],
+  "identifier": [ {
+    "use": "official",
+    "value": "test126"
+  }],
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
     "valueCode": "boolean"

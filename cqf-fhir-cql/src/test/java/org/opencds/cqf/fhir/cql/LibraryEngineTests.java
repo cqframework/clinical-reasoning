@@ -15,18 +15,18 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class LibraryEngineTests {
+    Repository repository =
+            new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
+    LibraryEngine libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
 
     @Test
     void fhirPath() {
         var patientId = "Patient/Patient1";
-        var repository =
-                new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
-        var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
-
         var params = parameters();
         params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
         params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
@@ -49,10 +49,6 @@ class LibraryEngineTests {
     @Test
     void fhirPathWithResource() {
         var patientId = "Patient/Patient1";
-        var repository =
-                new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
-        var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
-
         var params = parameters();
         params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
         params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
@@ -67,5 +63,14 @@ class LibraryEngineTests {
         assertEquals(
                 "test-code",
                 ((CodeableConcept) result.get(0)).getCodingFirstRep().getCode());
+    }
+
+    @Test
+    void expressionWithLibraryReference() {
+        var patientId = "Patient/Patient1";
+        var expression =
+                new CqfExpression("text/cql", "TestLibrary.testExpression", "http://fhir.test/Library/TestLibrary");
+        var result = libraryEngine.resolveExpression(patientId, expression, null, null, null, null);
+        assertEquals(((StringType) result.get(0)).getValue(), "I am a test");
     }
 }

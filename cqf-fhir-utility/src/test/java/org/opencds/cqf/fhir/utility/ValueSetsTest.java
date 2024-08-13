@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +11,14 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 
 class ValueSetsTest {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
+
+    @Test
+    void testNulls() {
+        assertNull(ValueSets.getContainsInExpansion(fhirContextR4, null));
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        assertNull(ValueSets.getContainsInExpansion(fhirContextR4, expansion));
+        assertNull(ValueSets.getCodesInCompose(fhirContextR4, new ValueSet()));
+    }
 
     @Test
     void testAddCodeToExpansion() {

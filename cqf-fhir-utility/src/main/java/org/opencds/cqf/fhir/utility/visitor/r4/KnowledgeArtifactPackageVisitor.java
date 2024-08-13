@@ -35,11 +35,8 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KnowledgeArtifactPackageVisitor {
-    private static final Logger logger = LoggerFactory.getLogger(KnowledgeArtifactPackageVisitor.class);
 
     public KnowledgeArtifactPackageVisitor() {
         this.terminologyServerClient = new TerminologyServerClient(FhirContext.forR4());
@@ -296,7 +293,6 @@ public class KnowledgeArtifactPackageVisitor {
     public void expandValueSet(
             ValueSet valueSet, Parameters expansionParameters, Optional<Endpoint> terminologyEndpoint) {
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
-        logger.info(valueSet.getUrl());
         Extension authoritativeSource = valueSet.getExtensionByUrl(Constants.AUTHORITATIVE_SOURCE_URL);
         String authoritativeSourceUrl = authoritativeSource != null && authoritativeSource.hasValue()
                 ? authoritativeSource.getValue().primitiveValue()

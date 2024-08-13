@@ -3,11 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
 
 class AdapterFactoryTest {
     @Test

@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -251,7 +250,6 @@ public class KnowledgeArtifactPackageVisitor {
                 Optional<RelatedArtifact> maybeVSRelatedArtifact = relatedArtifactsWithPreservedExtension.stream()
                         .filter(ra -> Canonicals.getUrl(ra.getResource()).equals(valueSet.getUrl()))
                         .findFirst();
-                checkIfValueSetNeedsCondition(valueSet, maybeVSRelatedArtifact.orElse(null));
                 // If leaf valueset
                 if (!valueSet.hasCompose()
                         || (valueSet.hasCompose()
@@ -419,48 +417,6 @@ public class KnowledgeArtifactPackageVisitor {
                 .filter(contained -> contained.getId().equals(reference))
                 .findFirst();
         return (Parameters) expansionParamResource.orElse(null);
-    }
-
-    protected void checkIfValueSetNeedsCondition(IBaseResource resource, RelatedArtifact relatedArtifact)
-            throws UnprocessableEntityException {
-        if (resource != null && resource.fhirType().equals(ResourceType.ValueSet.name())) {
-            ValueSet valueSet = (ValueSet) resource;
-            // TODO:: do we need to update the definition of a leaf?
-            boolean isLeaf = !valueSet.hasCompose()
-                    || (valueSet.hasCompose()
-                            && valueSet.getCompose()
-                                    .getIncludeFirstRep()
-                                    .getValueSet()
-                                    .isEmpty());
-            Optional<Extension> maybeConditionExtension = Optional.ofNullable(relatedArtifact)
-                    .map(RelatedArtifact::getExtension)
-                    .map(list -> {
-                        return list.stream()
-                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_CONDITION_URL))
-                                .findFirst()
-                                .orElse(null);
-                    });
-            Optional<Extension> maybePriorityExtension = Optional.ofNullable(relatedArtifact)
-                    .map(RelatedArtifact::getExtension)
-                    .map(list -> {
-                        return list.stream()
-                                .filter(ext -> ext.getUrl().equalsIgnoreCase(Constants.VALUE_SET_PRIORITY_URL))
-                                .findFirst()
-                                .orElse(null);
-                    });
-            if (isLeaf && (!maybeConditionExtension.isPresent() || !maybePriorityExtension.isPresent())) {
-                if (!maybeConditionExtension.isPresent() && !maybePriorityExtension.isPresent()) {
-                    throw new UnprocessableEntityException(
-                            "Missing condition and priority references on ValueSet : " + valueSet.getUrl());
-                } else if (!maybeConditionExtension.isPresent()) {
-                    throw new UnprocessableEntityException(
-                            "Missing condition reference on ValueSet : " + valueSet.getUrl());
-                } else {
-                    throw new UnprocessableEntityException(
-                            "Missing priority reference on ValueSet : " + valueSet.getUrl());
-                }
-            }
-        }
     }
 
     /**

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Meta;
@@ -41,16 +43,22 @@ public class ResourceAdapterTest {
         var id = new IdDt("patient-1");
         resource.setId(id);
         var adapter = adapterFactory.createResource(resource);
+        assertTrue(((ResourceAdapter) adapter).isDomainResource());
+        assertEquals(resource, ((ResourceAdapter) adapter).getDomainResource().get());
         assertEquals(id.getValue(), ((IIdType) adapter.getSingleProperty("id")).getValue());
         var newId = new IdType("patient-2");
         adapter.setProperty("id", newId);
         assertEquals(newId, resource.getIdElement());
         assertEquals("id", adapter.getTypesForProperty("id")[0]);
         assertNotNull(adapter.makeProperty("language"));
+        assertNull(adapter.getSingleProperty("meta"));
         var meta = (Meta) adapter.addChild("meta");
         var date = new Date();
         meta.setLastUpdated(date);
-        assertEquals(date, ((Meta) adapter.getSingleProperty("meta")).getLastUpdated());
+        assertEquals(date, ((Meta) adapter.getProperty("meta")[0]).getLastUpdated());
+        resource.addName(new HumanName().addGiven("name1"));
+        resource.addName(new HumanName().addGiven("name2"));
+        assertThrows(IllegalArgumentException.class, () -> adapter.getSingleProperty("name"));
     }
 
     @Test

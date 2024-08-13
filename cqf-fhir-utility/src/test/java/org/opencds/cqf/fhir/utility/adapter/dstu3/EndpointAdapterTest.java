@@ -12,7 +12,7 @@ public class EndpointAdapterTest {
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(new PlanDefinition()));
+        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(new PlanDefinition()));
     }
 
     @Test

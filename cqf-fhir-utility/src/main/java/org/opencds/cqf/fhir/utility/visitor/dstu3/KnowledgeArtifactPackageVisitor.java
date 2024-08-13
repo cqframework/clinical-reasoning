@@ -28,7 +28,6 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;

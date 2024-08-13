@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ public class StructureDefinitionAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(new Library()));
+        assertNotNull(new StructureDefinitionAdapter((IDomainResource) new StructureDefinition()));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -27,7 +26,7 @@ class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.Attachme
         }
 
         this.attachment = (Attachment) attachment;
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
+        fhirContext = FhirContext.forDstu3Cached();
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }

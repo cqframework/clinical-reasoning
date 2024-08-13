@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -162,21 +163,20 @@ public class QuestionnaireAdapterTest {
                 "profileRef",
                 "cqfLibraryRef",
                 // "variableRef",
-                "itemDefinitionRef"
-                // "answerValueSetRef",
+                "itemDefinitionRef",
+                "answerValueSetRef",
                 // "itemMediaRef",
                 // "itemAnswerMediaRef",
-                // "unitValueSetRef",
-                // "referenceProfileRef",
+                "unitValueSetRef",
+                "referenceProfileRef",
                 // "candidateExpressionRef",
-                // "lookupQuestionnaireRef",
+                "lookupQuestionnaireRef",
                 // "itemVariableRef",
                 // "initialExpressionRef",
                 // "calculatedExpressionRef",
                 // "calculatedValueRef",
                 // "expressionRef",
-                // "subQuestionnaireRef"
-                );
+                "subQuestionnaireRef");
         var questionnaire = new Questionnaire();
         questionnaire.getMeta().addProfile(dependencies.get(0));
         questionnaire.addExtension(Constants.CQIF_LIBRARY, new Reference(dependencies.get(1)));
@@ -184,6 +184,17 @@ public class QuestionnaireAdapterTest {
         // Expression().setReference(dependencies.get(2)));
         // questionnaire.addExtension(variableExt);
         questionnaire.addItem().setDefinition(dependencies.get(2) + "#Observation");
+        questionnaire.addItem().setOptions(new Reference(dependencies.get(3)));
+        questionnaire.addItem().addExtension(Constants.QUESTIONNAIRE_UNIT_VALUE_SET, new UriType(dependencies.get(4)));
+        questionnaire
+                .addItem()
+                .addExtension(Constants.QUESTIONNAIRE_REFERENCE_PROFILE, new UriType(dependencies.get(5)));
+        questionnaire
+                .addItem()
+                .addExtension(Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE, new UriType(dependencies.get(6)));
+        questionnaire
+                .addItem()
+                .addExtension(Constants.SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE, new UriType(dependencies.get(7)));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());

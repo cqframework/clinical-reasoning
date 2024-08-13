@@ -10,12 +10,4 @@ public class EndpointAdapter extends ResourceAdapter implements org.opencds.cqf.
             throw new IllegalArgumentException("resource passed as endpoint argument is not an Endpoint resource");
         }
     }
-
-    public EndpointAdapter(Endpoint endpoint) {
-        super(endpoint);
-    }
-
-    public Endpoint getEndpoint() {
-        return (Endpoint) resource;
-    }
 }

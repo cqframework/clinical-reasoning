@@ -13,12 +13,17 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ChargeItemDefinition;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
@@ -31,7 +36,7 @@ class KnowledgeArtifactAdapterTest {
     void invalid_object_fails() {
         assertThrows(
                 UnprocessableEntityException.class,
-                () -> adapterFactory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.Library()));
+                () -> new KnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.Library()));
     }
 
     @Test
@@ -115,6 +120,16 @@ class KnowledgeArtifactAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, def.getDate());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(new DateType()));
+        var newDateElement = new DateTimeType().setValue(new Date());
+        adapter.setDateElement(newDateElement);
+        assertEquals(newDateElement, def.getDateElement());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setEffectivePeriod(new Extension()));
+        var newEffectivePeriod = new Period();
+        newEffectivePeriod.setStart(new Date());
+        newEffectivePeriod.setEnd(new Date());
+        adapter.setEffectivePeriod(newEffectivePeriod);
+        assertThrows(Error.class, () -> def.getEffectivePeriod());
         var newApprovalDate = new Date();
         newApprovalDate.setTime(100);
         adapter.setApprovalDate(newApprovalDate);
@@ -137,6 +152,8 @@ class KnowledgeArtifactAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setRelatedArtifact(Arrays.asList(new Period())));
+        assertThrows(UnprocessableEntityException.class, () -> adapter.getRelatedArtifactsOfType("depends"));
     }
 
     @Test

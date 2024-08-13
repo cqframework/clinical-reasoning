@@ -13,13 +13,18 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.Period;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
@@ -31,7 +36,7 @@ class KnowledgeArtifactAdapterTest {
     void invalid_object_fails() {
         assertThrows(
                 UnprocessableEntityException.class,
-                () -> adapterFactory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.Library()));
+                () -> new KnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.Library()));
     }
 
     @Test
@@ -112,6 +117,11 @@ class KnowledgeArtifactAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, def.getDate());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(new DateType()));
+        var newDateElement = new DateTimeType().setValue(new Date());
+        adapter.setDateElement(newDateElement);
+        assertEquals(newDateElement, def.getDateElement());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setEffectivePeriod(new Extension()));
     }
 
     @Test
@@ -130,6 +140,8 @@ class KnowledgeArtifactAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setRelatedArtifact(Arrays.asList(new Period())));
+        assertThrows(UnprocessableEntityException.class, () -> adapter.getRelatedArtifactsOfType("depends"));
     }
 
     @Test

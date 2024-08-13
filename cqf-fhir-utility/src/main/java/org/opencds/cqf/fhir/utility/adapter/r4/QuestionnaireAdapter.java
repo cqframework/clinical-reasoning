@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -12,7 +11,8 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
-public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
+public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter {
 
     public QuestionnaireAdapter(IDomainResource questionnaire) {
         super(questionnaire);
@@ -114,26 +114,15 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter {
                     item.getExtension(),
                     (reference) -> item.setAnswerValueSet(reference)));
         }
-        var referenceExtensions = Arrays.asList(
-                Constants.QUESTIONNAIRE_UNIT_VALUE_SET,
-                Constants.QUESTIONNAIRE_REFERENCE_PROFILE,
-                Constants.SDC_QUESTIONNAIRE_LOOKUP_QUESTIONNAIRE,
-                Constants.SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE);
         item.getExtension().stream()
-                .filter(e -> referenceExtensions.contains(e.getUrl()))
+                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
                 .forEach(referenceExt -> references.add(new DependencyInfo(
                         referenceSource,
                         ((CanonicalType) referenceExt.getValue()).asStringValue(),
                         referenceExt.getExtension(),
                         (reference) -> referenceExt.setValue(new CanonicalType(reference)))));
-        var expressionExtensions = Arrays.asList(
-                Constants.VARIABLE_EXTENSION,
-                Constants.SDC_QUESTIONNAIRE_CANDIDATE_EXPRESSION,
-                Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION,
-                Constants.SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION,
-                Constants.CQF_EXPRESSION);
         item.getExtension().stream()
-                .filter(e -> expressionExtensions.contains(e.getUrl()))
+                .filter(e -> EXPRESSION_EXTENSIONS.contains(e.getUrl()))
                 .map(e -> (Expression) e.getValue())
                 .filter(e -> e.hasReference())
                 .forEach(expression -> references.add(new DependencyInfo(

@@ -26,7 +26,7 @@ class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.Attachme
         }
 
         this.attachment = (Attachment) attachment;
-        fhirContext = FhirContext.forR5Cached();
+        fhirContext = FhirContext.forR4Cached();
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }

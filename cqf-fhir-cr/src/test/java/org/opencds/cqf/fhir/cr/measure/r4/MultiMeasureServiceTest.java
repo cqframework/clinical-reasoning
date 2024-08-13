@@ -20,7 +20,7 @@ class MultiMeasureServiceTest {
                 .reportType("population")
                 .evaluate();
 
-        when.then().report();
+        when.then().hasMeasureReportCount(3).report();
     }
 
     @Test

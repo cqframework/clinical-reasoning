@@ -23,8 +23,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.Period;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
@@ -35,7 +35,7 @@ class KnowledgeArtifactAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(
-                UnprocessableEntityException.class,
+                IllegalArgumentException.class,
                 () -> new KnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.Library()));
     }
 

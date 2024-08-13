@@ -35,7 +35,7 @@ class KnowledgeArtifactAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(
-                UnprocessableEntityException.class,
+                IllegalArgumentException.class,
                 () -> new KnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.Library()));
     }
 

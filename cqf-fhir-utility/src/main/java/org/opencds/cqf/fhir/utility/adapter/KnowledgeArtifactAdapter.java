@@ -270,22 +270,6 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
             // Do nothing
             logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
         }
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact, String reference, String display) {
-        relatedArtifact.getResource().setReference(reference);
-        relatedArtifact.setDisplay(display);
-    }
-
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact, String reference, String display) {
-        relatedArtifact.setResource(reference);
-        relatedArtifact.setDisplay(display);
-    }
-
-    private static void setRelatedArtifactReference(
-            org.hl7.fhir.r5.model.RelatedArtifact relatedArtifact, String reference, String display) {
-        relatedArtifact.setResource(reference);
-        relatedArtifact.setDisplay(display);
     }
 
     <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString);

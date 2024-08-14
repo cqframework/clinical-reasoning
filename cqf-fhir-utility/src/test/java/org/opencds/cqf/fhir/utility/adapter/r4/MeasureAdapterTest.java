@@ -19,13 +19,16 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class MeasureAdapterTest {
@@ -160,16 +163,44 @@ public class MeasureAdapterTest {
     }
 
     @Test
-    @Disabled
     void adapter_get_all_dependencies() {
-        var dependencies = List.of("");
+        var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
         var measure = new Measure();
         measure.getMeta().addProfile(dependencies.get(0));
         measure.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
         measure.getLibrary().add(new CanonicalType(dependencies.get(2)));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
-        assertEquals(extractedDependencies.size(), dependencies.size());
+        assertEquals(dependencies.size(), extractedDependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+        });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_effective_data_requirements() {
+        var dependencies = List.of(
+                "libraryProfileRef",
+                "relatedArtifactRef",
+                "dataRequirementProfileRef",
+                "dataRequirementCodeFilterRef",
+                "measureProfileRef");
+        var library = new Library()
+                .setType(new CodeableConcept(new Coding(
+                        "http://terminology.hl7.org/CodeSystem/library-type",
+                        "module-definition",
+                        "Module Definition")));
+        library.setId("test");
+        library.getMeta().addProfile(dependencies.get(0));
+        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        library.addDataRequirement().addProfile(dependencies.get(2));
+        library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
+        var measure = new Measure().addContained(new Patient()).addContained(library);
+        measure.getMeta().addProfile(dependencies.get(4));
+        measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#test"));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
         });

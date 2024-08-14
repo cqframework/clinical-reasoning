@@ -64,18 +64,19 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter {
 
     @Override
     public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
 
         // If an effectiveDataRequirements library is present, use it exclusively
         findEffectiveDataRequirements();
         if (effectiveDataRequirements != null) {
-            return effectiveDataRequirementsAdapter.getDependencies();
+            references.addAll(effectiveDataRequirementsAdapter.getDependencies());
+            return references;
         }
 
         // Otherwise, fall back to the relatedArtifact and library
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = this.getMeasure().hasVersion()
-                ? this.getMeasure().getUrl() + "|" + this.getMeasure().getVersion()
-                : this.getMeasure().getUrl();
+
         /*
          relatedArtifact[].resource
          library[]

@@ -65,6 +65,7 @@ public class Constants {
     public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";
     public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression";
 
+    public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
@@ -77,6 +78,12 @@ public class Constants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition";
     public static final String CQFM_SOFTWARE_SYSTEM =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
+    public static final String CQFM_INPUT_PARAMETERS =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters";
+    public static final String CQFM_COMPONENT = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component";
+
+    public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
 
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";

@@ -7,10 +7,14 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
-public class MeasureAdapter extends KnowledgeArtifactAdapter {
+public class MeasureAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
 
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
@@ -93,17 +97,101 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter {
         */
 
         // relatedArtifact[].resource
-        references.addAll(this.getRelatedArtifact().stream()
+        references.addAll(getRelatedArtifact().stream()
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .collect(Collectors.toList()));
 
         // library[]
-        List<CanonicalType> libraries = this.getMeasure().getLibrary();
-        for (CanonicalType ct : libraries) {
+        for (var library : getMeasure().getLibrary()) {
             DependencyInfo dependency = new DependencyInfo(
-                    referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
+                    referenceSource,
+                    library.getValue(),
+                    library.getExtension(),
+                    (reference) -> library.setValue(reference));
             references.add(dependency);
         }
+
+        for (final var group : getMeasure().getGroup()) {
+            for (final var population : group.getPopulation()) {
+                // group[].population[].criteria.reference
+                if (population.getCriteria().hasReference()) {
+                    final var dependency = new DependencyInfo(
+                            referenceSource,
+                            population.getCriteria().getReference(),
+                            population.getCriteria().getExtension(),
+                            (reference) -> population.getCriteria().setReference(reference));
+                    references.add(dependency);
+                }
+            }
+            for (final var stratifier : group.getStratifier()) {
+                // group[].stratifier[].criteria.reference
+                if (stratifier.getCriteria().hasReference()) {
+                    final var dependency = new DependencyInfo(
+                            referenceSource,
+                            stratifier.getCriteria().getReference(),
+                            stratifier.getCriteria().getExtension(),
+                            (reference) -> stratifier.getCriteria().setReference(reference));
+                    references.add(dependency);
+                }
+                for (final var component : stratifier.getComponent()) {
+                    // group[].stratifier[].component[].criteria.reference
+                    if (component.getCriteria().hasReference()) {
+                        final var stratifierComponentDep = new DependencyInfo(
+                                referenceSource,
+                                component.getCriteria().getReference(),
+                                component.getCriteria().getExtension(),
+                                (reference) -> component.getCriteria().setReference(reference));
+                        references.add(stratifierComponentDep);
+                    }
+                }
+            }
+        }
+
+        for (final var supplement : getMeasure().getSupplementalData()) {
+            // supplementalData[].criteria.reference
+            if (supplement.getCriteria().hasReference()) {
+                final var dependency = new DependencyInfo(
+                        referenceSource,
+                        supplement.getCriteria().getReference(),
+                        supplement.getCriteria().getExtension(),
+                        (reference) -> supplement.getCriteria().setReference(reference));
+                references.add(dependency);
+            }
+        }
+
+        // extension[cqfm-effectiveDataRequirements]
+        // extension[crmi-effectiveDataRequirements]
+        get().getExtension().stream()
+                .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((CanonicalType) referenceExt.getValue()).getValue(),
+                        referenceExt.getExtension(),
+                        (reference) -> referenceExt.setValue(new CanonicalType(reference)))));
+
+        // extension[cqfm-inputParameters][]
+        // extension[cqfm-expansionParameters][]
+        // extension[cqfm-cqlOptions]
+        get().getExtension().stream()
+                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((Reference) referenceExt.getValue()).getReference(),
+                        referenceExt.getExtension(),
+                        (reference) -> referenceExt.setValue(new Reference(reference)))));
+
+        // extension[cqfm-component][].resource
+        get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
+            final var ref = (RelatedArtifact) ext.getValue();
+            if (ref.hasResource()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getResource(),
+                        ref.getExtension(),
+                        (reference) -> ref.setResource(reference));
+                references.add(dep);
+            }
+        });
 
         return references;
     }

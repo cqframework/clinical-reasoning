@@ -6,11 +6,14 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
-public class MeasureAdapter extends KnowledgeArtifactAdapter {
+public class MeasureAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
 
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
@@ -80,10 +83,10 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter {
         /*
          relatedArtifact[].resource
          library[]
-         group[].population[].criteria.reference
-         group[].stratifier[].criteria.reference
-         group[].stratifier[].component[].criteria.reference
-         supplementalData[].criteria.reference
+         group[].population[].criteria.reference - no path on dstu3
+         group[].stratifier[].criteria.reference - no path on dstu3
+         group[].stratifier[].component[].criteria.reference - no path on dstu3
+         supplementalData[].criteria.reference - no path on dstu3
          extension[cqfm-inputParameters][]
          extension[cqfm-expansionParameters][]
          extension[cqfm-effectiveDataRequirements]
@@ -93,20 +96,55 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter {
         */
 
         // relatedArtifact[].resource
-        references.addAll(this.getRelatedArtifact().stream()
+        references.addAll(getRelatedArtifact().stream()
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .collect(Collectors.toList()));
 
         // library[]
-        List<Reference> libraries = this.getMeasure().getLibrary();
-        for (Reference ref : libraries) {
+        for (var library : getMeasure().getLibrary()) {
             DependencyInfo dependency = new DependencyInfo(
                     referenceSource,
-                    ref.getReference(),
-                    ref.getExtension(),
-                    (reference) -> ref.setReference(reference));
+                    library.getReference(),
+                    library.getExtension(),
+                    (reference) -> library.setReference(reference));
             references.add(dependency);
         }
+
+        // extension[cqfm-effectiveDataRequirements]
+        // extension[crmi-effectiveDataRequirements]
+        get().getExtension().stream()
+                .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((Reference) referenceExt.getValue()).getReference(),
+                        referenceExt.getExtension(),
+                        (reference) -> referenceExt.setValue(new Reference(reference)))));
+
+        // extension[cqfm-inputParameters][]
+        // extension[cqfm-expansionParameters][]
+        // extension[cqfm-cqlOptions]
+        // extension[cqfm-effectiveDataRequirements]
+        // extension[crmi-effectiveDataRequirements]
+        get().getExtension().stream()
+                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((Reference) referenceExt.getValue()).getReference(),
+                        referenceExt.getExtension(),
+                        (reference) -> referenceExt.setValue(new Reference(reference)))));
+
+        // extension[cqfm-component][].resource
+        get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
+            final var ref = (RelatedArtifact) ext.getValue();
+            if (ref.hasResource() && ref.getResource().hasReference()) {
+                final var dep = new DependencyInfo(
+                        referenceSource,
+                        ref.getResource().getReference(),
+                        ref.getExtension(),
+                        (reference) -> ref.getResource().setReference(reference));
+                references.add(dep);
+            }
+        });
 
         return references;
     }

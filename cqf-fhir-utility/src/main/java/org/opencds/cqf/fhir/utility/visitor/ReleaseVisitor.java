@@ -112,16 +112,16 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                     var adapter = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                             .createKnowledgeArtifactAdapter(resource);
                     var reference = String.format("%s|%s", adapter.getUrl(), adapter.getVersion());
-                    KnowledgeArtifactAdapter.setRelatedArtifactReference(component, reference);
+                    KnowledgeArtifactAdapter.setRelatedArtifactReference(component, reference, null);
                 } else if (Canonicals.getVersion(relatedArtifactReference) == null
                         || Canonicals.getVersion(relatedArtifactReference).isEmpty()) {
                     // if the not Owned component doesn't have a version, try to find the latest version
                     String updatedReference = tryUpdateReferenceToLatestActiveVersion(
                             relatedArtifactReference, repository, artifactAdapter.getUrl());
-                    KnowledgeArtifactAdapter.setRelatedArtifactReference(component, updatedReference);
+                    KnowledgeArtifactAdapter.setRelatedArtifactReference(component, updatedReference, null);
                 }
                 var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component));
+                        fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component), null);
                 var relatedArtifacts = rootAdapter.getRelatedArtifact();
                 relatedArtifacts.add(componentToDependency);
                 rootAdapter.setRelatedArtifact(relatedArtifacts);
@@ -147,7 +147,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 // only add the dependency to the manifest if it is from a leaf artifact
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                     var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
-                            fhirVersion, "depends-on", dependency.getReference());
+                            fhirVersion, "depends-on", dependency.getReference(), null);
                     var relatedArtifacts = rootAdapter.getRelatedArtifact();
                     relatedArtifacts.add(newDep);
                     rootAdapter.setRelatedArtifact(relatedArtifacts);

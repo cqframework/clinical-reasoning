@@ -121,7 +121,10 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                     KnowledgeArtifactAdapter.setRelatedArtifactReference(component, updatedReference, null);
                 }
                 var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion, "depends-on", KnowledgeArtifactAdapter.getRelatedArtifactReference(component), null);
+                        fhirVersion,
+                        "depends-on",
+                        KnowledgeArtifactAdapter.getRelatedArtifactReference(component),
+                        null);
                 var relatedArtifacts = rootAdapter.getRelatedArtifact();
                 relatedArtifacts.add(componentToDependency);
                 rootAdapter.setRelatedArtifact(relatedArtifacts);

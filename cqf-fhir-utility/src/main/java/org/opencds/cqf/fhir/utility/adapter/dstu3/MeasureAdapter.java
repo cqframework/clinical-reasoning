@@ -12,25 +12,29 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class MeasureAdapter extends KnowledgeArtifactAdapter {
 
-    private Measure measure;
-
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
-
         if (!(measure instanceof Measure)) {
             throw new IllegalArgumentException("resource passed as measure argument is not a Measure resource");
         }
-
-        this.measure = (Measure) measure;
     }
 
     public MeasureAdapter(Measure measure) {
         super(measure);
-        this.measure = measure;
     }
 
     protected Measure getMeasure() {
-        return this.measure;
+        return (Measure) resource;
+    }
+
+    @Override
+    public Measure get() {
+        return getMeasure();
+    }
+
+    @Override
+    public Measure copy() {
+        return get().copy();
     }
 
     private boolean checkedEffectiveDataRequirements;

@@ -43,7 +43,77 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
 
     @Override
     public MetadataResource copy() {
-        return get().copy();
+        return this.get().copy();
+    }
+
+    @Override
+    public String getUrl() {
+        return this.get().getUrl();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.get().hasUrl();
+    }
+
+    @Override
+    public void setUrl(String url) {
+        this.get().setUrl(url);
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.get().setVersion(version);
+    }
+
+    @Override
+    public String getVersion() {
+        return this.get().getVersion();
+    }
+
+    @Override
+    public boolean hasVersion() {
+        return this.get().hasVersion();
+    }
+
+    @Override
+    public String getName() {
+        return this.get().getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.get().setName(name);
+    }
+
+    @Override
+    public boolean hasTitle() {
+        return this.get().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.get().getTitle();
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.get().setTitle(title);
+    }
+
+    @Override
+    public Date getApprovalDate() {
+        return this.get().getApprovalDate();
+    }
+
+    @Override
+    public Date getDate() {
+        return this.get().getDate();
+    }
+
+    @Override
+    public void setDate(Date approvalDate) {
+        this.get().setDate(approvalDate);
     }
 
     @Override

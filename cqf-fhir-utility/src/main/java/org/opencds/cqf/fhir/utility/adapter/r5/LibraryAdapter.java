@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -11,8 +12,15 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.UsageContext;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.r5.model.UriType;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -40,7 +48,67 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public Library copy() {
-        return get().copy();
+        return this.get().copy();
+    }
+
+    @Override
+    public String getName() {
+        return this.getLibrary().getName();
+    }
+
+    @Override
+    public boolean hasTitle() {
+        return this.getLibrary().hasTitle();
+    }
+
+    @Override
+    public String getTitle() {
+        return this.getLibrary().getTitle();
+    }
+
+    @Override
+    public String getPurpose() {
+        return this.getLibrary().getPurpose();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.getLibrary().setName(name);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.getLibrary().setTitle(title);
+    }
+
+    @Override
+    public String getUrl() {
+        return this.getLibrary().getUrl();
+    }
+
+    @Override
+    public boolean hasUrl() {
+        return this.getLibrary().hasUrl();
+    }
+
+    @Override
+    public void setUrl(String url) {
+        this.getLibrary().setUrl(url);
+    }
+
+    @Override
+    public String getVersion() {
+        return this.getLibrary().getVersion();
+    }
+
+    @Override
+    public boolean hasVersion() {
+        return this.getLibrary().hasVersion();
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.getLibrary().setVersion(version);
     }
 
     @Override
@@ -140,5 +208,59 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     @Override
     public List<UsageContext> getUseContext() {
         return getLibrary().getUseContext();
+    }
+
+    @Override
+    public Optional<IBaseParameters> getExpansionParameters() {
+        return getLibrary().getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.EXPANSION_PARAMETERS_URL))
+                .findAny()
+                .map(ext -> ((Reference) ext.getValue()).getReference())
+                .map(ref -> {
+                    if (getLibrary().hasContained()) {
+                        return getLibrary().getContained().stream()
+                                .filter(containedResource ->
+                                        containedResource.getId().equals(ref))
+                                .findFirst()
+                                .map(r -> (IBaseParameters) r)
+                                .orElse(null);
+                    }
+                    return null;
+                });
+    }
+
+    @Override
+    public void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
+        var newParameters = new ArrayList<ParametersParameterComponent>();
+        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
+            for (String parameter : systemVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("system-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
+            for (String parameter : canonicalVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("canonical-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        var existingExpansionParameters = getExpansionParameters();
+        if (existingExpansionParameters.isPresent()) {
+            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        } else {
+            var id = "#exp-params";
+            var newExpansionParameters = new Parameters();
+            newExpansionParameters.setParameter(newParameters);
+            newExpansionParameters.setId(id);
+            getLibrary().addContained(newExpansionParameters);
+            var expansionParamsExt = getLibrary().addExtension();
+            expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
+            expansionParamsExt.setValue(new Reference(id));
+        }
     }
 }

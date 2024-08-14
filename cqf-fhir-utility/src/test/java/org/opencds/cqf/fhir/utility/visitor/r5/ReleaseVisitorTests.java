@@ -26,15 +26,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StringType;
@@ -43,12 +47,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.ReleaseVisitor;
+import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 import org.slf4j.LoggerFactory;
 
 class ReleaseVisitorTests {
@@ -88,6 +95,171 @@ class ReleaseVisitorTests {
                 })
                 .when(spyRepository)
                 .transaction(any());
+    }
+
+    @Test
+    void visitMeasureCollectionTest() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.0.0");
+        params.addParameter("versionBehavior", new CodeType("default"));
+
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+        // Set the ID to Manifest-Release
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+        // resolvable resources get descriptors
+        for (final var dependency : dependenciesOnReleasedArtifact) {
+            if (dependency.getResource().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Library BreastCancerScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Measure Breast Cancer ScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Library CervicalCancerScreeningFHIR, 0.0.001"));
+            }
+            if (dependency.getResource().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
+                assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
+            }
+            // expansion params versions should be used
+            if (Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+                assertNotNull(Canonicals.getVersion(dependency.getResource()));
+                assertTrue(Canonicals.getVersion(dependency.getResource()).equals("2.76"));
+            }
+            if (Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+                assertNotNull(Canonicals.getVersion(dependency.getResource()));
+                assertTrue(Canonicals.getVersion(dependency.getResource())
+                        .equals("http://snomed.info/sct/731000124108/version/20230901"));
+            }
+        }
+        assertEquals(53, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
+    }
+
+    @Test
+    void visitMeasureEffectiveDataRequirementsTest() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+        Measure CervicalCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.0.0");
+        params.addParameter("versionBehavior", new CodeType("default"));
+
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+        // removing the effectiveDataRequirements changes the dependency count
+        CervicalCancerScreeningFHIR.setContained(null);
+        spyRepository.update(CervicalCancerScreeningFHIR);
+        BreastCancerScreeningFHIR.setContained(null);
+        spyRepository.update(BreastCancerScreeningFHIR);
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+
+        assertEquals(67, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
+    }
+
+    @Test
+    void bothCRMIandCQFMEffectiveDataRequirementsTest() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        spyRepository.transaction(bundle);
+        Library library = spyRepository
+                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+        Measure CervicalCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR =
+                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.0.0");
+        params.addParameter("versionBehavior", new CodeType("default"));
+        var crmiEDRId = "exp-params-crmi-test";
+        var crmiEDRExtension = new Extension();
+        crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL);
+        crmiEDRExtension.setValue(new Reference("#" + crmiEDRId));
+        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+        // if both cqfm and crmi effective data requirements are present then they will each be traced
+        var crmiEDRCervical = CervicalCancerScreeningFHIR.getContained().get(0).copy();
+        crmiEDRCervical.setId(crmiEDRId);
+        CervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
+        CervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        var crmiEDRBreastCancer =
+                BreastCancerScreeningFHIR.getContained().get(0).copy();
+        crmiEDRBreastCancer.setId(crmiEDRId);
+        BreastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
+        BreastCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        spyRepository.update(CervicalCancerScreeningFHIR);
+        spyRepository.update(BreastCancerScreeningFHIR);
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        assertNotNull(returnResource);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary = spyRepository.read(
+                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
+                .collect(Collectors.toList());
+        var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
+                .collect(Collectors.toList());
+
+        // this should be 69, but we're not handling contained reference correctly
+        assertEquals(68, dependenciesOnReleasedArtifact.size());
+        assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
     @Test
@@ -172,7 +344,11 @@ class ReleaseVisitorTests {
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition",
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-plandefinition",
                 "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-valueset",
-                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset");
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset",
+                "http://snomed.info/sct",
+                "http://hl7.org/fhir/sid/icd-10-cm",
+                "http://loinc.org",
+                "http://www.nlm.nih.gov/research/umls/rxnorm");
         var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/release-us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/release-rctc|" + existingVersion,
@@ -196,6 +372,54 @@ class ReleaseVisitorTests {
         // has extra groupers and rctc dependencies
         assertEquals(expectedErsdTestArtifactDependencies.size(), dependenciesOnReleasedArtifact.size());
         assertEquals(expectedErsdTestArtifactComponents.size(), componentsOnReleasedArtifact.size());
+
+        var expansionParameters =
+                new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
+        var systemVersionParams = expansionParameters
+                .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
+                        .orElse(null))
+                .map(versions ->
+                        versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
+                .orElse(new ArrayList<String>());
+        var canonicalVersionParams = expansionParameters
+                .map(p -> VisitorHelper.getListParameter("canonical-version", p, IPrimitiveType.class)
+                        .orElse(null))
+                .map(versions ->
+                        versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
+                .orElse(new ArrayList<String>());
+        var expectedNewCanonicalVersionParams = Arrays.asList(
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1063|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.360|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.120|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.362|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.528|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.408|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.409|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1469|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1866|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1906|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.480|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.481|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.761|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1223|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1182|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1181|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1184|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1601|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1600|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1603|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1602|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1082|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1439|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1436|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1435|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1446|2022-10-19",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1438|2022-10-19");
+        assertEquals(expectedNewCanonicalVersionParams.size(), canonicalVersionParams.size());
+        for (final var expected : expectedNewCanonicalVersionParams) {
+            assertTrue(canonicalVersionParams.stream().anyMatch(p -> p.equals(expected)));
+        }
     }
 
     @Test

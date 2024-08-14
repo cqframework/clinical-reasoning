@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
@@ -31,4 +33,8 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
     <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement);
 
     List<? extends ICompositeType> getUseContext();
+    Optional<IBaseParameters> getExpansionParameters();
+
+    void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters);
 }

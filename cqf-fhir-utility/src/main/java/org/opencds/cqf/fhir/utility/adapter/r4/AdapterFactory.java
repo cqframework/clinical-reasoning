@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -36,6 +37,8 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter adapter;
         if (resource instanceof Library) {
             adapter = createLibrary(resource);
+        } else if (resource instanceof Measure) {
+            adapter = new MeasureAdapter((Measure) resource);
         } else if (resource instanceof PlanDefinition) {
             adapter = new PlanDefinitionAdapter((PlanDefinition) resource);
         } else if (resource instanceof Questionnaire) {

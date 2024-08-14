@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
@@ -36,6 +37,8 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
         org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter adapter;
         if (resource instanceof Library) {
             adapter = createLibrary(resource);
+        } else if (resource instanceof Measure) {
+            adapter = new MeasureAdapter((Measure) resource);
         } else if (resource instanceof PlanDefinition) {
             adapter = new PlanDefinitionAdapter((PlanDefinition) resource);
         } else if (resource instanceof Questionnaire) {

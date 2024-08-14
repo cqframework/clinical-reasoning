@@ -53,6 +53,26 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         getModelResolver().setValue(get(), "name", newStringType(get().getStructureFhirVersionEnum(), name));
     }
 
+    default boolean hasTitle() {
+        return StringUtils.isNotBlank(getTitle());
+    }
+
+    default String getTitle() {
+        return resolvePathString(get(), "title");
+    }
+
+    default void setTitle(String title) {
+        getModelResolver().setValue(get(), "title", title);
+    }
+
+    default String getDescriptor() {
+        return String.format(
+                "%s %s%s",
+                this.get().fhirType(),
+                this.hasTitle() ? this.getTitle() : this.getName(),
+                this.hasVersion() ? ", " + this.getVersion() : "");
+    }
+
     default boolean hasUrl() {
         return StringUtils.isNotBlank(getUrl());
     }
@@ -153,22 +173,25 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     @SuppressWarnings("unchecked")
     static <T extends ICompositeType & IBaseHasExtensions> T newRelatedArtifact(
-            FhirVersionEnum version, String type, String reference) {
+            FhirVersionEnum version, String type, String reference, String display) {
         switch (version) {
             case DSTU3:
                 var dstu3 = new org.hl7.fhir.dstu3.model.RelatedArtifact();
                 dstu3.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
-                        .setResource(new Reference(reference));
+                        .setResource(new Reference(reference))
+                        .setDisplay(display);
                 return (T) dstu3;
             case R4:
                 var r4 = new org.hl7.fhir.r4.model.RelatedArtifact();
                 r4.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
-                        .setResource(reference);
+                        .setResource(reference)
+                        .setDisplay(display);
                 return (T) r4;
             case R5:
                 var r5 = new org.hl7.fhir.r5.model.RelatedArtifact();
                 r5.setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
-                        .setResource(reference);
+                        .setResource(reference)
+                        .setDisplay(display);
                 return (T) r5;
 
             default:
@@ -209,15 +232,20 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifactReference(
-            T relatedArtifact, String reference) {
+            T relatedArtifact, String reference, String display) {
         if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
             ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
                     .getResource()
-                    .setReference(reference);
+                    .setReference(reference)
+                    .setDisplay(display);
         } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact).setResource(reference);
+            ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact)
+                    .setResource(reference)
+                    .setDisplay(display);
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact).setResource(reference);
+            ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact)
+                    .setResource(reference)
+                    .setDisplay(display);
         } else {
             throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
         }

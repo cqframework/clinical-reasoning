@@ -192,7 +192,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.open
                 .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
                 .forEach(referenceExt -> references.add(new DependencyInfo(
                         referenceSource,
-                        ((CanonicalType) referenceExt.getValue()).getValue(),
+                        ((Reference) referenceExt.getValue()).getReference(),
                         referenceExt.getExtension(),
                         (reference) -> referenceExt.setValue(new CanonicalType(reference)))));
 

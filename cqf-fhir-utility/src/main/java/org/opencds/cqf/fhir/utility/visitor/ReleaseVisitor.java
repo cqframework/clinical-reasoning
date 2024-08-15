@@ -280,8 +280,10 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                     "depends-on",
                     updatedReference,
                     res.map(a -> a.getDescriptor()).orElse(null));
-            rootAdapter.getRelatedArtifact().add(componentToDependency);
-        }
+                var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
+                updatedRelatedArtifacts.add(componentToDependency);
+                artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+            }
         var dependencies = artifactAdapter.getDependencies();
         // Step 2: update dependencies recursively
         for (var dependency : dependencies) {
@@ -373,7 +375,9 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                         "depends-on",
                         dependency.getReference(),
                         dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
-                rootAdapter.getRelatedArtifact().add(newDep);
+                var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
+                updatedRelatedArtifacts.add(newDep);
+                rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
             }
         }
     }

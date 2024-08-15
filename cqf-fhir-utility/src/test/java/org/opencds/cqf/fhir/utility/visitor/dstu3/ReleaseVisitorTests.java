@@ -134,31 +134,31 @@ class ReleaseVisitorTests {
                 .collect(Collectors.toList());
         // resolvable resources get descriptors
         for (final var dependency : dependenciesOnReleasedArtifact) {
-            if (dependency.getResource().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
+            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Library BreastCancerScreeningFHIR, 0.0.001"));
             }
             if (dependency.getResource().equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Breast Cancer ScreeningFHIR, 0.0.001"));
             }
-            if (dependency.getResource().equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
+            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Library CervicalCancerScreeningFHIR, 0.0.001"));
             }
-            if (dependency.getResource().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
+            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource().getReference()).equals("http://loinc.org")) {
+            if (Canonicals.getUrl(dependency.getResource().getReference()) != null && Canonicals.getUrl(dependency.getResource().getReference()).equals("http://loinc.org")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource().getReference()));
                 assertTrue(Canonicals.getVersion(dependency.getResource().getReference())
                         .equals("2.76"));
             }
-            if (Canonicals.getUrl(dependency.getResource().getReference()).equals("http://snomed.info/sct")) {
+            if (Canonicals.getUrl(dependency.getResource().getReference()) != null && Canonicals.getUrl(dependency.getResource().getReference()).equals("http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource().getReference()));
                 assertTrue(Canonicals.getVersion(dependency.getResource().getReference())
                         .equals("http://snomed.info/sct/731000124108/version/20230901"));
             }
         }
-        assertEquals(53, dependenciesOnReleasedArtifact.size());
+        assertEquals(56, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
@@ -206,7 +206,7 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .collect(Collectors.toList());
 
-        assertEquals(63, dependenciesOnReleasedArtifact.size());
+        assertEquals(67, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
@@ -262,8 +262,8 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .collect(Collectors.toList());
 
-        // this should be 65, but we're not handling contained reference correctly
-        assertEquals(64, dependenciesOnReleasedArtifact.size());
+        // this should be 69, but we're not handling contained reference correctly
+        assertEquals(68, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 

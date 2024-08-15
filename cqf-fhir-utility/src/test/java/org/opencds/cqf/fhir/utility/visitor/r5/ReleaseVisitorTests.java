@@ -145,17 +145,17 @@ class ReleaseVisitorTests {
                 assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+            if (Canonicals.getUrl(dependency.getResource()) != null && Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertTrue(Canonicals.getVersion(dependency.getResource()).equals("2.76"));
             }
-            if (Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+            if (Canonicals.getUrl(dependency.getResource()) != null && Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertTrue(Canonicals.getVersion(dependency.getResource())
                         .equals("http://snomed.info/sct/731000124108/version/20230901"));
             }
         }
-        assertEquals(53, dependenciesOnReleasedArtifact.size());
+        assertEquals(56, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
@@ -201,7 +201,7 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .collect(Collectors.toList());
 
-        assertEquals(67, dependenciesOnReleasedArtifact.size());
+        assertEquals(71, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
@@ -257,8 +257,8 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .collect(Collectors.toList());
 
-        // this should be 69, but we're not handling contained reference correctly
-        assertEquals(68, dependenciesOnReleasedArtifact.size());
+        // this should be 73, but we're not handling contained reference correctly
+        assertEquals(72, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
     }
 
@@ -363,6 +363,9 @@ class ReleaseVisitorTests {
                 .collect(Collectors.toList());
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
+            if (!dependenciesOnReleasedArtifact.contains(dependency)) {
+                var s = dependency;
+            }
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
         }
         // and components

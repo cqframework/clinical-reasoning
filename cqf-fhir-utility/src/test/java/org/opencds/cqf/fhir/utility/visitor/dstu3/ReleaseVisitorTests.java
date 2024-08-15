@@ -40,6 +40,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
@@ -240,7 +241,7 @@ class ReleaseVisitorTests {
         var crmiEDRId = "exp-params-crmi-test";
         var crmiEDRExtension = new Extension();
         crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
-        crmiEDRExtension.setValue(new Reference("#" + crmiEDRId));
+        crmiEDRExtension.setValue(new UriType("#" + crmiEDRId));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));

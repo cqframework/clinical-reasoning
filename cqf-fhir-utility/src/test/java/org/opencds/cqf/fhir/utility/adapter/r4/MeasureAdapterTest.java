@@ -221,7 +221,7 @@ public class MeasureAdapterTest {
         library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
         var measure = new Measure().addContained(new Patient()).addContained(library);
         measure.getMeta().addProfile(dependencies.get(4));
-        measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#test"));
+        measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new Reference("#test"));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());

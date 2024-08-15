@@ -2,9 +2,13 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.Reference;
@@ -44,7 +48,12 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
     private boolean checkedEffectiveDataRequirements;
     private Library effectiveDataRequirements;
     private LibraryAdapter effectiveDataRequirementsAdapter;
-
+private String getEdrReferenceString(Extension edrExtension) {
+        return edrExtension.getUrl().contains("cqfm") ? ((Reference) edrExtension.getValue()).getReference() : ((UriType)edrExtension.getValue()).getValue();
+    }
+    private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
+        return edrExtension.getUrl().contains("cqfm") ? (reference) -> edrExtension.setValue(new Reference(reference)) : (reference) -> edrExtension.setValue(new CanonicalType(reference));
+    }
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             var edrExtensions = this.getMeasure().getExtension().stream()
@@ -53,10 +62,12 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
                     .collect(Collectors.toList());
 
             var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
+            // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a canonical
+            var maybeEdrReference = Optional.ofNullable(edrExtension).map(e -> getEdrReferenceString(e));
             if (edrExtension != null) {
-                var edrReference = ((Reference) edrExtension.getValue()).getReference();
+                var edrReference = maybeEdrReference.get();
                 for (var c : getMeasure().getContained()) {
-                    if (c.hasId() && c.getId().equals(edrReference) && c instanceof Library) {
+                    if (c.hasId() && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId())) && c instanceof Library) {
                         effectiveDataRequirements = (Library) c;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }
@@ -165,9 +176,9 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
                 .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
                 .forEach(referenceExt -> references.add(new DependencyInfo(
                         referenceSource,
-                        ((Reference) referenceExt.getValue()).getReference(),
+                        getEdrReferenceString(referenceExt),
                         referenceExt.getExtension(),
-                        (reference) -> referenceExt.setValue(new CanonicalType(reference)))));
+                        getEdrReferenceConsumer(referenceExt))));
 
         // extension[cqfm-inputParameters][]
         // extension[cqfm-expansionParameters][]

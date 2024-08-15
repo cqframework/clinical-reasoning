@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
@@ -224,7 +225,7 @@ class ReleaseVisitorTests {
         var crmiEDRId = "exp-params-crmi-test";
         var crmiEDRExtension = new Extension();
         crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
-        crmiEDRExtension.setValue(new Reference("#" + crmiEDRId));
+        crmiEDRExtension.setValue(new CanonicalType("#" + crmiEDRId));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));

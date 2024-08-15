@@ -153,8 +153,8 @@ public class R4MultiMeasureService {
 
             // add reporter if available
             if (reporter != null && !reporter.isEmpty()) {
-                measureReport.setReporter(r4MeasureServiceUtils.getReporter(reporter)
-                    .orElse(null));
+                measureReport.setReporter(
+                        r4MeasureServiceUtils.getReporter(reporter).orElse(null));
             }
             // add id to measureReport
             initializeReport(measureReport);
@@ -212,8 +212,8 @@ public class R4MultiMeasureService {
 
                 // add reporter if available
                 if (reporter != null && !reporter.isEmpty()) {
-                    measureReport.setReporter(r4MeasureServiceUtils.getReporter(reporter)
-                        .orElse(null));
+                    measureReport.setReporter(
+                            r4MeasureServiceUtils.getReporter(reporter).orElse(null));
                 }
                 // add id to measureReport
                 initializeReport(measureReport);

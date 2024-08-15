@@ -26,8 +26,10 @@ class R4MeasureServiceUtilsTest {
     private static final String LOCATION = "Location/loc1";
     private static final String PATIENT = "Patient/pat1";
     private static final String GROUP = "Group/grp1";
-    private static final IllegalArgumentException EXCEPTION_ILLEGAL_REPORTER = new IllegalArgumentException("R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
-    private static final Either<Object, IllegalArgumentException> EITHER_ILLEGAL_ARGUMENT_EXCEPTION = Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER);
+    private static final IllegalArgumentException EXCEPTION_ILLEGAL_REPORTER = new IllegalArgumentException(
+            "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
+    private static final Either<Object, IllegalArgumentException> EITHER_ILLEGAL_ARGUMENT_EXCEPTION =
+            Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER);
     private static final Either<Optional<Reference>, Exception> EITHER_EMPTY_RESULT = buildEitherLeft(null);
 
     @Mock
@@ -35,29 +37,31 @@ class R4MeasureServiceUtilsTest {
 
     private static Stream<Arguments> params() {
         return Stream.of(
-            Arguments.of(null, EITHER_EMPTY_RESULT),
-            Arguments.of(PRACTITIONER, buildEitherLeft(PRACTITIONER)),
-            Arguments.of(PRACTITIONER_ROLE, buildEitherLeft(PRACTITIONER_ROLE)),
-            Arguments.of(ORGANIZATION, buildEitherLeft(ORGANIZATION)),
-            Arguments.of(LOCATION, buildEitherLeft(LOCATION)),
-            Arguments.of(PATIENT, EITHER_ILLEGAL_ARGUMENT_EXCEPTION),
-            Arguments.of(GROUP, EITHER_ILLEGAL_ARGUMENT_EXCEPTION)
-        );
+                Arguments.of(null, EITHER_EMPTY_RESULT),
+                Arguments.of(PRACTITIONER, buildEitherLeft(PRACTITIONER)),
+                Arguments.of(PRACTITIONER_ROLE, buildEitherLeft(PRACTITIONER_ROLE)),
+                Arguments.of(ORGANIZATION, buildEitherLeft(ORGANIZATION)),
+                Arguments.of(LOCATION, buildEitherLeft(LOCATION)),
+                Arguments.of(PATIENT, EITHER_ILLEGAL_ARGUMENT_EXCEPTION),
+                Arguments.of(GROUP, EITHER_ILLEGAL_ARGUMENT_EXCEPTION));
     }
 
     @ParameterizedTest
     @MethodSource("params")
-    void getReporter(
-            @Nullable String theReporter,
-            Either<Optional<Reference>, Exception> theExpectedReporterOrError) {
+    void getReporter(@Nullable String theReporter, Either<Optional<Reference>, Exception> theExpectedReporterOrError) {
         final R4MeasureServiceUtils subject = new R4MeasureServiceUtils(repository);
 
         if (theExpectedReporterOrError.isRight()) {
             final Exception expectedException = theExpectedReporterOrError.right();
-            assertThrows(expectedException.getClass(), () -> subject.getReporter(theReporter), expectedException.getMessage());
+            assertThrows(
+                    expectedException.getClass(),
+                    () -> subject.getReporter(theReporter),
+                    expectedException.getMessage());
         } else if (theExpectedReporterOrError.isLeft()) {
             final Optional<Reference> optReporter = subject.getReporter(theReporter);
-            assertEquals(theExpectedReporterOrError.left().map(Reference::getReference), optReporter.map(Reference::getReference));
+            assertEquals(
+                    theExpectedReporterOrError.left().map(Reference::getReference),
+                    optReporter.map(Reference::getReference));
         } else {
             fail("Expecting an Either with only a left or a right but it has neither.");
         }

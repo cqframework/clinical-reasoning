@@ -78,7 +78,7 @@ public class SearchHelper {
      * @param canonical the canonical url to search for
      * @return
      */
-    private static <CanonicalType extends IPrimitiveType<String>> Class<? extends IBaseResource> getResourceType(
+    public static <CanonicalType extends IPrimitiveType<String>> Class<? extends IBaseResource> getResourceType(
             Repository repository, CanonicalType canonical) {
         Class<? extends IBaseResource> resourceType = null;
         try {
@@ -283,16 +283,13 @@ public class SearchHelper {
     /**
      * Searches the given Repository and handles paging to return all entries
      *
-     * @param <CanonicalType>
+     * @param additionalSearchParams search parameters to pass on to the repository
      * @param repository the repository to search
      * @param canonical the canonical url to search for
      * @return
      */
-    public static <CanonicalType extends IPrimitiveType<String>>
-            IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-                    Repository repository,
-                    String canonical,
-                    Map<String, List<IQueryParameterType>> additionalSearchParams) {
+    public static IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
+            Repository repository, String canonical, Map<String, List<IQueryParameterType>> additionalSearchParams) {
         var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonicalWithPagingWithParams(
                 repository, canonical, resourceType, additionalSearchParams);

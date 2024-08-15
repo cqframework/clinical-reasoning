@@ -60,6 +60,7 @@ public class Constants {
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
     public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
+    public static final String CQF_RESOURCETYPE = "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
 
     // DSTU3 CQF Extensions
     public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";

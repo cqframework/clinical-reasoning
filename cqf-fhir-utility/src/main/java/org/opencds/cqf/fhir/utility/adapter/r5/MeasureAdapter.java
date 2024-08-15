@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.UriType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -48,12 +48,19 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
     private boolean checkedEffectiveDataRequirements;
     private Library effectiveDataRequirements;
     private LibraryAdapter effectiveDataRequirementsAdapter;
-private String getEdrReferenceString(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm") ? ((Reference) edrExtension.getValue()).getReference() : ((UriType)edrExtension.getValue()).getValue();
+
+    private String getEdrReferenceString(Extension edrExtension) {
+        return edrExtension.getUrl().contains("cqfm")
+                ? ((Reference) edrExtension.getValue()).getReference()
+                : ((UriType) edrExtension.getValue()).getValue();
     }
+
     private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm") ? (reference) -> edrExtension.setValue(new Reference(reference)) : (reference) -> edrExtension.setValue(new CanonicalType(reference));
+        return edrExtension.getUrl().contains("cqfm")
+                ? (reference) -> edrExtension.setValue(new Reference(reference))
+                : (reference) -> edrExtension.setValue(new CanonicalType(reference));
     }
+
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             var edrExtensions = this.getMeasure().getExtension().stream()
@@ -67,7 +74,9 @@ private String getEdrReferenceString(Extension edrExtension) {
             if (edrExtension != null) {
                 var edrReference = maybeEdrReference.get();
                 for (var c : getMeasure().getContained()) {
-                    if (c.hasId() && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId())) && c instanceof Library) {
+                    if (c.hasId()
+                            && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
+                            && c instanceof Library) {
                         effectiveDataRequirements = (Library) c;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }

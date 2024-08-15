@@ -47,15 +47,22 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
     private boolean checkedEffectiveDataRequirements;
     private Library effectiveDataRequirements;
     private LibraryAdapter effectiveDataRequirementsAdapter;
+
     private String getEdrReferenceString(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm") ? ((Reference)edrExtension.getValue()).getReference() : ((UriType)edrExtension.getValue()).getValue();
+        return edrExtension.getUrl().contains("cqfm")
+                ? ((Reference) edrExtension.getValue()).getReference()
+                : ((UriType) edrExtension.getValue()).getValue();
     }
+
     private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm") ? (reference) -> edrExtension.setValue(new Reference(reference)) : (reference) -> edrExtension.setValue(new UriType(reference));
+        return edrExtension.getUrl().contains("cqfm")
+                ? (reference) -> edrExtension.setValue(new Reference(reference))
+                : (reference) -> edrExtension.setValue(new UriType(reference));
     }
+
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
-            var edrExtensions = this.getMeasure().getExtension().stream()
+            List<Extension> edrExtensions = this.getMeasure().getExtension().stream()
                     .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
                     .filter(ext -> ext.hasValue())
                     .collect(Collectors.toList());
@@ -66,7 +73,9 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
             if (maybeEdrReference.isPresent()) {
                 var edrReference = maybeEdrReference.get();
                 for (var c : getMeasure().getContained()) {
-                    if (c.hasId() && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId())) && c instanceof Library) {
+                    if (c.hasId()
+                            && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
+                            && c instanceof Library) {
                         effectiveDataRequirements = (Library) c;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }

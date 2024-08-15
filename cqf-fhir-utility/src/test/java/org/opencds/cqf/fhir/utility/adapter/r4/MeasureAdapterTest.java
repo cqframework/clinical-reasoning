@@ -22,10 +22,12 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -164,11 +166,33 @@ public class MeasureAdapterTest {
 
     @Test
     void adapter_get_all_dependencies() {
-        var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
+        var dependencies = List.of(
+                "profileRef",
+                "relatedArtifactRef",
+                "libraryRef",
+                "populationCriteriaRef",
+                "stratifierCriteriaRef",
+                "stratifierComponentCriteriaRef",
+                "supplementalDataCriteriaRef",
+                "inputParametersRef",
+                "expansionParametersRef",
+                "cqlOptionsRef",
+                "componentRef");
         var measure = new Measure();
         measure.getMeta().addProfile(dependencies.get(0));
         measure.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
         measure.getLibrary().add(new CanonicalType(dependencies.get(2)));
+        measure.addGroup().addPopulation().setCriteria(new Expression().setReference(dependencies.get(3)));
+        measure.addGroup().addStratifier().setCriteria(new Expression().setReference(dependencies.get(4)));
+        measure.addGroup()
+                .addStratifier()
+                .addComponent()
+                .setCriteria(new Expression().setReference(dependencies.get(5)));
+        measure.addSupplementalData().setCriteria(new Expression().setReference(dependencies.get(6)));
+        measure.addExtension(Constants.CQFM_INPUT_PARAMETERS, new Reference(dependencies.get(7)));
+        measure.addExtension(Constants.CQF_EXPANSION_PARAMETERS, new Reference(dependencies.get(8)));
+        measure.addExtension(Constants.CQF_CQL_OPTIONS, new Reference(dependencies.get(9)));
+        measure.addExtension(Constants.CQFM_COMPONENT, new RelatedArtifact().setResource(dependencies.get(10)));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());

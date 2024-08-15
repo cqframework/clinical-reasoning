@@ -164,11 +164,23 @@ public class MeasureAdapterTest {
 
     @Test
     void adapter_get_all_dependencies() {
-        var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
+        var dependencies = List.of(
+                "profileRef",
+                "relatedArtifactRef",
+                "libraryRef",
+                "inputParametersRef",
+                "expansionParametersRef",
+                "cqlOptionsRef",
+                "componentRef");
         var measure = new Measure();
         measure.getMeta().addProfile(dependencies.get(0));
         measure.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
         measure.getLibrary().add(new Reference(dependencies.get(2)));
+        measure.addExtension(Constants.CQFM_INPUT_PARAMETERS, new Reference(dependencies.get(3)));
+        measure.addExtension(Constants.CQF_EXPANSION_PARAMETERS, new Reference(dependencies.get(4)));
+        measure.addExtension(Constants.CQF_CQL_OPTIONS, new Reference(dependencies.get(5)));
+        measure.addExtension(
+                Constants.CQFM_COMPONENT, new RelatedArtifact().setResource(new Reference(dependencies.get(6))));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());

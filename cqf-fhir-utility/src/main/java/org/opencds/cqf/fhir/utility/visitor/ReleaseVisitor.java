@@ -54,7 +54,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 .orElse("");
         var versionBehavior = VisitorHelper.getParameter("versionBehavior", operationParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
-        var requireNonExpermimental = VisitorHelper.getParameter(
+        var requireNonExperimental = VisitorHelper.getParameter(
                         "requireNonExperimental", operationParameters, IPrimitiveType.class)
                 .map(t -> (String) t.getValue());
         checkReleaseVersion(version, versionBehavior);
@@ -79,7 +79,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 releaseVersion,
                 rootEffectivePeriod,
                 latestFromTxServer.orElse(false),
-                requireNonExpermimental,
+                requireNonExperimental,
                 repository,
                 new Date());
         var rootArtifactOriginalDependencies = new ArrayList<IDependencyInfo>(rootAdapter.getDependencies());

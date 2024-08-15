@@ -28,10 +28,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class MeasureAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
+public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
 
     private Measure measure;
 

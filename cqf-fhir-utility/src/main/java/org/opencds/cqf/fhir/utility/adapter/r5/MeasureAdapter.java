@@ -56,10 +56,10 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
             if (edrExtension != null) {
                 var edrReference = ((Reference) edrExtension.getValue()).getReference();
                 for (var c : getMeasure().getContained()) {
-                        if (c.hasId() && c.getId().equals(edrReference) && c instanceof Library) {
-                            effectiveDataRequirements = (Library) c;
-                            effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
-                        }
+                    if (c.hasId() && c.getId().equals(edrReference) && c instanceof Library) {
+                        effectiveDataRequirements = (Library) c;
+                        effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
+                    }
                 }
             }
             checkedEffectiveDataRequirements = true;

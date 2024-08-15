@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Period;
@@ -16,12 +15,10 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -29,7 +26,8 @@ import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 
-public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
+public class MeasureAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
 
     private Measure measure;
 
@@ -82,10 +80,10 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.open
             if (edrExtension != null) {
                 var edrReference = ((Reference) edrExtension.getValue()).getReference();
                 for (var c : getMeasure().getContained()) {
-                        if (c.hasId() && c.getId().equals(edrReference) && c instanceof Library) {
-                            effectiveDataRequirements = (Library) c;
-                            effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
-                        }
+                    if (c.hasId() && c.getId().equals(edrReference) && c instanceof Library) {
+                        effectiveDataRequirements = (Library) c;
+                        effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
+                    }
                 }
             }
             checkedEffectiveDataRequirements = true;
@@ -130,11 +128,10 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.open
         // library[]
         for (var library : getMeasure().getLibrary()) {
             final var dependency = new DependencyInfo(
-                referenceSource,
-                library.getReference(),
-                library.getExtension(),
-                (reference) -> library.setReference(reference)
-            );
+                    referenceSource,
+                    library.getReference(),
+                    library.getExtension(),
+                    (reference) -> library.setReference(reference));
             references.add(dependency);
         }
 

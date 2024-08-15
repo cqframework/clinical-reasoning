@@ -117,9 +117,9 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 systemVersionParams,
                 canonicalVersionParams);
         if (rootAdapter.get().fhirType().equals("Library")) {
-            ((LibraryAdapter)rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
+            ((LibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
         }
-        
+
         // removed duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
         var distinctResolvedRelatedArtifacts = new ArrayList<>(relatedArtifacts);
@@ -280,10 +280,10 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                     "depends-on",
                     updatedReference,
                     res.map(a -> a.getDescriptor()).orElse(null));
-                var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
-                updatedRelatedArtifacts.add(componentToDependency);
-                artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
-            }
+            var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
+            updatedRelatedArtifacts.add(componentToDependency);
+            artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+        }
         var dependencies = artifactAdapter.getDependencies();
         // Step 2: update dependencies recursively
         for (var dependency : dependencies) {

@@ -99,9 +99,8 @@ class ReleaseVisitorTests {
 
     @Test
     void visitMeasureCollectionTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
@@ -134,25 +133,38 @@ class ReleaseVisitorTests {
                 .collect(Collectors.toList());
         // resolvable resources get descriptors
         for (final var dependency : dependenciesOnReleasedArtifact) {
-            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
+            if (dependency
+                    .getResource()
+                    .getReference()
+                    .equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Library BreastCancerScreeningFHIR, 0.0.001"));
             }
             if (dependency.getResource().equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Breast Cancer ScreeningFHIR, 0.0.001"));
             }
-            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
+            if (dependency
+                    .getResource()
+                    .getReference()
+                    .equals("https://madie.cms.gov/Library/CervicalCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Library CervicalCancerScreeningFHIR, 0.0.001"));
             }
-            if (dependency.getResource().getReference().equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
+            if (dependency
+                    .getResource()
+                    .getReference()
+                    .equals("https://madie.cms.gov/Measure/CervicalCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource().getReference()) != null && Canonicals.getUrl(dependency.getResource().getReference()).equals("http://loinc.org")) {
+            if (Canonicals.getUrl(dependency.getResource().getReference()) != null
+                    && Canonicals.getUrl(dependency.getResource().getReference())
+                            .equals("http://loinc.org")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource().getReference()));
                 assertTrue(Canonicals.getVersion(dependency.getResource().getReference())
                         .equals("2.76"));
             }
-            if (Canonicals.getUrl(dependency.getResource().getReference()) != null && Canonicals.getUrl(dependency.getResource().getReference()).equals("http://snomed.info/sct")) {
+            if (Canonicals.getUrl(dependency.getResource().getReference()) != null
+                    && Canonicals.getUrl(dependency.getResource().getReference())
+                            .equals("http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource().getReference()));
                 assertTrue(Canonicals.getVersion(dependency.getResource().getReference())
                         .equals("http://snomed.info/sct/731000124108/version/20230901"));
@@ -164,9 +176,8 @@ class ReleaseVisitorTests {
 
     @Test
     void visitMeasureEffectiveDataRequirementsTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
@@ -212,9 +223,8 @@ class ReleaseVisitorTests {
 
     @Test
     void bothCRMIandCQFMEffectiveDataRequirementsTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))

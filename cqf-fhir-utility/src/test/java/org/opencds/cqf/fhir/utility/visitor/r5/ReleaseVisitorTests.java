@@ -99,9 +99,8 @@ class ReleaseVisitorTests {
 
     @Test
     void visitMeasureCollectionTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
@@ -145,11 +144,13 @@ class ReleaseVisitorTests {
                 assertTrue(dependency.getDisplay().equals("Measure Cervical Cancer ScreeningFHIR, 0.0.001"));
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource()) != null && Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+            if (Canonicals.getUrl(dependency.getResource()) != null
+                    && Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertTrue(Canonicals.getVersion(dependency.getResource()).equals("2.76"));
             }
-            if (Canonicals.getUrl(dependency.getResource()) != null && Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+            if (Canonicals.getUrl(dependency.getResource()) != null
+                    && Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertTrue(Canonicals.getVersion(dependency.getResource())
                         .equals("http://snomed.info/sct/731000124108/version/20230901"));
@@ -161,9 +162,8 @@ class ReleaseVisitorTests {
 
     @Test
     void visitMeasureEffectiveDataRequirementsTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
@@ -207,9 +207,8 @@ class ReleaseVisitorTests {
 
     @Test
     void bothCRMIandCQFMEffectiveDataRequirementsTest() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
-                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
                 .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))

@@ -100,7 +100,7 @@ class ReleaseVisitorTests {
     @Test
     void visitMeasureCollectionTest() {
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
@@ -112,7 +112,7 @@ class ReleaseVisitorTests {
         params.addParameter("version", "1.0.0");
         params.addParameter("versionBehavior", new CodeType("default"));
 
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // Set the ID to Manifest-Release
@@ -162,7 +162,7 @@ class ReleaseVisitorTests {
     @Test
     void visitMeasureEffectiveDataRequirementsTest() {
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
@@ -177,7 +177,7 @@ class ReleaseVisitorTests {
         params.addParameter("version", "1.0.0");
         params.addParameter("versionBehavior", new CodeType("default"));
 
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // removing the effectiveDataRequirements changes the dependency count
@@ -208,7 +208,7 @@ class ReleaseVisitorTests {
     @Test
     void bothCRMIandCQFMEffectiveDataRequirementsTest() {
         Bundle bundle =
-                (Bundle) jsonParser.parseResource(KnowledgeArtifactReleaseVisitorTests.class.getResourceAsStream(
+                (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
                         "Bundle-ecqm-qicore-2024-simplified.json"));
         spyRepository.transaction(bundle);
         Library library = spyRepository
@@ -226,7 +226,7 @@ class ReleaseVisitorTests {
         var crmiEDRExtension = new Extension();
         crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL);
         crmiEDRExtension.setValue(new Reference("#" + crmiEDRId));
-        KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // if both cqfm and crmi effective data requirements are present then they will each be traced

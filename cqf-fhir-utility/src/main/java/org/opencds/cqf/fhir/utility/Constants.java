@@ -160,10 +160,6 @@ public class Constants {
     public static final String CQFM_COMPONENT_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component";
 
-    // can't use List.of for Android 26 compatibility
-    public static final List<String> PRESERVED_EXTENSION_URLS =
-            Collections.unmodifiableList(Arrays.asList(VALUE_SET_PRIORITY_URL, VALUE_SET_CONDITION_URL));
-
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
 

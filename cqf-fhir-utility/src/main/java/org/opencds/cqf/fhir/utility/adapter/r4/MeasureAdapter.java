@@ -319,9 +319,4 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements org.open
     public boolean getExperimental() {
         return this.getMeasure().getExperimental();
     }
-
-    @Override
-    public void setExtension(List<IBaseExtension<?, ?>> extensions) {
-        this.get().setExtension(extensions.stream().map(e -> (Extension) e).collect(Collectors.toList()));
-    }
 }

@@ -30,6 +30,8 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +116,10 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 new HashMap<String, IDomainResource>(),
                 systemVersionParams,
                 canonicalVersionParams);
-        rootAdapter.setExpansionParameters(systemVersionParams, canonicalVersionParams);
+        if (rootAdapter.get().fhirType().equals("Library")) {
+            ((LibraryAdapter)rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
+        }
+        
         // removed duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
         var distinctResolvedRelatedArtifacts = new ArrayList<>(relatedArtifacts);
@@ -232,7 +237,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
     }
 
     private void gatherDependencies(
-            LibraryAdapter rootAdapter,
+            KnowledgeArtifactAdapter rootAdapter,
             KnowledgeArtifactAdapter artifactAdapter,
             List<IDomainResource> releasedResources,
             FhirVersionEnum fhirVersion,

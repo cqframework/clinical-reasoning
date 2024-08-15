@@ -325,6 +325,10 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         }
     }
 
+    default Optional<IBaseParameters> getExpansionParameters() {
+        return Optional.empty();
+    }
+
     String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
     String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";

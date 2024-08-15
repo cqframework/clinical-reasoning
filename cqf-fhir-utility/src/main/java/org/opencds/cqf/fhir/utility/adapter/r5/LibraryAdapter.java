@@ -47,67 +47,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public Library copy() {
-        return this.get().copy();
-    }
-
-    @Override
-    public String getName() {
-        return this.getLibrary().getName();
-    }
-
-    @Override
-    public boolean hasTitle() {
-        return this.getLibrary().hasTitle();
-    }
-
-    @Override
-    public String getTitle() {
-        return this.getLibrary().getTitle();
-    }
-
-    @Override
-    public String getPurpose() {
-        return this.getLibrary().getPurpose();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.getLibrary().setName(name);
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.getLibrary().setTitle(title);
-    }
-
-    @Override
-    public String getUrl() {
-        return this.getLibrary().getUrl();
-    }
-
-    @Override
-    public boolean hasUrl() {
-        return this.getLibrary().hasUrl();
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.getLibrary().setUrl(url);
-    }
-
-    @Override
-    public String getVersion() {
-        return this.getLibrary().getVersion();
-    }
-
-    @Override
-    public boolean hasVersion() {
-        return this.getLibrary().hasVersion();
-    }
-
-    @Override
-    public void setVersion(String version) {
-        this.getLibrary().setVersion(version);
+        return get().copy();
     }
 
     @Override
@@ -212,7 +152,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     @Override
     public Optional<IBaseParameters> getExpansionParameters() {
         return getLibrary().getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(Constants.EXPANSION_PARAMETERS_URL))
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
                 .findAny()
                 .map(ext -> ((Reference) ext.getValue()).getReference())
                 .map(ref -> {
@@ -258,7 +198,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
             var expansionParamsExt = getLibrary().addExtension();
-            expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
+            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
             expansionParamsExt.setValue(new Reference(id));
         }
     }

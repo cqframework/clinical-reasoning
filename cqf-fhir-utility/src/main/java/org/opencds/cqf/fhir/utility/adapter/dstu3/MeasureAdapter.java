@@ -29,30 +29,19 @@ import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 public class MeasureAdapter extends KnowledgeArtifactAdapter
         implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
 
-    private Measure measure;
-
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
-
         if (!(measure instanceof Measure)) {
             throw new IllegalArgumentException("resource passed as measure argument is not a Measure resource");
         }
-
-        this.measure = (Measure) measure;
     }
 
     public MeasureAdapter(Measure measure) {
         super(measure);
-        this.measure = measure;
-    }
-
-    @Override
-    public IBase accept(KnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
-        return visitor.visit(this, repository, operationParameters);
     }
 
     protected Measure getMeasure() {
-        return this.measure;
+        return (Measure) resource;
     }
 
     @Override
@@ -170,102 +159,5 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
         });
 
         return references;
-    }
-
-    @Override
-    public Date getApprovalDate() {
-        return this.getMeasure().getApprovalDate();
-    }
-
-    @Override
-    public Date getDate() {
-        return this.getMeasure().getDate();
-    }
-
-    @Override
-    public void setDate(Date date) {
-        this.getMeasure().setDate(date);
-    }
-
-    @Override
-    public void setDateElement(IPrimitiveType<Date> date) {
-        if (date != null && !(date instanceof DateTimeType)) {
-            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
-        }
-        this.getMeasure().setDateElement((DateTimeType) date);
-    }
-
-    @Override
-    public Period getEffectivePeriod() {
-        return this.getMeasure().getEffectivePeriod();
-    }
-
-    @Override
-    public void setApprovalDate(Date date) {
-        this.getMeasure().setApprovalDate(date);
-    }
-
-    @Override
-    public boolean hasRelatedArtifact() {
-        return this.getMeasure().hasRelatedArtifact();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifact() {
-        return this.getMeasure().getRelatedArtifact();
-    }
-
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
-        this.getMeasure()
-                .setRelatedArtifact(relatedArtifacts.stream()
-                        .map(ra -> (RelatedArtifact) ra)
-                        .collect(Collectors.toList()));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
-        try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
-        }
-        return this.getRelatedArtifact().stream()
-                .filter(ra -> ra.getType() == type)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void setEffectivePeriod(ICompositeType effectivePeriod) {
-        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be " + Period.class.getName());
-        }
-        this.getMeasure().setEffectivePeriod((Period) effectivePeriod);
-    }
-
-    @Override
-    public void setStatus(String statusCodeString) {
-        PublicationStatus status;
-        try {
-            status = PublicationStatus.fromCode(statusCodeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid status code");
-        }
-        this.getMeasure().setStatus(status);
-    }
-
-    @Override
-    public String getStatus() {
-        return this.getMeasure().getStatus() == null
-                ? null
-                : this.getMeasure().getStatus().toCode();
-    }
-
-    @Override
-    public boolean getExperimental() {
-        return this.getMeasure().getExperimental();
     }
 }

@@ -146,15 +146,6 @@ public class Constants {
     public static final String US_PH_CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     public static final String LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     public static final String ASSET_COLLECTION = "asset-collection";
-    public static final String EXPANSION_PARAMETERS_URL =
-            "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
-    public static final String CQFM_INPUT_PARAMETERS_URL =
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters";
-    public static final String CQl_OPTIONS_URL = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
-    public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS_URL =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
-    public static final String CQFM_COMPONENT_URL =
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component";
 
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";

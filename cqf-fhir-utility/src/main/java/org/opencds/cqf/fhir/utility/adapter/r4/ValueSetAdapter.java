@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -44,67 +43,7 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public ValueSet copy() {
-        return this.get().copy();
-    }
-
-    @Override
-    public IIdType getId() {
-        return this.getValueSet().getIdElement();
-    }
-
-    @Override
-    public void setId(IIdType id) {
-        this.getValueSet().setId(id);
-    }
-
-    @Override
-    public String getName() {
-        return this.getValueSet().getName();
-    }
-
-    @Override
-    public boolean hasTitle() {
-        return this.getValueSet().hasTitle();
-    }
-
-    @Override
-    public String getTitle() {
-        return this.getValueSet().getTitle();
-    }
-
-    @Override
-    public String getPurpose() {
-        return this.getValueSet().getPurpose();
-    }
-
-    @Override
-    public void setName(String name) {
-        this.getValueSet().setName(name);
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.getValueSet().setTitle(title);
-    }
-
-    @Override
-    public String getUrl() {
-        return this.getValueSet().getUrl();
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.getValueSet().setUrl(url);
-    }
-
-    @Override
-    public String getVersion() {
-        return this.getValueSet().getVersion();
-    }
-
-    @Override
-    public void setVersion(String version) {
-        this.getValueSet().setVersion(version);
+        return get().copy();
     }
 
     @Override

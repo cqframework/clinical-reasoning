@@ -333,11 +333,6 @@ public class ValueSets {
         return getStringValueFromPrimitiveAccessor(valueSet, idDef.getAccessor());
     }
 
-    public static String getResourceType(FhirContext fhirContext, IBaseResource resource) {
-        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(resource);
-        return def.getName();
-    }
-
     private static String getStringValueFromPrimitiveAccessor(IBase value, IAccessor accessor) {
         if (value == null || accessor == null) {
             return null;

@@ -154,7 +154,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     @Override
     public Optional<IBaseParameters> getExpansionParameters() {
         return getLibrary().getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(Constants.EXPANSION_PARAMETERS_URL))
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
                 .findAny()
                 .map(ext -> ((Reference) ext.getValue()).getReference())
                 .map(ref -> {
@@ -200,7 +200,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
             var expansionParamsExt = getLibrary().addExtension();
-            expansionParamsExt.setUrl(Constants.EXPANSION_PARAMETERS_URL);
+            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
             expansionParamsExt.setValue(new Reference(id));
         }
     }

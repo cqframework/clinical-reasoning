@@ -17,6 +17,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -128,13 +129,13 @@ public class R4MeasureServiceUtils {
         return measureReport;
     }
 
-    public Reference getReporter(String reporter) {
-        if (!reporter.isEmpty() && !reporter.contains("/")) {
+    public Optional<Reference> getReporter(String reporter) {
+        if (reporter != null && !reporter.isEmpty() && !reporter.contains("/")) {
             throw new IllegalArgumentException(
                     "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
         }
         Reference reference = null;
-        if (!reporter.isEmpty()) {
+        if (reporter != null && !reporter.isEmpty()) {
             if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
                 reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
             } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
@@ -148,6 +149,6 @@ public class R4MeasureServiceUtils {
             }
         }
 
-        return reference;
+        return Optional.ofNullable(reference);
     }
 }

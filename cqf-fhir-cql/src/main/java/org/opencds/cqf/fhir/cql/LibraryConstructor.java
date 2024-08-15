@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
@@ -46,10 +47,15 @@ public class LibraryConstructor {
         sb.append(String.format("%ndefine \"return\":%n       %s", expression));
     }
 
+    private String getFhirVersionString(FhirVersionEnum fhirVersion) {
+        // The version of the DSTU3 enum is 3.0.2 which the CQL Engine does not support.
+        return fhirVersion == FhirVersionEnum.DSTU3 ? "3.0.1" : fhirVersion.getFhirVersionString();
+    }
+
     private void constructIncludes(StringBuilder sb, List<Pair<String, String>> libraries) {
         sb.append(String.format(
                 "include FHIRHelpers version '%s' called FHIRHelpers%n",
-                fhirContext.getVersion().getVersion().getFhirVersionString()));
+                getFhirVersionString(fhirContext.getVersion().getVersion())));
 
         if (libraries != null) {
             for (Pair<String, String> library : libraries) {
@@ -93,7 +99,7 @@ public class LibraryConstructor {
     private void constructUsings(StringBuilder sb) {
         sb.append(String.format(
                 "using FHIR version '%s'%n",
-                fhirContext.getVersion().getVersion().getFhirVersionString()));
+                getFhirVersionString(fhirContext.getVersion().getVersion())));
     }
 
     private void constructHeader(StringBuilder sb) {

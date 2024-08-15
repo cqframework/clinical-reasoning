@@ -27,12 +27,13 @@ import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -259,12 +260,17 @@ public class PlanDefinition {
 
         public GeneratedPackage thenPackage() {
             if (isPackagePut == null) {
-                return new GeneratedPackage(processor.packagePlanDefinition(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))));
+                return new GeneratedPackage(
+                        processor.packagePlanDefinition(Eithers.forMiddle3(
+                                Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))),
+                        repository.fhirContext());
             } else {
-                return new GeneratedPackage(processor.packagePlanDefinition(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
-                        isPackagePut));
+                return new GeneratedPackage(
+                        processor.packagePlanDefinition(
+                                Eithers.forMiddle3(
+                                        Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                                isPackagePut),
+                        repository.fhirContext());
             }
         }
     }
@@ -401,19 +407,6 @@ public class PlanDefinition {
         public GeneratedCarePlan hasQuestionnaire() {
             assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
                     .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
-            return this;
-        }
-    }
-
-    public static class GeneratedPackage {
-        IBaseBundle generatedBundle;
-
-        public GeneratedPackage(IBaseBundle generatedBundle) {
-            this.generatedBundle = generatedBundle;
-        }
-
-        public GeneratedPackage hasEntry(int count) {
-            assertEquals(count, getEntry(generatedBundle).size());
             return this;
         }
     }

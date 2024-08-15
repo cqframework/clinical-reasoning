@@ -18,10 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)

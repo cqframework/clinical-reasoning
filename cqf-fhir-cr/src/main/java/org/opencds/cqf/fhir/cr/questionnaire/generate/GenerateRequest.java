@@ -2,15 +2,18 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.utility.Constants;
 
 public class GenerateRequest implements IQuestionnaireRequest {
     private final Boolean supportedOnly;
@@ -47,7 +50,7 @@ public class GenerateRequest implements IQuestionnaireRequest {
         this.modelResolver = modelResolver;
         fhirVersion =
                 this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
-        defaultLibraryUrl = "";
+        defaultLibraryUrl = resolveDefaultLibraryUrl();
         profileUrl = resolvePathString(this.profile, "url");
     }
 
@@ -150,5 +153,19 @@ public class GenerateRequest implements IQuestionnaireRequest {
     public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
         // Errors during Questionnaire generation manifest as error items
         throw new UnsupportedOperationException("Unimplemented method 'setOperationOutcome'");
+    }
+
+    @SuppressWarnings("unchecked")
+    protected final String resolveDefaultLibraryUrl() {
+        var libraryExt = getExtensions(profile).stream()
+                .filter(e -> e.getUrl()
+                        .equals(fhirVersion == FhirVersionEnum.DSTU3 ? Constants.CQIF_LIBRARY : Constants.CQF_LIBRARY))
+                .findFirst()
+                .orElse(null);
+        return libraryExt == null
+                ? null
+                : fhirVersion == FhirVersionEnum.DSTU3
+                        ? ((Reference) libraryExt.getValue()).getReference()
+                        : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 }

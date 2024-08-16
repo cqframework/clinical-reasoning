@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Attachment;
@@ -11,8 +13,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UsageContext;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -78,6 +85,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .forEach(ra -> references.add(ra));
         getLibrary().getDataRequirement().stream().forEach(dr -> {
+            // dataRequirement[].profile[]
             dr.getProfile().stream()
                     .filter(profile -> profile.hasValue())
                     .forEach(profile -> references.add(new DependencyInfo(
@@ -85,6 +93,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
                             profile.getValue(),
                             profile.getExtension(),
                             (reference) -> profile.setValue(reference))));
+            // dataRequirement[].codeFilter[].valueSet
             dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
                     .forEach(cf -> references.add(new DependencyInfo(
@@ -140,5 +149,59 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     @Override
     public List<UsageContext> getUseContext() {
         return getLibrary().getUseContext();
+    }
+
+    @Override
+    public Optional<IBaseParameters> getExpansionParameters() {
+        return getLibrary().getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
+                .findAny()
+                .map(ext -> ((Reference) ext.getValue()).getReference())
+                .map(ref -> {
+                    if (getLibrary().hasContained()) {
+                        return getLibrary().getContained().stream()
+                                .filter(containedResource ->
+                                        containedResource.getId().equals(ref))
+                                .findFirst()
+                                .map(r -> (IBaseParameters) r)
+                                .orElse(null);
+                    }
+                    return null;
+                });
+    }
+
+    @Override
+    public void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
+        var newParameters = new ArrayList<ParametersParameterComponent>();
+        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
+            for (String parameter : systemVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("system-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
+            for (String parameter : canonicalVersionExpansionParameters) {
+                var param = new ParametersParameterComponent();
+                param.setName("canonical-version");
+                param.setValue(new UriType(parameter));
+                newParameters.add(param);
+            }
+        }
+        var existingExpansionParameters = getExpansionParameters();
+        if (existingExpansionParameters.isPresent()) {
+            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        } else {
+            var id = "#exp-params";
+            var newExpansionParameters = new Parameters();
+            newExpansionParameters.setParameter(newParameters);
+            newExpansionParameters.setId(id);
+            getLibrary().addContained(newExpansionParameters);
+            var expansionParamsExt = getLibrary().addExtension();
+            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+            expansionParamsExt.setValue(new Reference(id));
+        }
     }
 }

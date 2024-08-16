@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -51,8 +52,8 @@ public class VisitorHelper {
                 .map(vals -> vals.stream().map(val -> (T) val).collect(Collectors.toList()));
     }
 
-    public static List<IBaseResource> getMetadataResourcesFromBundle(IBaseBundle bundle) {
-        List<IBaseResource> resourceList = new ArrayList<>();
+    public static List<IDomainResource> getMetadataResourcesFromBundle(IBaseBundle bundle) {
+        List<IDomainResource> resourceList = new ArrayList<>();
         var version = bundle.getStructureFhirVersionEnum();
         if (!BundleHelper.getEntryFirstRep(bundle).isEmpty()) {
             BundleHelper.getEntry(bundle).stream()
@@ -62,17 +63,17 @@ public class VisitorHelper {
                         switch (version) {
                             case DSTU3:
                                 if (r instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-                                    resourceList.add(r);
+                                    resourceList.add((IDomainResource) r);
                                 }
                                 break;
                             case R4:
                                 if (r instanceof org.hl7.fhir.r4.model.MetadataResource) {
-                                    resourceList.add(r);
+                                    resourceList.add((IDomainResource) r);
                                 }
                                 break;
                             case R5:
                                 if (r instanceof org.hl7.fhir.r5.model.MetadataResource) {
-                                    resourceList.add(r);
+                                    resourceList.add((IDomainResource) r);
                                 }
                                 break;
                             default:

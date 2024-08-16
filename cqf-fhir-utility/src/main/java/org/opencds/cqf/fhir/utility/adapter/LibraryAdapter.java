@@ -31,4 +31,7 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
     <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement);
 
     List<? extends ICompositeType> getUseContext();
+
+    void setExpansionParameters(
+            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters);
 }

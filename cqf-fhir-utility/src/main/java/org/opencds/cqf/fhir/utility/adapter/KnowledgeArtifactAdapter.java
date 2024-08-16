@@ -310,6 +310,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                 || resource instanceof org.hl7.fhir.r5.model.MetadataResource;
     }
 
+    // TODO: Make this a semver sort
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> isSupportedMetadataResource(r))
@@ -322,6 +323,10 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         } else {
             return Optional.ofNullable(null);
         }
+    }
+
+    default Optional<IBaseParameters> getExpansionParameters() {
+        return Optional.empty();
     }
 
     String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";

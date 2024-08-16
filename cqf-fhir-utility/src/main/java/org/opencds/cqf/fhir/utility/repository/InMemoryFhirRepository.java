@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import java.util.ArrayList;
@@ -175,7 +176,16 @@ public class InMemoryFhirRepository implements Repository {
             }
 
             if (include) {
-                builder.addCollectionEntry(resource);
+                if (resource instanceof org.hl7.fhir.dstu3.model.Resource) {
+                    builder.addCollectionEntry(((org.hl7.fhir.dstu3.model.Resource) resource).copy());
+                } else if (resource instanceof org.hl7.fhir.r4.model.Resource) {
+                    builder.addCollectionEntry(((org.hl7.fhir.r4.model.Resource) resource).copy());
+                } else if (resource instanceof org.hl7.fhir.r5.model.Resource) {
+                    builder.addCollectionEntry(((org.hl7.fhir.r5.model.Resource) resource).copy());
+                } else {
+                    throw new UnprocessableEntityException("Unsupported fhir version:"
+                            + resource.getStructureFhirVersionEnum().getFhirVersionString());
+                }
             }
         }
 

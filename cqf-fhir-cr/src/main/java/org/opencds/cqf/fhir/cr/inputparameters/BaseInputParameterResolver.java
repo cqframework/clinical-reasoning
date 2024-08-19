@@ -21,14 +21,14 @@ public abstract class BaseInputParameterResolver implements IInputParameterResol
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
+            boolean useServerData,
+            IBaseBundle data) {
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
         Repository bundleRepository = null;
-        if (bundle != null) {
-            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), bundle);
+        if (data != null) {
+            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), data);
         }
         this.repository = resolveRepository(useServerData, repository, bundleRepository);
     }

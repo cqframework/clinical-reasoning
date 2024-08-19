@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessRequestTests {
@@ -23,7 +24,10 @@ class ProcessRequestTests {
     @Mock
     LibraryEngine libraryEngine;
 
-    ProcessRequest fixture = new ProcessRequest();
+    @Mock
+    IPopulateProcessor populateProcessor;
+
+    ProcessRequest fixture = new ProcessRequest(populateProcessor);
 
     @BeforeEach
     void setup() {

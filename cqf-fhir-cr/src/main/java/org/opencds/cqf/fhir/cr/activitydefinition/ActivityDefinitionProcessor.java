@@ -109,8 +109,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
@@ -127,7 +127,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
                 createRestRepository(repository.fhirContext(), terminologyEndpoint));
@@ -145,8 +145,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
@@ -164,7 +164,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 new LibraryEngine(repository, evaluationSettings));
     }
 
@@ -180,8 +180,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subjectId)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
@@ -203,7 +203,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 libraryEngine,
                 modelResolver);
         return applyProcessor.apply(request);

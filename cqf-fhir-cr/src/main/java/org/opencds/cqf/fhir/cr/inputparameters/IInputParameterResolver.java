@@ -21,20 +21,20 @@ public interface IInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
+            boolean useServerData,
+            IBaseBundle data) {
         checkNotNull(repository, "expected non-null value for repository");
         var fhirVersion = repository.fhirContext().getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:
                 return (T) new org.opencds.cqf.fhir.cr.inputparameters.dstu3.InputParameterResolver(
-                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
             case R4:
                 return (T) new org.opencds.cqf.fhir.cr.inputparameters.r4.InputParameterResolver(
-                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
             case R5:
                 return (T) new org.opencds.cqf.fhir.cr.inputparameters.r5.InputParameterResolver(
-                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+                        repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
             default:
                 return null;
         }

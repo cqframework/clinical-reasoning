@@ -53,7 +53,7 @@ public class ExpressionProcessor {
         return request
                 .getLibraryEngine()
                 .resolveExpression(
-                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getBundle())
+                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData())
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -71,7 +71,7 @@ public class ExpressionProcessor {
             IOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
         return request
                 .getLibraryEngine()
-                .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getBundle())
+                .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getData())
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -92,41 +92,6 @@ public class ExpressionProcessor {
                 .findFirst()
                 .orElse(null);
         return extension == null ? null : CqfExpression.of(extension, request.getDefaultLibraryUrl());
-        // if (extension == null) {
-        //     return null;
-        // }
-        // switch (request.getFhirVersion()) {
-        //     case DSTU3:
-        //         // var languageExtension = extensions.stream()
-        //         var languageExtension = extension.getExtension().stream()
-        //                 .map(e -> (IBaseExtension<?, ?>) e)
-        //                 .filter(e -> e.getUrl().equals(Constants.CQF_EXPRESSION_LANGUAGE))
-        //                 .findFirst()
-        //                 .orElse(null);
-        //         // var libraryExtension = extensions.stream()
-        //         var libraryExtension = extension.getExtension().stream()
-        //                 .map(e -> (IBaseExtension<?, ?>) e)
-        //                 .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
-        //                 .findFirst()
-        //                 .orElse(null);
-        //         return new CqfExpression(
-        //                 languageExtension == null
-        //                         ? null
-        //                         : languageExtension.getValue().toString(),
-        //                 extension.getValue().toString(),
-        //                 libraryExtension == null
-        //                         ? request.getDefaultLibraryUrl()
-        //                         : libraryExtension.getValue().toString());
-        //     case R4:
-        //         return CqfExpression.of(
-        //                 (org.hl7.fhir.r4.model.Expression) extension.getValue(), request.getDefaultLibraryUrl());
-        //     case R5:
-        //         return CqfExpression.of(
-        //                 (org.hl7.fhir.r5.model.Expression) extension.getValue(), request.getDefaultLibraryUrl());
-
-        //     default:
-        //         return null;
-        // }
     }
 
     /**

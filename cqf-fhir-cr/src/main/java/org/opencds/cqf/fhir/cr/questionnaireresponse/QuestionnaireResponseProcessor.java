@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -71,15 +72,29 @@ public class QuestionnaireResponseProcessor {
             } else {
                 canonical = (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
             }
-            return canonical == null
-                    ? null
-                    : SearchHelper.searchRepositoryByCanonical(
-                            repository,
-                            canonical,
-                            repository
-                                    .fhirContext()
-                                    .getResourceDefinition("questionnaire")
-                                    .getImplementingClass());
+            if (canonical == null) {
+                return null;
+            }
+            IBaseResource questionnaire = null;
+            var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
+            if (contained != null && !contained.isEmpty()) {
+                questionnaire = contained.stream()
+                        .filter(r -> ((IPrimitiveType<String>) modelResolver.resolvePath(r, "url"))
+                                .getValueAsString()
+                                .equals(canonical.getValueAsString()))
+                        .findFirst()
+                        .orElse(null);
+            }
+            if (questionnaire == null) {
+                questionnaire = SearchHelper.searchRepositoryByCanonical(
+                        repository,
+                        canonical,
+                        repository
+                                .fhirContext()
+                                .getResourceDefinition("questionnaire")
+                                .getImplementingClass());
+            }
+            return questionnaire;
         } catch (DataFormatException | FHIRException e) {
             logger.error(e.getMessage());
             return null;
@@ -87,16 +102,20 @@ public class QuestionnaireResponseProcessor {
     }
 
     public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource) {
-        return extract(resource, null, null);
+        return extract(resource, null, null, true);
     }
 
     public <R extends IBaseResource> IBaseBundle extract(
-            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle) {
-        return extract(resource, parameters, bundle, new LibraryEngine(repository, evaluationSettings));
+            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle data, boolean useServerData) {
+        return extract(resource, parameters, data, useServerData, new LibraryEngine(repository, evaluationSettings));
     }
 
     public <R extends IBaseResource> IBaseBundle extract(
-            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
+            Either<IIdType, R> resource,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            boolean useServerData,
+            LibraryEngine libraryEngine) {
         var questionnaireResponse = resolveQuestionnaireResponse(resource);
         var questionnaire = resolveQuestionnaire(questionnaireResponse);
         var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
@@ -105,7 +124,8 @@ public class QuestionnaireResponseProcessor {
                 questionnaire,
                 subject == null ? null : subject.getReferenceElement(),
                 parameters,
-                bundle,
+                data,
+                useServerData,
                 libraryEngine,
                 modelResolver,
                 repository.fhirContext());

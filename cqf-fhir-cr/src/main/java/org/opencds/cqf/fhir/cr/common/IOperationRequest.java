@@ -26,9 +26,11 @@ public interface IOperationRequest {
 
     IIdType getSubjectId();
 
-    IBaseBundle getBundle();
-
     IBaseParameters getParameters();
+
+    boolean getUseServerData();
+
+    IBaseBundle getData();
 
     LibraryEngine getLibraryEngine();
 
@@ -82,7 +84,7 @@ public interface IOperationRequest {
         return getExtensionsByUrl(base, url).stream().findFirst().orElse(null);
     }
 
-    default Boolean hasExtension(IBase base, String url) {
+    default boolean hasExtension(IBase base, String url) {
         return getExtensions(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
@@ -90,7 +92,7 @@ public interface IOperationRequest {
         return resolvePathList(base, "contained", IBaseResource.class);
     }
 
-    default Boolean hasContained(IBaseResource base) {
+    default boolean hasContained(IBaseResource base) {
         return !getContained(base).isEmpty();
     }
 

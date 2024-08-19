@@ -18,7 +18,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
+    private final IBaseBundle data;
+    private final boolean useServerData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirContext fhirContext;
@@ -32,13 +33,15 @@ public class ExtractRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
+            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             FhirContext fhirContext) {
         this.questionnaireResponse = questionnaireResponse;
         this.subjectId = subjectId;
         this.parameters = parameters;
-        this.bundle = bundle;
+        this.data = bundle;
+        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.fhirContext = fhirContext;
@@ -94,8 +97,13 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
+    }
+
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 
     @Override

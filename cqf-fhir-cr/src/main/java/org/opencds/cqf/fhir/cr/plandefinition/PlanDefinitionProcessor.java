@@ -119,8 +119,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subject)) {
@@ -139,7 +139,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 libraryEngine,
                 modelResolver,
                 null);
@@ -186,8 +186,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
@@ -205,7 +205,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
@@ -224,8 +224,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             Repository dataRepository,
             Repository contentRepository,
@@ -244,7 +244,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 new LibraryEngine(repository, this.evaluationSettings));
     }
@@ -261,8 +261,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             LibraryEngine libraryEngine) {
         if (fhirVersion == FhirVersionEnum.R5) {
@@ -279,7 +279,7 @@ public class PlanDefinitionProcessor {
                     settingContext,
                     parameters,
                     useServerData,
-                    bundle,
+                    data,
                     prefetchData,
                     libraryEngine);
         }
@@ -298,7 +298,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 libraryEngine));
     }
@@ -319,8 +319,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
@@ -338,7 +338,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
@@ -357,8 +357,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             Repository dataRepository,
             Repository contentRepository,
@@ -377,7 +377,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 new LibraryEngine(repository, this.evaluationSettings));
     }
@@ -394,8 +394,8 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseParameters prefetchData,
             LibraryEngine libraryEngine) {
         // TODO: add prefetch bundles to data bundle?
@@ -413,7 +413,7 @@ public class PlanDefinitionProcessor {
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 prefetchData,
                 libraryEngine));
     }

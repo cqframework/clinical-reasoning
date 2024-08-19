@@ -16,11 +16,12 @@ import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class GenerateRequest implements IQuestionnaireRequest {
-    private final Boolean supportedOnly;
-    private final Boolean requiredOnly;
+    private final boolean supportedOnly;
+    private final boolean requiredOnly;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
+    private final boolean useServerData;
+    private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -33,11 +34,12 @@ public class GenerateRequest implements IQuestionnaireRequest {
 
     public GenerateRequest(
             IBaseResource profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             IIdType subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         this.profile = profile;
@@ -45,7 +47,8 @@ public class GenerateRequest implements IQuestionnaireRequest {
         this.requiredOnly = requiredOnly;
         this.subjectId = subjectId;
         this.parameters = parameters;
-        this.bundle = bundle;
+        this.useServerData = useServerData;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion =
@@ -109,8 +112,13 @@ public class GenerateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
+    }
+
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 
     @Override

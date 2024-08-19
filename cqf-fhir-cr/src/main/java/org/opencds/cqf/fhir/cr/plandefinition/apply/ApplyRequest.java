@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource planDefinition;
@@ -40,8 +41,8 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype setting;
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
-    private final Boolean useServerData;
-    private IBaseBundle bundle;
+    private final boolean useServerData;
+    private IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -65,8 +66,8 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
@@ -83,7 +84,7 @@ public class ApplyRequest implements ICpgRequest {
         this.settingContext = settingContext;
         this.parameters = parameters;
         this.useServerData = useServerData;
-        this.bundle = bundle;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion = planDefinition.getStructureFhirVersionEnum();
@@ -96,7 +97,7 @@ public class ApplyRequest implements ICpgRequest {
                         this.practitionerId,
                         this.parameters,
                         this.useServerData,
-                        this.bundle);
+                        this.data);
         defaultLibraryUrl = resolveDefaultLibraryUrl();
         requestResources = new ArrayList<>();
         extractedResources = new ArrayList<>();
@@ -117,7 +118,7 @@ public class ApplyRequest implements ICpgRequest {
                         settingContext,
                         parameters,
                         useServerData,
-                        bundle,
+                        data,
                         libraryEngine,
                         modelResolver,
                         inputParameterResolver)
@@ -139,15 +140,21 @@ public class ApplyRequest implements ICpgRequest {
                 getSettingContext(),
                 getParameters(),
                 getUseServerData(),
-                getBundle(),
+                getData(),
                 libraryEngine,
                 modelResolver);
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(profile, false, true, subjectId, parameters, bundle, libraryEngine, modelResolver)
+        return new GenerateRequest(
+                        profile, false, true, subjectId, parameters, useServerData, data, libraryEngine, modelResolver)
                 .setDefaultLibraryUrl(defaultLibraryUrl)
                 .setQuestionnaire(questionnaire);
+    }
+
+    public PopulateRequest toPopulateRequest() {
+        return new PopulateRequest(
+                "populate", questionnaire, subjectId, parameters, useServerData, data, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -200,12 +207,12 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
     }
 
     @Override
-    public Boolean getUseServerData() {
+    public boolean getUseServerData() {
         return useServerData;
     }
 
@@ -259,8 +266,8 @@ public class ApplyRequest implements ICpgRequest {
         return this;
     }
 
-    public ApplyRequest setBundle(IBaseBundle bundle) {
-        this.bundle = bundle;
+    public ApplyRequest setData(IBaseBundle bundle) {
+        this.data = bundle;
         return this;
     }
 
@@ -323,9 +330,9 @@ public class ApplyRequest implements ICpgRequest {
             params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
                     APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.dstu3.model.Parameters) getParameters()));
         }
-        if (getBundle() != null) {
+        if (getData() != null) {
             params.addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part(
-                    APPLY_PARAMETER_DATA, (org.hl7.fhir.dstu3.model.Resource) getBundle()));
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.dstu3.model.Resource) getData()));
         }
 
         return params;
@@ -356,9 +363,9 @@ public class ApplyRequest implements ICpgRequest {
             params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
                     APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.r4.model.Parameters) getParameters()));
         }
-        if (getBundle() != null) {
+        if (getData() != null) {
             params.addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part(
-                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r4.model.Resource) getBundle()));
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r4.model.Resource) getData()));
         }
 
         return params;
@@ -389,9 +396,9 @@ public class ApplyRequest implements ICpgRequest {
             params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
                     APPLY_PARAMETER_PARAMETERS, (org.hl7.fhir.r5.model.Parameters) getParameters()));
         }
-        if (getBundle() != null) {
+        if (getData() != null) {
             params.addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part(
-                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r5.model.Resource) getBundle()));
+                    APPLY_PARAMETER_DATA, (org.hl7.fhir.r5.model.Resource) getData()));
         }
 
         return params;

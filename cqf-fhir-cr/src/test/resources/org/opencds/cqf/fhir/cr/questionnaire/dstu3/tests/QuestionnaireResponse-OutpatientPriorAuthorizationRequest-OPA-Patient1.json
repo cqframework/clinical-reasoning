@@ -466,14 +466,6 @@
       ]
     }
   ],
-  "extension": [
-    {
-      "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
-      "valueReference": {
-        "reference": "#OutpatientPriorAuthorizationRequest"
-      }
-    }
-  ],
   "questionnaire": {
     "reference": "http://hl7.org/fhir/Questionnaire/OutpatientPriorAuthorizationRequest"
   },

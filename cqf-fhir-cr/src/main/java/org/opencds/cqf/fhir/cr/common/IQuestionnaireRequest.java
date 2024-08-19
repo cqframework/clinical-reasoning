@@ -17,7 +17,7 @@ public interface IQuestionnaireRequest extends IOperationRequest {
         return resolvePathList(base, "item", IBaseBackboneElement.class);
     }
 
-    default Boolean hasItems(IBase base) {
+    default boolean hasItems(IBase base) {
         return !getItems(base).isEmpty();
     }
 

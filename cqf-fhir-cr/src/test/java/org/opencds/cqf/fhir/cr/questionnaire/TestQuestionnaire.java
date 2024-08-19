@@ -110,7 +110,7 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
-        private IBaseBundle bundle;
+        private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
 
@@ -129,8 +129,8 @@ public class TestQuestionnaire {
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
                     parameters,
-                    bundle,
                     true,
+                    data,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }
@@ -155,8 +155,8 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When additionalData(IBaseBundle bundle) {
-            this.bundle = bundle;
+        public When additionalData(IBaseBundle data) {
+            this.data = data;
             return this;
         }
 
@@ -170,33 +170,13 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
-            if (buildRequest) {
-                var populateRequest = buildRequest("prepopulate");
-                return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
-            } else {
-                return new GeneratedQuestionnaire(
-                        repository,
-                        null,
-                        processor.prePopulate(
-                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
-                                subjectId,
-                                parameters,
-                                bundle,
-                                true,
-                                (IBaseResource) null,
-                                null,
-                                null));
-            }
-        }
-
         public IBaseResource runPopulate() {
             return processor.populate(
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
                     parameters,
-                    bundle,
                     true,
+                    data,
                     (IBaseResource) null,
                     null,
                     null);

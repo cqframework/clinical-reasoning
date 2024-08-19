@@ -39,9 +39,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
-        super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
+            boolean useServerData,
+            IBaseBundle data) {
+        super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
         this.parameters = resolveParameters(parameters);
     }
 

@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -32,7 +33,9 @@ public class LibraryProcessorTests {
         var repository =
                 new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
-        var processor = new LibraryProcessor(repository, EvaluationSettings.getDefault(), packageProcessor);
+        var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
+        var processor =
+                new LibraryProcessor(repository, EvaluationSettings.getDefault(), packageProcessor, evaluateProcessor);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));

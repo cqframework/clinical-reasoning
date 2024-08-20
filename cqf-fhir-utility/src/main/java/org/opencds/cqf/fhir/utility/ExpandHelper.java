@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 
 public class ExpandHelper {
     private final FhirContext fhirContext;
@@ -30,7 +32,8 @@ public class ExpandHelper {
             ParametersAdapter expansionParameters,
             Optional<EndpointAdapter> terminologyEndpoint,
             List<ValueSetAdapter> valueSets,
-            List<String> expandedList) {
+            List<String> expandedList,
+            Repository repository) {
         // Have we already expanded this ValueSet?
         if (expandedList.contains(valueSet.getUrl())) {
             // Nothing to do here
@@ -78,32 +81,42 @@ public class ExpandHelper {
                         .filter(v -> v.getUrl().equals(url)
                                 && (version == null || v.getVersion().equals(version)))
                         .findFirst()
-                        .orElse(null);
-                // Expand the ValueSet if we haven't already
-                if (!expandedList.contains(url)) {
-                    expandValueSet(vs, expansionParameters, terminologyEndpoint, valueSets, expandedList);
-                }
-                getCodesInExpansion(fhirContext, vs.get()).forEach(code -> {
-                    // Add the code if not already present
-                    var existingCodes = getCodesInExpansion(fhirContext, expansion);
-                    if (existingCodes != null
-                            && existingCodes.stream()
-                                    .noneMatch(expandedCode -> code.getSystem().equals(expandedCode.getSystem())
-                                            && code.getCode().equals(expandedCode.getCode())
-                                            && (StringUtils.isEmpty(code.getVersion())
-                                                    || code.getVersion().equals(expandedCode.getVersion())))) {
-                        try {
-                            addCodeToExpansion(fhirContext, expansion, code);
-                        } catch (Exception ex) {
-                            throw new UnprocessableEntityException(String.format(
-                                    "Encountered exception attempting to expand ValueSet %s: %s",
-                                    vs.get().getId(), ex.getMessage()));
-                        }
+                        .orElseGet(() -> {
+                            if (terminologyEndpoint.isPresent()) {
+                                return terminologyServerClient.getResource(terminologyEndpoint.get(),reference,valueSet.get().getStructureFhirVersionEnum()).map(r -> (ValueSetAdapter) createAdapterForResource(r)).orElse(null);
+                            } else {
+                                return VisitorHelper.tryGetLatestVersion(reference, repository).map(a -> (ValueSetAdapter)a).orElse(null);
+                            }
+                        });
+                if (vs != null) {
+                    // Expand the ValueSet if we haven't already
+                    if (!expandedList.contains(url)) {
+                        expandValueSet(vs, expansionParameters, terminologyEndpoint, valueSets, expandedList, repository);
                     }
-                });
-                // If any included expansion is naive it makes the expansion naive
-                if (vs.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
-                    addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
+                    getCodesInExpansion(fhirContext, vs.get()).forEach(code -> {
+                        // Add the code if not already present
+                        var existingCodes = getCodesInExpansion(fhirContext, expansion);
+                        if (existingCodes == null
+                                || existingCodes.stream()
+                                        .noneMatch(expandedCode -> code.getSystem().equals(expandedCode.getSystem())
+                                                && code.getCode().equals(expandedCode.getCode())
+                                                && (StringUtils.isEmpty(code.getVersion())
+                                                        || code.getVersion().equals(expandedCode.getVersion())))) {
+                            try {
+                                addCodeToExpansion(fhirContext, expansion, code);
+                            } catch (Exception ex) {
+                                throw new UnprocessableEntityException(String.format(
+                                        "Encountered exception attempting to expand ValueSet %s: %s",
+                                        vs.get().getId(), ex.getMessage()));
+                            }
+                        }
+                    });
+                    // If any included expansion is naive it makes the expansion naive
+                    if (vs.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
+                        addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
+                    }
+                } else {
+                    // Log that expansion failed due to missing leafs
                 }
             });
             valueSet.setExpansion(expansion);

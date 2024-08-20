@@ -11,12 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
@@ -91,6 +94,14 @@ public class TerminologyServerClient {
                 .withParameters((IBaseParameters) parameters.get())
                 .returnResourceType(getValueSetClass(fhirVersion))
                 .execute();
+    }
+
+    public java.util.Optional<IDomainResource> getResource(EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+        return  KnowledgeArtifactAdapter.findLatestVersion(ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()))
+            .search()
+            .forResource(getValueSetClass(versionEnum))
+            .where(Searches.byCanonical(url))
+            .execute());
     }
 
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {

@@ -13,8 +13,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
@@ -143,5 +145,12 @@ public class VisitorHelper {
 
     public static boolean typeHasCoding(ICompositeType type, String system, String code) {
         return false;
+    }
+
+    public static Optional<KnowledgeArtifactAdapter> tryGetLatestVersion(String inputReference, Repository repository) {
+        return KnowledgeArtifactAdapter.findLatestVersion(
+                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
+                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                        .createKnowledgeArtifactAdapter(res));
     }
 }

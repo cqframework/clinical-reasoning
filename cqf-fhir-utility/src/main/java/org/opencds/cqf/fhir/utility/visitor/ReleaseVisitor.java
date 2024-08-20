@@ -206,7 +206,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 var alreadyUpdated = checkIfReferenceInList(preReleaseReference, resourcesToUpdate);
                 if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !alreadyUpdated.isPresent()) {
                     // get the latest version regardless of status because it's owned and we're releasing it
-                    var latest = tryGetLatestVersion(preReleaseReference, repository);
+                    var latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
                     if (latest.isPresent()) {
                         checkNonExperimental(latest.get().get(), experimentalBehavior, repository);
                         // release components recursively
@@ -260,7 +260,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                             "Owned resource reference not found during release: " + preReleaseReference);
                 }
             } else {
-                res = tryGetLatestVersion(preReleaseReference, repository);
+                res = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             }
             if (res.isPresent()) {
                 // add to cache if resolvable
@@ -452,13 +452,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
             String inputReference, Repository repository, String status) {
         return KnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
                         repository, inputReference, Searches.byStatus(status)))
-                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
-                        .createKnowledgeArtifactAdapter(res));
-    }
-
-    private Optional<KnowledgeArtifactAdapter> tryGetLatestVersion(String inputReference, Repository repository) {
-        return KnowledgeArtifactAdapter.findLatestVersion(
-                        SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
                 .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }

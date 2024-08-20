@@ -1,7 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -37,6 +42,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             FhirContext fhirContext) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.questionnaireResponse = questionnaireResponse;
         this.subjectId = subjectId;
         this.parameters = parameters;
@@ -54,12 +61,29 @@ public class ExtractRequest implements IQuestionnaireRequest {
         return questionnaireResponse;
     }
 
-    public Boolean hasQuestionnaire() {
+    public boolean hasQuestionnaire() {
         return questionnaire != null;
     }
 
     public IBaseResource getQuestionnaire() {
         return questionnaire;
+    }
+
+    public IBaseBackboneElement getQuestionnaireItem(IBaseBackboneElement item) {
+        return hasQuestionnaire() ? getQuestionnaireItem(item, getItems(getQuestionnaire())) : null;
+    }
+
+    public IBaseBackboneElement getQuestionnaireItem(IBaseBackboneElement item, List<IBaseBackboneElement> qItems) {
+        return qItems != null
+                ? qItems.stream()
+                        .filter(i -> getItemLinkId(i).equals(getItemLinkId(item)))
+                        .findFirst()
+                        .orElse(null)
+                : null;
+    }
+
+    public boolean isDefinitionItem(IBaseBackboneElement item, IBaseBackboneElement qrItem) {
+        return StringUtils.isNotBlank(resolvePathString(item == null ? qrItem : item, "definition"));
     }
 
     public IBaseExtension<?, ?> getItemExtractionContext() {

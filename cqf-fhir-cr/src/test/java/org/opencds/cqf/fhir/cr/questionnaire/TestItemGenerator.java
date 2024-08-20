@@ -130,8 +130,8 @@ public class TestItemGenerator {
                         true,
                         subjectId,
                         parameters,
-                        true,
                         data,
+                        true,
                         null,
                         id);
             } else if (profileUrl != null || profileId != null || profile != null) {

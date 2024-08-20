@@ -35,8 +35,18 @@ class RequestResourceResolverTests {
     private final IIdType encounterId = Ids.newId(Encounter.class, "encounter123");
     private final IIdType organizationId = Ids.newId(Organization.class, "org123");
 
-    @SuppressWarnings("unchecked")
     private <R extends IBaseResource> R testResolver(String testId, Class<R> expectedClass) {
+        return testResolver(testId, expectedClass, subjectId, practitionerId, encounterId, organizationId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <R extends IBaseResource> R testResolver(
+            String testId,
+            Class<R> expectedClass,
+            IIdType subjectId,
+            IIdType practitionerId,
+            IIdType encounterId,
+            IIdType organizationId) {
         var result = new Given()
                 .repositoryFor(fhirContext, "dstu3")
                 .activityDefinition(testId)
@@ -85,6 +95,8 @@ class RequestResourceResolverTests {
     @Test
     void referralRequestResolver() {
         testResolver("referralrequest-test", ReferralRequest.class);
+        testResolver("referralrequest-test", ReferralRequest.class, subjectId, null, encounterId, organizationId);
+        testResolver("referralrequest-test", ReferralRequest.class, subjectId, null, encounterId, null);
     }
 
     @Test

@@ -129,8 +129,8 @@ public class TestQuestionnaire {
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
                     parameters,
-                    true,
                     data,
+                    true,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }
@@ -175,8 +175,8 @@ public class TestQuestionnaire {
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
                     parameters,
-                    true,
                     data,
+                    true,
                     (IBaseResource) null,
                     null,
                     null);

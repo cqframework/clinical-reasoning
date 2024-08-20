@@ -340,6 +340,7 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
+                .useServerData(false)
                 .additionalData(data)
                 .content(content)
                 .parameters(parameters)

@@ -38,39 +38,57 @@ public class ProcessDefinitionItem {
     }
 
     public void processDefinitionItem(
-            ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject)
-            throws ResolveExpressionException {
-        processDefinitionItem(request, item, resources, subject, null);
+            ExtractRequest request,
+            IBaseBackboneElement item,
+            IBaseBackboneElement questionnaireItem,
+            List<IBaseResource> resources,
+            IBaseReference subject) {
+        processDefinitionItem(request, item, questionnaireItem, resources, subject, null);
     }
 
     public void processDefinitionItem(
             ExtractRequest request,
             IBaseBackboneElement item,
+            IBaseBackboneElement questionnaireItem,
             List<IBaseResource> resources,
             IBaseReference subject,
-            IBaseExtension<?, ?> contextExtension)
-            throws ResolveExpressionException {
+            IBaseExtension<?, ?> contextExtension) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
+        var linkId = request.getItemLinkId(item);
         var contextExtensionUrl = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
         var itemExtractionContext = request.hasExtension(item, contextExtensionUrl)
                 ? expressionProcessor.getCqfExpression(request, request.getExtensions(item), contextExtensionUrl)
                 : expressionProcessor.getCqfExpression(
                         request, request.getExtensions(request.getQuestionnaireResponse()), contextExtensionUrl);
         if (itemExtractionContext != null) {
-            var context = expressionProcessor.getExpressionResultForItem(
-                    request, itemExtractionContext, request.getItemLinkId(item));
-            if (context != null && !context.isEmpty()) {
-                // TODO: edit context instead of creating new resources
+            try {
+                var context = expressionProcessor.getExpressionResultForItem(
+                        request, itemExtractionContext, request.getItemLinkId(item));
+                if (context != null && !context.isEmpty()) {
+                    // TODO: edit context instead of creating new resources
+                }
+            } catch (ResolveExpressionException e) {
+                var message = String.format(
+                        "Error encountered processing item %s: Error resolving expression %s: %s",
+                        linkId, itemExtractionContext.getExpression(), e.getMessage());
+                logger.error(message);
+                request.logException(message);
             }
         }
 
-        var definition = request.resolvePathString(item, "definition");
+        var definition = request.resolvePathString(questionnaireItem, "definition");
+        if (definition == null) {
+            definition = request.resolvePathString(item, "definition");
+        }
+        if (definition == null) {
+            throw new IllegalArgumentException(String.format("Unable to retrieve definition for item: %s", linkId));
+        }
         var resourceType = getDefinitionType(definition);
         var resource = (IBaseResource) newValue(request, resourceType);
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
-        resource.setId(new IdType(resourceType, request.getExtractId() + "-" + request.getItemLinkId(item)));
+        resource.setId(new IdType(resourceType, request.getExtractId() + "-" + linkId));
         resolveMeta(resource, definition);
         var subjectPath = getSubjectPath(resourceDefinition);
         if (subjectPath != null) {
@@ -96,8 +114,8 @@ public class ProcessDefinitionItem {
                         request.getModelResolver().setValue(resource, dateDef.getElementName(), authoredValue);
                     } catch (Exception ex) {
                         var message = String.format(
-                                "Error encountered attempting to set property (%s) on resource type (%s): %s",
-                                dateDef.getElementName(), resource.fhirType(), ex.getMessage());
+                                "Error encountered processing item %s: Error setting property (%s) on resource type (%s): %s",
+                                linkId, dateDef.getElementName(), resource.fhirType(), ex.getMessage());
                         logger.error(message);
                         request.logException(message);
                     }

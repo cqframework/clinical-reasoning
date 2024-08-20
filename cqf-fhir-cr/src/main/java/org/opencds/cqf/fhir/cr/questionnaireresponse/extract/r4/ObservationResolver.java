@@ -28,6 +28,7 @@ public class ObservationResolver {
     public IBaseResource resolve(
             ExtractRequest request,
             IBaseBackboneElement baseAnswer,
+            IBaseBackboneElement questionnaireItem,
             String linkId,
             IBaseReference subject,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,

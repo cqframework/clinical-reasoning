@@ -44,6 +44,7 @@
   "item": [
     {
       "linkId": "1",
+      "definition": "http://hl7.org/fhir/Organization#Organization",
       "text": "Facility Information",
       "type": "group",
       "item": [
@@ -58,6 +59,7 @@
             }
           ],
           "linkId": "1.1",
+          "definition": "http://hl7.org/fhir/Organization#Organization.name",
           "text": "Name",
           "type": "string",
           "required": true
@@ -73,12 +75,14 @@
             }
           ],
           "linkId": "1.2",
+          "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
           "text": "NPI",
           "type": "text",
           "required": true
         },
         {
           "linkId": "1.3",
+          "definition": "http://hl7.org/fhir/Organization#Organization.identifier",
           "text": "PTAN",
           "type": "string",
           "required": true
@@ -115,6 +119,7 @@
     },
     {
       "linkId": "2",
+      "definition": "http://hl7.org/fhir/Patient#Patient",
       "text": "Beneficiary Information",
       "type": "group",
       "item": [
@@ -129,6 +134,7 @@
             }
           ],
           "linkId": "2.1",
+          "definition": "http://hl7.org/fhir/Patient#Patient.name.given",
           "text": "First Name",
           "type": "string",
           "required": true
@@ -144,6 +150,7 @@
             }
           ],
           "linkId": "2.2",
+          "definition": "http://hl7.org/fhir/Patient#Patient.name.family",
           "text": "Last Name",
           "type": "text",
           "required": true
@@ -159,6 +166,7 @@
             }
           ],
           "linkId": "2.3",
+          "definition": "http://hl7.org/fhir/Patient#Patient.birthDate",
           "text": "Date of Birth",
           "type": "date",
           "required": true
@@ -174,6 +182,7 @@
             }
           ],
           "linkId": "2.4",
+          "definition": "http://hl7.org/fhir/Patient#Patient.identifier.value",
           "text": "Medicare ID",
           "type": "string",
           "required": true
@@ -189,6 +198,7 @@
             }
           ],
           "linkId": "2.5",
+          "definition": "http://hl7.org/fhir/Patient#Patient.gender",
           "text": "Gender",
           "type": "choice",
           "required": true,

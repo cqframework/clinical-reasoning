@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -42,6 +44,8 @@ public class GenerateRequest implements IQuestionnaireRequest {
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.profile = profile;
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;

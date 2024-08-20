@@ -72,6 +72,7 @@ public class ApplyRequest implements ICpgRequest {
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.planDefinition = planDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -154,7 +155,7 @@ public class ApplyRequest implements ICpgRequest {
 
     public PopulateRequest toPopulateRequest() {
         return new PopulateRequest(
-                "populate", questionnaire, subjectId, parameters, useServerData, data, libraryEngine, modelResolver);
+                "populate", questionnaire, subjectId, parameters, data, useServerData, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {

@@ -21,8 +21,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final boolean useServerData;
     private final IBaseBundle data;
+    private final boolean useServerData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -35,11 +35,12 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IBaseResource questionnaire,
             IIdType subjectId,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;

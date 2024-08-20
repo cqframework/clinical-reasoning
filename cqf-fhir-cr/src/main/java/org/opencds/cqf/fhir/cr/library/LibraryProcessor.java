@@ -31,8 +31,8 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 public class LibraryProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
-    protected final IPackageProcessor packageProcessor;
-    protected final IEvaluateProcessor evaluateProcessor;
+    protected IPackageProcessor packageProcessor;
+    protected IEvaluateProcessor evaluateProcessor;
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
 
@@ -53,10 +53,8 @@ public class LibraryProcessor {
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository);
-        this.evaluateProcessor = evaluateProcessor != null
-                ? evaluateProcessor
-                : new EvaluateProcessor(this.repository, this.evaluationSettings);
+        this.packageProcessor = packageProcessor;
+        this.evaluateProcessor = evaluateProcessor;
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -89,7 +87,8 @@ public class LibraryProcessor {
     }
 
     public IBaseBundle packageLibrary(IBaseResource questionnaire, IBaseParameters parameters) {
-        return packageProcessor.packageResource(questionnaire, parameters);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        return processor.packageResource(questionnaire, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> EvaluateRequest buildEvaluateRequest(
@@ -168,7 +167,10 @@ public class LibraryProcessor {
             IBaseBundle data,
             IBaseParameters prefetchData,
             LibraryEngine libraryEngine) {
-        return evaluateProcessor.evaluate(buildEvaluateRequest(
+        var processor = evaluateProcessor != null
+                ? evaluateProcessor
+                : new EvaluateProcessor(this.repository, this.evaluationSettings);
+        return processor.evaluate(buildEvaluateRequest(
                 library, subject, expression, parameters, useServerData, data, prefetchData, libraryEngine));
     }
 }

@@ -33,10 +33,10 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 public class PlanDefinitionProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
-    protected final IApplyProcessor applyProcessor;
-    protected final IPackageProcessor packageProcessor;
-    protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
-    protected final IRequestResolverFactory requestResolverFactory;
+    protected IApplyProcessor applyProcessor;
+    protected IPackageProcessor packageProcessor;
+    protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
+    protected IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
 
@@ -59,23 +59,27 @@ public class PlanDefinitionProcessor {
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository);
-        // These two classes will no longer be needed once we are able to call multiple operations against a
-        // HapiFhirRepository
-        this.requestResolverFactory = requestResolverFactory != null
-                ? requestResolverFactory
-                : IRequestResolverFactory.getDefault(fhirVersion);
-        this.activityProcessor = activityProcessor != null
-                ? activityProcessor
-                : new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
-                        this.repository, this.requestResolverFactory);
-        this.applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(this.repository, modelResolver, this.activityProcessor);
+        this.packageProcessor = packageProcessor;
+        this.requestResolverFactory = requestResolverFactory;
+        this.activityProcessor = activityProcessor;
+        this.applyProcessor = applyProcessor;
     }
 
     public EvaluationSettings evaluationSettings() {
         return evaluationSettings;
+    }
+
+    protected void initApplyProcessor() {
+        activityProcessor = activityProcessor != null
+                ? activityProcessor
+                : new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
+                        repository,
+                        requestResolverFactory != null
+                                ? requestResolverFactory
+                                : IRequestResolverFactory.getDefault(fhirVersion));
+        applyProcessor = applyProcessor != null
+                ? applyProcessor
+                : new ApplyProcessor(repository, modelResolver, activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
@@ -104,7 +108,8 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
-        return packageProcessor.packageResource(planDefinition, parameters);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        return processor.packageResource(planDefinition, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> ApplyRequest buildApplyRequest(
@@ -304,6 +309,7 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseResource apply(ApplyRequest request) {
+        initApplyProcessor();
         return applyProcessor.apply(request);
     }
 
@@ -419,6 +425,7 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseBundle applyR5(ApplyRequest request) {
+        initApplyProcessor();
         return applyProcessor.applyR5(request);
     }
 }

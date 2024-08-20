@@ -34,8 +34,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected final ResourceResolver resourceResolver;
-    protected final IApplyProcessor applyProcessor;
-    protected final IRequestResolverFactory requestResolverFactory;
+    protected IApplyProcessor applyProcessor;
+    protected IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected ExtensionResolver extensionResolver;
 
@@ -57,12 +57,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.requestResolverFactory = requestResolverFactory == null
-                ? IRequestResolverFactory.getDefault(fhirVersion)
-                : requestResolverFactory;
-        this.applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(this.repository, this.requestResolverFactory);
+        this.requestResolverFactory = requestResolverFactory;
+        this.applyProcessor = applyProcessor;
     }
 
     @Override
@@ -206,7 +202,18 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 data,
                 libraryEngine,
                 modelResolver);
+        initApplyProcessor();
         return applyProcessor.apply(request);
+    }
+
+    protected void initApplyProcessor() {
+        applyProcessor = applyProcessor != null
+                ? applyProcessor
+                : new ApplyProcessor(
+                        repository,
+                        requestResolverFactory != null
+                                ? requestResolverFactory
+                                : IRequestResolverFactory.getDefault(fhirVersion));
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveActivityDefinition(

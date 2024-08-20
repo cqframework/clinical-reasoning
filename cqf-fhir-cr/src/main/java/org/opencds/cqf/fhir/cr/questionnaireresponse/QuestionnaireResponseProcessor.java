@@ -51,7 +51,7 @@ public class QuestionnaireResponseProcessor {
         this.resourceResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.extractProcessor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
+        this.extractProcessor = extractProcessor;
     }
 
     public FhirContext fhirContext() {
@@ -129,6 +129,7 @@ public class QuestionnaireResponseProcessor {
                 libraryEngine,
                 modelResolver,
                 repository.fhirContext());
-        return extractProcessor.extract(request);
+        var processor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
+        return processor.extract(request);
     }
 }

@@ -16,10 +16,10 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
@@ -96,12 +96,14 @@ public class TerminologyServerClient {
                 .execute();
     }
 
-    public java.util.Optional<IDomainResource> getResource(EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
-        return  KnowledgeArtifactAdapter.findLatestVersion(ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()))
-            .search()
-            .forResource(getValueSetClass(versionEnum))
-            .where(Searches.byCanonical(url))
-            .execute());
+    public java.util.Optional<IDomainResource> getResource(
+            EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+        return KnowledgeArtifactAdapter.findLatestVersion(
+                ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()))
+                        .search()
+                        .forResource(getValueSetClass(versionEnum))
+                        .where(Searches.byCanonical(url))
+                        .execute());
     }
 
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {

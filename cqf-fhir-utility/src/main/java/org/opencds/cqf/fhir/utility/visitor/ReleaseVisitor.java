@@ -31,7 +31,6 @@ import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -226,7 +225,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                     }
                 } else if (!alreadyUpdated.isPresent()) {
                     // if it's a not-owned component just try to get the latest active version
-                    tryGetLatestVersionWithStatus(preReleaseReference, repository, "active")
+                    VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, "active")
                             .ifPresent(latestActive ->
                                     // check if it's experimental
                                     checkNonExperimental(latestActive.get(), experimentalBehavior, repository));
@@ -334,7 +333,8 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 // if not available in expansion parameters then try to find the latest version and update the
                 // dependency
                 if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
-                    maybeAdapter = tryGetLatestVersionWithStatus(dependency.getReference(), repository, "active")
+                    maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
+                                    dependency.getReference(), repository, "active")
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
@@ -446,14 +446,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
             // TODO: Log that multiple resources matched by url and version...
             return matchingResources.get(0);
         }
-    }
-
-    private Optional<KnowledgeArtifactAdapter> tryGetLatestVersionWithStatus(
-            String inputReference, Repository repository, String status) {
-        return KnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
-                        repository, inputReference, Searches.byStatus(status)))
-                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
-                        .createKnowledgeArtifactAdapter(res));
     }
 
     private String addVersionToReference(String inputReference, KnowledgeArtifactAdapter adapter) {

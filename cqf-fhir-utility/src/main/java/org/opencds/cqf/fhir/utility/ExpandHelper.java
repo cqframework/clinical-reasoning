@@ -83,22 +83,32 @@ public class ExpandHelper {
                         .findFirst()
                         .orElseGet(() -> {
                             if (terminologyEndpoint.isPresent()) {
-                                return terminologyServerClient.getResource(terminologyEndpoint.get(),reference,valueSet.get().getStructureFhirVersionEnum()).map(r -> (ValueSetAdapter) createAdapterForResource(r)).orElse(null);
+                                return terminologyServerClient
+                                        .getResource(
+                                                terminologyEndpoint.get(),
+                                                reference,
+                                                valueSet.get().getStructureFhirVersionEnum())
+                                        .map(r -> (ValueSetAdapter) createAdapterForResource(r))
+                                        .orElse(null);
                             } else {
-                                return VisitorHelper.tryGetLatestVersion(reference, repository).map(a -> (ValueSetAdapter)a).orElse(null);
+                                return VisitorHelper.tryGetLatestVersion(reference, repository)
+                                        .map(a -> (ValueSetAdapter) a)
+                                        .orElse(null);
                             }
                         });
                 if (vs != null) {
                     // Expand the ValueSet if we haven't already
                     if (!expandedList.contains(url)) {
-                        expandValueSet(vs, expansionParameters, terminologyEndpoint, valueSets, expandedList, repository);
+                        expandValueSet(
+                                vs, expansionParameters, terminologyEndpoint, valueSets, expandedList, repository);
                     }
                     getCodesInExpansion(fhirContext, vs.get()).forEach(code -> {
                         // Add the code if not already present
                         var existingCodes = getCodesInExpansion(fhirContext, expansion);
                         if (existingCodes == null
                                 || existingCodes.stream()
-                                        .noneMatch(expandedCode -> code.getSystem().equals(expandedCode.getSystem())
+                                        .noneMatch(expandedCode -> code.getSystem()
+                                                        .equals(expandedCode.getSystem())
                                                 && code.getCode().equals(expandedCode.getCode())
                                                 && (StringUtils.isEmpty(code.getVersion())
                                                         || code.getVersion().equals(expandedCode.getVersion())))) {

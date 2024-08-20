@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class VisitorHelper {
 
@@ -150,6 +151,14 @@ public class VisitorHelper {
     public static Optional<KnowledgeArtifactAdapter> tryGetLatestVersion(String inputReference, Repository repository) {
         return KnowledgeArtifactAdapter.findLatestVersion(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
+                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                        .createKnowledgeArtifactAdapter(res));
+    }
+
+    public static Optional<KnowledgeArtifactAdapter> tryGetLatestVersionWithStatus(
+            String inputReference, Repository repository, String status) {
+        return KnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+                        repository, inputReference, Searches.byStatus(status)))
                 .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }

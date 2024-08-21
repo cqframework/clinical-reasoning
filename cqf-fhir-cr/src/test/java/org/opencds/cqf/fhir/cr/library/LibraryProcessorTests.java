@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -75,5 +76,46 @@ public class LibraryProcessorTests {
                 .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(2);
+    }
+
+    @Test
+    void evaluateException() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasOperationOutcome();
+    }
+
+    @Test
+    void evaluateDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(47);
+    }
+
+    @Test
+    void evaluateR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(50);
+    }
+
+    @Test
+    @Disabled("R5 CQL evaluation currently fails")
+    void evaluateR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(47);
     }
 }

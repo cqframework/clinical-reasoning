@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cr.library;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -11,10 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -24,6 +31,7 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -100,6 +108,7 @@ public class TestLibrary {
         private String libraryId;
 
         private String subjectId;
+        private List<String> expression;
         private Boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
@@ -122,6 +131,11 @@ public class TestLibrary {
 
         public When subjectId(String id) {
             subjectId = id;
+            return this;
+        }
+
+        public When expression(List<String> value) {
+            expression = value;
             return this;
         }
 
@@ -189,6 +203,59 @@ public class TestLibrary {
                                 isPackagePut),
                         repository.fhirContext());
             }
+        }
+
+        public Evaluation thenEvaluate() {
+            if (additionalDataId != null) {
+                loadAdditionalData(readRepository(repository, additionalDataId));
+            }
+            return new Evaluation(
+                    repository,
+                    processor.evaluate(
+                            Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                            subjectId,
+                            expression,
+                            parameters,
+                            useServerData,
+                            additionalData,
+                            parameters,
+                            dataRepository,
+                            contentRepository,
+                            terminologyRepository));
+        }
+    }
+
+    public static class Evaluation {
+        final Repository repository;
+        final IBaseParameters result;
+        final IParser jsonParser;
+        final ModelResolver modelResolver;
+        final List<IBaseResource> parameter;
+
+        @SuppressWarnings("unchecked")
+        public Evaluation(Repository repository, IBaseParameters result) {
+            this.repository = repository;
+            this.result = result;
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
+            modelResolver = FhirModelResolverCache.resolverForVersion(
+                    this.repository.fhirContext().getVersion().getVersion());
+            parameter = ((List<IBaseResource>) modelResolver.resolvePath(result, "parameter"));
+        }
+
+        public Evaluation hasResults(Integer count) {
+            assertEquals(count, parameter.size());
+            return this;
+        }
+
+        public Evaluation hasOperationOutcome() {
+            assertTrue(modelResolver.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
+            return this;
+        }
+
+        public Evaluation resultHasValue(Integer index, IBase value) {
+            var actual = parameter.get(index);
+            assertEquals(value, actual);
+            return this;
         }
     }
 }

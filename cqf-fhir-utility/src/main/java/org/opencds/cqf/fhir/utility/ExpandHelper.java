@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
-    private static Logger logger = LoggerFactory.getLogger(ExpandHelper.class);
 
     private final FhirContext fhirContext;
     private final TerminologyServerClient terminologyServerClient;
@@ -43,7 +42,6 @@ public class ExpandHelper {
             // Nothing to do here
             return;
         }
-        logger.error("test");
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
         @SuppressWarnings("unchecked")
         var authoritativeSourceUrl = valueSet.getExtension().stream()
@@ -152,8 +150,8 @@ public class ExpandHelper {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
                     }
                 } else {
-                    logger.error("ValueSet '" + reference
-                            + "' could not be found and was not expanded. Contained codes were not added to grouper: "
+                    throw new UnprocessableEntityException("ValueSet '" + reference
+                            + "' could not be found and was not expanded. Contained codes could not be added to grouper: "
                             + valueSet.getUrl());
                 }
             });

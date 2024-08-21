@@ -17,8 +17,6 @@ import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
 
@@ -150,9 +148,8 @@ public class ExpandHelper {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
                     }
                 } else {
-                    throw new UnprocessableEntityException("ValueSet '" + reference
-                            + "' could not be found and was not expanded. Contained codes could not be added to grouper: "
-                            + valueSet.getUrl());
+                    throw new UnprocessableEntityException("Terminology Server expansion failed for ValueSet '"
+                            + valueSet.getUrl() + "' because Child ValueSet '" + reference + "' could not be found. ");
                 }
             });
             valueSet.setExpansion(expansion);

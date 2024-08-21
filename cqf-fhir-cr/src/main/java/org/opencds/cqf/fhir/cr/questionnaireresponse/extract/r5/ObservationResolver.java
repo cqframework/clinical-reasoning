@@ -10,11 +10,13 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Enumerations.ObservationStatus;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.InstantType;
 import org.hl7.fhir.r5.model.Observation;
@@ -29,13 +31,14 @@ public class ObservationResolver {
     public IBaseResource resolve(
             ExtractRequest request,
             IBaseBackboneElement baseAnswer,
-            IBaseBackboneElement questionnaireItem,
+            IBaseBackboneElement baseItem,
             String linkId,
             IBaseReference subject,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             IBaseExtension<?, ?> categoryExt) {
         var questionnaireResponse = (QuestionnaireResponse) request.getQuestionnaireResponse();
         var answer = (QuestionnaireResponseItemAnswerComponent) baseAnswer;
+        var item = (QuestionnaireItemComponent) baseItem;
         var obs = new Observation();
         obs.setId(request.getExtractId() + "." + linkId);
         obs.setBasedOn(questionnaireResponse.getBasedOn());
@@ -72,6 +75,21 @@ public class ObservationResolver {
             case "date":
                 obs.setValue(new DateTimeType(((DateType) answer.getValue()).getValue()));
                 break;
+            case "DecimalType":
+            case "IntegerType":
+                if (item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
+                    var unit = (Coding) item.getExtensionByUrl(Constants.QUESTIONNAIRE_UNIT).getValue();
+                    var quantity = new Quantity().setUnit(unit.getDisplay()).setSystem(unit.getSystem()).setCode(unit.getCode());
+                    if (answer.hasValueDecimalType()) {
+                        quantity.setValueElement(answer.getValueDecimalType());
+                    }
+                    if (answer.hasValueIntegerType()) {
+                        quantity.setValue(answer.getValueIntegerType().getValue());
+                    }
+                    obs.setValue(quantity);
+                } else {
+                    obs.setValue(answer.getValue());
+                }
             default:
                 obs.setValue(answer.getValue());
         }

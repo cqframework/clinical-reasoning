@@ -32,8 +32,7 @@ public class Constants {
             "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
     public static final String QUESTIONNAIRE_REFERENCE_PROFILE =
             "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile";
-    public static final String QUESTIONNAIRE_UNIT =
-            "http://hl7.org/fhir/StructureDefinition/questionnaire-unit";
+    public static final String QUESTIONNAIRE_UNIT = "http://hl7.org/fhir/StructureDefinition/questionnaire-unit";
     public static final String QUESTIONNAIRE_UNIT_VALUE_SET =
             "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet";
 

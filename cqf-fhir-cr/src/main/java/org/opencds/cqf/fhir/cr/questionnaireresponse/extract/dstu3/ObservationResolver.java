@@ -13,11 +13,11 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -77,8 +77,12 @@ public class ObservationResolver {
             case "DecimalType":
             case "IntegerType":
                 if (item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
-                    var unit = (Coding) item.getExtensionByUrl(Constants.QUESTIONNAIRE_UNIT).getValue();
-                    var quantity = new Quantity().setUnit(unit.getDisplay()).setSystem(unit.getSystem()).setCode(unit.getCode());
+                    var unit = (Coding)
+                            item.getExtensionByUrl(Constants.QUESTIONNAIRE_UNIT).getValue();
+                    var quantity = new Quantity()
+                            .setUnit(unit.getDisplay())
+                            .setSystem(unit.getSystem())
+                            .setCode(unit.getCode());
                     if (answer.hasValueDecimalType()) {
                         quantity.setValueElement(answer.getValueDecimalType());
                     }

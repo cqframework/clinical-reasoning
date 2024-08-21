@@ -17,8 +17,12 @@ import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
+    private static Logger logger = LoggerFactory.getLogger(ExpandHelper.class);
+
     private final FhirContext fhirContext;
     private final TerminologyServerClient terminologyServerClient;
 
@@ -39,15 +43,15 @@ public class ExpandHelper {
             // Nothing to do here
             return;
         }
-
+        logger.error("test");
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
         @SuppressWarnings("unchecked")
         var authoritativeSourceUrl = valueSet.getExtension().stream()
                 .filter(e -> e.getUrl().equals(Constants.AUTHORITATIVE_SOURCE_URL))
                 .findFirst()
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
+                .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext))
                 .orElse(null);
-
         // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
         // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()

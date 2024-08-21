@@ -20,12 +20,15 @@ import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
  * Future enhancements include adding support for multiple endpoints
  */
 public class TerminologyServerClient {
+    private static Logger logger = LoggerFactory.getLogger(TerminologyServerClient.class);
 
     private final FhirContext ctx;
     public static final String versionParamName = "valueSetVersion";
@@ -119,9 +122,12 @@ public class TerminologyServerClient {
         }
     }
 
+    private String getAddressBase(String address) {
+        return getAddressBase(address, this.ctx);
+    }
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.
     // Converts http URLs to https
-    public String getAddressBase(String address) {
+    public static String getAddressBase(String address, FhirContext ctx) {
         Objects.requireNonNull(address, "address must not be null");
         if (address.startsWith("http://")) {
             address = address.replaceFirst("http://", "https://");
@@ -133,7 +139,7 @@ public class TerminologyServerClient {
         // check if URL is in the format [base URL]/[resource type]/[id]
         var maybeFhirType = Canonicals.getResourceType(address);
         if (maybeFhirType != null && StringUtils.isNotBlank(maybeFhirType)) {
-            IBaseEnumFactory<?> factory = getEnumFactory();
+            IBaseEnumFactory<?> factory = TerminologyServerClient.getEnumFactory(ctx);
             try {
                 factory.fromCode(maybeFhirType);
             } catch (IllegalArgumentException e) {
@@ -156,7 +162,11 @@ public class TerminologyServerClient {
     }
 
     private IBaseEnumFactory<?> getEnumFactory() {
-        switch (this.ctx.getVersion().getVersion()) {
+        return getEnumFactory(this.ctx);
+    }
+
+    public static IBaseEnumFactory<?> getEnumFactory(FhirContext ctx) {
+        switch (ctx.getVersion().getVersion()) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
 
@@ -168,7 +178,7 @@ public class TerminologyServerClient {
 
             default:
                 throw new UnprocessableEntityException("unsupported FHIR version: "
-                        + this.ctx.getVersion().getVersion().toString());
+                        + ctx.getVersion().getVersion().toString());
         }
     }
 }

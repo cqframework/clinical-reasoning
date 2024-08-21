@@ -237,18 +237,26 @@ public class TerminologyServerClientTest {
     void addressUrlParsing() {
         var supportedVersions = Arrays.asList(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
         for (final var version : supportedVersions) {
-            var ts = new TerminologyServerClient(new FhirContext(version));
+            var ctx = new FhirContext(version);
             var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
             // remove the FHIR type and the ID if included
-            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1"));
+            assertEquals(
+                    theCorrectBaseServerUrl,
+                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
             // remove a FHIR type if one was included
-            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/ValueSet"));
+            assertEquals(
+                    theCorrectBaseServerUrl,
+                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
             // don't break on the actual base url
-            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl));
+            assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
             // ensure it's forcing https
-            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl.replace("https", "http")));
+            assertEquals(
+                    theCorrectBaseServerUrl,
+                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
             // remove trailing slashes
-            assertEquals(theCorrectBaseServerUrl, ts.getAddressBase(theCorrectBaseServerUrl + "/"));
+            assertEquals(
+                    theCorrectBaseServerUrl,
+                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
         }
     }
 }

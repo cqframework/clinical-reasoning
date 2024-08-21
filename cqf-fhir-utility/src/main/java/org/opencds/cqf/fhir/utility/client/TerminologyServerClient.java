@@ -20,15 +20,12 @@ import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
  * Future enhancements include adding support for multiple endpoints
  */
 public class TerminologyServerClient {
-    private static Logger logger = LoggerFactory.getLogger(TerminologyServerClient.class);
 
     private final FhirContext ctx;
     public static final String versionParamName = "valueSetVersion";
@@ -159,10 +156,6 @@ public class TerminologyServerClient {
             address = address.substring(0, address.indexOf(maybeFhirType) - 1);
         }
         return address;
-    }
-
-    private IBaseEnumFactory<?> getEnumFactory() {
-        return getEnumFactory(this.ctx);
     }
 
     public static IBaseEnumFactory<?> getEnumFactory(FhirContext ctx) {

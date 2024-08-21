@@ -81,7 +81,7 @@ public class ExpandHelper {
                 var split = reference.split("\\|");
                 var url = split.length == 1 ? reference : split[0];
                 var version = split.length == 1 ? null : split[1];
-                var vs = valueSets.stream()
+                var includedVS = valueSets.stream()
                         .filter(v -> v.getUrl().equals(url)
                                 && (version == null || v.getVersion().equals(version)))
                         .findFirst()
@@ -100,13 +100,35 @@ public class ExpandHelper {
                                         .orElse(null);
                             }
                         });
-                if (vs != null) {
+                if (includedVS != null) {
                     // Expand the ValueSet if we haven't already
                     if (!expandedList.contains(url)) {
+                        // update url and version exp params for child expansions
+                        var childExpParams = (ParametersAdapter) createAdapterForResource(expansionParameters.copy());
+                        var urlParam = childExpParams.getParameter(TerminologyServerClient.urlParamName);
+                        if (urlParam != null) {
+                            var ind = childExpParams.getParameter().indexOf(urlParam);
+                            childExpParams.getParameter().remove(ind);
+                            if (includedVS.hasUrl()) {
+                                childExpParams.addParameter(Parameters.newStringPart(
+                                        fhirContext, TerminologyServerClient.urlParamName, includedVS.getUrl()));
+                            }
+                        }
+                        var versionParam = childExpParams.getParameter(TerminologyServerClient.versionParamName);
+                        if (versionParam != null) {
+                            var ind = childExpParams.getParameter().indexOf(versionParam);
+                            childExpParams.getParameter().remove(ind);
+                            if (includedVS.hasVersion()) {
+                                childExpParams.addParameter(Parameters.newStringPart(
+                                        fhirContext,
+                                        TerminologyServerClient.versionParamName,
+                                        includedVS.getVersion()));
+                            }
+                        }
                         expandValueSet(
-                                vs, expansionParameters, terminologyEndpoint, valueSets, expandedList, repository);
+                                includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, repository);
                     }
-                    getCodesInExpansion(fhirContext, vs.get()).forEach(code -> {
+                    getCodesInExpansion(fhirContext, includedVS.get()).forEach(code -> {
                         // Add the code if not already present
                         var existingCodes = getCodesInExpansion(fhirContext, expansion);
                         if (existingCodes == null
@@ -121,16 +143,18 @@ public class ExpandHelper {
                             } catch (Exception ex) {
                                 throw new UnprocessableEntityException(String.format(
                                         "Encountered exception attempting to expand ValueSet %s: %s",
-                                        vs.get().getId(), ex.getMessage()));
+                                        includedVS.get().getId(), ex.getMessage()));
                             }
                         }
                     });
                     // If any included expansion is naive it makes the expansion naive
-                    if (vs.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
+                    if (includedVS.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
                     }
                 } else {
-                    // Log that expansion failed due to missing leafs
+                    logger.error("ValueSet '" + reference
+                            + "' could not be found and was not expanded. Contained codes were not added to grouper: "
+                            + valueSet.getUrl());
                 }
             });
             valueSet.setExpansion(expansion);

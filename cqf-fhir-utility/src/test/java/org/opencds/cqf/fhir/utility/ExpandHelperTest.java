@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -20,12 +19,10 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class ExpandHelperTest {
-    private final AdapterFactory factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R4);
     // we need to test that when expanding a grouper, we actually add child codes to the expansion.contains
     @Test
     void expandGrouperAddsLeafCodesToGrouperExpansionWithoutEndpointTest() {

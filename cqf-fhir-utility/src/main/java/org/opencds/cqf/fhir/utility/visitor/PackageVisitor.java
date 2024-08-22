@@ -177,7 +177,8 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
                     params,
                     terminologyEndpoint.map(e -> (EndpointAdapter) createAdapterForResource(e)),
                     valueSets,
-                    expandedList);
+                    expandedList,
+                    repository);
         });
     }
 

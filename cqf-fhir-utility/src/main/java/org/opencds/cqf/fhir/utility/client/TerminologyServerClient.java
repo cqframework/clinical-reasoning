@@ -11,12 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
@@ -93,6 +96,16 @@ public class TerminologyServerClient {
                 .execute();
     }
 
+    public java.util.Optional<IDomainResource> getResource(
+            EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+        return KnowledgeArtifactAdapter.findLatestVersion(
+                ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()))
+                        .search()
+                        .forResource(getValueSetClass(versionEnum))
+                        .where(Searches.byCanonical(url))
+                        .execute());
+    }
+
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
@@ -106,9 +119,12 @@ public class TerminologyServerClient {
         }
     }
 
+    private String getAddressBase(String address) {
+        return getAddressBase(address, this.ctx);
+    }
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.
     // Converts http URLs to https
-    public String getAddressBase(String address) {
+    public static String getAddressBase(String address, FhirContext ctx) {
         Objects.requireNonNull(address, "address must not be null");
         if (address.startsWith("http://")) {
             address = address.replaceFirst("http://", "https://");
@@ -120,7 +136,7 @@ public class TerminologyServerClient {
         // check if URL is in the format [base URL]/[resource type]/[id]
         var maybeFhirType = Canonicals.getResourceType(address);
         if (maybeFhirType != null && StringUtils.isNotBlank(maybeFhirType)) {
-            IBaseEnumFactory<?> factory = getEnumFactory();
+            IBaseEnumFactory<?> factory = TerminologyServerClient.getEnumFactory(ctx);
             try {
                 factory.fromCode(maybeFhirType);
             } catch (IllegalArgumentException e) {
@@ -142,8 +158,8 @@ public class TerminologyServerClient {
         return address;
     }
 
-    private IBaseEnumFactory<?> getEnumFactory() {
-        switch (this.ctx.getVersion().getVersion()) {
+    public static IBaseEnumFactory<?> getEnumFactory(FhirContext ctx) {
+        switch (ctx.getVersion().getVersion()) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
 
@@ -155,7 +171,7 @@ public class TerminologyServerClient {
 
             default:
                 throw new UnprocessableEntityException("unsupported FHIR version: "
-                        + this.ctx.getVersion().getVersion().toString());
+                        + ctx.getVersion().getVersion().toString());
         }
     }
 }

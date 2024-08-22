@@ -63,17 +63,7 @@ public class TerminologyServerClient {
             FhirVersionEnum fhirVersion) {
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
-        var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
-                .findFirst()
-                .map(ext -> ext.getValue().toString())
-                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC Username."));
-        var apiKey = endpoint.getExtensionsByUrl(Constants.APIKEY).stream()
-                .findFirst()
-                .map(ext -> ext.getValue().toString())
-                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
-        IGenericClient fhirClient = ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
-        Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
-
+        var fhirClient = initializeClientWithAuth(endpoint);
         if (parameters.getParameter(urlParamName) == null) {
             if (url == null) {
                 throw new UnprocessableEntityException("No '" + urlParamName + "' expansion parameter present");
@@ -96,14 +86,27 @@ public class TerminologyServerClient {
                 .execute();
     }
 
+    private IGenericClient initializeClientWithAuth(EndpointAdapter endpoint) {
+        var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
+                .findFirst()
+                .map(ext -> ext.getValue().toString())
+                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC Username."));
+        var apiKey = endpoint.getExtensionsByUrl(Constants.APIKEY).stream()
+                .findFirst()
+                .map(ext -> ext.getValue().toString())
+                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
+        IGenericClient fhirClient = ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+        Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
+        return fhirClient;
+    }
+
     public java.util.Optional<IDomainResource> getResource(
             EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
-        return KnowledgeArtifactAdapter.findLatestVersion(
-                ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()))
-                        .search()
-                        .forResource(getValueSetClass(versionEnum))
-                        .where(Searches.byCanonical(url))
-                        .execute());
+        return KnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+                .search()
+                .forResource(getValueSetClass(versionEnum))
+                .where(Searches.byCanonical(url))
+                .execute());
     }
 
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {

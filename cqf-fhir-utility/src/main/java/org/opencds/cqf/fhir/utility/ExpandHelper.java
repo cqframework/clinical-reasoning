@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInExpansion;
 import static org.opencds.cqf.fhir.utility.adapter.AdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Optional;
@@ -106,8 +107,16 @@ public class ExpandHelper {
                             var ind = childExpParams.getParameter().indexOf(urlParam);
                             childExpParams.getParameter().remove(ind);
                             if (includedVS.hasUrl()) {
-                                childExpParams.addParameter(Parameters.newStringPart(
-                                        fhirContext, TerminologyServerClient.urlParamName, includedVS.getUrl()));
+                                childExpParams.addParameter(
+                                        fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3
+                                                ? Parameters.newUriPart(
+                                                        fhirContext,
+                                                        TerminologyServerClient.urlParamName,
+                                                        includedVS.getUrl())
+                                                : Parameters.newUrlPart(
+                                                        fhirContext,
+                                                        TerminologyServerClient.urlParamName,
+                                                        includedVS.getUrl()));
                             }
                         }
                         var versionParam = childExpParams.getParameter(TerminologyServerClient.versionParamName);

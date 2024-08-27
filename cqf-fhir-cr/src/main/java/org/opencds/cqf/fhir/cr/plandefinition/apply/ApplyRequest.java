@@ -155,7 +155,16 @@ public class ApplyRequest implements ICpgRequest {
 
     public PopulateRequest toPopulateRequest() {
         return new PopulateRequest(
-                "populate", questionnaire, subjectId, parameters, data, useServerData, libraryEngine, modelResolver);
+                "populate",
+                questionnaire,
+                subjectId,
+                null,
+                null,
+                parameters,
+                data,
+                useServerData,
+                libraryEngine,
+                modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {

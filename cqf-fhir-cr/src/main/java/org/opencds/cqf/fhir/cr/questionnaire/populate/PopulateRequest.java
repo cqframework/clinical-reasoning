@@ -3,8 +3,11 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,6 +23,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final String operationName;
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
+    private final List<IBaseBackboneElement> context;
+    private final List<IBaseExtension<?, ?>> launchContext;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
     private final boolean useServerData;
@@ -34,6 +39,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
             String operationName,
             IBaseResource questionnaire,
             IIdType subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
@@ -44,11 +51,16 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
+        this.context = context;
         this.parameters = parameters;
         this.data = data;
         this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
+        this.launchContext = getExtensionsByUrl(this.questionnaire, Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        if (launchContext != null) {
+            this.launchContext.add(launchContext);
+        }
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
         inputParameterResolver = IInputParameterResolver.createResolver(
@@ -58,7 +70,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 null,
                 this.parameters,
                 this.useServerData,
-                this.data);
+                this.data,
+                this.context,
+                this.launchContext);
     }
 
     @Override
@@ -133,5 +147,13 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 : fhirVersion == FhirVersionEnum.DSTU3
                         ? ((Reference) libraryExt.getValue()).getReference()
                         : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+    }
+
+    public List<IBaseBackboneElement> getContext() {
+        return context;
+    }
+
+    public List<IBaseExtension<?, ?>> getLaunchContext() {
+        return launchContext;
     }
 }

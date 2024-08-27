@@ -14,14 +14,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,44 +38,56 @@ public class ProcessDefinitionItem {
         this.expressionProcessor = expressionProcessor;
     }
 
-    public void processDefinitionItem(
-            ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
-            List<IBaseResource> resources,
-            IBaseReference subject) {
-        processDefinitionItem(request, item, questionnaireItem, resources, subject, null);
-    }
+    // public void processDefinitionItem(
+    //         ExtractRequest request,
+    //         IBaseBackboneElement item,
+    //         IBaseBackboneElement questionnaireItem,
+    //         List<IBaseResource> resources,
+    //         IBaseReference subject) {
+    //     processDefinitionItem(request, item, questionnaireItem, resources, subject, null);
+    // }
 
+    @SuppressWarnings("unchecked")
     public void processDefinitionItem(
             ExtractRequest request,
             IBaseBackboneElement item,
             IBaseBackboneElement questionnaireItem,
             List<IBaseResource> resources,
-            IBaseReference subject,
-            IBaseExtension<?, ?> contextExtension) {
+            IBaseReference subject) { // ,
+        // IBaseExtension<?, ?> contextExtension) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
+        String resourceType = null;
+        IBaseResource contextResource = null;
         var linkId = request.getItemLinkId(item);
-        var contextExtensionUrl = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
-        var itemExtractionContext = request.hasExtension(item, contextExtensionUrl)
-                ? expressionProcessor.getCqfExpression(request, request.getExtensions(item), contextExtensionUrl)
-                : expressionProcessor.getCqfExpression(
-                        request, request.getExtensions(request.getQuestionnaireResponse()), contextExtensionUrl);
-        if (itemExtractionContext != null) {
-            try {
-                var context = expressionProcessor.getExpressionResultForItem(
-                        request, itemExtractionContext, request.getItemLinkId(item));
-                if (context != null && !context.isEmpty()) {
-                    // TODO: edit context instead of creating new resources
+        var contextExtension = request.getExtensionByUrl(
+                request.hasExtension(item, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                        ? item
+                        : request.getQuestionnaire(),
+                Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
+        if (contextExtension != null) {
+            var contextValue = contextExtension.getValue();
+            if (contextValue instanceof IPrimitiveType) {
+                resourceType = ((IPrimitiveType<String>) contextValue).getValueAsString();
+            } else if (contextValue instanceof ICompositeType) {
+                var contextExpression = CqfExpression.of(contextExtension, request.getDefaultLibraryUrl());
+                if (contextExpression != null) {
+                    try {
+                        var context =
+                                expressionProcessor.getExpressionResultForItem(request, contextExpression, linkId);
+                        if (context != null && !context.isEmpty()) {
+                            // TODO: handle multiple resources
+                            contextResource = (IBaseResource) context.get(0);
+                        }
+                    } catch (ResolveExpressionException e) {
+                        var message = String.format(
+                                "Error encountered processing item %s: Error resolving expression %s: %s",
+                                linkId, contextExpression.getExpression(), e.getMessage());
+                        logger.error(message);
+                        request.logException(message);
+                    }
                 }
-            } catch (ResolveExpressionException e) {
-                var message = String.format(
-                        "Error encountered processing item %s: Error resolving expression %s: %s",
-                        linkId, itemExtractionContext.getExpression(), e.getMessage());
-                logger.error(message);
-                request.logException(message);
             }
         }
 
@@ -85,8 +98,10 @@ public class ProcessDefinitionItem {
         if (definition == null) {
             throw new IllegalArgumentException(String.format("Unable to retrieve definition for item: %s", linkId));
         }
-        var resourceType = getDefinitionType(definition);
-        var resource = (IBaseResource) newValue(request, resourceType);
+        if (resourceType == null) {
+            resourceType = getDefinitionType(definition);
+        }
+        var resource = contextResource != null ? contextResource : (IBaseResource) newValue(request, resourceType);
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
         resource.setId(new IdType(resourceType, request.getExtractId() + "-" + linkId));
         resolveMeta(resource, definition);

@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.cr.inputparameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -56,5 +59,6 @@ public abstract class BaseInputParameterResolver implements IInputParameterResol
         }
     }
 
-    protected abstract IBaseParameters resolveParameters(IBaseParameters parameters);
+    protected abstract IBaseParameters resolveParameters(
+            IBaseParameters parameters, List<IBaseBackboneElement> context, List<IBaseExtension<?, ?>> launchContext);
 }

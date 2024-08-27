@@ -7,8 +7,11 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -201,6 +204,8 @@ public class QuestionnaireProcessor {
             String operationName,
             IBaseResource questionnaire,
             String subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
@@ -212,6 +217,8 @@ public class QuestionnaireProcessor {
                 operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
+                context,
+                launchContext,
                 parameters,
                 data,
                 useServerData,
@@ -221,7 +228,9 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
+            String subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
@@ -230,7 +239,9 @@ public class QuestionnaireProcessor {
             IBaseResource terminologyEndpoint) {
         return populate(
                 questionnaire,
-                patientId,
+                subjectId,
+                context,
+                launchContext,
                 parameters,
                 data,
                 useServerData,
@@ -241,7 +252,9 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
+            String subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
@@ -251,7 +264,9 @@ public class QuestionnaireProcessor {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return populate(
                 questionnaire,
-                patientId,
+                subjectId,
+                context,
+                launchContext,
                 parameters,
                 data,
                 useServerData,
@@ -260,23 +275,43 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
+            String subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
             LibraryEngine libraryEngine) {
-        return populate(resolveQuestionnaire(questionnaire), patientId, parameters, data, useServerData, libraryEngine);
+        return populate(
+                resolveQuestionnaire(questionnaire),
+                subjectId,
+                context,
+                launchContext,
+                parameters,
+                data,
+                useServerData,
+                libraryEngine);
     }
 
     public IBaseResource populate(
             IBaseResource questionnaire,
             String subjectId,
+            List<IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(buildPopulateRequest(
-                "populate", questionnaire, subjectId, parameters, data, useServerData, libraryEngine));
+                "populate",
+                questionnaire,
+                subjectId,
+                context,
+                launchContext,
+                parameters,
+                data,
+                useServerData,
+                libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

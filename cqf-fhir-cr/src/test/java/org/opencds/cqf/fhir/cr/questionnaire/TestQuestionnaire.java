@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -110,6 +111,9 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
+        private List<IBaseBackboneElement> context;
+        private IBaseExtension<?, ?> launchContext;
+        private boolean useServerData;
         private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
@@ -117,6 +121,7 @@ public class TestQuestionnaire {
         When(Repository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
             this.processor = processor;
+            useServerData = true;
         }
 
         private FhirContext fhirContext() {
@@ -128,9 +133,11 @@ public class TestQuestionnaire {
                     operationName,
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
+                    context,
+                    launchContext,
                     parameters,
                     data,
-                    true,
+                    useServerData,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }
@@ -155,6 +162,21 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public When context(List<IBaseBackboneElement> context) {
+            this.context = context;
+            return this;
+        }
+
+        public When launchContext(IBaseExtension<?, ?> extension) {
+            launchContext = extension;
+            return this;
+        }
+
+        public When useServerData(boolean value) {
+            useServerData = value;
+            return this;
+        }
+
         public When additionalData(IBaseBundle data) {
             this.data = data;
             return this;
@@ -174,9 +196,11 @@ public class TestQuestionnaire {
             return processor.populate(
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
+                    context,
+                    launchContext,
                     parameters,
                     data,
-                    true,
+                    useServerData,
                     (IBaseResource) null,
                     null,
                     null);
@@ -330,20 +354,20 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaireResponse itemHasAnswer(String theLinkId) {
+        public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
             var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
+                    .filter(i -> request.getItemLinkId(i).equals(linkId))
                     .collect(Collectors.toList());
             for (var item : matchingItems) {
-                assertFalse(request.resolvePathList(item, "answer").isEmpty());
+                assertTrue(!request.resolvePathList(item, "answer").isEmpty());
             }
 
             return this;
         }
 
-        public GeneratedQuestionnaireResponse itemHasAuthorExt(String theLinkId) {
+        public GeneratedQuestionnaireResponse itemHasAuthorExt(String linkId) {
             var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
+                    .filter(i -> request.getItemLinkId(i).equals(linkId))
                     .collect(Collectors.toList());
             for (var item : matchingItems) {
                 assertNotNull(request.getExtensionByUrl(item, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
@@ -357,6 +381,14 @@ public class TestQuestionnaire {
             assertTrue(request.hasContained(questionnaireResponse));
             assertTrue(request.getContained(questionnaireResponse).stream()
                     .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse hasNoErrors() {
+            assertFalse(request.hasExtension(questionnaireResponse, Constants.EXT_CRMI_MESSAGES));
+            assertTrue(request.getContained(questionnaireResponse).stream()
+                    .noneMatch(r -> r.fhirType().equals("OperationOutcome")));
 
             return this;
         }

@@ -107,17 +107,15 @@ public class ApplyProcessor implements IApplyProcessor {
         request.resolveOperationOutcome(requestOrchestration);
         var resultBundle = newBundle(
                 request.getFhirVersion(), requestOrchestration.getIdElement().getIdPart(), null);
-        addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), requestOrchestration));
+        addEntry(resultBundle, newEntryWithResource(requestOrchestration));
         for (var resource : request.getRequestResources()) {
-            addEntry(resultBundle, newEntryWithResource(request.getFhirVersion(), resource));
+            addEntry(resultBundle, newEntryWithResource(resource));
         }
         if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
             addEntry(
                     resultBundle,
-                    newEntryWithResource(
-                            request.getFhirVersion(),
-                            populateProcessor.processResponse(
-                                    request.toPopulateRequest(), request.getItems(request.getQuestionnaire()))));
+                    newEntryWithResource(populateProcessor.processResponse(
+                            request.toPopulateRequest(), request.getItems(request.getQuestionnaire()))));
         }
 
         return resultBundle;

@@ -180,7 +180,7 @@ public class PlanDefinition {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
             additionalData = resource.getIdElement().getResourceType().equals("Bundle")
                     ? (IBaseBundle) resource
-                    : addEntry(newBundle(fhirVersion), newEntryWithResource(fhirVersion, resource));
+                    : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
         }
 
         public When additionalData(String dataAssetName) {

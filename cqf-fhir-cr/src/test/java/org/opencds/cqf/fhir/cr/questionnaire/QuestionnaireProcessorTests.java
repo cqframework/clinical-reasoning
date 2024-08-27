@@ -11,6 +11,9 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -108,6 +111,59 @@ class QuestionnaireProcessorTests {
                     .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                     .thenPopulate(false);
         });
+    }
+
+    @Test
+    void populateWithLaunchContextResolvesParametersR4() {
+        given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(
+                        fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
+                .subjectId("OPA-Patient1")
+                .context(Arrays.asList(
+                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                                "context",
+                                org.opencds.cqf.fhir.utility.r4.Parameters.part("name", "user"),
+                                org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                                        "content",
+                                        new org.hl7.fhir.r4.model.Reference("Practitioner/OPA-AttendingPhysician1")))),
+                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                                "context",
+                                org.opencds.cqf.fhir.utility.r4.Parameters.part("name", "patient"),
+                                org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                                        "content", new org.hl7.fhir.r4.model.Reference("Patient/OPA-Patient1"))))))
+                .thenPopulate(true)
+                .hasItems(14)
+                .itemHasAnswer("family-name")
+                .itemHasAnswer("provider-name")
+                .hasNoErrors();
+    }
+
+    @Test
+    @Disabled("R5 CQL evaluation currently fails")
+    void populateWithLaunchContextResolvesParametersR5() {
+        given().repository(repositoryR5)
+                .when()
+                .questionnaireId(Ids.newId(
+                        fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
+                .subjectId("OPA-Patient1")
+                .context(Arrays.asList(
+                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                                "context",
+                                org.opencds.cqf.fhir.utility.r5.Parameters.part("name", "user"),
+                                org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                                        "content",
+                                        new org.hl7.fhir.r5.model.Reference("Practitioner/OPA-AttendingPhysician1")))),
+                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                                "context",
+                                org.opencds.cqf.fhir.utility.r5.Parameters.part("name", "patient"),
+                                org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                                        "content", new org.hl7.fhir.r5.model.Reference("Patient/OPA-Patient1"))))))
+                .thenPopulate(true)
+                .hasItems(14)
+                .itemHasAnswer("family-name")
+                .itemHasAnswer("provider-name")
+                .hasNoErrors();
     }
 
     @Test

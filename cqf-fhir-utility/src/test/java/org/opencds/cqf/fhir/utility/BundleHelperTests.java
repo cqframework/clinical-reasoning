@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -50,7 +51,7 @@ class BundleHelperTests {
             newBundle(fhirVersion);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            newEntryWithResource(fhirVersion, null);
+            newEntry(fhirVersion);
         });
     }
 
@@ -64,7 +65,7 @@ class BundleHelperTests {
                 .setName(Collections.singletonList(new org.hl7.fhir.dstu3.model.HumanName()
                         .setFamily("Test")
                         .addGiven("Test")));
-        var entry = newEntryWithResource(fhirVersion, resource);
+        var entry = newEntryWithResource(resource);
         assertTrue(entry instanceof org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent);
         addEntry(bundle, entry);
         assertFalse(getEntry(bundle).isEmpty());
@@ -83,7 +84,7 @@ class BundleHelperTests {
         var resource = new org.hl7.fhir.r4.model.Patient()
                 .setName(Collections.singletonList(
                         new org.hl7.fhir.r4.model.HumanName().setFamily("Test").addGiven("Test")));
-        var entry = newEntryWithResource(fhirVersion, resource);
+        var entry = newEntryWithResource(resource);
         assertTrue(entry instanceof org.hl7.fhir.r4.model.Bundle.BundleEntryComponent);
         addEntry(bundle, entry);
         assertFalse(getEntry(bundle).isEmpty());
@@ -102,7 +103,7 @@ class BundleHelperTests {
         var resource = new org.hl7.fhir.r5.model.Patient()
                 .setName(Collections.singletonList(
                         new org.hl7.fhir.r5.model.HumanName().setFamily("Test").addGiven("Test")));
-        var entry = newEntryWithResource(fhirVersion, resource);
+        var entry = newEntryWithResource(resource);
         assertTrue(entry instanceof org.hl7.fhir.r5.model.Bundle.BundleEntryComponent);
         addEntry(bundle, entry);
         assertFalse(getEntry(bundle).isEmpty());

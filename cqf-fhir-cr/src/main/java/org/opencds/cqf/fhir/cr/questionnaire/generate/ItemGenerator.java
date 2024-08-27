@@ -66,6 +66,8 @@ public class ItemGenerator {
     protected void processExtensions(GenerateRequest request, IBaseBackboneElement questionnaireItem) {
         extensionProcessor.processExtensionsInList(
                 request, questionnaireItem, request.getProfile(), INPUT_EXTENSION_LIST);
+        request.getExtensionsByUrl(questionnaireItem, Constants.CPG_FEATURE_EXPRESSION)
+                .forEach(ext -> ext.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
     }
 
     protected IBaseResource getCaseFeature(GenerateRequest request, String itemLinkId) {

@@ -14,7 +14,9 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -40,13 +42,18 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IIdType practitionerId,
             IBaseParameters parameters,
             boolean useServerData,
-            IBaseBundle data) {
+            IBaseBundle data,
+            List<IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
-        this.parameters = resolveParameters(parameters);
+        this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
     @Override
-    protected final Parameters resolveParameters(IBaseParameters baseParameters) {
+    protected final Parameters resolveParameters(
+            IBaseParameters baseParameters,
+            List<IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
@@ -69,6 +76,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                 params.addParameter(part("%practitioner", practitioner));
             }
         }
+        // Launch Context is not supported in Dstu3 due to the lack of an Expression type
         return params;
     }
 

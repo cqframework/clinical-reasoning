@@ -3,23 +3,34 @@ package org.opencds.cqf.fhir.cr.inputparameters.r4;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +51,18 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IIdType practitionerId,
             IBaseParameters parameters,
             boolean useServerData,
-            IBaseBundle data) {
+            IBaseBundle data,
+            List<IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
-        this.parameters = resolveParameters(parameters);
+        this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
     @Override
-    protected final Parameters resolveParameters(IBaseParameters baseParameters) {
+    protected final Parameters resolveParameters(
+            IBaseParameters baseParameters,
+            List<IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
@@ -69,7 +85,79 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                 params.addParameter(part("%practitioner", practitioner));
             }
         }
+        resolveLaunchContext(params, context, launchContext);
         return params;
+    }
+
+    protected boolean validateContext(String name, String type) {
+        switch (name) {
+            case "patient":
+                return type.equals(ResourceType.Patient.name());
+            case "encounter":
+                return type.equals(ResourceType.Encounter.name());
+            case "location":
+                return type.equals(ResourceType.Location.name());
+            case "user":
+                return type.equals(ResourceType.Patient.name())
+                        || type.equals(ResourceType.Practitioner.name())
+                        || type.equals(ResourceType.PractitionerRole.name())
+                        || type.equals(ResourceType.RelatedPerson.name());
+            case "study":
+                return type.equals(ResourceType.ResearchStudy.name());
+
+            default:
+                return false;
+        }
+    }
+
+    protected void resolveLaunchContext(
+            Parameters params, List<IBaseBackboneElement> contexts, List<IBaseExtension<?, ?>> launchContexts) {
+        final List<String> validContexts = Arrays.asList("patient", "encounter", "location", "user", "study");
+        if (launchContexts != null && !launchContexts.isEmpty()) {
+            launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
+                var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
+                if (!validContexts.contains(name)) {
+                    throw new IllegalArgumentException(String.format("Unsupported launch context: %s", name));
+                }
+                var type = launchContext
+                        .getExtensionByUrl("type")
+                        .getValueAsPrimitive()
+                        .getValueAsString();
+                if (!validateContext(name, type)) {
+                    throw new IllegalArgumentException(
+                            String.format("Unsupported launch context for %s: %s", name, type));
+                }
+                var content = contexts == null
+                        ? null
+                        : contexts.stream()
+                                .map(c -> (ParametersParameterComponent) c)
+                                .filter(c -> c.getPart().stream()
+                                        .filter(p -> p.getName().equals("name"))
+                                        .anyMatch(p -> ((StringType) p.getValue())
+                                                .getValueAsString()
+                                                .equals(name)))
+                                .flatMap(c -> c.getPart().stream()
+                                        .filter(p -> p.getName().equals("content")))
+                                .collect(Collectors.toList());
+                if (content == null || content.isEmpty()) {
+                    throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
+                }
+                var value = content.stream()
+                        .map(p -> readRepository(
+                                fhirContext().getResourceDefinition(type).getImplementingClass(),
+                                ((Reference) p.getValue()).getReferenceElement()))
+                        .collect(Collectors.toList());
+                if (!value.isEmpty()) {
+                    var resource =
+                            (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R4));
+                    if (value.size() > 1) {
+                        value.forEach(v ->
+                                ((Bundle) resource).addEntry(new BundleEntryComponent().setResource((Resource) v)));
+                    }
+                    params.addParameter(part("%" + name, resource));
+                }
+            });
+        }
     }
 
     @Override

@@ -162,7 +162,8 @@ public class ExpandHelper {
                 }
             });
             valueSet.setExpansion(expansion);
-        } else {
+        // ignore ValueSets without a compose
+        } else if (valueSet.hasCompose()) {
             throw new UnprocessableEntityException(
                     "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
         }

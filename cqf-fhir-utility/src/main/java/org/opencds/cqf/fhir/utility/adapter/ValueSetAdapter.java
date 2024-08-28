@@ -15,6 +15,8 @@ public interface ValueSetAdapter extends KnowledgeArtifactAdapter {
 
     public List<String> getValueSetIncludes();
 
+    public boolean hasCompose();
+
     // TODO: lots of duplicate code across version adapters
     // public default List<String> getValueSetIncludes() {
     //     return ValueSets.getIncludes(fhirContext(), get()).stream().map(i ->

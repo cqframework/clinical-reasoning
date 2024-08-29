@@ -30,7 +30,6 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,9 +114,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 new HashMap<String, IDomainResource>(),
                 systemVersionParams,
                 canonicalVersionParams);
-        if (rootAdapter.get().fhirType().equals("Library")) {
-            ((LibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
-        }
 
         // removed duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
@@ -338,14 +334,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
-                                // if we don't know the version even at this point then they are missing from the
-                                // expansion parameters, hence update the expansion parameters
-                                if (resourceType == null
-                                        || resourceType.getSimpleName().equals("CodeSystem")) {
-                                    systemVersionExpansionParameters.add(versionedReference);
-                                } else if (resourceType.getSimpleName().equals("ValueSet")) {
-                                    canonicalVersionExpansionParameters.add(versionedReference);
-                                }
                                 alreadyUpdatedDependencies.put(
                                         Canonicals.getUrl(dependency.getReference()), adapter.get());
                                 return adapter;

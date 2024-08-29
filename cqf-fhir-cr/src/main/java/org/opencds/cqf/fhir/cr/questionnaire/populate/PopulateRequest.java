@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -117,9 +118,14 @@ public class PopulateRequest implements IQuestionnaireRequest {
     @SuppressWarnings("unchecked")
     protected final String resolveDefaultLibraryUrl() {
         var libraryExt = getExtensions(questionnaire).stream()
-                .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
+                .filter(e -> e.getUrl()
+                        .equals(fhirVersion == FhirVersionEnum.DSTU3 ? Constants.CQIF_LIBRARY : Constants.CQF_LIBRARY))
                 .findFirst()
                 .orElse(null);
-        return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+        return libraryExt == null
+                ? null
+                : fhirVersion == FhirVersionEnum.DSTU3
+                        ? ((Reference) libraryExt.getValue()).getReference()
+                        : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 }

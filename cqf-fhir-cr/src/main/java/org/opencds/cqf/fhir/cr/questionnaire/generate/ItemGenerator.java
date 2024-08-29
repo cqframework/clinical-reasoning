@@ -12,11 +12,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.CqfExpression;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

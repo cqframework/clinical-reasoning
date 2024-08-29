@@ -1,11 +1,16 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.AttachmentAdapter {
 
-    private Attachment attachment;
+    private final Attachment attachment;
+    private final FhirContext fhirContext;
+    private final ModelResolver modelResolver;
 
     public AttachmentAdapter(ICompositeType attachment) {
         if (attachment == null) {
@@ -21,6 +26,9 @@ class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.Attachme
         }
 
         this.attachment = (Attachment) attachment;
+        fhirContext = FhirContext.forDstu3Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     protected Attachment getAttachment() {
@@ -50,5 +58,15 @@ class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.Attachme
     @Override
     public void setData(byte[] data) {
         this.getAttachment().setData(data);
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public ModelResolver getModelResolver() {
+        return modelResolver;
     }
 }

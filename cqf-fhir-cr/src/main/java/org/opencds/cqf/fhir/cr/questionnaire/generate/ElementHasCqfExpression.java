@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
 import static org.opencds.cqf.fhir.cr.questionnaire.generate.IElementProcessor.createInitial;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -26,7 +27,10 @@ public class ElementHasCqfExpression {
 
     public IBaseBackboneElement addProperties(
             IOperationRequest request, List<IBaseExtension<?, ?>> extensions, IBaseBackboneElement questionnaireItem) {
-        final var expression = expressionProcessor.getCqfExpression(request, extensions, Constants.CQF_EXPRESSION);
+        final var expressionExtensionUrl = request.getFhirVersion() == FhirVersionEnum.DSTU3
+                ? Constants.CQIF_CQL_EXPRESSION
+                : Constants.CQF_EXPRESSION;
+        final var expression = expressionProcessor.getCqfExpression(request, extensions, expressionExtensionUrl);
         final List<IBase> results = expressionProcessor.getExpressionResult(request, expression);
         results.forEach(result -> {
             if (IAnyResource.class.isAssignableFrom(result.getClass())) {

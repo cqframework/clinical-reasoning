@@ -12,6 +12,12 @@
     {
       "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
       "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqif-library",
+      "valueReference": {
+        "reference": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+      }
     }
   ],
   "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient",
@@ -1840,16 +1846,8 @@
       {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-            "valueString": "BeneficiaryFirstName"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-            "valueString": "text/cql.identifier"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueString": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryFirstName"
           }
         ],
         "id": "Patient.name.given",
@@ -1865,16 +1863,8 @@
       {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-            "valueString": "BeneficiaryLastName"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-            "valueString": "text/cql.identifier"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueString": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryLastName"
           }
         ],
         "id": "Patient.name.family",
@@ -1890,16 +1880,8 @@
       {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-            "valueString": "BeneficiaryDOB"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-            "valueString": "text/cql.identifier"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueString": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryDOB"
           }
         ],
         "id": "Patient.birthDate",
@@ -1915,16 +1897,8 @@
       {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-            "valueString": "BeneficiaryGender"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-            "valueString": "text/cql.identifier"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueString": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryGender"
           }
         ],
         "id": "Patient.gender",
@@ -1986,16 +1960,8 @@
       {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
-            "valueString": "BeneficiaryMedicareID"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression-language",
-            "valueString": "text/cql.identifier"
-          },
-          {
-            "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-            "valueString": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+            "url": "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression",
+            "valueString": "OutpatientPriorAuthorizationPrepopulation.BeneficiaryMedicareID"
           }
         ],
         "id": "Patient.identifier:MedicareID.value",

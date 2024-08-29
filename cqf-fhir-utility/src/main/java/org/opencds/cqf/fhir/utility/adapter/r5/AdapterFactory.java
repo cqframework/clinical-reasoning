@@ -6,11 +6,15 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 
 public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.AdapterFactory {
 
@@ -18,6 +22,10 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
     public org.opencds.cqf.fhir.utility.adapter.ResourceAdapter createResource(IBaseResource resource) {
         if (resource instanceof MetadataResource) {
             return createKnowledgeArtifactAdapter((MetadataResource) resource);
+        } else if (resource instanceof Endpoint) {
+            return createEndpoint(resource);
+        } else if (resource instanceof Parameters) {
+            return createParameters((Parameters) resource);
         } else {
             return new ResourceAdapter(resource);
         }
@@ -26,28 +34,33 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
     @Override
     public org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(
             IDomainResource resource) {
-        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter retval;
+        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter adapter;
         if (resource instanceof Library) {
-            retval = createLibrary(resource);
+            adapter = createLibrary(resource);
+        } else if (resource instanceof Measure) {
+            adapter = new MeasureAdapter((Measure) resource);
         } else if (resource instanceof PlanDefinition) {
-            retval = new org.opencds.cqf.fhir.utility.adapter.r5.PlanDefinitionAdapter((PlanDefinition) resource);
+            adapter = new PlanDefinitionAdapter((PlanDefinition) resource);
+        } else if (resource instanceof Questionnaire) {
+            adapter = new QuestionnaireAdapter((Questionnaire) resource);
+        } else if (resource instanceof StructureDefinition) {
+            adapter = new StructureDefinitionAdapter((StructureDefinition) resource);
         } else if (resource instanceof ValueSet) {
-            retval = new org.opencds.cqf.fhir.utility.adapter.r5.ValueSetAdapter((ValueSet) resource);
+            adapter = new ValueSetAdapter((ValueSet) resource);
         } else {
             if (resource instanceof MetadataResource) {
-                retval = new org.opencds.cqf.fhir.utility.adapter.r5.KnowledgeArtifactAdapter(
-                        (MetadataResource) resource);
+                adapter = new KnowledgeArtifactAdapter((MetadataResource) resource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resouce must be instance of %s", MetadataResource.class.getName()));
+                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
             }
         }
-        return retval;
+        return adapter;
     }
 
     @Override
-    public LibraryAdapter createLibrary(IBaseResource library) {
-        return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter((IDomainResource) library);
+    public org.opencds.cqf.fhir.utility.adapter.LibraryAdapter createLibrary(IBaseResource library) {
+        return new LibraryAdapter((IDomainResource) library);
     }
 
     @Override
@@ -64,5 +77,10 @@ public class AdapterFactory implements org.opencds.cqf.fhir.utility.adapter.Adap
     public org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter createParametersParameters(
             IBaseBackboneElement parametersParametersComponent) {
         return new ParametersParameterComponentAdapter(parametersParametersComponent);
+    }
+
+    @Override
+    public org.opencds.cqf.fhir.utility.adapter.EndpointAdapter createEndpoint(IBaseResource endpoint) {
+        return new EndpointAdapter(endpoint);
     }
 }

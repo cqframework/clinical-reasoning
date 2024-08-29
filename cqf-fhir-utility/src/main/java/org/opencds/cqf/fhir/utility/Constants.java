@@ -2,9 +2,6 @@ package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.model.api.Tag;
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class Constants {
@@ -33,8 +30,19 @@ public class Constants {
     public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";
     public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
             "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
+    public static final String QUESTIONNAIRE_REFERENCE_PROFILE =
+            "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile";
+    public static final String QUESTIONNAIRE_UNIT_VALUE_SET =
+            "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet";
+
+    public static final String VARIABLE_EXTENSION = "http://hl7.org/fhir/StructureDefinition/variable";
+
+    public static final String CPG_ASSERTION_EXPRESSION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-assertionExpression";
     public static final String CPG_FEATURE_EXPRESSION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression";
+    public static final String CPG_INFERENCE_EXPRESSION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-inferenceExpression";
     public static final String CPG_KNOWLEDGE_CAPABILITY =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability";
     public static final String CPG_KNOWLEDGE_REPRESENTATION_LEVEL =
@@ -48,18 +56,22 @@ public class Constants {
     public static final String CPG_INPUT_TEXT = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
     public static final String CPG_INPUT_DESCRIPTION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
-    // public static final String CQF_QUESTIONNAIRE =
-    // "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire";
 
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
     public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
+    public static final String CQF_RESOURCETYPE = "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
 
+    // DSTU3 CQF Extensions
+    public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";
+    public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression";
+
+    public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
+    public static final String CQF_EXPANSION_PARAMETERS =
+            "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
-    // This is only for dstu3 since the Expression type does not exist in that version
-    public static final String CQF_EXPRESSION_LANGUAGE =
-            "http://hl7.org/fhir/StructureDefinition/cqf-expression-language";
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+    public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";
 
     public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
@@ -67,6 +79,12 @@ public class Constants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition";
     public static final String CQFM_SOFTWARE_SYSTEM =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
+    public static final String CQFM_INPUT_PARAMETERS =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters";
+    public static final String CQFM_COMPONENT = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component";
+
+    public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
 
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";
@@ -99,6 +117,12 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-observation-extract-category";
     public static final String SDC_OBSERVATION_CATEGORY = "http://hl7.org/fhir/observation-category";
     public static final String SDC_CATEGORY_SURVEY = "survey";
+    public static final String SDC_QUESTIONNAIRE_LAUNCH_CONTEXT =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
+    public static final String SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire";
+    public static final String SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression";
 
     // $apply parameter names
     public static final String APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition";
@@ -119,29 +143,14 @@ public class Constants {
     public static final String APPLY_PARAMETER_DATA_ENDPOINT = "dataEndpoint";
     public static final String APPLY_PARAMETER_CONTENT_ENDPOINT = "contentEndpoint";
     public static final String APPLY_PARAMETER_TERMINOLOGY_ENDPOINT = "terminologyEndpoint";
+
     public static final String US_PH_CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    public static final String VALUE_SET_CONDITION_CODE = "focus";
-    public static final String VALUE_SET_PRIORITY_CODE = "priority";
-    public static final String VALUE_SET_CONDITION_URL =
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
-    public static final String VALUE_SET_PRIORITY_URL =
-            "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
     public static final String LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     public static final String ASSET_COLLECTION = "asset-collection";
-    public static final String EXPANSION_PARAMETERS_URL =
-            "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
-
-    // can't use List.of for Android 26 compatibility
-    public static final List<String> PRESERVED_EXTENSION_URLS =
-            Collections.unmodifiableList(Arrays.asList(VALUE_SET_PRIORITY_URL, VALUE_SET_CONDITION_URL));
 
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
-    public static final String VSM_WORKFLOW_CODES_CODE_SYSTEM_URL =
-            "http://aphl.org/fhir/vsm/CodeSystem/vsm-workflow-codes";
-    public static final String VSM_VALUE_SET_TAG_VSM_AUTHORED_CODE = "vsm-authored";
 
     public static final String VSAC_USERNAME = "vsacUsername";
-
     public static final String APIKEY = "apiKey";
 }

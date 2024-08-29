@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.inputparameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -53,12 +53,12 @@ public abstract class BaseInputParameterResolver implements IInputParameterResol
 
     protected <R extends IBaseResource> R readRepository(Class<R> resourceType, IIdType id) {
         try {
-            return repository.read(resourceType, id, null);
+            return repository.read(resourceType, id);
         } catch (Exception e) {
             return null;
         }
     }
 
     protected abstract IBaseParameters resolveParameters(
-            IBaseParameters parameters, List<IBaseBackboneElement> context, List<IBaseExtension<?, ?>> launchContext);
+            IBaseParameters parameters, List<IBase> context, List<IBaseExtension<?, ?>> launchContext);
 }

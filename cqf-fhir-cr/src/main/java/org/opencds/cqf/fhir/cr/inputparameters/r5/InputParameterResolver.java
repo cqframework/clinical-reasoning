@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -52,7 +52,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             List<IBaseExtension<?, ?>> launchContext) {
         super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
         this.parameters = resolveParameters(parameters, context, launchContext);
@@ -60,9 +60,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
 
     @Override
     protected final Parameters resolveParameters(
-            IBaseParameters baseParameters,
-            List<IBaseBackboneElement> context,
-            List<IBaseExtension<?, ?>> launchContext) {
+            IBaseParameters baseParameters, List<IBase> context, List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
@@ -111,7 +109,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
     }
 
     protected void resolveLaunchContext(
-            Parameters params, List<IBaseBackboneElement> contexts, List<IBaseExtension<?, ?>> launchContexts) {
+            Parameters params, List<IBase> contexts, List<IBaseExtension<?, ?>> launchContexts) {
         final List<String> validContexts = Arrays.asList("patient", "encounter", "location", "user", "study");
         if (launchContexts != null && !launchContexts.isEmpty()) {
             launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {

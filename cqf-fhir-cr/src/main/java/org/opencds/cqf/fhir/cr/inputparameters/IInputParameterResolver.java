@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.inputparameters;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -37,7 +37,7 @@ public interface IInputParameterResolver {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             List<IBaseExtension<?, ?>> launchContext) {
         checkNotNull(repository, "expected non-null value for repository");
         var fhirVersion = repository.fhirContext().getVersion().getVersion();

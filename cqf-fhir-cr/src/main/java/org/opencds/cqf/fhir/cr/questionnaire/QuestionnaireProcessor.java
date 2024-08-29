@@ -9,7 +9,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -204,7 +204,7 @@ public class QuestionnaireProcessor {
             String operationName,
             IBaseResource questionnaire,
             String subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
@@ -229,7 +229,7 @@ public class QuestionnaireProcessor {
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
@@ -253,7 +253,7 @@ public class QuestionnaireProcessor {
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
@@ -276,7 +276,7 @@ public class QuestionnaireProcessor {
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
@@ -296,7 +296,7 @@ public class QuestionnaireProcessor {
     public IBaseResource populate(
             IBaseResource questionnaire,
             String subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,

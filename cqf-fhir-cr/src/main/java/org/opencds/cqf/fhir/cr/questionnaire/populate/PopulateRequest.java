@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -23,7 +23,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final String operationName;
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
-    private final List<IBaseBackboneElement> context;
+    private final List<IBase> context;
     private final List<IBaseExtension<?, ?>> launchContext;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
@@ -39,7 +39,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
             String operationName,
             IBaseResource questionnaire,
             IIdType subjectId,
-            List<IBaseBackboneElement> context,
+            List<IBase> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
@@ -149,7 +149,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
                         : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 
-    public List<IBaseBackboneElement> getContext() {
+    public List<IBase> getContext() {
         return context;
     }
 

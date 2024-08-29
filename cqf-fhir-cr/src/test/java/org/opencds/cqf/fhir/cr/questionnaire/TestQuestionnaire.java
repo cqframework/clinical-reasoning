@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -111,7 +112,7 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
-        private List<IBaseBackboneElement> context;
+        private List<IBase> context;
         private IBaseExtension<?, ?> launchContext;
         private boolean useServerData;
         private IBaseBundle data;
@@ -162,7 +163,7 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When context(List<IBaseBackboneElement> context) {
+        public When context(List<IBase> context) {
             this.context = context;
             return this;
         }

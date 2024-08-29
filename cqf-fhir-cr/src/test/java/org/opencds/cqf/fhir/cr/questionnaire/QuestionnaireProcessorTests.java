@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
@@ -51,7 +51,7 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+                .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
     }
@@ -64,8 +64,7 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
-                .parameters(org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
-                        org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1")))
+                .parameters(newParameters(fhirContextR5, newStringPart(fhirContextR5, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(false);
     }
 
@@ -76,7 +75,7 @@ class QuestionnaireProcessorTests {
                 .questionnaireId(
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
                 .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+                .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
     }
@@ -88,7 +87,7 @@ class QuestionnaireProcessorTests {
                 .questionnaireId(
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
                 .subjectId("OPA-Patient1")
-                .parameters(parameters(stringPart("ClaimId", "OPA-Claim1")))
+                .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasErrors();
     }
@@ -121,17 +120,16 @@ class QuestionnaireProcessorTests {
                         fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
                 .subjectId("OPA-Patient1")
                 .context(Arrays.asList(
-                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                        newPart(
+                                fhirContextR4,
                                 "context",
-                                org.opencds.cqf.fhir.utility.r4.Parameters.part("name", "user"),
-                                org.opencds.cqf.fhir.utility.r4.Parameters.part(
-                                        "content",
-                                        new org.hl7.fhir.r4.model.Reference("Practitioner/OPA-AttendingPhysician1")))),
-                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r4.Parameters.part(
+                                newStringPart(fhirContextR4, "name", "user"),
+                                newPart(fhirContextR4, "Reference", "content", "Practitioner/OPA-AttendingPhysician1")),
+                        newPart(
+                                fhirContextR4,
                                 "context",
-                                org.opencds.cqf.fhir.utility.r4.Parameters.part("name", "patient"),
-                                org.opencds.cqf.fhir.utility.r4.Parameters.part(
-                                        "content", new org.hl7.fhir.r4.model.Reference("Patient/OPA-Patient1"))))))
+                                newStringPart(fhirContextR4, "name", "patient"),
+                                newPart(fhirContextR4, "Reference", "content", "Patient/OPA-Patient1"))))
                 .thenPopulate(true)
                 .hasItems(14)
                 .itemHasAnswer("family-name")
@@ -145,20 +143,19 @@ class QuestionnaireProcessorTests {
         given().repository(repositoryR5)
                 .when()
                 .questionnaireId(Ids.newId(
-                        fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
+                        fhirContextR5, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
                 .subjectId("OPA-Patient1")
                 .context(Arrays.asList(
-                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                        newPart(
+                                fhirContextR5,
                                 "context",
-                                org.opencds.cqf.fhir.utility.r5.Parameters.part("name", "user"),
-                                org.opencds.cqf.fhir.utility.r5.Parameters.part(
-                                        "content",
-                                        new org.hl7.fhir.r5.model.Reference("Practitioner/OPA-AttendingPhysician1")))),
-                        ((IBaseBackboneElement) org.opencds.cqf.fhir.utility.r5.Parameters.part(
+                                newStringPart(fhirContextR5, "name", "user"),
+                                newPart(fhirContextR5, "name", "content", "Practitioner/OPA-AttendingPhysician1")),
+                        newPart(
+                                fhirContextR5,
                                 "context",
-                                org.opencds.cqf.fhir.utility.r5.Parameters.part("name", "patient"),
-                                org.opencds.cqf.fhir.utility.r5.Parameters.part(
-                                        "content", new org.hl7.fhir.r5.model.Reference("Patient/OPA-Patient1"))))))
+                                newStringPart(fhirContextR5, "name", "patient"),
+                                newPart(fhirContextR5, "name", "content", "Practitioner/OPA-AttendingPhysician1"))))
                 .thenPopulate(true)
                 .hasItems(14)
                 .itemHasAnswer("family-name")
@@ -202,10 +199,11 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "ASLPA1"))
                 .subjectId("positive")
-                .parameters(parameters(
-                        stringPart("Service Request Id", "SleepStudy"),
-                        stringPart("Service Request Id", "SleepStudy2"),
-                        stringPart("Coverage Id", "Coverage-positive")))
+                .parameters(newParameters(
+                        fhirContextR4,
+                        newStringPart(fhirContextR4, "Service Request Id", "SleepStudy"),
+                        newStringPart(fhirContextR4, "Service Request Id", "SleepStudy2"),
+                        newStringPart(fhirContextR4, "Coverage Id", "Coverage-positive")))
                 .thenPopulate(true)
                 .hasItems(13)
                 .itemHasAnswer("1")

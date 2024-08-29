@@ -180,13 +180,13 @@ public class ExpandHelperTest {
         Exception notExpectingAnyException = null;
         try {
             expandHelper.expandValueSet(
-                (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
-                factory.createParameters(expansionParams),
-                // important part of the test
-                Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<ValueSetAdapter>(),
-                new ArrayList<String>(),
-                rep);
+                    (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    factory.createParameters(expansionParams),
+                    // important part of the test
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<ValueSetAdapter>(),
+                    new ArrayList<String>(),
+                    rep);
         } catch (Exception e) {
             notExpectingAnyException = e;
         }

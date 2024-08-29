@@ -47,6 +47,11 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
     }
 
     @Override
+    public boolean hasCompose() {
+        return this.get().hasCompose();
+    }
+
+    @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = getReferenceSource();

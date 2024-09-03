@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -27,6 +28,16 @@ public class ExpandHelper {
     public ExpandHelper(FhirContext fhirContext, TerminologyServerClient server) {
         this.fhirContext = fhirContext;
         terminologyServerClient = server;
+    }
+
+    private void checkCanonicalVersionParam(ParametersAdapter params) {
+        var canonicalVersionParams = params.getParameterValues(Constants.CANONICAL_VERSION_PARAMETER).stream().map(v -> ((IPrimitiveType<String>)v).getValue()).collect(Collectors.toList());
+        var urlParam = Optional.ofNullable(params.getParameter(TerminologyServerClient.urlParamName));
+        if (urlParam.isPresent()) {
+            // if url is present, then check if version is present, and if it matches the canonical-version
+        } else {
+            // use the canonical-version parameter to 
+        }
     }
 
     public void expandValueSet(
@@ -56,6 +67,7 @@ public class ExpandHelper {
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
             try {
+                checkCanonicalVersionParam(expansionParameters, valueSet.getUrl());
                 var expandedValueSet = (ValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
                 valueSet.setExpansion(expandedValueSet.getExpansion());

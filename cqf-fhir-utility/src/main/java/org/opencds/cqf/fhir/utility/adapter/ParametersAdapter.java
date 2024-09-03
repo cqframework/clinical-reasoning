@@ -11,6 +11,8 @@ public interface ParametersAdapter extends ResourceAdapter {
 
     public IBaseBackboneElement getParameter(String name);
 
+    public List<IBaseBackboneElement> getParameters(String name);
+
     public List<? extends IBaseDatatype> getParameterValues(String name);
 
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents);

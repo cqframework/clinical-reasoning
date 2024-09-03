@@ -378,13 +378,13 @@ class ReleaseVisitorTests {
         var expansionParameters =
                 new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
         var systemVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.SYSTEM_VERSION_PARAMETER, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
                 .orElse(new ArrayList<String>());
         var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("canonical-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.CANONICAL_VERSION_PARAMETER, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))

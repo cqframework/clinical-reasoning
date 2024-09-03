@@ -30,13 +30,16 @@ public class ExpandHelper {
         terminologyServerClient = server;
     }
 
-    private void checkCanonicalVersionParam(ParametersAdapter params) {
-        var canonicalVersionParams = params.getParameterValues(Constants.CANONICAL_VERSION_PARAMETER).stream().map(v -> ((IPrimitiveType<String>)v).getValue()).collect(Collectors.toList());
+    private void checkCanonicalVersionParam(ParametersAdapter params, String valueSetUrl) {
+        var canonicalVersionMatchingUrl = params.getParameterValues(Constants.CANONICAL_VERSION_PARAMETER).stream()
+            .map(v -> ((IPrimitiveType<String>)v).getValue())
+            .filter(canonical -> Canonicals.getUrl(canonical).equals(valueSetUrl))
+            .findAny();
         var urlParam = Optional.ofNullable(params.getParameter(TerminologyServerClient.urlParamName));
-        if (urlParam.isPresent()) {
+        if (urlParam.isPresent() && canonicalVersionMatchingUrl.isPresent()) {
             // if url is present, then check if version is present, and if it matches the canonical-version
-        } else {
-            // use the canonical-version parameter to 
+        } else if (canonicalVersionMatchingUrl.isPresent()){
+            // use the canonical-version parameter to add the correct url and values
         }
     }
 

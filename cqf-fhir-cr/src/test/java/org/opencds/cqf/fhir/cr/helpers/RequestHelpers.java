@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
@@ -154,20 +155,27 @@ public class RequestHelpers {
 
     public static PopulateRequest newPopulateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource questionnaire) {
-        return newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire, "populate");
-    }
-
-    public static PopulateRequest newPopulateRequestForVersion(
-            FhirVersionEnum fhirVersion,
-            LibraryEngine libraryEngine,
-            IBaseResource questionnaire,
-            String operationName) {
         return new PopulateRequest(
-                operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
+                null,
+                null,
+                true,
+                libraryEngine,
+                FhirModelResolverCache.resolverForVersion(fhirVersion));
+    }
+
+    public static ExtractRequest newExtractRequestForVersion(
+            FhirVersionEnum fhirVersion,
+            LibraryEngine libraryEngine,
+            IBaseResource questionnaireResponse,
+            IBaseResource questionnaire) {
+        return new ExtractRequest(
+                questionnaireResponse,
+                questionnaire,
+                Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
                 true,

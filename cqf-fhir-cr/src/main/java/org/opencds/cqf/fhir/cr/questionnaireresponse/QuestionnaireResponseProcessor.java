@@ -127,8 +127,7 @@ public class QuestionnaireResponseProcessor {
                 data,
                 useServerData,
                 libraryEngine,
-                modelResolver,
-                repository.fhirContext());
+                modelResolver);
         var processor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
         return processor.extract(request);
     }

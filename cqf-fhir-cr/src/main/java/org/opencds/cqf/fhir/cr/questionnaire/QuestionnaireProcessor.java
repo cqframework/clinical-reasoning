@@ -201,7 +201,6 @@ public class QuestionnaireProcessor {
     }
 
     public PopulateRequest buildPopulateRequest(
-            String operationName,
             IBaseResource questionnaire,
             String subjectId,
             List<IBase> context,
@@ -214,7 +213,6 @@ public class QuestionnaireProcessor {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
         }
         return new PopulateRequest(
-                operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 context,
@@ -303,15 +301,7 @@ public class QuestionnaireProcessor {
             boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(buildPopulateRequest(
-                "populate",
-                questionnaire,
-                subjectId,
-                context,
-                launchContext,
-                parameters,
-                data,
-                useServerData,
-                libraryEngine));
+                questionnaire, subjectId, context, launchContext, parameters, data, useServerData, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

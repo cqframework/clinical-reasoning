@@ -40,20 +40,20 @@ public class ExtractRequest implements IQuestionnaireRequest {
             IBaseBundle bundle,
             boolean useServerData,
             LibraryEngine libraryEngine,
-            ModelResolver modelResolver,
-            FhirContext fhirContext) {
+            ModelResolver modelResolver) {
+        checkNotNull(questionnaireResponse, "expected non-null value for questionnaireResponse");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.questionnaireResponse = questionnaireResponse;
+        this.questionnaire = questionnaire;
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.data = bundle;
         this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.fhirContext = fhirContext;
-        this.fhirVersion = fhirContext.getVersion().getVersion();
-        this.questionnaire = questionnaire;
+        this.fhirContext = this.libraryEngine.getRepository().fhirContext();
+        this.fhirVersion = questionnaireResponse.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = "";
     }
 

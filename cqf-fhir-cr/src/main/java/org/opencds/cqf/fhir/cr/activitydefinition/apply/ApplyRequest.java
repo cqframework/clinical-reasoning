@@ -51,6 +51,7 @@ public class ApplyRequest implements ICpgRequest {
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(activityDefinition, "expected non-null value for activityDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.activityDefinition = activityDefinition;

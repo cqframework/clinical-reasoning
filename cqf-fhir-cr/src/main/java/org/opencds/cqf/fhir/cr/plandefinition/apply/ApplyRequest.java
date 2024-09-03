@@ -71,6 +71,7 @@ public class ApplyRequest implements ICpgRequest {
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
+        checkNotNull(planDefinition, "expected non-null value for planDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.planDefinition = planDefinition;
@@ -155,16 +156,7 @@ public class ApplyRequest implements ICpgRequest {
 
     public PopulateRequest toPopulateRequest() {
         return new PopulateRequest(
-                "populate",
-                questionnaire,
-                subjectId,
-                null,
-                null,
-                parameters,
-                data,
-                useServerData,
-                libraryEngine,
-                modelResolver);
+                questionnaire, subjectId, null, null, parameters, data, useServerData, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {

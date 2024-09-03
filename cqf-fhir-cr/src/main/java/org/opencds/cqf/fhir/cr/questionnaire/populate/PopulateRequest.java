@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 
 public class PopulateRequest implements IQuestionnaireRequest {
-    private final String operationName;
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
     private final List<IBase> context;
@@ -36,7 +35,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private IBaseOperationOutcome operationOutcome;
 
     public PopulateRequest(
-            String operationName,
             IBaseResource questionnaire,
             IIdType subjectId,
             List<IBase> context,
@@ -46,9 +44,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
             boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(questionnaire, "expected non-null value for questionnaire");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.operationName = operationName;
         this.questionnaire = questionnaire;
         this.subjectId = subjectId;
         this.context = context;
@@ -77,7 +75,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @Override
     public String getOperationName() {
-        return operationName;
+        return "populate";
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -109,6 +110,10 @@ public class ResourceMatcherR4 implements ResourceMatcher {
             } else {
                 return false;
             }
+        }
+
+        if (pathResult instanceof IBaseEnumeration) {
+            return param.getValue().equals(((IBaseEnumeration<?>) pathResult).getValueAsString());
         }
 
         if (pathResult instanceof IPrimitiveType) {

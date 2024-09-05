@@ -49,4 +49,16 @@ public class PackageHelper {
         }
         return entry;
     }
+
+    public static IBaseBackboneElement deleteEntry(IBaseResource resource) {
+        final var fhirVersion = resource.getStructureFhirVersionEnum();
+        final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(),
+            resource);
+        var requestUrl = resource.fhirType();
+
+        final var request = BundleHelper.newRequest(fhirVersion, "DELETE", requestUrl);
+        BundleHelper.setEntryRequest(fhirVersion, entry, request);
+
+        return entry;
+    }
 }

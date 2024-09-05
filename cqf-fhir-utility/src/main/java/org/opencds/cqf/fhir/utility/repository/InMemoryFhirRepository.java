@@ -227,8 +227,16 @@ public class InMemoryFhirRepository implements Repository {
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                var resource = BundleHelper.getEntryResource(version, e);
+                var res = repository.delete(resource.getClass(), resource.getIdElement());
+                BundleHelper.addEntry(
+                    returnBundle,
+                    BundleHelper.newEntryWithResource(
+                        version, res.getResource()));
+
             } else {
-                throw new NotImplementedOperationException("Transaction stub only supports PUT or POST");
+                throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
             }
         });
         return returnBundle;

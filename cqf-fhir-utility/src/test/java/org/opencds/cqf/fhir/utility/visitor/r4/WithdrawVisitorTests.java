@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
@@ -49,24 +50,6 @@ class WithdrawVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
-    private final String specificationLibReference = "Library/SpecificationLibrary";
-    private final List<String> badVersionList = Arrays.asList(
-            "11asd1",
-            "1.1.3.1.1",
-            "1.|1.1.1",
-            "1/.1.1.1",
-            "-1.-1.2.1",
-            "1.-1.2.1",
-            "1.1.-2.1",
-            "7.1..21",
-            "1.2.1.3-draft",
-            "1.2.3-draft",
-            "3.2",
-            "1.",
-            "3.ad.2.",
-            "1.0.0.1",
-            "",
-            null);
 
     @BeforeEach
     void setup() {
@@ -98,6 +81,29 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert(!res.isEmpty());
+        assert(res.size() == 2);
+    }
+
+    @Test
+    void library_withdraw_No_draft_test() {
+        try {
+            Bundle bundle = (Bundle)
+                jsonParser.parseResource(
+                    WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+            spyRepository.transaction(bundle);
+            String version = "1.01.21";
+            Library library = spyRepository
+                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+            LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+            KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+            Parameters params = parameters(part("version", version));
+            libraryAdapter.accept(withdrawVisitor, spyRepository,
+                params);
+
+            fail("Trying to withdraw an active Library should throw an Exception");
+        } catch (PreconditionFailedException e) {
+            assert(e.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
+        }
     }
 }

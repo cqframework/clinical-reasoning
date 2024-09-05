@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,16 +20,13 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +39,10 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         if (!rootAdapter.getStatus().equals("draft")) {
             throw new PreconditionFailedException("Cannot withdraw an artifact that is not in draft status");
         }
-        var resourcesToUpdate = gatherOwnedChildren(rootAdapter, repository, new ArrayList<IDomainResource>());
+        var resToUpdate = new ArrayList<IDomainResource>();
+        resToUpdate.add(rootAdapter.get());
+
+        var resourcesToUpdate = gatherDependsOnChildren(rootAdapter, repository, resToUpdate);
 
         var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
 
@@ -56,14 +55,14 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private List<IDomainResource> gatherOwnedChildren(KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
-        adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
+    private List<IDomainResource> gatherDependsOnChildren(KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
+        adapter.getRelatedArtifactsOfType("depends-on").stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<KnowledgeArtifactAdapter> maybeArtifact = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (!resourcesToUpdate.contains(maybeArtifact.get().get())) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
-                    gatherOwnedChildren(maybeArtifact.get(), repository, resourcesToUpdate);
+                    gatherDependsOnChildren(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
             }
         });

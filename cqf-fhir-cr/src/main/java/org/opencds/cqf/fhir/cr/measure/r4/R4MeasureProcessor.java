@@ -18,13 +18,11 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
@@ -34,7 +32,7 @@ import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -45,10 +43,6 @@ public class R4MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
-
-    public R4MeasureProcessor(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
-        this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
-    }
 
     public R4MeasureProcessor(
             Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
@@ -116,7 +110,8 @@ public class R4MeasureProcessor {
 
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+            var helper = new R4DateHelper();
+            measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
 
         var url = measure.getLibrary().get(0).asStringValue();
@@ -177,12 +172,9 @@ public class R4MeasureProcessor {
     public Parameters makeParameters(Interval measurementPeriod) {
         Parameters parameters = new Parameters();
         if (measurementPeriod != null) {
-
-            Period period = new Period();
-            period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
-            period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
-
-            parameters.setParameter(MEASUREMENT_PERIOD_PARAMETER_NAME, period);
+            var helper = new R4DateHelper();
+            parameters.setParameter(
+                    MEASUREMENT_PERIOD_PARAMETER_NAME, helper.buildMeasurementPeriod(measurementPeriod));
         }
         return parameters;
     }
@@ -196,15 +188,6 @@ public class R4MeasureProcessor {
 
     protected Measure resolveById(IdType id) {
         return this.repository.read(Measure.class, id);
-    }
-
-    private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
     }
 
     private Map<String, Object> resolveParameterMap(Parameters parameters) {

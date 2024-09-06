@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
@@ -45,7 +44,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -67,6 +65,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
@@ -712,13 +711,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return cd;
     }
 
-    protected Period getPeriod(Interval measurementPeriod) {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
-        period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
-        return period;
-    }
-
     protected MeasureReport createMeasureReport(
             Measure measure,
             MeasureDef measureDef,
@@ -732,12 +724,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
             report.setSubject(new Reference(subjectIds.get(0)));
         }
-
+        var helper = new R4DateHelper();
         if (measurementPeriod != null) {
-            report.setPeriod(getPeriod(measurementPeriod));
-        } else if (measureDef.getDefaultMeasurementPeriod() != null) {
-            report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
+            report.setPeriod(helper.buildMeasurementPeriod((measurementPeriod)));
         }
+
         report.setMeasure(getMeasure(measure));
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());

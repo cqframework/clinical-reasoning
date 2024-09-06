@@ -133,25 +133,27 @@ public class ExpandHelper {
                         expandValueSet(
                                 includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, repository);
                     }
-                    Optional.ofNullable(getCodesInExpansion(fhirContext, includedVS.get())).ifPresent(e -> e.forEach(code -> {
-                        // Add the code if not already present
-                        var existingCodes = getCodesInExpansion(fhirContext, expansion);
-                        if (existingCodes == null
-                                || existingCodes.stream()
-                                        .noneMatch(expandedCode -> code.getSystem()
-                                                        .equals(expandedCode.getSystem())
-                                                && code.getCode().equals(expandedCode.getCode())
-                                                && (StringUtils.isEmpty(code.getVersion())
-                                                        || code.getVersion().equals(expandedCode.getVersion())))) {
-                            try {
-                                addCodeToExpansion(fhirContext, expansion, code);
-                            } catch (Exception ex) {
-                                throw new UnprocessableEntityException(String.format(
-                                        "Encountered exception attempting to expand ValueSet %s: %s",
-                                        includedVS.get().getId(), ex.getMessage()));
-                            }
-                        }
-                    }));
+                    Optional.ofNullable(getCodesInExpansion(fhirContext, includedVS.get()))
+                            .ifPresent(e -> e.forEach(code -> {
+                                // Add the code if not already present
+                                var existingCodes = getCodesInExpansion(fhirContext, expansion);
+                                if (existingCodes == null
+                                        || existingCodes.stream()
+                                                .noneMatch(expandedCode -> code.getSystem()
+                                                                .equals(expandedCode.getSystem())
+                                                        && code.getCode().equals(expandedCode.getCode())
+                                                        && (StringUtils.isEmpty(code.getVersion())
+                                                                || code.getVersion()
+                                                                        .equals(expandedCode.getVersion())))) {
+                                    try {
+                                        addCodeToExpansion(fhirContext, expansion, code);
+                                    } catch (Exception ex) {
+                                        throw new UnprocessableEntityException(String.format(
+                                                "Encountered exception attempting to expand ValueSet %s: %s",
+                                                includedVS.get().getId(), ex.getMessage()));
+                                    }
+                                }
+                            }));
                     // If any included expansion is naive it makes the expansion naive
                     if (includedVS.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());

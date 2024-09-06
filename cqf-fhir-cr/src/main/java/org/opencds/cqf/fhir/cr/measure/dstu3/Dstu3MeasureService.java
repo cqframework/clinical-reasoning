@@ -27,7 +27,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 
-public class Dstu3MeasureService {
+public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
@@ -93,18 +93,19 @@ public class Dstu3MeasureService {
      * @param terminologyEndpoint the endpoint of terminology services for your measure valuesets
      * @return the calculated MeasureReport
      */
+    @Override
     public MeasureReport evaluateMeasure(
-            IdType id,
-            String periodStart,
-            String periodEnd,
-            String reportType,
-            String subject,
-            String practitioner,
-            String lastReceivedOn,
-            String productLine,
-            Bundle additionalData,
-            Parameters parameters,
-            Endpoint terminologyEndpoint) {
+        IdType id,
+        String periodStart,
+        String periodEnd,
+        String reportType,
+        String subject,
+        String practitioner,
+        String lastReceivedOn,
+        String productLine,
+        Bundle additionalData,
+        Parameters parameters,
+        Endpoint terminologyEndpoint) {
 
         ensureSupplementalDataElementSearchParameter();
 

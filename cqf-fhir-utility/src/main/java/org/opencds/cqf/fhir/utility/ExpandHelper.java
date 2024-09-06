@@ -133,7 +133,7 @@ public class ExpandHelper {
                         expandValueSet(
                                 includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, repository);
                     }
-                    getCodesInExpansion(fhirContext, includedVS.get()).forEach(code -> {
+                    Optional.ofNullable(getCodesInExpansion(fhirContext, includedVS.get())).ifPresent(e -> e.forEach(code -> {
                         // Add the code if not already present
                         var existingCodes = getCodesInExpansion(fhirContext, expansion);
                         if (existingCodes == null
@@ -151,7 +151,7 @@ public class ExpandHelper {
                                         includedVS.get().getId(), ex.getMessage()));
                             }
                         }
-                    });
+                    }));
                     // If any included expansion is naive it makes the expansion naive
                     if (includedVS.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());

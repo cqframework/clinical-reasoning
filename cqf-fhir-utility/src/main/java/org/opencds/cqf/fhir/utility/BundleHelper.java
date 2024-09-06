@@ -4,9 +4,12 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class BundleHelper {
     private BundleHelper() {}
@@ -235,6 +238,32 @@ public class BundleHelper {
             default:
                 throw new IllegalArgumentException(
                         String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Gets request id if present
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return
+     */
+    public static Optional<IIdType> getEntryRequestId(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest().getUrl())
+                    .map(Canonicals::getIdPart).map(IdType::new);
+                    //.map(Element::getId);
+            case R4:
+                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest().getUrl())
+                    .map(Canonicals::getIdPart).map(org.hl7.fhir.r4.model.IdType::new);
+            case R5:
+                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest().getUrl())
+                    .map(Canonicals::getIdPart).map(org.hl7.fhir.r5.model.IdType::new);
+
+            default:
+                throw new IllegalArgumentException(
+                    String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 

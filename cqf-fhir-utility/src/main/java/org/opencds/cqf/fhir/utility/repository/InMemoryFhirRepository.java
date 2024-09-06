@@ -24,9 +24,12 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 
 public class InMemoryFhirRepository implements Repository {
 
@@ -228,12 +231,21 @@ public class InMemoryFhirRepository implements Repository {
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
-                var resource = BundleHelper.getEntryResource(version, e);
-                var res = repository.delete(resource.getClass(), resource.getIdElement());
-                BundleHelper.addEntry(
-                    returnBundle,
-                    BundleHelper.newEntryWithResource(
-                        version, res.getResource()));
+                if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
+                    var resourceClass = SearchHelper.getResourceClass(repository, Canonicals.getResourceType(e.fhirType()));
+                    var res = repository.delete(resourceClass, BundleHelper.getEntryRequestId(version, e).get());
+                    BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResource(
+                            version, res.getResource()));
+                } else {
+                    var resource = BundleHelper.getEntryResource(version, e);
+                    var res = repository.delete(resource.getClass(), resource.getIdElement());
+                    BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResource(
+                            version, res.getResource()));
+                }
 
             } else {
                 throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");

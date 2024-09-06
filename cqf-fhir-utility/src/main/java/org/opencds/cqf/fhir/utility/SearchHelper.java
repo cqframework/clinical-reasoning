@@ -31,8 +31,15 @@ public class SearchHelper {
                 repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }
 
+    /**
+     * Gets a resource class
+     *
+     * @param repository the repository to search
+     * @param resourceType String of the resource typeget
+     * @return
+     */
     @SuppressWarnings("unchecked")
-    protected static Class<IBaseResource> getResourceClass(Repository repository, String resourceType) {
+    public static Class<IBaseResource> getResourceClass(Repository repository, String resourceType) {
         return (Class<IBaseResource>)
                 repository.fhirContext().getResourceDefinition(resourceType).getImplementingClass();
     }

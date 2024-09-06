@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -180,7 +179,9 @@ public class Dstu3MeasureProcessor {
             }
             if (parameterMap.containsKey(param.getName())) {
                 if (parameterMap.get(param.getName()) instanceof List) {
-                    CollectionUtils.addIgnoreNull((List<?>) parameterMap.get(param.getName()), value);
+                    if (value != null) {
+                        ((List) parameterMap.get(param.getName())).add(value);
+                    }
                 } else {
                     parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
                 }

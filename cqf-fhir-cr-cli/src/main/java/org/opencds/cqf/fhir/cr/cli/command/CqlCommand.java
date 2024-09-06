@@ -124,6 +124,7 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
+    @SuppressWarnings("removal")
     private static class Logger implements ILoggingService {
 
         private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);

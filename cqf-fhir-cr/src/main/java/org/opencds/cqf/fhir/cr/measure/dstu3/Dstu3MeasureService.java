@@ -95,17 +95,17 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
      */
     @Override
     public MeasureReport evaluateMeasure(
-        IdType id,
-        String periodStart,
-        String periodEnd,
-        String reportType,
-        String subject,
-        String practitioner,
-        String lastReceivedOn,
-        String productLine,
-        Bundle additionalData,
-        Parameters parameters,
-        Endpoint terminologyEndpoint) {
+            IdType id,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            String subject,
+            String practitioner,
+            String lastReceivedOn,
+            String productLine,
+            Bundle additionalData,
+            Parameters parameters,
+            Endpoint terminologyEndpoint) {
 
         ensureSupplementalDataElementSearchParameter();
 

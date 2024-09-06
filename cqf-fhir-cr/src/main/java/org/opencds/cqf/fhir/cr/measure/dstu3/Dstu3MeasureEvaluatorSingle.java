@@ -13,15 +13,15 @@ import org.hl7.fhir.dstu3.model.Parameters;
 public interface Dstu3MeasureEvaluatorSingle {
 
     MeasureReport evaluateMeasure(
-        IdType id,
-        String periodStart,
-        String periodEnd,
-        String reportType,
-        String subject,
-        String practitioner,
-        String lastReceivedOn,
-        String productLine,
-        Bundle additionalData,
-        Parameters parameters,
-        Endpoint terminologyEndpoint);
+            IdType id,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            String subject,
+            String practitioner,
+            String lastReceivedOn,
+            String productLine,
+            Bundle additionalData,
+            Parameters parameters,
+            Endpoint terminologyEndpoint);
 }

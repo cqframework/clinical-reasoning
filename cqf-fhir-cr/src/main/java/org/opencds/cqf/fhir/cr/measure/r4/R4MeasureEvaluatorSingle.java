@@ -16,17 +16,17 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 public interface R4MeasureEvaluatorSingle {
 
     MeasureReport evaluate(
-        Either3<CanonicalType, IdType, Measure> measure,
-        String periodStart,
-        String periodEnd,
-        String reportType,
-        String subjectId,
-        String lastReceivedOn,
-        Endpoint contentEndpoint,
-        Endpoint terminologyEndpoint,
-        Endpoint dataEndpoint,
-        Bundle additionalData,
-        Parameters parameters,
-        String productLine,
-        String practitioner);
+            Either3<CanonicalType, IdType, Measure> measure,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            String subjectId,
+            String lastReceivedOn,
+            Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint,
+            Bundle additionalData,
+            Parameters parameters,
+            String productLine,
+            String practitioner);
 }

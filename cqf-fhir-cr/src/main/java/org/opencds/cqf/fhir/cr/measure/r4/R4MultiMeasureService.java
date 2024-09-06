@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
  * of measure resources. The output of this operation would be a bundle of MeasureReports instead of MeasureReport.
  */
-public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple  {
+public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
     private Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;

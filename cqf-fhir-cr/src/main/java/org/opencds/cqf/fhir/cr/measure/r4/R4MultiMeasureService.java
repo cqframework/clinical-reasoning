@@ -55,6 +55,7 @@ public class R4MultiMeasureService {
     public Bundle evaluate(
             List<IdType> measureId,
             List<String> measureUrl,
+            List<String> measureIdentifier,
             String periodStart,
             String periodEnd,
             String reportType,
@@ -76,7 +77,7 @@ public class R4MultiMeasureService {
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, null, measureUrl);
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
         var evalType = MeasureEvalType.fromCode(reportType)

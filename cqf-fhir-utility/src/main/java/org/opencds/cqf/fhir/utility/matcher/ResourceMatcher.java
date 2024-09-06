@@ -120,6 +120,14 @@ public interface ResourceMatcher {
                 } else if (param instanceof DateParam) {
                     match = isMatchDate((DateParam) param, r);
                 } else if (param instanceof TokenParam) {
+                    // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of
+                    // the value of the system property
+                    // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and
+                    // the value of [system] matches the system property of the Identifier or Coding
+                    // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
+                    // Coding/Identifier has no system property
+                    // [parameter]=[system]|: any element where the value of [system] matches the system property of the
+                    // Identifier or Coding
                     match = isMatchToken((TokenParam) param, r);
                     if (!match) {
                         var codes = getCodes(r);

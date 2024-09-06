@@ -13,10 +13,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Timing;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
@@ -69,5 +73,53 @@ public class ResourceMatcherR4 implements ResourceMatcher {
     @Override
     public Map<SPPathKey, IParsedExpression> getPathCache() {
         return pathCache;
+    }
+
+    @Override
+    public boolean isMatchToken(TokenParam param, IBase pathResult) {
+        if (param.getValue() == null) {
+            return true;
+        }
+
+        if (pathResult instanceof IIdType) {
+            var id = (IIdType) pathResult;
+            return param.getValue().equals(id.getIdPart());
+        }
+        if (pathResult instanceof Identifier) {
+            // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of the
+            // value of the system property
+            // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and the value
+            // of [system] matches the system property of the Identifier or Coding
+            // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
+            // Coding/Identifier has no system property
+            // [parameter]=[system]|: any element where the value of [system] matches the system property of the
+            // Identifier or Coding
+            var identifier = (Identifier) pathResult;
+            var system = identifier.getSystem();
+            var value = identifier.getValue();
+
+            if (param.getSystem() != null
+                    && param.getSystem().equals(system)
+                    && param.getValue() != null
+                    && param.getValue().equals(value)) {
+                return true;
+            } else if (param.getValue() != null && param.getValue().equals(value)) {
+                return true;
+            } else if (param.getSystem() != null && param.getSystem().equals(system)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if (pathResult instanceof IBaseEnumeration) {
+            return param.getValue().equals(((IBaseEnumeration<?>) pathResult).getValueAsString());
+        }
+
+        if (pathResult instanceof IPrimitiveType) {
+            return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+        }
+
+        return false;
     }
 }

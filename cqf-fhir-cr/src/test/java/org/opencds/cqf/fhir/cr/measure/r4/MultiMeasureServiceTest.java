@@ -9,6 +9,21 @@ class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test
+    void MultiMeasure_AllSubjects_MeasureIdentifier() {
+        var when = GIVEN_REPO
+                .when()
+                .measureIdentifier("test123")
+                .measureIdentifier("124")
+                .measureIdentifier("test126")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate();
+
+        when.then().hasMeasureReportCount(3).report();
+    }
+
+    @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureId() {
         var when = GIVEN_REPO
                 .when()
@@ -562,7 +577,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(2)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(2)

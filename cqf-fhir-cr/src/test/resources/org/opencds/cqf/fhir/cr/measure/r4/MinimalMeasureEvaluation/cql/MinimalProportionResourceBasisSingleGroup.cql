@@ -4,7 +4,7 @@ using FHIR version '4.0.1'
 
 include FHIRHelpers version '4.0.1' called FHIRHelpers
 
-parameter "Measurement Period" Interval<DateTime>
+parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)
 
 context Patient
 
@@ -49,3 +49,6 @@ define function "CalendarAgeInYearsAt"(BirthDateTime DateTime, AsOf DateTime):
 
 define function "LengthInDays"(Value Interval<DateTime>):
 	difference in days between start of Value and end of Value
+
+define "date of compliance":
+    "Measurement Period"

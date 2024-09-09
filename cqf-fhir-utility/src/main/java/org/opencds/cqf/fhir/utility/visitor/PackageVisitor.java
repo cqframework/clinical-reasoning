@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -178,7 +179,8 @@ public class PackageVisitor implements KnowledgeArtifactVisitor {
                     terminologyEndpoint.map(e -> (EndpointAdapter) createAdapterForResource(e)),
                     valueSets,
                     expandedList,
-                    repository);
+                    repository,
+                    new Date());
         });
     }
 

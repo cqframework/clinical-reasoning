@@ -1,7 +1,7 @@
 {
-  "id": "MinimalProportionResourceBasisSingleGroup",
+  "id": "MinimalProportionResourceBasisSingleGroupWithBadDOC",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/MinimalProportionResourceBasisSingleGroup",
+  "url": "http://example.com/Measure/MinimalProportionResourceBasisSingleGroupWithBadDOC",
   "library": [
     "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
   ],
@@ -24,6 +24,12 @@
   },
   "group": [
     {
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression",
+        "valueExpression": {
+          "language": "text/cql-identifier"
+        }
+      } ],
       "population": [
         {
           "id": "initial-population",

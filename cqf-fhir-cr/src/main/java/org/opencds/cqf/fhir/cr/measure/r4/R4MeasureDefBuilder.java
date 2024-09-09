@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -94,6 +97,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 // add to definition
                 populations.add(new PopulationDef(
                         "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
+            }
+            if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
+                    && checkPopulationForCode(populations, DATEOFCOMPLIANCE) == null) {
+                // add to definition
+                var expressionType = (Expression) group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                        .getValue();
+                if (!expressionType.hasExpression()) {
+                    throw new IllegalArgumentException(String.format(
+                            "no expression was listed for extension: %s", CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL));
+                }
+                var expression = expressionType.getExpression();
+                populations.add(new PopulationDef(
+                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression));
             }
 
             // Stratifiers

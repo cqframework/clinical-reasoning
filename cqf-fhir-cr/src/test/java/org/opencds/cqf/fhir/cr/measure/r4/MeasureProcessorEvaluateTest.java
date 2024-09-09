@@ -16,6 +16,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
 class MeasureProcessorEvaluateTest {
@@ -26,18 +27,27 @@ class MeasureProcessorEvaluateTest {
 
     @Test
     void measure_eval() {
+
+        var start = "2022-01-01";
+        var end = "2022-06-29";
+        var helper = new R4DateHelper();
+        var measurementPeriod = helper.buildMeasurementPeriod(start, end);
         var report = given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(start)
+                .periodEnd(end)
                 .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
                 .reportType("subject")
                 .evaluate()
                 .then()
                 .report();
 
-        assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
-        assertEquals("2022-06-29", formatter.format(report.getPeriod().getEnd()));
+        assertEquals(
+                measurementPeriod.getStart().toInstant(),
+                report.getPeriod().getStart().toInstant());
+        assertEquals(
+                measurementPeriod.getEnd().toInstant(),
+                report.getPeriod().getEnd().toInstant());
     }
 
     @Test

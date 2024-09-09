@@ -5,7 +5,7 @@ library EXM108 version '8.3.000'
 
 using FHIR version '4.0.1'
 
-include FHIRHelpers version '4.0.1' called FHIRHelpers
+include FHIRHelpers version '4.0.001' called FHIRHelpers
 include MATGlobalCommonFunctions version '5.0.000' called Global
 include SupplementalDataElements version '2.0.0' called SDE
 include VTEICU version '5.0.000' called VTEICU

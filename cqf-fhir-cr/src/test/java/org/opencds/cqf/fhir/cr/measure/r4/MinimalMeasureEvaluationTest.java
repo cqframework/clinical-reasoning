@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -584,7 +586,7 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(2)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(2);
@@ -875,5 +877,64 @@ class MinimalMeasureEvaluationTest {
                 .up()
                 .population("numerator")
                 .hasCount(0);
+    }
+
+    @Test
+    void ProportionResourceBasisSingleGroup_Subject_WithDOC() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionResourceBasisSingleGroupWithDOC")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .subject("Patient/female-1988")
+                .evaluate();
+        when.then()
+                .hasReportType("Individual")
+                .hasSubjectReference("Patient/female-1988")
+                .hasEvaluatedResourceCount(3)
+                .firstGroup()
+                .hasDateOfCompliance()
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .hasScore("1.0");
+    }
+
+    @Test
+    void ProportionResourceBasisSingleGroup_Subject_WithBadDOC() {
+        try {
+            var when = GIVEN_REPO
+                    .when()
+                    .measureId("MinimalProportionResourceBasisSingleGroupWithBadDOC")
+                    .periodStart("2024-01-01")
+                    .periodEnd("2024-12-31")
+                    .reportType("subject")
+                    .subject("Patient/female-1988")
+                    .evaluate();
+
+            when.then().report();
+            Assertions.fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "no expression was listed for extension: http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression"));
+        }
     }
 }

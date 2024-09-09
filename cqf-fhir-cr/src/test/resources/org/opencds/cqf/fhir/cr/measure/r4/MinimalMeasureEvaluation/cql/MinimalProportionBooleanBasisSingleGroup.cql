@@ -1,5 +1,7 @@
 library MinimalProportionBooleanBasisSingleGroup
+
 using FHIR version '4.0.1'
+
 parameter "Measurement Period" Interval<DateTime>
 
 context Patient
@@ -28,3 +30,6 @@ define "Measure Population Exclusions":
 
 define "Measure Population":
     "Denominator"
+
+define "date of compliance":
+    "Measurement Period"

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
+
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,12 +26,12 @@ import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -40,10 +42,6 @@ public class R4MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
-
-    public R4MeasureProcessor(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
-        this(repository, measureEvaluationOptions, new R4RepositorySubjectProvider());
-    }
 
     public R4MeasureProcessor(
             Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
@@ -111,7 +109,8 @@ public class R4MeasureProcessor {
 
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+            var helper = new R4DateHelper();
+            measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
 
         var url = measure.getLibrary().get(0).asStringValue();
@@ -162,9 +161,21 @@ public class R4MeasureProcessor {
                                     ? MeasureEvalType.POPULATION
                                     : MeasureEvalType.SUBJECT);
         }
+        // Library Evaluate
+        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        var params = makeParameters(measurementPeriod);
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id, params);
+        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod, libraryEngine, id, params);
+    }
 
-        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure);
-        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod);
+    public Parameters makeParameters(Interval measurementPeriod) {
+        Parameters parameters = new Parameters();
+        if (measurementPeriod != null) {
+            var helper = new R4DateHelper();
+            parameters.setParameter(
+                    MEASUREMENT_PERIOD_PARAMETER_NAME, helper.buildMeasurementPeriod(measurementPeriod));
+        }
+        return parameters;
     }
 
     protected Measure resolveByUrl(CanonicalType url) {
@@ -176,31 +187,6 @@ public class R4MeasureProcessor {
 
     protected Measure resolveById(IdType id) {
         return this.repository.read(Measure.class, id);
-    }
-
-    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-        switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
-                return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
-                return MeasureReportType.PATIENTLIST;
-            case POPULATION:
-                return MeasureReportType.SUMMARY;
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
-        }
-    }
-
-    private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
     }
 
     private Map<String, Object> resolveParameterMap(Parameters parameters) {

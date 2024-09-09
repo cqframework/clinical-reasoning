@@ -57,7 +57,11 @@ public enum MeasurePopulationType {
     TOTALNUMERATOR(
             "total-numerator",
             "Total Numerator",
-            "The calculated numerator value used to calculate the measure score from Numerator and Numerator-Exclusion values");
+            "The calculated numerator value used to calculate the measure score from Numerator and Numerator-Exclusion values"),
+    DATEOFCOMPLIANCE(
+            "date-compliance",
+            "Date of Compliance",
+            "The calculated date interval representing when the subject should receive criteria of Quality Measure");
     private String code;
     private String display;
     private String definition;

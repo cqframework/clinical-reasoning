@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
-public class R4MeasureService {
+public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
@@ -24,6 +24,7 @@ public class R4MeasureService {
         this.measureEvaluationOptions = measureEvaluationOptions;
     }
 
+    @Override
     public MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
             String periodStart,

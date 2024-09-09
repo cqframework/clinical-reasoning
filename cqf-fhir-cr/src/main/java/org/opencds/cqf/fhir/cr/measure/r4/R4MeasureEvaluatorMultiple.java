@@ -13,18 +13,18 @@ import org.hl7.fhir.r4.model.Parameters;
 public interface R4MeasureEvaluatorMultiple {
 
     Bundle evaluate(
-        List<IdType> measureId,
-        List<String> measureUrl,
-        List<String> measureIdentifier,
-        String periodStart,
-        String periodEnd,
-        String reportType,
-        String subject, // practitioner passed in here
-        Endpoint contentEndpoint,
-        Endpoint terminologyEndpoint,
-        Endpoint dataEndpoint,
-        Bundle additionalData,
-        Parameters parameters,
-        String productLine,
-        String reporter);
+            List<IdType> measureId,
+            List<String> measureUrl,
+            List<String> measureIdentifier,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            String subject, // practitioner passed in here
+            Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint,
+            Bundle additionalData,
+            Parameters parameters,
+            String productLine,
+            String reporter);
 }

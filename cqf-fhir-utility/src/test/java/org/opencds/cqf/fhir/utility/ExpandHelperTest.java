@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -37,6 +38,7 @@ public class ExpandHelperTest {
     @Test
     void expandGrouperAddsLeafCodesToGrouperExpansionWithoutEndpointTest() {
         var leafUrl = "www.test.com/fhir/ValueSet/leaf";
+        var expansionDate = new Date();
         var grouper = new ValueSet();
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
         var leaf = createLeafWithUrl(leafUrl);
@@ -55,8 +57,11 @@ public class ExpandHelperTest {
                 Optional.empty(),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                expansionDate);
         assertEquals(3, grouper.getExpansion().getContains().size());
+        assertEquals(
+                expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
         verify(client, never()).expand(any(ValueSetAdapter.class), any(), any());
@@ -92,7 +97,8 @@ public class ExpandHelperTest {
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, times(1)).getResource(any(), any(), any());
@@ -135,7 +141,8 @@ public class ExpandHelperTest {
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                new Date());
         var parametersCaptor = ArgumentCaptor.forClass(ParametersAdapter.class);
         verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), parametersCaptor.capture());
         verify(rep, times(0)).search(any(), any(), any(), any());
@@ -186,7 +193,8 @@ public class ExpandHelperTest {
                     Optional.of(factory.createEndpoint(endpoint)),
                     new ArrayList<ValueSetAdapter>(),
                     new ArrayList<String>(),
-                    rep);
+                    rep,
+                    new Date());
         } catch (Exception e) {
             notExpectingAnyException = e;
         }
@@ -239,7 +247,8 @@ public class ExpandHelperTest {
                     Optional.of(factory.createEndpoint(endpoint)),
                     new ArrayList<ValueSetAdapter>(),
                     new ArrayList<String>(),
-                    rep);
+                    rep,
+                    new Date());
         } catch (Exception e) {
             notExpectingAnyException = e;
         }

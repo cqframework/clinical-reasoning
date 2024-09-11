@@ -232,21 +232,21 @@ public class InMemoryFhirRepository implements Repository {
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
                 if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-                    var resourceType = Canonicals.getResourceType(((BundleEntryComponent) e).getRequest().getUrl());
+                    var resourceType = Canonicals.getResourceType(
+                            ((BundleEntryComponent) e).getRequest().getUrl());
                     var resourceClass = SearchHelper.getResourceClass(repository, resourceType);
-                    var res = repository.delete(resourceClass, BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
-                    BundleHelper.addEntry(
-                        returnBundle,
-                        BundleHelper.newEntryWithResource(
-                            version, res.getResource()));
+                    var res = repository.delete(
+                            resourceClass,
+                            BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
+                    BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(version, res.getResource()));
                 } else {
                     var resource = BundleHelper.getEntryResource(version, e);
                     var res = repository.delete(resource.getClass(), resource.getIdElement());
                     var location = res.getId().getValue();
                     BundleHelper.addEntry(
-                        returnBundle,
-                        BundleHelper.newEntryWithResponse(
-                            version, BundleHelper.newResponseWithLocation(version, location)));
+                            returnBundle,
+                            BundleHelper.newEntryWithResponse(
+                                    version, BundleHelper.newResponseWithLocation(version, location)));
                 }
 
             } else {

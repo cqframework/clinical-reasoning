@@ -52,8 +52,7 @@ public class PackageHelper {
 
     public static IBaseBackboneElement deleteEntry(IBaseResource resource) {
         final var fhirVersion = resource.getStructureFhirVersionEnum();
-        final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(),
-            resource);
+        final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(), resource);
         var requestUrl = resource.fhirType() + "/" + resource.getIdElement().getIdPart();
 
         final var request = BundleHelper.newRequest(fhirVersion, "DELETE", requestUrl);

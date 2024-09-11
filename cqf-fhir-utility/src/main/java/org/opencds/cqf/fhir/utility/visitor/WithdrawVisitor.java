@@ -40,13 +40,18 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private List<IDomainResource> gatherDependsOnChildren(KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
+    private List<IDomainResource> gatherDependsOnChildren(
+            KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
         adapter.getRelatedArtifactsOfType("depends-on").stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
-            Optional<KnowledgeArtifactAdapter> maybeArtifact = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
+            Optional<KnowledgeArtifactAdapter> maybeArtifact =
+                    VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
-                if (resourcesToUpdate.stream().filter(rtu -> rtu.getId().equals(maybeArtifact.get().getId().toString())).collect(
-                    Collectors.toList()).isEmpty()) {
+                if (resourcesToUpdate.stream()
+                        .filter(rtu ->
+                                rtu.getId().equals(maybeArtifact.get().getId().toString()))
+                        .collect(Collectors.toList())
+                        .isEmpty()) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     gatherDependsOnChildren(maybeArtifact.get(), repository, resourcesToUpdate);
                 }

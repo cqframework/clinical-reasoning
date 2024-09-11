@@ -1,48 +1,27 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.DraftVisitor;
 import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.visitor.WithdrawVisitor;
 
@@ -70,12 +49,10 @@ class WithdrawVisitorTests {
         Bundle bundle = (Bundle)
                 jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw.json"));
         Bundle tsBundle = spyRepository.transaction(bundle);
-        //InMemoryFhirRepository bug - need to get id like this
+        // InMemoryFhirRepository bug - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
-        Library library = spyRepository
-                .read(Library.class, new IdType(id))
-                .copy();
+        Library library = spyRepository.read(Library.class, new IdType(id)).copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
         Parameters params = parameters(part("version", version));
@@ -83,29 +60,27 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert(res.size() == 37);
+        assert (res.size() == 37);
     }
 
     @Test
     void library_withdraw_No_draft_test() {
         try {
-            Bundle bundle = (Bundle)
-                jsonParser.parseResource(
+            Bundle bundle = (Bundle) jsonParser.parseResource(
                     WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
             spyRepository.transaction(bundle);
             String version = "1.01.21";
             Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
-                .copy();
+                    .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                    .copy();
             LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
             KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
             Parameters params = parameters(part("version", version));
-            libraryAdapter.accept(withdrawVisitor, spyRepository,
-                params);
+            libraryAdapter.accept(withdrawVisitor, spyRepository, params);
 
             fail("Trying to withdraw an active Library should throw an Exception");
         } catch (PreconditionFailedException e) {
-            assert(e.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
+            assert (e.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
         }
     }
 }

@@ -115,7 +115,7 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
+        var outcome = new MethodOutcome(id, false);
         var resources = resourceMap.computeIfAbsent(id.getResourceType(), r -> new HashMap<>());
         var keyId = id.toUnqualifiedVersionless();
         if (resources.containsKey(keyId)) {
@@ -241,10 +241,11 @@ public class InMemoryFhirRepository implements Repository {
                 } else {
                     var resource = BundleHelper.getEntryResource(version, e);
                     var res = repository.delete(resource.getClass(), resource.getIdElement());
+                    var location = res.getId().getValue();
                     BundleHelper.addEntry(
                         returnBundle,
-                        BundleHelper.newEntryWithResource(
-                            version, res.getResource()));
+                        BundleHelper.newEntryWithResponse(
+                            version, BundleHelper.newResponseWithLocation(version, location)));
                 }
 
             } else {

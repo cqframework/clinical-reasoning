@@ -68,11 +68,13 @@ class WithdrawVisitorTests {
     @Test
     void library_withdraw_test() {
         Bundle bundle = (Bundle)
-                jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
-        String version = "1.01.21";
+                jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw.json"));
+        Bundle tsBundle = spyRepository.transaction(bundle);
+        //InMemoryFhirRepository bug - need to get id like this
+        String id = tsBundle.getEntry().get(0).getResponse().getLocation();
+        String version = "1.1.0-draft";
         Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .read(Library.class, new IdType(id))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
@@ -81,7 +83,7 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert(res.size() == 2);
+        assert(res.size() == 37);
     }
 
     @Test

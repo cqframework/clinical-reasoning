@@ -54,7 +54,7 @@ public class PackageHelper {
         final var fhirVersion = resource.getStructureFhirVersionEnum();
         final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(),
             resource);
-        var requestUrl = resource.fhirType();
+        var requestUrl = resource.fhirType() + "/" + resource.getIdElement().getIdPart();
 
         final var request = BundleHelper.newRequest(fhirVersion, "DELETE", requestUrl);
         BundleHelper.setEntryRequest(fhirVersion, entry, request);

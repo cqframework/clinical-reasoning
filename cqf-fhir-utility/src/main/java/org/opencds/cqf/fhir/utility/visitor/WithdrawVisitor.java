@@ -37,9 +37,7 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
             BundleHelper.addEntry(transactionBundle, entry);
         }
 
-        var retBundle = repository.transaction(transactionBundle);
-
-        return transactionBundle;
+        return repository.transaction(transactionBundle);
     }
 
     private List<IDomainResource> gatherDependsOnChildren(KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {

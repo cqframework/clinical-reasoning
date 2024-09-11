@@ -232,8 +232,9 @@ public class InMemoryFhirRepository implements Repository {
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
                 if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-                    var resourceClass = SearchHelper.getResourceClass(repository, Canonicals.getResourceType(e.fhirType()));
-                    var res = repository.delete(resourceClass, BundleHelper.getEntryRequestId(version, e).get());
+                    var resourceType = Canonicals.getResourceType(((BundleEntryComponent) e).getRequest().getUrl());
+                    var resourceClass = SearchHelper.getResourceClass(repository, resourceType);
+                    var res = repository.delete(resourceClass, BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
                     BundleHelper.addEntry(
                         returnBundle,
                         BundleHelper.newEntryWithResource(

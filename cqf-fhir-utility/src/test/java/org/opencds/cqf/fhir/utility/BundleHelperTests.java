@@ -12,9 +12,17 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newRequest;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 
 class BundleHelperTests {
@@ -105,5 +113,66 @@ class BundleHelperTests {
         assertEquals(resource, getEntryResourceFirstRep(bundle));
         assertEquals(resource, getEntryResource(fhirVersion, entry));
         assertFalse(getEntryResources(bundle).isEmpty());
+    }
+
+    @Test
+    void isEntryRequestDeleteDstu3() {
+        org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundle = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent().setRequest(
+            new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent().setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.DELETE));
+        var res = BundleHelper.isEntryRequestDelete(FhirVersionEnum.DSTU3, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
+    void isEntryRequestDeleteR4() {
+        BundleEntryComponent bundle = new Bundle.BundleEntryComponent().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.DELETE));
+        var res = BundleHelper.isEntryRequestDelete(FhirVersionEnum.R4, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
+    void isEntryRequestDeleteR5() {
+        org.hl7.fhir.r5.model.Bundle.BundleEntryComponent bundle = new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent().setRequest(
+            new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent().setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE));
+        var res = BundleHelper.isEntryRequestDelete(FhirVersionEnum.R5, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
+    void getEntryRequestIdDstu3() {
+        org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundle = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent().setRequest(
+            new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent().setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.GET));
+
+        bundle.getRequest().setUrl("Library/123");
+
+        var res = BundleHelper.getEntryRequestId(FhirVersionEnum.DSTU3, bundle);
+
+        assertEquals(new org.hl7.fhir.dstu3.model.IdType("123"), res.get());
+    }
+
+    @Test
+    void getEntryRequestIdR4() {
+        BundleEntryComponent bundle = new Bundle.BundleEntryComponent().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET));
+
+        bundle.getRequest().setUrl("Library/123");
+
+        var res = BundleHelper.getEntryRequestId(FhirVersionEnum.R4, bundle);
+
+        assertEquals(new IdType("123"), res.get());
+    }
+
+    @Test
+    void getEntryRequestIdR5() {
+        org.hl7.fhir.r5.model.Bundle.BundleEntryComponent bundle = new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent().setRequest(
+            new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent().setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.GET));
+
+        bundle.getRequest().setUrl("Library/123");
+
+        var res = BundleHelper.getEntryRequestId(FhirVersionEnum.R5, bundle);
+
+        assertEquals(new org.hl7.fhir.r5.model.IdType("123"), res.get());
     }
 }

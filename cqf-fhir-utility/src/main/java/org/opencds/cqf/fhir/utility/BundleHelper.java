@@ -4,11 +4,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 
 public class BundleHelper {
     private BundleHelper() {}
@@ -198,17 +200,17 @@ public class BundleHelper {
         switch (fhirVersion) {
             case DSTU3:
                 return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
+                        .map(Bundle.BundleEntryRequestComponent::getMethod)
                         .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.DELETE)
                         .isPresent();
             case R4:
                 return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
+                        .map(BundleEntryRequestComponent::getMethod)
                         .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE)
                         .isPresent();
             case R5:
                 return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
+                        .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
                         .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE)
                         .isPresent();
 

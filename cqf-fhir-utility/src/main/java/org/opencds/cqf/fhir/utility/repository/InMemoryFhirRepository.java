@@ -240,13 +240,7 @@ public class InMemoryFhirRepository implements Repository {
                             BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
                     BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(version, res.getResource()));
                 } else {
-                    var resource = BundleHelper.getEntryResource(version, e);
-                    var res = repository.delete(resource.getClass(), resource.getIdElement());
-                    var location = res.getId().getValue();
-                    BundleHelper.addEntry(
-                            returnBundle,
-                            BundleHelper.newEntryWithResponse(
-                                    version, BundleHelper.newResponseWithLocation(version, location)));
+                    throw new ResourceNotFoundException("Trying to delete an entry without id");
                 }
 
             } else {

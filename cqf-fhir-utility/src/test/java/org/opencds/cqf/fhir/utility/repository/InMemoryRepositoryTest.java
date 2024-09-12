@@ -82,7 +82,7 @@ class InMemoryRepositoryTest {
     @Test
     void linkNotImplemented() {
         try {
-            repository.link(Bundle.class,"Library/example1");
+            repository.link(Bundle.class, "Library/example1");
         } catch (NotImplementedException e) {
             assertEquals("Paging is not currently supported", e.getMessage());
         }
@@ -102,7 +102,7 @@ class InMemoryRepositoryTest {
         try {
             repository.invoke("someName", new Parameters());
         } catch (NotImplementedException e) {
-            assertNull( e.getMessage());
+            assertNull(e.getMessage());
         }
     }
 }

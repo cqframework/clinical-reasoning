@@ -112,6 +112,7 @@ public class R4MeasureProcessor {
 
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
+            // LUKETODO:
             measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
         }
 
@@ -196,6 +197,7 @@ public class R4MeasureProcessor {
     }
 
     private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
+        // LUKETODO:  this is where the fix needs to happen to consider timezones:
         // resolve the measurement period
         return new Interval(
                 DateHelper.resolveRequestDate(periodStart, true),

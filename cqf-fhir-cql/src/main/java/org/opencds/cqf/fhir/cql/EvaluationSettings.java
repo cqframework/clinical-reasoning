@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,7 @@ public class EvaluationSettings {
 
     private RetrieveSettings retrieveSettings;
     private TerminologySettings terminologySettings;
+    private ZoneId clientTimezone;
 
     public static EvaluationSettings getDefault() {
         EvaluationSettings settings = new EvaluationSettings();
@@ -111,5 +113,13 @@ public class EvaluationSettings {
 
     public void setTerminologySettings(TerminologySettings terminologySettings) {
         this.terminologySettings = terminologySettings;
+    }
+
+    public ZoneId getClientTimezone() {
+        return clientTimezone;
+    }
+
+    public void setClientTimezone(ZoneId theClientTimezone) {
+        clientTimezone = theClientTimezone;
     }
 }

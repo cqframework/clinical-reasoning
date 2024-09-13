@@ -18,7 +18,12 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
  * datetime, it's used. If not the timezone of the local system is used.
  */
 public class DateHelper {
+    // LUKETODO: what to do, if anything, about this?
     public static DateTime resolveRequestDate(String date, boolean start) {
+        return resolveRequestDate(date, start, ZoneId.systemDefault());
+    }
+
+    public static DateTime resolveRequestDate(String date, boolean start, ZoneId fallbackTimezone) {
         // ISO Instance Format
         if (date.contains("Z")) {
             var offset = Instant.parse(date).atOffset(ZoneOffset.UTC);
@@ -35,15 +40,15 @@ public class DateHelper {
         // Local DateTime
         if (date.contains("T")) {
             var offset = LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    .atZone(ZoneId.systemDefault())
-                    .toOffsetDateTime();
+                .atZone(fallbackTimezone)
+                .toOffsetDateTime();
             return new DateTime(offset);
         }
 
-        return resolveDate(start, date);
+        return resolveDate(start, date, fallbackTimezone);
     }
 
-    private static DateTime resolveDate(boolean start, String dateString) {
+    private static DateTime resolveDate(boolean start, String dateString, ZoneId fallbackTimezone) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
 
@@ -102,7 +107,7 @@ public class DateHelper {
         }
 
         // TODO: Seems like we might want set the precision appropriately here?
-        var offset = calendar.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+        var offset = calendar.toInstant().atZone(fallbackTimezone).toOffsetDateTime();
         return new DateTime(offset);
     }
 }

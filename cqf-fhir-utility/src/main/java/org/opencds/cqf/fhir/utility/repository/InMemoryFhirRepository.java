@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -94,7 +93,7 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
             I id, P patchParameters, Map<String, String> headers) {
-        throw new NotImplementedException("The PATCH operation is not currently supported");
+        throw new NotImplementedOperationException("The PATCH operation is not currently supported");
     }
 
     @Override
@@ -195,17 +194,17 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        throw new NotImplementedException("Paging is not currently supported");
+        throw new NotImplementedOperationException("Paging is not currently supported");
     }
 
     @Override
     public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-        throw new NotImplementedException("The capabilities interaction is not currently supported");
+        throw new NotImplementedOperationException("The capabilities interaction is not currently supported");
     }
 
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        throw new NotImplementedException("The transaction operation is not currently supported");
+        throw new NotImplementedOperationException("The transaction operation is not currently supported");
     }
 
     @SuppressWarnings("unchecked")
@@ -237,12 +236,12 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters> R invoke(
             String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new NotImplementedException();
+        throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
     @Override
     public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-        throw new NotImplementedException();
+        throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
     @Override
@@ -254,37 +253,37 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
             Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-        throw new NotImplementedException();
+        throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new NotImplementedException();
+        throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
     @Override
     public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
             I id, String name, P parameters, Map<String, String> headers) {
-        throw new NotImplementedException();
+        throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters> B history(
             P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new NotImplementedException("The history interaction is not currently supported");
+        throw new NotImplementedOperationException("The history interaction is not currently supported");
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
             Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new NotImplementedException("The history interaction is not currently supported");
+        throw new NotImplementedOperationException("The history interaction is not currently supported");
     }
 
     @Override
     public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
             I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-        throw new NotImplementedException("The history interaction is not currently supported");
+        throw new NotImplementedOperationException("The history interaction is not currently supported");
     }
 
     @Override

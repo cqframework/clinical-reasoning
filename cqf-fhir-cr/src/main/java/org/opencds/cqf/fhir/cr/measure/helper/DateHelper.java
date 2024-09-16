@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 
@@ -18,12 +19,8 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
  * datetime, it's used. If not the timezone of the local system is used.
  */
 public class DateHelper {
-    // LUKETODO: what to do, if anything, about this?
-    public static DateTime resolveRequestDate(String date, boolean start) {
-        return resolveRequestDate(date, start, ZoneId.systemDefault());
-    }
-
     public static DateTime resolveRequestDate(String date, boolean start, ZoneId fallbackTimezone) {
+        Objects.requireNonNull(fallbackTimezone);
         // ISO Instance Format
         if (date.contains("Z")) {
             var offset = Instant.parse(date).atOffset(ZoneOffset.UTC);
@@ -62,7 +59,7 @@ public class DateHelper {
             throw new IllegalArgumentException("Invalid date");
         }
 
-        calendar.setTimeZone(TimeZone.getDefault());
+        calendar.setTimeZone(TimeZone.getTimeZone(fallbackTimezone));
 
         // Set year
         calendar.set(Calendar.YEAR, dateVals.get(0));

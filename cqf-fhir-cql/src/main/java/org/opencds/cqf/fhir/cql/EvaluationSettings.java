@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -119,7 +120,14 @@ public class EvaluationSettings {
         return clientTimezone;
     }
 
-    public void setClientTimezone(ZoneId theClientTimezone) {
+    // LUKETODO:  consider merging the getters:
+    public ZoneId getClientTimezoneFallbackToUtc() {
+        return Optional.ofNullable(clientTimezone)
+            .orElse(ZoneId.of("UTC"));
+    }
+
+    public EvaluationSettings setClientTimezone(ZoneId theClientTimezone) {
         clientTimezone = theClientTimezone;
+        return this;
     }
 }

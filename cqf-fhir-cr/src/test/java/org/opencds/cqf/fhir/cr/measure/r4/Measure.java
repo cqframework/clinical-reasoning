@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -93,6 +94,8 @@ public class Measure {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
             this.evaluationOptions
                     .getEvaluationSettings()
+                    // LUKETODO:  test this on a computer set to Mountain time
+                    .setClientTimezone(ZoneId.systemDefault())
                     .getRetrieveSettings()
                     .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
                     .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);

@@ -176,6 +176,7 @@ class SimpleMeasureProcessorTest {
         // Need to make the test smart enough to handle that.
         assertEquals(report.getPeriod().getStartElement().getYear(), (Integer) 2018);
         // assertEquals(report.getPeriod().getStartElement().getMonth(), (Integer)12);
+        // LUKETODO:
         assertEquals(report.getPeriod().getStartElement().getDay(), (Integer) 31);
 
         assertEquals(report.getPeriod().getEndElement().getYear(), (Integer) 2019);

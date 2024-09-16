@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.helper.IntervalHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -79,7 +80,7 @@ public class Dstu3MeasureProcessor {
 
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
+            measurementPeriod = IntervalHelper.buildMeasurementPeriod(periodStart, periodEnd, measureEvaluationOptions.getEvaluationSettings().getClientTimezoneFallbackToUtc());
         }
 
         var reference = measure.getLibrary().get(0);
@@ -152,15 +153,6 @@ public class Dstu3MeasureProcessor {
                 throw new IllegalArgumentException(
                         String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
         }
-    }
-
-    private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
     }
 
     private Map<String, Object> resolveParameterMap(Parameters parameters) {

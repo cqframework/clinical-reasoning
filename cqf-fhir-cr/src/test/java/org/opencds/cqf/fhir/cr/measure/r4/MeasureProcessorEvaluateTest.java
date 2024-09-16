@@ -36,6 +36,7 @@ class MeasureProcessorEvaluateTest {
                 .then()
                 .report();
 
+        // LUKETODO:
         assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
         assertEquals("2022-06-29", formatter.format(report.getPeriod().getEnd()));
     }
@@ -57,6 +58,7 @@ class MeasureProcessorEvaluateTest {
                 .hasMeasureVersion("0.000.01")
                 .report();
 
+        // LUKETODO:
         assertEquals("2022-01-01", formatter.format(report.getPeriod().getStart()));
         assertEquals("2022-01-31", formatter.format(report.getPeriod().getEnd()));
     }

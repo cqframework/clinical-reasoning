@@ -144,6 +144,20 @@ class BundleHelperTests {
     }
 
     @Test
+    void isEntryRequestDeleteUnsupported() {
+        try {
+            org.hl7.fhir.r5.model.Bundle.BundleEntryComponent bundle =
+                    new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
+                            .setRequest(new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
+                                    .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE));
+
+            BundleHelper.isEntryRequestDelete(FhirVersionEnum.DSTU2, bundle);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unsupported version of FHIR"));
+        }
+    }
+
+    @Test
     void getEntryRequestIdDstu3() {
         org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundle =
                 new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
@@ -181,5 +195,19 @@ class BundleHelperTests {
         var res = BundleHelper.getEntryRequestId(FhirVersionEnum.R5, bundle);
 
         assertEquals(new org.hl7.fhir.r5.model.IdType("123"), res.get());
+    }
+
+    @Test
+    void getEntryRequestIdUnsupported() {
+        try {
+            org.hl7.fhir.r5.model.Bundle.BundleEntryComponent bundle =
+                    new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
+                            .setRequest(new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
+                                    .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE));
+
+            BundleHelper.getEntryRequestId(FhirVersionEnum.DSTU2, bundle);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unsupported version of FHIR"));
+        }
     }
 }

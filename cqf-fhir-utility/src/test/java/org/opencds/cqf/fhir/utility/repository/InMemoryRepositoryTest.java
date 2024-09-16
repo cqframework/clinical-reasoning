@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -83,7 +84,7 @@ class InMemoryRepositoryTest {
     void linkNotImplemented() {
         try {
             repository.link(Bundle.class, "Library/example1");
-        } catch (NotImplementedException e) {
+        } catch (NotImplementedOperationException e) {
             assertEquals("Paging is not currently supported", e.getMessage());
         }
     }
@@ -92,7 +93,7 @@ class InMemoryRepositoryTest {
     void capabilitiesNotImplemented() {
         try {
             repository.capabilities(CapabilityStatement.class);
-        } catch (NotImplementedException e) {
+        } catch (NotImplementedOperationException e) {
             assertEquals("The capabilities interaction is not currently supported", e.getMessage());
         }
     }
@@ -101,8 +102,8 @@ class InMemoryRepositoryTest {
     void invokeNotImplemented() {
         try {
             repository.invoke("someName", new Parameters());
-        } catch (NotImplementedException e) {
-            assertNull(e.getMessage());
+        } catch (NotImplementedOperationException e) {
+            assertEquals("Invoke is not currently supported", e.getMessage());
         }
     }
 }

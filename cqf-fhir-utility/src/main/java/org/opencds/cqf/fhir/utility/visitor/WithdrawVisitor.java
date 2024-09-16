@@ -51,8 +51,8 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
                 if (resourcesToUpdate.stream()
                         .filter(rtu ->
                                 rtu.getId().equals(maybeArtifact.get().getId().toString())
-                        && (rtu.getExtension().stream()
-                                    .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
+                                        && (rtu.getExtension().stream()
+                                                .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
                         .collect(Collectors.toList())
                         .isEmpty()) {
                     resourcesToUpdate.add(maybeArtifact.get().get());

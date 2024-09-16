@@ -60,7 +60,7 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 37);
+        assert (res.size() == 9);
     }
 
     @Test

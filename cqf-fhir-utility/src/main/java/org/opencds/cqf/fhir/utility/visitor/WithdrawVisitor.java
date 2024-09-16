@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class WithdrawVisitor implements KnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(WithdrawVisitor.class);
+    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
 
     @Override
     public IBase visit(
@@ -27,7 +28,7 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         var resToUpdate = new ArrayList<IDomainResource>();
         resToUpdate.add(rootAdapter.get());
 
-        var resourcesToUpdate = gatherDependsOnChildren(rootAdapter, repository, resToUpdate);
+        var resourcesToUpdate = gatherComposedOfChildren(rootAdapter, repository, resToUpdate);
 
         var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
 
@@ -40,20 +41,22 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private List<IDomainResource> gatherDependsOnChildren(
+    private List<IDomainResource> gatherComposedOfChildren(
             KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
-        adapter.getRelatedArtifactsOfType("depends-on").stream().forEach(c -> {
+        adapter.getRelatedArtifactsOfType("composed-of").stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<KnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (resourcesToUpdate.stream()
                         .filter(rtu ->
-                                rtu.getId().equals(maybeArtifact.get().getId().toString()))
+                                rtu.getId().equals(maybeArtifact.get().getId().toString())
+                        && (rtu.getExtension().stream()
+                                    .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
                         .collect(Collectors.toList())
                         .isEmpty()) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
-                    gatherDependsOnChildren(maybeArtifact.get(), repository, resourcesToUpdate);
+                    gatherComposedOfChildren(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
             }
         });

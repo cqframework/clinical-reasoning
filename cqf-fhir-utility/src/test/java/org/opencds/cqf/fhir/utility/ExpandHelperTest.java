@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -37,6 +38,7 @@ public class ExpandHelperTest {
     @Test
     void expandGrouperAddsLeafCodesToGrouperExpansionWithoutEndpointTest() {
         var leafUrl = "www.test.com/fhir/ValueSet/leaf";
+        var expansionDate = new Date();
         var grouper = new ValueSet();
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
         var leaf = createLeafWithUrl(leafUrl);
@@ -55,8 +57,11 @@ public class ExpandHelperTest {
                 Optional.empty(),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                expansionDate);
         assertEquals(3, grouper.getExpansion().getContains().size());
+        assertEquals(
+                expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
         verify(client, never()).expand(any(ValueSetAdapter.class), any(), any());
@@ -92,7 +97,8 @@ public class ExpandHelperTest {
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, times(1)).getResource(any(), any(), any());
@@ -135,7 +141,8 @@ public class ExpandHelperTest {
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
-                rep);
+                rep,
+                new Date());
         var parametersCaptor = ArgumentCaptor.forClass(ParametersAdapter.class);
         verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), parametersCaptor.capture());
         verify(rep, times(0)).search(any(), any(), any(), any());
@@ -186,7 +193,8 @@ public class ExpandHelperTest {
                     Optional.of(factory.createEndpoint(endpoint)),
                     new ArrayList<ValueSetAdapter>(),
                     new ArrayList<String>(),
-                    rep);
+                    rep,
+                    new Date());
         } catch (Exception e) {
             notExpectingAnyException = e;
         }
@@ -194,6 +202,60 @@ public class ExpandHelperTest {
         assertNull(notExpectingAnyException);
         // should not call the client
         verify(client, times(0)).expand(any(ValueSetAdapter.class), any(), any());
+        // should not search the repository
+        verify(rep, times(0)).search(any(), any(), any(), any());
+        // should not add any expansions
+        assertEquals(0, grouper.getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandingAGrouperWhereChildHasNoExpansionDoesNotThrowError() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+        // setup Vsets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        var leaf = new ValueSet();
+        leaf.setUrl(leafUrl);
+        var grouperUrl = "www.different-base-url.com/fhir/ValueSet/grouper";
+        var grouperVersion = "1.9.2";
+        var grouper = new ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.setVersion(grouperVersion);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
+        grouper.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType(grouperUrl));
+
+        // shouldn't be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // should be used
+        var client = mockTerminologyServerWithValueSetR4(leaf);
+
+        var expandHelper = new ExpandHelper(rep.fhirContext(), client);
+        var expansionParams = new Parameters();
+        // Setup exp params with Grouper URL and version
+        expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
+        expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+
+        Exception notExpectingAnyException = null;
+        try {
+            expandHelper.expandValueSet(
+                    (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    factory.createParameters(expansionParams),
+                    // important part of the test
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<ValueSetAdapter>(),
+                    new ArrayList<String>(),
+                    rep,
+                    new Date());
+        } catch (Exception e) {
+            notExpectingAnyException = e;
+        }
+        // should not error on empty leaf
+        assertNull(notExpectingAnyException);
+        // should call the client
+        verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), any());
         // should not search the repository
         verify(rep, times(0)).search(any(), any(), any(), any());
         // should not add any expansions

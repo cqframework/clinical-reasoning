@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -316,6 +317,24 @@ public class ValueSets {
                                 .getConstructor(String.class)
                                 .newInstance(code.getVersion()));
         containsDef.getMutator().addValue(expansion, newCode);
+    }
+
+    public static void setExpansionTimestamp(FhirContext fhirContext, IBase expansion, Date timeStamp)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                    NoSuchMethodException, SecurityException {
+        BaseRuntimeChildDefinition expansionChild = getExpansionDefinition(fhirContext);
+        RuntimeResourceBlockDefinition expansionBlockChild =
+                (RuntimeResourceBlockDefinition) expansionChild.getChildByName("expansion");
+        BaseRuntimeChildDefinition timeStampChild = expansionBlockChild.getChildByName("timestamp");
+        timeStampChild
+                .getMutator()
+                .setValue(
+                        expansion,
+                        timeStampChild
+                                .getChildByName("timestamp")
+                                .getImplementingClass()
+                                .getConstructor(Date.class)
+                                .newInstance(timeStamp));
     }
 
     public static void addParameterToExpansion(

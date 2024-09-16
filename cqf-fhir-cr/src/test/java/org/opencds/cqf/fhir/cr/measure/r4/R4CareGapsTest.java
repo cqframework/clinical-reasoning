@@ -305,16 +305,35 @@ class R4CareGapsTest {
     }
 
     @Test
-    void exm125_careGaps_error_notSupportedIdentifier() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    .measureIdentifiers("cms125")
-                    .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .getCareGapsReport()
-                    .then();
-        });
+    void exm125_careGaps_byIdentifier() {
+        given.when()
+                .measureIdentifiers("80366f35-e0a0-4ba7-a746-ad5760b79e01")
+                .subject("Patient/numer-EXM125")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssue()
+                .hasCareGapStatus("closed-gap")
+                .hasPatientReference("Patient/numer-EXM125")
+                .hasMeasureReportEvidence()
+                .up()
+                .composition()
+                .hasSubjectReference("Patient/numer-EXM125")
+                .hasAuthor("Organization/alphora-author")
+                .sectionCount(1)
+                .up()
+                .organization()
+                .orgResourceMatches("Organization/alphora-author")
+                .up()
+                .measureReport()
+                .measureReportMatches("http://ecqi.healthit.gov/ecqms/Measure/BreastCancerScreeningFHIR|2.0.003")
+                .measureReportSubjectMatches("Patient/numer-EXM125")
+                .measureReportTypeIndividual();
     }
 
     @Test

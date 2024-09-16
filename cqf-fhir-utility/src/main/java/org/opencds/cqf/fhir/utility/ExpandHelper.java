@@ -8,6 +8,8 @@ import static org.opencds.cqf.fhir.utility.adapter.AdapterFactory.createAdapterF
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +37,8 @@ public class ExpandHelper {
             Optional<EndpointAdapter> terminologyEndpoint,
             List<ValueSetAdapter> valueSets,
             List<String> expandedList,
-            Repository repository) {
+            Repository repository,
+            Date expansionTimestamp) {
         // Have we already expanded this ValueSet?
         if (expandedList.contains(valueSet.getUrl())) {
             // Nothing to do here
@@ -131,27 +134,35 @@ public class ExpandHelper {
                             }
                         }
                         expandValueSet(
-                                includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, repository);
+                                includedVS,
+                                childExpParams,
+                                terminologyEndpoint,
+                                valueSets,
+                                expandedList,
+                                repository,
+                                expansionTimestamp);
                     }
-                    getCodesInExpansion(fhirContext, includedVS.get()).forEach(code -> {
-                        // Add the code if not already present
-                        var existingCodes = getCodesInExpansion(fhirContext, expansion);
-                        if (existingCodes == null
-                                || existingCodes.stream()
-                                        .noneMatch(expandedCode -> code.getSystem()
-                                                        .equals(expandedCode.getSystem())
-                                                && code.getCode().equals(expandedCode.getCode())
-                                                && (StringUtils.isEmpty(code.getVersion())
-                                                        || code.getVersion().equals(expandedCode.getVersion())))) {
-                            try {
-                                addCodeToExpansion(fhirContext, expansion, code);
-                            } catch (Exception ex) {
-                                throw new UnprocessableEntityException(String.format(
-                                        "Encountered exception attempting to expand ValueSet %s: %s",
-                                        includedVS.get().getId(), ex.getMessage()));
-                            }
-                        }
-                    });
+                    Optional.ofNullable(getCodesInExpansion(fhirContext, includedVS.get()))
+                            .ifPresent(e -> e.forEach(code -> {
+                                // Add the code if not already present
+                                var existingCodes = getCodesInExpansion(fhirContext, expansion);
+                                if (existingCodes == null
+                                        || existingCodes.stream()
+                                                .noneMatch(expandedCode -> code.getSystem()
+                                                                .equals(expandedCode.getSystem())
+                                                        && code.getCode().equals(expandedCode.getCode())
+                                                        && (StringUtils.isEmpty(code.getVersion())
+                                                                || code.getVersion()
+                                                                        .equals(expandedCode.getVersion())))) {
+                                    try {
+                                        addCodeToExpansion(fhirContext, expansion, code);
+                                    } catch (Exception ex) {
+                                        throw new UnprocessableEntityException(String.format(
+                                                "Encountered exception attempting to expand ValueSet %s: %s",
+                                                includedVS.get().getId(), ex.getMessage()));
+                                    }
+                                }
+                            }));
                     // If any included expansion is naive it makes the expansion naive
                     if (includedVS.hasNaiveParameter() && !valueSet.hasNaiveParameter()) {
                         addParameterToExpansion(fhirContext, expansion, valueSet.createNaiveParameter());
@@ -161,6 +172,17 @@ public class ExpandHelper {
                             + valueSet.getUrl() + "' because Child ValueSet '" + reference + "' could not be found. ");
                 }
             });
+            try {
+                ValueSets.setExpansionTimestamp(
+                        fhirContext, expansion, expansionTimestamp == null ? new Date() : expansionTimestamp);
+            } catch (InstantiationException
+                    | IllegalAccessException
+                    | IllegalArgumentException
+                    | InvocationTargetException
+                    | NoSuchMethodException
+                    | SecurityException e) {
+                throw new UnprocessableEntityException(e.getMessage());
+            }
             valueSet.setExpansion(expansion);
             // ignore ValueSets without a compose
         } else if (valueSet.hasCompose()) {

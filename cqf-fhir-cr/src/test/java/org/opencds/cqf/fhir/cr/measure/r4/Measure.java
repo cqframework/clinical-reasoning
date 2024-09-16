@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -347,11 +349,15 @@ public class Measure {
             List<String> contained = getContainedIdsPerResourceType(ResourceType.Observation);
             List<String> extIds = getExtensionIds();
 
-            // contained Observations have a matching reference
+            assertEquals(
+                    contained.size(),
+                    extIds.size(),
+                    "Qty of SDE Observation resources don't match qty of Extension references");
+            // contained Observations have a matching extension reference
             for (String s : contained) {
-                assertTrue(extIds.contains(s));
+                assertTrue(extIds.stream().anyMatch(t -> t.replace("#", "").equals(s)));
             }
-            // extension references have a matching Observation
+            // extension references have a matching contained Observation resource
             for (String extId : extIds) {
                 // inline resource references concat prefix '#' to indicate they are not persisted
                 assertTrue(contained.contains(extId.replace("#", "")));
@@ -488,6 +494,21 @@ public class Measure {
             return this;
         }
 
+        public SelectedGroup hasDateOfCompliance() {
+            assertEquals(
+                    CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL,
+                    this.value()
+                            .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                            .get(0)
+                            .getUrl());
+            assertFalse(this.value()
+                    .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                    .get(0)
+                    .getValue()
+                    .isEmpty());
+            return this;
+        }
+
         public SelectedPopulation population(String name) {
             return this.population(g -> g.getPopulation().stream()
                     .filter(x -> x.hasCode()
@@ -508,7 +529,7 @@ public class Measure {
         }
 
         public SelectedGroup hasStratifierCount(int count) {
-            assertEquals(this.value().getStratifier().size(), count);
+            assertEquals(count, this.value().getStratifier().size());
             return this;
         }
 

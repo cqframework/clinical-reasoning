@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.Date;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -97,6 +98,17 @@ class ValueSetsTest {
         var expansion = new ValueSet.ValueSetExpansionComponent();
         valueSet.setExpansion(expansion);
         assertEquals(expansion, ValueSets.getExpansion(fhirContextR4, valueSet));
+    }
+
+    @Test
+    void testSetExpansionTimetamp()
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                    NoSuchMethodException, SecurityException {
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        assertNull(expansion.getTimestamp());
+        var timeStamp = new Date();
+        ValueSets.setExpansionTimestamp(fhirContextR4, expansion, timeStamp);
+        assertEquals(timeStamp.getTime(), expansion.getTimestamp().getTime());
     }
 
     @Test

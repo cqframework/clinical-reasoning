@@ -24,10 +24,11 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
-// Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
-// of measure resources. The output of this operation would be a bundle of MeasureReports instead of MeasureReport.
-
-public class R4MultiMeasureService {
+/**
+ * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
+ * of measure resources. The output of this operation would be a bundle of MeasureReports instead of MeasureReport.
+ */
+public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
     private Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -52,9 +53,11 @@ public class R4MultiMeasureService {
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
 
+    @Override
     public Bundle evaluate(
             List<IdType> measureId,
             List<String> measureUrl,
+            List<String> measureIdentifier,
             String periodStart,
             String periodEnd,
             String reportType,
@@ -76,7 +79,7 @@ public class R4MultiMeasureService {
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, null, measureUrl);
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
         var evalType = MeasureEvalType.fromCode(reportType)

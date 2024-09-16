@@ -26,9 +26,9 @@ Age (10-14, 15-19, 20+)
 */
 define "By Age":
   case
-    when AgeInYearsAt(start of "Measurement Period") in Interval[10, 14] then "P10Y--P14Y"
-    when AgeInYearsAt(start of "Measurement Period") in Interval[15, 19] then "P15Y--P19Y"
-    when AgeInYearsAt(start of "Measurement Period") >= 20 then "P20Y--P9999Y"
+    when AgeInYearsAt(date from start of "Measurement Period") in Interval[10, 14] then "P10Y--P14Y"
+    when AgeInYearsAt(date from start of "Measurement Period") in Interval[15, 19] then "P15Y--P19Y"
+    when AgeInYearsAt(date from start of "Measurement Period") >= 20 then "P20Y--P9999Y"
     else null
   end
 

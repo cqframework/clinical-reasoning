@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 
 /**
@@ -11,7 +14,19 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
  */
 public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
-    public R4MeasureEvaluation(CqlEngine context, Measure measure) {
-        super(context, measure, new R4MeasureDefBuilder(), new R4MeasureReportBuilder());
+    public R4MeasureEvaluation(
+            CqlEngine context,
+            Measure measure,
+            LibraryEngine libraryEngine,
+            VersionedIdentifier versionIdentifier,
+            Parameters parameters) {
+        super(
+                context,
+                measure,
+                new R4MeasureDefBuilder(),
+                new R4MeasureReportBuilder(),
+                libraryEngine,
+                versionIdentifier,
+                parameters);
     }
 }

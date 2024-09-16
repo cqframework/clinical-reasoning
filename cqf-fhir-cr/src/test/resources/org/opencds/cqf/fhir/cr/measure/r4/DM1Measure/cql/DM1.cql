@@ -11,7 +11,7 @@ include SupplementalDataElements version '1.0.1' called SDE
 include AmbulatoryVisits version '1.0.1' called AV
 include DMConcepts version '1.0.1' called DC
 
-parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)
+parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2019-12-31T11:59:59.9)
 
 context Patient
 

@@ -4,9 +4,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 
 public class BundleHelper {
     private BundleHelper() {}
@@ -186,6 +190,37 @@ public class BundleHelper {
     }
 
     /**
+     * Checks if an entry has a request type of DELETE
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return
+     */
+    public static boolean isEntryRequestDelete(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(Bundle.BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.DELETE)
+                        .isPresent();
+            case R4:
+                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE)
+                        .isPresent();
+            case R5:
+                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE)
+                        .isPresent();
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
      * Returns the list of entries from the Bundle
      *
      * @param bundle IBaseBundle type
@@ -200,6 +235,40 @@ public class BundleHelper {
                 return ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
             case R5:
                 return ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Gets request id if present
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return
+     */
+    public static Optional<IIdType> getEntryRequestId(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry)
+                                .getRequest()
+                                .getUrl())
+                        .map(Canonicals::getIdPart)
+                        .map(IdType::new);
+            case R4:
+                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
+                                .getRequest()
+                                .getUrl())
+                        .map(Canonicals::getIdPart)
+                        .map(org.hl7.fhir.r4.model.IdType::new);
+            case R5:
+                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
+                                .getRequest()
+                                .getUrl())
+                        .map(Canonicals::getIdPart)
+                        .map(org.hl7.fhir.r5.model.IdType::new);
 
             default:
                 throw new IllegalArgumentException(

@@ -23,9 +23,12 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 
 public class InMemoryFhirRepository implements Repository {
 
@@ -111,7 +114,7 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
-        var outcome = new MethodOutcome();
+        var outcome = new MethodOutcome(id, false);
         var resources = resourceMap.computeIfAbsent(id.getResourceType(), r -> new HashMap<>());
         var keyId = id.toUnqualifiedVersionless();
         if (resources.containsKey(keyId)) {
@@ -226,8 +229,21 @@ public class InMemoryFhirRepository implements Repository {
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
+                    var resourceType = Canonicals.getResourceType(
+                            ((BundleEntryComponent) e).getRequest().getUrl());
+                    var resourceClass = SearchHelper.getResourceClass(repository, resourceType);
+                    var res = repository.delete(
+                            resourceClass,
+                            BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
+                    BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(version, res.getResource()));
+                } else {
+                    throw new ResourceNotFoundException("Trying to delete an entry without id");
+                }
+
             } else {
-                throw new NotImplementedOperationException("Transaction stub only supports PUT or POST");
+                throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
             }
         });
         return returnBundle;

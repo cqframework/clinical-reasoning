@@ -28,7 +28,7 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         var resToUpdate = new ArrayList<IDomainResource>();
         resToUpdate.add(rootAdapter.get());
 
-        var resourcesToUpdate = gatherComposedOfChildren(rootAdapter, repository, resToUpdate);
+        var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
 
         var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
 
@@ -41,7 +41,7 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private List<IDomainResource> gatherComposedOfChildren(
+    private List<IDomainResource> getComponents(
             KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
         adapter.getRelatedArtifactsOfType("composed-of").stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
@@ -56,7 +56,7 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
                         .collect(Collectors.toList())
                         .isEmpty()) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
-                    gatherComposedOfChildren(maybeArtifact.get(), repository, resourcesToUpdate);
+                    getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
             }
         });

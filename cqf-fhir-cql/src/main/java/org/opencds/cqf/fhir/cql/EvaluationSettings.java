@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -123,7 +124,7 @@ public class EvaluationSettings {
     // LUKETODO:  consider merging the getters:
     public ZoneId getClientTimezoneFallbackToUtc() {
         return Optional.ofNullable(clientTimezone)
-            .orElse(ZoneId.of("UTC"));
+            .orElse(ZoneOffset.UTC);
     }
 
     public EvaluationSettings setClientTimezone(ZoneId theClientTimezone) {

@@ -10,12 +10,15 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter;
 
 public class GenerateRequest implements IQuestionnaireRequest {
     private final boolean supportedOnly;
@@ -28,9 +31,10 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final IBaseResource profile;
-    private final String profileUrl;
     private String defaultLibraryUrl;
     private IBaseResource questionnaire;
+    private QuestionnaireAdapter questionnaireAdapter;
+    private StructureDefinitionAdapter profileAdapter;
     private List<? extends ICompositeType> differentialElements;
     private List<? extends ICompositeType> snapshotElements;
 
@@ -58,15 +62,26 @@ public class GenerateRequest implements IQuestionnaireRequest {
         fhirVersion =
                 this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         defaultLibraryUrl = resolveDefaultLibraryUrl();
-        profileUrl = resolvePathString(this.profile, "url");
     }
 
     public IBaseResource getProfile() {
         return profile;
     }
 
-    public String getProfileUrl() {
-        return profileUrl;
+    public StructureDefinitionAdapter getProfileAdapter() {
+        if (profileAdapter == null) {
+            profileAdapter = (StructureDefinitionAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
+        }
+        return profileAdapter;
+    }
+
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
+        if (questionnaireAdapter == null && questionnaire != null) {
+            questionnaireAdapter = (QuestionnaireAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
+        }
+        return questionnaireAdapter;
     }
 
     public <E extends ICompositeType> void setDifferentialElements(List<E> elements) {

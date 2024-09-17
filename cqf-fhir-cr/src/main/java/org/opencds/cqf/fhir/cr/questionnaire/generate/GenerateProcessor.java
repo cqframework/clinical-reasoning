@@ -3,10 +3,14 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -43,12 +47,24 @@ public class GenerateProcessor implements IGenerateProcessor {
     public IBaseResource generate(GenerateRequest request, String id) {
         request.setQuestionnaire(
                 generate(id == null ? request.getProfile().getIdElement().getIdPart() : id));
-        request.addQuestionnaireItem(generateItem(request));
+        var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ssZ");
+        request.getQuestionnaireAdapter()
+                .setVersion(
+                        String.format("%s-%s", request.getProfileAdapter().getVersion(), formatter.format(new Date())));
+        var item = generateItem(request);
+        request.addQuestionnaireItem(item.getLeft());
+        if (!item.getRight().isEmpty()) {
+            // Add launchContexts
+            request.addLaunchContextExtensions(item.getRight());
+        }
         return request.getQuestionnaire();
     }
 
     @Override
-    public IBaseBackboneElement generateItem(GenerateRequest request) {
+    public Pair<IBaseBackboneElement, List<IBaseExtension<?, ?>>> generateItem(GenerateRequest request) {
+        logger.info(
+                "Generating Questionnaire Item for StructureDefinition/{}",
+                request.getProfile().getIdElement().getIdPart());
         request.setDifferentialElements(
                 getElements(request, request.resolvePath(request.getProfile(), "differential")));
         request.setSnapshotElements(getElements(request, getProfileSnapshot(request)));
@@ -100,11 +116,14 @@ public class GenerateProcessor implements IGenerateProcessor {
     protected IBaseResource createQuestionnaire() {
         switch (fhirVersion) {
             case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Questionnaire();
+                return new org.hl7.fhir.dstu3.model.Questionnaire()
+                        .setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
             case R4:
-                return new org.hl7.fhir.r4.model.Questionnaire();
+                return new org.hl7.fhir.r4.model.Questionnaire()
+                        .setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
             case R5:
-                return new org.hl7.fhir.r5.model.Questionnaire();
+                return new org.hl7.fhir.r5.model.Questionnaire()
+                        .setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
 
             default:
                 return null;

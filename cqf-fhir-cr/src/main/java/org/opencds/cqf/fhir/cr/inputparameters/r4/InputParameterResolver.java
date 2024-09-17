@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -31,6 +30,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,20 +87,20 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         return params;
     }
 
-    protected boolean validateContext(String name, String type) {
-        switch (name) {
-            case "patient":
+    protected boolean validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE code, String type) {
+        switch (code) {
+            case PATIENT:
                 return type.equals(ResourceType.Patient.name());
-            case "encounter":
+            case ENCOUNTER:
                 return type.equals(ResourceType.Encounter.name());
-            case "location":
+            case LOCATION:
                 return type.equals(ResourceType.Location.name());
-            case "user":
+            case USER:
                 return type.equals(ResourceType.Patient.name())
                         || type.equals(ResourceType.Practitioner.name())
                         || type.equals(ResourceType.PractitionerRole.name())
                         || type.equals(ResourceType.RelatedPerson.name());
-            case "study":
+            case STUDY:
                 return type.equals(ResourceType.ResearchStudy.name());
 
             default:
@@ -110,18 +110,14 @@ public class InputParameterResolver extends BaseInputParameterResolver {
 
     protected void resolveLaunchContext(
             Parameters params, List<IBase> contexts, List<IBaseExtension<?, ?>> launchContexts) {
-        final List<String> validContexts = Arrays.asList("patient", "encounter", "location", "user", "study");
         if (launchContexts != null && !launchContexts.isEmpty()) {
             launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
                 var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
-                if (!validContexts.contains(name)) {
-                    throw new IllegalArgumentException(String.format("Unsupported launch context: %s", name));
-                }
                 var type = launchContext
                         .getExtensionByUrl("type")
                         .getValueAsPrimitive()
                         .getValueAsString();
-                if (!validateContext(name, type)) {
+                if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
                     throw new IllegalArgumentException(
                             String.format("Unsupported launch context for %s: %s", name, type));
                 }
@@ -154,6 +150,8 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                                 ((Bundle) resource).addEntry(new BundleEntryComponent().setResource((Resource) v)));
                     }
                     params.addParameter(part("%" + name, resource));
+                    var cqlParameterName = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+                    params.addParameter(part(cqlParameterName, resource));
                 } else {
                     throw new IllegalArgumentException(
                             String.format("Unable to retrieve resource for context: %s", name));

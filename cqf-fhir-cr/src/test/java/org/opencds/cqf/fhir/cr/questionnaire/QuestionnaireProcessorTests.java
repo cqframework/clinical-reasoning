@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -205,7 +206,7 @@ class QuestionnaireProcessorTests {
                         newStringPart(fhirContextR4, "Service Request Id", "SleepStudy2"),
                         newStringPart(fhirContextR4, "Coverage Id", "Coverage-positive")))
                 .thenPopulate(true)
-                .hasItems(13)
+                .hasItems(10)
                 .itemHasAnswer("1")
                 .itemHasAuthorExt("1")
                 .itemHasAnswer("2")
@@ -235,5 +236,41 @@ class QuestionnaireProcessorTests {
                 .thenPackage()
                 .getBundle();
         assertNotNull(bundle);
+    }
+
+    @Test
+    @Disabled
+    void testIntegration() {
+        var questionnaire = given().repository(repositoryR4)
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "chf-bodyweight-change"))
+                .thenGenerate()
+                .questionnaire;
+        var questionnaireResponse = given().repository(repositoryR4)
+                .when()
+                .questionnaire(questionnaire)
+                .subjectId("chf-scenario1-patient")
+                .context(Arrays.asList(
+                        newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "patient"),
+                                newPart(fhirContextR4, "Reference", "content", "Patient/chf-scenario1-patient")),
+                        newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "encounter"),
+                                newPart(fhirContextR4, "Reference", "content", "Encounter/chf-scenario1-encounter"))))
+                .thenPopulate(true)
+                .hasItems(11)
+                .itemHasAnswerValue("1.2.1", "-1.4")
+                .itemHasAuthorExt("1.2.1")
+                .questionnaireResponse;
+        TestQuestionnaireResponse.given()
+                .repository(repositoryR4)
+                .when()
+                .questionnaireResponse(questionnaireResponse)
+                .extract()
+                .hasEntry(1);
     }
 }

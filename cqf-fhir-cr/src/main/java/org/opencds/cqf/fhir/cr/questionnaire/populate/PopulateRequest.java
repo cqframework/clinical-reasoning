@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -11,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -18,6 +20,8 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
@@ -32,7 +36,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
     private final IInputParameterResolver inputParameterResolver;
+    private final QuestionnaireAdapter questionnaireAdapter;
     private IBaseOperationOutcome operationOutcome;
+    private List<Pair<String, ParametersAdapter>> evaluatedLibraries;
 
     public PopulateRequest(
             IBaseResource questionnaire,
@@ -61,6 +67,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
         }
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
+        questionnaireAdapter = (QuestionnaireAdapter)
+                getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) this.questionnaire);
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
                 this.subjectId,
@@ -81,6 +89,11 @@ public class PopulateRequest implements IQuestionnaireRequest {
     @Override
     public IBaseResource getQuestionnaire() {
         return questionnaire;
+    }
+
+    @Override
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
+        return questionnaireAdapter;
     }
 
     @Override
@@ -153,5 +166,17 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     public List<IBaseExtension<?, ?>> getLaunchContext() {
         return launchContext;
+    }
+
+    public void addContextParameter(String name, IBaseResource resource) {
+        getAdapterFactory().createParameters(parameters).addParameter(name, resource);
+    }
+
+    public void setEvaluatedLibraries(List<Pair<String, ParametersAdapter>> evaluatedLibraries) {
+        this.evaluatedLibraries = evaluatedLibraries;
+    }
+
+    public List<Pair<String, ParametersAdapter>> getEvaluatedLibraries() {
+        return evaluatedLibraries;
     }
 }

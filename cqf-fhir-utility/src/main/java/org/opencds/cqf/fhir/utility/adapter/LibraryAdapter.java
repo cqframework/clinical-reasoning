@@ -24,6 +24,8 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
 
     LibraryAdapter setType(String type);
 
+    List<? extends ICompositeType> getParameter();
+
     List<? extends ICompositeType> getDataRequirement();
 
     LibraryAdapter addDataRequirement(ICompositeType dataRequirement);

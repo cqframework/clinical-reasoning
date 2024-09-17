@@ -22,7 +22,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
@@ -120,7 +119,7 @@ public class ProcessDefinitionItem {
                                         .stream()
                                         .map(r -> (IBaseResource) r)
                                         .collect(Collectors.toList());
-                    } catch (ResolveExpressionException e) {
+                    } catch (Exception e) {
                         var message = String.format(
                                 "Error encountered processing item %s: Error resolving context expression %s: %s",
                                 linkId, contextExpression.getExpression(), e.getMessage());

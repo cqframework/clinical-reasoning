@@ -19,9 +19,9 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-public class StructureDefinitionAdapter extends ResourceAdapter implements KnowledgeArtifactAdapter {
+public class StructureDefinitionAdapter extends ResourceAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter {
 
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);

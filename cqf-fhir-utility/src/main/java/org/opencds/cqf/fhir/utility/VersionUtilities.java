@@ -113,4 +113,59 @@ public class VersionUtilities {
                 throw new IllegalArgumentException("unknown or unsupported FHIR version");
         }
     }
+
+    /**
+     * Returns a CanonicalType for the supplied FHIR version.
+     *
+     * @param fhirVersion the FHIR version to create a CanonicalType for
+     * @return new CanonicalType
+     */
+    public static IPrimitiveType<String> canonicalTypeForVersion(FhirVersionEnum fhirVersion) {
+        return canonicalTypeForVersion(fhirVersion, null);
+    }
+
+    /**
+     * Returns a CanonicalType for the supplied version with a value of the supplied value.
+     * A UriType will be returned for FHIR versions before R4.
+     *
+     * @param fhirVersion the FHIR version to create a CanonicalType for
+     * @param value the string value of the CanonicalType
+     * @return the new CanonicalType
+     */
+    public static IPrimitiveType<String> canonicalTypeForVersion(FhirVersionEnum fhirVersion, String value) {
+        switch (fhirVersion) {
+            case DSTU2:
+                return new org.hl7.fhir.dstu2.model.UriType(value);
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.UriType(value);
+            case R4:
+                return new org.hl7.fhir.r4.model.CanonicalType(value);
+            case R5:
+                return new org.hl7.fhir.r5.model.CanonicalType(value);
+            default:
+                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+        }
+    }
+
+    /**
+     * Returns a CodeType for the supplied version with a value of the supplied code.
+     *
+     * @param fhirVersion the FHIR version to create a CodeType for
+     * @param code the string value of the CodeType
+     * @return the new CodeType
+     */
+    public static IPrimitiveType<String> codeTypeForVersion(FhirVersionEnum fhirVersion, String code) {
+        switch (fhirVersion) {
+            case DSTU2:
+                return new org.hl7.fhir.dstu2.model.CodeType(code);
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.CodeType(code);
+            case R4:
+                return new org.hl7.fhir.r4.model.CodeType(code);
+            case R5:
+                return new org.hl7.fhir.r5.model.CodeType(code);
+            default:
+                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+        }
+    }
 }

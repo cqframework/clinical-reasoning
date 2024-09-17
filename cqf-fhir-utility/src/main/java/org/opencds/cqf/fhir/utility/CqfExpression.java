@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
@@ -15,6 +16,7 @@ public class CqfExpression {
     private String altLanguage;
     private String altExpression;
     private String altLibraryUrl;
+    private String name;
 
     public static CqfExpression of(IBaseExtension<?, ?> extension, String defaultLibraryUrl) {
         if (extension == null) {
@@ -56,7 +58,8 @@ public class CqfExpression {
                 expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null);
+                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
+                expression.getName());
     }
 
     public static CqfExpression of(org.hl7.fhir.r5.model.Expression expression, String defaultLibraryUrl) {
@@ -72,13 +75,14 @@ public class CqfExpression {
                 expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null);
+                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
+                expression.getName());
     }
 
     public CqfExpression() {}
 
     public CqfExpression(String language, String expression, String libraryUrl) {
-        this(language, expression, libraryUrl, null, null, null);
+        this(language, expression, libraryUrl, null, null, null, null);
     }
 
     public CqfExpression(
@@ -87,13 +91,24 @@ public class CqfExpression {
             String libraryUrl,
             String altLanguage,
             String altExpression,
-            String altLibraryUrl) {
+            String altLibraryUrl,
+            String name) {
         this.language = language;
         this.expression = expression;
         this.libraryUrl = libraryUrl;
         this.altLanguage = altLanguage;
         this.altExpression = altExpression;
         this.altLibraryUrl = altLibraryUrl;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public CqfExpression setName(String name) {
+        this.name = name;
+        return this;
     }
 
     public String getLanguage() {
@@ -148,5 +163,25 @@ public class CqfExpression {
     public CqfExpression setAltLibraryUrl(String altLibraryUrl) {
         this.altLibraryUrl = altLibraryUrl;
         return this;
+    }
+
+    public ICompositeType toExpressionType(FhirVersionEnum fhirVersion) {
+        switch (fhirVersion) {
+            case R4:
+                return new org.hl7.fhir.r4.model.Expression()
+                        .setLanguage(language)
+                        .setExpression(expression)
+                        .setReference(libraryUrl)
+                        .setName(name);
+            case R5:
+                return new org.hl7.fhir.r5.model.Expression()
+                        .setLanguage(language)
+                        .setExpression(expression)
+                        .setReference(libraryUrl)
+                        .setName(name);
+
+            default:
+                return null;
+        }
     }
 }

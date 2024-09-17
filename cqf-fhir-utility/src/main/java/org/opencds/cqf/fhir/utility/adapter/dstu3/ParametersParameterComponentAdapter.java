@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -17,8 +16,8 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 class ParametersParameterComponentAdapter
         implements org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter {
 
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final Parameters.ParametersParameterComponent parametersParametersComponent;
-    private final FhirContext fhirContext;
     private final ModelResolver modelResolver;
 
     public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
@@ -32,7 +31,6 @@ class ParametersParameterComponentAdapter
         }
 
         this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }

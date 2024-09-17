@@ -12,11 +12,13 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class ExtractRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaireResponse;
@@ -31,6 +33,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
     private IBaseOperationOutcome operationOutcome;
+    private QuestionnaireAdapter questionnaireAdapter;
 
     public ExtractRequest(
             IBaseResource questionnaireResponse,
@@ -52,9 +55,9 @@ public class ExtractRequest implements IQuestionnaireRequest {
         this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.fhirContext = this.libraryEngine.getRepository().fhirContext();
-        this.fhirVersion = questionnaireResponse.getStructureFhirVersionEnum();
-        this.defaultLibraryUrl = "";
+        fhirContext = this.libraryEngine.getRepository().fhirContext();
+        fhirVersion = this.questionnaireResponse.getStructureFhirVersionEnum();
+        defaultLibraryUrl = "";
     }
 
     public IBaseResource getQuestionnaireResponse() {
@@ -67,6 +70,14 @@ public class ExtractRequest implements IQuestionnaireRequest {
 
     public IBaseResource getQuestionnaire() {
         return questionnaire;
+    }
+
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
+        if (questionnaireAdapter == null && questionnaire != null) {
+            questionnaireAdapter = (QuestionnaireAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
+        }
+        return questionnaireAdapter;
     }
 
     public IBaseBackboneElement getQuestionnaireItem(IBaseBackboneElement item) {
@@ -83,7 +94,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     public boolean isDefinitionItem(IBaseBackboneElement item, IBaseBackboneElement qrItem) {
-        return StringUtils.isNotBlank(resolvePathString(item == null ? qrItem : item, "definition"));
+        return hasExtension(item == null ? qrItem : item, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                || StringUtils.isNotBlank(resolvePathString(item == null ? qrItem : item, "definition"));
     }
 
     public IBaseExtension<?, ?> getItemExtractionContext() {

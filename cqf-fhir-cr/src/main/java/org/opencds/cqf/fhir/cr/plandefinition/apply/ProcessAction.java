@@ -96,9 +96,10 @@ public class ProcessAction {
                 }
                 var profile = searchRepositoryByCanonical(repository, profiles.get(0));
                 var generateRequest = request.toGenerateRequest(profile);
-                request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest));
+                var item = generateProcessor.generateItem(generateRequest);
+                request.addQuestionnaireItem(item.getLeft());
+                request.addLaunchContextExtensions(item.getRight());
                 // If input has text extension use it to override
-                // resolve extensions or not?
             }
         } catch (Exception e) {
             var message = String.format(

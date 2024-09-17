@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RequestResourceResolver {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static class Given {
         private IRequestResolverFactory resolverFactory;

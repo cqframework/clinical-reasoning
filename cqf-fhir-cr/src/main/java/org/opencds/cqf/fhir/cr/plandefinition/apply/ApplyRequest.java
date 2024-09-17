@@ -10,17 +10,22 @@ import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PARAMETERS;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PLAN_DEFINITION;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_PRACTITIONER;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_SUBJECT;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -28,6 +33,8 @@ import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource planDefinition;
@@ -52,6 +59,7 @@ public class ApplyRequest implements ICpgRequest {
     private final Collection<IBaseResource> extractedResources;
     private IBaseOperationOutcome operationOutcome;
     private IBaseResource questionnaire;
+    private QuestionnaireAdapter questionnaireAdapter;
     private Boolean containResources;
 
     public ApplyRequest(
@@ -155,8 +163,38 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public PopulateRequest toPopulateRequest() {
+        List<IBase> context = new ArrayList<>();
+        var launchContextExts =
+                getQuestionnaireAdapter().getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        launchContextExts.forEach(lc -> {
+            var code = lc.getExtension().stream()
+                    .map(c -> (IBaseExtension<?, ?>) c)
+                    .filter(c -> c.getUrl().equals("name"))
+                    .map(c -> resolvePathString(c.getValue(), "code"))
+                    .findFirst()
+                    .orElse(null);
+            String value = null;
+            switch (Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(code.toUpperCase())) {
+                case PATIENT:
+                    value = subjectId.getValue();
+                    break;
+                case ENCOUNTER:
+                    value = encounterId.getValue();
+                    break;
+                case USER:
+                    value = practitionerId.getValue();
+                    break;
+                default:
+                    break;
+            }
+            context.add(newPart(
+                    getFhirContext(),
+                    "context",
+                    newStringPart(getFhirContext(), "name", code),
+                    newPart(getFhirContext(), "Reference", "content", value)));
+        });
         return new PopulateRequest(
-                questionnaire, subjectId, null, null, parameters, data, useServerData, libraryEngine, modelResolver);
+                questionnaire, subjectId, context, null, parameters, data, useServerData, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -260,7 +298,16 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public IBaseResource getQuestionnaire() {
-        return this.questionnaire;
+        return questionnaire;
+    }
+
+    @Override
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
+        if (questionnaireAdapter == null && questionnaire != null) {
+            questionnaireAdapter = (QuestionnaireAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
+        }
+        return questionnaireAdapter;
     }
 
     public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
@@ -269,7 +316,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public ApplyRequest setData(IBaseBundle bundle) {
-        this.data = bundle;
+        data = bundle;
         return this;
     }
 

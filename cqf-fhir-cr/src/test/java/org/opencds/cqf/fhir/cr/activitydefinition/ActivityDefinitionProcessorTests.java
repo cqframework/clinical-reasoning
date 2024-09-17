@@ -37,7 +37,7 @@ class ActivityDefinitionProcessorTests {
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
-                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version));
+                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

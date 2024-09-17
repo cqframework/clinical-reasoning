@@ -80,27 +80,47 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
-                        fhirContextR4,
-                        "context",
-                        newStringPart(fhirContextR4, "name", "user"),
-                        newPart(fhirContextR4, "Reference", "content", practitioner.getId()))),
-                Arrays.asList((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r4.model.Extension(
-                                                "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r4.model.Extension(
-                                                "type", new org.hl7.fhir.r4.model.CodeType("Practitioner"))))));
+                Arrays.asList(
+                        newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "patient"),
+                                newPart(fhirContextR4, "Reference", "content", patient.getId())),
+                        newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "user"),
+                                newPart(fhirContextR4, "Reference", "content", practitioner.getId()))),
+                Arrays.asList(
+                        (IBaseExtension<?, ?>)
+                                new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                        .setExtension(Arrays.asList(
+                                                new org.hl7.fhir.r4.model.Extension(
+                                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("patient")),
+                                                new org.hl7.fhir.r4.model.Extension(
+                                                        "type", new org.hl7.fhir.r4.model.CodeType("Patient")))),
+                        (IBaseExtension<?, ?>)
+                                new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                        .setExtension(Arrays.asList(
+                                                new org.hl7.fhir.r4.model.Extension(
+                                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
+                                                new org.hl7.fhir.r4.model.Extension(
+                                                        "type", new org.hl7.fhir.r4.model.CodeType("Practitioner"))))));
         var actual = resolver.getParameters();
         assertNotNull(actual);
-        assertEquals(3, actual.getParameter().size());
+        assertEquals(6, actual.getParameter().size());
         assertTrue(actual.getParameter().get(0).getName().equals("%subject"));
         assertTrue(actual.getParameter().get(0).getResource().equals(patient));
         assertTrue(actual.getParameter().get(1).getName().equals("%practitioner"));
         assertTrue(actual.getParameter().get(1).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(2).getName().equals("%user"));
-        assertTrue(actual.getParameter().get(2).getResource().equals(practitioner));
+        assertTrue(actual.getParameter().get(2).getName().equals("%patient"));
+        assertTrue(actual.getParameter().get(2).getResource().equals(patient));
+        assertTrue(actual.getParameter().get(3).getName().equals("Patient"));
+        assertTrue(actual.getParameter().get(3).getResource().equals(patient));
+        assertTrue(actual.getParameter().get(4).getName().equals("%user"));
+        assertTrue(actual.getParameter().get(4).getResource().equals(practitioner));
+        assertTrue(actual.getParameter().get(5).getName().equals("User"));
+        assertTrue(actual.getParameter().get(5).getResource().equals(practitioner));
     }
 
     @Test
@@ -122,26 +142,46 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
-                        fhirContextR5,
-                        "context",
-                        newStringPart(fhirContextR5, "name", "user"),
-                        newPart(fhirContextR5, "Reference", "content", practitioner.getId()))),
-                Arrays.asList((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "type", new org.hl7.fhir.r5.model.CodeType("Practitioner"))))));
+                Arrays.asList(
+                        newPart(
+                                fhirContextR5,
+                                "context",
+                                newStringPart(fhirContextR5, "name", "patient"),
+                                newPart(fhirContextR5, "Reference", "content", patient.getId())),
+                        newPart(
+                                fhirContextR5,
+                                "context",
+                                newStringPart(fhirContextR5, "name", "user"),
+                                newPart(fhirContextR5, "Reference", "content", practitioner.getId()))),
+                Arrays.asList(
+                        (IBaseExtension<?, ?>)
+                                new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                        .setExtension(Arrays.asList(
+                                                new org.hl7.fhir.r5.model.Extension(
+                                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("patient")),
+                                                new org.hl7.fhir.r5.model.Extension(
+                                                        "type", new org.hl7.fhir.r5.model.CodeType("Patient")))),
+                        (IBaseExtension<?, ?>)
+                                new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                        .setExtension(Arrays.asList(
+                                                new org.hl7.fhir.r5.model.Extension(
+                                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
+                                                new org.hl7.fhir.r5.model.Extension(
+                                                        "type", new org.hl7.fhir.r5.model.CodeType("Practitioner"))))));
         var actual = resolver.getParameters();
         assertNotNull(actual);
-        assertEquals(3, actual.getParameter().size());
+        assertEquals(6, actual.getParameter().size());
         assertTrue(actual.getParameter().get(0).getName().equals("%subject"));
         assertTrue(actual.getParameter().get(0).getResource().equals(patient));
         assertTrue(actual.getParameter().get(1).getName().equals("%practitioner"));
         assertTrue(actual.getParameter().get(1).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(2).getName().equals("%user"));
-        assertTrue(actual.getParameter().get(2).getResource().equals(practitioner));
+        assertTrue(actual.getParameter().get(2).getName().equals("%patient"));
+        assertTrue(actual.getParameter().get(2).getResource().equals(patient));
+        assertTrue(actual.getParameter().get(3).getName().equals("Patient"));
+        assertTrue(actual.getParameter().get(3).getResource().equals(patient));
+        assertTrue(actual.getParameter().get(4).getName().equals("%user"));
+        assertTrue(actual.getParameter().get(4).getResource().equals(practitioner));
+        assertTrue(actual.getParameter().get(5).getName().equals("User"));
+        assertTrue(actual.getParameter().get(5).getResource().equals(practitioner));
     }
 }

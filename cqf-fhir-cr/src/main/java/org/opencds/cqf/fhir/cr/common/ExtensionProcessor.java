@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.common;
 import ca.uhn.fhir.model.api.IElement;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
@@ -36,11 +37,13 @@ public class ExtensionProcessor {
             IOperationRequest request, IBase resource, IElement definition, List<String> extList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> extList.contains(e.getUrl()))
+                .map(e -> SerializationUtils.clone(e))
                 .collect(Collectors.toList());
         processExtensions(request, resource, extensions);
     }
 
-    private void processExtensions(IOperationRequest request, IBase resource, List<IBaseExtension<?, ?>> extensions) {
+    private void processExtensions(
+            IOperationRequest request, IBase resource, List<? extends IBaseExtension<?, ?>> extensions) {
         if (extensions.isEmpty()) {
             return;
         }

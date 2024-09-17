@@ -54,6 +54,10 @@ public class LibraryEngine {
         return repository;
     }
 
+    public EvaluationSettings getSettings() {
+        return settings;
+    }
+
     private Pair<String, Object> buildContextParameter(String patientId) {
         Pair<String, Object> contextParameter = null;
         if (patientId != null) {
@@ -189,6 +193,11 @@ public class LibraryEngine {
                 results = resolveParameterValues(
                         ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
                 break;
+                // TODO: support fhir query?
+                // case "application/x-fhir-query":
+                //     repository.search(fhirContext.getResourceDefinition("Bundle").getImplementingClass(), null,
+                // null);
+                //     break;
             default:
                 logger.warn("An action language other than CQL was found: {}", language);
         }

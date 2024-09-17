@@ -51,7 +51,7 @@ class QuestionnaireResponseProcessorTests {
                 .when()
                 .questionnaireResponseId(questionnaireResponseId)
                 .extract()
-                .hasEntry(2);
+                .hasEntry(4);
     }
 
     @Test
@@ -99,4 +99,7 @@ class QuestionnaireResponseProcessorTests {
         assertTrue(obs.hasSubject());
         assertTrue(obs.hasValueBooleanType());
     }
+
+    @Test
+    void extractWithContainedQuestionnaire() {}
 }

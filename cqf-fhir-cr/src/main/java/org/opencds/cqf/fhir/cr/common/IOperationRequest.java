@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExten
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +20,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 public interface IOperationRequest {
     String getOperationName();
@@ -38,11 +41,23 @@ public interface IOperationRequest {
 
     FhirVersionEnum getFhirVersion();
 
+    default FhirContext getFhirContext() {
+        return getLibraryEngine().getRepository().fhirContext();
+    }
+
+    default Repository getRepository() {
+        return getLibraryEngine().getRepository();
+    }
+
     String getDefaultLibraryUrl();
 
     IBaseOperationOutcome getOperationOutcome();
 
     void setOperationOutcome(IBaseOperationOutcome operationOutcome);
+
+    default AdapterFactory getAdapterFactory() {
+        return AdapterFactory.forFhirVersion(getFhirVersion());
+    }
 
     default void logException(String exceptionMessage) {
         if (getOperationOutcome() == null) {
@@ -109,12 +124,19 @@ public interface IOperationRequest {
 
     @SuppressWarnings("unchecked")
     default String resolvePathString(IBase base, String path) {
-        var result = (IPrimitiveType<String>) resolvePath(base, path);
-        return result == null ? null : result.getValue();
+        var pathResult = resolvePath(base, path);
+        if (pathResult instanceof IPrimitiveType) {
+            return ((IPrimitiveType<String>) pathResult).getValueAsString();
+        }
+        return null;
+    }
+
+    default Object resolveRawPath(Object base, String path) {
+        return this.getModelResolver().resolvePath(base, path);
     }
 
     default IBase resolvePath(IBase base, String path) {
-        return (IBase) this.getModelResolver().resolvePath(base, path);
+        return (IBase) resolveRawPath(base, path);
     }
 
     @SuppressWarnings("unchecked")

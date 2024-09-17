@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -11,7 +12,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -40,7 +43,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaire";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static Given given() {
         return new Given();
@@ -118,6 +121,7 @@ public class TestQuestionnaire {
         private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
+        private IIdType profileId;
 
         When(Repository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
@@ -192,6 +196,11 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public When profileId(IIdType id) {
+            profileId = id;
+            return this;
+        }
+
         public IBaseResource runPopulate() {
             return processor.populate(
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
@@ -224,13 +233,18 @@ public class TestQuestionnaire {
                             : processor.packageQuestionnaire(param, isPut),
                     fhirContext());
         }
+
+        public GeneratedQuestionnaire thenGenerate() {
+            return new GeneratedQuestionnaire(
+                    repository, null, processor.generateQuestionnaire(Eithers.for3(null, profileId, null)));
+        }
     }
 
     public static class GeneratedQuestionnaire {
+        public IBaseResource questionnaire;
         Repository repository;
         IParser jsonParser;
         PopulateRequest request;
-        IBaseResource questionnaire;
         List<IBaseBackboneElement> items;
         IIdType expectedQuestionnaireId;
 
@@ -305,12 +319,15 @@ public class TestQuestionnaire {
         IParser jsonParser;
         PopulateRequest request;
         IBaseResource questionnaireResponse;
-        List<IBaseBackboneElement> items;
+        Map<String, IBaseBackboneElement> items;
         IIdType expectedId;
 
         private void populateItems(List<IBaseBackboneElement> itemList) {
             for (var item : itemList) {
-                items.add(item);
+                @SuppressWarnings("unchecked")
+                var linkIdPath = (IPrimitiveType<String>) request.resolvePath(item, "linkId");
+                var linkId = linkIdPath == null ? null : linkIdPath.getValue();
+                items.put(linkId, item);
                 var childItems = request.getItems(item);
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
@@ -324,7 +341,7 @@ public class TestQuestionnaire {
             this.request = request;
             this.questionnaireResponse = questionnaireResponse;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            items = new ArrayList<>();
+            items = new HashMap<>();
             if (request != null) {
                 populateItems(request.getItems(questionnaireResponse));
                 expectedId = Ids.newId(
@@ -355,24 +372,30 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
-            var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(linkId))
-                    .collect(Collectors.toList());
-            for (var item : matchingItems) {
-                assertTrue(!request.resolvePathList(item, "answer").isEmpty());
-            }
+            assertTrue(!request.resolvePathList(items.get(linkId), "answer").isEmpty());
+            return this;
+        }
 
+        @SuppressWarnings("unchecked")
+        public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, String value) {
+            var answer = request.resolvePathList(items.get(linkId), "answer", IPrimitiveType.class);
+            var answers = answer.stream()
+                    .map(a -> (IPrimitiveType<String>) request.resolvePath(a, "value"))
+                    .collect(Collectors.toList());
+            assertNotNull(answers);
+            assertTrue(
+                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    "expected answer to contain value: " + value);
             return this;
         }
 
         public GeneratedQuestionnaireResponse itemHasAuthorExt(String linkId) {
-            var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(linkId))
-                    .collect(Collectors.toList());
-            for (var item : matchingItems) {
-                assertNotNull(request.getExtensionByUrl(item, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
-            }
+            assertNotNull(request.getExtensionByUrl(items.get(linkId), Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
+            return this;
+        }
 
+        public GeneratedQuestionnaireResponse itemHasNoAuthorExt(String linkId) {
+            assertNull(request.getExtensionByUrl(items.get(linkId), Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
             return this;
         }
 

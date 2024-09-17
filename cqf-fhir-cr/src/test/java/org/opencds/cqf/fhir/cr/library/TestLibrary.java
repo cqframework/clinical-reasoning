@@ -37,8 +37,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestLibrary {
-    // Borrowing resources from PlanDefinition
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/plandefinition";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
         return PlanDefinition.class.getResourceAsStream(asset);

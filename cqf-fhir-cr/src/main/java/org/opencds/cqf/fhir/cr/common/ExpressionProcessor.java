@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,10 +27,9 @@ public class ExpressionProcessor {
      * @param expression CqfExpression to evaluate
      * @param itemLinkId link Id of the item
      * @return
-     * @throws ResolveExpressionException
      */
     public List<IBase> getExpressionResultForItem(
-            IOperationRequest request, CqfExpression expression, String itemLinkId) throws ResolveExpressionException {
+            IOperationRequest request, CqfExpression expression, String itemLinkId) {
         if (expression == null) {
             return new ArrayList<>();
         }
@@ -38,7 +38,7 @@ public class ExpressionProcessor {
         } catch (Exception ex) {
             final String message =
                     String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
-            throw new ResolveExpressionException(message);
+            throw new UnprocessableEntityException(message);
         }
     }
 
@@ -50,13 +50,12 @@ public class ExpressionProcessor {
      * @return
      */
     public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression) {
-        return request
-                .getLibraryEngine()
+        var result = request.getLibraryEngine()
                 .resolveExpression(
-                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData())
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData());
+        return result == null
+                ? new ArrayList<>()
+                : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**

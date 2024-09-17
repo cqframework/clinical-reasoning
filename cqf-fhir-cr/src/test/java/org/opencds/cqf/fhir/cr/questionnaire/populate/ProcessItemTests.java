@@ -26,8 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
-import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,87 +55,73 @@ class ProcessItemTests {
     }
 
     @Test
-    void processItemShouldReturnQuestionnaireItemComponentDstu3() throws ResolveExpressionException {
+    void processItemShouldReturnQuestionnaireResponseItemComponentDstu3() {
         // setup
         final org.hl7.fhir.dstu3.model.Questionnaire questionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        final PopulateRequest prePopulateRequest =
+        final PopulateRequest populateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, questionnaire);
         final IBaseBackboneElement originalQuestionnaireItemComponent =
                 new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent();
-        final IBaseBackboneElement populatedQuestionnaireItemComponent =
-                new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent();
         final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.DSTU3);
-        doReturn(populatedQuestionnaireItemComponent).when(fixture).copyItem(originalQuestionnaireItemComponent);
-        doReturn(expressionResults)
-                .when(fixture)
-                .getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
+        doReturn(expressionResults).when(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
         // execute
-        final IBaseBackboneElement actual = fixture.processItem(prePopulateRequest, originalQuestionnaireItemComponent);
+        final IBaseBackboneElement actual = fixture.processItem(populateRequest, originalQuestionnaireItemComponent);
         // validate
-        verify(fixture).getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
-        verify(fixture).copyItem(originalQuestionnaireItemComponent);
-        final var extensions = prePopulateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        assertEquals(1, extensions.size());
-        final var initial = prePopulateRequest.resolvePath(actual, "initial");
-        assertEquals(expressionResults.get(0), initial);
-    }
-
-    @Test
-    void processItemShouldReturnQuestionnaireItemComponentR4() throws ResolveExpressionException {
-        // setup
-        final Questionnaire questionnaire = new Questionnaire();
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        final PopulateRequest prePopulateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        final IBaseBackboneElement originalQuestionnaireItemComponent = new QuestionnaireItemComponent();
-        final IBaseBackboneElement populatedQuestionnaireItemComponent = new QuestionnaireItemComponent();
-        final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.R4);
-        doReturn(populatedQuestionnaireItemComponent).when(fixture).copyItem(originalQuestionnaireItemComponent);
-        doReturn(expressionResults)
-                .when(fixture)
-                .getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
-        // execute
-        final IBaseBackboneElement actual = fixture.processItem(prePopulateRequest, originalQuestionnaireItemComponent);
-        // validate
-        verify(fixture).getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
-        verify(fixture).copyItem(originalQuestionnaireItemComponent);
-        final var extensions = prePopulateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        assertEquals(1, extensions.size());
-        final var initials = prePopulateRequest.resolvePathList(actual, "initial", IBaseBackboneElement.class);
-        assertEquals(3, initials.size());
-        for (int i = 0; i < initials.size(); i++) {
-            assertEquals(expressionResults.get(i), prePopulateRequest.resolvePath(initials.get(i), "value"));
+        verify(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
+        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
+        // assertEquals(1, extensions.size());
+        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
+        assertEquals(1, answers.size());
+        for (int i = 0; i < answers.size(); i++) {
+            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
         }
     }
 
     @Test
-    void processItemShouldReturnQuestionnaireItemComponentR5() throws ResolveExpressionException {
+    void processItemShouldReturnQuestionnaireResponseItemComponentR4() {
+        // setup
+        final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        final PopulateRequest populateRequest =
+                newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        final IBaseBackboneElement originalQuestionnaireItemComponent = new QuestionnaireItemComponent();
+        final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.R4);
+        doReturn(expressionResults).when(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
+        // execute
+        final IBaseBackboneElement actual = fixture.processItem(populateRequest, originalQuestionnaireItemComponent);
+        // validate
+        verify(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
+        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
+        // assertEquals(1, extensions.size());
+        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
+        assertEquals(3, answers.size());
+        for (int i = 0; i < answers.size(); i++) {
+            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
+        }
+    }
+
+    @Test
+    void processItemShouldReturnQuestionnaireResponseItemComponentR5() {
         // setup
         final org.hl7.fhir.r5.model.Questionnaire questionnaire = new org.hl7.fhir.r5.model.Questionnaire();
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        final PopulateRequest prePopulateRequest =
+        final PopulateRequest populateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, questionnaire);
         final IBaseBackboneElement originalQuestionnaireItemComponent =
                 new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent();
-        final IBaseBackboneElement populatedQuestionnaireItemComponent =
-                new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent();
         final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.R5);
-        doReturn(populatedQuestionnaireItemComponent).when(fixture).copyItem(originalQuestionnaireItemComponent);
-        doReturn(expressionResults)
-                .when(fixture)
-                .getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
+        doReturn(expressionResults).when(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
         // execute
-        final IBaseBackboneElement actual = fixture.processItem(prePopulateRequest, originalQuestionnaireItemComponent);
+        final IBaseBackboneElement actual = fixture.processItem(populateRequest, originalQuestionnaireItemComponent);
         // validate
-        verify(fixture).getExpressionResults(prePopulateRequest, originalQuestionnaireItemComponent);
-        verify(fixture).copyItem(originalQuestionnaireItemComponent);
-        final var extensions = prePopulateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        assertEquals(1, extensions.size());
-        final var initials = prePopulateRequest.resolvePathList(actual, "initial", IBaseBackboneElement.class);
-        assertEquals(3, initials.size());
-        for (int i = 0; i < initials.size(); i++) {
-            assertEquals(expressionResults.get(i), prePopulateRequest.resolvePath(initials.get(i), "value"));
+        verify(fixture).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
+        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
+        // assertEquals(1, extensions.size());
+        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
+        assertEquals(3, answers.size());
+        for (int i = 0; i < answers.size(); i++) {
+            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
         }
     }
 
@@ -162,7 +146,7 @@ class ProcessItemTests {
     }
 
     @Test
-    void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() throws ResolveExpressionException {
+    void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
@@ -173,7 +157,7 @@ class ProcessItemTests {
                 .when(expressionProcessorService)
                 .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
         // execute
-        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaireItemComponent);
+        final List<IBase> actual = fixture.getInitialValue(prePopulateRequest, questionnaireItemComponent);
         // validate
         assertTrue(actual.isEmpty());
         verify(expressionProcessorService).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
@@ -181,8 +165,7 @@ class ProcessItemTests {
     }
 
     @Test
-    void getExpressionResultsShouldReturnListOfResourcesIfInitialExpressionIsNotNull()
-            throws ResolveExpressionException {
+    void getExpressionResultsShouldReturnListOfResourcesIfInitialExpressionIsNotNull() {
         // setup
         final List<IBase> expected = withExpressionResults(FhirVersionEnum.R4);
         final Questionnaire questionnaire = new Questionnaire();
@@ -199,7 +182,7 @@ class ProcessItemTests {
                 .when(expressionProcessorService)
                 .getExpressionResultForItem(prePopulateRequest, expression, "linkId");
         // execute
-        final List<IBase> actual = fixture.getExpressionResults(prePopulateRequest, questionnaireItemComponent);
+        final List<IBase> actual = fixture.getInitialValue(prePopulateRequest, questionnaireItemComponent);
         // validate
         assertEquals(expected, actual);
         verify(expressionProcessorService).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);

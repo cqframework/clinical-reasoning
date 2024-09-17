@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newExtractRequestFo
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -93,7 +93,7 @@ class ProcessDefinitionItemTests {
     }
 
     @Test
-    void testItemWithContextExtensionWithExpressionFailureThrows() throws ResolveExpressionException {
+    void testItemWithContextExtensionWithExpressionFailureThrows() {
         var fhirVersion = FhirVersionEnum.R4;
         var patientId = "patient1";
         var expression = new CqfExpression().setLanguage("text/fhirpath").setExpression("resource");
@@ -109,7 +109,7 @@ class ProcessDefinitionItemTests {
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var resources = new ArrayList<IBaseResource>();
         var subjectId = Ids.newId(fhirVersion, "Patient", patientId);
-        doThrow(ResolveExpressionException.class)
+        doThrow(UnprocessableEntityException.class)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(request), any(), eq("1"));
         assertThrows(
@@ -118,7 +118,7 @@ class ProcessDefinitionItemTests {
     }
 
     @Test
-    void testItemWithContextExtensionWithResource() throws ResolveExpressionException {
+    void testItemWithContextExtensionWithResource() {
         var fhirVersion = FhirVersionEnum.R4;
         var patientId = "patient1";
         var expression = new CqfExpression().setLanguage("text/fhirpath").setExpression("resource");
@@ -144,7 +144,7 @@ class ProcessDefinitionItemTests {
     }
 
     @Test
-    void testItemWithContextExtensionWithMultipleResources() throws ResolveExpressionException {
+    void testItemWithContextExtensionWithMultipleResources() {
         var fhirVersion = FhirVersionEnum.R4;
         var patientId = "patient1";
         var expression = new CqfExpression().setLanguage("text/fhirpath").setExpression("resource");

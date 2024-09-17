@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -92,6 +93,68 @@ public class ExtensionBuilders {
                 return new org.hl7.fhir.r4.model.Extension(entry.getKey(), value);
             case R5:
                 return new org.hl7.fhir.r5.model.Extension(entry.getKey(), value);
+
+            default:
+                return null;
+        }
+    }
+
+    public static IBaseExtension buildSdcLaunchContextExt(FhirVersionEnum fhirVersion, String code) {
+        return buildSdcLaunchContextExt(fhirVersion, code, null);
+    }
+
+    public static IBaseExtension buildSdcLaunchContextExt(
+            FhirVersionEnum fhirVersion, String code, String resourceType) {
+        var system = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
+        var display = "";
+        switch (code) {
+            case "patient":
+                display = "Patient";
+                resourceType = display;
+                break;
+            case "encounter":
+                display = "Encounter";
+                resourceType = display;
+                break;
+            case "location":
+                display = "Location";
+                resourceType = display;
+                break;
+            case "user":
+                display = "User";
+                resourceType = resourceType == null ? "Practitioner" : resourceType;
+                break;
+            case "study":
+                display = "ResearchStudy";
+                resourceType = display;
+                break;
+
+            default:
+                throw new IllegalArgumentException(String.format("Unrecognized launch context code: %s", code));
+        }
+        switch (fhirVersion) {
+            case DSTU3:
+                return (IBaseExtension)
+                        new org.hl7.fhir.dstu3.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.dstu3.model.Extension(
+                                                "name", new org.hl7.fhir.dstu3.model.Coding(system, code, display)),
+                                        new org.hl7.fhir.dstu3.model.Extension(
+                                                "type", new org.hl7.fhir.dstu3.model.CodeType(resourceType))));
+            case R4:
+                return (IBaseExtension) new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r4.model.Extension(
+                                        "name", new org.hl7.fhir.r4.model.Coding(system, code, display)),
+                                new org.hl7.fhir.r4.model.Extension(
+                                        "type", new org.hl7.fhir.r4.model.CodeType(resourceType))));
+            case R5:
+                return (IBaseExtension) new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "name", new org.hl7.fhir.r5.model.Coding(system, code, display)),
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "type", new org.hl7.fhir.r5.model.CodeType(resourceType))));
 
             default:
                 return null;

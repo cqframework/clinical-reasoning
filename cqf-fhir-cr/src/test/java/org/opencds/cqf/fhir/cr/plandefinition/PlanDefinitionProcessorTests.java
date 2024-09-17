@@ -428,7 +428,13 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(3)
-                .hasQuestionnaire();
+                .hasQuestionnaire()
+                .hasQuestionnaireResponseItemValue("1.1", "Claim/OPA-Claim1")
+                .hasQuestionnaireResponseItemValue("2.1", "Acme Clinic")
+                .hasQuestionnaireResponseItemValue("2.2.2", "1407071236")
+                .hasQuestionnaireResponseItemValue("3.4.2", "12345")
+                .hasQuestionnaireResponseItemValue("4.1.2", "1245319599")
+                .hasQuestionnaireResponseItemValue("4.2.2", "456789");
     }
 
     @Test

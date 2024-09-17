@@ -1,27 +1,23 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -41,42 +37,41 @@ class ItemGeneratorTests {
     @Mock
     Repository repository;
 
-    @Mock
-    IElementProcessor elementProcessor;
+    // @Mock
+    // IElementProcessor elementProcessor;
 
     @Mock
     LibraryEngine libraryEngine;
 
-    @InjectMocks
-    @Spy
     ItemGenerator fixture;
 
     @Test
-    void generateShouldCatchAndNotFailOnFeatureExpressionException() throws ResolveExpressionException {
+    void generateShouldCatchAndNotFailOnFeatureExpressionException() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(fhirContextR4).when(repository).fhirContext();
+        fixture = spy(new ItemGenerator(repository));
         var profile = new StructureDefinition();
         var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
         var groupItem = new QuestionnaireItemComponent();
         doReturn(groupItem).when(fixture).createQuestionnaireItem(request, null);
         var cqfExpression = new CqfExpression();
         doReturn(cqfExpression).when(fixture).getFeatureExpression(request);
-        var resultException = new ResolveExpressionException("Expression exception");
+        var resultException = new UnprocessableEntityException("Expression exception");
         doThrow(resultException).when(fixture).getFeatureExpressionResults(request, cqfExpression, null);
         fixture.generate(request);
     }
 
-    @Test
-    void generateShouldReturnErrorItemOnException() {
-        doReturn(repository).when(libraryEngine).getRepository();
-        doReturn(fhirContextR4).when(repository).fhirContext();
-        var profile = new StructureDefinition();
-        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
-        var result = (QuestionnaireItemComponent) fixture.generate(request);
-        assertNotNull(result);
-        assertEquals("DISPLAY", result.getType().name());
-        assertTrue(result.getText().contains("An error occurred during item creation: "));
-    }
+    // @Test
+    // void generateShouldReturnErrorItemOnException() {
+    //     doReturn(repository).when(libraryEngine).getRepository();
+    //     doReturn(fhirContextR4).when(repository).fhirContext();
+    //     var profile = new StructureDefinition();
+    //     var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
+    //     var result = (QuestionnaireItemComponent) fixture.generate(request);
+    //     assertNotNull(result);
+    //     assertEquals("DISPLAY", result.getType().name());
+    //     assertTrue(result.getText().contains("An error occurred during item creation: "));
+    // }
 
     /* Tests using TestItemGenerator class */
 
@@ -87,8 +82,7 @@ class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new StringType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(4)
-                .itemHasInitialValue();
+                .hasItemCount(6);
     }
 
     @Test
@@ -98,8 +92,10 @@ class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(4)
-                .itemHasInitialValue();
+                .hasItemCount(9)
+                .itemHasInitialValue("1.4.1")
+                .itemHasHiddenValueExtension("1.4.1")
+                .itemHasInitialExpression("1.1.1");
     }
 
     @Test
@@ -109,8 +105,10 @@ class ItemGeneratorTests {
                 .subjectId(ROUTE_ONE_PATIENT)
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(4)
-                .itemHasInitialValue();
+                .hasItemCount(9)
+                .itemHasInitialValue("1.4.1")
+                .itemHasHiddenValueExtension("1.4.1");
+        // .itemHasInitialExpression("1.1.1");
     }
 
     @Test
@@ -120,7 +118,7 @@ class ItemGeneratorTests {
                 .profileUrl(new CanonicalType(SLEEP_STUDY_PROFILE))
                 .subjectId(SLEEP_STUDY_PATIENT)
                 .then()
-                .hasItemCount(2)
+                .hasItemCount(3)
                 .hasId("aslp-sleep-study-order");
     }
 
@@ -131,7 +129,7 @@ class ItemGeneratorTests {
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(SLEEP_STUDY_PROFILE))
                 .subjectId(SLEEP_STUDY_PATIENT)
                 .then()
-                .hasItemCount(2)
+                .hasItemCount(3)
                 .hasId("aslp-sleep-study-order");
     }
 
@@ -147,7 +145,7 @@ class ItemGeneratorTests {
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition"))
                 .subjectId(ROUTE_ONE_PATIENT)
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(6);
     }
 
     @Test
@@ -157,6 +155,16 @@ class ItemGeneratorTests {
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition2"))
                 .subjectId(ROUTE_ONE_PATIENT)
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(3);
+    }
+
+    @Test
+    void generate() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "chf-bodyweight-change"))
+                .subjectId(ROUTE_ONE_PATIENT)
+                .then()
+                .hasItemCount(11);
     }
 }

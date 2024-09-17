@@ -4,9 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
 import java.util.List;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -79,9 +77,10 @@ public class QuestionnaireResponseProcessor {
             var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
             if (contained != null && !contained.isEmpty()) {
                 questionnaire = contained.stream()
-                        .filter(r -> ((IPrimitiveType<String>) modelResolver.resolvePath(r, "url"))
-                                .getValueAsString()
-                                .equals(canonical.getValueAsString()))
+                        .filter(r -> r.fhirType().equals("Questionnaire")
+                                && canonical
+                                        .getValueAsString()
+                                        .equals(r.getIdElement().getIdPart()))
                         .findFirst()
                         .orElse(null);
             }
@@ -95,7 +94,7 @@ public class QuestionnaireResponseProcessor {
                                 .getImplementingClass());
             }
             return questionnaire;
-        } catch (DataFormatException | FHIRException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
             return null;
         }

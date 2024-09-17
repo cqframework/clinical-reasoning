@@ -112,10 +112,7 @@ public class ApplyProcessor implements IApplyProcessor {
             addEntry(resultBundle, newEntryWithResource(resource));
         }
         if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
-            addEntry(
-                    resultBundle,
-                    newEntryWithResource(populateProcessor.processResponse(
-                            request.toPopulateRequest(), request.getItems(request.getQuestionnaire()))));
+            addEntry(resultBundle, newEntryWithResource(populateProcessor.populate(request.toPopulateRequest())));
         }
 
         return resultBundle;
@@ -131,8 +128,7 @@ public class ApplyProcessor implements IApplyProcessor {
         }
         var version = request.resolvePathString(request.getPlanDefinition(), "version");
         if (version != null) {
-            var subject = request.getSubjectId().getValue();
-            subject = subject.contains("/") ? subject.split("/")[1] : subject;
+            var subject = request.getSubjectId().getIdPart();
             var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ssZ");
             request.getModelResolver()
                     .setValue(
@@ -189,7 +185,6 @@ public class ApplyProcessor implements IApplyProcessor {
         processGoals(request, requestOrchestration);
         var metConditions = new HashMap<String, IBaseBackboneElement>();
         for (var action : request.resolvePathList(request.getPlanDefinition(), "action", IBaseBackboneElement.class)) {
-            // TODO - Apply input/output dataRequirements?
             request.getModelResolver()
                     .setValue(
                             requestOrchestration,

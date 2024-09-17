@@ -10,7 +10,8 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
-public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter {
+public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter
+        implements org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter {
 
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);

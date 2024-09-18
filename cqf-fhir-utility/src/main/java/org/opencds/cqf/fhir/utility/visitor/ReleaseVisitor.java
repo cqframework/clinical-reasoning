@@ -309,26 +309,24 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 var resourceType = Canonicals.getResourceType(dependency.getReference()) == null
                         ? null
                         : SearchHelper.getResourceType(repository, dependency);
-                if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
-                    // TODO: update when we support requireVersionedDependencies
-                    Optional<String> expansionParametersVersion = Optional.empty();
-                    // assume if we can't figure out the resource type it's a CodeSystem
-                    if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
-                        expansionParametersVersion = systemVersionExpansionParameters.stream()
-                                .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
-                                .filter(canonical ->
-                                        Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                                .findAny();
-                    } else if (resourceType.getSimpleName().equals("ValueSet")) {
-                        expansionParametersVersion = canonicalVersionExpansionParameters.stream()
-                                .filter(canonical ->
-                                        Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                                .findAny();
-                    }
-                    expansionParametersVersion
-                            .map(canonical -> Canonicals.getVersion(canonical))
-                            .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
+                // First check the expansion parameters for a system-version or canonical-version for the artifact
+                // TODO: update when we support requireVersionedDependencies
+                Optional<String> expansionParametersVersion = Optional.empty();
+                // assume if we can't figure out the resource type it's a CodeSystem
+                if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
+                    expansionParametersVersion = systemVersionExpansionParameters.stream()
+                            .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
+                            .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
+                            .findAny();
+                } else if (resourceType.getSimpleName().equals("ValueSet")) {
+                    expansionParametersVersion = canonicalVersionExpansionParameters.stream()
+                            .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
+                            .findAny();
                 }
+                expansionParametersVersion
+                        .map(canonical -> Canonicals.getVersion(canonical))
+                        .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
+
                 Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
                 // if not available in expansion parameters then try to find the latest version and update the
                 // dependency
@@ -338,14 +336,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
-                                // if we don't know the version even at this point then they are missing from the
-                                // expansion parameters, hence update the expansion parameters
-                                if (resourceType == null
-                                        || resourceType.getSimpleName().equals("CodeSystem")) {
-                                    systemVersionExpansionParameters.add(versionedReference);
-                                } else if (resourceType.getSimpleName().equals("ValueSet")) {
-                                    canonicalVersionExpansionParameters.add(versionedReference);
-                                }
                                 alreadyUpdatedDependencies.put(
                                         Canonicals.getUrl(dependency.getReference()), adapter.get());
                                 return adapter;

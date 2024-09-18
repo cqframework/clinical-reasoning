@@ -29,22 +29,25 @@ public class ExpandHelper {
 
     private final FhirContext fhirContext;
     private final TerminologyServerClient terminologyServerClient;
-    public static final List<String> unsupportedParametersToRemove = Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.SYSTEM_VERSION, Constants.CANONICAL_VERSION)));
+    public static final List<String> unsupportedParametersToRemove = Collections.unmodifiableList(
+            new ArrayList<String>(Arrays.asList(Constants.SYSTEM_VERSION, Constants.CANONICAL_VERSION)));
 
     public ExpandHelper(FhirContext fhirContext, TerminologyServerClient server) {
         this.fhirContext = fhirContext;
         terminologyServerClient = server;
     }
+
     @SuppressWarnings("unchecked")
     private static void filterOutUnsupportedParameters(ParametersAdapter parameters) {
         var paramsToSet = parameters.getParameter();
         unsupportedParametersToRemove.forEach(parameterUrl -> {
-            while(parameters.getParameter(parameterUrl) != null) {
+            while (parameters.getParameter(parameterUrl) != null) {
                 paramsToSet.remove(parameters.getParameter(parameterUrl));
                 parameters.setParameter((List<IBaseBackboneElement>) paramsToSet);
             }
         });
     }
+
     public void expandValueSet(
             ValueSetAdapter valueSet,
             ParametersAdapter expansionParameters,

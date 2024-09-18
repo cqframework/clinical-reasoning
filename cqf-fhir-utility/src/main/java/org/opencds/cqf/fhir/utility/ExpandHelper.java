@@ -9,10 +9,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
@@ -25,12 +29,22 @@ public class ExpandHelper {
 
     private final FhirContext fhirContext;
     private final TerminologyServerClient terminologyServerClient;
+    public static final List<String> unsupportedParametersToRemove = Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.SYSTEM_VERSION, Constants.CANONICAL_VERSION)));
 
     public ExpandHelper(FhirContext fhirContext, TerminologyServerClient server) {
         this.fhirContext = fhirContext;
         terminologyServerClient = server;
     }
-
+    @SuppressWarnings("unchecked")
+    private static void filterOutUnsupportedParameters(ParametersAdapter parameters) {
+        var paramsToSet = parameters.getParameter();
+        unsupportedParametersToRemove.forEach(parameterUrl -> {
+            while(parameters.getParameter(parameterUrl) != null) {
+                paramsToSet.remove(parameters.getParameter(parameterUrl));
+                parameters.setParameter((List<IBaseBackboneElement>) paramsToSet);
+            }
+        });
+    }
     public void expandValueSet(
             ValueSetAdapter valueSet,
             ParametersAdapter expansionParameters,
@@ -44,6 +58,7 @@ public class ExpandHelper {
             // Nothing to do here
             return;
         }
+        filterOutUnsupportedParameters(expansionParameters);
         // Gather the Terminology Service from the valueSet's authoritativeSourceUrl.
         @SuppressWarnings("unchecked")
         var authoritativeSourceUrl = valueSet.getExtension().stream()

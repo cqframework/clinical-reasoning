@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
@@ -93,13 +94,13 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 .equalsIgnoreCase("depends-on"));
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.SYSTEM_VERSION, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
                 .orElse(new ArrayList<String>());
         var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("canonical-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.CANONICAL_VERSION, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))

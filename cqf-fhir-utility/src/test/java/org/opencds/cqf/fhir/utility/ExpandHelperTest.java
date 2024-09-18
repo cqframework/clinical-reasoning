@@ -262,6 +262,58 @@ public class ExpandHelperTest {
         assertEquals(0, grouper.getExpansion().getContains().size());
     }
 
+    @Test
+    void unsupportedParametersAreRemovedWhenExpanding() {
+                // setup tx server endpoint
+                var baseUrl = "www.test.com/fhir";
+                var endpoint = new Endpoint();
+                endpoint.setAddress(baseUrl);
+                // setup Vsets
+                var leafUrl = baseUrl + "/ValueSet/leaf";
+                // ensure that the grouper is not expanded using the Tx Server
+                var grouperUrl = "www.different-base-url.com/fhir/ValueSet/grouper";
+                var grouperVersion = "1.9.2";
+                var grouper = new ValueSet();
+                grouper.setUrl(grouperUrl);
+                grouper.setVersion(grouperVersion);
+                grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
+                grouper.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType(grouperUrl));
+                var leaf = createLeafWithUrl(leafUrl);
+                leaf.setVersion("1.1.1");
+
+                // shouldn't be used
+                var rep = mockRepositoryWithValueSetR4(leaf);
+        
+                // should be used
+                var client = mockTerminologyServerWithValueSetR4(leaf);
+        
+                var expandHelper = new ExpandHelper(rep.fhirContext(), client);
+                var expansionParams = new Parameters();
+                // Setup exp params with Grouper URL and version
+                expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
+                expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+
+                ExpandHelper.unsupportedParametersToRemove.forEach(unsupportedParam -> {
+                    expansionParams.addParameter(unsupportedParam, "test");
+                });
+                expandHelper.expandValueSet(
+                        (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                        factory.createParameters(expansionParams),
+                        // important part of the test
+                        Optional.of(factory.createEndpoint(endpoint)),
+                        new ArrayList<ValueSetAdapter>(),
+                        new ArrayList<String>(),
+                        rep,
+                        new Date());
+                var parametersCaptor = ArgumentCaptor.forClass(ParametersAdapter.class);
+                verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), parametersCaptor.capture());
+                var filteredExpansionParams = parametersCaptor.getValue();
+                assertEquals(2, filteredExpansionParams.getParameter().size());
+                ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
+                    assertNull(filteredExpansionParams.getParameter(parameterUrl));
+                });
+    }
+
     ValueSet createLeafWithUrl(String url) {
         var leaf = new ValueSet();
         leaf.setUrl(url);

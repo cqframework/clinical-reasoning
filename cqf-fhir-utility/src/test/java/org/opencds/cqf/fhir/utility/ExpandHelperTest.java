@@ -137,7 +137,6 @@ public class ExpandHelperTest {
         expandHelper.expandValueSet(
                 (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(expansionParams),
-                // important part of the test
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),
@@ -189,7 +188,6 @@ public class ExpandHelperTest {
             expandHelper.expandValueSet(
                     (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                     factory.createParameters(expansionParams),
-                    // important part of the test
                     Optional.of(factory.createEndpoint(endpoint)),
                     new ArrayList<ValueSetAdapter>(),
                     new ArrayList<String>(),
@@ -243,7 +241,6 @@ public class ExpandHelperTest {
             expandHelper.expandValueSet(
                     (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                     factory.createParameters(expansionParams),
-                    // important part of the test
                     Optional.of(factory.createEndpoint(endpoint)),
                     new ArrayList<ValueSetAdapter>(),
                     new ArrayList<String>(),
@@ -299,7 +296,6 @@ public class ExpandHelperTest {
         expandHelper.expandValueSet(
                 (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(expansionParams),
-                // important part of the test
                 Optional.of(factory.createEndpoint(endpoint)),
                 new ArrayList<ValueSetAdapter>(),
                 new ArrayList<String>(),

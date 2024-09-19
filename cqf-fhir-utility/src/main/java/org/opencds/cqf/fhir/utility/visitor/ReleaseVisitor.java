@@ -326,7 +326,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 }
                 expansionParametersVersion
                         .map(canonical -> Canonicals.getVersion(canonical))
-                        .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
+                        .ifPresent(version -> dependency.setReference(Canonicals.getUrl(dependency.getReference()) + "|" + version));
 
                 Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
                 // if not available in expansion parameters then try to find the latest version and update the

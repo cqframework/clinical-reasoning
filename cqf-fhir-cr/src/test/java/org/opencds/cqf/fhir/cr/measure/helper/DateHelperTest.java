@@ -24,20 +24,39 @@ class DateHelperTest {
     // LUKETODO:  consider more test cases
     private static final ZoneId TIMEZONE_EASTERN = ZoneId.of("America/Toronto");
     private static final ZoneId TIMEZONE_MOUNTAIN = ZoneId.of("America/Denver");
+    // Half hour offset timezone
+    private static final ZoneId TIMEZONE_NEWFOUNDLAND = ZoneId.of("America/St_Johns");
 
+    private static final ZoneOffset OFFSET_MINUS_2_5 = ZoneOffset.ofHoursMinutes(-2, -30);
+    private static final ZoneOffset OFFSET_MINUS_3_5 = ZoneOffset.ofHoursMinutes(-3, -30);
+    private static final ZoneOffset OFFSET_MINUS_4 = ZoneOffset.ofHours(-4);
     private static final ZoneOffset OFFSET_MINUS_5 = ZoneOffset.ofHours(-5);
     private static final ZoneOffset OFFSET_MINUS_6 = ZoneOffset.ofHours(-6);
     private static final ZoneOffset OFFSET_MINUS_7 = ZoneOffset.ofHours(-7);
 
+    private static final String FULL_WITH_T_2019_JAN = "2019-01-17T12:30:00";
+    private static final String FULL_WITH_T_2019_JULY = "2019-07-17T12:30:00";
+    protected static final String YEAR_ONLY_2017 = "2017";
+    protected static final String DATE_ONLY_2017_01_01 = "2017-01-01";
+
     public static Stream<Arguments> dateHelperTestParams() {
         return Stream.of(
             Arguments.of(
-                "2019-01-17T12:30:00",
+                FULL_WITH_T_2019_JAN,
                 IS_START,
                 TIMEZONE_EASTERN,
                 toDateTime(
                     LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                     OFFSET_MINUS_5
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_START,
+                TIMEZONE_EASTERN,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_4
                 )
             ),
             Arguments.of(
@@ -58,7 +77,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017-01-01",
+                DATE_ONLY_2017_01_01,
                 IS_START,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -67,7 +86,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017",
+                YEAR_ONLY_2017,
                 IS_START,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -76,12 +95,21 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2019-01-17T12:30:00",
+                FULL_WITH_T_2019_JAN,
                 IS_END,
                 TIMEZONE_EASTERN,
                 toDateTime(
                     LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                     OFFSET_MINUS_5
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_END,
+                TIMEZONE_EASTERN,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_4
                 )
             ),
             Arguments.of(
@@ -102,7 +130,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017-01-01",
+                DATE_ONLY_2017_01_01,
                 IS_END,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -111,7 +139,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017",
+                YEAR_ONLY_2017,
                 IS_END,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -120,12 +148,21 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2019-01-17T12:30:00",
+                FULL_WITH_T_2019_JAN,
                 IS_START,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
                     LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                     OFFSET_MINUS_7
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_START,
+                TIMEZONE_MOUNTAIN,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_6
                 )
             ),
             Arguments.of(
@@ -146,7 +183,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017-01-01",
+                DATE_ONLY_2017_01_01,
                 IS_START,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -155,7 +192,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017",
+                YEAR_ONLY_2017,
                 IS_START,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -164,12 +201,21 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2019-01-17T12:30:00",
+                FULL_WITH_T_2019_JAN,
                 IS_END,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
                     LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                     OFFSET_MINUS_7
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_END,
+                TIMEZONE_MOUNTAIN,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_6
                 )
             ),
             Arguments.of(
@@ -190,7 +236,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017-01-01",
+                DATE_ONLY_2017_01_01,
                 IS_END,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -199,12 +245,119 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                "2017",
+                YEAR_ONLY_2017,
                 IS_END,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
                     LocalDateTime.of(2017, Month.DECEMBER, 31, 23, 59, 59, 999000000),
                     OFFSET_MINUS_7
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JAN,
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
+                    OFFSET_MINUS_3_5
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_2_5
+                )
+            ),
+            Arguments.of(
+                "2019-01-01T22:00:00.0-06:00",
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
+                    OFFSET_MINUS_6
+                )
+            ),
+            Arguments.of(
+                "2017-01-01T00:00:00.000Z",
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                    ZoneOffset.UTC
+                )
+            ),
+            Arguments.of(
+                DATE_ONLY_2017_01_01,
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                    OFFSET_MINUS_3_5
+                )
+            ),
+            Arguments.of(
+                YEAR_ONLY_2017,
+                IS_START,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                    OFFSET_MINUS_3_5
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JAN,
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
+                    OFFSET_MINUS_3_5
+                )
+            ),
+            Arguments.of(
+                FULL_WITH_T_2019_JULY,
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_2_5
+                )
+            ),
+            Arguments.of(
+                "2019-01-01T22:00:00.0-06:00",
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
+                    OFFSET_MINUS_6
+                )
+            ),
+            Arguments.of(
+                "2017-01-01T00:00:00.000Z",
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                    ZoneOffset.UTC
+                )
+            ),
+            Arguments.of(
+                DATE_ONLY_2017_01_01,
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.JANUARY, 1, 23, 59, 59, 999000000),
+                    OFFSET_MINUS_3_5
+                )
+            ),
+            Arguments.of(
+                YEAR_ONLY_2017,
+                IS_END,
+                TIMEZONE_NEWFOUNDLAND,
+                toDateTime(
+                    LocalDateTime.of(2017, Month.DECEMBER, 31, 23, 59, 59, 999000000),
+                    OFFSET_MINUS_3_5
                 )
             )
         );

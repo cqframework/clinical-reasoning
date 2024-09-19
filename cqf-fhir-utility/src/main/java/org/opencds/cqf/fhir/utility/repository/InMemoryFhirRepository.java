@@ -195,7 +195,8 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        throw new NotImplementedException("The transaction operation is not currently supported");
+        // TODO: LD: What's the expectation here if we call transaction() InMemory
+        return null;
     }
 
     @SuppressWarnings("unchecked")

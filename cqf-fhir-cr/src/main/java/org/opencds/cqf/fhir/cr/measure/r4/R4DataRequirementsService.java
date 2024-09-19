@@ -88,7 +88,7 @@ public class R4DataRequirementsService {
         Interval measurementPeriod;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
             measurementPeriod = IntervalHelper.buildMeasurementPeriod(periodStart, periodEnd, measureEvaluationOptions.getEvaluationSettings()
-                .getClientTimezoneFallbackToUtc());
+                .getClientTimezone());
             parameters.put("MeasurementPeriod", measurementPeriod);
 
             return processDataRequirements(measure, library, parameters);

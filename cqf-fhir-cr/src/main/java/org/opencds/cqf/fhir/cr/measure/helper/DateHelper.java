@@ -16,7 +16,7 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 /**
  * Helper class to resolve measurement period start and end dates. If a timezone
  * is specified in a
- * datetime, it's used. If not the timezone of the local system is used.
+ * datetime, it's used. If not the timezone specified in the ZoneId parameter is used.
  */
 public class DateHelper {
     public static DateTime resolveRequestDate(String date, boolean start, ZoneId fallbackTimezone) {

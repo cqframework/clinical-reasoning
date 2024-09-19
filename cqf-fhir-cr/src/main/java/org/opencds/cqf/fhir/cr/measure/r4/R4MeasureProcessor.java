@@ -115,7 +115,7 @@ public class R4MeasureProcessor {
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
             measurementPeriod = IntervalHelper.buildMeasurementPeriod(periodStart, periodEnd, measureEvaluationOptions.getEvaluationSettings()
-                .getClientTimezoneFallbackToUtc());
+                .getClientTimezone());
         }
 
         var url = measure.getLibrary().get(0).asStringValue();

@@ -80,7 +80,8 @@ public class Dstu3MeasureProcessor {
 
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = IntervalHelper.buildMeasurementPeriod(periodStart, periodEnd, measureEvaluationOptions.getEvaluationSettings().getClientTimezoneFallbackToUtc());
+            measurementPeriod = IntervalHelper.buildMeasurementPeriod(
+                periodStart, periodEnd, measureEvaluationOptions.getEvaluationSettings().getClientTimezone());
         }
 
         var reference = measure.getLibrary().get(0);

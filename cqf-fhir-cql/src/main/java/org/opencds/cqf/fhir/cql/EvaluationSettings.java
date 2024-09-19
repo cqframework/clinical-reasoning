@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import jakarta.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.cql.model.ModelIdentifier;
@@ -117,12 +118,8 @@ public class EvaluationSettings {
         this.terminologySettings = terminologySettings;
     }
 
+    @Nonnull
     public ZoneId getClientTimezone() {
-        return clientTimezone;
-    }
-
-    // LUKETODO:  consider merging the getters:
-    public ZoneId getClientTimezoneFallbackToUtc() {
         return Optional.ofNullable(clientTimezone)
             .orElse(ZoneOffset.UTC);
     }

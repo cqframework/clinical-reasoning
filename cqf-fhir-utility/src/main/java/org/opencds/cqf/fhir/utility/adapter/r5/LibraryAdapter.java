@@ -175,7 +175,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
         if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
             for (String parameter : systemVersionExpansionParameters) {
                 var param = new ParametersParameterComponent();
-                param.setName("system-version");
+                param.setName(Constants.SYSTEM_VERSION);
                 param.setValue(new UriType(parameter));
                 newParameters.add(param);
             }
@@ -183,7 +183,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
         if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
             for (String parameter : canonicalVersionExpansionParameters) {
                 var param = new ParametersParameterComponent();
-                param.setName("canonical-version");
+                param.setName(Constants.CANONICAL_VERSION);
                 param.setValue(new UriType(parameter));
                 newParameters.add(param);
             }

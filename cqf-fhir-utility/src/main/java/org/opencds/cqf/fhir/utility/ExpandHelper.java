@@ -29,8 +29,8 @@ public class ExpandHelper {
 
     private final FhirContext fhirContext;
     private final TerminologyServerClient terminologyServerClient;
-    public static final List<String> unsupportedParametersToRemove = Collections.unmodifiableList(
-            new ArrayList<String>(Arrays.asList(Constants.SYSTEM_VERSION, Constants.CANONICAL_VERSION)));
+    public static final List<String> unsupportedParametersToRemove =
+            Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
 
     public ExpandHelper(FhirContext fhirContext, TerminologyServerClient server) {
         this.fhirContext = fhirContext;

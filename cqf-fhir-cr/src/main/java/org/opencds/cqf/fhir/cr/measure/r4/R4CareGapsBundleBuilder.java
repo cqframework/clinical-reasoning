@@ -195,13 +195,6 @@ public class R4CareGapsBundleBuilder {
                 .build();
     }
 
-    private Bundle getBundle() {
-        return new BundleBuilder<>(Bundle.class)
-                .withProfile(CARE_GAPS_BUNDLE_PROFILE)
-                .withType(Bundle.BundleType.DOCUMENT.toString())
-                .build();
-    }
-
     private Composition getComposition(Patient patient) {
         return new CompositionBuilder<>(Composition.class)
                 .withProfile(CARE_GAPS_COMPOSITION_PROFILE)

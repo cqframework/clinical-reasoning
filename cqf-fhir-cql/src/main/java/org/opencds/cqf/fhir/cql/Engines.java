@@ -95,7 +95,7 @@ public class Engines {
         IBaseBundle additionalData,
         NpmProcessor npmProcessor,
         Boolean useLibraryCache) {
-        return forRepositoryAndSettings(settings, repository, additionalData, null, true, null);
+        return forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, useLibraryCache, null);
     }
 
     public static CqlEngine forRepositoryAndSettings(

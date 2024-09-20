@@ -9,6 +9,9 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 
+/*
+Care Gaps Status Evaluator houses the algorithm logic for which Care-Gap status is applicable to a Measure Report.
+ */
 public class R4CareGapStatusEvaluator {
 
     public CareGapsStatusCode getGapStatus(Measure measure, MeasureReport measureReport) {

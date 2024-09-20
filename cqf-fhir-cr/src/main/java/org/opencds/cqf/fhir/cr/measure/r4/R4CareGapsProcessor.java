@@ -27,6 +27,9 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*
+Care Gaps Processor houses construction of result body with input of different Result Bodies, such as Document Bundle vs non-document bundle
+ */
 public class R4CareGapsProcessor {
 
     private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsProcessor.class);

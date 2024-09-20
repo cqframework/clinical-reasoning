@@ -10,6 +10,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 
+/*
+Care Gap service that processes and produces care-gaps report as a result
+ */
 public class R4CareGapsService {
 
     private final Repository repository;

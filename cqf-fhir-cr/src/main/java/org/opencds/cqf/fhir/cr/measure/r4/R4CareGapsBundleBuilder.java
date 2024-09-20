@@ -53,12 +53,11 @@ import org.opencds.cqf.fhir.utility.builder.CompositionBuilder;
 import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/*
+Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
+ */
 public class R4CareGapsBundleBuilder {
-
-    private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsBundleBuilder.class);
     private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
             "http://loinc.org/96315-7",
             new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),

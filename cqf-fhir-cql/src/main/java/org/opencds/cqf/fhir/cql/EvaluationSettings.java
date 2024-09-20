@@ -88,8 +88,9 @@ public class EvaluationSettings {
         return this;
     }
 
-    public void setCqlOptions(CqlOptions cqlOptions) {
+    public EvaluationSettings setCqlOptions(CqlOptions cqlOptions) {
         this.cqlOptions = cqlOptions;
+        return this;
     }
 
     public RetrieveSettings getRetrieveSettings() {
@@ -114,8 +115,9 @@ public class EvaluationSettings {
         return this;
     }
 
-    public void setTerminologySettings(TerminologySettings terminologySettings) {
+    public EvaluationSettings setTerminologySettings(TerminologySettings terminologySettings) {
         this.terminologySettings = terminologySettings;
+        return this;
     }
 
     @Nonnull

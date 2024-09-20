@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.junit.Assert.assertThrows;
-
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");

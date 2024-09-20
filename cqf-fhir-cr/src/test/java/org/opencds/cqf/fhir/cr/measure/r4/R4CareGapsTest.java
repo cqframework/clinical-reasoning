@@ -1,9 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
 import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
@@ -220,7 +221,7 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_wrongSubjectParam() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        try {
             given.when()
                     .subject("Patient/numer-EXM124")
                     .periodStart("2019-01-01")
@@ -230,7 +231,10 @@ class R4CareGapsTest {
                     .measureIds("BreastCancerScreeningFHIR")
                     .getCareGapsReport()
                     .then();
-        });
+            fail("this should fail with no resource found");
+        } catch (ResourceNotFoundException e) {
+            Assertions.assertTrue(e.getMessage().contains("Resource Patient/numer-EXM124 is not known"));
+        }
     }
 
     @Test
@@ -265,7 +269,7 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_wrongsStatusParam() {
-        assertThrows(RuntimeException.class, () -> {
+        try {
             given.when()
                     .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
@@ -275,7 +279,11 @@ class R4CareGapsTest {
                     .measureIds("BreastCancerScreeningFHIR")
                     .getCareGapsReport()
                     .then();
-        });
+            fail("this should fail with no resource found");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(
+                    e.getMessage().contains("CareGap status parameter: closed-ga is not an accepted value"));
+        }
     }
 
     @Test
@@ -283,19 +291,6 @@ class R4CareGapsTest {
         assertThrows(RuntimeException.class, () -> {
             given.when()
                     .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .measureIds("BreastCancerScreeningFHIR")
-                    .getCareGapsReport()
-                    .then();
-        });
-    }
-
-    @Test
-    void exm125_careGaps_error_notSupported() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    // .subject("Patient/numer-EXM125")
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
                     .measureIds("BreastCancerScreeningFHIR")
@@ -337,87 +332,43 @@ class R4CareGapsTest {
     }
 
     @Test
-    void exm125_careGaps_error_notSupportedProgram() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    .programs("program")
-                    .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .getCareGapsReport()
-                    .then();
-        });
-    }
-
-    @Test
-    void exm125_careGaps_error_notSupportedPractitioner() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    .practitioner("Practitioner/error")
-                    .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .getCareGapsReport()
-                    .then();
-        });
-    }
-
-    @Test
-    void exm125_careGaps_error_notSupportedTopic() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    .topics("Practitioner/error")
-                    .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .getCareGapsReport()
-                    .then();
-        });
-    }
-
-    @Test
-    void exm125_careGaps_error_notSupportedOrg() {
-        assertThrows(NotImplementedOperationException.class, () -> {
-            given.when()
-                    .organization("Organization/error")
-                    .subject("Patient/numer-EXM125")
-                    .periodStart("2019-01-01")
-                    .periodEnd("2019-12-31")
-                    .getCareGapsReport()
-                    .then();
-        });
-    }
-
-    @Test
     void exm125_careGaps_error_invalidPatient() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        try {
             given.when()
-                    .subject("Patient/numer-EXM126") // invali
+                    .subject("Patient/numer-EXM126") // invalid
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
                     .measureIds("BreastCancerScreeningFHIR")
+                    .statuses("open-gap")
                     .getCareGapsReport()
                     .then();
-        });
+            fail("this should fail with no resource found");
+        } catch (ResourceNotFoundException e) {
+            Assertions.assertTrue(e.getMessage().contains("Resource Patient/numer-EXM126 is not known"));
+        }
     }
 
     @Test
     void exm125_careGaps_error_invalidGroup() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        try {
             given.when()
                     .subject("Group/numer-EXM126") // invalid
                     .periodStart("2019-01-01")
                     .periodEnd("2019-12-31")
                     .measureIds("BreastCancerScreeningFHIR")
+                    .statuses("closed-gap")
                     .getCareGapsReport()
                     .then();
-        });
+            fail("this should fail with no resource found");
+        } catch (ResourceNotFoundException e) {
+            Assertions.assertTrue(e.getMessage().contains("Resource Group/numer-EXM126 is not known"));
+        }
     }
 
     @Test
-    void exm125_careGaps_error_notPersonOrGroup() {
+    void exm125_careGaps_Practitioner() {
         given.when()
-                .subject("Practitioner/error") // invalid
+                .subject("Practitioner/error")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
                 .measureIds("BreastCancerScreeningFHIR")
@@ -433,7 +384,7 @@ class R4CareGapsTest {
     void ProportionBooleanBasisSingleGroup_Subject_noImprovementNotation() {
         GIVEN_REPO
                 .when()
-                .subject("Patient/female-1988") // invalid
+                .subject("Patient/female-1988")
                 .periodStart("2019-01-01")
                 .periodEnd("2019-12-31")
                 .measureIds("MinimalProportionBooleanBasisSingleGroup")
@@ -441,7 +392,7 @@ class R4CareGapsTest {
                 .statuses("open-gap")
                 .getCareGapsReport()
                 .then()
-                .hasBundleCount(1); // no results
+                .hasBundleCount(1);
     }
 
     // Issue #466 unable to process group level scoring definition
@@ -458,5 +409,98 @@ class R4CareGapsTest {
                 .getCareGapsReport()
                 .then()
                 .hasBundleCount(1); // no results
+    }
+
+    @Test
+    void ProportionBooleanBasisSingleGroup_All_Subjects() {
+        GIVEN_REPO
+                .when()
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisSingleGroup")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .statuses("not-applicable")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(8); // All 8 subjects have a bundle
+    }
+
+    @Test
+    void ProportionBooleanBasisSingleGroup_group_practitioner_type() {
+        GIVEN_REPO
+                .when()
+                .subject("Group/group-practitioners-1")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisSingleGroup")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .statuses("not-applicable")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1); // 1 Subject has matched generalPractitioner
+    }
+
+    @Test
+    void MinimalRatioBooleanBasisSingleGroup_practitioner() {
+        GIVEN_REPO
+                .when()
+                .subject("Practitioner/tester")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalRatioBooleanBasisSingleGroup")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .statuses("not-applicable")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1); // 1 Subject has matched generalPractitioner
+    }
+
+    @Test
+    void Cohort_ScoringTypeError() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .subject("Practitioner/tester")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("MinimalCohortResourceBasisSingleGroup")
+                    .statuses("closed-gap")
+                    .statuses("open-gap")
+                    .statuses("not-applicable")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1);
+
+            fail("method should error");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(e.getMessage()
+                    .contains("MeasureScoring type: Cohort, is not an accepted Type for care-gaps service"));
+        }
+    }
+
+    @Test
+    void ContinuousVariable_ScoringTypeError() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("MinimalContinuousVariableBooleanBasisSingleGroup")
+                    .statuses("closed-gap")
+                    .statuses("open-gap")
+                    .statuses("not-applicable")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1);
+
+            fail("method should error");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(e.getMessage()
+                    .contains(
+                            "MeasureScoring type: Continuous Variable, is not an accepted Type for care-gaps service"));
+        }
     }
 }

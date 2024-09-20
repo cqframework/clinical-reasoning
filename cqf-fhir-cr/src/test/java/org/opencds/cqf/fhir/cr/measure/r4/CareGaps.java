@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DetectedIssue;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Organization;
@@ -153,7 +154,7 @@ public class CareGaps {
         private String practitioner;
         private String organization;
         private List<String> statuses = new ArrayList<>();
-        private List<String> measureIds = new ArrayList<>();
+        private List<IdType> measureIds = new ArrayList<>();
         private List<String> measureIdentifiers = new ArrayList<>();
         private List<CanonicalType> measureUrls = new ArrayList<>();
         private List<String> programs = new ArrayList<>();
@@ -195,7 +196,7 @@ public class CareGaps {
         }
 
         public CareGaps.When measureIds(String measureIds) {
-            this.measureIds.add(measureIds);
+            this.measureIds.add(new IdType(measureIds));
             return this;
         }
 
@@ -216,17 +217,7 @@ public class CareGaps {
 
         public CareGaps.When getCareGapsReport() {
             this.operation = () -> service.getCareGapsReport(
-                    periodStart,
-                    periodEnd,
-                    topic,
-                    subject,
-                    practitioner,
-                    organization,
-                    statuses,
-                    measureIds,
-                    measureIdentifiers,
-                    measureUrls,
-                    programs);
+                    periodStart, periodEnd, subject, statuses, measureIds, measureIdentifiers, measureUrls);
             return this;
         }
 

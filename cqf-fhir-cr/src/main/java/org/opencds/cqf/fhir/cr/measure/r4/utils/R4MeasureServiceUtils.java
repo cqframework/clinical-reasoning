@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -41,6 +43,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class R4MeasureServiceUtils {
@@ -184,7 +187,6 @@ public class R4MeasureServiceUtils {
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
-    // TODO: stubbing for future identifier search implementation
     public Measure resolveByIdentifier(String identifier) {
         List<IQueryParameterType> params = new ArrayList<>();
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
@@ -245,13 +247,60 @@ public class R4MeasureServiceUtils {
                 Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
                 measureList.add(measureByIdentifier);
             }
-            // TODO: resolve IGRepository search for identifier
-            // throw new NotImplementedOperationException("search for identifier not implemented.");
         }
 
         Map<String, Measure> result = new HashMap<>();
         measureList.forEach(measure -> result.putIfAbsent(measure.getUrl(), measure));
 
         return new ArrayList<>(result.values());
+    }
+
+    public List<MeasureScoring> getMeasureGroupScoringTypes(Measure measure) {
+        var groupScoringCodes = measure.getGroup().stream()
+                .map(t -> (CodeableConcept)
+                        t.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue())
+                .collect(Collectors.toList());
+        // extract measureScoring Type from components
+        return groupScoringCodes.stream()
+                .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
+                .collect(Collectors.toList());
+    }
+
+    public boolean hasMultipleGroupScoringTypes(Measure measure) {
+        if (measure.getGroup().size() > 1) {
+            var scoringType = getMeasureGroupScoringTypes(measure);
+            // all scoringTypes in list match?
+            return scoringType.stream().allMatch(scoringType.get(0)::equals);
+        } else {
+            // single rate Measures can't have multiple group scoring definitions
+            return false;
+        }
+    }
+
+    public boolean hasGroupScoringDef(Measure measure) {
+
+        return !measure.getGroup().stream()
+                .filter(t -> t.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null)
+                .collect(Collectors.toList())
+                .isEmpty();
+    }
+
+    public List<MeasureScoring> getMeasureScoringDef(Measure measure) {
+        if (hasGroupScoringDef(measure)) {
+            return getMeasureGroupScoringTypes(measure);
+        } else {
+            if (!measure.hasScoring()) {
+                throw new IllegalArgumentException(String.format(
+                        "Measure: %s, does not have a defined Measure Scoring Type.", measure.getIdPart()));
+            }
+            return Collections.singletonList(MeasureScoring.fromCode(
+                    measure.getScoring().getCodingFirstRep().getCode()));
+        }
+    }
+
+    public void listThrowIllegalArgumentIfEmpty(List<String> value, String parameterName) {
+        if (value == null || value.isEmpty()) {
+            throw new IllegalArgumentException(parameterName + " parameter requires a value.");
+        }
     }
 }

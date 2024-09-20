@@ -4,9 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -80,8 +82,22 @@ public class Engines {
     }
 
     public static CqlEngine forRepositoryAndSettings(
+        EvaluationSettings settings, Repository repository, IBaseBundle additionalData, ArrayList<LibrarySourceProvider> librarySourceProviders) {
+        return forRepositoryAndSettings(settings, repository, additionalData, null, true, librarySourceProviders);
+    }
+
+    public static CqlEngine forRepositoryAndSettings(
             EvaluationSettings settings, Repository repository, IBaseBundle additionalData) {
-        return forRepositoryAndSettings(settings, repository, additionalData, null, true);
+        return forRepositoryAndSettings(settings, repository, additionalData, null, true, null);
+    }
+
+    public static CqlEngine forRepositoryAndSettings(
+        EvaluationSettings settings,
+        Repository repository,
+        IBaseBundle additionalData,
+        NpmProcessor npmProcessor,
+        Boolean useLibraryCache) {
+        return forRepositoryAndSettings(settings, repository, additionalData, null, true, null);
     }
 
     public static CqlEngine forRepositoryAndSettings(
@@ -89,13 +105,15 @@ public class Engines {
             Repository repository,
             IBaseBundle additionalData,
             NpmProcessor npmProcessor,
-            Boolean useLibraryCache) {
+            Boolean useLibraryCache,
+        ArrayList<LibrarySourceProvider> librarySourceProviders) {
         checkNotNull(settings);
         checkNotNull(repository);
 
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
-        var sourceProviders = new ArrayList<LibrarySourceProvider>();
+
+        ArrayList<LibrarySourceProvider> sourceProviders = Objects.requireNonNullElseGet(librarySourceProviders, ArrayList::new);
         sourceProviders.add(buildLibrarySource(repository));
 
         var dataProviders =

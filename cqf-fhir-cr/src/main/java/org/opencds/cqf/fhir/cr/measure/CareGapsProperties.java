@@ -5,9 +5,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.base.Strings;
 
 public class CareGapsProperties {
-
-    public final String CARE_GAPS_REPORTER_KEY = "care_gaps_reporter";
-    public final String CARE_GAPS_SECTION_AUTHOR_KEY = "care_gaps_composition_section_author";
     private String careGapsReporter;
     /**
      * Implements the author element of the

@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -22,6 +21,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.slf4j.Logger;
@@ -33,8 +33,6 @@ Care Gaps Processor houses construction of result body with input of different R
 public class R4CareGapsProcessor {
 
     private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsProcessor.class);
-    public static final Set<MeasureScoring> CARE_GAP_ACCEPTED_SCORING_TYPES =
-            Set.of(MeasureScoring.RATIO, MeasureScoring.PROPORTION);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private CareGapsProperties careGapsProperties;
@@ -164,7 +162,8 @@ public class R4CareGapsProcessor {
     private void checkMeasureScoringType(Measure measure) {
         List<MeasureScoring> scoringTypes = r4MeasureServiceUtils.getMeasureScoringDef(measure);
         for (MeasureScoring measureScoringType : scoringTypes) {
-            if (!CARE_GAP_ACCEPTED_SCORING_TYPES.contains(measureScoringType)) {
+            if (!measureScoringType.equals(MeasureScoring.PROPORTION)
+                    && !measureScoringType.equals(MeasureScoring.RATIO)) {
                 throw new IllegalArgumentException(String.format(
                         "MeasureScoring type: %s, is not an accepted Type for care-gaps service",
                         measureScoringType.getDisplay()));
@@ -175,9 +174,9 @@ public class R4CareGapsProcessor {
     private void checkConfigurationReferences() {
         careGapsProperties.validateRequiredProperties();
 
-        addConfiguredResource(careGapsProperties.getCareGapsReporter(), careGapsProperties.CARE_GAPS_REPORTER_KEY);
+        addConfiguredResource(careGapsProperties.getCareGapsReporter(), CareGapsConstants.CARE_GAPS_REPORTER_KEY);
         addConfiguredResource(
                 careGapsProperties.getCareGapsCompositionSectionAuthor(),
-                careGapsProperties.CARE_GAPS_SECTION_AUTHOR_KEY);
+                CareGapsConstants.CARE_GAPS_SECTION_AUTHOR_KEY);
     }
 }

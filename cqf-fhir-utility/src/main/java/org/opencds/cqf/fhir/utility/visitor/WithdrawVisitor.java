@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WithdrawVisitor implements KnowledgeArtifactVisitor {
+public class WithdrawVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(WithdrawVisitor.class);
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
 
@@ -25,14 +25,21 @@ public class WithdrawVisitor implements KnowledgeArtifactVisitor {
         if (!rootAdapter.getStatus().equals("draft")) {
             throw new PreconditionFailedException("Cannot withdraw an artifact that is not in draft status");
         }
+        var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
+        var transactionBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");
+
         var resToUpdate = new ArrayList<IDomainResource>();
         resToUpdate.add(rootAdapter.get());
 
+        findArtifactCommentsToUpdate(rootAdapter.get(), fhirVersion.getFhirVersionString(), repository)
+                .forEach(artifact -> {
+                    var resource = BundleHelper.getEntryResource(fhirVersion, artifact);
+                    var entry = PackageHelper.deleteEntry(resource);
+                    BundleHelper.addEntry(transactionBundle, entry);
+                });
+
         var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
 
-        var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
-
-        var transactionBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");
         for (var artifact : resourcesToUpdate) {
             var entry = PackageHelper.deleteEntry(artifact);
             BundleHelper.addEntry(transactionBundle, entry);

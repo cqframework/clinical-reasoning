@@ -14,16 +14,19 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.visitor.KnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.visitor.WithdrawVisitor;
+import java.util.concurrent.ExecutionException;
 
 class WithdrawVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -32,6 +35,9 @@ class WithdrawVisitorTests {
 
     @BeforeEach
     void setup() {
+        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
+            ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
+        //fhirContext.getResourceDefinition("SearchParameter").addSearchParam(BundleHelper.resourceToRuntimeSearchParam(sp));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         doAnswer(new Answer<Bundle>() {
                     @Override
@@ -54,13 +60,35 @@ class WithdrawVisitorTests {
         String version = "1.1.0-draft";
         Library library = spyRepository.read(Library.class, new IdType(id)).copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
         Parameters params = parameters(part("version", version));
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, spyRepository, params);
 
         var res = returnedBundle.getEntry();
 
         assert (res.size() == 9);
+    }
+
+    @Test
+    void library_withdraw_with_approval_test() throws Exception {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw-with-approval.json"));
+        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
+            ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
+        Bundle tsBundle = spyRepository.transaction(bundle);
+        spyRepository.update(sp);
+        // InMemoryFhirRepository bug - need to get id like this
+        String id = tsBundle.getEntry().get(0).getResponse().getLocation();
+        String version = "1.1.0-draft";
+        Library library = spyRepository.read(Library.class, new IdType(id)).copy();
+        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+        Parameters params = parameters(part("version", version));
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, spyRepository, params);
+
+        var res = returnedBundle.getEntry();
+
+        assert (res.size() == 10);
     }
 
     @Test
@@ -74,7 +102,7 @@ class WithdrawVisitorTests {
                     .read(Library.class, new IdType("Library/SpecificationLibrary"))
                     .copy();
             LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-            KnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+            IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
             Parameters params = parameters(part("version", version));
             libraryAdapter.accept(withdrawVisitor, spyRepository, params);
 

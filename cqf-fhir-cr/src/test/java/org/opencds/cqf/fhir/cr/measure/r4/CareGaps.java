@@ -149,21 +149,12 @@ public class CareGaps {
 
         private IPrimitiveType<Date> periodStart;
         private IPrimitiveType<Date> periodEnd;
-        private List<String> topic = new ArrayList<>();
         private String subject;
-        private String practitioner;
-        private String organization;
         private List<String> statuses = new ArrayList<>();
         private List<IdType> measureIds = new ArrayList<>();
         private List<String> measureIdentifiers = new ArrayList<>();
         private List<CanonicalType> measureUrls = new ArrayList<>();
-        private List<String> programs = new ArrayList<>();
         private Supplier<Parameters> operation;
-
-        public CareGaps.When topics(String topic) {
-            this.topic.add(topic);
-            return this;
-        }
 
         public CareGaps.When periodEnd(String periodEnd) {
             this.periodEnd = new DateType(periodEnd);
@@ -175,18 +166,8 @@ public class CareGaps {
             return this;
         }
 
-        public CareGaps.When practitioner(String practitioner) {
-            this.practitioner = practitioner;
-            return this;
-        }
-
         public CareGaps.When subject(String subject) {
             this.subject = subject;
-            return this;
-        }
-
-        public CareGaps.When organization(String organization) {
-            this.organization = organization;
             return this;
         }
 
@@ -207,11 +188,6 @@ public class CareGaps {
 
         public CareGaps.When measureIdentifiers(String measureIdentifiers) {
             this.measureIdentifiers.add(measureIdentifiers);
-            return this;
-        }
-
-        public CareGaps.When programs(String programs) {
-            this.programs.add(programs);
             return this;
         }
 

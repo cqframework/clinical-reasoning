@@ -4,11 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -82,7 +80,7 @@ public class Engines {
     }
 
     public static CqlEngine forRepositoryAndSettings(
-        EvaluationSettings settings, Repository repository, IBaseBundle additionalData, ArrayList<LibrarySourceProvider> librarySourceProviders) {
+        EvaluationSettings settings, Repository repository, IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders) {
         return forRepositoryAndSettings(settings, repository, additionalData, null, true, librarySourceProviders);
     }
 
@@ -106,14 +104,14 @@ public class Engines {
             IBaseBundle additionalData,
             NpmProcessor npmProcessor,
             Boolean useLibraryCache,
-        ArrayList<LibrarySourceProvider> librarySourceProviders) {
+        List<LibrarySourceProvider> librarySourceProviders) {
         checkNotNull(settings);
         checkNotNull(repository);
 
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
 
-        ArrayList<LibrarySourceProvider> sourceProviders = Objects.requireNonNullElseGet(librarySourceProviders, ArrayList::new);
+        List<LibrarySourceProvider> sourceProviders = librarySourceProviders == null ? new ArrayList<>() : librarySourceProviders;
         sourceProviders.add(buildLibrarySource(repository));
 
         var dataProviders =

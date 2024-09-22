@@ -265,20 +265,20 @@ public class R4MeasureServiceUtils {
                 .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
                 .collect(Collectors.toList());
     }
-/*]
-// TODO: add logic for handling multi-rate Measures for care-gaps
-// this method will check for varying scoring types defined on a measure
-    public boolean hasMultipleGroupScoringTypes(Measure measure) {
-        if (measure.getGroup().size() > 1) {
-            var scoringType = getMeasureGroupScoringTypes(measure);
-            // all scoringTypes in list match?
-            return scoringType.stream().allMatch(scoringType.get(0)::equals);
-        } else {
-            // single rate Measures can't have multiple group scoring definitions
-            return false;
+    /*]
+    // TODO: add logic for handling multi-rate Measures for care-gaps
+    // this method will check for varying scoring types defined on a measure
+        public boolean hasMultipleGroupScoringTypes(Measure measure) {
+            if (measure.getGroup().size() > 1) {
+                var scoringType = getMeasureGroupScoringTypes(measure);
+                // all scoringTypes in list match?
+                return scoringType.stream().allMatch(scoringType.get(0)::equals);
+            } else {
+                // single rate Measures can't have multiple group scoring definitions
+                return false;
+            }
         }
-    }
-*/
+    */
     public boolean hasGroupScoringDef(Measure measure) {
 
         return !measure.getGroup().stream()

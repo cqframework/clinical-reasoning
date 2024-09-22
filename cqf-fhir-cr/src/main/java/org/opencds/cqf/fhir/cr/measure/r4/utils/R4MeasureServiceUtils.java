@@ -265,7 +265,9 @@ public class R4MeasureServiceUtils {
                 .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
                 .collect(Collectors.toList());
     }
-
+/*]
+// TODO: add logic for handling multi-rate Measures for care-gaps
+// this method will check for varying scoring types defined on a measure
     public boolean hasMultipleGroupScoringTypes(Measure measure) {
         if (measure.getGroup().size() > 1) {
             var scoringType = getMeasureGroupScoringTypes(measure);
@@ -276,7 +278,7 @@ public class R4MeasureServiceUtils {
             return false;
         }
     }
-
+*/
     public boolean hasGroupScoringDef(Measure measure) {
 
         return !measure.getGroup().stream()

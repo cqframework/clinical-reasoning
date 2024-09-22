@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -329,6 +331,31 @@ public class CareGaps {
                     .findFirst()
                     .get()
                     .getResource()));
+        }
+
+        public SelectedBundle measureReportEvaluatedResourcesFound() {
+            // get resource References from the Patient Bundle
+            List<String> bundleResourceReferences = bundleReport().getEntry().stream()
+                    .map(g -> g.getResource()
+                            .getResourceType()
+                            .toString()
+                            .concat("/" + g.getResource().getIdPart()))
+                    .collect(Collectors.toList());
+            // get resource References from evaluatedResources on Measure Report
+            List<MeasureReport> measureReports = bundleReport().getEntry().stream()
+                    .filter(x -> x.getResource().getResourceType().toString().equals("MeasureReport"))
+                    .map(g -> (MeasureReport) g.getResource())
+                    .collect(Collectors.toList());
+            // check all references are found in patient bundle
+            for (MeasureReport report : measureReports) {
+                var reportReferences = report.getEvaluatedResource();
+                if (!reportReferences.isEmpty()) {
+                    for (Reference reference : reportReferences) {
+                        assertTrue(bundleResourceReferences.contains(reference.getReference()));
+                    }
+                }
+            }
+            return this;
         }
         ;
 

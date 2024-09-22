@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
@@ -93,13 +94,13 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                 .equalsIgnoreCase("depends-on"));
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("system-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.SYSTEM_VERSION, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
                 .orElse(new ArrayList<String>());
         var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getListParameter("canonical-version", p, IPrimitiveType.class)
+                .map(p -> VisitorHelper.getListParameter(Constants.CANONICAL_VERSION, p, IPrimitiveType.class)
                         .orElse(null))
                 .map(versions ->
                         versions.stream().map(v -> (String) v.getValue()).collect(Collectors.toList()))
@@ -329,6 +330,7 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                             .map(canonical -> Canonicals.getVersion(canonical))
                             .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
                 }
+
                 Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
                 // if not available in expansion parameters then try to find the latest version and update the
                 // dependency
@@ -338,14 +340,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
                             .map(adapter -> {
                                 String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                                 dependency.setReference(versionedReference);
-                                // if we don't know the version even at this point then they are missing from the
-                                // expansion parameters, hence update the expansion parameters
-                                if (resourceType == null
-                                        || resourceType.getSimpleName().equals("CodeSystem")) {
-                                    systemVersionExpansionParameters.add(versionedReference);
-                                } else if (resourceType.getSimpleName().equals("ValueSet")) {
-                                    canonicalVersionExpansionParameters.add(versionedReference);
-                                }
                                 alreadyUpdatedDependencies.put(
                                         Canonicals.getUrl(dependency.getReference()), adapter.get());
                                 return adapter;

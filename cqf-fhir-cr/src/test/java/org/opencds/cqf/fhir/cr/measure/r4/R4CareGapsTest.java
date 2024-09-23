@@ -286,7 +286,7 @@ class R4CareGapsTest {
             fail("this should fail with no resource found");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(
-                    e.getMessage().contains("CareGap status parameter: closed-ga is not an accepted value"));
+                    e.getMessage().contains("CareGap status parameter: closed-ga, is not an accepted value"));
         }
     }
 

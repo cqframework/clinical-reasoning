@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.api.Repository;
  * operations by name.
  */
 public class OperationRegistry {
+
     public class OperationInvocationParams {
 
         private final Repository repository;
@@ -90,10 +91,20 @@ public class OperationRegistry {
 
     private final Multimap<String, OperationClosure<?>> operationMap;
 
+    /**
+     * Creates a new OperationRegistry instance. This instance will be used to register and execute operations for
+     * a Repository.
+     */
     public OperationRegistry() {
         this.operationMap = MultimapBuilder.hashKeys().arrayListValues().build();
     }
 
+    /**
+     * Used to register a new Operation provider. The class must have methods annotated with @Operation.
+     * @param <T> The type of the class to register
+     * @param clazz The class to register
+     * @param factory A factory function that will create an instance of the class
+     */
     public <T> void register(Class<T> clazz, Function<Repository, T> factory) {
         var methodBinders = Arrays.stream(clazz.getMethods())
                 .filter(m -> m.isAnnotationPresent(Operation.class))
@@ -110,6 +121,12 @@ public class OperationRegistry {
         }
     }
 
+    /**
+     * Used to build an OperationInvocationParams object that can be used to execute an operation.
+     * @param repository the repository to use for data access and recursive invocations
+     * @param operationName the name of the operation to execute
+     * @return an OperationInvocationParams object that can be used to execute the operation
+     */
     public OperationInvocationParams buildOperation(Repository repository, String operationName) {
         return new OperationInvocationParams(repository, operationName);
     }

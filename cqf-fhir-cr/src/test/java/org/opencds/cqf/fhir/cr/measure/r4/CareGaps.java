@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
@@ -179,7 +180,7 @@ public class CareGaps {
         }
 
         public CareGaps.When measureIds(String measureIds) {
-            this.measureIds.add(new IdType(measureIds));
+            this.measureIds.add(new IdType("Measure", measureIds));
             return this;
         }
 
@@ -336,16 +337,16 @@ public class CareGaps {
         public SelectedBundle measureReportEvaluatedResourcesFound() {
             // get resource References from the Patient Bundle
             List<String> bundleResourceReferences = bundleReport().getEntry().stream()
-                    .map(g -> g.getResource()
-                            .getResourceType()
-                            .toString()
-                            .concat("/" + g.getResource().getIdPart()))
+                    .map(BundleEntryComponent::getResource)
+                    .map(x -> x.getResourceType().toString().concat("/" + x.getIdPart()))
                     .collect(Collectors.toList());
+
             // get resource References from evaluatedResources on Measure Report
             List<MeasureReport> measureReports = bundleReport().getEntry().stream()
-                    .filter(x -> x.getResource().getResourceType().toString().equals("MeasureReport"))
+                    .filter(x -> x.getResource() instanceof MeasureReport)
                     .map(g -> (MeasureReport) g.getResource())
                     .collect(Collectors.toList());
+
             // check all references are found in patient bundle
             for (MeasureReport report : measureReports) {
                 var reportReferences = report.getEvaluatedResource();

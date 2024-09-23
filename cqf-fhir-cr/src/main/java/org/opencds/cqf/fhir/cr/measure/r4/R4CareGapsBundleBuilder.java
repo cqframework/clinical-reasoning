@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
@@ -7,14 +8,13 @@ import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GA
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_REPORT_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,30 +54,22 @@ import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
 
-/*
-Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
+/**
+ * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
  */
 public class R4CareGapsBundleBuilder {
-    private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
+    private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = Map.of(
             "http://loinc.org/96315-7",
             new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),
             "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",
             new CodeableConceptSettings()
                     .add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps"));
-
     private final Repository repository;
-
-    private final MeasureEvaluationOptions measureEvaluationOptions;
-    protected final Map<String, Resource> configuredResources;
-
+    private final Map<String, Resource> configuredResources;
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-
-    private CareGapsProperties careGapsProperties;
-
-    private String serverBase;
-
+    private final CareGapsProperties careGapsProperties;
+    private final String serverBase;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
-
     private final R4MultiMeasureService r4MultiMeasureService;
 
     public R4CareGapsBundleBuilder(
@@ -88,7 +80,6 @@ public class R4CareGapsBundleBuilder {
             Map<String, Resource> configuredResources) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
-        this.measureEvaluationOptions = measureEvaluationOptions;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
 
@@ -126,7 +117,7 @@ public class R4CareGapsBundleBuilder {
                     null,
                     reporter);
 
-            // Patient
+            // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.
             var patient = repository.read(Patient.class, new IdType(subject));
 
             // finalize patient Bundle results
@@ -140,6 +131,7 @@ public class R4CareGapsBundleBuilder {
         return paramResults;
     }
 
+    @Nullable
     public Bundle makePatientBundle(Bundle bundle, List<String> statuses, Patient patient) {
         Map<String, Resource> evalPlusSDE = new HashMap<>();
         List<DetectedIssue> detectedIssues = new ArrayList<>();
@@ -172,6 +164,7 @@ public class R4CareGapsBundleBuilder {
             // only add if a DetectedIssue is found and has MeasureReports
             return addBundleEntries(serverBase, composition, detectedIssues, measureReports, evalPlusSDE);
         } else {
+            // return nothing if not-applicable
             return null;
         }
     }
@@ -250,13 +243,14 @@ public class R4CareGapsBundleBuilder {
     private void populateSDEResources(MeasureReport measureReport, Map<String, Resource> resources) {
         if (measureReport.hasExtension()) {
             for (Extension extension : measureReport.getExtension()) {
-                if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
+                if (extension.hasUrl() && extension.getUrl().equals(EXT_SDE_REFERENCE_URL)) {
                     Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference
                             ? (Reference) extension.getValue()
                             : null;
                     if (sdeRef != null
                             && sdeRef.hasReference()
                             && !sdeRef.getReference().startsWith("#")) {
+                        // sde reference comes in format [ResourceType]/{id}
                         IdType sdeId = new IdType(sdeRef.getReference());
                         if (!resources.containsKey(Ids.simple(sdeId))) {
                             Class<? extends IBaseResource> resourceType = fhirContext

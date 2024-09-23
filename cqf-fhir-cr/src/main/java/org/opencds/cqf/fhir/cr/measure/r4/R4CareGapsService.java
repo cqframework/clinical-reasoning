@@ -10,19 +10,10 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 
-/*
-Care Gap service that processes and produces care-gaps report as a result
+/**
+ * Care Gap service that processes and produces care-gaps report as a result
  */
 public class R4CareGapsService {
-
-    private final Repository repository;
-
-    private final MeasureEvaluationOptions measureEvaluationOptions;
-
-    private CareGapsProperties careGapsProperties;
-
-    private String serverBase;
-
     private final R4CareGapsProcessor r4CareGapsProcessor;
 
     public R4CareGapsService(
@@ -30,10 +21,6 @@ public class R4CareGapsService {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase) {
-        this.repository = repository;
-        this.careGapsProperties = careGapsProperties;
-        this.measureEvaluationOptions = measureEvaluationOptions;
-        this.serverBase = serverBase;
 
         r4CareGapsProcessor =
                 new R4CareGapsProcessor(careGapsProperties, repository, measureEvaluationOptions, serverBase);

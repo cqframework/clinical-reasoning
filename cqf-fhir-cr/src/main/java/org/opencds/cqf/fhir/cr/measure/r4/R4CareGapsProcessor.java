@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
 import java.util.Date;
@@ -27,17 +28,15 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
-Care Gaps Processor houses construction of result body with input of different Result Bodies, such as Document Bundle vs non-document bundle
+/**
+ * Care Gaps Processor houses construction of result body with input of different Result Bodies, such as Document Bundle vs non-document bundle
  */
 public class R4CareGapsProcessor {
 
     private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsProcessor.class);
     private final Repository repository;
-    private final MeasureEvaluationOptions measureEvaluationOptions;
-    private CareGapsProperties careGapsProperties;
-    private String serverBase;
-    protected final Map<String, Resource> configuredResources = new HashMap<>();
+    private final CareGapsProperties careGapsProperties;
+    private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
 
@@ -48,8 +47,6 @@ public class R4CareGapsProcessor {
             String serverBase) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
-        this.measureEvaluationOptions = measureEvaluationOptions;
-        this.serverBase = serverBase;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
@@ -106,7 +103,7 @@ public class R4CareGapsProcessor {
 
     private void addConfiguredResource(String id, String key) {
         // read resource from repository
-        Resource resource = repository.read(Organization.class, new IdType(id));
+        Resource resource = repository.read(Organization.class, new IdType(RESOURCE_TYPE_ORGANIZATION, id));
 
         // validate resource
         checkNotNull(
@@ -144,10 +141,11 @@ public class R4CareGapsProcessor {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
-            if (!status.equals(CareGapsStatusCode.CLOSED_GAP.toString())
-                    && !status.equals(CareGapsStatusCode.OPEN_GAP.toString())
-                    && !status.equals(CareGapsStatusCode.NOT_APPLICABLE.toString())) {
-                throw new IllegalArgumentException("CareGap status parameter: " + status + " is not an accepted value");
+            if (!CareGapsStatusCode.CLOSED_GAP.toString().equals(status)
+                    && !CareGapsStatusCode.OPEN_GAP.toString().equals(status)
+                    && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)) {
+                throw new IllegalArgumentException(
+                        String.format("CareGap status parameter: %s, is not an accepted value", status));
             }
         }
     }
@@ -162,8 +160,8 @@ public class R4CareGapsProcessor {
     private void checkMeasureScoringType(Measure measure) {
         List<MeasureScoring> scoringTypes = r4MeasureServiceUtils.getMeasureScoringDef(measure);
         for (MeasureScoring measureScoringType : scoringTypes) {
-            if (!measureScoringType.equals(MeasureScoring.PROPORTION)
-                    && !measureScoringType.equals(MeasureScoring.RATIO)) {
+            if (!MeasureScoring.PROPORTION.equals(measureScoringType)
+                    && !MeasureScoring.RATIO.equals(measureScoringType)) {
                 throw new IllegalArgumentException(String.format(
                         "MeasureScoring type: %s, is not an accepted Type for care-gaps service",
                         measureScoringType.getDisplay()));

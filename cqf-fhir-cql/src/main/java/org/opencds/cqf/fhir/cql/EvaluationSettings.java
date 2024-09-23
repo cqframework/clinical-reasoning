@@ -126,8 +126,8 @@ public class EvaluationSettings {
             .orElse(ZoneOffset.UTC);
     }
 
-    public EvaluationSettings setClientTimezone(ZoneId theClientTimezone) {
-        clientTimezone = theClientTimezone;
+    public EvaluationSettings setClientTimezone(ZoneId clientTimezone) {
+        this.clientTimezone = clientTimezone;
         return this;
     }
 }

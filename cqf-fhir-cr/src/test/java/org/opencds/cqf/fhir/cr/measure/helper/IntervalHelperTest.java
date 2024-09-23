@@ -16,11 +16,11 @@ class IntervalHelperTest {
     private static final ZoneId TIMEZONE_EASTERN = ZoneId.of("America/Toronto");
     private static final ZoneId TIMEZONE_MOUNTAIN = ZoneId.of("America/Denver");
 
+    private static final ZoneOffset OFFSET_MINUS_4 = ZoneOffset.ofHours(-4);
     private static final ZoneOffset OFFSET_MINUS_5 = ZoneOffset.ofHours(-5);
     private static final ZoneOffset OFFSET_MINUS_6 = ZoneOffset.ofHours(-6);
     private static final ZoneOffset OFFSET_MINUS_7 = ZoneOffset.ofHours(-7);
 
-    // LUKETODO:  consider more test cases
     public static Stream<Arguments> dateHelperTestParams() {
         return Stream.of(
             Arguments.of(
@@ -55,6 +55,40 @@ class IntervalHelperTest {
                     OFFSET_MINUS_5,
                     LocalDateTime.of(2017, Month.JANUARY, 1, 23, 59, 59, 999000000),
                     OFFSET_MINUS_5
+                )
+            ),
+            Arguments.of(
+                "2019-07-17T12:30:00",
+                TIMEZONE_EASTERN,
+                toDateTimeRange(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_4
+                )
+            ),
+            Arguments.of(
+                "2019-07-01T22:00:00.0-06:00",
+                TIMEZONE_EASTERN,
+                toDateTimeRange(
+                    LocalDateTime.of(2019, Month.JULY, 1, 22, 0, 0),
+                    OFFSET_MINUS_6
+                )
+            ),
+            Arguments.of(
+                "2017-07-01T00:00:00.000Z",
+                TIMEZONE_EASTERN,
+                toDateTimeRange(
+                    LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0),
+                    ZoneOffset.UTC
+                )
+            ),
+            Arguments.of(
+                "2017-07-01",
+                TIMEZONE_EASTERN,
+                toDateTimeRange(
+                    LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0),
+                    OFFSET_MINUS_4,
+                    LocalDateTime.of(2017, Month.JULY, 1, 23, 59, 59, 999000000),
+                    OFFSET_MINUS_4
                 )
             ),
             Arguments.of(
@@ -99,6 +133,40 @@ class IntervalHelperTest {
                     OFFSET_MINUS_7,
                     LocalDateTime.of(2017, Month.JANUARY, 1, 23, 59, 59, 999000000),
                     OFFSET_MINUS_7
+                )
+            ),
+            Arguments.of(
+                "2019-07-17T12:30:00",
+                TIMEZONE_MOUNTAIN,
+                toDateTimeRange(
+                    LocalDateTime.of(2019, Month.JULY, 17, 12, 30, 0),
+                    OFFSET_MINUS_6
+                )
+            ),
+            Arguments.of(
+                "2019-07-01T22:00:00.0-06:00",
+                TIMEZONE_MOUNTAIN,
+                toDateTimeRange(
+                    LocalDateTime.of(2019, Month.JULY, 1, 22, 0, 0),
+                    OFFSET_MINUS_6
+                )
+            ),
+            Arguments.of(
+                "2017-07-01T00:00:00.000Z",
+                TIMEZONE_MOUNTAIN,
+                toDateTimeRange(
+                    LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0),
+                    ZoneOffset.UTC
+                )
+            ),
+            Arguments.of(
+                "2017-07-01",
+                TIMEZONE_MOUNTAIN,
+                toDateTimeRange(
+                    LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0),
+                    OFFSET_MINUS_6,
+                    LocalDateTime.of(2017, Month.JULY, 1, 23, 59, 59, 999000000),
+                    OFFSET_MINUS_6
                 )
             ),
             Arguments.of(

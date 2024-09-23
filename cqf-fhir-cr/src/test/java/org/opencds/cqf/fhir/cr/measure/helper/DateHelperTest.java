@@ -21,7 +21,6 @@ class DateHelperTest {
     private static final boolean IS_START = true;
     private static final boolean IS_END = false;
 
-    // LUKETODO:  consider more test cases
     private static final ZoneId TIMEZONE_EASTERN = ZoneId.of("America/Toronto");
     private static final ZoneId TIMEZONE_MOUNTAIN = ZoneId.of("America/Denver");
     // Half hour offset timezone
@@ -34,15 +33,15 @@ class DateHelperTest {
     private static final ZoneOffset OFFSET_MINUS_6 = ZoneOffset.ofHours(-6);
     private static final ZoneOffset OFFSET_MINUS_7 = ZoneOffset.ofHours(-7);
 
-    private static final String FULL_WITH_T_2019_JAN = "2019-01-17T12:30:00";
-    private static final String FULL_WITH_T_2019_JULY = "2019-07-17T12:30:00";
+    private static final String FULL_WITH_T_2019_JAN_12_30 = "2019-01-17T12:30:00";
+    private static final String FULL_WITH_T_2019_JULY_12_30 = "2019-07-17T12:30:00";
     protected static final String YEAR_ONLY_2017 = "2017";
     protected static final String DATE_ONLY_2017_01_01 = "2017-01-01";
 
     public static Stream<Arguments> dateHelperTestParams() {
         return Stream.of(
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_START,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -51,7 +50,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_START,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -95,7 +94,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_END,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -104,7 +103,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_END,
                 TIMEZONE_EASTERN,
                 toDateTime(
@@ -148,7 +147,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_START,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -157,7 +156,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_START,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -201,7 +200,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_END,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -210,7 +209,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_END,
                 TIMEZONE_MOUNTAIN,
                 toDateTime(
@@ -254,7 +253,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_START,
                 TIMEZONE_NEWFOUNDLAND,
                 toDateTime(
@@ -263,7 +262,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_START,
                 TIMEZONE_NEWFOUNDLAND,
                 toDateTime(
@@ -307,7 +306,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JAN,
+                FULL_WITH_T_2019_JAN_12_30,
                 IS_END,
                 TIMEZONE_NEWFOUNDLAND,
                 toDateTime(
@@ -316,7 +315,7 @@ class DateHelperTest {
                 )
             ),
             Arguments.of(
-                FULL_WITH_T_2019_JULY,
+                FULL_WITH_T_2019_JULY_12_30,
                 IS_END,
                 TIMEZONE_NEWFOUNDLAND,
                 toDateTime(

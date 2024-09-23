@@ -14,6 +14,7 @@ import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.get
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,7 +59,7 @@ import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
  */
 public class R4CareGapsBundleBuilder {
-    private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = Map.of(
+    private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
             "http://loinc.org/96315-7",
             new CodeableConceptSettings().add("http://loinc.org", "96315-7", "Gaps in care report"),
             "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",

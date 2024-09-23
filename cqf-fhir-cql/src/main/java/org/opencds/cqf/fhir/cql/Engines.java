@@ -147,7 +147,9 @@ public class Engines {
         libraryManager.getLibrarySourceLoader().clearProviders();
 
         if (npmProcessor != null) {
-            // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency list, and b) there are packages with different package ids but the same base canonical (e.g. fhir.r4.examples has the same base canonical as fhir.r4)
+            // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
+            // list, and b) there are packages with different package ids but the same base canonical (e.g.
+            // fhir.r4.examples has the same base canonical as fhir.r4)
             // NOTE: Using ensureNamespaceRegistered works around a but not b
             Set<String> keys = new HashSet<String>();
             Set<String> uris = new HashSet<String>();

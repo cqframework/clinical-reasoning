@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -16,15 +17,18 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DetectedIssue;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -148,21 +152,12 @@ public class CareGaps {
 
         private IPrimitiveType<Date> periodStart;
         private IPrimitiveType<Date> periodEnd;
-        private List<String> topic = new ArrayList<>();
         private String subject;
-        private String practitioner;
-        private String organization;
         private List<String> statuses = new ArrayList<>();
-        private List<String> measureIds = new ArrayList<>();
+        private List<IdType> measureIds = new ArrayList<>();
         private List<String> measureIdentifiers = new ArrayList<>();
         private List<CanonicalType> measureUrls = new ArrayList<>();
-        private List<String> programs = new ArrayList<>();
         private Supplier<Parameters> operation;
-
-        public CareGaps.When topics(String topic) {
-            this.topic.add(topic);
-            return this;
-        }
 
         public CareGaps.When periodEnd(String periodEnd) {
             this.periodEnd = new DateType(periodEnd);
@@ -174,18 +169,8 @@ public class CareGaps {
             return this;
         }
 
-        public CareGaps.When practitioner(String practitioner) {
-            this.practitioner = practitioner;
-            return this;
-        }
-
         public CareGaps.When subject(String subject) {
             this.subject = subject;
-            return this;
-        }
-
-        public CareGaps.When organization(String organization) {
-            this.organization = organization;
             return this;
         }
 
@@ -195,7 +180,7 @@ public class CareGaps {
         }
 
         public CareGaps.When measureIds(String measureIds) {
-            this.measureIds.add(measureIds);
+            this.measureIds.add(new IdType("Measure", measureIds));
             return this;
         }
 
@@ -209,24 +194,9 @@ public class CareGaps {
             return this;
         }
 
-        public CareGaps.When programs(String programs) {
-            this.programs.add(programs);
-            return this;
-        }
-
         public CareGaps.When getCareGapsReport() {
             this.operation = () -> service.getCareGapsReport(
-                    periodStart,
-                    periodEnd,
-                    topic,
-                    subject,
-                    practitioner,
-                    organization,
-                    statuses,
-                    measureIds,
-                    measureIdentifiers,
-                    measureUrls,
-                    programs);
+                    periodStart, periodEnd, subject, statuses, measureIds, measureIdentifiers, measureUrls);
             return this;
         }
 
@@ -362,6 +332,31 @@ public class CareGaps {
                     .findFirst()
                     .get()
                     .getResource()));
+        }
+
+        public SelectedBundle measureReportEvaluatedResourcesFound() {
+            // get resource References from the Patient Bundle
+            List<String> bundleResourceReferences = bundleReport().getEntry().stream()
+                    .map(BundleEntryComponent::getResource)
+                    .map(x -> x.getResourceType().toString().concat("/" + x.getIdPart()))
+                    .collect(Collectors.toList());
+
+            // get resource References from evaluatedResources on Measure Report
+            List<MeasureReport> measureReports = bundleReport().getEntry().stream()
+                    .filter(x -> x.getResource() instanceof MeasureReport)
+                    .map(g -> (MeasureReport) g.getResource())
+                    .collect(Collectors.toList());
+
+            // check all references are found in patient bundle
+            for (MeasureReport report : measureReports) {
+                var reportReferences = report.getEvaluatedResource();
+                if (!reportReferences.isEmpty()) {
+                    for (Reference reference : reportReferences) {
+                        assertTrue(bundleResourceReferences.contains(reference.getReference()));
+                    }
+                }
+            }
+            return this;
         }
         ;
 

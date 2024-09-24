@@ -154,6 +154,15 @@ public class R4CareGapsProcessor {
         for (Measure measure : measures) {
             checkMeasureScoringType(measure);
             checkMeasureImprovementNotation(measure);
+            checkMeasureBasis(measure);
+        }
+    }
+
+    private void checkMeasureBasis(Measure measure) {
+        R4MeasureBasisDef measureDef = new R4MeasureBasisDef();
+        if (!measureDef.isBooleanBasis(measure)) {
+            throw new IllegalArgumentException(
+                    String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart()));
         }
     }
 

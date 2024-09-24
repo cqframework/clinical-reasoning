@@ -29,4 +29,5 @@ public class MeasureReportConstants {
     public static final String RESOURCE_TYPE_PRACTITIONER_ROLE = "PractitionerRole";
     public static final String RESOURCE_TYPE_ORGANIZATION = "Organization";
     public static final String RESOURCE_TYPE_LOCATION = "Location";
+    public static final String RESOURCE_TYPE_PATIENT = "Patient";
 }

@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.SearchParameter;
@@ -653,44 +653,51 @@ public class BundleHelper {
         switch (fhirVersion) {
             case DSTU3:
                 var res = (SearchParameter) resource;
-                return new RuntimeSearchParam(res.getIdElement(),
-                    res.getUrl(),
-                    res.getCode(),
-                    res.getDescription(),
-                    res.getExpression(),
-                    RestSearchParameterTypeEnum.REFERENCE,
-                    null,
-                    res.getTarget().stream().map(StringType::toString).collect(Collectors.toSet()),
-                    RuntimeSearchParamStatusEnum.ACTIVE,
-                    res.getBase().stream().map(StringType::toString).collect(Collectors.toList()));
+                return new RuntimeSearchParam(
+                        res.getIdElement(),
+                        res.getUrl(),
+                        res.getCode(),
+                        res.getDescription(),
+                        res.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        res.getTarget().stream().map(StringType::toString).collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        res.getBase().stream().map(StringType::toString).collect(Collectors.toList()));
             case R4:
                 var resR4 = (org.hl7.fhir.r4.model.SearchParameter) resource;
-                return new RuntimeSearchParam(resR4.getIdElement(),
-                    resR4.getUrl(),
-                    resR4.getCode(),
-                    resR4.getDescription(),
-                    resR4.getExpression(),
-                    RestSearchParameterTypeEnum.REFERENCE,
-                    null,
-                    resR4.getTarget().stream().map(org.hl7.fhir.r4.model.StringType::toString).collect(Collectors.toSet()),
-                    RuntimeSearchParamStatusEnum.ACTIVE,
-                    resR4.getBase().stream().map(org.hl7.fhir.r4.model.StringType::toString).collect(Collectors.toList()));
+                return new RuntimeSearchParam(
+                        resR4.getIdElement(),
+                        resR4.getUrl(),
+                        resR4.getCode(),
+                        resR4.getDescription(),
+                        resR4.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        resR4.getTarget().stream()
+                                .map(org.hl7.fhir.r4.model.StringType::toString)
+                                .collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        resR4.getBase().stream()
+                                .map(org.hl7.fhir.r4.model.StringType::toString)
+                                .collect(Collectors.toList()));
             case R5:
                 var resR5 = (org.hl7.fhir.r5.model.SearchParameter) resource;
-                return new RuntimeSearchParam(resR5.getIdElement(),
-                    resR5.getUrl(),
-                    resR5.getCode(),
-                    resR5.getDescription(),
-                    resR5.getExpression(),
-                    RestSearchParameterTypeEnum.REFERENCE,
-                    null,
-                    resR5.getTarget().stream().map(PrimitiveType::toString).collect(Collectors.toSet()),
-                    RuntimeSearchParamStatusEnum.ACTIVE,
-                    resR5.getBase().stream().map(PrimitiveType::toString).collect(Collectors.toList()));
+                return new RuntimeSearchParam(
+                        resR5.getIdElement(),
+                        resR5.getUrl(),
+                        resR5.getCode(),
+                        resR5.getDescription(),
+                        resR5.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        resR5.getTarget().stream().map(PrimitiveType::toString).collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        resR5.getBase().stream().map(PrimitiveType::toString).collect(Collectors.toList()));
 
             default:
                 throw new IllegalArgumentException(
-                    String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
         }
     }
 }

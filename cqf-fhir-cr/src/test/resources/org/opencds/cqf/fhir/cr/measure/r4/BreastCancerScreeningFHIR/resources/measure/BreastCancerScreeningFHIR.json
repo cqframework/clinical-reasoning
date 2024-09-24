@@ -117,5 +117,18 @@
         "expression": "Numerator"
       }
     } ]
+  } ],
+  "supplementalData": [ {
+    "id": "sde-patient-sex",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Sex"
+    }
   } ]
 }

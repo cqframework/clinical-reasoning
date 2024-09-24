@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.google.common.base.Strings;
+
 public class CareGapsProperties {
     private String careGapsReporter;
     /**
@@ -36,5 +40,17 @@ public class CareGapsProperties {
 
     public void setCareGapsCompositionSectionAuthor(String careGapsCompositionSectionAuthor) {
         this.careGapsCompositionSectionAuthor = careGapsCompositionSectionAuthor;
+    }
+
+    public void validateRequiredProperties() {
+        checkArgument(
+                !Strings.isNullOrEmpty(getCareGapsReporter()),
+                "Setting care-gaps properties.care_gaps_reporter setting is required for the $care-gaps operation.");
+        checkArgument(
+                !Strings.isNullOrEmpty(getCareGapsCompositionSectionAuthor()),
+                "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
+        checkArgument(
+                !Strings.isNullOrEmpty(fhirBaseUrl),
+                "The fhirBaseUrl setting is required for the $care-gaps operation.");
     }
 }

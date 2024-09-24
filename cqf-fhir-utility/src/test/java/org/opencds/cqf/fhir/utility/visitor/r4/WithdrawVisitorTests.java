@@ -25,7 +25,6 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.visitor.WithdrawVisitor;
-import java.util.concurrent.ExecutionException;
 
 class WithdrawVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -35,7 +34,7 @@ class WithdrawVisitorTests {
     @BeforeEach
     void setup() {
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-            ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
         spyRepository.update(sp);
         doAnswer(new Answer<Bundle>() {
@@ -73,7 +72,7 @@ class WithdrawVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw-with-approval.json"));
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-            ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         Bundle tsBundle = spyRepository.transaction(bundle);
         spyRepository.update(sp);
         // InMemoryFhirRepository bug - need to get id like this

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
@@ -69,12 +71,25 @@ public interface ResourceMatcher {
 
     public Map<SPPathKey, IParsedExpression> getPathCache();
 
+    public Map<String, RuntimeSearchParam> customSearchParams = new HashMap<>();
+
+    default void addCustomParameter(RuntimeSearchParam searchParam) {
+        this.customSearchParams.put(searchParam.getName(), searchParam);
+    }
+
+    default Map<String, RuntimeSearchParam> getCustomParameters() {
+        return this.customSearchParams;
+    }
+
     // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
         boolean match = true;
 
         var context = getContext();
         var s = context.getResourceDefinition(resource).getSearchParam(name);
+        if (s == null) {
+            s = this.getCustomParameters().get(name);
+        }
         if (s == null) {
             throw new RuntimeException(String.format(
                     "The SearchParameter %s for Resource %s is not supported.", name, resource.fhirType()));

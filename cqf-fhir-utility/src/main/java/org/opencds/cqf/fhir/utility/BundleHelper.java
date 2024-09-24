@@ -655,7 +655,7 @@ public class BundleHelper {
                 var res = (SearchParameter) resource;
                 return new RuntimeSearchParam(res.getIdElement(),
                     res.getUrl(),
-                    res.getName(),
+                    res.getCode(),
                     res.getDescription(),
                     res.getExpression(),
                     RestSearchParameterTypeEnum.REFERENCE,
@@ -667,7 +667,7 @@ public class BundleHelper {
                 var resR4 = (org.hl7.fhir.r4.model.SearchParameter) resource;
                 return new RuntimeSearchParam(resR4.getIdElement(),
                     resR4.getUrl(),
-                    resR4.getName(),
+                    resR4.getCode(),
                     resR4.getDescription(),
                     resR4.getExpression(),
                     RestSearchParameterTypeEnum.REFERENCE,
@@ -679,7 +679,7 @@ public class BundleHelper {
                 var resR5 = (org.hl7.fhir.r5.model.SearchParameter) resource;
                 return new RuntimeSearchParam(resR5.getIdElement(),
                     resR5.getUrl(),
-                    resR5.getName(),
+                    resR5.getCode(),
                     resR5.getDescription(),
                     resR5.getExpression(),
                     RestSearchParameterTypeEnum.REFERENCE,

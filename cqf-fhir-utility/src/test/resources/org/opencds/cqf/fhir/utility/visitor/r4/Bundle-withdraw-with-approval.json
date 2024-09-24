@@ -6,7 +6,7 @@
       "fullUrl": "http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary|1.1.0-draft",
       "resource": {
         "resourceType": "Library",
-        "id": "1566",
+        "id": "SpecificationLibrary",
         "meta": {
           "versionId": "2",
           "lastUpdated": "2024-09-17T18:36:08.464+00:00",
@@ -1072,8 +1072,8 @@
         ]
       },
       "request": {
-        "method": "POST",
-        "url": "Library",
+        "method": "PUT",
+        "url": "Library/SpecificationLibrary",
         "ifNoneExist": "url=http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary&version=1.1.0-draft"
       }
     },
@@ -12425,7 +12425,7 @@
                 "url": "relatedArtifact",
                 "valueRelatedArtifact": {
                   "type": "derived-from",
-                  "resource": "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary|1.0.0"
+                  "resource": "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary|1.1.0"
                 }
               }
             ]

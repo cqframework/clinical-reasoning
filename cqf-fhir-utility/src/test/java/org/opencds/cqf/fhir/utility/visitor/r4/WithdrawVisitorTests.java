@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -37,8 +36,8 @@ class WithdrawVisitorTests {
     void setup() {
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
             ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
-        //fhirContext.getResourceDefinition("SearchParameter").addSearchParam(BundleHelper.resourceToRuntimeSearchParam(sp));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));
+        spyRepository.update(sp);
         doAnswer(new Answer<Bundle>() {
                     @Override
                     public Bundle answer(InvocationOnMock a) throws Throwable {

@@ -3,11 +3,8 @@ package org.opencds.cqf.fhir.utility.repository;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -109,6 +106,10 @@ public class InMemoryFhirRepository implements Repository {
         var outcome = new MethodOutcome(theId, false);
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
+        }
+        if (resource.fhirType().equals("SearchParameter")) {
+            var resourceMatcher = Repositories.getResourceMatcher(this.context);
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
         }
         resources.put(theId, resource);
 

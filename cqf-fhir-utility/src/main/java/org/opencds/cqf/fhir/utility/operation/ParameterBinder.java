@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.Resources;
 
@@ -68,6 +70,9 @@ interface ParameterBinder {
 
         public IdParameterBinder(Parameter parameter) {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
+            checkArgument(
+                    IIdType.class.isAssignableFrom(parameter.getType()),
+                    "Parameter annotated with @IdParam must be of type IIdType");
         }
 
         @Override
@@ -167,11 +172,14 @@ interface ParameterBinder {
 
         public UnboundParamBinder(Parameter parameter) {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
+            checkArgument(
+                    IBaseParameters.class.isAssignableFrom(parameter.getType()),
+                    "Parameter annotated with @UnboundParam must be of type IBaseParameters");
         }
 
         @Override
         public Type type() {
-            return Type.OPERATION;
+            return Type.UNBOUND;
         }
 
         @Override

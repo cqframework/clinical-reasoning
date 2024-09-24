@@ -89,7 +89,7 @@ public class OperationRegistry {
         }
     }
 
-    private final Multimap<String, OperationClosure<?>> operationMap;
+    private final Multimap<String, InvocationContext<?>> operationMap;
 
     /**
      * Creates a new OperationRegistry instance. This instance will be used to register and execute operations for
@@ -116,7 +116,7 @@ public class OperationRegistry {
         }
 
         for (var methodBinder : methodBinders) {
-            var closure = new OperationClosure<T>(factory, methodBinder);
+            var closure = new InvocationContext<T>(factory, methodBinder);
             operationMap.put(methodBinder.name(), closure);
         }
     }
@@ -141,7 +141,7 @@ public class OperationRegistry {
         return callable.call();
     }
 
-    private OperationClosure<?> findOperation(Scope scope, String name, String typeName) {
+    private InvocationContext<?> findOperation(Scope scope, String name, String typeName) {
         requireNonNull(scope, "Scope cannot be null");
         requireNonNull(name, "Operation name cannot be null");
 
@@ -157,7 +157,7 @@ public class OperationRegistry {
             throw new IllegalArgumentException("No operation found with name " + name + " and scope " + scope);
         }
 
-        Predicate<OperationClosure<?>> typePredicate =
+        Predicate<InvocationContext<?>> typePredicate =
                 typeName != null ? c -> c.methodBinder().typeName().equals(typeName) : c -> true;
         var typedClosures = scopedClosures.stream().filter(typePredicate).collect(Collectors.toList());
 

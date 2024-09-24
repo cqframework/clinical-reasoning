@@ -32,23 +32,30 @@ class MethodBinder {
     private final String typeName;
     private final Scope scope;
     private final List<ParameterBinder> parameterBinders;
-    private final boolean hasIdParam;
 
     MethodBinder(Method method) {
-        this.method = requireNonNull(method, "Method cannot be null");
+        this.method = requireNonNull(method, "method cannot be null");
         this.operation =
-                requireNonNull(method.getAnnotation(Operation.class), "Method must be annotated with @Operation");
-        this.name = requireNonNull(operation.name(), "@Operation name cannot be null")
-                .substring(Math.max(operation.name().indexOf("$"), 0)); // Normalize name to remove $
+                requireNonNull(method.getAnnotation(Operation.class), "method must be annotated with @Operation");
+
+        this.name = normalizeName(requireNonNull(operation.name(), "@Operation name cannot be null"));
         this.typeName = typeNameFrom(operation);
+        this.parameterBinders = parameterBindersFrom(method);
         this.description = method.getAnnotation(Description.class);
 
-        this.parameterBinders =
-                Arrays.stream(method.getParameters()).map(ParameterBinder::from).collect(Collectors.toList());
-
-        this.hasIdParam = parameterBinders.stream().anyMatch(x -> x.type() == Type.ID);
-        this.scope = hasIdParam ? Scope.INSTANCE : (!this.typeName.isEmpty() ? Scope.TYPE : Scope.SERVER);
+        var hasIdParam = parameterBinders.stream().anyMatch(x -> x.type() == Type.ID);
+        this.scope = hasIdParam ? Scope.INSTANCE : this.typeName.isEmpty() ? Scope.SERVER : Scope.TYPE;
         validateParameterBinders(parameterBinders);
+    }
+
+    // Normalize the operation name to remove the $ prefix
+    private static String normalizeName(String name) {
+        return name.substring(Math.max(name.indexOf("$"), 0));
+    }
+
+    // Create a list of ParameterBinders from the method's parameters
+    private static List<ParameterBinder> parameterBindersFrom(Method method) {
+        return Arrays.stream(method.getParameters()).map(ParameterBinder::from).collect(Collectors.toList());
     }
 
     @Nonnull
@@ -98,7 +105,7 @@ class MethodBinder {
 
         // If we have an id parameter for the method
         // it's guaranteed to be the first parameter
-        if (this.hasIdParam) {
+        if (this.scope == Scope.INSTANCE) {
             args.add(id);
             paramIndex++;
         }
@@ -112,7 +119,8 @@ class MethodBinder {
         }
 
         if (cloned != null && !cloned.isEmpty()) {
-            throw new IllegalArgumentException("Parameters were not bound to @Operation invocation: " + cloned);
+            throw new IllegalArgumentException(
+                    "Parameters were not bound to @Operation invocation: " + Resources.stringify(cloned));
         }
 
         return args;
@@ -125,14 +133,14 @@ class MethodBinder {
             throw new IllegalArgumentException("Method cannot have more than one @IdParam");
         }
 
+        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
+            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
+        }
+
         var unboundParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.UNBOUND).count();
         if (unboundParamCount > 1) {
             throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
-        }
-
-        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
-            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
         }
 
         if (unboundParamCount > 0
@@ -142,8 +150,8 @@ class MethodBinder {
     }
 
     private static String typeNameFrom(Operation operation) {
-        if ((IBaseResource.class == operation.type() || operation.type() == null)
-                && (operation.typeName() == null || "".equals(operation.typeName()))) {
+        // operation.type() == IBaseResource.class is the default value, meaning the operation is not type specific
+        if ((IBaseResource.class == operation.type()) && ("".equals(operation.typeName()))) {
             return "";
         } else if (operation.type() != null) {
             return operation.type().getSimpleName();
@@ -152,6 +160,15 @@ class MethodBinder {
         }
     }
 
+    /**
+     * Bind the parameters to the method and return a Callable that can be used to invoke the method.
+     *
+     * This means that the parameters of the Parameters resource and mapped to the Java method's arguments
+     * @param provider the object that contains the method to be invoked
+     * @param id the id of the resource that the operation is being invoked on
+     * @param parameters the Parameters resource that contains the operation's parameters
+     * @return a Callable that can be used to invoke the method
+     */
     public Callable<IBaseResource> bind(Object provider, IIdType id, IBaseParameters parameters) {
         var args = args(id, parameters);
         return () -> (IBaseResource) method.invoke(provider, args.toArray());

@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -35,7 +34,7 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReleaseVisitor implements KnowledgeArtifactVisitor {
+public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
 
     @Override
@@ -524,31 +523,6 @@ public class ReleaseVisitor implements KnowledgeArtifactVisitor {
             throw new PreconditionFailedException(String.format(
                     "The artifact was approved on '%s', but was last modified on '%s'. An approval must be provided after the most-recent update.",
                     approvalDate, artifact.getDate()));
-        }
-    }
-
-    private List<IBaseBackboneElement> findArtifactCommentsToUpdate(
-            IBaseResource artifact, String releaseVersion, Repository repository) {
-        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-            return org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseVersion, repository)
-                    .stream()
-                    .map(r -> (IBaseBackboneElement) r)
-                    .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
-            return org.opencds.cqf.fhir.utility.visitor.r4.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseVersion, repository)
-                    .stream()
-                    .map(r -> (IBaseBackboneElement) r)
-                    .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
-            return org.opencds.cqf.fhir.utility.visitor.r5.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseVersion, repository)
-                    .stream()
-                    .map(r -> (IBaseBackboneElement) r)
-                    .collect(Collectors.toList());
-        } else {
-            throw new UnprocessableEntityException("Version not supported");
         }
     }
 

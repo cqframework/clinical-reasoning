@@ -3,10 +3,14 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 
 /**
@@ -38,10 +42,23 @@ public class R4CareGapStatusEvaluator {
      * <li>'closed-gap': if in 'Denominator' & in 'Numerator', where 'improvement notation' = increase. Then the subject is 'closed-gap'</li>
      * </ul>
      */
-    public CareGapsStatusCode getGapStatus(Measure measure, MeasureReport measureReport) {
+    public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
+        Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();
+
+        for (MeasureReportGroupComponent group : measureReport.getGroup()) {
+            var groupId = group.getId();
+            var gapStatus = getGapStatus(measure, group);
+
+            groupStatus.put(groupId, gapStatus);
+        }
+        return groupStatus;
+    }
+
+    private CareGapsStatusCode getGapStatus(Measure measure, MeasureReportGroupComponent measureReportGroup) {
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
         Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
-        measureReport.getGroup().forEach(group -> group.getPopulation().forEach(population -> {
+        // get Numerator and Denominator membership
+        measureReportGroup.getPopulation().forEach(population -> {
             if (population.hasCode()
                     && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
                     && population.getCount() == 1) {
@@ -52,13 +69,15 @@ public class R4CareGapStatusEvaluator {
                     && population.getCount() == 1) {
                 inDenominator.setValue(true);
             }
-        }));
+        });
 
         // default improvementNotation
         boolean isPositive = true;
 
-        // if value is present, set value from measure if populated
-        if (measure.hasImprovementNotation()) {
+        // look for group specified 'improvement notation', if missing, then look on measure
+        if (groupHasImprovementNotation(measureReportGroup)) {
+            isPositive = groupImprovementNotationIsPositive(measureReportGroup);
+        } else if (measure.hasImprovementNotation()) {
             isPositive =
                     measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
         }
@@ -74,5 +93,16 @@ public class R4CareGapStatusEvaluator {
         }
 
         return CareGapsStatusCode.CLOSED_GAP;
+    }
+
+    private boolean groupHasImprovementNotation(MeasureReportGroupComponent groupComponent) {
+        return groupComponent.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM) != null;
+    }
+
+    private boolean groupImprovementNotationIsPositive(MeasureReportGroupComponent groupComponent) {
+        var code = (CodeableConcept) groupComponent
+                .getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM)
+                .getValue();
+        return code.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
     }
 }

@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
@@ -155,6 +156,7 @@ public class R4CareGapsProcessor {
             checkMeasureScoringType(measure);
             checkMeasureImprovementNotation(measure);
             checkMeasureBasis(measure);
+            checkMeasureGroupComponents(measure);
         }
     }
 
@@ -163,6 +165,26 @@ public class R4CareGapsProcessor {
         if (!measureDef.isBooleanBasis(measure)) {
             throw new IllegalArgumentException(
                     String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart()));
+        }
+    }
+
+    /**
+     * MultiRate Measures require a unique 'id' per GroupComponent to uniquely identify results in Measure Report.
+     * This is helpful when creating DetectedIssues per GroupComponent so endUsers can attribute evidence of a Care-Gap to the specific MeasureReport result
+     * @param measure
+     */
+    private void checkMeasureGroupComponents(Measure measure) {
+        // if a Multi-rate Measure, enforce groupId to be populated
+        if (measure.getGroup().size() > 1) {
+            for (MeasureGroupComponent group : measure.getGroup()) {
+                if (measure.getGroup().size() > 1
+                        && (group.getId() == null
+                                || group.getId().isEmpty()
+                                || group.getId().isBlank())) {
+                    throw new IllegalArgumentException(
+                            "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated.");
+                }
+            }
         }
     }
 

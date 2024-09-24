@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -31,7 +32,7 @@ class MeasureProcessorEvaluateTest {
         var start = "2022-01-01";
         var end = "2022-06-29";
         var helper = new R4DateHelper();
-        var measurementPeriod = helper.buildMeasurementPeriod(start, end);
+        var measurementPeriod = helper.buildMeasurementPeriod(start, end, ZoneId.systemDefault());
         var report = given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
                 .periodStart(start)

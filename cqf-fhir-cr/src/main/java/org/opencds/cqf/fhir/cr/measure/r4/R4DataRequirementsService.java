@@ -48,7 +48,7 @@ import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvi
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.helper.IntervalHelper;
 import org.opencds.cqf.fhir.cr.measure.helper.SubjectContext;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
@@ -85,11 +85,10 @@ public class R4DataRequirementsService {
 
         Interval measurementPeriod;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = new Interval(
-                    DateHelper.resolveRequestDate(periodStart, true),
-                    true,
-                    DateHelper.resolveRequestDate(periodEnd, false),
-                    true);
+            measurementPeriod = IntervalHelper.buildMeasurementPeriod(
+                    periodStart,
+                    periodEnd,
+                    measureEvaluationOptions.getEvaluationSettings().getClientTimezone());
             parameters.put("MeasurementPeriod", measurementPeriod);
 
             return processDataRequirements(measure, library, parameters);

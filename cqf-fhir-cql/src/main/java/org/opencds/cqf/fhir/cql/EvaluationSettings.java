@@ -1,7 +1,11 @@
 package org.opencds.cqf.fhir.cql;
 
+import jakarta.annotation.Nonnull;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -21,6 +25,7 @@ public class EvaluationSettings {
 
     private RetrieveSettings retrieveSettings;
     private TerminologySettings terminologySettings;
+    private ZoneId clientTimezone;
 
     public static EvaluationSettings getDefault() {
         EvaluationSettings settings = new EvaluationSettings();
@@ -83,8 +88,9 @@ public class EvaluationSettings {
         return this;
     }
 
-    public void setCqlOptions(CqlOptions cqlOptions) {
+    public EvaluationSettings setCqlOptions(CqlOptions cqlOptions) {
         this.cqlOptions = cqlOptions;
+        return this;
     }
 
     public RetrieveSettings getRetrieveSettings() {
@@ -109,7 +115,18 @@ public class EvaluationSettings {
         return this;
     }
 
-    public void setTerminologySettings(TerminologySettings terminologySettings) {
+    public EvaluationSettings setTerminologySettings(TerminologySettings terminologySettings) {
         this.terminologySettings = terminologySettings;
+        return this;
+    }
+
+    @Nonnull
+    public ZoneId getClientTimezone() {
+        return Optional.ofNullable(clientTimezone).orElse(ZoneOffset.UTC);
+    }
+
+    public EvaluationSettings setClientTimezone(ZoneId clientTimezone) {
+        this.clientTimezone = clientTimezone;
+        return this;
     }
 }

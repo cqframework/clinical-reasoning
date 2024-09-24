@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -95,6 +96,7 @@ public class Measure {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
             this.evaluationOptions
                     .getEvaluationSettings()
+                    .setClientTimezone(ZoneId.systemDefault()) // preserve backward compatibility with previous TZ
                     .getRetrieveSettings()
                     .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
                     .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);

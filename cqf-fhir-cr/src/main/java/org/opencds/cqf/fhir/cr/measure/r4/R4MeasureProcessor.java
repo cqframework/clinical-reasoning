@@ -110,7 +110,10 @@ public class R4MeasureProcessor {
         Interval measurementPeriod = null;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
             var helper = new R4DateHelper();
-            measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
+            measurementPeriod = helper.buildMeasurementPeriodInterval(
+                    periodStart,
+                    periodEnd,
+                    measureEvaluationOptions.getEvaluationSettings().getClientTimezone());
         }
 
         var url = measure.getLibrary().get(0).asStringValue();

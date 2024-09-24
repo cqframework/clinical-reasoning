@@ -1,24 +1,21 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import java.time.ZoneId;
 import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.helper.IntervalHelper;
 
 public class R4DateHelper {
 
-    public Interval buildMeasurementPeriodInterval(String periodStart, String periodEnd) {
+    public Interval buildMeasurementPeriodInterval(String periodStart, String periodEnd, ZoneId timezone) {
         // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
+        return IntervalHelper.buildMeasurementPeriod(periodStart, periodEnd, timezone);
     }
 
-    public Period buildMeasurementPeriod(String periodStart, String periodEnd) {
-        Interval measurementPeriod = buildMeasurementPeriodInterval(periodStart, periodEnd);
+    public Period buildMeasurementPeriod(String periodStart, String periodEnd, ZoneId timezone) {
+        Interval measurementPeriod = buildMeasurementPeriodInterval(periodStart, periodEnd, timezone);
         return buildMeasurementPeriod(measurementPeriod);
     }
 

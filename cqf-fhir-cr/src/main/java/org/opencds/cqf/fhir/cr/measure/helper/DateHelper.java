@@ -9,16 +9,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 
 /**
  * Helper class to resolve measurement period start and end dates. If a timezone
  * is specified in a
- * datetime, it's used. If not the timezone of the local system is used.
+ * datetime, it's used. If not the timezone specified in the ZoneId parameter is used.
  */
 public class DateHelper {
-    public static DateTime resolveRequestDate(String date, boolean start) {
+    public static DateTime resolveRequestDate(String date, boolean start, ZoneId fallbackTimezone) {
+        Objects.requireNonNull(fallbackTimezone);
         // ISO Instance Format
         if (date.contains("Z")) {
             var offset = Instant.parse(date).atOffset(ZoneOffset.UTC);
@@ -35,15 +37,15 @@ public class DateHelper {
         // Local DateTime
         if (date.contains("T")) {
             var offset = LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(fallbackTimezone)
                     .toOffsetDateTime();
             return new DateTime(offset);
         }
 
-        return resolveDate(start, date);
+        return resolveDate(start, date, fallbackTimezone);
     }
 
-    private static DateTime resolveDate(boolean start, String dateString) {
+    private static DateTime resolveDate(boolean start, String dateString, ZoneId fallbackTimezone) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
 
@@ -57,7 +59,7 @@ public class DateHelper {
             throw new IllegalArgumentException("Invalid date");
         }
 
-        calendar.setTimeZone(TimeZone.getDefault());
+        calendar.setTimeZone(TimeZone.getTimeZone(fallbackTimezone));
 
         // Set year
         calendar.set(Calendar.YEAR, dateVals.get(0));
@@ -102,7 +104,7 @@ public class DateHelper {
         }
 
         // TODO: Seems like we might want set the precision appropriately here?
-        var offset = calendar.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+        var offset = calendar.toInstant().atZone(fallbackTimezone).toOffsetDateTime();
         return new DateTime(offset);
     }
 }

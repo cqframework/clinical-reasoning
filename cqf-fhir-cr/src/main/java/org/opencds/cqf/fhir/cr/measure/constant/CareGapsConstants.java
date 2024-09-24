@@ -21,4 +21,6 @@ public class CareGapsConstants {
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-gapStatus";
     public static final String CARE_GAPS_GAP_STATUS_SYSTEM =
             "http://hl7.org/fhir/us/davinci-deqm/CodeSystem/gaps-status";
+    public static final String CARE_GAPS_REPORTER_KEY = "care_gaps_reporter";
+    public static final String CARE_GAPS_SECTION_AUTHOR_KEY = "care_gaps_composition_section_author";
 }

@@ -590,4 +590,24 @@ class R4CareGapsTest {
                     .contains("Multi-rate Measure resources require unique 'id' for GroupComponents to be populated."));
         }
     }
+
+    /*
+    // TODO implement Measure Group Level improvement notation extension
+    @Test
+    void MinimalProportionBooleanBasisMultiGroupGroupImpNotation() {
+        GIVEN_REPO
+            .when()
+            .subject("Patient/female-1988")
+            .periodStart("2019-01-01")
+            .periodEnd("2019-12-31")
+            .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+            .statuses("closed-gap")
+            .getCareGapsReport()
+            .then()
+            .hasBundleCount(1)
+            .firstParameter()
+            .detectedIssueCount(
+                2); // 2 Detected issue per groupId, one is decrease, the other increase improvement Notation. Both should be closed-gap
+    }
+     */
 }

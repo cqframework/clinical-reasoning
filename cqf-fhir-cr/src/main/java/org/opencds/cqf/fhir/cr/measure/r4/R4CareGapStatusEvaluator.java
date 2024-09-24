@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -32,8 +31,8 @@ public class R4CareGapStatusEvaluator {
      * Improvement Notation of Scoring Algorithm indicates whether the ratio of Numerator over Denominator populations represents a scenario to increase the Numerator to improve outcomes, or to decrease the Numerator count. If this value is not set on a Measure resource, then it is defaulted to 'Increase' under the IsPositive variable.
      * </p>
      * <ul>
-     * <li>ex: 1/10 with improvementNotation "decrease" means that the measureScore is 90%, therefore absense from 'Numerator' means criteria for care was met</li>
-     * <li>ex: 1/10 with improvementNotation "increase" means that the measureScore is 10%, therefore absense from 'Numerator' means criteria for care was NOT met.</li>
+     * <li>ex: 1/10 with improvementNotation "decrease" means that the measureScore is 90%, therefore absence from 'Numerator' means criteria for care was met</li>
+     * <li>ex: 1/10 with improvementNotation "increase" means that the measureScore is 10%, therefore absence from 'Numerator' means criteria for care was NOT met.</li>
      * </ul>
      * <ul>
      * <li>'open-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = increase. Then the subject is 'open-gap'</li>
@@ -74,10 +73,11 @@ public class R4CareGapStatusEvaluator {
         // default improvementNotation
         boolean isPositive = true;
 
-        // look for group specified 'improvement notation', if missing, then look on measure
-        if (groupHasImprovementNotation(measureReportGroup)) {
+        // TODO: look for group specified 'improvement notation', if missing, then look on measure
+        /*if (groupHasImprovementNotation(measureReportGroup)) {
             isPositive = groupImprovementNotationIsPositive(measureReportGroup);
-        } else if (measure.hasImprovementNotation()) {
+        } else if (measure.hasImprovementNotation()) {*/
+        if (measure.hasImprovementNotation()) {
             isPositive =
                     measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
         }
@@ -95,14 +95,16 @@ public class R4CareGapStatusEvaluator {
         return CareGapsStatusCode.CLOSED_GAP;
     }
 
+    /*
+    // TODO implement Measure Group Level improvement notation extension
     private boolean groupHasImprovementNotation(MeasureReportGroupComponent groupComponent) {
-        return groupComponent.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM) != null;
+        return groupComponent.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION) != null;
     }
 
     private boolean groupImprovementNotationIsPositive(MeasureReportGroupComponent groupComponent) {
         var code = (CodeableConcept) groupComponent
-                .getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM)
+                .getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
                 .getValue();
         return code.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
-    }
+    }*/
 }

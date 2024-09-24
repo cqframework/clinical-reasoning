@@ -171,7 +171,7 @@ public class R4CareGapsProcessor {
     /**
      * MultiRate Measures require a unique 'id' per GroupComponent to uniquely identify results in Measure Report.
      * This is helpful when creating DetectedIssues per GroupComponent so endUsers can attribute evidence of a Care-Gap to the specific MeasureReport result
-     * @param measure
+     * @param measure Measure resource
      */
     private void checkMeasureGroupComponents(Measure measure) {
         // if a Multi-rate Measure, enforce groupId to be populated

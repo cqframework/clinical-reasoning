@@ -130,11 +130,8 @@ public class LibraryEngine {
         librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
         librarySourceProviders.addAll(this.librarySourceProviders);
 
-        var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false);
-        var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
-        for (var source : librarySourceProviders) {
-            providers.registerProvider(source);
-        }
+        var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false, librarySourceProviders);
+
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             evaluationParameters.put("%fhirpathcontext", contextParameter);

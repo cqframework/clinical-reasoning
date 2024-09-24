@@ -507,4 +507,28 @@ class R4CareGapsTest {
                             "MeasureScoring type: Continuous Variable, is not an accepted Type for care-gaps service"));
         }
     }
+
+    // MinimalProportionResourceBasisSingleGroup
+    @Test
+    void MinimalProportionResourceBasisSingleGroup_Subject() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .subject("Patient/female-1988")
+                    .periodStart("2024-01-01")
+                    .periodEnd("2024-12-31")
+                    .measureIds("MinimalProportionResourceBasisSingleGroup")
+                    .statuses("closed-gap")
+                    .statuses("open-gap")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1);
+            fail("resource based measures should fail");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "CareGaps can't process Measure: MinimalProportionResourceBasisSingleGroup, it is not Boolean basis"));
+        }
+    }
 }

@@ -178,9 +178,7 @@ public class R4CareGapsProcessor {
         if (measure.getGroup().size() > 1) {
             for (MeasureGroupComponent group : measure.getGroup()) {
                 if (measure.getGroup().size() > 1
-                        && (group.getId() == null
-                                || group.getId().isEmpty()
-                                || group.getId().isBlank())) {
+                        && (group.getId() == null || group.getId().isEmpty())) {
                     throw new IllegalArgumentException(
                             "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated.");
                 }

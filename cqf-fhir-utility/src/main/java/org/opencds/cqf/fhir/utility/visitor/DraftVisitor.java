@@ -25,7 +25,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
-public class DraftVisitor implements KnowledgeArtifactVisitor {
+public class DraftVisitor implements IKnowledgeArtifactVisitor {
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters draftParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();

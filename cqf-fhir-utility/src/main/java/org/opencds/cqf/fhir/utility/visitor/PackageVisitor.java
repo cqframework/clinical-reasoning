@@ -42,7 +42,7 @@ import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
-public class PackageVisitor implements KnowledgeArtifactVisitor {
+public class PackageVisitor implements IKnowledgeArtifactVisitor {
     protected final FhirContext fhirContext;
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;

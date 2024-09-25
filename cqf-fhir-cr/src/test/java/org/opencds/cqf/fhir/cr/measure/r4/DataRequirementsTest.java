@@ -56,7 +56,7 @@ class DataRequirementsTest {
                 .DataRequirements()
                 .then()
                 .hasDataRequirementCount(1)
-                .hasParameterDefCount(11)
+                .hasParameterDefCount(13)
                 .hasRelatedArtifactCount(1)
                 .report();
     }

@@ -1,16 +1,23 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r5.model.PrimitiveType;
 
 public class BundleHelper {
     private BundleHelper() {}
@@ -634,6 +641,59 @@ public class BundleHelper {
                 }
                 return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request);
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    public static RuntimeSearchParam resourceToRuntimeSearchParam(IBaseResource resource) {
+        var fhirVersion = resource.getStructureFhirVersionEnum();
+        switch (fhirVersion) {
+            case DSTU3:
+                var res = (SearchParameter) resource;
+                return new RuntimeSearchParam(
+                        res.getIdElement(),
+                        res.getUrl(),
+                        res.getCode(),
+                        res.getDescription(),
+                        res.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        res.getTarget().stream().map(StringType::toString).collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        res.getBase().stream().map(StringType::toString).collect(Collectors.toList()));
+            case R4:
+                var resR4 = (org.hl7.fhir.r4.model.SearchParameter) resource;
+                return new RuntimeSearchParam(
+                        resR4.getIdElement(),
+                        resR4.getUrl(),
+                        resR4.getCode(),
+                        resR4.getDescription(),
+                        resR4.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        resR4.getTarget().stream()
+                                .map(org.hl7.fhir.r4.model.StringType::toString)
+                                .collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        resR4.getBase().stream()
+                                .map(org.hl7.fhir.r4.model.StringType::toString)
+                                .collect(Collectors.toList()));
+            case R5:
+                var resR5 = (org.hl7.fhir.r5.model.SearchParameter) resource;
+                return new RuntimeSearchParam(
+                        resR5.getIdElement(),
+                        resR5.getUrl(),
+                        resR5.getCode(),
+                        resR5.getDescription(),
+                        resR5.getExpression(),
+                        RestSearchParameterTypeEnum.REFERENCE,
+                        null,
+                        resR5.getTarget().stream().map(PrimitiveType::toString).collect(Collectors.toSet()),
+                        RuntimeSearchParamStatusEnum.ACTIVE,
+                        resR5.getBase().stream().map(PrimitiveType::toString).collect(Collectors.toList()));
 
             default:
                 throw new IllegalArgumentException(

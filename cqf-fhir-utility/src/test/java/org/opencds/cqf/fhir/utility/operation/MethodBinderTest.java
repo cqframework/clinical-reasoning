@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
@@ -60,6 +61,18 @@ public class MethodBinderTest {
 
         @Operation(name = "hasCanonical", canonicalUrl = "http://example.com")
         public void hasCanonical(@IdParam IdType id) {}
+
+        @Operation(name = "hasTypeName", typeName = "Measure")
+        public void hasTypeName(@OperationParam(name = "stringType") StringType stringType) {}
+
+        @Operation(name = "hasType", type = Measure.class)
+        public void hasType(@OperationParam(name = "stringType") StringType stringType) {}
+
+        @Operation(name = "noArgs")
+        public void noArgs() {}
+
+        @Operation(name = "$nameNormalizes")
+        public void nameNormalizes() {}
     }
 
     private static List<Method> methods = Arrays.asList(ExampleMethods.class.getDeclaredMethods());
@@ -168,5 +181,31 @@ public class MethodBinderTest {
         var m = methodBinderByName("idFirst");
         assertNotNull(m.operation());
         assertEquals(m.operation().name(), "idFirst");
+    }
+
+    @Test
+    public void hasType() {
+        var m = methodBinderByName("hasType");
+        assertEquals("Measure", m.typeName());
+        assertEquals(Scope.TYPE, m.scope());
+    }
+
+    @Test
+    public void hasTypeName() {
+        var m = methodBinderByName("hasTypeName");
+        assertEquals("Measure", m.typeName());
+        assertEquals(Scope.TYPE, m.scope());
+    }
+
+    @Test
+    public void noArgs() {
+        var m = methodBinderByName("noArgs");
+        assertEquals(Scope.SERVER, m.scope());
+    }
+
+    @Test
+    public void nameNormalizes() {
+        var m = methodBinderByName("nameNormalizes");
+        assertEquals("nameNormalizes", m.name());
     }
 }

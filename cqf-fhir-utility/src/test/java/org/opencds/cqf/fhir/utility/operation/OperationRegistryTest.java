@@ -47,6 +47,7 @@ class OperationRegistryTest {
     @Test
     void noAnnotatedMethod_throws() {
         final class BadExample {
+            @SuppressWarnings("unused")
             public void noAnnotation() {}
         }
 

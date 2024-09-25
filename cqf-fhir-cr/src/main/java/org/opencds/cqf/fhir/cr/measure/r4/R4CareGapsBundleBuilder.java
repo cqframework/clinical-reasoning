@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
+import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
@@ -17,6 +18,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -257,7 +260,10 @@ public class R4CareGapsBundleBuilder {
         if (measureReportGroupId != null && isMultiRateMeasure(measureReport)) {
             // MeasureReportGroupComponent.id value set here to differentiate between DetectedIssue resources for the
             // same MeasureReport
-            detectedIssue.setDetail(String.format("MeasureReportGroupComponent.id=%s", measureReportGroupId));
+            Extension groupIdExt = new Extension();
+            groupIdExt.setUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
+            groupIdExt.setValue(new StringType(measureReportGroupId));
+            detectedIssue.setExtension(Collections.singletonList(groupIdExt));
         }
         return detectedIssue;
     }

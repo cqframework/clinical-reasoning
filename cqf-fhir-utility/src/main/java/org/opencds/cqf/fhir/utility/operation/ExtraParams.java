@@ -6,13 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to denote the parameters that are not bound by the @Operation definition.
+ * Used to denote the parameters that are not present in the @Operation definition.
  * The absence of this annotation on a method implies that it is strict, and will
- * only accept parameters that are defined in the @Operation  definition. Additional
+ * only accept parameters that are defined in the @Operation definition. Additional
  * parameters will result in an error.
  *
  * If this annotation is present on a method, it must be the last parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.PARAMETER)
-public @interface UnboundParam {}
+public @interface ExtraParams {}

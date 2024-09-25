@@ -6,11 +6,11 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import jakarta.annotation.Nonnull;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Parameters;
@@ -20,7 +20,7 @@ interface ParameterBinder {
     enum Type {
         ID,
         OPERATION,
-        UNBOUND
+        EXTRA
     }
 
     // Extract the value from the parameters resource that matches the external name of the parameter.
@@ -36,32 +36,64 @@ interface ParameterBinder {
     @Nonnull
     Parameter parameter();
 
+    // Ensures that the parameter annotations are valid for the operation
+    // Requirements specific to a given parameter are checked in the ParameterBinder
+    // This method checks for cross-parameter requirements
+    static List<ParameterBinder> validate(List<ParameterBinder> parameterBinders) {
+        var idParamCount =
+                parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
+        if (idParamCount > 1) {
+            throw new IllegalArgumentException("Method cannot have more than one @IdParam");
+        }
+
+        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
+            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
+        }
+
+        var unboundParamCount =
+                parameterBinders.stream().filter(x -> x.type() == Type.EXTRA).count();
+        if (unboundParamCount > 1) {
+            throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
+        }
+
+        if (unboundParamCount > 0
+                && parameterBinders.get(parameterBinders.size() - 1).type() != Type.EXTRA) {
+            throw new IllegalArgumentException("If @UnboundParam is present, it must be the last parameter");
+        }
+
+        return parameterBinders;
+    }
+
     static ParameterBinder from(Parameter parameter) {
         requireNonNull(parameter, "parameter can not be null");
 
         var idParam = parameter.getAnnotation(IdParam.class);
         var operationParam = parameter.getAnnotation(OperationParam.class);
-        var unboundParam = parameter.getAnnotation(UnboundParam.class);
+        var extraParam = parameter.getAnnotation(ExtraParams.class);
 
-        ensureExactlyOneOf(idParam, operationParam, unboundParam);
+        ensureExactlyOneOf(idParam, operationParam, extraParam);
 
         if (idParam != null) {
             return new IdParameterBinder(parameter);
         } else if (operationParam != null) {
             return new OperationParameterBinder(parameter, operationParam);
         } else {
-            return new UnboundParamBinder(parameter);
+            return new ExtraParamBinder(parameter);
         }
     }
 
-    static void ensureExactlyOneOf(Annotation... annotations) {
-        var count = Arrays.stream(annotations).filter(Objects::nonNull).count();
+    static void ensureExactlyOneOf(IdParam idParam, OperationParam operationParam, ExtraParams extraParams) {
+
+        var count = Arrays.asList(idParam, operationParam, extraParams).stream()
+                .filter(Objects::nonNull)
+                .count();
+
         if (count == 0) {
             throw new IllegalArgumentException(
-                    "Method Parameter must be annotated with @IdParam, @OperationParam, or @UnboundParam");
+                    "Method Parameter must be annotated with @IdParam, @OperationParam, or @ExtraParams");
         } else if (count > 1) {
             throw new IllegalArgumentException(
-                    "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @UnboundParam");
+                    "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @ExtraParams");
         }
     }
 
@@ -104,6 +136,10 @@ interface ParameterBinder {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
             this.operationParam = requireNonNull(operationParam, "operationParam can not be null");
             requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
+            checkArgument(
+                    IBase.class.isAssignableFrom(parameter.getType())
+                            || List.class.isAssignableFrom(parameter.getType()),
+                    "Parameter annotated with @Operation must be a FHIR type or a List");
         }
 
         @Override
@@ -167,10 +203,10 @@ interface ParameterBinder {
         }
     }
 
-    static class UnboundParamBinder implements ParameterBinder {
+    static class ExtraParamBinder implements ParameterBinder {
         private final Parameter parameter;
 
-        public UnboundParamBinder(Parameter parameter) {
+        public ExtraParamBinder(Parameter parameter) {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
             checkArgument(
                     IBaseParameters.class.isAssignableFrom(parameter.getType()),
@@ -179,7 +215,7 @@ interface ParameterBinder {
 
         @Override
         public Type type() {
-            return Type.UNBOUND;
+            return Type.EXTRA;
         }
 
         @Override

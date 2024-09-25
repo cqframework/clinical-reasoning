@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import java.nio.file.Path;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -29,8 +31,8 @@ class OperationRegistryTest {
 
         @Operation(name = "example")
         public IBaseParameters example(
-                @OperationParam(name = "stringParam") String param,
-                @UnboundParam IBaseParameters everythingElseNotBound) {
+                @OperationParam(name = "stringParam") IPrimitiveType<String> param,
+                @ExtraParams IBaseParameters everythingElseNotBound) {
             return new Parameters()
                     .addParameter("result", new IntegerType(5))
                     .addParameter("config", new StringType(configParam));
@@ -40,6 +42,18 @@ class OperationRegistryTest {
         public IBaseParameters recursive() {
             return this.repository.invoke("example", null, Parameters.class);
         }
+    }
+
+    @Test
+    void noAnnotatedMethod_throws() {
+        final class BadExample {
+            public void noAnnotation() {}
+        }
+
+        var operationRegistry = new OperationRegistry();
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> operationRegistry.register(BadExample.class, r -> new BadExample()));
     }
 
     @Test

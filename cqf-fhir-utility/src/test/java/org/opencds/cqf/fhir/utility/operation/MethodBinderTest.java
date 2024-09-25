@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.utility.operation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -25,10 +27,10 @@ public class MethodBinderTest {
         public void idFirst(@IdParam IdType id) {}
 
         @Operation(name = "idLast")
-        public void idLast(@OperationParam(name = "param") String param, @IdParam IdType id) {}
+        public void idLast(@OperationParam(name = "param") StringType param, @IdParam IdType id) {}
 
         @Operation(name = "noId")
-        public void noId(@OperationParam(name = "param") String param) {}
+        public void noId(@OperationParam(name = "param") StringType param) {}
 
         @Operation(name = "manyIds")
         public void manyIds(@IdParam IdType id, @IdParam IdType id2) {}
@@ -36,18 +38,28 @@ public class MethodBinderTest {
         @Operation(name = "idIsNotIdType")
         public void idIsNotIdType(@IdParam StringType id) {}
 
-        @Operation(name = "unboundFirst")
-        public void unboundFirst(@UnboundParam IBaseParameters id, @OperationParam(name = "param") String param) {}
+        @Operation(name = "extraFirst")
+        public void extraFirst(@ExtraParams IBaseParameters extras, @OperationParam(name = "param") String param) {}
 
-        @Operation(name = "unboundLast")
-        public void unboundLast(
-                @OperationParam(name = "param") String param, @UnboundParam IBaseParameters parameters) {}
+        @Operation(name = "extraLast")
+        public void extraLast(
+                @OperationParam(name = "param") StringType param, @ExtraParams IBaseParameters parameters) {}
 
-        @Operation(name = "manyUnbound")
-        public void manyUnbound(@UnboundParam IBaseParameters parameters, @UnboundParam IBaseParameters parameters2) {}
+        @Operation(name = "manyExtra")
+        public void manyExtra(@ExtraParams IBaseParameters parameters, @ExtraParams IBaseParameters parameters2) {}
 
-        @Operation(name = "unboundIsNotParametersType")
-        public void unboundIsNotParametersType(@UnboundParam IdType idType) {}
+        @Operation(name = "extraIsNotParametersType")
+        public void extraIsNotParametersType(@ExtraParams IdType idType) {}
+
+        @Operation(name = "operationParamIsNotFhirType")
+        public void operationParamIsNotFhirType(@OperationParam(name = "stringType") String stringType) {}
+
+        @Description("has a description")
+        @Operation(name = "hasDescription")
+        public void hasDescription(@IdParam IdType id) {}
+
+        @Operation(name = "hasCanonical", canonicalUrl = "http://example.com")
+        public void hasCanonical(@IdParam IdType id) {}
     }
 
     private static List<Method> methods = Arrays.asList(ExampleMethods.class.getDeclaredMethods());
@@ -105,25 +117,56 @@ public class MethodBinderTest {
     }
 
     @Test
-    public void unboundFirst_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("unboundFirst"));
+    public void extraFirst_throws() {
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("extraFirst"));
     }
 
     @Test
-    public void unboundLast() {
-        var m = methodBinderByName("unboundLast");
-        assertEquals(m.scope(), Scope.SERVER);
-        assertEquals("unboundLast", m.name());
+    public void extraLast() {
+        var m = methodBinderByName("extraLast");
+        assertEquals(Scope.SERVER, m.scope());
+        assertEquals("extraLast", m.name());
         assertEquals(2, m.parameters().size());
     }
 
     @Test
-    public void manyUnbound_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyUnbound"));
+    public void manyExtra_throws() {
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyExtra"));
     }
 
     @Test
-    public void unboundIsNotParametersType_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("unboundIsNotParametersType"));
+    public void extraIsNotParametersType_throws() {
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("extraIsNotParametersType"));
+    }
+
+    @Test
+    public void operationParamIsNotFhirType_throws() {
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("operationParamIsNotFhirType"));
+    }
+
+    @Test
+    public void binderGetsDescription() {
+        var m = methodBinderByName("hasDescription");
+        assertEquals("has a description", m.description());
+    }
+
+    @Test
+    public void binderGetsCanonical() {
+        var m = methodBinderByName("hasCanonical");
+        assertEquals("http://example.com", m.canonicalUrl());
+    }
+
+    @Test
+    public void binderGetsMethod() {
+        var m = methodBinderByName("idFirst");
+        assertNotNull(m.method());
+        assertEquals(m.method().getName(), "idFirst");
+    }
+
+    @Test
+    public void binderGetsOperationAnnotation() {
+        var m = methodBinderByName("idFirst");
+        assertNotNull(m.operation());
+        assertEquals(m.operation().name(), "idFirst");
     }
 }

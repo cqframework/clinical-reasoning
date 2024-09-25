@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.utility.operation;
 
+import static java.util.Objects.requireNonNull;
+
+import jakarta.annotation.Nonnull;
 import java.util.function.Function;
 import org.opencds.cqf.fhir.api.Repository;
 
@@ -16,14 +19,16 @@ class InvocationContext<T> {
     private final Function<Repository, T> factory;
 
     InvocationContext(Function<Repository, T> factory, MethodBinder methodBinder) {
-        this.methodBinder = methodBinder;
-        this.factory = factory;
+        this.factory = requireNonNull(factory, "factory cannot be null");
+        this.methodBinder = requireNonNull(methodBinder, "methodBinder cannot be null");
     }
 
+    @Nonnull
     MethodBinder methodBinder() {
         return this.methodBinder;
     }
 
+    @Nonnull
     Function<Repository, T> factory() {
         return this.factory;
     }

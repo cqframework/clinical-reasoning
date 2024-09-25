@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.operation;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.operation.ParameterBinder.validate;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -33,24 +34,41 @@ class MethodBinder {
     private final Scope scope;
     private final List<ParameterBinder> parameterBinders;
 
+    // Hack to allow for a default instance for the Description annotation
+    // If a given method doesn't have a Description annotation, we use this one
+    private static @Description final class DefaultDescription {}
+
+    private static final Description DEFAULT_DESCRIPTION = DefaultDescription.class.getAnnotation(Description.class);
+
     MethodBinder(Method method) {
         this.method = requireNonNull(method, "method cannot be null");
         this.operation =
                 requireNonNull(method.getAnnotation(Operation.class), "method must be annotated with @Operation");
-
+        this.description = requireNonNullElse(method.getAnnotation(Description.class), DEFAULT_DESCRIPTION);
         this.name = normalizeName(requireNonNull(operation.name(), "@Operation name cannot be null"));
         this.typeName = typeNameFrom(operation);
-        this.parameterBinders = parameterBindersFrom(method);
-        this.description = method.getAnnotation(Description.class);
-
-        var hasIdParam = parameterBinders.stream().anyMatch(x -> x.type() == Type.ID);
-        this.scope = hasIdParam ? Scope.INSTANCE : this.typeName.isEmpty() ? Scope.SERVER : Scope.TYPE;
-        validateParameterBinders(parameterBinders);
+        this.parameterBinders = validate(parameterBindersFrom(method));
+        this.scope = determineScope(parameterBinders, typeName);
     }
 
-    // Normalize the operation name to remove the $ prefix
+    private static <T> T requireNonNullElse(T obj, T defaultObj) {
+        return obj != null ? obj : defaultObj;
+    }
+
+    private static Scope determineScope(List<ParameterBinder> parameterBinders, String typeName) {
+        boolean hasIdParam = parameterBinders.stream().anyMatch(x -> x.type() == Type.ID);
+        if (hasIdParam) {
+            return Scope.INSTANCE;
+        } else if (typeName.isEmpty()) {
+            return Scope.SERVER;
+        } else {
+            return Scope.TYPE;
+        }
+    }
+
+    // Normalize the operation name to remove the $ prefix if present
     private static String normalizeName(String name) {
-        return name.substring(Math.max(name.indexOf("$"), 0));
+        return name.startsWith("$") ? name.substring(1) : name;
     }
 
     // Create a list of ParameterBinders from the method's parameters
@@ -58,44 +76,13 @@ class MethodBinder {
         return Arrays.stream(method.getParameters()).map(ParameterBinder::from).collect(Collectors.toList());
     }
 
-    @Nonnull
-    Operation operation() {
-        return operation;
-    }
-
-    @Nonnull
-    String name() {
-        return name;
-    }
-
-    @Nonnull
-    String typeName() {
-        return typeName;
-    }
-
-    @Nonnull
-    String canonicalUrl() {
-        return operation.canonicalUrl() != null ? operation.canonicalUrl() : "";
-    }
-
-    @Nonnull
-    Method method() {
-        return method;
-    }
-
-    @Nonnull
-    String description() {
-        return description != null && description.shortDefinition() != null ? description.shortDefinition() : "";
-    }
-
-    @Nonnull
-    Scope scope() {
-        return scope;
-    }
-
-    @Nonnull
-    List<ParameterBinder> parameters() {
-        return parameterBinders;
+    private static String typeNameFrom(Operation operation) {
+        // IBaseResource is the default type for an operation, meaning the type is not specified
+        if (operation.type() != IBaseResource.class) {
+            return operation.type().getSimpleName();
+        } else {
+            return operation.typeName();
+        }
     }
 
     private List<Object> args(IIdType id, IBaseParameters parameters) {
@@ -126,38 +113,44 @@ class MethodBinder {
         return args;
     }
 
-    private static void validateParameterBinders(List<ParameterBinder> parameterBinders) {
-        var idParamCount =
-                parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
-        if (idParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @IdParam");
-        }
-
-        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
-            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
-        }
-
-        var unboundParamCount =
-                parameterBinders.stream().filter(x -> x.type() == Type.UNBOUND).count();
-        if (unboundParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
-        }
-
-        if (unboundParamCount > 0
-                && parameterBinders.get(parameterBinders.size() - 1).type() != Type.UNBOUND) {
-            throw new IllegalArgumentException("If @UnboundParam is present, it must be the last parameter");
-        }
+    @Nonnull
+    Operation operation() {
+        return operation;
     }
 
-    private static String typeNameFrom(Operation operation) {
-        // operation.type() == IBaseResource.class is the default value, meaning the operation is not type specific
-        if ((IBaseResource.class == operation.type()) && ("".equals(operation.typeName()))) {
-            return "";
-        } else if (operation.type() != null) {
-            return operation.type().getSimpleName();
-        } else {
-            return operation.typeName();
-        }
+    @Nonnull
+    String name() {
+        return name;
+    }
+
+    @Nonnull
+    String typeName() {
+        return typeName;
+    }
+
+    @Nonnull
+    String canonicalUrl() {
+        return operation.canonicalUrl();
+    }
+
+    @Nonnull
+    Method method() {
+        return method;
+    }
+
+    @Nonnull
+    String description() {
+        return description.value();
+    }
+
+    @Nonnull
+    Scope scope() {
+        return scope;
+    }
+
+    @Nonnull
+    List<ParameterBinder> parameters() {
+        return parameterBinders;
     }
 
     /**

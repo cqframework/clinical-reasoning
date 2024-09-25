@@ -80,7 +80,7 @@ public class OperationRegistry {
             } else if (id != null) {
                 return id.getResourceType();
             } else {
-                return null;
+                return "";
             }
         }
 
@@ -89,14 +89,15 @@ public class OperationRegistry {
         }
     }
 
-    private final Multimap<String, InvocationContext<?>> operationMap;
+    private final Multimap<String, InvocationContext<?>> invocationContextByName;
 
     /**
      * Creates a new OperationRegistry instance. This instance will be used to register and execute operations for
      * a Repository.
      */
     public OperationRegistry() {
-        this.operationMap = MultimapBuilder.hashKeys().arrayListValues().build();
+        this.invocationContextByName =
+                MultimapBuilder.hashKeys().arrayListValues().build();
     }
 
     /**
@@ -116,8 +117,8 @@ public class OperationRegistry {
         }
 
         for (var methodBinder : methodBinders) {
-            var closure = new InvocationContext<T>(factory, methodBinder);
-            operationMap.put(methodBinder.name(), closure);
+            var context = new InvocationContext<T>(factory, methodBinder);
+            invocationContextByName.put(methodBinder.name(), context);
         }
     }
 
@@ -133,42 +134,45 @@ public class OperationRegistry {
 
     IBaseResource execute(OperationInvocationParams params) throws Exception {
         requireNonNull(params, "Operation invocation parameters cannot be null");
-        var closure = findOperation(params.scope(), params.name(), params.typeName());
+        var context = findInvocationContext(params.scope(), params.name(), params.typeName());
 
-        var instance = closure.factory().apply(params.repository);
-        var callable = closure.methodBinder().bind(instance, params.id(), params.parameters());
+        var instance = context.factory().apply(params.repository);
+        var callable = context.methodBinder().bind(instance, params.id(), params.parameters());
 
         return callable.call();
     }
 
-    private InvocationContext<?> findOperation(Scope scope, String name, String typeName) {
-        requireNonNull(scope, "Scope cannot be null");
-        requireNonNull(name, "Operation name cannot be null");
+    private InvocationContext<?> findInvocationContext(Scope scope, String name, String typeName) {
+        requireNonNull(scope, "scope cannot be null");
+        requireNonNull(name, "operation name cannot be null");
+        requireNonNull(typeName, "typeName cannot be null");
 
-        var closures = operationMap.get(name);
-        if (closures.isEmpty()) {
+        var contexts = invocationContextByName.get(name);
+        if (contexts.isEmpty()) {
             throw new IllegalArgumentException("No operation found with name " + name);
         }
 
-        var scopedClosures =
-                closures.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
+        var scopedContexts =
+                contexts.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
 
-        if (scopedClosures.isEmpty()) {
+        if (scopedContexts.isEmpty()) {
             throw new IllegalArgumentException("No operation found with name " + name + " and scope " + scope);
         }
 
-        Predicate<InvocationContext<?>> typePredicate =
-                typeName != null ? c -> c.methodBinder().typeName().equals(typeName) : c -> true;
-        var typedClosures = scopedClosures.stream().filter(typePredicate).collect(Collectors.toList());
+        // Only filter by type if the typeName is not empty
+        Predicate<InvocationContext<?>> typePredicate = typeName.isEmpty()
+                ? c -> true
+                : c -> c.methodBinder().typeName().equals(typeName);
+        var typeContexts = scopedContexts.stream().filter(typePredicate).collect(Collectors.toList());
 
-        if (typedClosures.isEmpty()) {
+        if (typeContexts.isEmpty()) {
             throw new IllegalArgumentException("No operation found with type " + typeName);
         }
 
-        if (typedClosures.size() > 1) {
+        if (typeContexts.size() > 1) {
             throw new IllegalArgumentException("Multiple operations found with name " + name + " and type " + typeName);
         }
 
-        return typedClosures.get(0);
+        return typeContexts.get(0);
     }
 }

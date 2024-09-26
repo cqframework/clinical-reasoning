@@ -2,9 +2,6 @@ package org.opencds.cqf.fhir.utility.visitor;
 
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -12,8 +9,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WithdrawVisitor extends AbstractKnowledgeArtifactVisitor {
 

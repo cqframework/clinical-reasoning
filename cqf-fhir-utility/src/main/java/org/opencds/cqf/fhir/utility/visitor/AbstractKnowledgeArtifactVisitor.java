@@ -40,19 +40,19 @@ public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArti
     }
 
     protected List<IDomainResource> getComponents(
-        KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
+            KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
         adapter.getRelatedArtifactsOfType("composed-of").stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<KnowledgeArtifactAdapter> maybeArtifact =
-                VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
+                    VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (resourcesToUpdate.stream()
-                    .filter(rtu ->
-                        rtu.getId().equals(maybeArtifact.get().getId().toString())
-                            && (rtu.getExtension().stream()
-                            .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
-                    .collect(Collectors.toList())
-                    .isEmpty()) {
+                        .filter(rtu ->
+                                rtu.getId().equals(maybeArtifact.get().getId().toString())
+                                        && (rtu.getExtension().stream()
+                                                .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
+                        .collect(Collectors.toList())
+                        .isEmpty()) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }

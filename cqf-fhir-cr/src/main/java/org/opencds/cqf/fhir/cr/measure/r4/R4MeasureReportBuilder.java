@@ -348,21 +348,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
             // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-                String doc = null;
-                if (getReportPopulation(groupDef, DATEOFCOMPLIANCE) != null
-                        && !getReportPopulation(groupDef, DATEOFCOMPLIANCE)
-                                .getResources()
-                                .isEmpty()) {
-                    doc = getReportPopulation(groupDef, DATEOFCOMPLIANCE)
-                            .getResources()
-                            .iterator()
-                            .next()
-                            .toString();
+                var docPopDef = getReportPopulation(groupDef, DATEOFCOMPLIANCE);
+                if (docPopDef != null
+                        && docPopDef.getResources() != null
+                        && !docPopDef.getResources().isEmpty()) {
+                    Interval docInterval =
+                            (Interval) docPopDef.getResources().iterator().next();
+
+                    if (docInterval != null) {
+                        var helper = new R4DateHelper();
+                        reportGroup
+                                .addExtension()
+                                .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                                .setValue(helper.buildMeasurementPeriod((docInterval)));
+                    }
                 }
-                reportGroup
-                        .addExtension()
-                        .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                        .setValue(new StringType(doc));
             }
 
             if (bc.measureDef.isBooleanBasis()) {

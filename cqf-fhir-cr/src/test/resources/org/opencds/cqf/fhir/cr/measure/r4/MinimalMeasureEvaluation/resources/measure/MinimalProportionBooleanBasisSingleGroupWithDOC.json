@@ -1,15 +1,14 @@
 {
-  "id": "MinimalProportionResourceBasisSingleGroupWithDOC",
+  "id": "MinimalProportionBooleanBasisSingleGroupWithDOC",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/MinimalProportionResourceBasisSingleGroupWithDOC",
+  "url": "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC",
   "library": [
-    "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
+    "http://example.com/Library/MinimalProportionBooleanBasisSingleGroup"
   ],
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-    "valueCode": "encounter"
-  }
-    ],
+    "valueCode": "boolean"
+  } ],
   "scoring": {
     "coding": [
       {
@@ -89,7 +88,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator Exception"
+            "expression": "always false"
           }
         },
         {
@@ -121,7 +120,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator"
+            "expression": "always false"
           }
         }
       ]

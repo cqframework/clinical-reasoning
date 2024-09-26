@@ -144,7 +144,8 @@ public class R4CareGapsProcessor {
         for (String status : statuses) {
             if (!CareGapsStatusCode.CLOSED_GAP.toString().equals(status)
                     && !CareGapsStatusCode.OPEN_GAP.toString().equals(status)
-                    && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)) {
+                    && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)
+                    && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
                 throw new IllegalArgumentException(
                         String.format("CareGap status parameter: %s, is not an accepted value", status));
             }

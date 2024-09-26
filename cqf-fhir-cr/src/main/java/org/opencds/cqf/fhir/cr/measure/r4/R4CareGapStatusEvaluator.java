@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
 
@@ -7,9 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 
 /**
@@ -43,17 +46,19 @@ public class R4CareGapStatusEvaluator {
      */
     public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
         Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();
+        var reportDate = measureReport.getDateElement();
 
         for (MeasureReportGroupComponent group : measureReport.getGroup()) {
             var groupId = group.getId();
-            var gapStatus = getGapStatus(measure, group);
+            var gapStatus = getGapStatus(measure, group, reportDate);
 
             groupStatus.put(groupId, gapStatus);
         }
         return groupStatus;
     }
 
-    private CareGapsStatusCode getGapStatus(Measure measure, MeasureReportGroupComponent measureReportGroup) {
+    private CareGapsStatusCode getGapStatus(
+            Measure measure, MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
         Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
         // get Numerator and Denominator membership
@@ -89,10 +94,37 @@ public class R4CareGapStatusEvaluator {
 
         if (Boolean.TRUE.equals(inDenominator.getValue())
                 && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
-            return CareGapsStatusCode.OPEN_GAP;
+            return getOpenOrProspectiveStatus(measureReportGroup, reportDate);
         }
 
         return CareGapsStatusCode.CLOSED_GAP;
+    }
+
+    private CareGapsStatusCode getOpenOrProspectiveStatus(
+            MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
+        if (hasDateOfComplianceExt(measureReportGroup)) {
+            Period dateOfCompliance = getDateOfComplianceExt(measureReportGroup);
+
+            boolean reportBeforeEndOfDOC = reportDate.before(dateOfCompliance.getEndElement());
+            boolean reportAfterStartOfDOC = reportDate.after(dateOfCompliance.getStartElement());
+            boolean reportBeforeStartOfDOC = reportDate.before(dateOfCompliance.getStartElement());
+
+            boolean reportWithinDOC = reportAfterStartOfDOC && reportBeforeEndOfDOC;
+            if (reportWithinDOC || reportBeforeStartOfDOC) {
+                return CareGapsStatusCode.PROSPECTIVE_GAP;
+            }
+        }
+        return CareGapsStatusCode.OPEN_GAP;
+    }
+
+    private boolean hasDateOfComplianceExt(MeasureReportGroupComponent measureReportGroup) {
+        var ext = measureReportGroup.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL);
+        return ext != null && !ext.getValue().isEmpty();
+    }
+
+    private Period getDateOfComplianceExt(MeasureReportGroupComponent measureReportGroup) {
+        var ext = measureReportGroup.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL);
+        return (Period) ext.getValue();
     }
 
     /*

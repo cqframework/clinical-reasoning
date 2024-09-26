@@ -107,7 +107,12 @@ public class InMemoryFhirRepository implements Repository {
         if (!resources.containsKey(theId)) {
             outcome.setCreated(true);
         }
+        if (resource.fhirType().equals("SearchParameter")) {
+            var resourceMatcher = Repositories.getResourceMatcher(this.context);
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+        }
         resources.put(theId, resource);
+
         return outcome;
     }
 

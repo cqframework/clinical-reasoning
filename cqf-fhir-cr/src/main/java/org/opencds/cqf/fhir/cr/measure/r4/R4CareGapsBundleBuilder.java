@@ -18,7 +18,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -228,12 +227,7 @@ public class R4CareGapsBundleBuilder {
     }
 
     private boolean isMultiRateMeasure(MeasureReport measureReport) {
-        boolean isMultiRate = false;
-
-        if (!measureReport.getGroup().isEmpty()) {
-            isMultiRate = measureReport.getGroup().size() > 1;
-        }
-        return isMultiRate;
+        return measureReport.getGroup().size() > 1;
     }
 
     private DetectedIssue getDetectedIssue(
@@ -263,7 +257,7 @@ public class R4CareGapsBundleBuilder {
             Extension groupIdExt = new Extension();
             groupIdExt.setUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
             groupIdExt.setValue(new StringType(measureReportGroupId));
-            detectedIssue.setExtension(Collections.singletonList(groupIdExt));
+            detectedIssue.setExtension(List.of(groupIdExt));
         }
         return detectedIssue;
     }

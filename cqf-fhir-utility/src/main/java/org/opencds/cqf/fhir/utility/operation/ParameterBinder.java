@@ -10,6 +10,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -163,9 +164,11 @@ interface ParameterBinder {
             var context = parameters.getStructureFhirVersionEnum().newContextCached();
             var parts = Parameters.getPartsByName(context, parameters, this.name());
 
-            // TODO: Clear consumed parameters.
+            Parameters.removeParameter(parameters, this.name());
 
-            if (parts.size() > operationParam.max()) {
+            // -1 means no max, -2 means "default behavior" which is type-specific
+            // TODO: the type-specific part is not implemented
+            if (operationParam.max() >= 0 && parts.size() > operationParam.max()) {
                 throw new IllegalArgumentException("Parameter " + this.name() + " has more values than allowed by max");
             }
 
@@ -174,9 +177,11 @@ interface ParameterBinder {
                         "Parameter " + this.name() + " has fewer values than required by min");
             }
 
-            // Hmm... this validation should happen in the registration
+            var t = parameters.getStructureFhirVersionEnum().newContextCached().newTerser();
             if (List.class.isAssignableFrom(parameter.getType())) {
-                return parts;
+                parts.stream()
+                        .map(x -> t.getSingleValueOrNull(x, "value[x]", IBase.class))
+                        .collect(Collectors.toList());
             }
 
             if (parts.isEmpty()) {
@@ -190,11 +195,17 @@ interface ParameterBinder {
 
             var part = parts.get(0);
 
-            if (part.getClass().isAssignableFrom(parameter.getType())) {
-                return part;
+            var value = t.getSingleValueOrNull(part, "value[x]", IBase.class);
+            if (value == null) {
+                return null;
             }
 
-            throw new IllegalArgumentException("Parameter " + this.name() + " is not of the expected type");
+            if (parameter.getType().isAssignableFrom(value.getClass())) {
+                return value;
+            }
+
+            throw new IllegalArgumentException(
+                    "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());
         }
 
         @Override

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -14,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * A utility class for parameter creation and functions in clinical reasoning
@@ -481,5 +483,35 @@ public class Parameters {
      */
     public static IBase newUuidPart(FhirContext fhirContext, String name, String value, IBase... parts) {
         return newPart(fhirContext, "uuid", name, value, parts);
+    }
+
+    /**
+     * Removes a parameter from a Parameters object by name
+     * @param parameters the Parameters object to remove the parameter from
+     * @param name the name of the parameter to remove
+     */
+    public static void removeParameter(IBaseParameters parameters, String name) {
+        checkNotNull(parameters);
+        checkNotNull(name);
+
+        var ctx = parameters.getStructureFhirVersionEnum().newContextCached();
+        var child = getParameterChild(ctx);
+
+        var values = child.getAccessor().getValues(parameters);
+
+        for (int i = 0; i < values.size(); i++) {
+            var ppc = (IBase) values.get(i);
+            var partParameterDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition(ppc.getClass());
+            var nameChild = partParameterDef.getChildByName("name");
+            var nameValues = nameChild.getAccessor().getValues(ppc);
+            var ppcName = nameValues.stream()
+                    .filter(t -> t instanceof IPrimitiveType<?>)
+                    .map(t -> ((IPrimitiveType<?>) t))
+                    .findFirst();
+            if (ppcName.isPresent() && ppcName.get().getValue().equals(name)) {
+                values.remove(i);
+                return;
+            }
+        }
     }
 }

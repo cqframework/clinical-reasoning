@@ -128,7 +128,7 @@ public class OperationRegistry {
      * @param operationName the name of the operation to execute
      * @return an OperationInvocationParams object that can be used to execute the operation
      */
-    public OperationInvocationParams buildOperation(Repository repository, String operationName) {
+    public OperationInvocationParams buildContext(Repository repository, String operationName) {
         return new OperationInvocationParams(repository, operationName);
     }
 

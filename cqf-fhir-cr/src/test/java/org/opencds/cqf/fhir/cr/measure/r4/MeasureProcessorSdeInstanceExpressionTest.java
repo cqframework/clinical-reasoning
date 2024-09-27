@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 class MeasureProcessorSdeInstanceExpressionTest {

@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
@@ -9,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GA
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_REPORT_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 

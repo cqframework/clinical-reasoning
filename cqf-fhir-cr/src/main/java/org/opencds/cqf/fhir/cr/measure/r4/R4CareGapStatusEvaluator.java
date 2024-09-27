@@ -43,6 +43,11 @@ public class R4CareGapStatusEvaluator {
      * <li>'closed-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = decrease. Then the subject is 'closed-gap'</li>
      * <li>'closed-gap': if in 'Denominator' & in 'Numerator', where 'improvement notation' = increase. Then the subject is 'closed-gap'</li>
      * </ul>
+     * <p>'prospective-gap' is a concept that represents a period of time where a 'care-gap' measure has opportunity to address recommended care in a specific window of time. This 'window of time' we call the 'Date of Compliance' to indicate a range of time that optimally represents when care is meant to be provided.</p>
+     *<br/>
+     * <p>If care has not been provided ('open-gap'), and the date (reportDate) of evaluating for the Measure is before or within the 'Date of Compliance' interval, then the Measure is considered a 'prospective-gap' for the subject evaluated.</p>
+     *
+     * <p></p>
      */
     public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
         Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();

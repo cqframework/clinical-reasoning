@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 import java.util.Map;
 import org.hl7.fhir.r4.model.MeasureReport;

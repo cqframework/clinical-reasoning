@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,21 +42,20 @@ public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArti
 
     protected List<IDomainResource> getComponents(
             KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
-        adapter.getRelatedArtifactsOfType("composed-of").stream().forEach(c -> {
+        adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
             final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<KnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
-                if (resourcesToUpdate.stream()
-                        .filter(rtu ->
-                                rtu.getId().equals(maybeArtifact.get().getId().toString())
-                                        && (rtu.getExtension().stream()
-                                                .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))
-                        .collect(Collectors.toList())
-                        .isEmpty()) {
+                if (resourcesToUpdate.stream().noneMatch(rtu ->
+                    rtu.getId().equals(maybeArtifact.get().getId().toString())
+                        && (rtu.getExtension().stream()
+                        .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
+            } else {
+                throw new ResourceNotFoundException("Unexpected resource not found when getting components");
             }
         });
 

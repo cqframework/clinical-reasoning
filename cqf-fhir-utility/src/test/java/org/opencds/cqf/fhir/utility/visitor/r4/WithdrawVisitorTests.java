@@ -75,7 +75,7 @@ class WithdrawVisitorTests {
                 ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         Bundle tsBundle = spyRepository.transaction(bundle);
         spyRepository.update(sp);
-        // InMemoryFhirRepository bug - need to get id like this
+        // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
         Library library = spyRepository.read(Library.class, new IdType(id)).copy();

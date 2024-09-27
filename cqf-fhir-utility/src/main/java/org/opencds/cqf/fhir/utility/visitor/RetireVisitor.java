@@ -28,10 +28,12 @@ public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
 
         var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
 
+        var nowDate = new Date();
+
         for (var resource : resourcesToUpdate) {
             var artifact = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                     .createKnowledgeArtifactAdapter(resource);
-            updateMetadata(artifact);
+            updateMetadata(artifact, nowDate);
             var entry = PackageHelper.createEntry(artifact.get(), true);
             BundleHelper.addEntry(transactionBundle, entry);
         }
@@ -39,8 +41,8 @@ public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private static void updateMetadata(KnowledgeArtifactAdapter artifactAdapter) {
-        artifactAdapter.setDate(new Date());
+    private static void updateMetadata(KnowledgeArtifactAdapter artifactAdapter, Date date) {
+        artifactAdapter.setDate(date);
         artifactAdapter.setStatus("retired");
     }
 }

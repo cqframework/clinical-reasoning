@@ -59,7 +59,7 @@ public class RetireVisitorTest {
         Bundle bundle =
                 (Bundle) jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-retire.json"));
         Bundle tsBundle = spyRepository.transaction(bundle);
-        // InMemoryFhirRepository bug - need to get id like this
+        // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
         Library library = spyRepository.read(Library.class, new IdType(id)).copy();
@@ -92,7 +92,7 @@ public class RetireVisitorTest {
     }
 
     @Test
-    void library_withdraw_No_draft_test() {
+    void library_retire_no_draft_test() {
         try {
             Bundle bundle = (Bundle) jsonParser.parseResource(
                     WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));

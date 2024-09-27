@@ -18,6 +18,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -257,7 +258,7 @@ public class R4CareGapsBundleBuilder {
             Extension groupIdExt = new Extension();
             groupIdExt.setUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
             groupIdExt.setValue(new StringType(measureReportGroupId));
-            detectedIssue.setExtension(List.of(groupIdExt));
+            detectedIssue.setExtension(Collections.singletonList(groupIdExt));
         }
         return detectedIssue;
     }

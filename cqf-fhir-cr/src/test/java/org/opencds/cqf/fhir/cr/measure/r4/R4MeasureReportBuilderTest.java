@@ -51,6 +51,6 @@ class R4MeasureReportBuilderTest {
         assertTrue(measureBasisDef.isBooleanBasis(measureBooleanBias));
 
         assertNotNull(measureWithEmptyExtension);
-        assertFalse(measureBasisDef.isBooleanBasis(measureWithEmptyExtension));
+        assertTrue(measureBasisDef.isBooleanBasis(measureWithEmptyExtension));
     }
 }

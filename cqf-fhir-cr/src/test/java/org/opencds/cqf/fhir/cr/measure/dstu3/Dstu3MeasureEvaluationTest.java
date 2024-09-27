@@ -8,9 +8,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -52,16 +54,25 @@ import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.BaseMeasureEvaluationTest;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     public String getFhirVersion() {
         return "3.0.0";
     }
+
+    private Repository repository = new IgRepository(
+            FhirContext.forDstu3Cached(),
+            Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/dstu3/EXM105FHIR3Measure/"));
+    private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
     @Test
     void cohortMeasureEvaluation() throws Exception {
@@ -229,15 +240,18 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         // TODO: Set up engine environment
         var engine = new CqlEngine(new Environment(ll, dps, null));
-
-        var lib = engine.getEnvironment().getLibraryManager().resolveLibrary(new VersionedIdentifier().withId("Test"));
+        var id = new VersionedIdentifier().withId("Test");
+        var lib = engine.getEnvironment().getLibraryManager().resolveLibrary(id);
         engine.getState().init(lib.getLibrary());
-
-        Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure);
+        var libraryEngine = new LibraryEngine(repository, this.evaluationOptions.getEvaluationSettings());
+        Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure, libraryEngine, id, null);
         MeasureReport report = evaluation.evaluate(
                 subjectIds.size() == 1 ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION,
                 subjectIds,
-                measurementPeriod);
+                measurementPeriod,
+                libraryEngine,
+                id,
+                null);
         assertNotNull(report);
 
         // Simulate sending it across the wire

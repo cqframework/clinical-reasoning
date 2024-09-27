@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 
 class R4MeasureDefBuilderTest {
 
@@ -44,7 +45,10 @@ class R4MeasureDefBuilderTest {
         var measure = new Measure();
         measure.setId("123");
         measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
-        measure.addGroup().addPopulation().setId("pop-id");
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        grp.getCriteria().setExpression("test");
         measure.setExtension(Collections.singletonList(RESOURCE_BASIS_EXT));
 
         var def = BUILDER.build(measure);
@@ -56,7 +60,10 @@ class R4MeasureDefBuilderTest {
         var measure = new Measure();
         measure.setId("123");
         measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
-        measure.addGroup().addPopulation().setId("pop-id");
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        grp.getCriteria().setExpression("test");
         measure.setExtension(Collections.singletonList(BOOLEAN_BASIS_EXT));
 
         var def = BUILDER.build(measure);
@@ -68,8 +75,11 @@ class R4MeasureDefBuilderTest {
         var measure = new Measure();
         measure.setId("123");
         measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
-        measure.addGroup().addPopulation().setId("pop-id");
-
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        grp.getCriteria().setExpression("test");
+        // no extension set to define basis of Measure
         var def = BUILDER.build(measure);
         Assertions.assertTrue(def.isBooleanBasis());
     }

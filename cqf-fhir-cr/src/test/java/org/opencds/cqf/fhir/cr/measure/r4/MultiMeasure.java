@@ -147,6 +147,7 @@ public class MultiMeasure {
 
         private List<IdType> measureId = new ArrayList<>();
         private List<String> measureUrl = new ArrayList<>();
+        private List<String> measureIdentifier = new ArrayList<>();
         private String periodStart;
         private String periodEnd;
         private List<String> subjectIds;
@@ -161,6 +162,11 @@ public class MultiMeasure {
 
         public MultiMeasure.When measureId(String measureId) {
             this.measureId.add(new IdType("Measure", measureId));
+            return this;
+        }
+
+        public MultiMeasure.When measureIdentifier(String measureIdentifier) {
+            this.measureIdentifier.add(measureIdentifier);
             return this;
         }
 
@@ -218,6 +224,7 @@ public class MultiMeasure {
             this.operation = () -> service.evaluate(
                     measureId,
                     measureUrl,
+                    measureIdentifier,
                     periodStart,
                     periodEnd,
                     reportType,

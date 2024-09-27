@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-public class ApproveVisitor implements KnowledgeArtifactVisitor {
+public class ApproveVisitor implements IKnowledgeArtifactVisitor {
     @Override
     public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters approveParameters) {
         Date currentDate = new Date();

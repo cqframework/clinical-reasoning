@@ -10,6 +10,9 @@ public class MeasureReportConstants {
 
     public static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM =
             "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
+
+    public static final String MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-improvementNotation";
     public static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM =
             "http://terminology.hl7.org/CodeSystem/measure-population";
     public static final String MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION =

@@ -507,4 +507,107 @@ class R4CareGapsTest {
                             "MeasureScoring type: Continuous Variable, is not an accepted Type for care-gaps service"));
         }
     }
+
+    // MinimalProportionResourceBasisSingleGroup
+    @Test
+    void MinimalProportionResourceBasisSingleGroup_Subject() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .subject("Patient/female-1988")
+                    .periodStart("2024-01-01")
+                    .periodEnd("2024-12-31")
+                    .measureIds("MinimalProportionResourceBasisSingleGroup")
+                    .statuses("closed-gap")
+                    .statuses("open-gap")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1);
+            fail("resource based measures should fail");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "CareGaps can't process Measure: MinimalProportionResourceBasisSingleGroup, it is not Boolean basis"));
+        }
+    }
+
+    @Test
+    void MinimalProportionBooleanBasisMultiGroup() {
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisMultiGroup")
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .statuses("not-applicable")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(2); // 1 Detected issue per groupId
+    }
+
+    @Test
+    void MinimalProportionBooleanBasisMultiGroupDifferentStatus() {
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisMultiGroupDifferentStatus")
+                .statuses("closed-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(
+                        1); // 2 Detected issue per groupId, 1 open-gap, 1 closed-gap. Only "closed-gap" should show
+    }
+
+    @Test
+    void MinimalProportionBooleanBasisMultiGroup_NoId() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .subject("Patient/female-1988")
+                    .periodStart("2019-01-01")
+                    .periodEnd("2019-12-31")
+                    .measureIds("MinimalProportionBooleanBasisMultiGroupNoGroupId")
+                    .statuses("closed-gap")
+                    .statuses("open-gap")
+                    .statuses("not-applicable")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1)
+                    .firstParameter()
+                    .detectedIssueCount(2); // 1 Detected issue per groupId
+            fail("this should fail without a groupId");
+        } catch (IllegalArgumentException e) {
+            Assertions.assertTrue(e.getMessage()
+                    .contains("Multi-rate Measure resources require unique 'id' for GroupComponents to be populated."));
+        }
+    }
+
+    /*
+    // TODO implement Measure Group Level improvement notation extension
+    @Test
+    void MinimalProportionBooleanBasisMultiGroupGroupImpNotation() {
+        GIVEN_REPO
+            .when()
+            .subject("Patient/female-1988")
+            .periodStart("2019-01-01")
+            .periodEnd("2019-12-31")
+            .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+            .statuses("closed-gap")
+            .getCareGapsReport()
+            .then()
+            .hasBundleCount(1)
+            .firstParameter()
+            .detectedIssueCount(
+                2); // 2 Detected issue per groupId, one is decrease, the other increase improvement Notation. Both should be closed-gap
+    }
+     */
 }

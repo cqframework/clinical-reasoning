@@ -129,7 +129,9 @@ public class R4CareGapStatusEvaluator {
 
     private Period getDateOfComplianceExt(MeasureReportGroupComponent measureReportGroup) {
         var ext = measureReportGroup.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL);
-        return (Period) ext.getValue();
+        var extValue = ext.getValue();
+        assert extValue instanceof Period;
+        return (Period) extValue;
     }
 
     /*

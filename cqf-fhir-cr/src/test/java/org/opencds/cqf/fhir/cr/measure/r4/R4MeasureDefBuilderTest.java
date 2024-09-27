@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.POPULATION_BASIS_URL;
@@ -10,7 +11,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 
@@ -52,7 +52,7 @@ class R4MeasureDefBuilderTest {
         measure.setExtension(Collections.singletonList(RESOURCE_BASIS_EXT));
 
         var def = BUILDER.build(measure);
-        Assertions.assertFalse(def.isBooleanBasis());
+        assertFalse(def.isBooleanBasis());
     }
 
     @Test
@@ -67,7 +67,7 @@ class R4MeasureDefBuilderTest {
         measure.setExtension(Collections.singletonList(BOOLEAN_BASIS_EXT));
 
         var def = BUILDER.build(measure);
-        Assertions.assertTrue(def.isBooleanBasis());
+        assertTrue(def.isBooleanBasis());
     }
 
     @Test
@@ -81,6 +81,6 @@ class R4MeasureDefBuilderTest {
         grp.getCriteria().setExpression("test");
         // no extension set to define basis of Measure
         var def = BUILDER.build(measure);
-        Assertions.assertTrue(def.isBooleanBasis());
+        assertTrue(def.isBooleanBasis());
     }
 }

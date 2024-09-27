@@ -352,10 +352,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getResources() != null
                         && !docPopDef.getResources().isEmpty()) {
-                    Interval docInterval =
-                            (Interval) docPopDef.getResources().iterator().next();
+                    var docValue = docPopDef.getResources().iterator().next();
+                    if (docValue != null) {
+                        assert docValue instanceof Interval;
+                        Interval docInterval = (Interval) docValue;
 
-                    if (docInterval != null) {
                         var helper = new R4DateHelper();
                         reportGroup
                                 .addExtension()

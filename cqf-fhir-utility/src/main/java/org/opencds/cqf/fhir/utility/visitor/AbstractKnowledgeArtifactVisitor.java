@@ -47,10 +47,11 @@ public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArti
             Optional<KnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
-                if (resourcesToUpdate.stream().noneMatch(rtu ->
-                    rtu.getId().equals(maybeArtifact.get().getId().toString())
-                        && (rtu.getExtension().stream()
-                        .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))) {
+                if (resourcesToUpdate.stream()
+                        .noneMatch(rtu ->
+                                rtu.getId().equals(maybeArtifact.get().getId().toString())
+                                        && (rtu.getExtension().stream()
+                                                .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl))))) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }

@@ -179,7 +179,7 @@ interface ParameterBinder {
 
             var t = parameters.getStructureFhirVersionEnum().newContextCached().newTerser();
             if (List.class.isAssignableFrom(parameter.getType())) {
-                parts.stream()
+                return parts.stream()
                         .map(x -> t.getSingleValueOrNull(x, "value[x]", IBase.class))
                         .collect(Collectors.toList());
             }

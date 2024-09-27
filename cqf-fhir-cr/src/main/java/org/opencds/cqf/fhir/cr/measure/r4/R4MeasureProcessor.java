@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Arrays;

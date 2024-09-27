@@ -42,7 +42,7 @@ class Dstu3MeasureReportBuilderTest {
         assertFalse(measureBasisDef.isBooleanBasis(measureEncounterBias));
         // No specified Basis
         assertNotNull(measureWithoutExtension);
-        assertFalse(measureBasisDef.isBooleanBasis(measureWithoutExtension));
+        assertTrue(measureBasisDef.isBooleanBasis(measureWithoutExtension));
         // Boolean Basis
         assertNotNull(measureBooleanBias);
         assertTrue(measureBasisDef.isBooleanBasis(measureBooleanBias));

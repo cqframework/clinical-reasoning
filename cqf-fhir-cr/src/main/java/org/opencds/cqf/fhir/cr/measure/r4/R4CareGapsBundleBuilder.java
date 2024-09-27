@@ -228,12 +228,7 @@ public class R4CareGapsBundleBuilder {
     }
 
     private boolean isMultiRateMeasure(MeasureReport measureReport) {
-        boolean isMultiRate = false;
-
-        if (!measureReport.getGroup().isEmpty()) {
-            isMultiRate = measureReport.getGroup().size() > 1;
-        }
-        return isMultiRate;
+        return measureReport.getGroup().size() > 1;
     }
 
     private DetectedIssue getDetectedIssue(

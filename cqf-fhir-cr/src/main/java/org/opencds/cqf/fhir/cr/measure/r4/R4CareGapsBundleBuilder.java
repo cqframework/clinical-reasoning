@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
+import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
@@ -17,6 +18,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -146,15 +149,22 @@ public class R4CareGapsBundleBuilder {
             addResourceId(mr);
             Measure measure = r4MeasureServiceUtils.resolveByUrl(mr.getMeasure());
             // Applicable Reports per Gap-Status
-            var gapStatus = gapEvaluator.getGapStatus(measure, mr);
-            boolean keepResult = statuses.contains(gapStatus.toString());
-            if (keepResult) {
+            var gapStatus = gapEvaluator.getGroupGapStatus(measure, mr);
+            var filteredGapStatus = filteredGapStatus(gapStatus, statuses);
+            if (!filteredGapStatus.isEmpty()) {
                 // add Report to final Care-gap report
                 measureReports.add(mr);
-                // Issue Detected for Report
-                DetectedIssue detectedIssue = getDetectedIssue(patient, mr, gapStatus);
-                detectedIssues.add(getDetectedIssue(patient, mr, gapStatus));
-                composition.addSection(getSection(measure, mr, detectedIssue, gapStatus));
+                // Issue(s) Detected from MeasureReport
+                for (Map.Entry<String, CareGapsStatusCode> item : filteredGapStatus.entrySet()) {
+                    String groupId = item.getKey();
+                    CareGapsStatusCode careGapsStatusCode = item.getValue();
+                    // create DetectedIssue per gap-status and MeasureReport.groupId
+                    DetectedIssue issue = getDetectedIssue(patient, mr, groupId, careGapsStatusCode);
+                    // add DetectedIssue list to set on Bundle
+                    detectedIssues.add(issue);
+                    // add sections for DetectedIssues created
+                    composition.addSection(getSection(measure, mr, issue, careGapsStatusCode));
+                }
                 // Track evaluated Resources
                 populateEvaluatedResources(mr, evalPlusSDE);
                 populateSDEResources(mr, evalPlusSDE);
@@ -168,6 +178,20 @@ public class R4CareGapsBundleBuilder {
             // return nothing if not-applicable
             return null;
         }
+    }
+
+    private Map<String, CareGapsStatusCode> filteredGapStatus(
+            Map<String, CareGapsStatusCode> careGapStatusPerGroupId, List<String> statuses) {
+        Map<String, CareGapsStatusCode> filtered = new HashMap<>();
+        for (Map.Entry<String, CareGapsStatusCode> entry : careGapStatusPerGroupId.entrySet()) {
+            String groupId = entry.getKey();
+            CareGapsStatusCode careGapsStatusCode = entry.getValue();
+            // check resulting status for report groups is in operation request 'statuses'
+            if (statuses.contains(careGapsStatusCode.toString())) {
+                filtered.put(groupId, careGapsStatusCode);
+            }
+        }
+        return filtered;
     }
 
     private Bundle.BundleEntryComponent getBundleEntry(String serverBase, Resource resource) {
@@ -203,9 +227,17 @@ public class R4CareGapsBundleBuilder {
                 .build();
     }
 
+    private boolean isMultiRateMeasure(MeasureReport measureReport) {
+        return measureReport.getGroup().size() > 1;
+    }
+
     private DetectedIssue getDetectedIssue(
-            Patient patient, MeasureReport measureReport, CareGapsStatusCode careGapStatusCode) {
-        return new DetectedIssueBuilder<>(DetectedIssue.class)
+            Patient patient,
+            MeasureReport measureReport,
+            String measureReportGroupId,
+            CareGapsStatusCode careGapsStatusCode) {
+
+        var detectedIssue = new DetectedIssueBuilder<>(DetectedIssue.class)
                 .withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
                 .withStatus(DetectedIssue.DetectedIssueStatus.FINAL.toString())
                 .withCode(CARE_GAPS_CODES.get("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP"))
@@ -216,9 +248,19 @@ public class R4CareGapsBundleBuilder {
                         new CodeableConceptSettings()
                                 .add(
                                         CARE_GAPS_GAP_STATUS_SYSTEM,
-                                        careGapStatusCode.toString(),
-                                        careGapStatusCode.toDisplayString())))
+                                        careGapsStatusCode.toString(),
+                                        careGapsStatusCode.toDisplayString())))
                 .build();
+
+        if (measureReportGroupId != null && isMultiRateMeasure(measureReport)) {
+            // MeasureReportGroupComponent.id value set here to differentiate between DetectedIssue resources for the
+            // same MeasureReport
+            Extension groupIdExt = new Extension();
+            groupIdExt.setUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
+            groupIdExt.setValue(new StringType(measureReportGroupId));
+            detectedIssue.setExtension(Collections.singletonList(groupIdExt));
+        }
+        return detectedIssue;
     }
 
     private void populateEvaluatedResources(MeasureReport measureReport, Map<String, Resource> resources) {

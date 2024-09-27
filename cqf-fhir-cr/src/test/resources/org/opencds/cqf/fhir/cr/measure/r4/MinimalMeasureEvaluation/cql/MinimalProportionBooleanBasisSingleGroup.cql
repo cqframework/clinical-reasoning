@@ -33,3 +33,9 @@ define "Measure Population":
 
 define "date of compliance":
     "Measurement Period"
+
+define "always false":
+    false
+
+define "always true":
+    true

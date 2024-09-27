@@ -10,11 +10,16 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -24,9 +29,10 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
-import org.opencds.cqf.fhir.utility.visitor.WithdrawVisitor;
+import org.opencds.cqf.fhir.utility.visitor.RetireVisitor;
 
-class WithdrawVisitorTests {
+public class RetireVisitorTest {
+
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -49,48 +55,44 @@ class WithdrawVisitorTests {
     }
 
     @Test
-    void library_withdraw_test() {
-        Bundle bundle = (Bundle)
-                jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw.json"));
+    void library_retire_test() {
+        Bundle bundle =
+                (Bundle) jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-retire.json"));
         Bundle tsBundle = spyRepository.transaction(bundle);
-        // InMemoryFhirRepository bug - need to get id like this
-        String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "1.1.0-draft";
-        Library library = spyRepository.read(Library.class, new IdType(id)).copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
-        Parameters params = parameters(part("version", version));
-        Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, spyRepository, params);
-
-        var res = returnedBundle.getEntry();
-
-        assert (res.size() == 9);
-    }
-
-    @Test
-    void library_withdraw_with_approval_test() throws Exception {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw-with-approval.json"));
-        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-                ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
-        Bundle tsBundle = spyRepository.transaction(bundle);
-        spyRepository.update(sp);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
         Library library = spyRepository.read(Library.class, new IdType(id)).copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+        IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
         Parameters params = parameters(part("version", version));
-        Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, spyRepository, params);
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(retireVisitor, spyRepository, params);
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 10);
+        assert (res.size() == 9);
+        var libraries = spyRepository.search(Bundle.class, Library.class, new HashMap()).getEntry().stream()
+                .filter(x -> ((Library) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
+                .collect(Collectors.toList());
+
+        var valueSets = spyRepository.search(Bundle.class, ValueSet.class, new HashMap()).getEntry().stream()
+                .filter(x -> ((ValueSet) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
+                .collect(Collectors.toList());
+
+        var planDefinitions =
+                spyRepository.search(Bundle.class, PlanDefinition.class, new HashMap()).getEntry().stream()
+                        .filter(x -> ((PlanDefinition) x.getResource())
+                                .getStatus()
+                                .equals(Enumerations.PublicationStatus.RETIRED))
+                        .collect(Collectors.toList());
+
+        assert (libraries.size() == 2);
+        assert (valueSets.size() == 6);
+        assert (planDefinitions.size() == 1);
     }
 
     @Test
-    void library_withdraw_No_draft_test() {
+    void library_retire_no_draft_test() {
         try {
             Bundle bundle = (Bundle) jsonParser.parseResource(
                     WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
@@ -100,9 +102,9 @@ class WithdrawVisitorTests {
                     .read(Library.class, new IdType("Library/SpecificationLibrary"))
                     .copy();
             LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-            IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+            IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
             Parameters params = parameters(part("version", version));
-            libraryAdapter.accept(withdrawVisitor, spyRepository, params);
+            libraryAdapter.accept(retireVisitor, spyRepository, params);
 
             fail("Trying to withdraw an active Library should throw an Exception");
         } catch (PreconditionFailedException e) {

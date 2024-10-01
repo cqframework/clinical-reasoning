@@ -937,4 +937,39 @@ class MinimalMeasureEvaluationTest {
                                     "no expression was listed for extension: http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression"));
         }
     }
+
+    // MinimalProportionResourceBasisSingleGroupExclusionTest, Numerator value should be forced to false because of
+    // Denominator exclusion=true
+    @Test
+    void MinimalProportionBooleanBasisSingleGroupExclusionTest() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionBooleanBasisSingleGroupExclusionTest")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("subject")
+                .subject("Patient/female-1988")
+                .evaluate();
+        when.then()
+                .hasReportType("Individual")
+                .hasSubjectReference("Patient/female-1988")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(0)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("denominator-exception")
+                .hasCount(0)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(0);
+    }
 }

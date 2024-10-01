@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
 
 import java.util.Arrays;
 import java.util.HashMap;

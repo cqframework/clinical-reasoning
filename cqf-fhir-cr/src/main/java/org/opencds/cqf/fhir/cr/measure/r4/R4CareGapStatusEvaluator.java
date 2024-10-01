@@ -1,12 +1,18 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 
 /**
@@ -28,8 +34,8 @@ public class R4CareGapStatusEvaluator {
      * Improvement Notation of Scoring Algorithm indicates whether the ratio of Numerator over Denominator populations represents a scenario to increase the Numerator to improve outcomes, or to decrease the Numerator count. If this value is not set on a Measure resource, then it is defaulted to 'Increase' under the IsPositive variable.
      * </p>
      * <ul>
-     * <li>ex: 1/10 with improvementNotation "decrease" means that the measureScore is 90%, therefore absense from 'Numerator' means criteria for care was met</li>
-     * <li>ex: 1/10 with improvementNotation "increase" means that the measureScore is 10%, therefore absense from 'Numerator' means criteria for care was NOT met.</li>
+     * <li>ex: 1/10 with improvementNotation "decrease" means that the measureScore is 90%, therefore absence from 'Numerator' means criteria for care was met</li>
+     * <li>ex: 1/10 with improvementNotation "increase" means that the measureScore is 10%, therefore absence from 'Numerator' means criteria for care was NOT met.</li>
      * </ul>
      * <ul>
      * <li>'open-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = increase. Then the subject is 'open-gap'</li>
@@ -37,11 +43,31 @@ public class R4CareGapStatusEvaluator {
      * <li>'closed-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = decrease. Then the subject is 'closed-gap'</li>
      * <li>'closed-gap': if in 'Denominator' & in 'Numerator', where 'improvement notation' = increase. Then the subject is 'closed-gap'</li>
      * </ul>
+     * <p>'prospective-gap' is a concept that represents a period of time where a 'care-gap' measure has opportunity to address recommended care in a specific window of time. This 'window of time' we call the 'Date of Compliance' to indicate a range of time that optimally represents when care is meant to be provided.</p>
+     *<br/>
+     * <p>If care has not been provided ('open-gap'), and the date (reportDate) of evaluating for the Measure is before or within the 'Date of Compliance' interval, then the Measure is considered a 'prospective-gap' for the subject evaluated.</p>
+     *
+     * <p></p>
      */
-    public CareGapsStatusCode getGapStatus(Measure measure, MeasureReport measureReport) {
+    public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
+        Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();
+        var reportDate = measureReport.getDateElement();
+
+        for (MeasureReportGroupComponent group : measureReport.getGroup()) {
+            var groupId = group.getId();
+            var gapStatus = getGapStatus(measure, group, reportDate);
+
+            groupStatus.put(groupId, gapStatus);
+        }
+        return groupStatus;
+    }
+
+    private CareGapsStatusCode getGapStatus(
+            Measure measure, MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
         Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
-        measureReport.getGroup().forEach(group -> group.getPopulation().forEach(population -> {
+        // get Numerator and Denominator membership
+        measureReportGroup.getPopulation().forEach(population -> {
             if (population.hasCode()
                     && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
                     && population.getCount() == 1) {
@@ -52,12 +78,15 @@ public class R4CareGapStatusEvaluator {
                     && population.getCount() == 1) {
                 inDenominator.setValue(true);
             }
-        }));
+        });
 
         // default improvementNotation
         boolean isPositive = true;
 
-        // if value is present, set value from measure if populated
+        // TODO: look for group specified 'improvement notation', if missing, then look on measure
+        /*if (groupHasImprovementNotation(measureReportGroup)) {
+            isPositive = groupImprovementNotationIsPositive(measureReportGroup);
+        } else if (measure.hasImprovementNotation()) {*/
         if (measure.hasImprovementNotation()) {
             isPositive =
                     measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
@@ -70,9 +99,51 @@ public class R4CareGapStatusEvaluator {
 
         if (Boolean.TRUE.equals(inDenominator.getValue())
                 && ((isPositive && !inNumerator.getValue()) || (!isPositive && inNumerator.getValue()))) {
-            return CareGapsStatusCode.OPEN_GAP;
+            return getOpenOrProspectiveStatus(measureReportGroup, reportDate);
         }
 
         return CareGapsStatusCode.CLOSED_GAP;
     }
+
+    private CareGapsStatusCode getOpenOrProspectiveStatus(
+            MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
+        if (hasDateOfComplianceExt(measureReportGroup)) {
+            Period dateOfCompliance = getDateOfComplianceExt(measureReportGroup);
+
+            boolean reportBeforeEndOfDOC = reportDate.before(dateOfCompliance.getEndElement());
+            boolean reportAfterStartOfDOC = reportDate.after(dateOfCompliance.getStartElement());
+            boolean reportBeforeStartOfDOC = reportDate.before(dateOfCompliance.getStartElement());
+
+            boolean reportWithinDOC = reportAfterStartOfDOC && reportBeforeEndOfDOC;
+            if (reportWithinDOC || reportBeforeStartOfDOC) {
+                return CareGapsStatusCode.PROSPECTIVE_GAP;
+            }
+        }
+        return CareGapsStatusCode.OPEN_GAP;
+    }
+
+    private boolean hasDateOfComplianceExt(MeasureReportGroupComponent measureReportGroup) {
+        var ext = measureReportGroup.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL);
+        return ext != null && !ext.getValue().isEmpty();
+    }
+
+    private Period getDateOfComplianceExt(MeasureReportGroupComponent measureReportGroup) {
+        var ext = measureReportGroup.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL);
+        var extValue = ext.getValue();
+        assert extValue instanceof Period;
+        return (Period) extValue;
+    }
+
+    /*
+    // TODO implement Measure Group Level improvement notation extension
+    private boolean groupHasImprovementNotation(MeasureReportGroupComponent groupComponent) {
+        return groupComponent.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION) != null;
+    }
+
+    private boolean groupImprovementNotationIsPositive(MeasureReportGroupComponent groupComponent) {
+        var code = (CodeableConcept) groupComponent
+                .getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
+                .getValue();
+        return code.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
+    }*/
 }

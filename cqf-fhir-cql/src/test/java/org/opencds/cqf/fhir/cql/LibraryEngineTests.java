@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -121,7 +122,10 @@ class LibraryEngineTests {
                         return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
                 }
             });
-        libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault(), null, libraryResourceProvider);
+        var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(
+            libraryResourceProvider);
+
+        libraryEngine = new LibraryEngine(repository, evaluationSettings, null);
         repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression =

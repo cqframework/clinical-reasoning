@@ -82,22 +82,8 @@ public class Engines {
     }
 
     public static CqlEngine forRepositoryAndSettings(
-        EvaluationSettings settings, Repository repository, IBaseBundle additionalData, List<LibrarySourceProvider> librarySourceProviders) {
-        return forRepositoryAndSettings(settings, repository, additionalData, null, true, librarySourceProviders);
-    }
-
-    public static CqlEngine forRepositoryAndSettings(
             EvaluationSettings settings, Repository repository, IBaseBundle additionalData) {
-        return forRepositoryAndSettings(settings, repository, additionalData, null, true, null);
-    }
-
-    public static CqlEngine forRepositoryAndSettings(
-        EvaluationSettings settings,
-        Repository repository,
-        IBaseBundle additionalData,
-        NpmProcessor npmProcessor,
-        Boolean useLibraryCache) {
-        return forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, useLibraryCache, null);
+        return forRepositoryAndSettings(settings, repository, additionalData, null, true);
     }
 
     public static CqlEngine forRepositoryAndSettings(
@@ -105,15 +91,13 @@ public class Engines {
             Repository repository,
             IBaseBundle additionalData,
             NpmProcessor npmProcessor,
-            Boolean useLibraryCache,
-        List<LibrarySourceProvider> librarySourceProviders) {
+            Boolean useLibraryCache) {
         checkNotNull(settings);
         checkNotNull(repository);
-
+        var sourceProviders = new ArrayList<LibrarySourceProvider>();
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
 
-        List<LibrarySourceProvider> sourceProviders = librarySourceProviders == null ? new ArrayList<>() : librarySourceProviders;
         sourceProviders.add(buildLibrarySource(repository));
 
         var dataProviders =
@@ -179,6 +163,9 @@ public class Engines {
         }
 
         librarySourceProviders.forEach(lsp -> {
+            libraryManager.getLibrarySourceLoader().registerProvider(lsp);
+        });
+        settings.getLibrarySourceProviders().forEach(lsp -> {
             libraryManager.getLibrarySourceLoader().registerProvider(lsp);
         });
 

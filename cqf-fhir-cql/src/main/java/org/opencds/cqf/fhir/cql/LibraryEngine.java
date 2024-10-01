@@ -37,7 +37,6 @@ public class LibraryEngine {
     protected final Repository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
-    private final List<LibrarySourceProvider> librarySourceProviders;
     protected NpmProcessor npmProcessor;
 
     public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
@@ -45,15 +44,10 @@ public class LibraryEngine {
     }
 
     public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings, NpmProcessor npmProcessor) {
-        this(repository, evaluationSettings, npmProcessor, new ArrayList<>());
-    }
-
-    public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings, NpmProcessor npmProcessor, List<LibrarySourceProvider> librarySourceProviders) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         this.npmProcessor = npmProcessor;
-        this.librarySourceProviders = librarySourceProviders;
     }
 
     public Repository getRepository() {
@@ -128,10 +122,11 @@ public class LibraryEngine {
 
         List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
         librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        librarySourceProviders.addAll(this.librarySourceProviders);
-
-        var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false, librarySourceProviders);
-
+        var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false);
+        var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
+        for (var source : librarySourceProviders) {
+            providers.registerProvider(source);
+        }
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             evaluationParameters.put("%fhirpathcontext", contextParameter);

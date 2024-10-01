@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.Resources;
@@ -130,17 +133,35 @@ interface ParameterBinder {
     }
 
     static class OperationParameterBinder implements ParameterBinder {
+
+        private enum ParameterClass {
+            RESOURCE,
+            VALUE,
+            LIST
+        }
+
         private final Parameter parameter;
         private final OperationParam operationParam;
+        private final ParameterClass parameterClass;
 
         public OperationParameterBinder(Parameter parameter, OperationParam operationParam) {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
             this.operationParam = requireNonNull(operationParam, "operationParam can not be null");
             requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
-            checkArgument(
-                    IBase.class.isAssignableFrom(parameter.getType())
-                            || List.class.isAssignableFrom(parameter.getType()),
-                    "Parameter annotated with @Operation must be a FHIR type or a List");
+            this.parameterClass = determineParameterClass(parameter);
+        }
+
+        private static ParameterClass determineParameterClass(Parameter parameter) {
+            var type = parameter.getType();
+            if (IBaseResource.class.isAssignableFrom(type)) {
+                return ParameterClass.RESOURCE;
+            } else if (IBaseDatatype.class.isAssignableFrom(type)) {
+                return ParameterClass.VALUE;
+            } else if (List.class.isAssignableFrom(type)) {
+                return ParameterClass.LIST;
+            } else {
+                throw new IllegalArgumentException("Parameter annotated with @Operation must be a FHIR type or a List");
+            }
         }
 
         @Override
@@ -159,53 +180,63 @@ interface ParameterBinder {
                 return null;
             }
 
-            // Extract the value from the parameters resource that matches the external name of the @OperationParam
-            // And handle collection types like list.
             var context = parameters.getStructureFhirVersionEnum().newContextCached();
-            var parts = Parameters.getPartsByName(context, parameters, this.name());
+            var terser = context.newTerser();
+            var params = ParametersUtil.getNamedParameters(context, parameters, this.name());
 
             Parameters.removeParameter(parameters, this.name());
 
-            // -1 means no max, -2 means "default behavior" which is type-specific
-            // TODO: the type-specific part is not implemented
-            if (operationParam.max() >= 0 && parts.size() > operationParam.max()) {
+            var defaultMax = this.parameterClass == ParameterClass.LIST ? -1 : 1;
+            var max = operationParam.max() == -2 ? defaultMax : operationParam.max();
+            if (max > 0 && params.size() > max) {
                 throw new IllegalArgumentException("Parameter " + this.name() + " has more values than allowed by max");
             }
 
-            if (parts.size() < operationParam.min()) {
+            if (operationParam.min() > 0 && params.size() < operationParam.min()) {
                 throw new IllegalArgumentException(
                         "Parameter " + this.name() + " has fewer values than required by min");
             }
 
-            var t = parameters.getStructureFhirVersionEnum().newContextCached().newTerser();
-            if (List.class.isAssignableFrom(parameter.getType())) {
-                return parts.stream()
-                        .map(x -> t.getSingleValueOrNull(x, "value[x]", IBase.class))
-                        .collect(Collectors.toList());
+            Object value = null;
+            switch (parameterClass) {
+                case LIST:
+                    value = params.stream()
+                            .map(x -> terser.getSingleValueOrNull(x, "value[x]", IBase.class))
+                            .collect(Collectors.toList());
+                    break;
+                case RESOURCE:
+                    var tempResource = !params.isEmpty()
+                            ? terser.getSingleValueOrNull(params.get(0), "resource", IBaseResource.class)
+                            : null;
+                    // We had _some_ parameters, but we didn't get a resource at the expected location
+                    if (!params.isEmpty() && tempResource == null) {
+                        throw new IllegalArgumentException(
+                                "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                    }
+
+                    value = tempResource;
+                    break;
+                case VALUE:
+                    var tempValue = !params.isEmpty()
+                            ? terser.getSingleValueOrNull(params.get(0), "value[x]", IBase.class)
+                            : null;
+
+                    // We had _some_ parameters, but we didn't get a resource at the expected location
+                    if (!params.isEmpty() && tempValue == null) {
+                        throw new IllegalArgumentException(
+                                "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                    }
+
+                    value = tempValue;
+                    break;
             }
 
-            if (parts.isEmpty()) {
-                return null;
-            }
-
-            if (parts.size() > 1) {
+            try {
+                return this.parameter.getType().cast(value);
+            } catch (ClassCastException e) {
                 throw new IllegalArgumentException(
-                        "Parameter " + this.name() + " is a single value, but multiple values were found");
+                        "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());
             }
-
-            var part = parts.get(0);
-
-            var value = t.getSingleValueOrNull(part, "value[x]", IBase.class);
-            if (value == null) {
-                return null;
-            }
-
-            if (parameter.getType().isAssignableFrom(value.getClass())) {
-                return value;
-            }
-
-            throw new IllegalArgumentException(
-                    "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());
         }
 
         @Override

@@ -9,16 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.operation.OperationRegistry.OperationInvocationParams;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class OperationRegistryTest {
@@ -117,34 +120,86 @@ class OperationRegistryTest {
     }
 
     @Test
-    void registerOperation() {
-        final class Example {
-            private String configParam;
+    void parametersWithResource() {
+        final class GetIdFromResource {
 
-            Example(String configParam) {
-                this.configParam = configParam;
-            }
-
-            @Operation(name = "example")
-            public IBaseParameters example(
-                    @OperationParam(name = "stringParam") IPrimitiveType<String> param,
-                    @ExtraParams IBaseParameters everythingElseNotBound) {
+            @Operation(name = "get-id")
+            public IBaseParameters getId(@OperationParam(name = "resource") IBaseResource resource) {
                 return new Parameters()
-                        .addParameter("result", new IntegerType(5))
-                        .addParameter("config", new StringType(configParam));
+                        .addParameter(
+                                "result", new StringType(resource.getIdElement().getIdPart()));
             }
         }
 
-        var o = constructAndRegister(Example.class, r -> new Example("test config"))
-                .buildContext(repo, "example");
-        var result = assertDoesNotThrow(() -> o.execute());
+        var registry = constructAndRegister(GetIdFromResource.class, r -> new GetIdFromResource());
+
+        var arguments = new Parameters();
+        arguments.addParameter().setName("resource").setResource(new Library().setId("123"));
+
+        var op = registry.buildContext(repo, "get-id").parameters(arguments);
+        var result = assertDoesNotThrow(() -> op.execute());
 
         var p = assertInstanceOf(Parameters.class, result);
-        var num = assertInstanceOf(IntegerType.class, p.getParameter("result").getValue())
+        var id = assertInstanceOf(StringType.class, p.getParameter("result").getValue())
                 .getValue();
-        assertEquals(5, num);
-        var config = assertInstanceOf(StringType.class, p.getParameter("config").getValue())
-                .getValue();
-        assertEquals("test config", config);
+        assertEquals("123", id);
+
+        // Multiple resources should fail
+        arguments = new Parameters();
+        arguments.addParameter().setName("resource").setResource(new Library().setId("123"));
+        arguments.addParameter().setName("resource").setResource(new Library().setId("456"));
+
+        var op2 = registry.buildContext(repo, "get-id").parameters(arguments);
+
+        var e = assertThrows(IllegalArgumentException.class, () -> op2.execute());
+        assertTrue(e.getMessage().contains("max"));
+
+        // Parameters with wrong type should fail
+        arguments = new Parameters();
+        arguments.addParameter().setName("resource").setValue(new StringType("123"));
+
+        var op3 = registry.buildContext(repo, "get-id").parameters(arguments);
+        e = assertThrows(IllegalArgumentException.class, () -> op3.execute());
+        assertTrue(e.getMessage().contains("type"));
+    }
+
+    @Test
+    void parametersWithList() {
+        final class GetIdFromResources {
+
+            @Operation(name = "get-id")
+            public IBaseParameters getId(@OperationParam(name = "resources") List<IBaseResource> resources) {
+                List<String> ids = resources.stream()
+                        .map(r -> r.getIdElement().getIdPart())
+                        .collect(Collectors.toList());
+
+                var params = new Parameters();
+                for (var id : ids) {
+                    params.addParameter("result", new StringType(id));
+                }
+
+                return params;
+            }
+        }
+
+        var arguments = new Parameters();
+        var resourceParam = arguments.addParameter().setName("resources");
+        resourceParam.addPart().setResource(new Library().setId("123"));
+        resourceParam.addPart().setResource(new Measure().setId("456"));
+
+        OperationInvocationParams op = constructAndRegister(GetIdFromResources.class, r -> new GetIdFromResources())
+                .buildContext(repo, "get-id")
+                .parameters(arguments);
+        var result = assertDoesNotThrow(() -> op.execute());
+
+        var p = assertInstanceOf(Parameters.class, result);
+        var results = p.getParameters("result");
+        assertEquals(2, results.size());
+        assertEquals(
+                "123",
+                assertInstanceOf(StringType.class, results.get(0).getValue()).getValue());
+        assertEquals(
+                "456",
+                assertInstanceOf(StringType.class, results.get(0).getValue()).getValue());
     }
 }

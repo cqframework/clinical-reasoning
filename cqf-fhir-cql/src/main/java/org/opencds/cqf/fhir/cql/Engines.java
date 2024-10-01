@@ -94,9 +94,10 @@ public class Engines {
             Boolean useLibraryCache) {
         checkNotNull(settings);
         checkNotNull(repository);
-        var sourceProviders = new ArrayList<LibrarySourceProvider>();
+
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
+        var sourceProviders = new ArrayList<LibrarySourceProvider>();
 
         sourceProviders.add(buildLibrarySource(repository));
 

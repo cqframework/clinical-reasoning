@@ -591,6 +591,25 @@ class R4CareGapsTest {
         }
     }
 
+    // 'prospective gap' test relies on date of report to decide if 'prospective' or 'open' gap. This will fail EOY
+    // 2025.
+    @Test
+    void MinimalProportionBooleanBasisSingleGroupWithDOC() {
+        GIVEN_REPO
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .measureIds("MinimalProportionBooleanBasisSingleGroupWithDOC")
+                .statuses("prospective-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasCareGapStatus("prospective-gap");
+    }
     /*
     // TODO implement Measure Group Level improvement notation extension
     @Test

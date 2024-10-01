@@ -5,8 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -145,8 +147,18 @@ public class Engines {
         libraryManager.getLibrarySourceLoader().clearProviders();
 
         if (npmProcessor != null) {
+            // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
+            // list, and b) there are packages with different package ids but the same base canonical (e.g.
+            // fhir.r4.examples has the same base canonical as fhir.r4)
+            // NOTE: Using ensureNamespaceRegistered works around a but not b
+            Set<String> keys = new HashSet<String>();
+            Set<String> uris = new HashSet<String>();
             for (var n : npmProcessor.getNamespaces()) {
-                libraryManager.getNamespaceManager().addNamespace(n);
+                if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
+                    libraryManager.getNamespaceManager().addNamespace(n);
+                    keys.add(n.getName());
+                    uris.add(n.getUri());
+                }
             }
         }
 

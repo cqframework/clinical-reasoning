@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -14,8 +11,8 @@ class MultipleRateMeasureProcessorTest {
     void fhir347_singlePatient() {
         given.when()
                 .measureId("FHIR347")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/numer1-EXM347")
                 .reportType("subject")
                 .evaluate()

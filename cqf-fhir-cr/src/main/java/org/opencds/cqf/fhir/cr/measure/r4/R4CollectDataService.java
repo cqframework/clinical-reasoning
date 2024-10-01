@@ -50,7 +50,11 @@ public class R4CollectDataService {
      *         evaluated Resources
      */
     public Parameters collectData(
-            IdType measureId, ZonedDateTime periodStart, ZonedDateTime periodEnd, String subject, String practitioner) {
+            IdType measureId,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            String practitioner) {
 
         Parameters parameters = new Parameters();
         var subjectProvider = new R4RepositorySubjectProvider();

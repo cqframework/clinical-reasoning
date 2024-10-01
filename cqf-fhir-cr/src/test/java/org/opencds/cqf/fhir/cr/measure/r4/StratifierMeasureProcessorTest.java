@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -16,8 +13,8 @@ class StratifierMeasureProcessorTest {
 
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/denom-EXM74-strat1-case1")
                 .reportType("subject")
                 .evaluate()
@@ -51,8 +48,8 @@ class StratifierMeasureProcessorTest {
     void exm74_singlePatient_numerator() {
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/numer-EXM74-strat1-case7")
                 .reportType("subject")
                 .evaluate()
@@ -84,8 +81,8 @@ class StratifierMeasureProcessorTest {
 
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .reportType("subject-list")
                 .evaluate()
                 .then()
@@ -133,8 +130,8 @@ class StratifierMeasureProcessorTest {
     void exm74_population() {
         given.when()
                 .measureId("PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .reportType("population")
                 .evaluate()
                 .then()

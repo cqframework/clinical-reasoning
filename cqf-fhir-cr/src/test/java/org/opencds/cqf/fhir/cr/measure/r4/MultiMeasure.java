@@ -8,7 +8,10 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -181,13 +184,15 @@ public class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.When periodEnd(ZonedDateTime periodEnd) {
-            this.periodEnd = periodEnd;
+        public MultiMeasure.When periodEnd(String periodEnd) {
+            this.periodEnd =
+                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 
-        public MultiMeasure.When periodStart(ZonedDateTime periodStart) {
-            this.periodStart = periodStart;
+        public MultiMeasure.When periodStart(String periodStart) {
+            this.periodStart = LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 

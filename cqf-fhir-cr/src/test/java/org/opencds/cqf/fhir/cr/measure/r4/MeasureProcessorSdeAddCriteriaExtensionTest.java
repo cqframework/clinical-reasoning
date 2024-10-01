@@ -2,9 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.Test;
@@ -19,8 +16,8 @@ class MeasureProcessorSdeAddCriteriaExtensionTest {
     void exm124_subject_list() {
         var report = given.when()
                 .measureId("InitialInpatientPopulation")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47")
                 .reportType("subject")
                 .evaluate()

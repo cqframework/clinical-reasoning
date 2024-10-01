@@ -2,9 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -17,8 +14,8 @@ class DiabetesMeasureProcessorTest {
     void a1c_singlePatient_numerator() {
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JUNE, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/numer-CMS122-Patient")
                 .reportType("patient")
                 .evaluate()
@@ -35,8 +32,8 @@ class DiabetesMeasureProcessorTest {
     void a1c_population() throws IOException {
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JUNE, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .reportType("population")
                 .evaluate()
                 .then()
@@ -57,8 +54,8 @@ class DiabetesMeasureProcessorTest {
                         "DiabetesHemoglobinA1cHbA1cPoorControl9FHIR/CMS122-AdditionalData-bundle.json"));
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2020, Month.JUNE, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2020-01-01")
                 .subject("Patient/numer-CMS122-Patient")
                 .reportType("patient")
                 .additionalData(additionalData)

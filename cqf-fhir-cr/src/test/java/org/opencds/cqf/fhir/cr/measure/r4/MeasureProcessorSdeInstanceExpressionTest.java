@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -19,8 +16,8 @@ class MeasureProcessorSdeInstanceExpressionTest {
     void measure_eval_missing_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
-                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2022, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2022-01-01")
+                .periodEnd("2022-12-31")
                 .subject("Patient/hist-open-HCC189")
                 .reportType("subject")
                 .evaluate()
@@ -32,8 +29,8 @@ class MeasureProcessorSdeInstanceExpressionTest {
     void measure_eval_non_retrieve_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
-                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2022, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2022-01-01")
+                .periodEnd("2022-12-31")
                 .subject("Patient/hist-closed-HCC189")
                 .reportType("subject")
                 .evaluate()

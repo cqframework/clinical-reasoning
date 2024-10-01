@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -15,8 +12,8 @@ class DaVinciExtensionMeasureProcessorTest {
     void exm125_numerator() {
         given.when()
                 .measureId("BreastCancerScreeningFHIR")
-                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
                 .subject("Patient/numer-EXM125")
                 .reportType("subject")
                 .evaluate()

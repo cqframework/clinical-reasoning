@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,8 +19,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("population")
                 .evaluate();
 
@@ -54,8 +53,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("summary")
                 .evaluate();
 
@@ -88,8 +87,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
 
         when.then()
@@ -121,8 +120,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("population")
                 .evaluate();
         // Denominator Exception that meets Numerator and does not meet Numerator
@@ -161,8 +160,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -197,8 +196,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -237,8 +236,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // Denominator Exception that meets Numerator and does not meet Numerator
         // ** When subject meets criteria of Denominator Exception, but not Numerator, it shows count for Denominator
@@ -275,8 +274,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -311,8 +310,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -351,8 +350,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         when.then()
                 .firstGroup()
@@ -379,8 +378,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -412,8 +411,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -449,8 +448,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroupErrorPopulation")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // `Initial Population`, `Numerator`, `Denominator` are required Population Definitions for Measure Scoring
         // Type: proportion
@@ -462,8 +461,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioBooleanBasisSingleGroupErrorPopulation")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // `Denominator Exception` are not permitted for MeasureScoring type: ratio
         assertThrows(IllegalArgumentException.class, () -> when.then().report());
@@ -474,8 +473,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         when.then()
                 .firstGroup()
@@ -502,8 +501,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -535,8 +534,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalRatioResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -572,8 +571,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         when.then().firstGroup().population("initial-population").hasCount(9);
     }
@@ -583,8 +582,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -602,18 +601,18 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneOffset.UTC))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneOffset.UTC))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
         when.then()
                 .hasReportType("Subject List")
                 .hasPeriodStart(Date.from(LocalDate.of(2024, Month.JANUARY, 1)
-                        .atStartOfDay(ZoneOffset.UTC)
+                        .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()))
                 .hasPeriodEnd(Date.from(LocalDate.of(2024, Month.DECEMBER, 31)
-                        .atStartOfDay(ZoneOffset.UTC)
+                        .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()))
                 .hasSubjectReference("Patient/female-1988")
                 .subjectResultsValidation()
@@ -629,8 +628,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         when.then().firstGroup().population("initial-population").hasCount(8);
     }
@@ -640,8 +639,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -659,8 +658,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -680,8 +679,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortBooleanBasisSingleGroupErrorPopulation")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // `Initial Population` is a required Population Definition for Measure Scoring Type: cohort
         assertThrows(NullPointerException.class, () -> when.then().report());
@@ -692,8 +691,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         when.then()
                 .firstGroup()
@@ -715,8 +714,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -743,8 +742,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -774,8 +773,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // uses resource library instead of boolean
         when.then()
@@ -795,8 +794,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -820,8 +819,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -848,8 +847,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroupErrorPopulation")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .evaluate();
         // `Initial Population` & `Measure Population` are required Population Definitions for Measure Scoring Type:
         // continuous-variable
@@ -861,8 +860,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("population")
                 .practitioner("tester")
                 .evaluate();
@@ -895,8 +894,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionResourceBasisSingleGroupWithDOC")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -933,8 +932,8 @@ class MinimalMeasureEvaluationTest {
             var when = GIVEN_REPO
                     .when()
                     .measureId("MinimalProportionResourceBasisSingleGroupWithBadDOC")
-                    .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                    .periodStart("2024-01-01")
+                    .periodEnd("2024-12-31")
                     .reportType("subject")
                     .subject("Patient/female-1988")
                     .evaluate();
@@ -956,8 +955,8 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionBooleanBasisSingleGroupExclusionTest")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();

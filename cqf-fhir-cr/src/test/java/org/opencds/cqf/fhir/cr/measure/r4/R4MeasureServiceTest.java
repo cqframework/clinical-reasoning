@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -13,8 +10,8 @@ class R4MeasureServiceTest {
     void exm108_individualPractitionerParam() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .practitioner("Practitioner/exm108-practitioner-2")
                 .reportType("population")
                 .evaluate()
@@ -29,8 +26,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .practitioner("Practitioner/exm108-practitioner-1")
                 .reportType("population")
                 .evaluate()
@@ -49,8 +46,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .subject("Group/patient-group-108")
                 .reportType("population")
                 .evaluate()
@@ -69,8 +66,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .practitioner(null)
                 .reportType("population")
                 .evaluate()
@@ -89,8 +86,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -106,8 +103,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .subject("Patient/numer-EXM108")
                 .evaluate()
                 .then()
@@ -125,8 +122,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -142,8 +139,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .reportType("individual")
                 .evaluate()
                 .then()
@@ -160,8 +157,8 @@ class R4MeasureServiceTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodStart("2018-12-31")
+                .periodEnd("2019-12-31")
                 .reportType("summary")
                 .subject("Patient/numer-EXM108")
                 .evaluate()

@@ -5,13 +5,11 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RE
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
@@ -42,7 +40,6 @@ public class R4CareGapsProcessor {
     private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
-    private final MeasurePeriodValidator measurePeriodValidator;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -56,7 +53,6 @@ public class R4CareGapsProcessor {
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties, repository, measureEvaluationOptions, serverBase, configuredResources, measurePeriodValidator);
-        this.measurePeriodValidator = measurePeriodValidator;
     }
 
     public Parameters getCareGapsReport(

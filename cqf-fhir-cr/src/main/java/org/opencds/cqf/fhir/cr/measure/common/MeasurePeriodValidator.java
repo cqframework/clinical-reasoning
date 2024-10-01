@@ -1,12 +1,16 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
 
 import java.time.ZonedDateTime;
 
-// LUKETODO:  javadoc
-// This gets called IMMEDIATELY from ALL parts of ClinicalReasoning called by hapi-fhir or cdr that pass periods
+/**
+ * Ensure that periods used for measure evaluation, specifically, start and end ZonedDateTimes,
+ * are valid in relation to each other.
+ * <p/>
+ * For example, a period with a start of 2024-01-01 and an end of 2023-01-01 is invalid, since a
+ * start date must be before an end date.
+ */
 public class MeasurePeriodValidator {
 	public void validateParsedPeriodStartAndEnd(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         if ((periodStart == null && periodEnd != null) || (periodStart != null && periodEnd == null)) {

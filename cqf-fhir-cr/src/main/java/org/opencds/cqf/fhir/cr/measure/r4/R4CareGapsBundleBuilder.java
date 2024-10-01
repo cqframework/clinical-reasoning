@@ -20,7 +20,6 @@ import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Composition;
@@ -77,7 +75,6 @@ public class R4CareGapsBundleBuilder {
     private final String serverBase;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4MultiMeasureService r4MultiMeasureService;
-    private final MeasurePeriodValidator measurePeriodValidator;
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
@@ -93,8 +90,6 @@ public class R4CareGapsBundleBuilder {
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MultiMeasureService = new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
-
-        this.measurePeriodValidator = measurePeriodValidator;
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(

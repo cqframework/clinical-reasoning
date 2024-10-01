@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
@@ -35,6 +38,9 @@ public class ParameterBinderTest {
         @Operation(name = "resource")
         public void resource(@OperationParam(name = "resource") IBaseResource resource) {}
 
+        @Operation(name = "encounter")
+        public void encounter(@OperationParam(name = "encounter") Encounter resource) {}
+
         @Operation(name = "resourceRequired")
         public void resourceRequired(@OperationParam(name = "resource", min = 1) IBaseResource resource) {}
 
@@ -47,7 +53,7 @@ public class ParameterBinderTest {
 
         @Operation(name = "listOfResourcesWithMin")
         public void listOfResourcesWithMin(
-                @OperationParam(name = "resources", min = 1) List<IBaseResource> resources) {}
+                @OperationParam(name = "resources", min = 2) List<IBaseResource> resources) {}
 
         @Operation(name = "string")
         public void string(@OperationParam(name = "string") StringType string) {}
@@ -62,7 +68,7 @@ public class ParameterBinderTest {
         public void listOfStringsWithMax(@OperationParam(name = "strings", max = 1) List<StringType> strings) {}
 
         @Operation(name = "listOfStringsWithMin")
-        public void listOfStringsWithMin(@OperationParam(name = "strings", min = 1) List<StringType> strings) {}
+        public void listOfStringsWithMin(@OperationParam(name = "strings", min = 2) List<StringType> strings) {}
     }
 
     private static List<Method> methods = Arrays.asList(ExampleParameters.class.getDeclaredMethods());
@@ -97,6 +103,12 @@ public class ParameterBinderTest {
         result = binder.bind(p);
         assertNull(null);
 
+        // Happy, resource not required, not set
+        p = new Parameters();
+        p.addParameter().setName("resource");
+        result = binder.bind(p);
+        assertNull(null);
+
         // Happy, resource expected, resource given
         p = new Parameters();
         var l = new Library().setId("123");
@@ -127,6 +139,26 @@ public class ParameterBinderTest {
     }
 
     @Test
+    public void encounter() {
+        var binder = firstParameterBinderOf("encounter");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("encounter", binder.name());
+
+        // Happy, resource expected, resource given
+        var p = new Parameters();
+        var enc = new Encounter().setId("123");
+        p.addParameter().setName("encounter").setResource(enc);
+        var result = binder.bind(p);
+        assertSame(enc, result);
+
+        // Error, passed a Library instead of an Encounter
+        var p2 = new Parameters();
+        p2.addParameter().setName("encounter").setResource(new Library().setId("123"));
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        assertTrue(e.getMessage().contains("type"));
+    }
+
+    @Test
     public void resourceRequired() {
         var binder = firstParameterBinderOf("resourceRequired");
         assertEquals(Type.OPERATION, binder.type());
@@ -139,14 +171,20 @@ public class ParameterBinderTest {
         var result = binder.bind(p);
         assertSame(l, result);
 
-        // Error, resource not given
+        // Error, no parameter given
         var p2 = new Parameters();
         var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("required"));
 
+        // Error, no resource given
+        var p3 = new Parameters();
+        p3.addParameter().setName("resource");
+        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        assertTrue(e.getMessage().contains("required"));
+
         // Error, nothing given
-        var e2 = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
-        assertTrue(e2.getMessage().contains("required"));
+        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
+        assertTrue(e.getMessage().contains("required"));
     }
 
     @Test
@@ -164,7 +202,13 @@ public class ParameterBinderTest {
         result = binder.bind(p);
         assertNull(null);
 
-        // Happy, value expected, value given
+        // Happy, value not required, not set
+        p = new Parameters();
+        p.addParameter().setName("string");
+        result = binder.bind(p);
+        assertNull(null);
+
+        // Happy, value type expected, value given
         var s = new StringType("123");
         p = new Parameters();
         p.addParameter().setName("string").setValue(s);
@@ -191,6 +235,65 @@ public class ParameterBinderTest {
         part2.setResource(new Library().setId("456"));
         e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p4));
         assertTrue(e.getMessage().contains("both"));
+
+        // Error, passed a date instead of a string
+        var p5 = new Parameters();
+        p5.addParameter().setName("string").setValue(new DateType("2020-01-01"));
+        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p5));
+        assertTrue(e.getMessage().contains("type"));
+    }
+
+    @Test
+    public void listOfResources() {
+        var binder = firstParameterBinderOf("listOfResources");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("resources", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("resources");
+        part.addPart().setResource(new Library().setId("456"));
+        part.addPart().setResource(new Library().setId("789"));
+        var result = binder.bind(p);
+
+        assertInstanceOf(List.class, result);
+        assertEquals(2, ((List<?>) result).size());
+
+        // Error, empty part
+        var p2 = new Parameters();
+        var part2 = p2.addParameter().setName("resources");
+        part2.addPart();
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        assertTrue(e.getMessage().contains("empty"));
+    }
+
+    @Test
+    public void listOfResourcesWithMax() {
+        var binder = firstParameterBinderOf("listOfResourcesWithMax");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("resources", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("resources");
+        part.addPart().setResource(new Library().setId("456"));
+        part.addPart().setResource(new Library().setId("789"));
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        assertTrue(e.getMessage().contains("max"));
+    }
+
+    @Test
+    public void listOfResourcesWithMin() {
+        var binder = firstParameterBinderOf("listOfResourcesWithMin");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("resources", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("resources");
+        part.addPart().setResource(new Library().setId("456"));
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        assertTrue(e.getMessage().contains("min"));
     }
 
     @Test
@@ -206,13 +309,72 @@ public class ParameterBinderTest {
         var result = binder.bind(p);
         assertSame(s, result);
 
-        // Error, string not given
+        // Error, no parameter given
         var p2 = new Parameters();
         var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("required"));
 
+        // Error, no string given
+        var p3 = new Parameters();
+        p3.addParameter().setName("string");
+        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        assertTrue(e.getMessage().contains("required"));
+
         // Error, nothing given
-        var e2 = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
-        assertTrue(e2.getMessage().contains("required"));
+        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
+        assertTrue(e.getMessage().contains("required"));
+    }
+
+    @Test
+    public void listOfStrings() {
+        var binder = firstParameterBinderOf("listOfStrings");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("strings", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("strings");
+        part.addPart().setValue(new StringType("456"));
+        part.addPart().setValue(new StringType("456"));
+        var result = binder.bind(p);
+
+        assertInstanceOf(List.class, result);
+        assertEquals(2, ((List<?>) result).size());
+
+        // Error, empty part
+        var p2 = new Parameters();
+        var part2 = p2.addParameter().setName("strings");
+        part2.addPart();
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        assertTrue(e.getMessage().contains("empty"));
+    }
+
+    @Test
+    public void listOfStringsWithMax() {
+        var binder = firstParameterBinderOf("listOfStringsWithMax");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("strings", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("strings");
+        part.addPart().setValue(new StringType("123"));
+        part.addPart().setValue(new StringType("456"));
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        assertTrue(e.getMessage().contains("max"));
+    }
+
+    @Test
+    public void listOfStringsWithMin() {
+        var binder = firstParameterBinderOf("listOfStringsWithMin");
+        assertEquals(Type.OPERATION, binder.type());
+        assertEquals("strings", binder.name());
+
+        // Happy, list of Resources expected, list of Resources given
+        var p = new Parameters();
+        var part = p.addParameter().setName("strings");
+        part.addPart().setValue(new StringType("123"));
+        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        assertTrue(e.getMessage().contains("min"));
     }
 }

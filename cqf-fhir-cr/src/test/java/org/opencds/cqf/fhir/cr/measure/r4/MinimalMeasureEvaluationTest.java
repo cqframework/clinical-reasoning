@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -600,13 +602,19 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalCohortResourceBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneOffset.UTC))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneOffset.UTC))
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
         when.then()
                 .hasReportType("Subject List")
+                .hasPeriodStart(Date.from(LocalDate.of(2024, Month.JANUARY, 1)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant()))
+                .hasPeriodEnd(Date.from(LocalDate.of(2024, Month.DECEMBER, 31)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant()))
                 .hasSubjectReference("Patient/female-1988")
                 .subjectResultsValidation()
                 .containedListHasCorrectResourceType("Encounter")

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -18,8 +19,8 @@ public interface R4MeasureEvaluatorSingle {
 
     MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,

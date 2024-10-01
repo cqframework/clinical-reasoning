@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
@@ -17,8 +18,8 @@ public interface R4MeasureEvaluatorMultiple {
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
             Endpoint contentEndpoint,

@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -324,6 +325,18 @@ public class Measure {
         public SelectedReport hasReportType(String reportType) {
             var ref = this.report().getType();
             assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
+
+        public SelectedReport hasPeriodStart(Date periodStart) {
+            var period = this.report().getPeriod();
+            assertEquals(periodStart, period.getStart());
+            return this;
+        }
+
+        public SelectedReport hasPeriodEnd(Date periodEnd) {
+            var period = this.report().getPeriod();
+            assertEquals(periodEnd, period.getEnd());
             return this;
         }
 

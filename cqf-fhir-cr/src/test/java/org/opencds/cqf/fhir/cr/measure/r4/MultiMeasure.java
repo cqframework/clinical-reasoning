@@ -10,6 +10,7 @@ import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -419,6 +420,18 @@ public class MultiMeasure {
         public SelectedMeasureReport hasReporter(String reporter) {
             var ref = this.report().getReporter().getReference();
             assertEquals(reporter, ref);
+            return this;
+        }
+
+        public SelectedMeasureReport hasPeriodStart(Date periodStart) {
+            var period = this.report().getPeriod();
+            assertEquals(periodStart, period.getStart());
+            return this;
+        }
+
+        public SelectedMeasureReport hasPeriodEnd(Date periodEnd) {
+            var period = this.report().getPeriod();
+            assertEquals(periodEnd, period.getEnd());
             return this;
         }
     }

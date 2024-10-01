@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -76,8 +77,8 @@ public class R4CollectDataService {
     private void addReports(
             R4MeasureProcessor processor,
             IdType measureId,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             Parameters parameters) {
         MeasureReport report = processor.evaluateMeasure(

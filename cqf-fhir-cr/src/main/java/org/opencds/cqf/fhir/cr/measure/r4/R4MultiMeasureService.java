@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -65,8 +66,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
             Endpoint contentEndpoint,
@@ -77,7 +78,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        measurePeriodValidator.validateParsedPeriodStartAndEnd(periodStart, periodEnd);
+        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
             // if needing to use proxy repository, override constructors
@@ -138,8 +139,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void populationMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             MeasureEvalType evalType,
             String subjectParam,
@@ -188,8 +189,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void subjectMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             MeasureEvalType evalType,
             List<String> subjects,

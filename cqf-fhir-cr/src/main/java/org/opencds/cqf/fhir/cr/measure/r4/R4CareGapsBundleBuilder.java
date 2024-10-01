@@ -94,8 +94,8 @@ public class R4CareGapsBundleBuilder {
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             List<String> statuses,
             List<IdType> measureIds) {

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertThrows;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
@@ -894,8 +896,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneOffset.UTC))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneOffset.UTC))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("Location/office")
@@ -906,7 +908,13 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
                 .hasSubjectReference("Practitioner/tester")
-                .hasReporter("Location/office");
+                .hasReporter("Location/office")
+                .hasPeriodStart(Date.from(LocalDate.of(2024, Month.JANUARY, 1)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant()))
+                .hasPeriodEnd(Date.from(LocalDate.of(2024, Month.DECEMBER, 31)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant()));
     }
 
     @Test

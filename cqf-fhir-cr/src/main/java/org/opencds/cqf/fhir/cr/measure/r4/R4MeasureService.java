@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
@@ -34,8 +35,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     @Override
     public MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,
@@ -47,7 +48,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             String productLine,
             String practitioner) {
 
-        measurePeriodValidator.validateParsedPeriodStartAndEnd(periodStart, periodEnd);
+        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());

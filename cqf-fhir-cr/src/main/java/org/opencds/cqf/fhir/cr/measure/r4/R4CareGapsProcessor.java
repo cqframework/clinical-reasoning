@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -61,8 +62,8 @@ public class R4CareGapsProcessor {
     }
 
     public Parameters getCareGapsReport(
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> statuses,
             List<IdType> measureIds,

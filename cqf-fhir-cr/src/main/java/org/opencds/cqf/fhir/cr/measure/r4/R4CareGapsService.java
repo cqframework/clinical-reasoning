@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -41,8 +42,8 @@ public class R4CareGapsService {
      *         Reports will be returned.
      */
     public Parameters getCareGapsReport(
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> statuses,
             List<IdType> measureIds,

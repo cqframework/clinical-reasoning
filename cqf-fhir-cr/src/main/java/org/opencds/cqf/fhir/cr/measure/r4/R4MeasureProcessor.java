@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,8 +54,8 @@ public class R4MeasureProcessor {
 
     public MeasureReport evaluateMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
@@ -80,8 +81,8 @@ public class R4MeasureProcessor {
 
     public MeasureReport evaluateMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
@@ -94,8 +95,8 @@ public class R4MeasureProcessor {
 
     protected MeasureReport evaluateMeasure(
             Measure measure,
-            ZonedDateTime periodStart,
-            ZonedDateTime periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,

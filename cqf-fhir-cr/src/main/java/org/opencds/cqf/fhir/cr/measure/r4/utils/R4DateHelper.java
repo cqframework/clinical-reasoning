@@ -5,20 +5,10 @@ import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
 public class R4DateHelper {
     public Interval buildMeasurementPeriodInterval(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         return new Interval(convertToDateTime(periodStart), true, convertToDateTime(periodEnd), true);
-    }
-
-    public Interval buildMeasurementPeriodInterval(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
     }
 
     public Period buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {

@@ -3,17 +3,15 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
-import java.util.Map;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
 /**
  * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
@@ -39,62 +37,57 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+    public void score(MeasureDef measureDef, MeasureReport measureReport) {
+        // Measure Def Check
+        if (measureDef == null) {
+            throw new IllegalArgumentException("MeasureDef is required in order to score a Measure.");
+        }
         // No groups to score, nothing to do.
         if (measureReport.getGroup().isEmpty()) {
             return;
         }
 
-        if (measureScoring == null || measureScoring.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
-        }
-
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            scoreGroup(getGroupMeasureScoring(mrgc, measureScoring), mrgc);
+            scoreGroup(getGroupMeasureScoring(mrgc, measureDef), mrgc);
         }
     }
 
-    protected MeasureScoring getGroupMeasureScoring(
-            MeasureReportGroupComponent mrgc, Map<GroupDef, MeasureScoring> measureScoring) {
-        if (measureScoring.size() == 1) {
-            return measureScoring.values().iterator().next();
+    protected MeasureScoring checkMissingScoringType(MeasureScoring measureScoring) {
+        if (measureScoring == null) {
+            throw new IllegalArgumentException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
         }
+        return measureScoring;
+    }
 
-        MeasureScoring measureScoringFromGroup = null;
-        // cycle through available Group Definitions to retrieve appropriate MeasureScoring
-        for (Map.Entry<GroupDef, MeasureScoring> entry : measureScoring.entrySet()) {
-            // Take only MeasureScoring available
-            // Match by group id if available
-            if (mrgc.getId() != null && entry.getKey().id() != null) {
-                if (entry.getKey().id().equals(mrgc.getId())) {
-                    measureScoringFromGroup = entry.getValue();
-                    break;
-                }
-            }
-            // Match by group's population id, subtract off totalNum and totalDen from population size
-            if (mrgc.getPopulation().size() == (entry.getKey().populations().size() - 2)) {
-                int i = 0;
-                // measureReportGroupPopulation
-                for (MeasureReportGroupPopulationComponent popId : mrgc.getPopulation()) {
-                    // get populations from groupDef
-                    for (PopulationDef popDefEntry : entry.getKey().populations()) {
-                        if (popId.getId().equals(popDefEntry.id())) {
-                            i++;
-                            break;
-                        }
-                    }
-                }
-                // Check all populations found a match
-                if (i == mrgc.getPopulation().size()) {
-                    measureScoringFromGroup = entry.getValue();
+    protected void groupHasValidId(String id) {
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately.");
+        }
+    }
+
+    protected MeasureScoring getGroupMeasureScoring(MeasureReportGroupComponent mrgc, MeasureDef measureDef) {
+        MeasureScoring groupScoringType = null;
+        // if not multi-rate, get first groupDef scoringType
+        if (measureDef.groups().size() == 1) {
+            groupScoringType = measureDef.groups().get(0).measureScoring();
+        } else {
+            // multi rate measure, match groupComponent to groupDef to extract scoringType
+            for (GroupDef groupDef : measureDef.groups()) {
+                var groupDefMeasureScoring = groupDef.measureScoring();
+                // groups must have id populated
+                groupHasValidId(mrgc.getId());
+                groupHasValidId(groupDef.id());
+                // Match by group id if available
+                // Note: Match by group's population id, was removed per cqf-measures conformance change FHIR-45423
+                // multi-rate measures must have a group.id defined to be conformant
+                if (groupDef.id().equals(mrgc.getId())) {
+                    groupScoringType = groupDefMeasureScoring;
                 }
             }
         }
-        if (measureScoringFromGroup == null) {
-            throw new IllegalArgumentException("No MeasureScoring value set");
-        }
-        return measureScoringFromGroup;
+        return checkMissingScoringType(groupScoringType);
     }
 
     protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {

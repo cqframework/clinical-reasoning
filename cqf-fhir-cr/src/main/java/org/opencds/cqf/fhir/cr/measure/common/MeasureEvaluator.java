@@ -372,13 +372,12 @@ public class MeasureEvaluator {
             throw new NullPointerException("`" + INITIALPOPULATION.getDisplay() + "`, `" + NUMERATOR.getDisplay()
                     + "`, `" + DENOMINATOR.getDisplay()
                     + "` are required Population Definitions for Measure Scoring Type: "
-                    + measureDef.scoring().get(groupDef).toCode());
+                    + groupDef.measureScoring().toCode());
         }
         // Ratio Populations Check
-        if (measureDef.scoring().get(groupDef).toCode().equals("ratio") && denominatorException != null) {
-            throw new IllegalArgumentException(
-                    "`" + DENOMINATOREXCEPTION.getDisplay() + "` are not permitted " + "for MeasureScoring type: "
-                            + measureDef.scoring().get(groupDef).toCode());
+        if (groupDef.measureScoring().toCode().equals("ratio") && denominatorException != null) {
+            throw new IllegalArgumentException("`" + DENOMINATOREXCEPTION.getDisplay() + "` are not permitted "
+                    + "for MeasureScoring type: " + groupDef.measureScoring().toCode());
         }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
@@ -469,7 +468,7 @@ public class MeasureEvaluator {
             throw new NullPointerException(
                     "`" + INITIALPOPULATION.getDisplay() + "` & `" + MEASUREPOPULATION.getDisplay()
                             + "` are required Population Definitions for Measure Scoring Type: "
-                            + measureDef.scoring().get(groupDef).toCode());
+                            + groupDef.measureScoring().toCode());
         }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
@@ -518,7 +517,7 @@ public class MeasureEvaluator {
         if (initialPopulation == null) {
             throw new NullPointerException("`" + INITIALPOPULATION.getDisplay()
                     + "` is a required Population Definition for Measure Scoring Type: "
-                    + measureDef.scoring().get(groupDef).toCode());
+                    + groupDef.measureScoring().toCode());
         }
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
@@ -534,7 +533,7 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult) {
         evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
 
-        var scoring = measureDef.scoring().get(groupDef);
+        var scoring = groupDef.measureScoring();
         switch (scoring) {
             case PROPORTION:
             case RATIO:

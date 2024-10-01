@@ -236,7 +236,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.report().addContained(r);
         }
 
-        this.measureReportScorer.score(measureDef.scoring(), bc.report());
+        this.measureReportScorer.score(measureDef, bc.report());
 
         return bc.report();
     }
@@ -343,8 +343,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add extension to group for totalDenominator and totalNumerator
-        if (bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.PROPORTION)
-                || bc.measureDef.scoring().get(groupDef).equals(MeasureScoring.RATIO)) {
+        if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
+                || groupDef.measureScoring().equals(MeasureScoring.RATIO)) {
 
             // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {

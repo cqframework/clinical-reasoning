@@ -2,12 +2,12 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -56,11 +56,11 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (!measure.getGroup().isEmpty() && groupMeasureScoringCode == null) {
             throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
         }
+        var measureLevelImpNotation = measureIsIncreaseImprovementNotation(measure);
         List<GroupDef> groups = new ArrayList<>();
-        Map<GroupDef, MeasureScoring> groupMeasureScoring = new HashMap<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            // Ids are not required on groups in dstu3
-            // checkId(group);
+            // group improvement notation
+            var groupIsIncreaseImprovementNotation = groupIsIncreaseImprovementNotation(measureLevelImpNotation, group);
 
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
@@ -101,9 +101,11 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     group.getId(),
                     null, // No code on group in dstu3
                     stratifiers,
-                    populations);
+                    populations,
+                    groupMeasureScoringCode,
+                    groupIsIncreaseImprovementNotation);
             groups.add(groupDef);
-            groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
+            // groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
         // define basis of measure
         Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();
@@ -112,7 +114,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 measure.getId(),
                 measure.getUrl(),
                 measure.getVersion(),
-                groupMeasureScoring,
                 groups,
                 sdes,
                 measureBasisDef.isBooleanBasis(measure));
@@ -164,5 +165,28 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private MeasureScoring getMeasureScoring(Measure measure) {
         return MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
+    }
+
+    private boolean isIncreaseImprovementNotation(String improvementNotationValue) {
+        return improvementNotationValue.equals(IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
+    }
+
+    public boolean measureIsIncreaseImprovementNotation(Measure measure) {
+        if (measure.hasImprovementNotation()) {
+            return isIncreaseImprovementNotation(measure.getImprovementNotation());
+        } else {
+            // default ImprovementNotation behavior
+            return true;
+        }
+    }
+
+    public boolean groupIsIncreaseImprovementNotation(
+            boolean measureImprovementNotationIsPositive, MeasureGroupComponent group) {
+        var improvementNotationExt = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        if (improvementNotationExt != null) {
+            return isIncreaseImprovementNotation(
+                    improvementNotationExt.getValue().toString());
+        }
+        return measureImprovementNotationIsPositive;
     }
 }

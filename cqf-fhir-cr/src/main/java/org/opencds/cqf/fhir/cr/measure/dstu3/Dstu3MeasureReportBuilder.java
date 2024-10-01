@@ -94,7 +94,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        this.measureReportScorer.score(measureDef.scoring(), this.report);
+        this.measureReportScorer.score(measureDef, this.report);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {

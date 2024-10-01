@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -54,7 +54,6 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -65,6 +64,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
@@ -348,21 +348,22 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
             // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-                String doc = null;
-                if (getReportPopulation(groupDef, DATEOFCOMPLIANCE) != null
-                        && !getReportPopulation(groupDef, DATEOFCOMPLIANCE)
-                                .getResources()
-                                .isEmpty()) {
-                    doc = getReportPopulation(groupDef, DATEOFCOMPLIANCE)
-                            .getResources()
-                            .iterator()
-                            .next()
-                            .toString();
+                var docPopDef = getReportPopulation(groupDef, DATEOFCOMPLIANCE);
+                if (docPopDef != null
+                        && docPopDef.getResources() != null
+                        && !docPopDef.getResources().isEmpty()) {
+                    var docValue = docPopDef.getResources().iterator().next();
+                    if (docValue != null) {
+                        assert docValue instanceof Interval;
+                        Interval docInterval = (Interval) docValue;
+
+                        var helper = new R4DateHelper();
+                        reportGroup
+                                .addExtension()
+                                .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                                .setValue(helper.buildMeasurementPeriod((docInterval)));
+                    }
                 }
-                reportGroup
-                        .addExtension()
-                        .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                        .setValue(new StringType(doc));
             }
 
             if (bc.measureDef.isBooleanBasis()) {

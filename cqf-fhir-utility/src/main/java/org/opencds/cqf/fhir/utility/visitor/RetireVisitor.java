@@ -2,15 +2,17 @@ package org.opencds.cqf.fhir.utility.visitor;
 
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.util.ArrayList;
+import java.util.Date;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
-public class WithdrawVisitor extends AbstractKnowledgeArtifactVisitor {
+public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
 
     @Override
     public IBase visit(
@@ -24,20 +26,23 @@ public class WithdrawVisitor extends AbstractKnowledgeArtifactVisitor {
         var resToUpdate = new ArrayList<IDomainResource>();
         resToUpdate.add(rootAdapter.get());
 
-        findArtifactCommentsToUpdate(rootAdapter.get(), fhirVersion.getFhirVersionString(), repository)
-                .forEach(artifact -> {
-                    var resource = BundleHelper.getEntryResource(fhirVersion, artifact);
-                    var entry = PackageHelper.deleteEntry(resource);
-                    BundleHelper.addEntry(transactionBundle, entry);
-                });
-
         var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
 
-        for (var artifact : resourcesToUpdate) {
-            var entry = PackageHelper.deleteEntry(artifact);
+        var nowDate = new Date();
+
+        for (var resource : resourcesToUpdate) {
+            var artifact = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
+                    .createKnowledgeArtifactAdapter(resource);
+            updateMetadata(artifact, nowDate);
+            var entry = PackageHelper.createEntry(artifact.get(), true);
             BundleHelper.addEntry(transactionBundle, entry);
         }
 
         return repository.transaction(transactionBundle);
+    }
+
+    private static void updateMetadata(KnowledgeArtifactAdapter artifactAdapter, Date date) {
+        artifactAdapter.setDate(date);
+        artifactAdapter.setStatus("retired");
     }
 }

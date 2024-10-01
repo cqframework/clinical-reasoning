@@ -58,9 +58,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.BaseMeasureEvaluationTest;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
@@ -94,7 +94,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any()))
                 .thenReturn(Arrays.asList(patient));
 
-        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family";
+        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family.value";
 
         Measure measure = cohort_measure();
 
@@ -124,8 +124,8 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .thenReturn(Arrays.asList(patient));
 
         String cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                + "define Denominator: 'John' in Patient.name.given\n"
+                + "define InitialPopulation: 'Doe' in Patient.name.family.value\n"
+                + "define Denominator: 'John' in Patient.name.given.value\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n";
 
         Measure measure = proportion_measure();
@@ -155,7 +155,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .thenReturn(Arrays.asList(patient));
 
         String cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+                + "define InitialPopulation: 'Doe' in Patient.name.family.value\n"
                 + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
 
         Measure measure = continuous_variable_measure();
@@ -211,8 +211,8 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .thenReturn(Arrays.asList(jane_doe()));
 
         String cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                + "define Denominator: 'John' in Patient.name.given\n"
+                + "define InitialPopulation: 'Doe' in Patient.name.family.value\n"
+                + "define Denominator: 'John' in Patient.name.given.value\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
         Measure measure = stratified_measure();

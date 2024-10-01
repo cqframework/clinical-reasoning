@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> {
 

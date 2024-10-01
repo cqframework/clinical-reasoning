@@ -5,7 +5,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
 public class R4DateHelper {
 

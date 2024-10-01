@@ -8,10 +8,10 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -176,63 +176,113 @@ interface ParameterBinder {
 
         @Override
         public Object bind(IBaseParameters parameters) {
-            if (parameters == null) {
+            if (parameters == null && operationParam.min() <= 0) {
                 return null;
+            } else if (parameters == null) {
+                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
             }
 
             var context = parameters.getStructureFhirVersionEnum().newContextCached();
             var terser = context.newTerser();
             var params = ParametersUtil.getNamedParameters(context, parameters, this.name());
-
             Parameters.removeParameter(parameters, this.name());
 
-            var defaultMax = this.parameterClass == ParameterClass.LIST ? -1 : 1;
-            var max = operationParam.max() == -2 ? defaultMax : operationParam.max();
-            if (max > 0 && params.size() > max) {
-                throw new IllegalArgumentException("Parameter " + this.name() + " has more values than allowed by max");
+            if (params.isEmpty() && operationParam.min() > 0) {
+                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
             }
 
-            if (operationParam.min() > 0 && params.size() < operationParam.min()) {
+            if (params.size() > 1) {
+                throw new IllegalArgumentException("Parameter " + this.name()
+                        + " has more than one value. Use parameter parts for multiple values");
+            }
+
+            // Not required and not present so we can return null
+            if (params.isEmpty()) {
+                return null;
+            }
+
+            // Here, we need to get either the part, the resource, or the value[x] from the parameter
+            // For list-valued parameters, we need to the value/resource from each part
+
+            // First, let's check for parts. For lists this is correct.
+            // For single-valued parameters, this is incorrect
+            var parts = terser.getValues(params.get(0), "part");
+            if (parameterClass != ParameterClass.LIST && !parts.isEmpty()) {
                 throw new IllegalArgumentException(
-                        "Parameter " + this.name() + " has fewer values than required by min");
+                        "Parameter " + this.name() + " is not the expected type " + parameter.getType());
             }
 
-            Object value = null;
-            switch (parameterClass) {
-                case LIST:
-                    value = params.stream()
-                            .map(x -> terser.getSingleValueOrNull(x, "value[x]", IBase.class))
-                            .collect(Collectors.toList());
-                    break;
-                case RESOURCE:
-                    var tempResource = !params.isEmpty()
-                            ? terser.getSingleValueOrNull(params.get(0), "resource", IBaseResource.class)
-                            : null;
-                    // We had _some_ parameters, but we didn't get a resource at the expected location
-                    if (!params.isEmpty() && tempResource == null) {
+            if (parameterClass == ParameterClass.LIST) {
+                var size = parts.size();
+                if (operationParam.min() > size) {
+                    throw new IllegalArgumentException("Parameter " + this.name()
+                            + " has fewer values than the minimum of " + operationParam.min());
+                }
+
+                if (operationParam.max() > 0 && size > operationParam.max()) {
+                    throw new IllegalArgumentException("Parameter " + this.name()
+                            + " has more values than the maximum of " + operationParam.max());
+                }
+            }
+
+            if (parameterClass == ParameterClass.LIST) {
+                var values = new ArrayList<IBase>();
+                for (var part : parts) {
+                    var r = terser.getSingleValueOrNull(part, "resource", IBaseResource.class);
+                    var v = terser.getSingleValueOrNull(part, "value[x]", IBase.class);
+
+                    if (v != null) {
+                        values.add(v);
+                    } else if (r != null) {
+                        values.add(r);
+                    } else {
                         throw new IllegalArgumentException(
-                                "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                                "Parameter " + this.name() + " has an empty part. Expected a resource or value[x]");
                     }
+                }
 
-                    value = tempResource;
-                    break;
-                case VALUE:
-                    var tempValue = !params.isEmpty()
-                            ? terser.getSingleValueOrNull(params.get(0), "value[x]", IBase.class)
-                            : null;
+                return values;
+            }
 
-                    // We had _some_ parameters, but we didn't get a resource at the expected location
-                    if (!params.isEmpty() && tempValue == null) {
-                        throw new IllegalArgumentException(
-                                "Parameter " + this.name() + " is not the expected type " + parameter.getType());
-                    }
+            var param = params.get(0);
+            IBaseResource valueResource = terser.getSingleValueOrNull(param, "resource", IBaseResource.class);
+            IBase value = terser.getSingleValueOrNull(param, "value[x]", IBase.class);
+            if (valueResource != null && value != null) {
+                throw new IllegalArgumentException(
+                        "Parameter " + this.name() + " has both a resource and a value. Only one is allowed");
+            }
 
-                    value = tempValue;
-                    break;
+            if (parameterClass == ParameterClass.RESOURCE) {
+                if (value != null) {
+                    throw new IllegalArgumentException(
+                            "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                }
+
+                if (valueResource == null && operationParam.min() > 0) {
+                    throw new IllegalArgumentException(
+                            "Parameter " + this.name() + " is required but was not provided");
+                }
+            }
+
+            if (parameterClass == ParameterClass.VALUE) {
+                if (valueResource != null) {
+                    throw new IllegalArgumentException(
+                            "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                }
+
+                if (value == null && operationParam.min() > 0) {
+                    throw new IllegalArgumentException(
+                            "Parameter " + this.name() + " is required but was not provided");
+                }
+            }
+
+            var returnValue = valueResource != null ? valueResource : value;
+            if (returnValue == null) {
+                return null;
             }
 
             try {
-                return this.parameter.getType().cast(value);
+                return this.parameter.getType().cast(returnValue);
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(
                         "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());

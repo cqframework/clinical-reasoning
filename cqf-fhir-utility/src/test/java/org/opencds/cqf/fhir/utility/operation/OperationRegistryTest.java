@@ -144,7 +144,7 @@ class OperationRegistryTest {
                 .getValue();
         assertEquals("123", id);
 
-        // Multiple resources should fail
+        // Ensure that multiple parameters of the same name are not allowed
         arguments = new Parameters();
         arguments.addParameter().setName("resource").setResource(new Library().setId("123"));
         arguments.addParameter().setName("resource").setResource(new Library().setId("456"));
@@ -152,7 +152,7 @@ class OperationRegistryTest {
         var op2 = registry.buildContext(repo, "get-id").parameters(arguments);
 
         var e = assertThrows(IllegalArgumentException.class, () -> op2.execute());
-        assertTrue(e.getMessage().contains("max"));
+        assertTrue(e.getMessage().contains("parts"));
 
         // Parameters with wrong type should fail
         arguments = new Parameters();
@@ -200,6 +200,6 @@ class OperationRegistryTest {
                 assertInstanceOf(StringType.class, results.get(0).getValue()).getValue());
         assertEquals(
                 "456",
-                assertInstanceOf(StringType.class, results.get(0).getValue()).getValue());
+                assertInstanceOf(StringType.class, results.get(1).getValue()).getValue());
     }
 }

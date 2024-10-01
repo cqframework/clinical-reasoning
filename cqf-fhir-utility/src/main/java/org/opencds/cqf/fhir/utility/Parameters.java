@@ -21,43 +21,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
  * A utility class for parameter creation and functions in clinical reasoning
  */
 public class Parameters {
-
-    public enum ParameterType {
-        VALUE,
-        RESOURCE,
-        PARTS
-    }
-
-    class ParameterValue {
-        private final ParameterType type;
-        private final Object value;
-
-        ParameterValue(ParameterType type, Object value) {
-            this.value = value;
-            this.type = type;
-        }
-
-        public ParameterType getType() {
-            return type;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public <T extends IBaseDatatype> T getValue(Class<T> type) {
-            return type.cast(value);
-        }
-
-        public <R extends IBaseResource> R getResource(Class<R> type) {
-            return type.cast(value);
-        }
-
-        public List<IBase> getParts() {
-            return (List<IBase>) value;
-        }
-    }
-
     private Parameters() {}
 
     private static BaseRuntimeChildDefinition getParameterChild(FhirContext fhirContext) {

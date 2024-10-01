@@ -5,8 +5,16 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import java.time.ZonedDateTime;
 
 public class R4DateHelper {
+    public Interval buildMeasurementPeriodInterval(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+        return new Interval(
+            convertToDateTime(periodStart),
+            true,
+            convertToDateTime(periodEnd),
+            true);
+    }
 
     public Interval buildMeasurementPeriodInterval(String periodStart, String periodEnd) {
         // resolve the measurement period
@@ -17,7 +25,7 @@ public class R4DateHelper {
                 true);
     }
 
-    public Period buildMeasurementPeriod(String periodStart, String periodEnd) {
+    public Period buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         Interval measurementPeriod = buildMeasurementPeriodInterval(periodStart, periodEnd);
         return buildMeasurementPeriod(measurementPeriod);
     }
@@ -38,5 +46,9 @@ public class R4DateHelper {
             throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
         }
         return period;
+    }
+
+    private DateTime convertToDateTime(ZonedDateTime zonedDateTime) {
+        return new DateTime(zonedDateTime.toOffsetDateTime());
     }
 }

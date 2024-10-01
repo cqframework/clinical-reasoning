@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -89,6 +91,7 @@ public class CareGaps {
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
+        private final MeasurePeriodValidator measurePeriodEvaluator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -109,6 +112,7 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.careGapsProperties.setMyFhirBaseUrl(this.serverBase);
+            this.measurePeriodEvaluator = new MeasurePeriodValidator();
         }
 
         public CareGaps.Given repository(Repository repository) {
@@ -134,7 +138,7 @@ public class CareGaps {
         }
 
         private R4CareGapsService buildCareGapsService() {
-            return new R4CareGapsService(careGapsProperties, repository, evaluationOptions, serverBase);
+            return new R4CareGapsService(careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
         }
 
         public When when() {
@@ -150,8 +154,8 @@ public class CareGaps {
             this.service = service;
         }
 
-        private IPrimitiveType<Date> periodStart;
-        private IPrimitiveType<Date> periodEnd;
+        private ZonedDateTime periodStart;
+        private ZonedDateTime periodEnd;
         private String subject;
         private List<String> statuses = new ArrayList<>();
         private List<IdType> measureIds = new ArrayList<>();
@@ -159,13 +163,13 @@ public class CareGaps {
         private List<CanonicalType> measureUrls = new ArrayList<>();
         private Supplier<Parameters> operation;
 
-        public CareGaps.When periodEnd(String periodEnd) {
-            this.periodEnd = new DateType(periodEnd);
+        public CareGaps.When periodEnd(ZonedDateTime periodEnd) {
+            this.periodEnd = periodEnd;
             return this;
         }
 
-        public CareGaps.When periodStart(String periodStart) {
-            this.periodStart = new DateType(periodStart);
+        public CareGaps.When periodStart(ZonedDateTime periodStart) {
+            this.periodStart = periodStart;
             return this;
         }
 

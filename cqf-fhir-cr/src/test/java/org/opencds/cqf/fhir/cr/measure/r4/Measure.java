@@ -12,11 +12,13 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import net.sf.saxon.expr.Component.M;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -38,6 +40,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
@@ -91,6 +94,7 @@ public class Measure {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
+        private MeasurePeriodValidator measurePeriodValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -104,6 +108,8 @@ public class Measure {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.measurePeriodValidator = new MeasurePeriodValidator();
         }
 
         public Given repository(Repository repository) {
@@ -129,7 +135,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
         }
 
         public When when() {
@@ -146,8 +152,8 @@ public class Measure {
         }
 
         private String measureId;
-        private String periodStart;
-        private String periodEnd;
+        private ZonedDateTime periodStart;
+        private ZonedDateTime periodEnd;
         private List<String> subjectIds;
         private String subject;
         private String reportType;
@@ -163,12 +169,12 @@ public class Measure {
             return this;
         }
 
-        public When periodEnd(String periodEnd) {
+        public When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
         }
 
-        public When periodStart(String periodStart) {
+        public When periodStart(ZonedDateTime periodStart) {
             this.periodStart = periodStart;
             return this;
         }

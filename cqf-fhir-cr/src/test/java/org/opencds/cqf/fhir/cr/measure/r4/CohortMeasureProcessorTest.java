@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 
 class CohortMeasureProcessorTest {
 
@@ -11,8 +14,8 @@ class CohortMeasureProcessorTest {
     void seenPatients_singlePatient() {
         given.when()
                 .measureId("SeenPatients")
-                .periodStart("2019-01-01")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/ip-SeenPatients")
                 .reportType("subject")
                 .evaluate()

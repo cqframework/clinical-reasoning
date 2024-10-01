@@ -2,7 +2,10 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -15,8 +18,8 @@ class MeasureProcessorSdeSanityTest {
     void measure_eval_unique_extension_list() {
         given.when()
                 .measureId("DM1Measure")
-                .periodStart("2020-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/DM1-patient-1")
                 .reportType("subject")
                 .evaluate()

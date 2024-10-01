@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.CollectData.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 
 class CollectDataTest {
 
@@ -10,8 +13,8 @@ class CollectDataTest {
         Given given = CollectData.given().repositoryFor("CaseRepresentation101");
         given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
                 .collectData()
                 .then()
@@ -29,8 +32,8 @@ class CollectDataTest {
         CollectData.Given given = CollectData.given().repositoryFor("CaseRepresentation101");
         given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault()))
                 .collectData()
                 .then()
                 .hasParameterCount(16)
@@ -43,8 +46,8 @@ class CollectDataTest {
         CollectData.Given given = CollectData.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
-                .periodStart("2019-01-01")
-                .periodEnd("2020-01-01")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/numer-EXM104")
                 .collectData()
                 .then()
@@ -61,8 +64,8 @@ class CollectDataTest {
         CollectData.Given given = CollectData.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");
         given.when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
-                .periodStart("2019-01-01")
-                .periodEnd("2020-01-01")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
                 .collectData()
                 .then()
                 .hasParameterCount(18)
@@ -76,8 +79,8 @@ class CollectDataTest {
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
                 .practitioner("Practitioner/tester")
-                .periodStart("2019-01-01")
-                .periodEnd("2020-01-01")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
                 .collectData()
                 .then()
                 .hasParameterCount(2)
@@ -91,8 +94,8 @@ class CollectDataTest {
         given.when()
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
                 .practitioner("Practitioner/empty")
-                .periodStart("2019-01-01")
-                .periodEnd("2020-01-01")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
                 .collectData()
                 .then()
                 .hasParameterCount(1)

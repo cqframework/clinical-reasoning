@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
@@ -40,23 +42,26 @@ public class R4CareGapsProcessor {
     private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
+    private final MeasurePeriodValidator measurePeriodValidator;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            String serverBase) {
+            String serverBase,
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
-                careGapsProperties, repository, measureEvaluationOptions, serverBase, configuredResources);
+                careGapsProperties, repository, measureEvaluationOptions, serverBase, configuredResources, measurePeriodValidator);
+        this.measurePeriodValidator = measurePeriodValidator;
     }
 
     public Parameters getCareGapsReport(
-            IPrimitiveType<Date> periodStart,
-            IPrimitiveType<Date> periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String subject,
             List<String> statuses,
             List<IdType> measureIds,

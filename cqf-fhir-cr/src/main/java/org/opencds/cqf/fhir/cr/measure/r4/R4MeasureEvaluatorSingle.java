@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import java.time.ZonedDateTime;
 
 /**
  * Interface for {@link R4MeasureService} and any other concrete classes that implement the same
@@ -17,8 +18,8 @@ public interface R4MeasureEvaluatorSingle {
 
     MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
-            String periodStart,
-            String periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,

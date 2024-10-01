@@ -4,6 +4,9 @@ import static org.junit.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 
 class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
@@ -15,8 +18,8 @@ class MultiMeasureServiceTest {
                 .measureIdentifier("test123")
                 .measureIdentifier("124")
                 .measureIdentifier("test126")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .evaluate();
 
@@ -35,8 +38,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .evaluate();
 
@@ -184,8 +187,8 @@ class MultiMeasureServiceTest {
                 .measureUrl("http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .evaluate();
 
@@ -333,8 +336,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .evaluate();
 
@@ -366,8 +369,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .subject("Group/group-patients-1")
                 .evaluate();
@@ -400,8 +403,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .subject("Group/group-practitioners-1")
                 .evaluate();
@@ -434,8 +437,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .subject("Practitioner/tester")
                 .evaluate();
@@ -468,8 +471,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -640,8 +643,8 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                 .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject-list")
                 .subject("Patient/female-1988")
                 .evaluate();
@@ -815,8 +818,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .evaluate();
@@ -851,8 +854,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("Practitioner/empty")
@@ -871,8 +874,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("PractitionerRole/test")
@@ -891,8 +894,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("Location/office")
@@ -911,8 +914,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("Organization/payer")
@@ -931,8 +934,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("payer")
@@ -951,8 +954,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter(null)
@@ -971,8 +974,8 @@ class MultiMeasureServiceTest {
         var when = GIVEN_REPO
                 .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
-                .periodStart("2024-01-01")
-                .periodEnd("2024-12-31")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("population")
                 .subject("Practitioner/tester")
                 .reporter("Patient/male-2022")

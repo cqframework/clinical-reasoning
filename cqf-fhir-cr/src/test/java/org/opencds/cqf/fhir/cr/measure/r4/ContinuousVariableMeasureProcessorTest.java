@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 
 class ContinuousVariableMeasureProcessorTest {
 
@@ -11,8 +14,8 @@ class ContinuousVariableMeasureProcessorTest {
     void cms111_singlePatient() {
         given.when()
                 .measureId("CMS111")
-                .periodStart("2019-01-01")
-                .periodEnd("2020-01-01")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2020, Month.JANUARY, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/measure-strat1-EXM111")
                 .reportType("subject")
                 .evaluate()

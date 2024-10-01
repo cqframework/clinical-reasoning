@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.benchmark;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -46,8 +49,8 @@ public class Measures {
                 .when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
                 .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault()))
                 .reportType("subject")
                 .evaluate();
     }

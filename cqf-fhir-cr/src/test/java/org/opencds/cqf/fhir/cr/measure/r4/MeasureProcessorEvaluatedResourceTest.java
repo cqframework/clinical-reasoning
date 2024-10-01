@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -14,8 +17,8 @@ class MeasureProcessorEvaluatedResourceTest {
     void measure_eval_contained_is_unique() {
         var report = given.when()
                 .measureId("HTN1Measure")
-                .periodStart("2020-08-16")
-                .periodEnd("2022-08-16")
+                .periodStart(LocalDate.of(2020, Month.AUGUST, 16).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.AUGUST, 16).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/HTN1-patient-1")
                 .reportType("subject")
                 .evaluate()

@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 
 class SimpleMeasureProcessorTest {
 
@@ -15,8 +18,8 @@ class SimpleMeasureProcessorTest {
     void exm108_partialSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("numer-EXM108")
                 .reportType("subject")
                 .evaluate()
@@ -30,8 +33,8 @@ class SimpleMeasureProcessorTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("denom-EXM108")
                 .reportType("subject")
                 .evaluate()
@@ -48,8 +51,8 @@ class SimpleMeasureProcessorTest {
     void exm108_fullSubjectId() {
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/numer-EXM108")
                 .reportType("subject")
                 .evaluate()
@@ -64,8 +67,8 @@ class SimpleMeasureProcessorTest {
 
         given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/denom-EXM108")
                 .reportType("subject")
                 .evaluate()
@@ -84,8 +87,8 @@ class SimpleMeasureProcessorTest {
         // This bundle has two patients, a numerator and denominator
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .reportType("population")
                 .evaluate()
                 .then()
@@ -111,8 +114,8 @@ class SimpleMeasureProcessorTest {
         // This default behavior if no type or subject is specified is "population"
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -137,8 +140,8 @@ class SimpleMeasureProcessorTest {
         // This default behavior if no type is specified is "individual"
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/numer-EXM108")
                 .evaluate()
                 .then()
@@ -160,8 +163,8 @@ class SimpleMeasureProcessorTest {
     void exm108_singlePatient_hasMetadata() {
         var report = given.when()
                 .measureId("measure-EXM108-8.3.000")
-                .periodStart("2018-12-31")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2018, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/numer-EXM108")
                 .reportType("subject")
                 .evaluate()

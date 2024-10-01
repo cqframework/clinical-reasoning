@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -53,8 +53,8 @@ public class R4MeasureProcessor {
 
     public MeasureReport evaluateMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
-            String periodStart,
-            String periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
@@ -80,8 +80,8 @@ public class R4MeasureProcessor {
 
     public MeasureReport evaluateMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
-            String periodStart,
-            String periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
@@ -94,8 +94,8 @@ public class R4MeasureProcessor {
 
     protected MeasureReport evaluateMeasure(
             Measure measure,
-            String periodStart,
-            String periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
@@ -108,7 +108,7 @@ public class R4MeasureProcessor {
         }
 
         Interval measurementPeriod = null;
-        if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
+        if (periodStart != null && periodEnd != null) {
             var helper = new R4DateHelper();
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }

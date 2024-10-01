@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -33,6 +34,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -85,6 +87,7 @@ public class MultiMeasure {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
+        private MeasurePeriodValidator measurePeriodValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -100,6 +103,8 @@ public class MultiMeasure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.serverBase = "http://localhost";
+
+            this.measurePeriodValidator = new MeasurePeriodValidator();
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -129,7 +134,7 @@ public class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase);
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public MultiMeasure.When when() {
@@ -148,8 +153,8 @@ public class MultiMeasure {
         private List<IdType> measureId = new ArrayList<>();
         private List<String> measureUrl = new ArrayList<>();
         private List<String> measureIdentifier = new ArrayList<>();
-        private String periodStart;
-        private String periodEnd;
+        private ZonedDateTime periodStart;
+        private ZonedDateTime periodEnd;
         private List<String> subjectIds;
         private String subject;
         private String reportType;
@@ -175,12 +180,12 @@ public class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.When periodEnd(String periodEnd) {
+        public MultiMeasure.When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
         }
 
-        public MultiMeasure.When periodStart(String periodStart) {
+        public MultiMeasure.When periodStart(ZonedDateTime periodStart) {
             this.periodStart = periodStart;
             return this;
         }

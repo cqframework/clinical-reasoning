@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -28,8 +31,8 @@ class MeasureProcessorEvaluateTest {
     @Test
     void measure_eval() {
 
-        var start = "2022-01-01";
-        var end = "2022-06-29";
+        var start = LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault());
+        var end = LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault());
         var helper = new R4DateHelper();
         var measurementPeriod = helper.buildMeasurementPeriod(start, end);
         var report = given.when()
@@ -58,8 +61,8 @@ class MeasureProcessorEvaluateTest {
                         MeasureProcessorEvaluateTest.class.getResourceAsStream("CaseRepresentation101/generated.json"));
         var report = given.when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-01-31")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JANUARY, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
                 .additionalData(additionalData)
                 .evaluate()
@@ -79,8 +82,8 @@ class MeasureProcessorEvaluateTest {
                 .when()
                 .measureId("ANCIND01")
                 .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
-                .periodStart("2018-01-01")
-                .periodEnd("2030-12-31")
+                .periodStart(LocalDate.of(2018, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2030, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .evaluate();
         MeasureReport report = when.then().report();
@@ -113,8 +116,8 @@ class MeasureProcessorEvaluateTest {
                 .when()
                 .measureId("ANCIND01")
                 .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
-                .periodStart("2018-01-01")
-                .periodEnd("2030-12-31")
+                .periodStart(LocalDate.of(2018, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2030, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .parameters(Parameters.parameters(Parameters.part("encounter", "2d0ecfb4-9dec-4daa-a261-e37e426d0d7b")))
                 .evaluate();
@@ -145,8 +148,8 @@ class MeasureProcessorEvaluateTest {
                 .when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
                 .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-06-29")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("subject")
                 .evaluate();
 
@@ -181,8 +184,8 @@ class MeasureProcessorEvaluateTest {
                 .evaluationOptions(evaluationOptions)
                 .when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-01-31")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JANUARY, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
                 .additionalData(additionalData)
                 .evaluate();
@@ -203,8 +206,8 @@ class MeasureProcessorEvaluateTest {
                 .when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
                 .subject(null)
-                .periodStart("2018-01-01")
-                .periodEnd("2030-12-31")
+                .periodStart(LocalDate.of(2018, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2030, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("summary")
                 .evaluate();
         MeasureReport report = when.then().report();
@@ -221,8 +224,8 @@ class MeasureProcessorEvaluateTest {
                 .when()
                 .measureId("DischargedonAntithromboticTherapyFHIR")
                 .subject(null)
-                .periodStart("2018-01-01")
-                .periodEnd("2030-12-31")
+                .periodStart(LocalDate.of(2018, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2030, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .reportType("summary")
                 .evaluate();
 

@@ -89,12 +89,13 @@ public class R4CareGapsBundleBuilder {
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService = new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
+        r4MultiMeasureService =
+                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
             ZonedDateTime periodStart,
-            ZonedDateTime  periodEnd,
+            ZonedDateTime periodEnd,
             List<String> subjects,
             List<String> statuses,
             List<IdType> measureIds) {

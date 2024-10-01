@@ -52,7 +52,12 @@ public class R4CareGapsProcessor {
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
-                careGapsProperties, repository, measureEvaluationOptions, serverBase, configuredResources, measurePeriodValidator);
+                careGapsProperties,
+                repository,
+                measureEvaluationOptions,
+                serverBase,
+                configuredResources,
+                measurePeriodValidator);
     }
 
     public Parameters getCareGapsReport(

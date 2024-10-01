@@ -2,11 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.Assert.assertThrows;
 
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");

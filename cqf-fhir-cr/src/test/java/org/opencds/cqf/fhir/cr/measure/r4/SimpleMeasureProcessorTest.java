@@ -3,12 +3,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 class SimpleMeasureProcessorTest {
 

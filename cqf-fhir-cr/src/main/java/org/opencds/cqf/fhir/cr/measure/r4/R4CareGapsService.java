@@ -23,8 +23,8 @@ public class R4CareGapsService {
             String serverBase,
             MeasurePeriodValidator measurePeriodEvalutator) {
 
-        r4CareGapsProcessor =
-                new R4CareGapsProcessor(careGapsProperties, repository, measureEvaluationOptions, serverBase, measurePeriodEvalutator);
+        r4CareGapsProcessor = new R4CareGapsProcessor(
+                careGapsProperties, repository, measureEvaluationOptions, serverBase, measurePeriodEvalutator);
     }
 
     /**
@@ -42,7 +42,7 @@ public class R4CareGapsService {
      */
     public Parameters getCareGapsReport(
             ZonedDateTime periodStart,
-            ZonedDateTime  periodEnd,
+            ZonedDateTime periodEnd,
             String subject,
             List<String> statuses,
             List<IdType> measureIds,

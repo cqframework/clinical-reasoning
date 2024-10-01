@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 class CohortMeasureProcessorTest {
 

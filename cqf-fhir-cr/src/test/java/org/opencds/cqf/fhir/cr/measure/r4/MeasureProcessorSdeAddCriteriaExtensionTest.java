@@ -2,14 +2,14 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 
 class MeasureProcessorSdeAddCriteriaExtensionTest {
 

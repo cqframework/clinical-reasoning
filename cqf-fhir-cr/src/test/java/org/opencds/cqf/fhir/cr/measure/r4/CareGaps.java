@@ -12,17 +12,14 @@ import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DetectedIssue;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -138,7 +135,8 @@ public class CareGaps {
         }
 
         private R4CareGapsService buildCareGapsService() {
-            return new R4CareGapsService(careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
+            return new R4CareGapsService(
+                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
         }
 
         public When when() {

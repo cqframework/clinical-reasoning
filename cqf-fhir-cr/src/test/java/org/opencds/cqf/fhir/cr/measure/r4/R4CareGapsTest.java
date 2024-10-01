@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
 import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
 
 class R4CareGapsTest {
     private static final Given given = CareGaps.given().repositoryFor("BreastCancerScreeningFHIR");
@@ -20,8 +20,8 @@ class R4CareGapsTest {
     void exm125_careGaps_closedGap() {
         given.when()
                 .subject("Patient/numer-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .measureIds("BreastCancerScreeningFHIR")
@@ -53,8 +53,8 @@ class R4CareGapsTest {
     void exm125_careGaps_openGap() {
         given.when()
                 .subject("Patient/denom-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .measureIds("BreastCancerScreeningFHIR")
@@ -86,8 +86,8 @@ class R4CareGapsTest {
     void exm125_careGaps_NA() {
         given.when()
                 .subject("Patient/neg-denom-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("not-applicable")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -120,8 +120,8 @@ class R4CareGapsTest {
     void exm125_careGaps_group() {
         given.when()
                 .subject("Group/exm125-group")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .measureIds("BreastCancerScreeningFHIR")
@@ -173,8 +173,8 @@ class R4CareGapsTest {
     void exm125_careGaps_twoMeasuresById() {
         given.when()
                 .subject("Patient/numer-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .statuses("not-applicable")
@@ -192,8 +192,8 @@ class R4CareGapsTest {
     void exm125_careGaps_twoMeasuresByUrl() {
         given.when()
                 .subject("Patient/numer-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .statuses("not-applicable")
@@ -211,8 +211,8 @@ class R4CareGapsTest {
     void exm125_careGaps_twoMeasuresByUrlAndId() {
         given.when()
                 .subject("Patient/numer-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .statuses("not-applicable")
@@ -231,8 +231,11 @@ class R4CareGapsTest {
         try {
             given.when()
                     .subject("Patient/numer-EXM124")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .statuses("closed-gap")
                     .statuses("open-gap")
                     .measureIds("BreastCancerScreeningFHIR")
@@ -249,8 +252,11 @@ class R4CareGapsTest {
         assertThrows(ResourceNotFoundException.class, () -> {
             given.when()
                     .subject("Patient/numer-EXM125")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .statuses("closed-gap")
                     .statuses("open-gap")
                     .measureIds("BreastCancerScreeningFHI")
@@ -264,8 +270,11 @@ class R4CareGapsTest {
         assertThrows(InvalidInterval.class, () -> {
             given.when()
                     .subject("Patient/numer-EXM125")
-                    .periodStart(LocalDate.of(2020,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .statuses("closed-gap")
                     .statuses("open-gap")
                     .measureIds("BreastCancerScreeningFHIR")
@@ -279,8 +288,11 @@ class R4CareGapsTest {
         try {
             given.when()
                     .subject("Patient/numer-EXM125")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .statuses("closed-ga")
                     .statuses("open-gap")
                     .measureIds("BreastCancerScreeningFHIR")
@@ -298,8 +310,11 @@ class R4CareGapsTest {
         assertThrows(RuntimeException.class, () -> {
             given.when()
                     .subject("Patient/numer-EXM125")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("BreastCancerScreeningFHIR")
                     .getCareGapsReport()
                     .then();
@@ -311,8 +326,8 @@ class R4CareGapsTest {
         given.when()
                 .measureIdentifiers("80366f35-e0a0-4ba7-a746-ad5760b79e01")
                 .subject("Patient/numer-EXM125")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .statuses("closed-gap")
                 .statuses("open-gap")
                 .getCareGapsReport()
@@ -343,8 +358,11 @@ class R4CareGapsTest {
         try {
             given.when()
                     .subject("Patient/numer-EXM126") // invalid
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("BreastCancerScreeningFHIR")
                     .statuses("open-gap")
                     .getCareGapsReport()
@@ -360,8 +378,11 @@ class R4CareGapsTest {
         try {
             given.when()
                     .subject("Group/numer-EXM126") // invalid
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("BreastCancerScreeningFHIR")
                     .statuses("closed-gap")
                     .getCareGapsReport()
@@ -376,8 +397,8 @@ class R4CareGapsTest {
     void exm125_careGaps_Practitioner() {
         given.when()
                 .subject("Practitioner/error")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("BreastCancerScreeningFHIR")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -392,8 +413,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/female-1988")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroup")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -408,8 +429,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/female-1988") // invalid
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroupGroupScoringDef")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -422,8 +443,8 @@ class R4CareGapsTest {
     void ProportionBooleanBasisSingleGroup_All_Subjects() {
         GIVEN_REPO
                 .when()
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroup")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -438,8 +459,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Group/group-practitioners-1")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroup")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -454,8 +475,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Practitioner/tester")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalRatioBooleanBasisSingleGroup")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -471,8 +492,11 @@ class R4CareGapsTest {
             GIVEN_REPO
                     .when()
                     .subject("Practitioner/tester")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("MinimalCohortResourceBasisSingleGroup")
                     .statuses("closed-gap")
                     .statuses("open-gap")
@@ -493,8 +517,11 @@ class R4CareGapsTest {
         try {
             GIVEN_REPO
                     .when()
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("MinimalContinuousVariableBooleanBasisSingleGroup")
                     .statuses("closed-gap")
                     .statuses("open-gap")
@@ -518,8 +545,11 @@ class R4CareGapsTest {
             GIVEN_REPO
                     .when()
                     .subject("Patient/female-1988")
-                    .periodStart(LocalDate.of(2024,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2024,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("MinimalProportionResourceBasisSingleGroup")
                     .statuses("closed-gap")
                     .statuses("open-gap")
@@ -540,8 +570,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/female-1988")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisMultiGroup")
                 .statuses("closed-gap")
                 .statuses("open-gap")
@@ -558,8 +588,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/female-1988")
-                .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisMultiGroupDifferentStatus")
                 .statuses("closed-gap")
                 .getCareGapsReport()
@@ -576,8 +606,11 @@ class R4CareGapsTest {
             GIVEN_REPO
                     .when()
                     .subject("Patient/female-1988")
-                    .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
                     .measureIds("MinimalProportionBooleanBasisMultiGroupNoGroupId")
                     .statuses("closed-gap")
                     .statuses("open-gap")
@@ -601,8 +634,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/male-2022")
-                .periodStart(LocalDate.of(2024,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .periodEnd(LocalDate.of(2024,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroupWithDOC")
                 .statuses("prospective-gap")
                 .getCareGapsReport()

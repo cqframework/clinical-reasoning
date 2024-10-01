@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.hl7.fhir.r4.model.Encounter;
@@ -27,7 +28,7 @@ public class ParametersTest {
         ppc.addPart().setValue(new StringType("valueOne"));
         ppc.addPart().setValue(new StringType("valueTwo"));
 
-        org.opencds.cqf.fhir.utility.Parameters.removeParameter(parameters, "bubba");
+        org.opencds.cqf.fhir.utility.Parameters.removeParameter(parameters, "one");
 
         assertTrue(parameters.isEmpty());
     }
@@ -40,7 +41,7 @@ public class ParametersTest {
 
         org.opencds.cqf.fhir.utility.Parameters.removeParameter(parameters, "one");
 
-        assertTrue(parameters.getParameter("two") != null);
+        assertNotNull(parameters.getParameter("two"));
     }
 
     @Test

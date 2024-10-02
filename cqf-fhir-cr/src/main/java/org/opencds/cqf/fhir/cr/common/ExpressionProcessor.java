@@ -29,7 +29,7 @@ public class ExpressionProcessor {
      * @return
      */
     public List<IBase> getExpressionResultForItem(
-            IOperationRequest request, CqfExpression expression, String itemLinkId) {
+            ICqlOperationRequest request, CqfExpression expression, String itemLinkId) {
         if (expression == null) {
             return new ArrayList<>();
         }
@@ -49,7 +49,7 @@ public class ExpressionProcessor {
      * @param expression CqfExpression to evaluate
      * @return
      */
-    public List<IBase> getExpressionResult(IOperationRequest request, CqfExpression expression) {
+    public List<IBase> getExpressionResult(ICqlOperationRequest request, CqfExpression expression) {
         var result = request.getLibraryEngine()
                 .resolveExpression(
                         request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData());
@@ -67,7 +67,7 @@ public class ExpressionProcessor {
      * @return
      */
     public List<IBase> getExpressionResult(
-            IOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
+            ICqlOperationRequest request, CqfExpression expression, IBaseParameters parameters) {
         return request
                 .getLibraryEngine()
                 .resolveExpression(request.getSubjectId().getIdPart(), expression, parameters, request.getData())

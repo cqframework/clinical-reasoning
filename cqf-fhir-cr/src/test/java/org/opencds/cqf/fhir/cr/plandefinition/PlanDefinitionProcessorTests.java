@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -42,12 +43,14 @@ class PlanDefinitionProcessorTests {
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
         var packageProcessor = new PackageProcessor(repository);
+        var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
+                dataRequirementsProcessor,
                 activityProcessor,
                 requestResolverFactory);
         assertNotNull(processor.evaluationSettings());

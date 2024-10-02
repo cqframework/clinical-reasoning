@@ -139,6 +139,7 @@ public class ApplyProcessor implements IApplyProcessor {
                                     version.concat(String.format("-%s-%s", subject, formatter.format(new Date())))));
         }
         request.setQuestionnaire(questionnaire);
+        request.addCqlLibraryExtension();
         extractQuestionnaireResponse(request);
     }
 
@@ -155,6 +156,7 @@ public class ApplyProcessor implements IApplyProcessor {
                 try {
                     var extractBundle = extractProcessor.extract(
                             Eithers.forRight(questionnaireResponse),
+                            null,
                             request.getParameters(),
                             request.getData(),
                             request.getUseServerData(),

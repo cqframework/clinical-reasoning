@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -108,7 +109,7 @@ public class TestLibrary {
 
         private String subjectId;
         private List<String> expression;
-        private Boolean useServerData;
+        private boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
         private Repository terminologyRepository;
@@ -138,7 +139,7 @@ public class TestLibrary {
             return this;
         }
 
-        public When useServerData(Boolean value) {
+        public When useServerData(boolean value) {
             useServerData = value;
             return this;
         }
@@ -204,6 +205,11 @@ public class TestLibrary {
             }
         }
 
+        public DataRequirementsLibrary thenDataRequirements() {
+            return new DataRequirementsLibrary(processor.dataRequirements(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)), parameters));
+        }
+
         public Evaluation thenEvaluate() {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
@@ -217,7 +223,7 @@ public class TestLibrary {
                             parameters,
                             useServerData,
                             additionalData,
-                            parameters,
+                            null,
                             dataRepository,
                             contentRepository,
                             terminologyRepository));

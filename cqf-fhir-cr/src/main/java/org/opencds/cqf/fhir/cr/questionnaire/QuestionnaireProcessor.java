@@ -20,6 +20,8 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -44,6 +46,7 @@ public class QuestionnaireProcessor {
     protected Repository repository;
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
 
     public QuestionnaireProcessor(Repository repository) {
@@ -51,7 +54,7 @@ public class QuestionnaireProcessor {
     }
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null);
+        this(repository, evaluationSettings, null, null, null, null);
     }
 
     public QuestionnaireProcessor(
@@ -59,6 +62,7 @@ public class QuestionnaireProcessor {
             EvaluationSettings evaluationSettings,
             IGenerateProcessor generateProcessor,
             IPackageProcessor packageProcessor,
+            IDataRequirementsProcessor dataRequirementsProcessor,
             IPopulateProcessor populateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
@@ -68,6 +72,7 @@ public class QuestionnaireProcessor {
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.generateProcessor = generateProcessor;
         this.packageProcessor = packageProcessor;
+        this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.populateProcessor = populateProcessor;
     }
 
@@ -198,6 +203,18 @@ public class QuestionnaireProcessor {
     public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, IBaseParameters parameters) {
         var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
         return processor.packageResource(questionnaire, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> questionnaire, IBaseParameters parameters) {
+        return dataRequirements(resolveQuestionnaire(questionnaire), parameters);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource questionnaire, IBaseParameters parameters) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository);
+        return processor.getDataRequirements(questionnaire, parameters);
     }
 
     public PopulateRequest buildPopulateRequest(

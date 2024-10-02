@@ -7,9 +7,9 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -34,9 +34,14 @@ public class LibraryProcessorTests {
         var repository =
                 new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
+        var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
-        var processor =
-                new LibraryProcessor(repository, EvaluationSettings.getDefault(), packageProcessor, evaluateProcessor);
+        var processor = new LibraryProcessor(
+                repository,
+                EvaluationSettings.getDefault(),
+                packageProcessor,
+                dataRequirementsProcessor,
+                evaluateProcessor);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));
@@ -79,10 +84,37 @@ public class LibraryProcessorTests {
     }
 
     @Test
-    void evaluateException() {
+    void dataRequirementsDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(29);
+    }
+
+    @Test
+    void dataRequirementsR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void dataRequirementsR5() {
         given().repositoryFor(fhirContextR5, "r5")
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void evaluateException() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("BadLibrary")
                 .subjectId("OPA-Patient1")
                 .thenEvaluate()
                 .hasOperationOutcome();
@@ -109,13 +141,12 @@ public class LibraryProcessorTests {
     }
 
     @Test
-    @Disabled("R5 CQL evaluation currently fails")
     void evaluateR5() {
         given().repositoryFor(fhirContextR5, "r5")
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .subjectId("OPA-Patient1")
                 .thenEvaluate()
-                .hasResults(47);
+                .hasResults(48);
     }
 }

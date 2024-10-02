@@ -31,7 +31,7 @@ public class ProcessItemWithContext extends ProcessItem {
         this(new ExpressionProcessor());
     }
 
-    private ProcessItemWithContext(ExpressionProcessor expressionProcessor) {
+    public ProcessItemWithContext(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 

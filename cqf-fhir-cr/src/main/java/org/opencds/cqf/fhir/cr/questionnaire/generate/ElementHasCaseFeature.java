@@ -34,7 +34,7 @@ public class ElementHasCaseFeature {
         switch (fhirVersion) {
             case R4:
                 var r4Expression = new org.hl7.fhir.r4.model.Expression()
-                        .setLanguage("text/cql.expression")
+                        .setLanguage("text/cql-expression")
                         .setExpression(expression)
                         .setName(name);
                 if (StringUtils.isNotBlank(libraryRef)) {
@@ -43,7 +43,7 @@ public class ElementHasCaseFeature {
                 return r4Expression;
             case R5:
                 var r5Expression = new org.hl7.fhir.r4.model.Expression()
-                        .setLanguage("text/cql.expression")
+                        .setLanguage("text/cql-expression")
                         .setExpression(expression)
                         .setName(name);
                 if (StringUtils.isNotBlank(libraryRef)) {

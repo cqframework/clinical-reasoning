@@ -13,15 +13,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.common.IOperationRequest;
+import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 
-public class EvaluateRequest implements IOperationRequest {
+public class EvaluateRequest implements ICqlOperationRequest {
     private final IBaseResource library;
     private final IIdType subjectId;
     private final Set<String> expression;
     private final IBaseParameters parameters;
-    private final Boolean useServerData;
+    private final boolean useServerData;
     private final IBaseBundle data;
+    private final List<? extends IBaseParameters> prefetchData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -32,8 +33,9 @@ public class EvaluateRequest implements IOperationRequest {
             IIdType subjectId,
             List<String> expression,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
+            List<? extends IBaseParameters> prefetchData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
@@ -44,6 +46,7 @@ public class EvaluateRequest implements IOperationRequest {
         this.parameters = parameters;
         this.useServerData = useServerData;
         this.data = data;
+        this.prefetchData = prefetchData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion = library.getStructureFhirVersionEnum();

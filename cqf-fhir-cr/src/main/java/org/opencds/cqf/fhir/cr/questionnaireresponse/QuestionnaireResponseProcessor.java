@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 
 public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
-    protected final ResourceResolver resourceResolver;
+    protected final ResourceResolver questionnaireResponseResolver;
+    protected final ResourceResolver questionnaireResolver;
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
@@ -46,7 +47,8 @@ public class QuestionnaireResponseProcessor {
             Repository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-        this.resourceResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
+        this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
+        this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.extractProcessor = extractProcessor;
@@ -57,66 +59,83 @@ public class QuestionnaireResponseProcessor {
     }
 
     protected <R extends IBaseResource> R resolveQuestionnaireResponse(Either<IIdType, R> questionnaireResponse) {
-        return (R) resourceResolver.resolve(questionnaireResponse);
+        return (R) questionnaireResponseResolver.resolve(questionnaireResponse);
     }
 
     @SuppressWarnings("unchecked")
-    protected IBaseResource resolveQuestionnaire(IBaseResource questionnaireResponse) {
-        try {
-            IPrimitiveType<String> canonical;
-            if (questionnaireResponse.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
-                var pathResult = modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-                canonical = pathResult == null ? null : ((IBaseReference) pathResult).getReferenceElement();
-            } else {
-                canonical = (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-            }
-            if (canonical == null) {
+    protected <R extends IBaseResource> IBaseResource resolveQuestionnaire(
+            IBaseResource questionnaireResponse, Either<IIdType, R> questionnaireId) {
+        if (questionnaireId != null) {
+            return (R) questionnaireResolver.resolve(questionnaireId);
+        } else {
+            try {
+                IPrimitiveType<String> canonical;
+                if (questionnaireResponse.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
+                    var pathResult = modelResolver.resolvePath(questionnaireResponse, "questionnaire");
+                    canonical = pathResult == null ? null : ((IBaseReference) pathResult).getReferenceElement();
+                } else {
+                    canonical =
+                            (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
+                }
+                if (canonical == null) {
+                    return null;
+                }
+                IBaseResource questionnaire = null;
+                var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
+                if (contained != null && !contained.isEmpty()) {
+                    questionnaire = contained.stream()
+                            .filter(r -> r.fhirType().equals("Questionnaire")
+                                    && canonical
+                                            .getValueAsString()
+                                            .equals(r.getIdElement().getIdPart()))
+                            .findFirst()
+                            .orElse(null);
+                }
+                if (questionnaire == null) {
+                    questionnaire = SearchHelper.searchRepositoryByCanonical(
+                            repository,
+                            canonical,
+                            repository
+                                    .fhirContext()
+                                    .getResourceDefinition("questionnaire")
+                                    .getImplementingClass());
+                }
+                return questionnaire;
+            } catch (Exception e) {
+                logger.error(e.getMessage());
                 return null;
             }
-            IBaseResource questionnaire = null;
-            var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
-            if (contained != null && !contained.isEmpty()) {
-                questionnaire = contained.stream()
-                        .filter(r -> r.fhirType().equals("Questionnaire")
-                                && canonical
-                                        .getValueAsString()
-                                        .equals(r.getIdElement().getIdPart()))
-                        .findFirst()
-                        .orElse(null);
-            }
-            if (questionnaire == null) {
-                questionnaire = SearchHelper.searchRepositoryByCanonical(
-                        repository,
-                        canonical,
-                        repository
-                                .fhirContext()
-                                .getResourceDefinition("questionnaire")
-                                .getImplementingClass());
-            }
-            return questionnaire;
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            return null;
         }
     }
 
     public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource) {
-        return extract(resource, null, null, true);
+        return extract(resource, null, null, null, true);
     }
 
     public <R extends IBaseResource> IBaseBundle extract(
-            Either<IIdType, R> resource, IBaseParameters parameters, IBaseBundle data, boolean useServerData) {
-        return extract(resource, parameters, data, useServerData, new LibraryEngine(repository, evaluationSettings));
+            Either<IIdType, R> questionnaireResponseId,
+            Either<IIdType, R> questionnaireId,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            boolean useServerData) {
+        return extract(
+                questionnaireResponseId,
+                questionnaireId,
+                parameters,
+                data,
+                useServerData,
+                new LibraryEngine(repository, evaluationSettings));
     }
 
     public <R extends IBaseResource> IBaseBundle extract(
-            Either<IIdType, R> resource,
+            Either<IIdType, R> questionnaireResponseId,
+            Either<IIdType, R> questionnaireId,
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
             LibraryEngine libraryEngine) {
-        var questionnaireResponse = resolveQuestionnaireResponse(resource);
-        var questionnaire = resolveQuestionnaire(questionnaireResponse);
+        var questionnaireResponse = resolveQuestionnaireResponse(questionnaireResponseId);
+        var questionnaire = resolveQuestionnaire(questionnaireResponse, questionnaireId);
         var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
         var request = new ExtractRequest(
                 questionnaireResponse,

@@ -137,9 +137,17 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                     throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
                 }
                 var value = content.stream()
-                        .map(p -> readRepository(
-                                fhirContext().getResourceDefinition(type).getImplementingClass(),
-                                ((Reference) p.getValue()).getReferenceElement()))
+                        .map(p -> {
+                            if (p.getValue() instanceof Reference) {
+                                return readRepository(
+                                        fhirContext()
+                                                .getResourceDefinition(type)
+                                                .getImplementingClass(),
+                                        ((Reference) p.getValue()).getReferenceElement());
+                            } else {
+                                return (Resource) p.getResource();
+                            }
+                        })
                         .filter(p -> p != null)
                         .collect(Collectors.toList());
                 if (!value.isEmpty()) {

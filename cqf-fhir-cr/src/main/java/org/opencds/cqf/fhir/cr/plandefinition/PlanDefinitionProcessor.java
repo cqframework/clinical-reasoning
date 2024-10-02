@@ -19,6 +19,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -35,6 +37,7 @@ public class PlanDefinitionProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected IApplyProcessor applyProcessor;
     protected IPackageProcessor packageProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
@@ -45,7 +48,7 @@ public class PlanDefinitionProcessor {
     }
 
     public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null, null);
+        this(repository, evaluationSettings, null, null, null, null, null);
     }
 
     public PlanDefinitionProcessor(
@@ -53,6 +56,7 @@ public class PlanDefinitionProcessor {
             EvaluationSettings evaluationSettings,
             IApplyProcessor applyProcessor,
             IPackageProcessor packageProcessor,
+            IDataRequirementsProcessor dataRequirementsProcessor,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
@@ -60,6 +64,7 @@ public class PlanDefinitionProcessor {
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
+        this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.requestResolverFactory = requestResolverFactory;
         this.activityProcessor = activityProcessor;
         this.applyProcessor = applyProcessor;
@@ -110,6 +115,18 @@ public class PlanDefinitionProcessor {
     public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
         var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
         return processor.packageResource(planDefinition, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> planDefinition, IBaseParameters parameters) {
+        return dataRequirements(resolvePlanDefinition(planDefinition), parameters);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource planDefinition, IBaseParameters parameters) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository);
+        return processor.getDataRequirements(planDefinition, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> ApplyRequest buildApplyRequest(

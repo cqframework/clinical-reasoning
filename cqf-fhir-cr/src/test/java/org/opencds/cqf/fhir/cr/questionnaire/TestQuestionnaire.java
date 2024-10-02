@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
@@ -54,6 +55,7 @@ public class TestQuestionnaire {
         private EvaluationSettings evaluationSettings;
         private IGenerateProcessor generateProcessor;
         private IPackageProcessor packageProcessor;
+        private IDataRequirementsProcessor dataRequirementsProcessor;
         private IPopulateProcessor populateProcessor;
 
         public Given repository(Repository repository) {
@@ -82,6 +84,11 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public Given dataRequirementsProcessor(IDataRequirementsProcessor dataRequirementsProcessor) {
+            this.dataRequirementsProcessor = dataRequirementsProcessor;
+            return this;
+        }
+
         public Given populateProcessor(IPopulateProcessor populateProcessor) {
             this.populateProcessor = populateProcessor;
             return this;
@@ -100,7 +107,12 @@ public class TestQuestionnaire {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             return new QuestionnaireProcessor(
-                    repository, evaluationSettings, generateProcessor, packageProcessor, populateProcessor);
+                    repository,
+                    evaluationSettings,
+                    generateProcessor,
+                    packageProcessor,
+                    dataRequirementsProcessor,
+                    populateProcessor);
         }
 
         public When when() {

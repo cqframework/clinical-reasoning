@@ -188,20 +188,27 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     }
 
     public void setNestedValue(IBase target, String path, Object value, BaseRuntimeElementCompositeDefinition<?> def) {
-        // var def = (BaseRuntimeElementCompositeDefinition<?>) fhirContext
-        // .getElementDefinition(target.getClass());
         var identifiers = path.split("\\.");
         for (int i = 0; i < identifiers.length; i++) {
             var identifier = identifiers[i];
             var isList = identifier.contains("[");
+            var isSlice = identifier.contains(":");
             var isLast = i == identifiers.length - 1;
             var index = isList ? Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1)) : 0;
-            var targetPath = isList ? identifier.replaceAll("\\[\\d\\]", "") : identifier;
+            var targetPath = isList
+                    ? identifier.replaceAll("\\[\\d\\]", "")
+                    : isSlice ? identifier.substring(0, identifier.indexOf(":")) : identifier;
             var targetDef = def.getChildByName(targetPath);
-
             var targetValues = targetDef.getAccessor().getValues(target);
             IBase targetValue;
             if (targetValues.size() >= index + 1 && !isLast) {
+                // TODO: handle slice names
+                // if (targetValues.size() > 1 && isSlice) {
+                //     var sliceName = isSlice ? identifier.split(":")[1] : null;
+                //     targetValue = targetValues.stream()
+                // } else {
+                //     targetValue = targetValues.get(index);
+                // }
                 targetValue = targetValues.get(index);
             } else {
                 var elementDef = targetDef.getChildByName(targetPath);

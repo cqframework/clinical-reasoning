@@ -18,6 +18,8 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -32,6 +34,7 @@ public class LibraryProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IEvaluateProcessor evaluateProcessor;
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
@@ -41,19 +44,21 @@ public class LibraryProcessor {
     }
 
     public LibraryProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+        this(repository, evaluationSettings, null, null, null);
     }
 
     public LibraryProcessor(
             Repository repository,
             EvaluationSettings evaluationSettings,
             IPackageProcessor packageProcessor,
+            IDataRequirementsProcessor dataRequirementsProcessor,
             IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
+        this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.evaluateProcessor = evaluateProcessor;
     }
 
@@ -86,9 +91,21 @@ public class LibraryProcessor {
         return packageLibrary(resolveLibrary(library), parameters);
     }
 
-    public IBaseBundle packageLibrary(IBaseResource questionnaire, IBaseParameters parameters) {
+    public IBaseBundle packageLibrary(IBaseResource library, IBaseParameters parameters) {
         var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
-        return processor.packageResource(questionnaire, parameters);
+        return processor.packageResource(library, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        return dataRequirements(resolveLibrary(library), parameters);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource library, IBaseParameters parameters) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository);
+        return processor.getDataRequirements(library, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> EvaluateRequest buildEvaluateRequest(
@@ -96,9 +113,9 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseParameters> prefetchData,
             LibraryEngine libraryEngine) {
         return new EvaluateRequest(
                 resolveLibrary(library),
@@ -107,6 +124,7 @@ public class LibraryProcessor {
                 parameters,
                 useServerData,
                 data,
+                prefetchData,
                 libraryEngine,
                 modelResolver);
     }
@@ -116,9 +134,9 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseParameters> prefetchData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
@@ -140,9 +158,9 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseParameters> prefetchData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
@@ -163,9 +181,9 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseParameters> prefetchData,
             LibraryEngine libraryEngine) {
         var processor = evaluateProcessor != null
                 ? evaluateProcessor

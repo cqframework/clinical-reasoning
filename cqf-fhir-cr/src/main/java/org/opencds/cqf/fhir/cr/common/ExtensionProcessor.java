@@ -19,7 +19,7 @@ public class ExtensionProcessor {
      * @param excludedExtList A list of extension URL's to excluded from the definition
      */
     public void processExtensions(
-            IOperationRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
+            ICqlOperationRequest request, IBase resource, IElement definition, List<String> excludedExtList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> !excludedExtList.contains(e.getUrl()))
                 .collect(Collectors.toList());
@@ -34,7 +34,7 @@ public class ExtensionProcessor {
      * @param extList A list of extension URL's to include from the definition
      */
     public void processExtensionsInList(
-            IOperationRequest request, IBase resource, IElement definition, List<String> extList) {
+            ICqlOperationRequest request, IBase resource, IElement definition, List<String> extList) {
         var extensions = request.getExtensions(definition).stream()
                 .filter(e -> extList.contains(e.getUrl()))
                 .map(e -> SerializationUtils.clone(e))
@@ -43,7 +43,7 @@ public class ExtensionProcessor {
     }
 
     private void processExtensions(
-            IOperationRequest request, IBase resource, List<? extends IBaseExtension<?, ?>> extensions) {
+            ICqlOperationRequest request, IBase resource, List<? extends IBaseExtension<?, ?>> extensions) {
         if (extensions.isEmpty()) {
             return;
         }

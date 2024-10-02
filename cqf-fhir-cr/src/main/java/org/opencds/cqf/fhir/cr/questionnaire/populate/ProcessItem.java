@@ -23,7 +23,7 @@ public class ProcessItem {
         this(new ExpressionProcessor());
     }
 
-    private ProcessItem(ExpressionProcessor expressionProcessor) {
+    public ProcessItem(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 

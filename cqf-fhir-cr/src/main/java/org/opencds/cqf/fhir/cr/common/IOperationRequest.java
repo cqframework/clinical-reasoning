@@ -12,41 +12,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 public interface IOperationRequest {
     String getOperationName();
 
-    IIdType getSubjectId();
-
-    IBaseParameters getParameters();
-
-    boolean getUseServerData();
-
-    IBaseBundle getData();
-
-    LibraryEngine getLibraryEngine();
-
     ModelResolver getModelResolver();
 
     FhirVersionEnum getFhirVersion();
 
-    default FhirContext getFhirContext() {
-        return getLibraryEngine().getRepository().fhirContext();
-    }
+    Repository getRepository();
 
-    default Repository getRepository() {
-        return getLibraryEngine().getRepository();
+    default FhirContext getFhirContext() {
+        return getRepository().fhirContext();
     }
 
     String getDefaultLibraryUrl();

@@ -14,7 +14,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
-public interface IQuestionnaireRequest extends IOperationRequest {
+public interface IQuestionnaireRequest extends ICqlOperationRequest {
     IBaseResource getQuestionnaire();
 
     QuestionnaireAdapter getQuestionnaireAdapter();
@@ -48,6 +48,10 @@ public interface IQuestionnaireRequest extends IOperationRequest {
         }
     }
 
+    default void addCqlLibraryExtension() {
+        addCqlLibraryExtension(null);
+    }
+
     @SuppressWarnings("unchecked")
     default void addCqlLibraryExtension(String library) {
         var libraryRef = StringUtils.isNotBlank(library) ? library : getDefaultLibraryUrl();
@@ -56,8 +60,6 @@ public interface IQuestionnaireRequest extends IOperationRequest {
                         .noneMatch(e -> ((IPrimitiveType<String>) e.getValue())
                                 .getValueAsString()
                                 .equals(libraryRef))) {
-            // ((IDomainResource) getQuestionnaire()).addExtension() .add(buildReferenceExt(getFhirVersion(),
-            // cqfLibrary(libraryRef), false));
             var libraryExt = ((IDomainResource) getQuestionnaire()).addExtension();
             libraryExt.setUrl(Constants.CQF_LIBRARY);
             libraryExt.setValue(canonicalTypeForVersion(getFhirVersion(), libraryRef));

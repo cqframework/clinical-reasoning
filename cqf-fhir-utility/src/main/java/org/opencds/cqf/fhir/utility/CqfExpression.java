@@ -34,7 +34,7 @@ public class CqfExpression {
         switch (version) {
             case DSTU3:
                 return new CqfExpression(
-                        "text/cql.expression", extension.getValue().toString(), defaultLibraryUrl);
+                        "text/cql-expression", extension.getValue().toString(), defaultLibraryUrl);
             case R4:
                 return CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), defaultLibraryUrl);
             case R5:

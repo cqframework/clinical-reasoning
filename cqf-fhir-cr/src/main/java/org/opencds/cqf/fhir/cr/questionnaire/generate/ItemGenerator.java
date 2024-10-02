@@ -252,12 +252,11 @@ public class ItemGenerator {
     }
 
     public IBaseBackboneElement createQuestionnaireItem(GenerateRequest request, String linkId) {
+        var text = request.getProfileAdapter().hasTitle()
+                ? request.getProfileAdapter().getTitle()
+                : request.getProfileAdapter().getName();
         var item = createQuestionnaireItemComponent(
-                request,
-                request.getProfileAdapter().getName(),
-                linkId,
-                request.getProfileAdapter().getUrl(),
-                false);
+                request, text, linkId, request.getProfileAdapter().getUrl(), false);
         var extractContext = item.addExtension();
         extractContext.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
         extractContext.setValue(codeTypeForVersion(

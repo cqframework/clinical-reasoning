@@ -30,9 +30,6 @@ public class ExpressionProcessor {
      */
     public List<IBase> getExpressionResultForItem(
             ICqlOperationRequest request, CqfExpression expression, String itemLinkId) {
-        if (expression == null) {
-            return new ArrayList<>();
-        }
         try {
             return getExpressionResult(request, expression);
         } catch (Exception ex) {
@@ -50,9 +47,14 @@ public class ExpressionProcessor {
      * @return
      */
     public List<IBase> getExpressionResult(ICqlOperationRequest request, CqfExpression expression) {
-        var result = request.getLibraryEngine()
-                .resolveExpression(
-                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData());
+        var result = expression == null
+                ? null
+                : request.getLibraryEngine()
+                        .resolveExpression(
+                                request.getSubjectId().getIdPart(),
+                                expression,
+                                request.getParameters(),
+                                request.getData());
         return result == null
                 ? new ArrayList<>()
                 : result.stream().filter(Objects::nonNull).collect(Collectors.toList());

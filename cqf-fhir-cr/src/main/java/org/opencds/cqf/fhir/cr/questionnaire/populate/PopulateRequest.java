@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -20,7 +19,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
@@ -38,7 +36,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final IInputParameterResolver inputParameterResolver;
     private final QuestionnaireAdapter questionnaireAdapter;
     private IBaseOperationOutcome operationOutcome;
-    private List<Pair<String, ParametersAdapter>> evaluatedLibraries;
 
     public PopulateRequest(
             IBaseResource questionnaire,
@@ -160,23 +157,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
                         : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 
-    public List<IBase> getContext() {
-        return context;
-    }
-
-    public List<IBaseExtension<?, ?>> getLaunchContext() {
-        return launchContext;
-    }
-
     public void addContextParameter(String name, IBaseResource resource) {
         getAdapterFactory().createParameters(parameters).addParameter(name, resource);
-    }
-
-    public void setEvaluatedLibraries(List<Pair<String, ParametersAdapter>> evaluatedLibraries) {
-        this.evaluatedLibraries = evaluatedLibraries;
-    }
-
-    public List<Pair<String, ParametersAdapter>> getEvaluatedLibraries() {
-        return evaluatedLibraries;
     }
 }

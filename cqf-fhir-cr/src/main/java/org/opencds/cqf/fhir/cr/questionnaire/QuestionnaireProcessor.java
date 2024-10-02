@@ -78,12 +78,12 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
             Either3<C, IIdType, R> questionnaire) {
-        return (R) questionnaireResolver.resolve(questionnaire);
+        return questionnaireResolver.resolve(questionnaire);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveStructureDefinition(
             Either3<C, IIdType, R> structureDef) {
-        return (R) structureDefResolver.resolve(structureDef);
+        return structureDefResolver.resolve(structureDef);
     }
 
     public IBaseResource generateQuestionnaire(String id) {

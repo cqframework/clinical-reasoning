@@ -33,7 +33,9 @@ public class ElementProcessor implements IElementProcessor {
             CqfExpression caseFeature,
             Boolean isGroup) {
         var element = (ElementDefinition) baseElement;
-        final var itemType = isGroup ? QuestionnaireItemType.GROUP : parseItemType(elementType, element.hasBinding());
+        final var itemType = Boolean.TRUE.equals(isGroup)
+                ? QuestionnaireItemType.GROUP
+                : parseItemType(elementType, element.hasBinding());
         final var item = initializeQuestionnaireItem(
                 itemType, request.getProfileAdapter().getUrl(), element, childLinkId);
         item.setRequired(element.hasMin() && element.getMin() > 0);

@@ -29,7 +29,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessItemWithContextTests {
+class ProcessItemWithContextTests {
     @Mock
     private Repository repository;
 

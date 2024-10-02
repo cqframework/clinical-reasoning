@@ -42,7 +42,7 @@ public class ElementHasCaseFeature {
                 }
                 return r4Expression;
             case R5:
-                var r5Expression = new org.hl7.fhir.r4.model.Expression()
+                var r5Expression = new org.hl7.fhir.r5.model.Expression()
                         .setLanguage("text/cql-expression")
                         .setExpression(expression)
                         .setName(name);

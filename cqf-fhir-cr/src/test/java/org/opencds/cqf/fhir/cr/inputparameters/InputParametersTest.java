@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.inputparameters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
@@ -57,10 +56,10 @@ class InputParametersTest {
         var actual = resolver.getParameters();
         assertNotNull(actual);
         assertEquals(2, actual.getParameter().size());
-        assertTrue(actual.getParameter().get(0).getName().equals("%subject"));
-        assertTrue(actual.getParameter().get(0).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(1).getName().equals("%practitioner"));
-        assertTrue(actual.getParameter().get(1).getResource().equals(practitioner));
+        assertEquals("%subject", actual.getParameter().get(0).getName());
+        assertEquals(patient, actual.getParameter().get(0).getResource());
+        assertEquals("%practitioner", actual.getParameter().get(1).getName());
+        assertEquals(practitioner, actual.getParameter().get(1).getResource());
     }
 
     @Test
@@ -156,28 +155,28 @@ class InputParametersTest {
         var actual = resolver.getParameters();
         assertNotNull(actual);
         assertEquals(11, actual.getParameter().size());
-        assertTrue(actual.getParameter().get(0).getName().equals("%subject"));
-        assertTrue(actual.getParameter().get(0).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(1).getName().equals("%patient"));
-        assertTrue(actual.getParameter().get(1).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(2).getName().equals("Patient"));
-        assertTrue(actual.getParameter().get(2).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(3).getName().equals("%encounter"));
-        assertTrue(actual.getParameter().get(3).getResource().equals(encounter));
-        assertTrue(actual.getParameter().get(4).getName().equals("Encounter"));
-        assertTrue(actual.getParameter().get(4).getResource().equals(encounter));
-        assertTrue(actual.getParameter().get(5).getName().equals("%location"));
-        assertTrue(actual.getParameter().get(5).getResource().equals(location));
-        assertTrue(actual.getParameter().get(6).getName().equals("Location"));
-        assertTrue(actual.getParameter().get(6).getResource().equals(location));
-        assertTrue(actual.getParameter().get(7).getName().equals("%user"));
-        assertTrue(actual.getParameter().get(7).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(8).getName().equals("User"));
-        assertTrue(actual.getParameter().get(8).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(9).getName().equals("%study"));
-        assertTrue(actual.getParameter().get(9).getResource().equals(study));
-        assertTrue(actual.getParameter().get(10).getName().equals("Study"));
-        assertTrue(actual.getParameter().get(10).getResource().equals(study));
+        assertEquals("%subject", actual.getParameter().get(0).getName());
+        assertEquals(patient, actual.getParameter().get(0).getResource());
+        assertEquals("%patient", actual.getParameter().get(1).getName());
+        assertEquals(patient, actual.getParameter().get(1).getResource());
+        assertEquals("Patient", actual.getParameter().get(2).getName());
+        assertEquals(patient, actual.getParameter().get(2).getResource());
+        assertEquals("%encounter", actual.getParameter().get(3).getName());
+        assertEquals(encounter, actual.getParameter().get(3).getResource());
+        assertEquals("Encounter", actual.getParameter().get(4).getName());
+        assertEquals(encounter, actual.getParameter().get(4).getResource());
+        assertEquals("%location", actual.getParameter().get(5).getName());
+        assertEquals(location, actual.getParameter().get(5).getResource());
+        assertEquals("Location", actual.getParameter().get(6).getName());
+        assertEquals(location, actual.getParameter().get(6).getResource());
+        assertEquals("%user", actual.getParameter().get(7).getName());
+        assertEquals(practitioner, actual.getParameter().get(7).getResource());
+        assertEquals("User", actual.getParameter().get(8).getName());
+        assertEquals(practitioner, actual.getParameter().get(8).getResource());
+        assertEquals("%study", actual.getParameter().get(9).getName());
+        assertEquals(study, actual.getParameter().get(9).getResource());
+        assertEquals("Study", actual.getParameter().get(10).getName());
+        assertEquals(study, actual.getParameter().get(10).getResource());
     }
 
     @Test
@@ -273,27 +272,27 @@ class InputParametersTest {
         var actual = resolver.getParameters();
         assertNotNull(actual);
         assertEquals(11, actual.getParameter().size());
-        assertTrue(actual.getParameter().get(0).getName().equals("%subject"));
-        assertTrue(actual.getParameter().get(0).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(1).getName().equals("%patient"));
-        assertTrue(actual.getParameter().get(1).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(2).getName().equals("Patient"));
-        assertTrue(actual.getParameter().get(2).getResource().equals(patient));
-        assertTrue(actual.getParameter().get(3).getName().equals("%encounter"));
-        assertTrue(actual.getParameter().get(3).getResource().equals(encounter));
-        assertTrue(actual.getParameter().get(4).getName().equals("Encounter"));
-        assertTrue(actual.getParameter().get(4).getResource().equals(encounter));
-        assertTrue(actual.getParameter().get(5).getName().equals("%location"));
-        assertTrue(actual.getParameter().get(5).getResource().equals(location));
-        assertTrue(actual.getParameter().get(6).getName().equals("Location"));
-        assertTrue(actual.getParameter().get(6).getResource().equals(location));
-        assertTrue(actual.getParameter().get(7).getName().equals("%user"));
-        assertTrue(actual.getParameter().get(7).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(8).getName().equals("User"));
-        assertTrue(actual.getParameter().get(8).getResource().equals(practitioner));
-        assertTrue(actual.getParameter().get(9).getName().equals("%study"));
-        assertTrue(actual.getParameter().get(9).getResource().equals(study));
-        assertTrue(actual.getParameter().get(10).getName().equals("Study"));
-        assertTrue(actual.getParameter().get(10).getResource().equals(study));
+        assertEquals("%subject", actual.getParameter().get(0).getName());
+        assertEquals(patient, actual.getParameter().get(0).getResource());
+        assertEquals("%patient", actual.getParameter().get(1).getName());
+        assertEquals(patient, actual.getParameter().get(1).getResource());
+        assertEquals("Patient", actual.getParameter().get(2).getName());
+        assertEquals(patient, actual.getParameter().get(2).getResource());
+        assertEquals("%encounter", actual.getParameter().get(3).getName());
+        assertEquals(encounter, actual.getParameter().get(3).getResource());
+        assertEquals("Encounter", actual.getParameter().get(4).getName());
+        assertEquals(encounter, actual.getParameter().get(4).getResource());
+        assertEquals("%location", actual.getParameter().get(5).getName());
+        assertEquals(location, actual.getParameter().get(5).getResource());
+        assertEquals("Location", actual.getParameter().get(6).getName());
+        assertEquals(location, actual.getParameter().get(6).getResource());
+        assertEquals("%user", actual.getParameter().get(7).getName());
+        assertEquals(practitioner, actual.getParameter().get(7).getResource());
+        assertEquals("User", actual.getParameter().get(8).getName());
+        assertEquals(practitioner, actual.getParameter().get(8).getResource());
+        assertEquals("%study", actual.getParameter().get(9).getName());
+        assertEquals(study, actual.getParameter().get(9).getResource());
+        assertEquals("Study", actual.getParameter().get(10).getName());
+        assertEquals(study, actual.getParameter().get(10).getResource());
     }
 }

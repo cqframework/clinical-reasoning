@@ -82,7 +82,7 @@ public class ItemGenerator {
                             return (name.equals("PRACTITIONER"))
                                     || request.resolvePathString(p, "use").equals("in")
                                             && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
-                                                    .map(c -> c.toString())
+                                                    .map(Object::toString)
                                                     .collect(Collectors.toList())
                                                     .contains(name);
                         })
@@ -91,13 +91,11 @@ public class ItemGenerator {
                         request.getFhirVersion(),
                         request.resolvePathString(p, "name").toLowerCase())));
             }
-            return new ImmutablePair<IBaseBackboneElement, List<IBaseExtension<?, ?>>>(
-                    questionnaireItem, launchContextExts);
+            return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
             logger.error(message);
-            return new ImmutablePair<IBaseBackboneElement, List<IBaseExtension<?, ?>>>(
-                    createErrorItem(request, linkId, message), new ArrayList<>());
+            return new ImmutablePair<>(createErrorItem(request, linkId, message), new ArrayList<>());
         }
     }
 
@@ -187,11 +185,12 @@ public class ItemGenerator {
             String sliceName,
             Boolean requiredOnly) {
         var path = request.resolvePathString(element, "path");
-        if (existingElements != null && !existingElements.isEmpty()) {
-            if (existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")))) {
-                return false;
-            }
+        if (existingElements != null
+                && !existingElements.isEmpty()
+                && existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")))) {
+            return false;
         }
+
         // filter out slicing definitions
         if (request.resolvePath(element, "slicing") != null) {
             return false;
@@ -212,13 +211,13 @@ public class ItemGenerator {
         if (sliceName != null && !request.resolvePathString(element, "id").contains(sliceName)) {
             return false;
         }
-        if (requiredOnly) {
+        if (Boolean.TRUE.equals(requiredOnly)) {
             var min = request.resolvePath(element, "min", IPrimitiveType.class);
             if (min == null || (Integer) min.getValue() == 0) {
                 return false;
             }
         }
-        if (request.getSupportedOnly()) {
+        if (Boolean.TRUE.equals(request.getSupportedOnly())) {
             var mustSupportElement = request.resolvePath(element, "mustSupport", IBaseBooleanDatatype.class);
             if (mustSupportElement == null || mustSupportElement.getValue().equals(Boolean.FALSE)) {
                 return false;
@@ -273,7 +272,7 @@ public class ItemGenerator {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent()
                         .setType(
-                                isDisplay
+                                Boolean.TRUE.equals(isDisplay)
                                         ? org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.DISPLAY
                                         : org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)
@@ -282,7 +281,7 @@ public class ItemGenerator {
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
                         .setType(
-                                isDisplay
+                                Boolean.TRUE.equals(isDisplay)
                                         ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
                                         : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)
@@ -291,7 +290,7 @@ public class ItemGenerator {
             case R5:
                 return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
                         .setType(
-                                isDisplay
+                                Boolean.TRUE.equals(isDisplay)
                                         ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
                                         : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP)
                         .setDefinition(definition)

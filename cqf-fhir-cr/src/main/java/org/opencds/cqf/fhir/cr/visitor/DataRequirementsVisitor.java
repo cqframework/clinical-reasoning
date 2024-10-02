@@ -108,11 +108,11 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
         var adapterFactory = AdapterFactory.forFhirVersion(fhirVersion);
         switch (fhirVersion) {
             case DSTU3:
-                var versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
-                return adapterFactory.createLibrary(versionConvertor_30_50.convertResource(r5Library));
+                var versionConvertor3050 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+                return adapterFactory.createLibrary(versionConvertor3050.convertResource(r5Library));
             case R4:
-                var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-                return adapterFactory.createLibrary(versionConvertor_40_50.convertResource(r5Library));
+                var versionConvertor4050 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+                return adapterFactory.createLibrary(versionConvertor4050.convertResource(r5Library));
             case R5:
                 return adapterFactory.createLibrary(r5Library);
 

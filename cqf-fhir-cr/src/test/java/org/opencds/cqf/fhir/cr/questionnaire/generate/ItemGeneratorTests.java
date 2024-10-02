@@ -37,9 +37,6 @@ class ItemGeneratorTests {
     @Mock
     Repository repository;
 
-    // @Mock
-    // IElementProcessor elementProcessor;
-
     @Mock
     LibraryEngine libraryEngine;
 
@@ -60,18 +57,6 @@ class ItemGeneratorTests {
         doThrow(resultException).when(fixture).getFeatureExpressionResults(request, cqfExpression, null);
         fixture.generate(request);
     }
-
-    // @Test
-    // void generateShouldReturnErrorItemOnException() {
-    //     doReturn(repository).when(libraryEngine).getRepository();
-    //     doReturn(fhirContextR4).when(repository).fhirContext();
-    //     var profile = new StructureDefinition();
-    //     var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine, profile);
-    //     var result = (QuestionnaireItemComponent) fixture.generate(request);
-    //     assertNotNull(result);
-    //     assertEquals("DISPLAY", result.getType().name());
-    //     assertTrue(result.getText().contains("An error occurred during item creation: "));
-    // }
 
     /* Tests using TestItemGenerator class */
 
@@ -107,8 +92,8 @@ class ItemGeneratorTests {
                 .then()
                 .hasItemCount(9)
                 .itemHasInitialValue("1.4.1")
-                .itemHasHiddenValueExtension("1.4.1");
-        // .itemHasInitialExpression("1.1.1");
+                .itemHasHiddenValueExtension("1.4.1")
+                .itemHasInitialExpression("1.1.1");
     }
 
     @Test

@@ -143,7 +143,6 @@ class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    // @Disabled // Unable to load R5 packages and run CQL
     void activityDefinitionApplyR5() throws FHIRException {
         var result = this.activityDefinitionProcessorR5.apply(
                 Eithers.forMiddle3(Ids.newId(

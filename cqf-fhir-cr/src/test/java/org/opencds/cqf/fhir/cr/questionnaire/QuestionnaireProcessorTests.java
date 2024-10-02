@@ -151,12 +151,16 @@ class QuestionnaireProcessorTests {
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),
-                                newPart(fhirContextR5, "name", "content", "Practitioner/OPA-AttendingPhysician1")),
+                                newPart(fhirContextR5, "Reference", "content", "Practitioner/OPA-AttendingPhysician1")),
                         newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "patient"),
-                                newPart(fhirContextR5, "name", "content", "Practitioner/OPA-AttendingPhysician1"))))
+                                newPart(
+                                        fhirContextR5,
+                                        "Reference",
+                                        "content",
+                                        "Practitioner/OPA-AttendingPhysician1"))))
                 .thenPopulate(true)
                 .hasItems(14)
                 .itemHasAnswer("family-name")

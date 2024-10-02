@@ -1,0 +1,21 @@
+{
+  "id": "UberSimple",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/MinimalProportionResourceBasisSingleGroup",
+  "library": [
+    "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "encounter"
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-compatible",
+      "valueBoolean": "true"
+    }
+  ],
+  "subject": {
+    "reference": "Patient/female-1914"
+  }
+}

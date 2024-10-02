@@ -61,7 +61,7 @@ public class R4LibraryEvaluationService {
             expressionSet = new HashSet<>(expression);
         }
         try {
-            return (Parameters) libraryEngine.evaluate(libraryIdentifier, subject, parameters, data, expressionSet);
+            return (Parameters) libraryEngine.evaluate(libraryIdentifier, subject, parameters, data, null, expressionSet);
         } catch (Exception e) {
             return parameters(part("evaluation error", (OperationOutcome)
                     baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));

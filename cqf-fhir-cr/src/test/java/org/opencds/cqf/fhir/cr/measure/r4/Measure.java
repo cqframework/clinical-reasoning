@@ -174,7 +174,8 @@ public class Measure {
 
         public When periodEnd(String periodEnd) {
             this.periodEnd =
-                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
+                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                        .atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 

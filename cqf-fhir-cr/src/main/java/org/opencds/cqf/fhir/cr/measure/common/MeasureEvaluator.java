@@ -13,7 +13,9 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +39,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3._1999.xhtml.P;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -86,21 +89,33 @@ public class MeasureEvaluator {
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
+        final Object measurementPeriodLowObject = measurementPeriod.getLow();
+
+        final ZonedDateTime zonedDateTime;
+        if (measurementPeriodLowObject instanceof DateTime) {
+            final DateTime measurementPeriodLow = (DateTime) measurementPeriodLowObject;
+            zonedDateTime = LocalDateTime.now()
+                .atOffset(measurementPeriodLow.getZoneOffset())
+                .toZonedDateTime();
+        } else {
+            zonedDateTime = null;
+        }
+
         switch (measureEvalType) {
             case PATIENT:
             case SUBJECT:
                 return this.evaluate(
-                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, parameters, versionedIdentifier);
+                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, parameters, versionedIdentifier, zonedDateTime);
             case SUBJECTLIST:
                 return this.evaluate(
-                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, parameters, versionedIdentifier);
+                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, parameters, versionedIdentifier, zonedDateTime);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluate(
-                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, parameters, versionedIdentifier);
+                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, parameters, versionedIdentifier, zonedDateTime);
             case POPULATION:
                 return this.evaluate(
-                        measureDef, MeasureReportType.SUMMARY, subjectIds, parameters, versionedIdentifier);
+                        measureDef, MeasureReportType.SUMMARY, subjectIds, parameters, versionedIdentifier, zonedDateTime);
             default:
                 // never hit because this value is set upstream
                 throw new IllegalArgumentException(
@@ -223,7 +238,8 @@ public class MeasureEvaluator {
             MeasureReportType type,
             List<String> subjectIds,
             IBaseParameters parameters,
-            VersionedIdentifier id) {
+            VersionedIdentifier id,
+            ZonedDateTime zonedDateTime) {
         var subjectSize = subjectIds.size();
         logger.info(
                 "Evaluating Measure {}, report type {}, with {} subject(s)",
@@ -242,8 +258,9 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
+            // LUKETODO:
             EvaluationResult result =
-                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, context);
+                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

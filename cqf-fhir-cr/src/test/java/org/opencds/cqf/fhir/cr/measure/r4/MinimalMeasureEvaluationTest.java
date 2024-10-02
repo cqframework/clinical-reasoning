@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -981,5 +984,26 @@ class MinimalMeasureEvaluationTest {
                 .up()
                 .population("numerator")
                 .hasCount(0);
+    }
+
+    @Test
+    void uberSimple() {
+        var when = GIVEN_REPO
+            .when()
+            .measureId("UberSimple")
+            .periodStart(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 1, 20, 0, 0), ZoneOffset.UTC))
+            .periodEnd(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 1, 21, 0, 0), ZoneOffset.UTC))
+            .reportType("subject")
+            .subject("Patient/female-1914")
+            .evaluate();
+
+        when.then()
+            .hasReportType("Individual")
+            .hasPeriodStart(Date.from(LocalDateTime.of(2020, Month.JANUARY, 1, 20, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasPeriodEnd(Date.from(LocalDateTime.of(2020, Month.JANUARY, 1, 21, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasSubjectReference("Patient/female-1914")
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1);
     }
 }

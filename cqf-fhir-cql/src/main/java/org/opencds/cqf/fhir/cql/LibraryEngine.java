@@ -5,17 +5,22 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmProcessor;
+import org.hl7.elm.r1.Expression;
+import org.hl7.elm.r1.Interval;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -71,8 +76,9 @@ public class LibraryEngine {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle additionalData,
+            ZonedDateTime zonedDateTime,
             Set<String> expressions) {
-        return this.evaluate(VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData, expressions);
+        return this.evaluate(VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData, zonedDateTime, expressions);
     }
 
     public IBaseParameters evaluate(
@@ -80,10 +86,11 @@ public class LibraryEngine {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle additionalData,
+            ZonedDateTime zonedDateTime,
             Set<String> expressions) {
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
         var result = getEvaluationResult(
-                id, patientId, parameters, additionalData, expressions, cqlFhirParametersConverter, null);
+                id, patientId, parameters, additionalData, expressions, cqlFhirParametersConverter, zonedDateTime, null);
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -185,7 +192,7 @@ public class LibraryEngine {
             case "text/cql-name":
                 validateLibrary(libraryToBeEvaluated);
                 parametersResult = this.evaluate(
-                        libraryToBeEvaluated, subjectId, parameters, bundle, Collections.singleton(expression));
+                        libraryToBeEvaluated, subjectId, parameters, bundle, null, Collections.singleton(expression));
                 results = resolveParameterValues(
                         ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
                 break;
@@ -293,6 +300,7 @@ public class LibraryEngine {
         return result;
     }
 
+    // LUKETODO:  This is where we're missing the offset
     public EvaluationResult getEvaluationResult(
             VersionedIdentifier id,
             String patientId,
@@ -300,6 +308,7 @@ public class LibraryEngine {
             IBaseBundle additionalData,
             Set<String> expressions,
             CqlFhirParametersConverter cqlFhirParametersConverter,
+            @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
         if (cqlFhirParametersConverter == null) {
@@ -310,7 +319,21 @@ public class LibraryEngine {
             engine = Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
         }
 
+//        final Map<String, Object> engineStateParameters = engine.getState().getParameters();
+//
+//        if (engineStateParameters.containsKey("Measuremeent Period")) {
+//            final Object measurePeriodAsObject = engineStateParameters.get("Measuremeent Period");
+//
+//            if (measurePeriodAsObject instanceof Interval) {
+//                final Interval measurePeriod = (Interval)measurePeriodAsObject;
+//
+//                final Expression low = measurePeriod.getLow();
+//            }
+//        }
+
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        return engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
+
+//        return engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
+        return engine.evaluate(new VersionedIdentifier().withId(id.getId()), expressions, buildContextParameter(patientId), evaluationParameters, null, zonedDateTime);
     }
 }

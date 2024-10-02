@@ -30,8 +30,10 @@ public class R4DateHelper {
             final java.util.Date periodStartJavaUtilDate = convertToJavaUtilDateKeepOffset(dtStart);
             final java.util.Date periodEndJavaUtilDate = convertToJavaUtilDateKeepOffset(dtEnd);
 
-            period.setStart(periodStartJavaUtilDate)
-                  .setEnd(periodEndJavaUtilDate);
+//            period.setStart(periodStartJavaUtilDate)
+//                  .setEnd(periodEndJavaUtilDate);
+
+            period.setStart(dtStart.toJavaDate()).setEnd(dtEnd.toJavaDate());
         } else if (measurementPeriodInterval.getStart() instanceof Date) {
             Date dStart = (Date) measurementPeriodInterval.getStart();
             Date dEnd = (Date) measurementPeriodInterval.getEnd();

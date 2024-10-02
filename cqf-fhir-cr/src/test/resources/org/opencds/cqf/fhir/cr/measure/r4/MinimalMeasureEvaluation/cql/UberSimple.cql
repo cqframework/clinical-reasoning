@@ -2,6 +2,8 @@ library UberSimple
 
 using FHIR version '4.0.1'
 
+include FHIRHelpers version '4.0.1' called FHIRHelpers
+
 parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)
 
 context Patient
@@ -21,4 +23,4 @@ define "All Encounters":
 
 define "Encounters in Period":
      [Encounter] E
-       where E.period within "Measurement Period"
+       where E.period during "Measurement Period"

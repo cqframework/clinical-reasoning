@@ -422,7 +422,7 @@ public class CareGaps {
 
         public SelectedDetectedIssue hasGroupIdReportExtension(String groupId) {
             var groupIdExt = detectedIssueReport().getExtensionByUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
-            assertEquals(groupIdExt.getValue(), new StringType(groupId));
+            assertEquals(groupIdExt.getValue().toString(), groupId);
             return this;
         }
     }

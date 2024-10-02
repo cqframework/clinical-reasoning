@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
@@ -245,18 +247,21 @@ public class InMemoryFhirRepository implements Repository {
         return returnBundle;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R extends IBaseResource, P extends IBaseParameters> R invoke(
             String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
         try {
-            return (R) operationRegistry
+            var result = operationRegistry
                     .buildContext(this, name)
                     .parameters(parameters)
                     .execute();
+            return returnType.cast(result);
         } catch (BaseServerResponseException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new InternalErrorException(e);
         }
     }
@@ -266,19 +271,23 @@ public class InMemoryFhirRepository implements Repository {
         throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+        checkNotNull(resourceType, "resourceType is required");
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
         try {
-            return (R) operationRegistry
+            var result = operationRegistry
                     .buildContext(this, name)
                     .parameters(parameters)
                     .resourceType(resourceType)
                     .execute();
+            return returnType.cast(result);
         } catch (BaseServerResponseException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new InternalErrorException(e);
         }
     }
@@ -289,19 +298,27 @@ public class InMemoryFhirRepository implements Repository {
         throw new NotImplementedOperationException("Invoke is not currently supported");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
+        checkNotNull(id, "id is required");
+        checkArgument(id.hasResourceType(), "resourceType is required for id scoped operations");
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
         try {
-            return (R) operationRegistry
+            var result = operationRegistry
                     .buildContext(this, name)
                     .parameters(parameters)
                     .id(id)
+                    .resourceType(this.context
+                            .getResourceDefinition(id.getResourceType())
+                            .getImplementingClass())
                     .execute();
+            return returnType.cast(result);
         } catch (BaseServerResponseException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new InternalErrorException(e);
         }
     }

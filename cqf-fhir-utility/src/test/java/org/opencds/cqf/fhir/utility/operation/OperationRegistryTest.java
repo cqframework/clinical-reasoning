@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ class OperationRegistryTest {
         // depends on the parameters passed to the operation invocation. We don't
         // have all those parameters until we try to execute the operation.
         var ctx = registry.buildContext(repo, "nonExistentOperation");
-        var e = assertThrows(IllegalArgumentException.class, () -> ctx.execute());
+        var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().contains("name"));
     }
 
@@ -85,7 +86,7 @@ class OperationRegistryTest {
 
         var ctx = constructAndRegister(ServerScopedExample.class).buildContext(repo, "serverScoped");
         ctx.id(new IdType("Library/123"));
-        var e = assertThrows(IllegalArgumentException.class, () -> ctx.execute());
+        var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("scope"));
     }
 
@@ -99,7 +100,7 @@ class OperationRegistryTest {
 
         var ctx = constructAndRegister(TypedScopeExample.class).buildContext(repo, "typeScoped");
         ctx.resourceType(Library.class);
-        var e = assertThrows(IllegalArgumentException.class, () -> ctx.execute());
+        var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("type"));
     }
 
@@ -115,7 +116,7 @@ class OperationRegistryTest {
 
         var ctx = constructAndRegister(AmbiguousExample.class).buildContext(repo, "ambiguous");
         ctx.resourceType(Library.class);
-        var e = assertThrows(IllegalArgumentException.class, () -> ctx.execute());
+        var e = assertThrows(IllegalStateException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("multiple"));
     }
 

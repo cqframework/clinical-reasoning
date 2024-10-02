@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.utility.operation;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -84,8 +86,13 @@ public class OperationRegistry {
             }
         }
 
-        public IBaseResource execute() throws Exception {
-            return OperationRegistry.this.execute(this);
+        public IBaseResource execute() throws Exception, Throwable {
+            try {
+                return OperationRegistry.this.execute(this);
+            } catch (InvocationTargetException e) {
+                // unwrap the exception thrown by the method
+                throw e.getCause();
+            }
         }
     }
 
@@ -149,14 +156,14 @@ public class OperationRegistry {
 
         var contexts = invocationContextByName.get(name);
         if (contexts.isEmpty()) {
-            throw new IllegalArgumentException("No operation found with name " + name);
+            throw new InvalidRequestException("No operation found with name " + name);
         }
 
         var scopedContexts =
                 contexts.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
 
         if (scopedContexts.isEmpty()) {
-            throw new IllegalArgumentException("No operation found with name " + name + " and scope " + scope);
+            throw new InvalidRequestException("No operation found with name " + name + " and scope " + scope);
         }
 
         // Only filter by type if the typeName is not empty
@@ -166,11 +173,11 @@ public class OperationRegistry {
         var typeContexts = scopedContexts.stream().filter(typePredicate).collect(Collectors.toList());
 
         if (typeContexts.isEmpty()) {
-            throw new IllegalArgumentException("No operation found with type " + typeName);
+            throw new InvalidRequestException("No operation found with type " + typeName);
         }
 
         if (typeContexts.size() > 1) {
-            throw new IllegalArgumentException("Multiple operations found with name " + name + " and type " + typeName);
+            throw new IllegalStateException("Multiple operations found with name " + name + " and type " + typeName);
         }
 
         return typeContexts.get(0);

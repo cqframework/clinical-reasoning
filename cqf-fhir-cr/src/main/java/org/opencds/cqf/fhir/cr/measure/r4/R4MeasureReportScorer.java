@@ -63,7 +63,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return groupDefs.stream()
                 .filter(t -> t.id().equals(mrgc.getId()))
                 .findFirst()
-                .orElseThrow();
+                .orElse(null);
     }
 
     protected MeasureScoring checkMissingScoringType(MeasureScoring measureScoring) {

@@ -167,4 +167,15 @@ class ItemGeneratorTests {
                 .then()
                 .hasItemCount(11);
     }
+
+    @Test
+    void generateWithLaunchContexts() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "LaunchContexts"))
+                .subjectId(ROUTE_ONE_PATIENT)
+                .then()
+                .hasItemCount(3)
+                .hasLaunchContextExtension(5);
+    }
 }

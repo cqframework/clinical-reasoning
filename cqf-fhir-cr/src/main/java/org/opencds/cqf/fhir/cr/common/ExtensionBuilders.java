@@ -120,6 +120,7 @@ public class ExtensionBuilders {
                 display = "Location";
                 resourceType = display;
                 break;
+            case "practitioner":
             case "user":
                 display = "User";
                 resourceType = resourceType == null ? "Practitioner" : resourceType;

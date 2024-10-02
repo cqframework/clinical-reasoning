@@ -77,12 +77,15 @@ public class ItemGenerator {
                                         request.getFhirVersion(), caseFeature.getLibraryUrl())));
                 // Add any other in parameters that match launch context codes
                 var inParameters = featureLibrary.getParameter().stream()
-                        .filter(p -> request.resolvePathString(p, "use").equals("in")
-                                && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
-                                        .map(c -> c.toString())
-                                        .collect(Collectors.toList())
-                                        .contains(request.resolvePathString(p, "name")
-                                                .toUpperCase()))
+                        .filter(p -> {
+                            var name = request.resolvePathString(p, "name").toUpperCase();
+                            return (name.equals("PRACTITIONER"))
+                                    || request.resolvePathString(p, "use").equals("in")
+                                            && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
+                                                    .map(c -> c.toString())
+                                                    .collect(Collectors.toList())
+                                                    .contains(name);
+                        })
                         .collect(Collectors.toList());
                 inParameters.forEach(p -> launchContextExts.add(ExtensionBuilders.buildSdcLaunchContextExt(
                         request.getFhirVersion(),

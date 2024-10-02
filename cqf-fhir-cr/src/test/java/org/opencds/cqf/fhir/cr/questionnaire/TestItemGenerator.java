@@ -17,9 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -236,6 +238,26 @@ public class TestItemGenerator {
 
         public GeneratedItem hasId(String expectedId) {
             assertEquals(expectedId, questionnaire.getIdElement().getIdPart());
+            return this;
+        }
+
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        public GeneratedItem hasLaunchContextExtension(int count) {
+            var pathResult = modelResolver.resolvePath(questionnaire, "extension");
+            var exts = pathResult instanceof List ? (List<IBaseExtension>) pathResult : new ArrayList<>();
+            var launchContextExts = exts.stream()
+                    .filter(e -> {
+                        var urlPathResult = modelResolver.resolvePath(e, "url");
+                        if (urlPathResult instanceof IPrimitiveType) {
+                            return ((IPrimitiveType<String>) urlPathResult)
+                                    .getValueAsString()
+                                    .equals(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+                        } else {
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+            assertEquals(count, launchContextExts.size());
             return this;
         }
     }

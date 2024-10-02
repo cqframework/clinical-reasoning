@@ -54,15 +54,15 @@ interface ParameterBinder {
             throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
         }
 
-        var unboundParamCount =
+        var extraParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.EXTRA).count();
-        if (unboundParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @UnboundParam");
+        if (extraParamCount > 1) {
+            throw new IllegalArgumentException("Method cannot have more than one @ExtraParams");
         }
 
-        if (unboundParamCount > 0
+        if (extraParamCount > 0
                 && parameterBinders.get(parameterBinders.size() - 1).type() != Type.EXTRA) {
-            throw new IllegalArgumentException("If @UnboundParam is present, it must be the last parameter");
+            throw new IllegalArgumentException("If @ExtraParams is present, it must be the last parameter");
         }
 
         return parameterBinders;
@@ -302,7 +302,7 @@ interface ParameterBinder {
             this.parameter = requireNonNull(parameter, "parameter can not be null");
             checkArgument(
                     IBaseParameters.class.isAssignableFrom(parameter.getType()),
-                    "Parameter annotated with @UnboundParam must be of type IBaseParameters");
+                    "Parameter annotated with @ExtraParams must be of type IBaseParameters");
         }
 
         @Override
@@ -312,7 +312,7 @@ interface ParameterBinder {
 
         @Override
         public String name() {
-            return "<unbound>";
+            return "<extra>";
         }
 
         @Override

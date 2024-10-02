@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -238,5 +239,46 @@ public class MethodBinderTest {
         var provider = new ExampleMethods();
         var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, null));
         assertTrue(e.getMessage().contains("id required"));
+    }
+
+    @Test
+    public void missingOperationParamAnnotation_throws() {
+        final class MissingOperationAnnotation {
+            @Operation(name = "missingOperationParam")
+            public IBaseResource missingOperationParam(StringType param) {
+                return null;
+            }
+        }
+
+        var method = MissingOperationAnnotation.class.getDeclaredMethods()[0];
+        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
+        assertTrue(e.getMessage().contains("must be annotated"));
+    }
+
+    @Test
+    public void conflictingAnnotations_throws() {
+        final class ConflictingAnnotation {
+            @Operation(name = "function")
+            public IBaseResource function(@IdParam @OperationParam(name = "id") IdType id) {
+                return null;
+            }
+        }
+
+        var method = ConflictingAnnotation.class.getDeclaredMethods()[0];
+        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
+        assertTrue(e.getMessage().contains("one of"));
+    }
+
+    @Test
+    public void missingOperationAnnotation_throws() {
+        final class MissingOperationAnnotation {
+            public IBaseResource function(@IdParam IdType id) {
+                return null;
+            }
+        }
+
+        var method = MissingOperationAnnotation.class.getDeclaredMethods()[0];
+        var e = assertThrows(NullPointerException.class, () -> new MethodBinder(method));
+        assertTrue(e.getMessage().contains("must be annotated"));
     }
 }

@@ -18,4 +18,11 @@ class ResourcesTest {
         assertNotSame(c, lib);
         assertTrue(c.equalsDeep(lib));
     }
+
+    @Test
+    void testStringify() {
+        var lib = new Library();
+        var s = Resources.stringify(lib);
+        assertTrue(s.contains("Library"));
+    }
 }

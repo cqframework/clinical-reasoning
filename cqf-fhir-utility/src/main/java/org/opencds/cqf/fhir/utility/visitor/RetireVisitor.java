@@ -17,8 +17,8 @@ public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
     @Override
     public IBase visit(
             KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
-        if (!rootAdapter.getStatus().equals("draft")) {
-            throw new PreconditionFailedException("Cannot withdraw an artifact that is not in draft status");
+        if (!rootAdapter.getStatus().equals("active")) {
+            throw new PreconditionFailedException("Cannot retire an artifact that is not in active status");
         }
         var fhirVersion = rootAdapter.get().getStructureFhirVersionEnum();
         var transactionBundle = BundleHelper.newBundle(fhirVersion, null, "transaction");

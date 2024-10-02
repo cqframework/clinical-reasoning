@@ -61,7 +61,7 @@ public class RetireVisitorTest {
         Bundle tsBundle = spyRepository.transaction(bundle);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "1.1.0-draft";
+        String version = "1.1.0";
         Library library = spyRepository.read(Library.class, new IdType(id)).copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
@@ -95,7 +95,7 @@ public class RetireVisitorTest {
     void library_retire_no_draft_test() {
         try {
             Bundle bundle = (Bundle) jsonParser.parseResource(
-                    WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                    WithdrawVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
             spyRepository.transaction(bundle);
             String version = "1.01.21";
             Library library = spyRepository
@@ -108,7 +108,7 @@ public class RetireVisitorTest {
 
             fail("Trying to withdraw an active Library should throw an Exception");
         } catch (PreconditionFailedException e) {
-            assert (e.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
+            assert (e.getMessage().contains("Cannot retire an artifact that is not in active status"));
         }
     }
 }

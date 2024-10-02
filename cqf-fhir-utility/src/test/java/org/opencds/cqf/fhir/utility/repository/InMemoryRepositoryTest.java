@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-class InMemoryRepositoryTest {
+public class InMemoryRepositoryTest {
 
     Repository repository;
 

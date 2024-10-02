@@ -40,6 +40,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3._1999.xhtml.P;
+import javax.annotation.Nullable;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -89,17 +90,7 @@ public class MeasureEvaluator {
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
-        final Object measurementPeriodLowObject = measurementPeriod.getLow();
-
-        final ZonedDateTime zonedDateTime;
-        if (measurementPeriodLowObject instanceof DateTime) {
-            final DateTime measurementPeriodLow = (DateTime) measurementPeriodLowObject;
-            zonedDateTime = LocalDateTime.now()
-                .atOffset(measurementPeriodLow.getZoneOffset())
-                .toZonedDateTime();
-        } else {
-            zonedDateTime = null;
-        }
+        final ZonedDateTime zonedDateTime = getZonedTimeZoneForEval(measurementPeriod);
 
         switch (measureEvalType) {
             case PATIENT:
@@ -121,6 +112,29 @@ public class MeasureEvaluator {
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
         }
+    }
+
+    @Nullable
+    private static  ZonedDateTime getZonedTimeZoneForEval(Interval theMeasurementPeriod) {
+        if (theMeasurementPeriod == null) {
+            return null;
+        }
+
+        final Object measurementPeriodLowObject = theMeasurementPeriod.getLow();
+
+        if (measurementPeriodLowObject == null) {
+            return null;
+        }
+
+        if (measurementPeriodLowObject instanceof DateTime) {
+            final DateTime measurementPeriodLow = (DateTime) measurementPeriodLowObject;
+
+            return LocalDateTime.now()
+                .atOffset(measurementPeriodLow.getZoneOffset())
+                .toZonedDateTime();
+        }
+
+        return null;
     }
 
     protected ParameterDef getMeasurementPeriodParameterDef() {

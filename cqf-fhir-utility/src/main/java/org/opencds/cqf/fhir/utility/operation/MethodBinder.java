@@ -86,13 +86,18 @@ class MethodBinder {
     }
 
     private List<Object> args(IIdType id, IBaseParameters parameters) {
+        if (this.scope != Scope.INSTANCE && id != null) {
+            throw new IllegalArgumentException("id not supported on non-instance operation");
+        } else if (this.scope == Scope.INSTANCE && id == null) {
+            throw new IllegalArgumentException("id required for instance operation");
+        }
 
         var args = new ArrayList<>(parameterBinders.size());
         int paramIndex = 0;
 
         // If we have an id parameter for the method
         // it's guaranteed to be the first parameter
-        if (this.scope == Scope.INSTANCE) {
+        if (id != null) {
             args.add(id);
             paramIndex++;
         }

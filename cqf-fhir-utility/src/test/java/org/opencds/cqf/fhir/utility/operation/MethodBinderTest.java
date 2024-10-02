@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.operation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Test;
 
@@ -207,5 +209,34 @@ public class MethodBinderTest {
     public void nameNormalizes() {
         var m = methodBinderByName("nameNormalizes");
         assertEquals("nameNormalizes", m.name());
+    }
+
+    @Test
+    public void unboundArgs_throws() {
+        var m = methodBinderByName("noArgs");
+
+        var provider = new ExampleMethods();
+        var parameters = new Parameters().addParameter("anyParam", new StringType("anyValue"));
+        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, parameters));
+        assertTrue(e.getMessage().contains("not bound"));
+    }
+
+    @Test
+    public void idWithoutInstanceScope_throws() {
+        var m = methodBinderByName("noArgs");
+
+        var provider = new ExampleMethods();
+        var id = new IdType("Library/123");
+        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, id, null));
+        assertTrue(e.getMessage().contains("non-instance"));
+    }
+
+    @Test
+    public void instanceScopeWithoutId_throws() {
+        var m = methodBinderByName("idFirst");
+
+        var provider = new ExampleMethods();
+        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, null));
+        assertTrue(e.getMessage().contains("id required"));
     }
 }

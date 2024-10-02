@@ -255,7 +255,7 @@ public class InMemoryFhirRepository implements Repository {
         checkNotNull(headers, "headers are required");
         try {
             var result = operationRegistry
-                    .buildContext(this, name)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .execute();
             return returnType.cast(result);
@@ -280,7 +280,7 @@ public class InMemoryFhirRepository implements Repository {
         checkNotNull(headers, "headers are required");
         try {
             var result = operationRegistry
-                    .buildContext(this, name)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .resourceType(resourceType)
                     .execute();
@@ -308,7 +308,7 @@ public class InMemoryFhirRepository implements Repository {
         checkNotNull(headers, "headers are required");
         try {
             var result = operationRegistry
-                    .buildContext(this, name)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .id(id)
                     .resourceType(this.context

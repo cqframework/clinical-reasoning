@@ -135,7 +135,7 @@ public class OperationRegistry {
      * @param operationName the name of the operation to execute
      * @return an OperationInvocationParams object that can be used to execute the operation
      */
-    public OperationInvocationParams buildContext(Repository repository, String operationName) {
+    public OperationInvocationParams buildInvocationContext(Repository repository, String operationName) {
         return new OperationInvocationParams(repository, operationName);
     }
 
@@ -143,10 +143,14 @@ public class OperationRegistry {
         requireNonNull(params, "Operation invocation parameters cannot be null");
         var context = findInvocationContext(params.scope(), params.name(), params.typeName());
 
-        var instance = context.factory().apply(params.repository);
+        var instance = context.factory().apply(params.repository());
         var callable = context.methodBinder().bind(instance, params.id(), params.parameters());
 
         return callable.call();
+    }
+
+    private static String normalizeName(String name) {
+        return name.startsWith("$") ? name.substring(1) : name;
     }
 
     private InvocationContext<?> findInvocationContext(Scope scope, String name, String typeName) {
@@ -154,16 +158,18 @@ public class OperationRegistry {
         requireNonNull(name, "operation name cannot be null");
         requireNonNull(typeName, "typeName cannot be null");
 
-        var contexts = invocationContextByName.get(name);
+        var normalizedName = normalizeName(name);
+
+        var contexts = invocationContextByName.get(normalizedName);
         if (contexts.isEmpty()) {
-            throw new InvalidRequestException("No operation found with name " + name);
+            throw new InvalidRequestException("No operation found with name " + normalizedName);
         }
 
         var scopedContexts =
                 contexts.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
 
         if (scopedContexts.isEmpty()) {
-            throw new InvalidRequestException("No operation found with name " + name + " and scope " + scope);
+            throw new InvalidRequestException("No operation found with name " + normalizedName + " and scope " + scope);
         }
 
         // Only filter by type if the typeName is not empty
@@ -177,7 +183,8 @@ public class OperationRegistry {
         }
 
         if (typeContexts.size() > 1) {
-            throw new IllegalStateException("Multiple operations found with name " + name + " and type " + typeName);
+            throw new IllegalStateException(
+                    "Multiple operations found with name " + normalizedName + " and type " + typeName);
         }
 
         return typeContexts.get(0);

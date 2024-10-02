@@ -70,7 +70,7 @@ class OperationRegistryTest {
         // Whether an operation invocation is scoped by instance, type, or server
         // depends on the parameters passed to the operation invocation. We don't
         // have all those parameters until we try to execute the operation.
-        var ctx = registry.buildContext(repo, "nonExistentOperation");
+        var ctx = registry.buildInvocationContext(repo, "nonExistentOperation");
         var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().contains("name"));
     }
@@ -84,7 +84,7 @@ class OperationRegistryTest {
             public void serverScoped() {}
         }
 
-        var ctx = constructAndRegister(ServerScopedExample.class).buildContext(repo, "serverScoped");
+        var ctx = constructAndRegister(ServerScopedExample.class).buildInvocationContext(repo, "serverScoped");
         ctx.id(new IdType("Library/123"));
         var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("scope"));
@@ -98,7 +98,7 @@ class OperationRegistryTest {
             public void typeScoped() {}
         }
 
-        var ctx = constructAndRegister(TypedScopeExample.class).buildContext(repo, "typeScoped");
+        var ctx = constructAndRegister(TypedScopeExample.class).buildInvocationContext(repo, "typeScoped");
         ctx.resourceType(Library.class);
         var e = assertThrows(InvalidRequestException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("type"));
@@ -114,7 +114,7 @@ class OperationRegistryTest {
             public void ambiguous2() {}
         }
 
-        var ctx = constructAndRegister(AmbiguousExample.class).buildContext(repo, "ambiguous");
+        var ctx = constructAndRegister(AmbiguousExample.class).buildInvocationContext(repo, "ambiguous");
         ctx.resourceType(Library.class);
         var e = assertThrows(IllegalStateException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("multiple"));
@@ -137,7 +137,7 @@ class OperationRegistryTest {
         var arguments = new Parameters();
         arguments.addParameter().setName("resource").setResource(new Library().setId("123"));
 
-        var op = registry.buildContext(repo, "get-id").parameters(arguments);
+        var op = registry.buildInvocationContext(repo, "get-id").parameters(arguments);
         var result = assertDoesNotThrow(() -> op.execute());
 
         var p = assertInstanceOf(Parameters.class, result);
@@ -150,7 +150,7 @@ class OperationRegistryTest {
         arguments.addParameter().setName("resource").setResource(new Library().setId("123"));
         arguments.addParameter().setName("resource").setResource(new Library().setId("456"));
 
-        var op2 = registry.buildContext(repo, "get-id").parameters(arguments);
+        var op2 = registry.buildInvocationContext(repo, "get-id").parameters(arguments);
 
         var e = assertThrows(IllegalArgumentException.class, () -> op2.execute());
         assertTrue(e.getMessage().contains("parts"));
@@ -159,9 +159,37 @@ class OperationRegistryTest {
         arguments = new Parameters();
         arguments.addParameter().setName("resource").setValue(new StringType("123"));
 
-        var op3 = registry.buildContext(repo, "get-id").parameters(arguments);
+        var op3 = registry.buildInvocationContext(repo, "get-id").parameters(arguments);
         e = assertThrows(IllegalArgumentException.class, () -> op3.execute());
         assertTrue(e.getMessage().contains("type"));
+    }
+
+    @Test
+    void nameNormalization() {
+        final class NameNormalizationExample {
+            @Operation(name = "$withAmpersand")
+            public IBaseResource withAmpersand() {
+                return null;
+            }
+
+            @Operation(name = "noAmpersand")
+            public IBaseResource noAmpersand() {
+                return null;
+            }
+        }
+
+        var registry = constructAndRegister(NameNormalizationExample.class, r -> new NameNormalizationExample());
+        var op = registry.buildInvocationContext(repo, "$withAmpersand");
+        assertDoesNotThrow(() -> op.execute());
+
+        var op2 = registry.buildInvocationContext(repo, "withAmpersand");
+        assertDoesNotThrow(() -> op2.execute());
+
+        var op3 = registry.buildInvocationContext(repo, "$noAmpersand");
+        assertDoesNotThrow(() -> op3.execute());
+
+        var op4 = registry.buildInvocationContext(repo, "noAmpersand");
+        assertDoesNotThrow(() -> op4.execute());
     }
 
     @Test
@@ -189,7 +217,7 @@ class OperationRegistryTest {
         resourceParam.addPart().setResource(new Measure().setId("456"));
 
         OperationInvocationParams op = constructAndRegister(GetIdFromResources.class, r -> new GetIdFromResources())
-                .buildContext(repo, "get-id")
+                .buildInvocationContext(repo, "get-id")
                 .parameters(arguments);
         var result = assertDoesNotThrow(() -> op.execute());
 

@@ -4,7 +4,7 @@ using FHIR version '4.0.1'
 
 include FHIRHelpers version '4.0.1' called FHIRHelpers
 
-parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)
+parameter "Measurement Period" Interval<DateTime> default Interval[@2020-01-16T20:00:00, @2020-01-16T21:00:00)
 
 context Patient
 

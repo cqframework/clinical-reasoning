@@ -274,7 +274,7 @@ public class MeasureEvaluator {
 
             // LUKETODO:
             EvaluationResult result =
-                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, zonedDateTime, context);
+                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, null, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

@@ -1020,6 +1020,7 @@ class MinimalMeasureEvaluationTest {
         //    "start": "2020-01-16T20:00:00Z",
         //    "end": "2020-01-16T21:00:00Z"
         //  }
+        // test is one hour after resource period
         var when = GIVEN_REPO
             .when()
             .measureId("UberSimple")
@@ -1040,5 +1041,64 @@ class MinimalMeasureEvaluationTest {
             .up()
             .population("numerator")
             .hasCount(0);
+    }
+
+    @Test
+    void uberSimple_UsesMeasurementPeriodToExcludeResource2() {
+        //Targeted Encounter "period": {
+        //    "start": "2020-01-16T20:00:00Z",
+        //    "end": "2020-01-16T21:00:00Z"
+        //  }
+        // test is one hour before resource period
+        var when = GIVEN_REPO
+            .when()
+            .measureId("UberSimple")
+            .periodStart(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 19, 0, 0), ZoneOffset.UTC))
+            .periodEnd(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0), ZoneOffset.UTC))
+            .reportType("subject")
+            .subject("Patient/female-1914")
+            .evaluate().then();
+
+        when
+            .hasReportType("Individual")
+            .hasPeriodStart(Date.from(LocalDateTime.of(2020, Month.JANUARY, 16, 19, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasPeriodEnd(Date.from(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasSubjectReference("Patient/female-1914")
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1)
+            .up()
+            .population("numerator")
+            .hasCount(0);
+    }
+
+    @Test
+    void uberSimple_DefaultMeasurementPeriodToIncludeResource() {
+        //Targeted Encounter "period": {
+        //    "start": "2020-01-16T20:00:00Z",
+        //    "end": "2020-01-16T21:00:00Z"
+        //  }
+        // default period should default to UTC of parameter default
+        // parameter "Measurement Period" Interval<DateTime> default Interval[@2020-01-16T20:00:00, @2020-01-16T21:00:00)
+        var when = GIVEN_REPO
+            .when()
+            .measureId("UberSimple")
+            //.periodStart(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0), ZoneOffset.UTC))
+            //.periodEnd(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0), ZoneOffset.UTC))
+            .reportType("subject")
+            .subject("Patient/female-1914")
+            .evaluate().then();
+
+        when
+            .hasReportType("Individual")
+            .hasPeriodStart(Date.from(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasPeriodEnd(Date.from(LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0).toInstant(ZoneOffset.UTC)))
+            .hasSubjectReference("Patient/female-1914")
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1)
+            .up()
+            .population("numerator")
+            .hasCount(1);
     }
 }

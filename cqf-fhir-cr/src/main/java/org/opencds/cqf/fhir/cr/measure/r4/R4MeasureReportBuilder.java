@@ -65,6 +65,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
@@ -318,11 +319,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         reportGroup.setCode(measureGroup.getCode());
         reportGroup.setId(measureGroup.getId());
-
-        if (measureGroup.hasDescription()) {
-            reportGroup.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measureGroup.getDescription()));
-        }
+        // Measure Level Extension
+        addMeasureDescription(reportGroup, measureGroup);
+        addExtensionImprovementNotation(reportGroup, bc.measureDef, groupDef);
 
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             var measurePop = measureGroup.getPopulation().get(i);
@@ -430,6 +429,35 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             var reportStratum = reportStratifier.addStratum();
             buildStratum(bc, reportStratum, stratValue.getKey(), stratValue.getValue(), populations, groupDef);
+        }
+    }
+
+    protected void addMeasureDescription(MeasureReportGroupComponent reportGroup, MeasureGroupComponent measureGroup) {
+        if (measureGroup.hasDescription()) {
+            reportGroup.addExtension(
+                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measureGroup.getDescription()));
+        }
+    }
+
+    protected void addExtensionImprovementNotation(
+            MeasureReportGroupComponent reportGroup, MeasureDef measureDef, GroupDef groupDef) {
+        // if already set on Measure, don't set on groups too
+        if (!measureDef.useMeasureImpNotation()) {
+            if (groupDef.isPositiveImprovementNotation()) {
+                reportGroup.addExtension(
+                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
+                        new CodeableConcept(new Coding(
+                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY)));
+            } else {
+                reportGroup.addExtension(
+                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
+                        new CodeableConcept(new Coding(
+                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY)));
+            }
         }
     }
 
@@ -733,7 +761,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         report.setMeasure(getMeasure(measure));
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());
-        report.setImprovementNotation(measure.getImprovementNotation());
+        if (measureDef.useMeasureImpNotation()) {
+            // if true, all group components have the same improvement Notation
+            report.setImprovementNotation(measure.getImprovementNotation());
+        }
         report.setLanguage(measure.getLanguage());
 
         if (measure.hasDescription()) {

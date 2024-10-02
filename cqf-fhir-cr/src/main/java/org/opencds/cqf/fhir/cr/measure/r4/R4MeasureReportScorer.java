@@ -48,8 +48,22 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            scoreGroup(getGroupMeasureScoring(mrgc, measureDef), mrgc);
+            scoreGroup(
+                    getGroupMeasureScoring(mrgc, measureDef),
+                    mrgc,
+                    getGroupDef(measureDef, mrgc).isPositiveImprovementNotation());
         }
+    }
+
+    protected GroupDef getGroupDef(MeasureDef measureDef, MeasureReportGroupComponent mrgc) {
+        var groupDefs = measureDef.groups();
+        if (groupDefs.size() == 1) {
+            return groupDefs.get(0);
+        }
+        return groupDefs.stream()
+                .filter(t -> t.id().equals(mrgc.getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
     protected MeasureScoring checkMissingScoringType(MeasureScoring measureScoring) {
@@ -90,7 +104,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(groupScoringType);
     }
 
-    protected void scoreGroup(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc) {
+    protected void scoreGroup(
+            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
@@ -98,7 +113,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                         getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
                         getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
                 if (score != null) {
-                    mrgc.setMeasureScore(new Quantity(score));
+                    if (isIncreaseImprovementNotation) {
+                        mrgc.setMeasureScore(new Quantity(score));
+                    } else {
+                        mrgc.setMeasureScore(new Quantity(1 - score));
+                    }
                 }
                 break;
             default:

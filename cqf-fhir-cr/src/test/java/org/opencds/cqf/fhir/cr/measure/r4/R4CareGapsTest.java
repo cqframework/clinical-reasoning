@@ -610,23 +610,40 @@ class R4CareGapsTest {
                 .detectedIssue()
                 .hasCareGapStatus("prospective-gap");
     }
-    /*
-    // TODO implement Measure Group Level improvement notation extension
+
+    // implement Measure Group Level improvement notation extension
     @Test
     void MinimalProportionBooleanBasisMultiGroupGroupImpNotation() {
+        // 2 Detected issues,1 per groupId, one 'closed-gap' the other 'open-gap'
+        // make sure each group matches the correct status and has extension reference
         GIVEN_REPO
-            .when()
-            .subject("Patient/female-1988")
-            .periodStart("2019-01-01")
-            .periodEnd("2019-12-31")
-            .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
-            .statuses("closed-gap")
-            .getCareGapsReport()
-            .then()
-            .hasBundleCount(1)
-            .firstParameter()
-            .detectedIssueCount(
-                2); // 2 Detected issue per groupId, one is decrease, the other increase improvement Notation. Both should be closed-gap
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+                .statuses("closed-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasGroupIdReportExtension("group-2");
+
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart("2019-01-01")
+                .periodEnd("2019-12-31")
+                .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+                .statuses("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasGroupIdReportExtension("group-1");
     }
-     */
 }

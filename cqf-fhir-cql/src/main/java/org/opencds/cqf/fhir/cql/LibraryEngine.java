@@ -300,7 +300,6 @@ public class LibraryEngine {
         return result;
     }
 
-    // LUKETODO:  This is where we're missing the offset
     public EvaluationResult getEvaluationResult(
             VersionedIdentifier id,
             String patientId,

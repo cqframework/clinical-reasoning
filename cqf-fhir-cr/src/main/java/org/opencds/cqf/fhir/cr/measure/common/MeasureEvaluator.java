@@ -176,6 +176,8 @@ public class MeasureEvaluator {
         if (measurementPeriod == null) {
             measurementPeriod =
                     (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
+            // LUKETODO:  get rid of this:
+            logger.info("Default measurementPeriod from evaluation visitor: {}", measurementPeriod);
             this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
             return;
         }
@@ -272,9 +274,8 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
-            // LUKETODO:
             EvaluationResult result =
-                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, null, context);
+                libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

@@ -12,6 +12,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -51,6 +53,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     @FunctionalInterface
     interface Validator<T> {
@@ -346,7 +350,13 @@ public class Measure {
 
         public SelectedReport hasPeriodStart(Date periodStart) {
             var period = this.report().getPeriod();
-            assertEquals(periodStart, period.getStart());
+            assertEquals(
+                periodStart,
+                period.getStart(),
+                String.format(
+                    "Expected period start of %s but was: %s",
+                    DATE_FORMAT.format(periodStart),
+                    DATE_FORMAT.format(period.getStart())));
             return this;
         }
 

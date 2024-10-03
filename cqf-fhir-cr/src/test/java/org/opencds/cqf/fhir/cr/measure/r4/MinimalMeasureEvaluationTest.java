@@ -348,6 +348,7 @@ class MinimalMeasureEvaluationTest {
                 .hasScore("1.0");
     }
 
+    // LUKETODO:  try removing patient 1914 from the group and see what happens
     @Test
     void RatioBooleanBasisSingleGroup_Population() {
         var when = GIVEN_REPO

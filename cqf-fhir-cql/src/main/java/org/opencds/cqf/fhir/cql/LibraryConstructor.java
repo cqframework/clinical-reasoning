@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,20 +30,12 @@ public class LibraryConstructor {
     public String constructCqlLibrary(
             String expression, List<Pair<String, String>> libraries, List<CqlParameterDefinition> parameters) {
         logger.debug("Constructing expression for local evaluation");
-
-        StringBuilder sb = new StringBuilder();
-
-        constructHeader(sb, "expression", "1.0.0");
-        constructUsings(sb);
-        constructIncludes(sb, libraries);
-        constructParameters(sb, parameters);
-        constructContext(sb, null);
-        constructExpression(sb, expression);
-
-        String cql = sb.toString();
-
-        logger.debug(cql);
-        return cql;
+        return constructCqlLibrary(
+                "expression",
+                "1.0.0",
+                Arrays.asList(String.format("%ndefine \"return\":%n       %s", expression)),
+                libraries,
+                parameters);
     }
 
     public String constructCqlLibrary(
@@ -51,7 +44,6 @@ public class LibraryConstructor {
             List<String> expressions,
             List<Pair<String, String>> libraries,
             List<CqlParameterDefinition> parameters) {
-        logger.debug("Constructing library {} for expression set", name);
 
         StringBuilder sb = new StringBuilder();
 
@@ -68,10 +60,6 @@ public class LibraryConstructor {
 
         logger.debug(cql);
         return cql;
-    }
-
-    private void constructExpression(StringBuilder sb, String expression) {
-        sb.append(String.format("%ndefine \"return\":%n       %s", expression));
     }
 
     private String getFhirVersionString(FhirVersionEnum fhirVersion) {

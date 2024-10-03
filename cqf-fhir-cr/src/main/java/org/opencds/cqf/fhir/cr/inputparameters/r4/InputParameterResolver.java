@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -83,7 +84,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                 params.addParameter(part("%practitioner", practitioner));
             }
         }
-        resolveLaunchContext(params, context, launchContext);
+        if (launchContext != null && !launchContext.isEmpty()) {
+            resolveLaunchContext(params, context, launchContext);
+        }
         return params;
     }
 
@@ -110,62 +113,64 @@ public class InputParameterResolver extends BaseInputParameterResolver {
 
     protected void resolveLaunchContext(
             Parameters params, List<IBase> contexts, List<IBaseExtension<?, ?>> launchContexts) {
-        if (launchContexts != null && !launchContexts.isEmpty()) {
-            launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
-                var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
-                var type = launchContext
-                        .getExtensionByUrl("type")
-                        .getValueAsPrimitive()
-                        .getValueAsString();
-                if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
-                    throw new IllegalArgumentException(
-                            String.format("Unsupported launch context for %s: %s", name, type));
+        launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
+            var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
+            var type = launchContext
+                    .getExtensionByUrl("type")
+                    .getValueAsPrimitive()
+                    .getValueAsString();
+            if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
+                throw new IllegalArgumentException(String.format("Unsupported launch context for %s: %s", name, type));
+            }
+            var content = getContent(contexts, name);
+            if (content == null || content.isEmpty()) {
+                throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
+            }
+            var value = getValue(type, content);
+            if (!value.isEmpty()) {
+                var resource =
+                        (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R4));
+                if (value.size() > 1) {
+                    value.forEach(
+                            v -> ((Bundle) resource).addEntry(new BundleEntryComponent().setResource((Resource) v)));
                 }
-                var content = contexts == null
-                        ? null
-                        : contexts.stream()
-                                .map(c -> (ParametersParameterComponent) c)
-                                .filter(c -> c.getPart().stream()
-                                        .filter(p -> p.getName().equals("name"))
-                                        .anyMatch(p -> ((StringType) p.getValue())
-                                                .getValueAsString()
-                                                .equals(name)))
-                                .flatMap(c -> c.getPart().stream()
-                                        .filter(p -> p.getName().equals("content")))
-                                .collect(Collectors.toList());
-                if (content == null || content.isEmpty()) {
-                    throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
-                }
-                var value = content.stream()
-                        .map(p -> {
-                            if (p.getValue() instanceof Reference) {
-                                return readRepository(
-                                        fhirContext()
-                                                .getResourceDefinition(type)
-                                                .getImplementingClass(),
-                                        ((Reference) p.getValue()).getReferenceElement());
-                            } else {
-                                return (Resource) p.getResource();
-                            }
-                        })
-                        .filter(p -> p != null)
+                params.addParameter(part("%" + name, resource));
+                var cqlParameterName = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+                params.addParameter(part(cqlParameterName, resource));
+            } else {
+                throw new IllegalArgumentException(String.format("Unable to retrieve resource for context: %s", name));
+            }
+        });
+    }
+
+    protected List<ParametersParameterComponent> getContent(List<IBase> contexts, String name) {
+        return contexts == null
+                ? null
+                : contexts.stream()
+                        .map(c -> (ParametersParameterComponent) c)
+                        .filter(c -> c.getPart().stream()
+                                .filter(p -> p.getName().equals("name"))
+                                .anyMatch(p -> ((StringType) p.getValue())
+                                        .getValueAsString()
+                                        .equals(name)))
+                        .flatMap(c ->
+                                c.getPart().stream().filter(p -> p.getName().equals("content")))
                         .collect(Collectors.toList());
-                if (!value.isEmpty()) {
-                    var resource =
-                            (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R4));
-                    if (value.size() > 1) {
-                        value.forEach(v ->
-                                ((Bundle) resource).addEntry(new BundleEntryComponent().setResource((Resource) v)));
+    }
+
+    protected List<IBaseResource> getValue(String type, List<ParametersParameterComponent> content) {
+        return content.stream()
+                .map(p -> {
+                    if (p.getValue() instanceof Reference) {
+                        return readRepository(
+                                fhirContext().getResourceDefinition(type).getImplementingClass(),
+                                ((Reference) p.getValue()).getReferenceElement());
+                    } else {
+                        return (Resource) p.getResource();
                     }
-                    params.addParameter(part("%" + name, resource));
-                    var cqlParameterName = name.substring(0, 1).toUpperCase().concat(name.substring(1));
-                    params.addParameter(part(cqlParameterName, resource));
-                } else {
-                    throw new IllegalArgumentException(
-                            String.format("Unable to retrieve resource for context: %s", name));
-                }
-            });
-        }
+                })
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
     }
 
     @Override

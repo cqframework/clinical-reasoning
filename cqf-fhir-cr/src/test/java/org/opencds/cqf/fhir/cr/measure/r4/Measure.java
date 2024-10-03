@@ -362,7 +362,13 @@ public class Measure {
 
         public SelectedReport hasPeriodEnd(Date periodEnd) {
             var period = this.report().getPeriod();
-            assertEquals(periodEnd, period.getEnd());
+            assertEquals(
+                periodEnd,
+                period.getEnd(),
+                String.format(
+                    "Expected period start of %s but was: %s",
+                    DATE_FORMAT.format(periodEnd),
+                    DATE_FORMAT.format(period.getEnd())));
             return this;
         }
 

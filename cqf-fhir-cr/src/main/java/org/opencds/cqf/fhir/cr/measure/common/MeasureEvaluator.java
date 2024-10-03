@@ -206,7 +206,7 @@ public class MeasureEvaluator {
             final DateTime end = (DateTime) endAsObject;
 
             final OffsetDateTime offsetDateTimeStart = start.getDateTime();
-            final OffsetDateTime offsetDateTimeEnd = start.getDateTime();
+            final OffsetDateTime offsetDateTimeEnd = end.getDateTime();
 
             final OffsetDateTime offsetDateTimeUtcStart = offsetDateTimeStart.withOffsetSameLocal(
                 ZoneOffset.UTC);

@@ -15,10 +15,12 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTAL
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
@@ -81,12 +83,13 @@ public class MeasureEvaluator {
             MeasureDef measureDef,
             MeasureEvalType measureEvalType,
             List<String> subjectIds,
-            Interval measurementPeriod,
+            @Nullable Interval measurementPeriod,
             IBaseParameters parameters,
             VersionedIdentifier versionedIdentifier) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
+        logger.info("6560: 1) MeasureEvaluator.evaluate() OUTER > this.setMeasurementPeriod(measurementPeriod)");
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
@@ -115,26 +118,16 @@ public class MeasureEvaluator {
     }
 
     @Nullable
-    private static  ZonedDateTime getZonedTimeZoneForEval(Interval theMeasurementPeriod) {
-        if (theMeasurementPeriod == null) {
-            return null;
-        }
-
-        final Object measurementPeriodLowObject = theMeasurementPeriod.getLow();
-
-        if (measurementPeriodLowObject == null) {
-            return null;
-        }
-
-        if (measurementPeriodLowObject instanceof DateTime) {
-            final DateTime measurementPeriodLow = (DateTime) measurementPeriodLowObject;
-
-            return LocalDateTime.now()
-                .atOffset(measurementPeriodLow.getZoneOffset())
-                .toZonedDateTime();
-        }
-
-        return null;
+    private static ZonedDateTime getZonedTimeZoneForEval(@Nullable Interval theMeasurementPeriod) {
+        return Optional.ofNullable(theMeasurementPeriod)
+            .map(Interval::getLow)
+            .filter(DateTime.class::isInstance)
+            .map(DateTime.class::cast)
+            .map(DateTime::getZoneOffset)
+            .map(zoneOffset -> LocalDateTime.now()
+                .atOffset(zoneOffset)
+                .toZonedDateTime())
+            .orElse(null);
     }
 
     protected ParameterDef getMeasurementPeriodParameterDef() {
@@ -174,11 +167,15 @@ public class MeasureEvaluator {
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
+            logger.info("6560: 2) MeasureEvaluator#setMeasurementPeriod > this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState())");
             measurementPeriod =
                     (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
+
             // LUKETODO:  get rid of this:
-            logger.info("Default measurementPeriod from evaluation visitor: {}", measurementPeriod);
-            this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+            logger.info("6560: 3) MeasureEvaluator#setMeasurementPeriod > Default measurementPeriod from evaluation visitor: {}", displayPeriod(measurementPeriod));
+            // >>>>> mutate measurement period with my desired timezone:
+            final Interval intervalWithUtc = mutateIntervalWithDefaultTimezone(measurementPeriod);
+            this.context.getState().setParameter(null, this.measurementPeriodParameterName, intervalWithUtc);
             return;
         }
 
@@ -196,6 +193,45 @@ public class MeasureEvaluator {
         Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
 
         this.context.getState().setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
+    }
+
+    // LUKETODO: this is a nasty hack   is this how we want to do this?
+    private static Interval mutateIntervalWithDefaultTimezone(Interval measurementPeriod) {
+        final Object startAsObject = measurementPeriod.getStart();
+        final Object endAsObject  = measurementPeriod.getEnd();
+
+        // LUKETODO:  error handling if one is and one isn't?
+        if (startAsObject  instanceof DateTime && endAsObject  instanceof DateTime) {
+            final DateTime start = (DateTime) startAsObject;
+            final DateTime end = (DateTime) endAsObject;
+
+            final OffsetDateTime offsetDateTimeStart = start.getDateTime();
+            final OffsetDateTime offsetDateTimeEnd = start.getDateTime();
+
+            final OffsetDateTime offsetDateTimeUtcStart = offsetDateTimeStart.withOffsetSameLocal(
+                ZoneOffset.UTC);
+            final OffsetDateTime offsetDateTimeUtcEnd = offsetDateTimeEnd.withOffsetSameLocal(
+                ZoneOffset.UTC);
+
+            final Interval intervalWithUtc = new Interval(new DateTime(offsetDateTimeUtcStart), true,
+                new DateTime(offsetDateTimeUtcEnd), true);
+
+            return intervalWithUtc;
+        }
+
+        // LUKETODO:  error handling
+        throw new IllegalArgumentException("");
+    }
+
+    private static String displayPeriod(Interval measurementPeriod) {
+        final DateTime start = (DateTime)measurementPeriod.getStart();
+        final DateTime end = (DateTime)measurementPeriod.getEnd();
+
+        return String.format("start: %s - end: %s", start.getDateTime(), end.getDateTime());
+    }
+
+    private static String displayPeriodPart(DateTime dateTime) {
+        return String.format("dateTime: %s", dateTime.getDateTime());
     }
 
     protected Interval convertInterval(Interval interval, String targetType) {
@@ -274,6 +310,7 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
+            logger.info("6560: 4) MeasureEvaluator.evaluate() INNER > libraryEngine.getEvaluationResult()");
             EvaluationResult result =
                 libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, zonedDateTime, context);
 

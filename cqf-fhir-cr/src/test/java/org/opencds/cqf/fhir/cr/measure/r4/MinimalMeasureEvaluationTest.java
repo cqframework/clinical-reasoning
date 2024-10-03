@@ -1084,12 +1084,12 @@ class MinimalMeasureEvaluationTest {
         var when = GIVEN_REPO
             .when()
             .measureId("UberSimple")
-            //.periodStart(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0), ZoneOffset.UTC))
-            //.periodEnd(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0), ZoneOffset.UTC))
+            // No explicit period start and end
             .reportType("subject")
             .subject("Patient/female-1914")
             .evaluate().then();
 
+        // LUKETODO:  in BaseElmVisitor#visitDateTime:  timezoneOffset is null
         when
             .hasReportType("Individual")
             .hasPeriodStart(Date.from(LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0).toInstant(ZoneOffset.UTC)))

@@ -125,7 +125,7 @@ public class PlanDefinitionProcessor {
     public IBaseResource dataRequirements(IBaseResource planDefinition, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository);
+                : new DataRequirementsProcessor(repository, evaluationSettings);
         return processor.getDataRequirements(planDefinition, parameters);
     }
 

@@ -20,16 +20,16 @@ import org.slf4j.LoggerFactory;
 
 public class ExtractProcessor implements IExtractProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(ExtractProcessor.class);
-    protected final ProcessItem processItem;
-    protected final ProcessDefinitionItem processDefinitionItem;
+    protected final ProcessItem itemProcessor;
+    protected final ProcessDefinitionItem definitionItemProcessor;
 
     public ExtractProcessor() {
         this(new ProcessItem(), new ProcessDefinitionItem());
     }
 
     private ExtractProcessor(ProcessItem processItem, ProcessDefinitionItem processDefinitionItem) {
-        this.processItem = processItem;
-        this.processDefinitionItem = processDefinitionItem;
+        this.itemProcessor = processItem;
+        this.definitionItemProcessor = processDefinitionItem;
     }
 
     @Override
@@ -98,8 +98,8 @@ public class ExtractProcessor implements IExtractProcessor {
             processDefinitionItem(request, item, questionnaireItem, resources, groupSubject);
         } else {
             request.getItems(item).forEach(childItem -> {
-                if (!childItem.getExtension().stream()
-                        .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))) {
+                if (childItem.getExtension().stream()
+                        .noneMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))) {
                     var childQ = request.getQuestionnaireItem(childItem, request.getItems(questionnaireItem));
                     if (!request.getItems(childItem).isEmpty()) {
                         processGroupItem(request, childItem, childQ, questionnaireCodeMap, resources, groupSubject);
@@ -134,7 +134,7 @@ public class ExtractProcessor implements IExtractProcessor {
             List<IBaseResource> resources,
             IBaseReference subject) {
         try {
-            processItem.processItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
+            itemProcessor.processItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
         } catch (Exception e) {
             request.logException(e.getMessage());
             throw e;
@@ -148,7 +148,7 @@ public class ExtractProcessor implements IExtractProcessor {
             List<IBaseResource> resources,
             IBaseReference subject) {
         try {
-            processDefinitionItem.processDefinitionItem(request, item, questionnaireItem, resources, subject);
+            definitionItemProcessor.processDefinitionItem(request, item, questionnaireItem, resources, subject);
         } catch (Exception e) {
             request.logException(e.getMessage());
             throw e;

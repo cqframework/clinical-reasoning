@@ -104,7 +104,7 @@ public class LibraryProcessor {
     public IBaseResource dataRequirements(IBaseResource library, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository);
+                : new DataRequirementsProcessor(repository, evaluationSettings);
         return processor.getDataRequirements(library, parameters);
     }
 

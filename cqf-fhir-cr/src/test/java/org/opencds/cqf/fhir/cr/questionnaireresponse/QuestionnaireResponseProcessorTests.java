@@ -101,5 +101,22 @@ class QuestionnaireResponseProcessorTests {
     }
 
     @Test
-    void extractWithContainedQuestionnaire() {}
+    void extractWithQuestionnaireUnitExt() {
+        var questionnaireResponseId = "NumericExtract";
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2);
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2);
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2);
+    }
 }

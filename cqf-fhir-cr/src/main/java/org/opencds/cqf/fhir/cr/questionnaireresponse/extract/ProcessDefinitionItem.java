@@ -129,7 +129,7 @@ public class ProcessDefinitionItem {
                 }
             }
         }
-        return new ImmutablePair<String, List<IBaseResource>>(resourceType, context);
+        return new ImmutablePair<>(resourceType, context);
     }
 
     private void processResource(
@@ -146,45 +146,60 @@ public class ProcessDefinitionItem {
         if (isCreatedResource) {
             resource.setId(new IdType(resource.fhirType(), request.getExtractId() + "-" + linkId));
             resolveMeta(resource, definition);
-            var subjectPath = getSubjectPath(resourceDefinition);
-            if (subjectPath != null) {
-                request.getModelResolver().setValue(resource, subjectPath, subject);
-            }
-            var authorPath = getAuthorPath(resourceDefinition);
-            if (authorPath != null) {
-                var authorValue = request.resolvePath(request.getQuestionnaireResponse(), "author");
-                if (authorValue != null) {
-                    request.getModelResolver().setValue(resource, authorPath, authorValue);
-                }
-            }
-            var dateAuthored =
-                    request.resolvePath(request.getQuestionnaireResponse(), "authored", IPrimitiveType.class);
-            if (dateAuthored != null) {
-                var dateDefs = getDateDefs(resourceDefinition);
-                if (dateDefs != null && !dateDefs.isEmpty()) {
-                    dateDefs.forEach(dateDef -> {
-                        try {
-                            var authoredValue = dateDef.getDatatype()
-                                    .getConstructor(String.class)
-                                    .newInstance(dateAuthored.getValueAsString());
-
-                            request.getModelResolver().setValue(resource, dateDef.getElementName(), authoredValue);
-                        } catch (Exception ex) {
-                            var message = String.format(
-                                    "Error encountered processing item %s: Error setting property (%s) on resource type (%s): %s",
-                                    linkId, dateDef.getElementName(), resource.fhirType(), ex.getMessage());
-                            logger.error(message);
-                            request.logException(message);
-                        }
-                    });
-                }
-            }
+            resolveSubject(request, resource, subject, resourceDefinition);
+            resolveAuthored(request, linkId, resource, resourceDefinition);
         }
 
         processChildren(
                 request, resourceDefinition, resource, request.getItems(item), request.getItems(questionnaireItem));
 
         resources.add(resource);
+    }
+
+    private void resolveSubject(
+            ExtractRequest request,
+            IBaseResource resource,
+            IBaseReference subject,
+            BaseRuntimeElementDefinition<?> resourceDefinition) {
+        var subjectPath = getSubjectPath(resourceDefinition);
+        if (subjectPath != null) {
+            request.getModelResolver().setValue(resource, subjectPath, subject);
+        }
+    }
+
+    private void resolveAuthored(
+            ExtractRequest request,
+            String linkId,
+            IBaseResource resource,
+            BaseRuntimeElementDefinition<?> resourceDefinition) {
+        var authorPath = getAuthorPath(resourceDefinition);
+        if (authorPath != null) {
+            var authorValue = request.resolvePath(request.getQuestionnaireResponse(), "author");
+            if (authorValue != null) {
+                request.getModelResolver().setValue(resource, authorPath, authorValue);
+            }
+        }
+        var dateAuthored = request.resolvePath(request.getQuestionnaireResponse(), "authored", IPrimitiveType.class);
+        if (dateAuthored != null) {
+            var dateDefs = getDateDefs(resourceDefinition);
+            if (dateDefs != null && !dateDefs.isEmpty()) {
+                dateDefs.forEach(dateDef -> {
+                    try {
+                        var authoredValue = dateDef.getDatatype()
+                                .getConstructor(String.class)
+                                .newInstance(dateAuthored.getValueAsString());
+
+                        request.getModelResolver().setValue(resource, dateDef.getElementName(), authoredValue);
+                    } catch (Exception ex) {
+                        var message = String.format(
+                                "Error encountered processing item %s: Error setting property (%s) on resource type (%s): %s",
+                                linkId, dateDef.getElementName(), resource.fhirType(), ex.getMessage());
+                        logger.error(message);
+                        request.logException(message);
+                    }
+                });
+            }
+        }
     }
 
     private void processChildren(
@@ -207,26 +222,34 @@ public class ProcessDefinitionItem {
                 if (!children.isEmpty()) {
                     processChildren(request, resourceDefinition, resource, children, request.getItems(resource));
                 } else {
-                    var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
-                    var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-                    if (answerValue != null) {
-                        // Check if answer type matches path types available and transform if necessary
-                        var pathDefinition =
-                                (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
-                        if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
-                            var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
-                            if (!choices.contains(answerValue.getClass())) {
-                                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
-                            }
-                        } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
-                                && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
-                            answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
-                        }
-                        request.getModelResolver().setValue(resource, path, answerValue);
-                    }
+                    processChild(request, resourceDefinition, resource, childItem, path);
                 }
             }
         });
+    }
+
+    private void processChild(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IBaseResource resource,
+            IBaseBackboneElement childItem,
+            String path) {
+        var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
+        var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
+        if (answerValue != null) {
+            // Check if answer type matches path types available and transform if necessary
+            var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
+            if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
+                var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
+                if (!choices.contains(answerValue.getClass())) {
+                    answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                }
+            } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
+                    && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
+                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+            }
+            request.getModelResolver().setValue(resource, path, answerValue);
+        }
     }
 
     private String getDefinition(
@@ -266,7 +289,7 @@ public class ProcessDefinitionItem {
         results.add(definition.getChildByName("recordDate"));
 
         return results.stream()
-                .filter(d -> d instanceof BaseRuntimeChildDatatypeDefinition)
+                .filter(BaseRuntimeChildDatatypeDefinition.class::isInstance)
                 .map(d -> (BaseRuntimeChildDatatypeDefinition) d)
                 .collect(Collectors.toList());
     }

@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Library;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
@@ -73,20 +74,27 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                 .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
                 .orElseGet(() -> new ArrayList<>());
 
+        LibraryAdapter library;
         var primaryLibrary = adapter.getPrimaryLibrary(repository);
-        var libraryManager = createLibraryManager(repository);
-        CqlTranslator translator = translateLibrary(primaryLibrary, libraryManager);
+        if (primaryLibrary != null) {
+            var libraryManager = createLibraryManager(repository);
+            CqlTranslator translator = translateLibrary(primaryLibrary, libraryManager);
+            var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
+            var evaluationParameters =
+                    parameters.isPresent() ? cqlFhirParametersConverter.toCqlParameters(parameters.get()) : null;
 
-        var r5Library = dataRequirementsProcessor.gatherDataRequirements(
-                libraryManager,
-                translator.getTranslatedLibrary(),
-                evaluationSettings.getCqlOptions().getCqlCompilerOptions(),
-                null,
-                null, // TODO: convert parameters
-                true,
-                true);
-        var library = convertAndCreateAdapter(fhirVersion, r5Library);
-
+            var r5Library = dataRequirementsProcessor.gatherDataRequirements(
+                    libraryManager,
+                    translator.getTranslatedLibrary(),
+                    evaluationSettings.getCqlOptions().getCqlCompilerOptions(),
+                    null,
+                    evaluationParameters,
+                    true,
+                    true);
+            library = convertAndCreateAdapter(fhirVersion, r5Library);
+        } else {
+            library = AdapterFactory.forFhirContext(repository.fhirContext()).createLibrary(null);
+        }
         var gatheredResources = new ArrayList<String>();
         var relatedArtifacts = library.getRelatedArtifact();
         recursiveGather(

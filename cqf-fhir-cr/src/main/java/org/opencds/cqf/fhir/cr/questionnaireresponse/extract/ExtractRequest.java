@@ -118,6 +118,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
         return "extract-" + questionnaireResponse.getIdElement().getIdPart();
     }
 
+    @Override
     public FhirContext getFhirContext() {
         return fhirContext;
     }

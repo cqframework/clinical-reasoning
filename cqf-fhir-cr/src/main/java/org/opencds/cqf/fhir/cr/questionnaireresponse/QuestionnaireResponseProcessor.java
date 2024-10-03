@@ -59,14 +59,14 @@ public class QuestionnaireResponseProcessor {
     }
 
     protected <R extends IBaseResource> R resolveQuestionnaireResponse(Either<IIdType, R> questionnaireResponse) {
-        return (R) questionnaireResponseResolver.resolve(questionnaireResponse);
+        return questionnaireResponseResolver.resolve(questionnaireResponse);
     }
 
     @SuppressWarnings("unchecked")
     protected <R extends IBaseResource> IBaseResource resolveQuestionnaire(
             IBaseResource questionnaireResponse, Either<IIdType, R> questionnaireId) {
         if (questionnaireId != null) {
-            return (R) questionnaireResolver.resolve(questionnaireId);
+            return questionnaireResolver.resolve(questionnaireId);
         } else {
             try {
                 IPrimitiveType<String> canonical;

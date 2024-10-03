@@ -1100,9 +1100,9 @@ class MinimalMeasureEvaluationTest {
                 // These assertions reflect the new passing CQL Interval with one extra minute at each end (minus and
                 // plus, respectively):
                 .hasPeriodStart(Date.from(
-                        LocalDateTime.of(2020, Month.JANUARY, 16, 19, 59, 0).toInstant(ZoneOffset.UTC)))
+                        LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasPeriodEnd(Date.from(
-                        LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 59).toInstant(ZoneOffset.UTC)))
+                        LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasSubjectReference("Patient/female-1914")
                 .firstGroup()
                 .population("initial-population")

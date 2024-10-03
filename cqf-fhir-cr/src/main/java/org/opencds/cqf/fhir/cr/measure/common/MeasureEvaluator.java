@@ -240,7 +240,9 @@ public class MeasureEvaluator {
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
     private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
-        return new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
+        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
+        newDateTime.setPrecision(dateTime.getPrecision());
+        return newDateTime;
     }
 
     protected Interval convertInterval(Interval interval, String targetType) {

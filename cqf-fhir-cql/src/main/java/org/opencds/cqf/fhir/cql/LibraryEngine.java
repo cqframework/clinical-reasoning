@@ -323,22 +323,8 @@ public class LibraryEngine {
             engine = Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
         }
 
-        //        final Map<String, Object> engineStateParameters = engine.getState().getParameters();
-        //
-        //        if (engineStateParameters.containsKey("Measuremeent Period")) {
-        //            final Object measurePeriodAsObject = engineStateParameters.get("Measuremeent Period");
-        //
-        //            if (measurePeriodAsObject instanceof Interval) {
-        //                final Interval measurePeriod = (Interval)measurePeriodAsObject;
-        //
-        //                final Expression low = measurePeriod.getLow();
-        //            }
-        //        }
-
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
 
-        //        return engine.evaluate(id.getId(), expressions, buildContextParameter(patientId),
-        // evaluationParameters);
         return engine.evaluate(
                 new VersionedIdentifier().withId(id.getId()),
                 expressions,

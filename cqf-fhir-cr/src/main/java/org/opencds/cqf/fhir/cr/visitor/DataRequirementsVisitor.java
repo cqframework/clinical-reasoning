@@ -93,7 +93,14 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                     true);
             library = convertAndCreateAdapter(fhirVersion, r5Library);
         } else {
-            library = AdapterFactory.forFhirContext(repository.fhirContext()).createLibrary(null);
+            library = AdapterFactory.forFhirContext(repository.fhirContext())
+                    .createLibrary(repository
+                            .fhirContext()
+                            .getResourceDefinition("Library")
+                            .newInstance());
+            library.setName("EffectiveDataRequirements");
+            library.setStatus(adapter.getStatus());
+            library.setType("module-definition");
         }
         var gatheredResources = new ArrayList<String>();
         var relatedArtifacts = library.getRelatedArtifact();

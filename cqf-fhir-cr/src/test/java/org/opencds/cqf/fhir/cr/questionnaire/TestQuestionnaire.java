@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -249,6 +250,11 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaire thenGenerate() {
             return new GeneratedQuestionnaire(
                     repository, null, processor.generateQuestionnaire(Eithers.for3(null, profileId, null)));
+        }
+
+        public DataRequirementsLibrary thenDataRequirements() {
+            var param = Eithers.for3(questionnaireUrl, questionnaireId, questionnaire);
+            return new DataRequirementsLibrary(processor.dataRequirements(param, parameters));
         }
     }
 

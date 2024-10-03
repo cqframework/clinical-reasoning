@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -174,5 +177,11 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
                     (reference) -> definition.setValue(reference)));
         }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
+    }
+
+    @Override
+    public IBaseResource getPrimaryLibrary(Repository repository) {
+        var libraries = getPlanDefinition().getLibrary();
+        return libraries.isEmpty() ? null : SearchHelper.searchRepositoryByCanonical(repository, libraries.get(0));
     }
 }

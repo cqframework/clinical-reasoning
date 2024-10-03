@@ -533,4 +533,31 @@ class PlanDefinitionProcessorTests {
                 .hasEntry(2)
                 .entryHasOperationOutcome(1);
     }
+
+    @Test
+    void dataRequirementsDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(29);
+    }
+
+    @Test
+    void dataRequirementsR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void dataRequirementsR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
 }

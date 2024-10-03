@@ -42,6 +42,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -290,6 +291,12 @@ public class PlanDefinition {
                         repository.fhirContext());
             }
         }
+
+        public DataRequirementsLibrary thenDataRequirements() {
+            return new DataRequirementsLibrary(processor.dataRequirements(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                    parameters));
+        }
     }
 
     public static class GeneratedBundle {
@@ -378,15 +385,8 @@ public class PlanDefinition {
             return this;
         }
 
-        // @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaire() {
-            assertTrue(questionnaire != null);
-            // assertTrue(getEntryResources(generatedBundle).stream()
-            //         .anyMatch(r -> r.fhirType().equals("QuestionnaireResponse")));
-            // assertTrue(getEntryResources(generatedBundle).stream()
-            //         .anyMatch(r -> r.fhirType().equals("QuestionnaireResponse")
-            //                 && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
-            //                         .stream().anyMatch(c -> c.fhirType().equals("Questionnaire"))));
+            assertNotNull(questionnaire);
             return this;
         }
 

@@ -180,6 +180,6 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
     @Override
     public IBaseResource getPrimaryLibrary(Repository repository) {
         var libraries = getPlanDefinition().getLibrary();
-        return libraries.size() > 0 ? SearchHelper.searchRepositoryByCanonical(repository, libraries.get(0)) : null;
+        return libraries.isEmpty() ? null : SearchHelper.searchRepositoryByCanonical(repository, libraries.get(0));
     }
 }

@@ -199,6 +199,33 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
+    void dataRequirementsDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenDataRequirements()
+                .hasDataRequirements(29);
+    }
+
+    @Test
+    void dataRequirementsR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void dataRequirementsR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
     void pa_aslp_Populate() {
         given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()

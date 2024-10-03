@@ -2,12 +2,15 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -73,10 +76,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
         getQuestionnaire()
                 .getDerivedFrom()
                 .forEach(derivedRef -> references.add(new DependencyInfo(
-                        referenceSource,
-                        derivedRef.asStringValue(),
-                        derivedRef.getExtension(),
-                        (reference) -> derivedRef.setValue(reference))));
+                        referenceSource, derivedRef.asStringValue(), derivedRef.getExtension(), derivedRef::setValue)));
 
         getQuestionnaire()
                 .getExtensionsByUrl(Constants.CQF_LIBRARY)
@@ -84,7 +84,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((CanonicalType) libraryExt.getValue()).asStringValue(),
                         libraryExt.getExtension(),
-                        (reference) -> libraryExt.setValue(new CanonicalType(reference)))));
+                        reference -> libraryExt.setValue(new CanonicalType(reference)))));
 
         getQuestionnaire().getExtensionsByUrl(Constants.VARIABLE_EXTENSION).stream()
                 .map(e -> (Expression) e.getValue())
@@ -93,7 +93,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
-                        (reference) -> expression.setReference(reference))));
+                        expression::setReference)));
 
         getQuestionnaire().getItem().forEach(item -> getDependenciesOfItem(item, references, referenceSource));
 
@@ -109,10 +109,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
         }
         if (item.hasAnswerValueSet()) {
             references.add(new DependencyInfo(
-                    referenceSource,
-                    item.getAnswerValueSet(),
-                    item.getExtension(),
-                    (reference) -> item.setAnswerValueSet(reference)));
+                    referenceSource, item.getAnswerValueSet(), item.getExtension(), item::setAnswerValueSet));
         }
         item.getExtension().stream()
                 .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
@@ -120,7 +117,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((CanonicalType) referenceExt.getValue()).asStringValue(),
                         referenceExt.getExtension(),
-                        (reference) -> referenceExt.setValue(new CanonicalType(reference)))));
+                        reference -> referenceExt.setValue(new CanonicalType(reference)))));
         item.getExtension().stream()
                 .filter(e -> EXPRESSION_EXTENSIONS.contains(e.getUrl()))
                 .map(e -> (Expression) e.getValue())
@@ -129,7 +126,15 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
-                        (reference) -> expression.setReference(reference))));
+                        expression::setReference)));
         item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
+    }
+
+    @Override
+    public IBaseResource getPrimaryLibrary(Repository repository) {
+        var library = getQuestionnaire().getExtensionByUrl(Constants.CQF_LIBRARY);
+        return library == null
+                ? null
+                : SearchHelper.searchRepositoryByCanonical(repository, library.getValueCanonicalType());
     }
 }

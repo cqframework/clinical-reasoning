@@ -9,7 +9,10 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
@@ -160,5 +163,14 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
                     (reference) -> ((Reference) vs).setReference(reference));
         }
         return null;
+    }
+
+    @Override
+    public IBaseResource getPrimaryLibrary(Repository repository) {
+        var libraries = getPlanDefinition().getLibrary();
+        return libraries.isEmpty()
+                ? null
+                : SearchHelper.searchRepositoryByCanonical(
+                        repository, libraries.get(0).getReferenceElement());
     }
 }

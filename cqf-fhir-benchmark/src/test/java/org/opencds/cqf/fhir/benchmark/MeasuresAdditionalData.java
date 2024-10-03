@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.r4.model.Bundle;
@@ -51,8 +54,8 @@ public class MeasuresAdditionalData {
                 .evaluationOptions(evaluationOptions)
                 .when()
                 .measureId("GlycemicControlHypoglycemicInitialPopulation")
-                .periodStart("2022-01-01")
-                .periodEnd("2022-01-31")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JANUARY, 31).atStartOfDay(ZoneId.systemDefault()))
                 .subject("Patient/980babd9-4979-4b76-978c-946719022dbb")
                 .additionalData(additionalData)
                 .evaluate();

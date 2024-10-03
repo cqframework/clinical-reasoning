@@ -12,7 +12,14 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -38,6 +45,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
@@ -45,6 +53,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     @FunctionalInterface
     interface Validator<T> {
@@ -91,6 +101,7 @@ public class Measure {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
+        private MeasurePeriodValidator measurePeriodValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -104,6 +115,8 @@ public class Measure {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.measurePeriodValidator = new MeasurePeriodValidator();
         }
 
         public Given repository(Repository repository) {
@@ -129,7 +142,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
         }
 
         public When when() {
@@ -146,8 +159,8 @@ public class Measure {
         }
 
         private String measureId;
-        private String periodStart;
-        private String periodEnd;
+        private ZonedDateTime periodStart;
+        private ZonedDateTime periodEnd;
         private List<String> subjectIds;
         private String subject;
         private String reportType;
@@ -164,11 +177,23 @@ public class Measure {
         }
 
         public When periodEnd(String periodEnd) {
+            this.periodEnd =
+                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
+            return this;
+        }
+
+        public When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
         }
 
         public When periodStart(String periodStart) {
+            this.periodStart = LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atStartOfDay(ZoneId.systemDefault());
+            return this;
+        }
+
+        public When periodStart(ZonedDateTime periodStart) {
             this.periodStart = periodStart;
             return this;
         }
@@ -319,6 +344,28 @@ public class Measure {
         public SelectedReport hasReportType(String reportType) {
             var ref = this.report().getType();
             assertEquals(reportType, ref.getDisplay());
+            return this;
+        }
+
+        public SelectedReport hasPeriodStart(Date periodStart) {
+            var period = this.report().getPeriod();
+            assertEquals(
+                    periodStart,
+                    period.getStart(),
+                    String.format(
+                            "Expected period start of %s but was: %s",
+                            DATE_FORMAT.format(periodStart), DATE_FORMAT.format(period.getStart())));
+            return this;
+        }
+
+        public SelectedReport hasPeriodEnd(Date periodEnd) {
+            var period = this.report().getPeriod();
+            assertEquals(
+                    periodEnd,
+                    period.getEnd(),
+                    String.format(
+                            "Expected period start of %s but was: %s",
+                            DATE_FORMAT.format(periodEnd), DATE_FORMAT.format(period.getEnd())));
             return this;
         }
 

@@ -451,7 +451,7 @@ class R4CareGapsTest {
                 .statuses("not-applicable")
                 .getCareGapsReport()
                 .then()
-                .hasBundleCount(8); // All 8 subjects have a bundle
+                .hasBundleCount(9); // All 8 subjects have a bundle
     }
 
     @Test

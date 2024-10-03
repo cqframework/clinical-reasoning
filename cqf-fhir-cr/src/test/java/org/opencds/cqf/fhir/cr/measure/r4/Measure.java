@@ -178,8 +178,7 @@ public class Measure {
 
         public When periodEnd(String periodEnd) {
             this.periodEnd =
-                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-                        .atStartOfDay(ZoneId.systemDefault());
+                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 
@@ -351,24 +350,22 @@ public class Measure {
         public SelectedReport hasPeriodStart(Date periodStart) {
             var period = this.report().getPeriod();
             assertEquals(
-                periodStart,
-                period.getStart(),
-                String.format(
-                    "Expected period start of %s but was: %s",
-                    DATE_FORMAT.format(periodStart),
-                    DATE_FORMAT.format(period.getStart())));
+                    periodStart,
+                    period.getStart(),
+                    String.format(
+                            "Expected period start of %s but was: %s",
+                            DATE_FORMAT.format(periodStart), DATE_FORMAT.format(period.getStart())));
             return this;
         }
 
         public SelectedReport hasPeriodEnd(Date periodEnd) {
             var period = this.report().getPeriod();
             assertEquals(
-                periodEnd,
-                period.getEnd(),
-                String.format(
-                    "Expected period start of %s but was: %s",
-                    DATE_FORMAT.format(periodEnd),
-                    DATE_FORMAT.format(period.getEnd())));
+                    periodEnd,
+                    period.getEnd(),
+                    String.format(
+                            "Expected period start of %s but was: %s",
+                            DATE_FORMAT.format(periodEnd), DATE_FORMAT.format(period.getEnd())));
             return this;
         }
 

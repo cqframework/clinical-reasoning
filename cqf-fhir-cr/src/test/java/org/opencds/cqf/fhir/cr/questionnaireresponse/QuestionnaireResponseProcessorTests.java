@@ -1,11 +1,14 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -118,5 +121,20 @@ class QuestionnaireResponseProcessorTests {
                 .questionnaireResponseId(questionnaireResponseId)
                 .extract()
                 .hasEntry(2);
+    }
+
+    @Test
+    void itemExtractionContextAtRoot() {
+        var questionnaireResponseId = "definition-OPA-Patient1";
+        var bundle = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(1)
+                .getBundle();
+        var organization = (Organization) BundleHelper.getEntryResourceFirstRep(bundle);
+        assertNotNull(organization);
+        assertEquals(String.format("extract-%s", questionnaireResponseId), organization.getIdPart());
+        assertEquals("Acme Clinic", organization.getName());
     }
 }

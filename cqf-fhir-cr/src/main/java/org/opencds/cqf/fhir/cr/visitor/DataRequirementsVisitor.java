@@ -169,7 +169,14 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
     protected LibraryManager createLibraryManager(Repository repository) {
         var librarySourceProvider = buildLibrarySource(repository);
         var sourceProviders = new ArrayList<>(Arrays.asList(librarySourceProvider, librarySourceProvider));
-        var libraryManager = new LibraryManager(new ModelManager());
+        var modelManager = evaluationSettings.getModelCache() != null
+                ? new ModelManager(evaluationSettings.getModelCache())
+                : new ModelManager();
+        var libraryManager = new LibraryManager(
+                modelManager,
+                evaluationSettings.getCqlOptions().getCqlCompilerOptions(),
+                evaluationSettings.getLibraryCache());
+        libraryManager.getLibrarySourceLoader().clearProviders();
         for (var provider : sourceProviders) {
             libraryManager.getLibrarySourceLoader().registerProvider(provider);
         }

@@ -158,6 +158,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     public void addContextParameter(String name, IBaseResource resource) {
-        getAdapterFactory().createParameters(parameters).addParameter(name, resource);
+        getAdapterFactory().createParameters(getParameters()).addParameter(name, resource);
     }
 }

@@ -27,15 +27,16 @@ class ValueSetProcessorTests {
 
     @Test
     void processors() {
-        var bundle = given().repository(repositoryR4)
+        var when = given().repository(repositoryR4)
                 .packageProcessor(new PackageProcessor(repositoryR4))
                 .dataRequirementsProcessor(new DataRequirementsProcessor(repositoryR4))
                 .when()
                 .valueSetId(Ids.newId(fhirContextR4, "ValueSet", "AdministrativeGender"))
-                .isPut(Boolean.FALSE)
-                .thenPackage()
-                .getBundle();
+                .isPut(Boolean.FALSE);
+        var bundle = when.thenPackage().getBundle();
         assertNotNull(bundle);
+        var library = when.thenDataRequirements().getLibrary();
+        assertNotNull(library);
     }
 
     @Test

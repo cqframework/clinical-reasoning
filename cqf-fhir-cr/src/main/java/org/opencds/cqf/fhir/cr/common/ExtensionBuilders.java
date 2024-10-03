@@ -134,14 +134,6 @@ public class ExtensionBuilders {
                 throw new IllegalArgumentException(String.format("Unrecognized launch context code: %s", code));
         }
         switch (fhirVersion) {
-            case DSTU3:
-                return (IBaseExtension)
-                        new org.hl7.fhir.dstu3.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.dstu3.model.Extension(
-                                                "name", new org.hl7.fhir.dstu3.model.Coding(system, code, display)),
-                                        new org.hl7.fhir.dstu3.model.Extension(
-                                                "type", new org.hl7.fhir.dstu3.model.CodeType(resourceType))));
             case R4:
                 return (IBaseExtension) new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                         .setExtension(Arrays.asList(

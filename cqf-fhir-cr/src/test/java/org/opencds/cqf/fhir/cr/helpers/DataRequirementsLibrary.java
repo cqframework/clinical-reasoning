@@ -19,4 +19,8 @@ public class DataRequirementsLibrary {
         assertEquals(count, libraryAdapter.getDataRequirement().size());
         return this;
     }
+
+    public IBaseResource getLibrary() {
+        return library;
+    }
 }

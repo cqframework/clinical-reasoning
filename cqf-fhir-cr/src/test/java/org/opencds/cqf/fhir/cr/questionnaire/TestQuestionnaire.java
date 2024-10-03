@@ -394,15 +394,13 @@ public class TestQuestionnaire {
             return this;
         }
 
-        @SuppressWarnings("unchecked")
-        public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, String value) {
-            var answer = request.resolvePathList(items.get(linkId), "answer", IPrimitiveType.class);
-            var answers = answer.stream()
-                    .map(a -> (IPrimitiveType<String>) request.resolvePath(a, "value"))
-                    .collect(Collectors.toList());
+        public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {
+            var answer = request.resolvePathList(items.get(linkId), "answer", IBase.class);
+            var answers =
+                    answer.stream().map(a -> request.resolvePath(a, "value")).collect(Collectors.toList());
             assertNotNull(answers);
             assertTrue(
-                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    answers.stream().anyMatch(a -> a.toString().equals(value.toString())),
                     "expected answer to contain value: " + value);
             return this;
         }

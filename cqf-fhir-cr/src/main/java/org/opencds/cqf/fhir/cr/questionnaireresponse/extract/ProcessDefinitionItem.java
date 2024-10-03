@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -144,14 +145,22 @@ public class ProcessDefinitionItem {
             IBaseReference subject) {
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
         if (isCreatedResource) {
-            resource.setId(new IdType(resource.fhirType(), request.getExtractId() + "-" + linkId));
+            var id = request.getExtractId();
+            if (StringUtils.isNotBlank(linkId)) {
+                id = id.concat(String.format("-%s", linkId));
+            }
+            resource.setId(new IdType(resource.fhirType(), id));
             resolveMeta(resource, definition);
             resolveSubject(request, resource, subject, resourceDefinition);
             resolveAuthored(request, linkId, resource, resourceDefinition);
         }
 
         processChildren(
-                request, resourceDefinition, resource, request.getItems(item), request.getItems(questionnaireItem));
+                request,
+                resourceDefinition,
+                resource,
+                request.getItems(item == null ? request.getQuestionnaireResponse() : item),
+                request.getItems(questionnaireItem == null ? request.getQuestionnaire() : questionnaireItem));
 
         resources.add(resource);
     }

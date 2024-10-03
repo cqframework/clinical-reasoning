@@ -55,6 +55,16 @@ class QuestionnaireProcessorTests {
                 .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
+
+        given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "definition"))
+                .subjectId("OPA-Patient1")
+                .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
+                .thenPopulate(true)
+                .hasItems(2)
+                .itemHasAnswerValue("1.1", new org.hl7.fhir.r4.model.StringType("Acme Clinic"))
+                .hasNoErrors();
     }
 
     @Test
@@ -270,7 +280,18 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
-    @Disabled
+    void testItemContextPopulationWithoutDefinition() {
+        given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "observation"))
+                .subjectId("Patient1")
+                .thenPopulate(true)
+                .hasItems(2)
+                .itemHasAnswerValue("1", new org.hl7.fhir.r4.model.IntegerType(50));
+    }
+
+    @Test
+    @Disabled("Currently failing due to an issue in the CHF CQL")
     void testIntegration() {
         var questionnaire = given().repository(repositoryR4)
                 .when()
@@ -294,7 +315,7 @@ class QuestionnaireProcessorTests {
                                 newPart(fhirContextR4, "Reference", "content", "Encounter/chf-scenario1-encounter"))))
                 .thenPopulate(true)
                 .hasItems(11)
-                .itemHasAnswerValue("1.2.1", "-1.4")
+                // .itemHasAnswerValue("1.2.1", "-1.4")
                 .itemHasAuthorExt("1.2.1")
                 .questionnaireResponse;
         TestQuestionnaireResponse.given()

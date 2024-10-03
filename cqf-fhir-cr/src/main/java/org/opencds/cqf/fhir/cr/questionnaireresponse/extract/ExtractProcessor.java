@@ -45,10 +45,6 @@ public class ExtractProcessor implements IExtractProcessor {
         var extractionContextExt = request.getItemExtractionContext();
         if (extractionContextExt != null) {
             processDefinitionItem(request, null, null, resources, subject);
-            // request.getItems(request.getQuestionnaireResponse()).forEach(item -> {
-            //     var questionnaireItem = request.getQuestionnaireItem(item);
-            //     processDefinitionItem(request, item, questionnaireItem, resources, subject);
-            // });
         } else {
             var questionnaireCodeMap = CodeMap.create(request);
             request.getItems(request.getQuestionnaireResponse()).forEach(item -> {

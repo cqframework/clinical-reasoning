@@ -68,7 +68,6 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
 
         if (value instanceof org.hl7.fhir.dstu3.model.Coding) {
             var coding = (org.hl7.fhir.dstu3.model.Coding) value;
-            // var patient = new org.hl7.fhir.dstu3.model.Patient().setGender(null)
             switch (type.getSimpleName()) {
                 case CODE:
                 case PRIMITIVE:

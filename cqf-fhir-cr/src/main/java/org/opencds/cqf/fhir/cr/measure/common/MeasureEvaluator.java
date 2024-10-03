@@ -314,6 +314,8 @@ public class MeasureEvaluator {
             EvaluationResult result =
                 libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, zonedDateTime, context);
 
+            final ExpressionResult numerator = result.expressionResults.get("Numerator");
+            logger.info("6560: 5) EvaluationResult  Numerator: value:{}, resources: {}", numerator.value(), numerator.evaluatedResources());
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }
 

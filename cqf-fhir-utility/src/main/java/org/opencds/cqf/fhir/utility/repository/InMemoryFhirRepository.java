@@ -1,11 +1,16 @@
 package org.opencds.cqf.fhir.utility.repository;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -29,31 +34,19 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 
 public class InMemoryFhirRepository implements Repository {
 
     private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
     private final FhirContext context;
-    private final Map<String, Function<IBaseParameters, Object>> operationMap;
+    private final OperationRegistry operationRegistry;
 
     public InMemoryFhirRepository(FhirContext context) {
         this.context = context;
         this.resourceMap = new HashMap<>();
-        this.operationMap = new HashMap<>();
+        this.operationRegistry = new OperationRegistry();
     }
-
-    // public InMemoryFhirRepository(FhirContext context, Class<?> clazz, List<String> directoryList, boolean recursive)
-    // {
-    //     this.context = context;
-    //     // TODO: Resource loader.
-    //     this.resourceMap = new HashMap<>();
-    //     this.operationMap = new HashMap<>();
-    //     // var resourceLoader = new FhirResourceLoader(context, clazz, directoryList,
-    //     // recursive);
-    //     // this.resourceMap = Maps.uniqueIndex(resourceLoader.getResources(),
-    //     // r -> Ids.newId(this.context, r.fhirType(),
-    //     // r.getIdElement().getIdPart()));
-    // }
 
     public InMemoryFhirRepository(FhirContext context, IBaseBundle bundle) {
         this.context = context;
@@ -62,7 +55,7 @@ public class InMemoryFhirRepository implements Repository {
                 .collect(Collectors.groupingBy(
                         IBaseResource::fhirType,
                         Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless(), Function.identity())));
-        this.operationMap = new HashMap<>();
+        this.operationRegistry = new OperationRegistry();
     }
 
     @Override
@@ -258,7 +251,20 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters> R invoke(
             String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new NotImplementedOperationException("Invoke is not currently supported");
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
+        try {
+            var result = operationRegistry
+                    .buildInvocationContext(this, name)
+                    .parameters(parameters)
+                    .execute();
+            return returnType.cast(result);
+        } catch (BaseServerResponseException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new InternalErrorException(e);
+        }
     }
 
     @Override
@@ -269,7 +275,22 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(name, parameters);
+        checkNotNull(resourceType, "resourceType is required");
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
+        try {
+            var result = operationRegistry
+                    .buildInvocationContext(this, name)
+                    .parameters(parameters)
+                    .resourceType(resourceType)
+                    .execute();
+            return returnType.cast(result);
+        } catch (BaseServerResponseException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new InternalErrorException(e);
+        }
     }
 
     @Override
@@ -281,7 +302,26 @@ public class InMemoryFhirRepository implements Repository {
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        throw new NotImplementedOperationException("Invoke is not currently supported");
+        checkNotNull(id, "id is required");
+        checkArgument(id.hasResourceType(), "resourceType is required for id scoped operations");
+        checkNotNull(name, "name is required");
+        checkNotNull(returnType, "returnType is required");
+        checkNotNull(headers, "headers are required");
+        try {
+            var result = operationRegistry
+                    .buildInvocationContext(this, name)
+                    .parameters(parameters)
+                    .id(id)
+                    .resourceType(this.context
+                            .getResourceDefinition(id.getResourceType())
+                            .getImplementingClass())
+                    .execute();
+            return returnType.cast(result);
+        } catch (BaseServerResponseException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new InternalErrorException(e);
+        }
     }
 
     @Override
@@ -313,8 +353,18 @@ public class InMemoryFhirRepository implements Repository {
         return this.context;
     }
 
-    @SuppressWarnings("unchecked")
-    protected <R extends Object> R invokeOperation(String operationName, IBaseParameters parameters) {
-        return (R) operationMap.get(operationName).apply(parameters);
+    /**
+     * Register an operation with the repository. This must be a class with at least one method annotated with
+     * the @Operation annotation. The factory function is used to create an instance of the operation class on
+     * a per-request basis. All methods on the operation class marked with the @Operation annotation will be
+     * available for invocation.
+     * @param <T> the type of the operation class
+     * @param clazz the operation class
+     * @param factory a factory function that will create an instance of the operation class
+     */
+    public <T> void registerOperation(Class<T> clazz, Function<Repository, T> factory) {
+        requireNonNull(clazz, "clazz can not be null");
+        requireNonNull(factory, "factory can not be null");
+        operationRegistry.register(clazz, factory);
     }
 }

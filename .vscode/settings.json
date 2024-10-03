@@ -47,6 +47,7 @@
         "mrgc",
         "mrgsc",
         "msdc",
+        "Multimap",
         "mvnw",
         "NDJSON",
         "numer",
@@ -65,6 +66,7 @@
         "questionnaireitem",
         "questionnaireresponse",
         "RESOURCETYPE",
+        "rethrown",
         "sdes",
         "SEARCHPARAMETER",
         "SEARCHSET",
@@ -124,5 +126,9 @@
         "cSpell.fixSpellingWithRenameProvider": true,
         "cSpell.advanced.feature.useReferenceProviderWithRename": true,
         "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "cqframework",
+        "projectKey": "cqframework_clinical-reasoning"
     }
 }

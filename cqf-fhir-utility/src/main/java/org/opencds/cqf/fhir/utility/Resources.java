@@ -71,4 +71,19 @@ public class Resources {
         var terser = resource.getStructureFhirVersionEnum().newContextCached().newTerser();
         return terser.clone(resource);
     }
+
+    /**
+     * Convert a resource to a prettified JSON string
+     *
+     * @param resource the resource to convert
+     * @return the JSON string
+     */
+    public static String stringify(IBaseResource resource) {
+        checkNotNull(resource);
+        return resource.getStructureFhirVersionEnum()
+                .newContextCached()
+                .newJsonParser()
+                .setPrettyPrint(true)
+                .encodeResourceToString(resource);
+    }
 }

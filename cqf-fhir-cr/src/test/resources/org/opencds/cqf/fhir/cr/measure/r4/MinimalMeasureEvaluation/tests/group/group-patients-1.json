@@ -5,7 +5,6 @@
   "actual": true,
   "name": "Patient Group",
   "member": [
-    {  "entity": {  "reference": "Patient/female-1914" } },
     {  "entity": {  "reference": "Patient/female-1931" } },
     {  "entity": {  "reference": "Patient/female-1944" } },
     {  "entity": {  "reference": "Patient/female-1988" } },

@@ -670,8 +670,8 @@ class R4CareGapsTest {
         GIVEN_REPO
                 .when()
                 .subject("Patient/female-1988")
-                .periodStart("2019-01-01")
-                .periodEnd("2019-12-31")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
                 .statuses("open-gap")
                 .getCareGapsReport()

@@ -89,7 +89,6 @@ public class R4CqlExecutionService {
                     expression == null ? null : Collections.singleton(expression));
 
         } catch (Exception e) {
-            e.printStackTrace();
             return parameters(part("evaluation error", (OperationOutcome)
                     baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));
         }

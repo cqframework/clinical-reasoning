@@ -62,7 +62,7 @@ class DynamicValueProcessorTests {
         assertEquals(Level.WARN, logger.getLoggingEvents().get(0).getLevel());
         assertEquals(
                 "Null value received when evaluating dynamic value expression: NullTest",
-                logger.getAllLoggingEvents().get(0).getMessage());
+                logger.getLoggingEvents().get(0).getMessage());
     }
 
     @Test

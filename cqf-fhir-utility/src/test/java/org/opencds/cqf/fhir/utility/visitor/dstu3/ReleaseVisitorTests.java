@@ -13,7 +13,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,8 +56,6 @@ import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 import org.slf4j.event.Level;
 
 class ReleaseVisitorTests {
-    private static final TestLogger logger = TestLoggerFactory.getTestLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private Repository spyRepository;
     private final IParser jsonParser = fhirContext.newJsonParser();
@@ -82,7 +79,6 @@ class ReleaseVisitorTests {
 
     @BeforeEach
     void setup() {
-        logger.clearAll();
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         spyRepository = spy(new InMemoryFhirRepository(fhirContext));

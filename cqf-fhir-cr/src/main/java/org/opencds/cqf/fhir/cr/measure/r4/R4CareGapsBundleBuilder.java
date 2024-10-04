@@ -148,10 +148,8 @@ public class R4CareGapsBundleBuilder {
         List<DetectedIssue> detectedIssues = new ArrayList<>();
         List<MeasureReport> measureReports = new ArrayList<>();
         var gapEvaluator = new R4CareGapStatusEvaluator();
-        Composition composition = null;
-        if (isDocumentMode) {
-            composition = getComposition(patient);
-        }
+        var composition = getComposition(patient, isDocumentMode);
+
         // get Evaluation Bundle Results
         for (BundleEntryComponent entry : bundle.getEntry()) {
             MeasureReport mr = (MeasureReport) entry.getResource();
@@ -228,15 +226,19 @@ public class R4CareGapsBundleBuilder {
                 .build();
     }
 
-    private Composition getComposition(Patient patient) {
-        return new CompositionBuilder<>(Composition.class)
-                .withProfile(CARE_GAPS_COMPOSITION_PROFILE)
-                .withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
-                .withStatus(Composition.CompositionStatus.FINAL.toString())
-                .withTitle("Care Gap Report for " + Ids.simplePart(patient))
-                .withSubject(Ids.simple(patient))
-                .withAuthor(Ids.simple(configuredResources.get("care_gaps_composition_section_author")))
-                .build();
+    private Composition getComposition(Patient patient, boolean isDocumentMode) {
+        Composition composition = null;
+        if (isDocumentMode) {
+            composition = new CompositionBuilder<>(Composition.class)
+                    .withProfile(CARE_GAPS_COMPOSITION_PROFILE)
+                    .withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
+                    .withStatus(Composition.CompositionStatus.FINAL.toString())
+                    .withTitle("Care Gap Report for " + Ids.simplePart(patient))
+                    .withSubject(Ids.simple(patient))
+                    .withAuthor(Ids.simple(configuredResources.get("care_gaps_composition_section_author")))
+                    .build();
+        }
+        return composition;
     }
 
     private boolean isMultiRateMeasure(MeasureReport measureReport) {

@@ -42,7 +42,7 @@ public class R4CareGapsProcessor {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
 
-    private static final Boolean isDocumentModeDefault = true;
+    private static final Boolean defaultDocumentMode = true;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -88,7 +88,7 @@ public class R4CareGapsProcessor {
 
         // Set default for optional parameter value
         if (isDocumentMode == null) {
-            isDocumentMode = isDocumentModeDefault;
+            isDocumentMode = defaultDocumentMode;
         }
 
         // Subject Population for Report

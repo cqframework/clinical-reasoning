@@ -103,7 +103,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
             library.setType("module-definition");
         }
         var gatheredResources = new ArrayList<String>();
-        var relatedArtifacts = library.getRelatedArtifact();
+        var relatedArtifacts = stripInvalid(library);
         recursiveGather(
                 adapter.get(),
                 gatheredResources,
@@ -117,6 +117,24 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
 
         library.setRelatedArtifact(relatedArtifacts);
         return library.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ICompositeType & IBaseHasExtensions> List<T> stripInvalid(LibraryAdapter library) {
+        // Until we support passing the Manifest we do not know the IG context and cannot correctly setup the
+        // NamespaceManager
+        // This method will strip out any relatedArtifacts that do not have a full valid canonical
+        return library.getRelatedArtifact().stream()
+                .filter(r -> {
+                    var resourcePath = library.resolvePath(r, "resource");
+                    var reference =
+                            library.fhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU3)
+                                    ? ((org.hl7.fhir.dstu3.model.Reference) resourcePath).getReference()
+                                    : ((IPrimitiveType<String>) resourcePath).getValue();
+                    return reference.split("/").length > 2;
+                })
+                .map(r -> (T) r)
+                .collect(Collectors.toList());
     }
 
     private LibraryAdapter convertAndCreateAdapter(FhirVersionEnum fhirVersion, Library r5Library) {

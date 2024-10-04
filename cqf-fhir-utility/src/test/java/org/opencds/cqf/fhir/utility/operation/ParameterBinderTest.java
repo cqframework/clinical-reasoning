@@ -85,7 +85,7 @@ public class ParameterBinderTest {
     }
 
     private static ParameterBinder firstParameterBinderOf(String name) {
-        return methodBinderByName(name).parameters().get(0);
+        return methodBinderByName(name).getParameters$cqf_fhir_utility().get(0);
     }
 
     @Test

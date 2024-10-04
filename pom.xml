@@ -28,6 +28,7 @@
         <guava.version>32.1.2-jre</guava.version>
         <error-prone.version>2.24.1</error-prone.version>
         <checkstyle.version>10.12.7</checkstyle.version>
+        <kotlin.version>2.0.20</kotlin.version>
     </properties>
 
     <licenses>
@@ -185,6 +186,13 @@
                 <groupId>info.cqframework</groupId>
                 <artifactId>cqf-fhir-npm</artifactId>
                 <version>${cql.version}</version>
+            </dependency>
+
+            <!-- Kotlin Dependencies -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
             </dependency>
 
             <!-- Engine JAXB -->
@@ -410,14 +418,48 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>2.39.0</version>
+                    <version>2.44.0.BETA2</version>
                     <configuration>
+                        <kotlin>
+                            <ktfmt>
+                                <style>KOTLINLANG</style>
+                            </ktfmt>
+                        </kotlin>
                         <java>
-                            <palantirJavaFormat>
-                                <version>2.38.0</version>
-                            </palantirJavaFormat>
+                            <palantirJavaFormat/>
                         </java>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-maven-plugin</artifactId>
+                    <version>${kotlin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>compile</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <sourceDirs>
+                                    <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                                    <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                                </sourceDirs>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test-compile</id>
+                            <goals>
+                                <goal>test-compile</goal>
+                            </goals>
+                            <configuration>
+                                <sourceDirs>
+                                    <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                                    <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                                </sourceDirs>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -439,6 +481,32 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
+                    <executions>
+                        <!-- Replacing default-compile as it is treated specially by Maven -->
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <!-- Replacing default-testCompile as it is treated specially by Maven -->
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>none</phase>
+                        </execution>
+                        <execution>
+                            <id>java-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>java-test-compile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -616,6 +684,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

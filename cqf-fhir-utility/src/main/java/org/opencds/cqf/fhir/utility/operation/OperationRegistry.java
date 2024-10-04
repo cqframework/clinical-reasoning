@@ -86,7 +86,7 @@ public class OperationRegistry {
             }
         }
 
-        public IBaseResource execute() throws Exception, Throwable {
+        public IBaseResource execute() throws Throwable {
             try {
                 return OperationRegistry.this.execute(this);
             } catch (InvocationTargetException e) {
@@ -124,8 +124,8 @@ public class OperationRegistry {
         }
 
         for (var methodBinder : methodBinders) {
-            var context = new InvocationContext<T>(factory, methodBinder);
-            invocationContextByName.put(methodBinder.name(), context);
+            var context = new InvocationContext<>(factory, methodBinder);
+            invocationContextByName.put(methodBinder.getName(), context);
         }
     }
 
@@ -165,8 +165,9 @@ public class OperationRegistry {
             throw new InvalidRequestException("No operation found with name " + normalizedName);
         }
 
-        var scopedContexts =
-                contexts.stream().filter(c -> c.methodBinder().scope() == scope).collect(Collectors.toList());
+        var scopedContexts = contexts.stream()
+                .filter(c -> c.methodBinder().getScope$cqf_fhir_utility() == scope)
+                .collect(Collectors.toList());
 
         if (scopedContexts.isEmpty()) {
             throw new InvalidRequestException("No operation found with name " + normalizedName + " and scope " + scope);
@@ -175,7 +176,7 @@ public class OperationRegistry {
         // Only filter by type if the typeName is not empty
         Predicate<InvocationContext<?>> typePredicate = typeName.isEmpty()
                 ? c -> true
-                : c -> c.methodBinder().typeName().equals(typeName);
+                : c -> c.methodBinder().getTypeName().equals(typeName);
         var typeContexts = scopedContexts.stream().filter(typePredicate).collect(Collectors.toList());
 
         if (typeContexts.isEmpty()) {

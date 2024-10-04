@@ -180,16 +180,16 @@ class OperationRegistryTest {
 
         var registry = constructAndRegister(NameNormalizationExample.class, r -> new NameNormalizationExample());
         var op = registry.buildInvocationContext(repo, "$withAmpersand");
-        assertDoesNotThrow(() -> op.execute());
+        assertDoesNotThrow(op::execute);
 
         var op2 = registry.buildInvocationContext(repo, "withAmpersand");
-        assertDoesNotThrow(() -> op2.execute());
+        assertDoesNotThrow(op2::execute);
 
         var op3 = registry.buildInvocationContext(repo, "$noAmpersand");
-        assertDoesNotThrow(() -> op3.execute());
+        assertDoesNotThrow(op3::execute);
 
         var op4 = registry.buildInvocationContext(repo, "noAmpersand");
-        assertDoesNotThrow(() -> op4.execute());
+        assertDoesNotThrow(op4::execute);
     }
 
     @Test

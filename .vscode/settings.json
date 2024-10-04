@@ -131,5 +131,6 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "cqframework",
         "projectKey": "cqframework_clinical-reasoning"
-    }
+    },
+    "kotlin.codegen.enabled": true
 }

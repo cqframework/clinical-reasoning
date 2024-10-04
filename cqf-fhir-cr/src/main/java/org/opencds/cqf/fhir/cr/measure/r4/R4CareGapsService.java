@@ -1,14 +1,15 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.util.Date;
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 
 /**
  * Care Gap service that processes and produces care-gaps report as a result
@@ -20,10 +21,11 @@ public class R4CareGapsService {
             CareGapsProperties careGapsProperties,
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            String serverBase) {
+            String serverBase,
+            MeasurePeriodValidator measurePeriodEvalutator) {
 
-        r4CareGapsProcessor =
-                new R4CareGapsProcessor(careGapsProperties, repository, measureEvaluationOptions, serverBase);
+        r4CareGapsProcessor = new R4CareGapsProcessor(
+                careGapsProperties, repository, measureEvaluationOptions, serverBase, measurePeriodEvalutator);
     }
 
     /**
@@ -40,8 +42,8 @@ public class R4CareGapsService {
      *         Reports will be returned.
      */
     public Parameters getCareGapsReport(
-            IPrimitiveType<Date> periodStart,
-            IPrimitiveType<Date> periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> statuses,
             List<IdType> measureIds,

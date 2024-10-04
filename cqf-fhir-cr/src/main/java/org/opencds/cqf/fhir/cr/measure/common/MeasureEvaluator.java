@@ -13,11 +13,16 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
@@ -77,7 +82,7 @@ public class MeasureEvaluator {
             MeasureDef measureDef,
             MeasureEvalType measureEvalType,
             List<String> subjectIds,
-            Interval measurementPeriod,
+            @Nullable Interval measurementPeriod,
             IBaseParameters parameters,
             VersionedIdentifier versionedIdentifier) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
@@ -86,26 +91,59 @@ public class MeasureEvaluator {
         // measurementPeriod is not required, because it's often defaulted in CQL
         this.setMeasurementPeriod(measurementPeriod);
 
+        final ZonedDateTime zonedDateTime = getZonedTimeZoneForEval(measurementPeriod);
+
         switch (measureEvalType) {
             case PATIENT:
             case SUBJECT:
                 return this.evaluate(
-                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, parameters, versionedIdentifier);
+                        measureDef,
+                        MeasureReportType.INDIVIDUAL,
+                        subjectIds,
+                        parameters,
+                        versionedIdentifier,
+                        zonedDateTime);
             case SUBJECTLIST:
                 return this.evaluate(
-                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, parameters, versionedIdentifier);
+                        measureDef,
+                        MeasureReportType.SUBJECTLIST,
+                        subjectIds,
+                        parameters,
+                        versionedIdentifier,
+                        zonedDateTime);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluate(
-                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, parameters, versionedIdentifier);
+                        measureDef,
+                        MeasureReportType.PATIENTLIST,
+                        subjectIds,
+                        parameters,
+                        versionedIdentifier,
+                        zonedDateTime);
             case POPULATION:
                 return this.evaluate(
-                        measureDef, MeasureReportType.SUMMARY, subjectIds, parameters, versionedIdentifier);
+                        measureDef,
+                        MeasureReportType.SUMMARY,
+                        subjectIds,
+                        parameters,
+                        versionedIdentifier,
+                        zonedDateTime);
             default:
                 // never hit because this value is set upstream
                 throw new IllegalArgumentException(
                         String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
         }
+    }
+
+    @Nullable
+    private static ZonedDateTime getZonedTimeZoneForEval(@Nullable Interval interval) {
+        return Optional.ofNullable(interval)
+                .map(Interval::getLow)
+                .filter(DateTime.class::isInstance)
+                .map(DateTime.class::cast)
+                .map(DateTime::getZoneOffset)
+                .map(zoneOffset -> LocalDateTime.now().atOffset(zoneOffset).toZonedDateTime())
+                .orElse(null);
     }
 
     protected ParameterDef getMeasurementPeriodParameterDef() {
@@ -147,7 +185,10 @@ public class MeasureEvaluator {
         if (measurementPeriod == null) {
             measurementPeriod =
                     (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
-            this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
+
+            this.context
+                    .getState()
+                    .setParameter(null, this.measurementPeriodParameterName, cloneIntervalWithUtc(measurementPeriod));
             return;
         }
 
@@ -165,6 +206,43 @@ public class MeasureEvaluator {
         Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
 
         this.context.getState().setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
+    }
+
+    /**
+     * Convert an Interval from some other timezone to UTC, including both the start and end.
+     * For example, 2020-01-16T12:00:00-07:00-2020-01-16T12:59:59-07:00 becomes
+     * 2020-01-16T12:00:00Z-2020-01-16T12:59:59Z
+     *
+     * @param interval The original interval with some offset.
+     * @return The original dateTime but converted to UTC with the same local timestamp.
+     */
+    private static Interval cloneIntervalWithUtc(Interval interval) {
+        final Object startAsObject = interval.getStart();
+        final Object endAsObject = interval.getEnd();
+
+        if (startAsObject instanceof DateTime && endAsObject instanceof DateTime) {
+            return new Interval(
+                    cloneDateTimeWithUtc((DateTime) startAsObject),
+                    true,
+                    cloneDateTimeWithUtc((DateTime) endAsObject),
+                    true);
+        }
+
+        // Give up and just return the original Interval
+        return interval;
+    }
+
+    /**
+     * Convert a DateTime from some other timezone to UTC.
+     * For example, 2020-01-16T12:00:00-07:00 becomes 2020-01-16T12:00:00Z
+     *
+     * @param dateTime The original dateTime with some offset.
+     * @return The original dateTime but converted to UTC with the same local timestamp.
+     */
+    private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
+        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
+        newDateTime.setPrecision(dateTime.getPrecision());
+        return newDateTime;
     }
 
     protected Interval convertInterval(Interval interval, String targetType) {
@@ -223,7 +301,8 @@ public class MeasureEvaluator {
             MeasureReportType type,
             List<String> subjectIds,
             IBaseParameters parameters,
-            VersionedIdentifier id) {
+            VersionedIdentifier id,
+            ZonedDateTime zonedDateTime) {
         var subjectSize = subjectIds.size();
         logger.info(
                 "Evaluating Measure {}, report type {}, with {} subject(s)",
@@ -242,8 +321,8 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
-            EvaluationResult result =
-                    libraryEngine.getEvaluationResult(id, subjectId, parameters, null, null, null, context);
+            EvaluationResult result = libraryEngine.getEvaluationResult(
+                    id, subjectId, parameters, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

@@ -7,9 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -28,8 +33,8 @@ class MeasureProcessorEvaluateTest {
     @Test
     void measure_eval() {
 
-        var start = "2022-01-01";
-        var end = "2022-06-29";
+        var start = LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault());
+        var end = LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault());
         var helper = new R4DateHelper();
         var measurementPeriod = helper.buildMeasurementPeriod(start, end);
         var report = given.when()
@@ -48,6 +53,31 @@ class MeasureProcessorEvaluateTest {
         assertEquals(
                 measurementPeriod.getEnd().toInstant(),
                 report.getPeriod().getEnd().toInstant());
+    }
+
+    @Test
+    void measure_eval_UTC() {
+        var start = LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneOffset.UTC);
+        var end = LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneOffset.UTC);
+        var helper = new R4DateHelper();
+        var measurementPeriod = helper.buildMeasurementPeriod(start, end);
+        var report = given.when()
+                .measureId("GlycemicControlHypoglycemicInitialPopulation")
+                .periodStart(start)
+                .periodEnd(end)
+                .subject("Patient/eNeMVHWfNoTsMTbrwWQQ30A3")
+                .reportType("subject")
+                .evaluate()
+                .then()
+                .report();
+
+        final Period actualPeriod = report.getPeriod();
+
+        assertEquals(
+                measurementPeriod.getStart().toInstant(),
+                actualPeriod.getStart().toInstant());
+        assertEquals(
+                measurementPeriod.getEnd().toInstant(), actualPeriod.getEnd().toInstant());
     }
 
     @Test

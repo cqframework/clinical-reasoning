@@ -6,6 +6,10 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -105,8 +109,8 @@ public class CollectData {
         }
 
         private IdType theId;
-        private String periodStart;
-        private String periodEnd;
+        private ZonedDateTime periodStart;
+        private ZonedDateTime periodEnd;
         private String subject;
         private String practitioner;
         private Supplier<Parameters> operation;
@@ -116,13 +120,25 @@ public class CollectData {
             return this;
         }
 
-        public When periodEnd(String periodEnd) {
+        public When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
         }
 
-        public When periodStart(String periodStart) {
+        public When periodStart(ZonedDateTime periodStart) {
             this.periodStart = periodStart;
+            return this;
+        }
+
+        public When periodEnd(String periodEnd) {
+            this.periodEnd =
+                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
+            return this;
+        }
+
+        public When periodStart(String periodStart) {
+            this.periodStart = LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 

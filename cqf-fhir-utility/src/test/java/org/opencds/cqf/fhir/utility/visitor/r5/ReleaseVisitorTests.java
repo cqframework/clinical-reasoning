@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
@@ -14,9 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -56,7 +53,7 @@ import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
-import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
@@ -476,33 +473,24 @@ class ReleaseVisitorTests {
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
 
-        Appender<ILoggingEvent> myMockAppender = mock(Appender.class);
-        List<String> warningMessages = new ArrayList<>();
-        doAnswer(t -> {
-                    ILoggingEvent evt = (ILoggingEvent) t.getArguments()[0];
-                    // we only care about warning messages here
-                    if (evt.getLevel().equals(Level.WARN)) {
-                        // instead of appending to logs, we just add it to a list
-                        warningMessages.add(evt.getFormattedMessage());
-                    }
-                    return null;
-                })
-                .when(myMockAppender)
-                .doAppend(any());
-        org.slf4j.Logger logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        ch.qos.logback.classic.Logger loggerRoot = (ch.qos.logback.classic.Logger) logger;
-        // add the mocked appender, make sure it is detached at the end
-        loggerRoot.addAppender(myMockAppender);
-
         Parameters params = parameters(
                 part("version", new StringType("1.2.3")),
                 part("versionBehavior", new CodeType("default")),
                 part("requireNonExperimental", new CodeType("warn")));
+
+        var logger = TestLoggerFactory.getTestLogger(ReleaseVisitor.class);
+        logger.clear();
+
         libraryAdapter.accept(releaseVisitor, spyRepository, params);
         // no warning if the root is Experimental
-        assertEquals(0, warningMessages.size());
+        assertEquals(0, logger.getLoggingEvents().size());
 
         libraryAdapter2.accept(releaseVisitor, spyRepository, params);
+
+        var warningMessages = logger.getLoggingEvents().stream()
+                .filter(event -> event.getLevel().equals(Level.WARN))
+                .map(event -> event.getMessage())
+                .collect(Collectors.toList());
 
         // SHOULD warn if the root is not experimental
         assertTrue(warningMessages.stream()
@@ -510,8 +498,6 @@ class ReleaseVisitorTests {
                         message.contains("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.7")));
         assertTrue(warningMessages.stream()
                 .anyMatch(message -> message.contains("http://ersd.aimsplatform.org/fhir/Library/rctc2")));
-        // cleanup
-        loggerRoot.detachAppender(myMockAppender);
     }
 
     @Test

@@ -38,19 +38,21 @@ public class R4CareGapsService {
      * @param measureIds
      * @param measureIdentifiers
      * @param measureUrls
+     * @param isDocumentMode
      * @return Parameters that includes zero to many document bundles that include Care Gap Measure
      *         Reports will be returned.
      */
     public Parameters getCareGapsReport(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
-            String subject,
+            @Nullable String subject,
             List<String> statuses,
             List<IdType> measureIds,
             List<String> measureIdentifiers,
-            List<CanonicalType> measureUrls) {
+            List<CanonicalType> measureUrls,
+            @Nullable Boolean isDocumentMode) {
 
         return r4CareGapsProcessor.getCareGapsReport(
-                periodStart, periodEnd, subject, statuses, measureIds, measureIdentifiers, measureUrls);
+                periodStart, periodEnd, subject, statuses, measureIds, measureIdentifiers, measureUrls, isDocumentMode);
     }
 }

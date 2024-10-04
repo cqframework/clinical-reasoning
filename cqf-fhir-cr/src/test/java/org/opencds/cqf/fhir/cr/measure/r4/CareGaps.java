@@ -161,6 +161,8 @@ public class CareGaps {
         private List<CanonicalType> measureUrls = new ArrayList<>();
         private Supplier<Parameters> operation;
 
+        private Boolean isDocumentMode;
+
         public CareGaps.When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
@@ -196,9 +198,21 @@ public class CareGaps {
             return this;
         }
 
+        public CareGaps.When isDocumentMode(Boolean isDocumentMode) {
+            this.isDocumentMode = isDocumentMode;
+            return this;
+        }
+
         public CareGaps.When getCareGapsReport() {
             this.operation = () -> service.getCareGapsReport(
-                    periodStart, periodEnd, subject, statuses, measureIds, measureIdentifiers, measureUrls);
+                    periodStart,
+                    periodEnd,
+                    subject,
+                    statuses,
+                    measureIds,
+                    measureIdentifiers,
+                    measureUrls,
+                    isDocumentMode);
             return this;
         }
 
@@ -283,7 +297,11 @@ public class CareGaps {
                             .size());
             return this;
         }
-        ;
+
+        public SelectedBundle bundleEntryCount(int count) {
+            assertEquals(count, bundleReport().getEntry().size());
+            return this;
+        }
 
         public DetectedIssue resourceToDetectedIssue(Resource theResource) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
@@ -404,6 +422,32 @@ public class CareGaps {
             CodeableConcept cc = (CodeableConcept) statusExt.get().getValue();
             assertEquals(CARE_GAPS_GAP_STATUS_SYSTEM, cc.getCodingFirstRep().getSystem());
             assertEquals(gapStatus, cc.getCodingFirstRep().getCode());
+            return this;
+        }
+
+        public SelectedDetectedIssue hasIdentifiedPeriod() {
+            assertTrue(detectedIssueReport().hasIdentifiedPeriod());
+            return this;
+        }
+
+        public SelectedDetectedIssue hasImplicatedMeasureReference() {
+            assertTrue(
+                    detectedIssueReport().getImplicatedFirstRep().getReference().startsWith("Measure"));
+            return this;
+        }
+
+        public SelectedDetectedIssue hasContainedMeasureReport() {
+            var containedResource = detectedIssueReport().getContained().get(0);
+            assertTrue(containedResource instanceof MeasureReport);
+            return this;
+        }
+
+        public SelectedDetectedIssue hasContainedEvidenceReference() {
+            assertTrue(detectedIssueReport()
+                    .getEvidenceFirstRep()
+                    .getDetailFirstRep()
+                    .getReference()
+                    .startsWith("#"));
             return this;
         }
 

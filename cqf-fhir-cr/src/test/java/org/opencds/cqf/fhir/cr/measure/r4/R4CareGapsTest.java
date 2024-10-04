@@ -218,11 +218,32 @@ class R4CareGapsTest {
                 .statuses("not-applicable")
                 .measureIds("BreastCancerScreeningFHIR")
                 .measureUrls("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108|8.3.000")
+                .isDocumentMode(true)
                 .getCareGapsReport()
                 .then()
                 .hasBundleCount(1)
                 .firstParameter()
                 .measureReportCount(2)
+                .detectedIssueCount(2);
+    }
+
+    @Test
+    void exm125_careGaps_twoMeasuresByUrlAndId_NonDocumentMode() {
+        given.when()
+                .subject("Patient/numer-EXM125")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .statuses("closed-gap")
+                .statuses("open-gap")
+                .statuses("not-applicable")
+                .measureIds("BreastCancerScreeningFHIR")
+                .measureUrls("http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108|8.3.000")
+                .isDocumentMode(false)
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .bundleEntryCount(2) // only DetectedIssues should be within Bundle
                 .detectedIssueCount(2);
     }
 
@@ -630,13 +651,14 @@ class R4CareGapsTest {
     // 'prospective gap' test relies on date of report to decide if 'prospective' or 'open' gap. This will fail EOY
     // 2025.
     @Test
-    void MinimalProportionBooleanBasisSingleGroupWithDOC() {
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode() {
         GIVEN_REPO
                 .when()
                 .subject("Patient/male-2022")
                 .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureIds("MinimalProportionBooleanBasisSingleGroupWithDOC")
+                .isDocumentMode(true)
                 .statuses("prospective-gap")
                 .getCareGapsReport()
                 .then()
@@ -646,23 +668,28 @@ class R4CareGapsTest {
                 .detectedIssue()
                 .hasCareGapStatus("prospective-gap");
     }
-    /*
-    // TODO implement Measure Group Level improvement notation extension
+
     @Test
-    void MinimalProportionBooleanBasisMultiGroupGroupImpNotation() {
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode() {
         GIVEN_REPO
-            .when()
-            .subject("Patient/female-1988")
-            .periodStart(LocalDate.of(2019,  Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .periodEnd(LocalDate.of(2019,  Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .measureIds("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
-            .statuses("closed-gap")
-            .getCareGapsReport()
-            .then()
-            .hasBundleCount(1)
-            .firstParameter()
-            .detectedIssueCount(
-                2); // 2 Detected issue per groupId, one is decrease, the other increase improvement Notation. Both should be closed-gap
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureIds("MinimalProportionBooleanBasisSingleGroupWithDOC")
+                .isDocumentMode(false)
+                .statuses("prospective-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .bundleEntryCount(1) // non-document mode should leave only 1 Detected Issue per MeasureReport.group
+                .detectedIssueCount(1) // this confirms only entry is a DetectedIssue
+                .detectedIssue()
+                .hasCareGapStatus("prospective-gap")
+                .hasContainedEvidenceReference()
+                .hasContainedMeasureReport()
+                .hasIdentifiedPeriod()
+                .hasImplicatedMeasureReference();
     }
-     */
 }

@@ -42,6 +42,8 @@ public class R4CareGapsProcessor {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
 
+    private final Boolean isDocumentModeDefault = true;
+
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             Repository repository,
@@ -68,7 +70,8 @@ public class R4CareGapsProcessor {
             List<String> statuses,
             List<IdType> measureIds,
             List<String> measureIdentifiers,
-            List<CanonicalType> measureUrls) {
+            List<CanonicalType> measureUrls,
+            Boolean isDocumentMode) {
 
         // validate and set required configuration resources for care-gaps
         checkConfigurationReferences();
@@ -83,6 +86,11 @@ public class R4CareGapsProcessor {
         checkValidStatusCode(statuses);
         measureCompatibilityCheck(measures);
 
+        // Set default for optional parameter value
+        if (isDocumentMode == null) {
+            isDocumentMode = isDocumentModeDefault;
+        }
+
         // Subject Population for Report
         List<String> subjects = getSubjects(subject);
 
@@ -92,7 +100,7 @@ public class R4CareGapsProcessor {
         // Build Patient Bundles
 
         List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                periodStart, periodEnd, subjects, statuses, collectedMeasureIds);
+                periodStart, periodEnd, subjects, statuses, collectedMeasureIds, isDocumentMode);
 
         // Return Results with Bundles
         return result.setParameter(components);

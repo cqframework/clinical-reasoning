@@ -24,6 +24,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                             request.getSubject(),
                             request.getParameters(),
                             request.getData(),
+                            null,
                             request.getExpression());
         } catch (Exception e) {
             request.logException(e.getMessage());

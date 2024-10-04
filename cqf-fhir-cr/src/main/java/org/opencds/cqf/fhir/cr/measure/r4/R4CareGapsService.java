@@ -31,14 +31,18 @@ public class R4CareGapsService {
     /**
      * Calculate measures describing gaps in care
      *
-     * @param periodStart
-     * @param periodEnd
-     * @param subject
-     * @param statuses
-     * @param measureIds
-     * @param measureIdentifiers
-     * @param measureUrls
-     * @param isDocumentMode
+     * @param periodStart measurement period starting interval.
+     * @param periodEnd measurement period ending interval.
+     * @param subject subject population to use for care-gap results. Accepted values [empty=all Patients, Patient/{id}, Group/{id} type {person, practitioner}, Practitioner/{id}]
+     * @param statuses determines what care-gap statuses will be returned by the service if found. [prospective-gap, closed-gap, open-gap, not-applicable].
+     *                 If Result is 'not-applicable' for Measure, but status requested was 'open-gap', then no result will be returned.
+     * @param measureIds Measures to check care-gap for by resolving by fhir resource id
+     * @param measureIdentifiers Measures to check care-gap for by resolving identifier value or systemUrl|value
+     * @param measureUrls Measures to check care-gap for by resolving canonical url reference
+     * @param isDocumentMode optional, default is 'true'. This parameter determines if standard care-gaps
+     *                       formatted 'document' bundle is returned with [composition, Detected Issue,
+     *                       configured resources, evaluated resources, measure reports]. Or non-document mode,
+     *                       which just returns a bundle with [Detected Issue(s)], with contained Measure Report.
      * @return Parameters that includes zero to many document bundles that include Care Gap Measure
      *         Reports will be returned.
      */

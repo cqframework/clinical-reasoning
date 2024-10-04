@@ -142,7 +142,9 @@ public class R4CareGapsBundleBuilder {
         }
         return paramResults;
     }
-
+    /**
+     * method to use for creating 'Document' bundle per Patient, use when 'isDocumentMode'=true
+     */
     @Nullable
     public Bundle makePatientDocumentBundle(Bundle bundle, List<String> statuses, Patient patient) {
         Map<String, Resource> evalPlusSDE = new HashMap<>();
@@ -187,7 +189,9 @@ public class R4CareGapsBundleBuilder {
             return null;
         }
     }
-
+    /**
+     * method to use for creating 'Non-Document' bundle per Patient, use when 'isDocumentMode'=false
+     */
     @Nullable
     public Bundle makePatientNonDocumentBundle(Bundle bundle, List<String> statuses, Patient patient) {
         List<DetectedIssue> detectedIssues = new ArrayList<>();
@@ -267,9 +271,6 @@ public class R4CareGapsBundleBuilder {
                 .withTitle("Care Gap Report for " + Ids.simplePart(patient))
                 .withSubject(Ids.simple(patient))
                 .withAuthor(Ids.simple(configuredResources.get("care_gaps_composition_section_author")))
-                // .withCustodian(organization) // TODO: Optional: identifies the organization
-                // who is responsible for ongoing maintenance of and accessing to this gaps in
-                // care report. Add as a setting and optionally read if it's there.
                 .build();
     }
 

@@ -3,13 +3,12 @@ package org.opencds.cqf.fhir.utility.operation
 import ca.uhn.fhir.model.api.annotation.Description
 import ca.uhn.fhir.rest.annotation.Operation
 import java.lang.reflect.Method
-import java.util.concurrent.Callable
 import org.hl7.fhir.instance.model.api.IBaseParameters
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.instance.model.api.IIdType
 import org.opencds.cqf.fhir.utility.Resources
+import org.opencds.cqf.fhir.utility.operation.ParameterBinder.Companion.validate
 import org.opencds.cqf.fhir.utility.operation.ParameterBinder.Type
-import org.opencds.cqf.fhir.utility.operation.ParameterBinder.validate
 
 class MethodBinder(val method: Method) {
     val operation: Operation =
@@ -55,9 +54,9 @@ class MethodBinder(val method: Method) {
         return args
     }
 
-    fun bind(provider: Any, id: IIdType?, parameters: IBaseParameters?): Callable<IBaseResource> {
+    fun bind(provider: Any, id: IIdType?, parameters: IBaseParameters?): () -> IBaseResource? {
         val args = args(id, parameters)
-        return Callable { method.invoke(provider, *args.toTypedArray()) as IBaseResource? }
+        return { method.invoke(provider, *args.toTypedArray()) as IBaseResource? }
     }
 
     companion object {

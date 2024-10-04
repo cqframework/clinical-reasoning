@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.annotation.IdParam
 import ca.uhn.fhir.rest.annotation.Operation
 import ca.uhn.fhir.rest.annotation.OperationParam
 import java.lang.reflect.Method
-import java.util.*
 import org.hl7.fhir.dstu3.model.Measure
 import org.hl7.fhir.instance.model.api.IBaseParameters
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -17,6 +16,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
+@Suppress("unused", "UNUSED_PARAMETER")
 class MethodBinderTest {
     // These are simply a bunch of example method signatures to test the MethodBinder class
     internal inner class ExampleMethods {
@@ -272,7 +272,7 @@ class MethodBinderTest {
 
     companion object {
         private val methods: List<Method> =
-            Arrays.asList(*ExampleMethods::class.java.declaredMethods)
+            listOf(*ExampleMethods::class.java.declaredMethods)
 
         private fun methodByName(name: String): Method {
             return methods.stream().filter { x: Method -> x.name == name }.findFirst().get()

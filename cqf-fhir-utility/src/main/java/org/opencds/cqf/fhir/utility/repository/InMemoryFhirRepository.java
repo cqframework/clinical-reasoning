@@ -364,6 +364,6 @@ public class InMemoryFhirRepository implements Repository {
     public <T> void registerOperation(Class<T> clazz, Function<Repository, T> factory) {
         requireNonNull(clazz, "clazz can not be null");
         requireNonNull(factory, "factory can not be null");
-        operationRegistry.register(clazz, factory);
+        operationRegistry.register(clazz, factory::apply);
     }
 }

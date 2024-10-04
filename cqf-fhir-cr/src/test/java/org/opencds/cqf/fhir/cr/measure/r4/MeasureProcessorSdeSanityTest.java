@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -45,13 +45,10 @@ class MeasureProcessorSdeSanityTest {
         var start = period.getStart();
         var end = period.getEnd();
 
-        // The CQL engine sets times with an unspecified offset to the _current_ system offset,
-        // using the rules for the system default timezone. A given timezone may have variable
-        // offsets from UTC (e.g. daylight savings time), and the current offset may be different
-        // than the expected offset for a given date.
-        var now = OffsetDateTime.now();
+        // clinical-reasoning overrides the CQL engine to set times with an unspecified offset to the UTC offset,
+        // Otherwise, CQL would set it to the local server's timezone offset.
 
-        assertEquals("2019-01-01", formatter.format(start.toInstant().atOffset(now.getOffset())));
-        assertEquals("2019-12-31", formatter.format(end.toInstant().atOffset(now.getOffset())));
+        assertEquals("2019-01-01", formatter.format(start.toInstant().atOffset(ZoneOffset.UTC)));
+        assertEquals("2019-12-31", formatter.format(end.toInstant().atOffset(ZoneOffset.UTC)));
     }
 }

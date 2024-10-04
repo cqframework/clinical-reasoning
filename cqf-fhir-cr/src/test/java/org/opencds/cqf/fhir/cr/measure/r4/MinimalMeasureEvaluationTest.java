@@ -3,6 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -24,10 +28,10 @@ class MinimalMeasureEvaluationTest {
                 .hasReportType("Summary")
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("denominator")
-                .hasCount(5)
+                .hasCount(6)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -36,12 +40,12 @@ class MinimalMeasureEvaluationTest {
                 .hasCount(1)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.6");
+                .hasScore("0.5");
     }
 
     @Test
@@ -58,10 +62,10 @@ class MinimalMeasureEvaluationTest {
                 .hasReportType("Summary")
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("denominator")
-                .hasCount(5)
+                .hasCount(6)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -70,12 +74,12 @@ class MinimalMeasureEvaluationTest {
                 .hasCount(1)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.6");
+                .hasScore("0.5");
     }
 
     @Test
@@ -91,10 +95,10 @@ class MinimalMeasureEvaluationTest {
                 .hasReportType("Summary")
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("denominator")
-                .hasCount(5)
+                .hasCount(6)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -103,12 +107,12 @@ class MinimalMeasureEvaluationTest {
                 .hasCount(1)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.6");
+                .hasScore("0.5");
     }
 
     @Test
@@ -131,10 +135,10 @@ class MinimalMeasureEvaluationTest {
                 .hasReportType("Summary")
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("denominator")
-                .hasCount(5)
+                .hasCount(6)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -143,12 +147,12 @@ class MinimalMeasureEvaluationTest {
                 .hasCount(1)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.6");
+                .hasScore("0.5");
     }
 
     @Test
@@ -245,10 +249,10 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(9)
+                .hasCount(10)
                 .up()
                 .population("denominator")
-                .hasCount(6)
+                .hasCount(7)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -257,12 +261,12 @@ class MinimalMeasureEvaluationTest {
                 .hasCount(1)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.5");
+                .hasScore("0.42857142857142855");
     }
 
     @Test
@@ -352,21 +356,21 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("denominator")
-                .hasCount(6)
+                .hasCount(7)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.5");
+                .hasScore("0.42857142857142855");
     }
 
     @Test
@@ -475,21 +479,21 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(9)
+                .hasCount(10)
                 .up()
                 .population("denominator")
-                .hasCount(7)
+                .hasCount(8)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
                 .up()
                 .population("numerator-exclusion")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("numerator")
                 .hasCount(3)
                 .up()
-                .hasScore("0.42857142857142855");
+                .hasScore("0.375");
     }
 
     @Test
@@ -570,7 +574,7 @@ class MinimalMeasureEvaluationTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .evaluate();
-        when.then().firstGroup().population("initial-population").hasCount(9);
+        when.then().firstGroup().population("initial-population").hasCount(10);
     }
 
     @Test
@@ -604,6 +608,12 @@ class MinimalMeasureEvaluationTest {
                 .evaluate();
         when.then()
                 .hasReportType("Subject List")
+                .hasPeriodStart(Date.from(LocalDate.of(2024, Month.JANUARY, 1)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()))
+                .hasPeriodEnd(Date.from(LocalDate.of(2024, Month.DECEMBER, 31)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()))
                 .hasSubjectReference("Patient/female-1988")
                 .subjectResultsValidation()
                 .containedListHasCorrectResourceType("Encounter")
@@ -621,7 +631,7 @@ class MinimalMeasureEvaluationTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .evaluate();
-        when.then().firstGroup().population("initial-population").hasCount(8);
+        when.then().firstGroup().population("initial-population").hasCount(9);
     }
 
     @Test
@@ -687,16 +697,16 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(9)
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(7)
+                .hasCount(8)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(7);
+                .hasCount(8);
     }
 
     @Test
@@ -770,10 +780,10 @@ class MinimalMeasureEvaluationTest {
         when.then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .population("measure-population")
-                .hasCount(6)
+                .hasCount(7)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(2);

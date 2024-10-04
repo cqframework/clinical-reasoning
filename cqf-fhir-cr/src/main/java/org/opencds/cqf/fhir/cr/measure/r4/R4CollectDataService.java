@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +50,11 @@ public class R4CollectDataService {
      *         evaluated Resources
      */
     public Parameters collectData(
-            IdType measureId, String periodStart, String periodEnd, String subject, String practitioner) {
+            IdType measureId,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            String practitioner) {
 
         Parameters parameters = new Parameters();
         var subjectProvider = new R4RepositorySubjectProvider();
@@ -75,8 +81,8 @@ public class R4CollectDataService {
     private void addReports(
             R4MeasureProcessor processor,
             IdType measureId,
-            String periodStart,
-            String periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             Parameters parameters) {
         MeasureReport report = processor.evaluateMeasure(

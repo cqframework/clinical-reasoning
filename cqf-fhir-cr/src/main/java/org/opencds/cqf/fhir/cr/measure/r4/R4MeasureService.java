@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -11,6 +13,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -18,17 +21,22 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final MeasurePeriodValidator measurePeriodValidator;
 
-    public R4MeasureService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public R4MeasureService(
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        this.measurePeriodValidator = measurePeriodValidator;
     }
 
     @Override
     public MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
-            String periodStart,
-            String periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,
@@ -39,6 +47,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             Parameters parameters,
             String productLine,
             String practitioner) {
+
+        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, new R4RepositorySubjectProvider());

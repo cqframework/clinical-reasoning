@@ -42,7 +42,7 @@ public class R4CareGapsProcessor {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
 
-    private final Boolean isDocumentModeDefault = true;
+    private static final Boolean isDocumentModeDefault = true;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,

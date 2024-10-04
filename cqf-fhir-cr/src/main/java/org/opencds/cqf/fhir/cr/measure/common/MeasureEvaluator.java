@@ -586,11 +586,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            MeasureDef measureDef,
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         if (initialPopulation == null) {
@@ -623,7 +619,7 @@ public class MeasureEvaluator {
                 evaluateContinuousVariable(measureDef, groupDef, subjectType, subjectId, evaluationResult);
                 break;
             case COHORT:
-                evaluateCohort(measureDef, groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
         }
     }

@@ -105,7 +105,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     groupMeasureScoringCode,
                     groupIsIncreaseImprovementNotation);
             groups.add(groupDef);
-            // groupMeasureScoring.put(groupDef, groupMeasureScoringCode);
         }
         // define basis of measure
         Dstu3MeasureBasisDef measureBasisDef = new Dstu3MeasureBasisDef();

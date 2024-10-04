@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchContextExt;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.codeTypeForVersion;
 
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
@@ -69,7 +69,7 @@ public class ItemGenerator {
                 itemContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
                 itemContextExt.setValue(caseFeature.toExpressionType(request.getFhirVersion()));
                 // Assume Patient
-                launchContextExts.add(ExtensionBuilders.buildSdcLaunchContextExt(request.getFhirVersion(), "patient"));
+                launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), "patient"));
                 var featureLibrary = request.getAdapterFactory()
                         .createLibrary(SearchHelper.searchRepositoryByCanonical(
                                 repository,
@@ -86,10 +86,9 @@ public class ItemGenerator {
                                                     .collect(Collectors.toList())
                                                     .contains(name);
                         })
+                        .map(p -> request.resolvePathString(p, "name").toLowerCase())
                         .collect(Collectors.toList());
-                inParameters.forEach(p -> launchContextExts.add(ExtensionBuilders.buildSdcLaunchContextExt(
-                        request.getFhirVersion(),
-                        request.resolvePathString(p, "name").toLowerCase())));
+                inParameters.forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), p)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {

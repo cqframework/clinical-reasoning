@@ -32,17 +32,19 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
                         .map(c -> resolvePathString(c.getValue(), "code"))
                         .findFirst()
                         .orElse(null);
-                var exists =
-                        getQuestionnaireAdapter()
-                                .getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .stream()
-                                .anyMatch(lc -> lc.getExtension().stream()
-                                        .map(c -> (IBaseExtension<?, ?>) c)
-                                        .anyMatch(c -> c.getUrl().equals("name")
-                                                && resolvePathString(c.getValue(), "code")
-                                                        .equals(code)));
-                if (!exists) {
-                    getQuestionnaireAdapter().addExtension(e);
+                if (StringUtils.isNotBlank(code)) {
+                    var exists =
+                            getQuestionnaireAdapter()
+                                    .getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                    .stream()
+                                    .anyMatch(lc -> lc.getExtension().stream()
+                                            .map(c -> (IBaseExtension<?, ?>) c)
+                                            .anyMatch(c -> c.getUrl().equals("name")
+                                                    && resolvePathString(c.getValue(), "code")
+                                                            .equals(code)));
+                    if (!exists) {
+                        getQuestionnaireAdapter().addExtension(e);
+                    }
                 }
             });
         }

@@ -5,6 +5,8 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -75,8 +77,10 @@ public class LibraryEngine {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle additionalData,
+            ZonedDateTime zonedDateTime,
             Set<String> expressions) {
-        return this.evaluate(VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData, expressions);
+        return this.evaluate(
+                VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData, zonedDateTime, expressions);
     }
 
     public IBaseParameters evaluate(
@@ -84,10 +88,18 @@ public class LibraryEngine {
             String patientId,
             IBaseParameters parameters,
             IBaseBundle additionalData,
+            ZonedDateTime zonedDateTime,
             Set<String> expressions) {
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
         var result = getEvaluationResult(
-                id, patientId, parameters, additionalData, expressions, cqlFhirParametersConverter, null);
+                id,
+                patientId,
+                parameters,
+                additionalData,
+                expressions,
+                cqlFhirParametersConverter,
+                zonedDateTime,
+                null);
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -189,7 +201,7 @@ public class LibraryEngine {
             case "text/cql-name":
                 validateLibrary(libraryToBeEvaluated);
                 parametersResult = this.evaluate(
-                        libraryToBeEvaluated, subjectId, parameters, bundle, Collections.singleton(expression));
+                        libraryToBeEvaluated, subjectId, parameters, bundle, null, Collections.singleton(expression));
                 results = resolveParameterValues(
                         ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
                 break;
@@ -304,6 +316,7 @@ public class LibraryEngine {
             IBaseBundle additionalData,
             Set<String> expressions,
             CqlFhirParametersConverter cqlFhirParametersConverter,
+            @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
         if (cqlFhirParametersConverter == null) {
@@ -315,6 +328,13 @@ public class LibraryEngine {
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        return engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
+
+        return engine.evaluate(
+                new VersionedIdentifier().withId(id.getId()),
+                expressions,
+                buildContextParameter(patientId),
+                evaluationParameters,
+                null,
+                zonedDateTime);
     }
 }

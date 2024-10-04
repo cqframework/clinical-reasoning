@@ -98,6 +98,7 @@ public class Engines {
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
         var sourceProviders = new ArrayList<LibrarySourceProvider>();
+
         sourceProviders.add(buildLibrarySource(repository));
 
         var dataProviders =
@@ -163,6 +164,9 @@ public class Engines {
         }
 
         librarySourceProviders.forEach(lsp -> {
+            libraryManager.getLibrarySourceLoader().registerProvider(lsp);
+        });
+        settings.getLibrarySourceProviders().forEach(lsp -> {
             libraryManager.getLibrarySourceLoader().registerProvider(lsp);
         });
 

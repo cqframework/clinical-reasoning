@@ -17,9 +17,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Composition;
@@ -47,6 +46,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -81,19 +81,21 @@ public class R4CareGapsBundleBuilder {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            Map<String, Resource> configuredResources) {
+            Map<String, Resource> configuredResources,
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService = new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase);
+        r4MultiMeasureService =
+                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
-            IPrimitiveType<Date> periodStart,
-            IPrimitiveType<Date> periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             List<String> statuses,
             List<IdType> measureIds) {
@@ -109,8 +111,8 @@ public class R4CareGapsBundleBuilder {
                     measureIds,
                     null,
                     null,
-                    periodStart.getValueAsString(),
-                    periodEnd.getValueAsString(),
+                    periodStart,
+                    periodEnd,
                     MeasureEvalType.SUBJECT.toCode(),
                     subject,
                     null,

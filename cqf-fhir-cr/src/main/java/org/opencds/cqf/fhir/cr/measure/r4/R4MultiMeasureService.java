@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -32,6 +35,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
     private Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final MeasurePeriodValidator measurePeriodValidator;
     private String serverBase;
 
     private final R4RepositorySubjectProvider subjectProvider;
@@ -41,9 +45,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private R4MeasureServiceUtils r4MeasureServiceUtils;
 
     public R4MultiMeasureService(
-            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, String serverBase) {
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            String serverBase,
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
 
         subjectProvider = new R4RepositorySubjectProvider();
@@ -58,8 +66,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
-            String periodStart,
-            String periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
             Endpoint contentEndpoint,
@@ -69,6 +77,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             Parameters parameters,
             String productLine,
             String reporter) {
+
+        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
             // if needing to use proxy repository, override constructors
@@ -129,8 +139,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void populationMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            String periodStart,
-            String periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             MeasureEvalType evalType,
             String subjectParam,
@@ -179,8 +189,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void subjectMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            String periodStart,
-            String periodEnd,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
             String reportType,
             MeasureEvalType evalType,
             List<String> subjects,

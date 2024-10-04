@@ -122,7 +122,7 @@ public class LibraryEngine {
 
         List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
         librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        
+
         var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false);
         var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
         for (var source : librarySourceProviders) {

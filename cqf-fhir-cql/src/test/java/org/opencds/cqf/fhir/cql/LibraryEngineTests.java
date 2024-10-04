@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -32,11 +31,10 @@ class LibraryEngineTests {
 
     Repository repository;
     LibraryEngine libraryEngine;
+
     @BeforeEach
-    public void beforeEach()
-    {
-        repository =
-            new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
+    public void beforeEach() {
+        repository = new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
         libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
     }
 
@@ -91,39 +89,34 @@ class LibraryEngineTests {
     }
 
     String libraryCql = "library MyLibrary version '1.0.0'\n"
-        + "\n"
-        + "using FHIR version '4.0.1'\n"
-        + "\n"
-        + "include FHIRHelpers version '4.0.1' called FHIRHelpers\n"
-        + "\n"
-        + "context Patient\n"
-        + "\n"
-        + "define \"MyNameReturner\":\n"
-        + " Patient.name.given";
-
+            + "\n"
+            + "using FHIR version '4.0.1'\n"
+            + "\n"
+            + "include FHIRHelpers version '4.0.1' called FHIRHelpers\n"
+            + "\n"
+            + "context Patient\n"
+            + "\n"
+            + "define \"MyNameReturner\":\n"
+            + " Patient.name.given";
 
     @Test
     void expressionWithLibraryResourceProvider() {
 
         var libraryResourceProvider = new ArrayList<LibrarySourceProvider>();
-        libraryResourceProvider.add(
-            new LibrarySourceProvider() {
-                @Override
-                public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
-                    return null;
-                }
+        libraryResourceProvider.add(new LibrarySourceProvider() {
+            @Override
+            public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+                return null;
+            }
 
-                @Override
-                public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
-                    LibraryContentType type) {
-                    if("MyLibrary".equals(libraryIdentifier.getId()))
-                        return new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8));
-                    else
-                        return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
-                }
-            });
-        var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(
-            libraryResourceProvider);
+            @Override
+            public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
+                if ("MyLibrary".equals(libraryIdentifier.getId()))
+                    return new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8));
+                else return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
+            }
+        });
+        var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings, null);
         repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
@@ -133,5 +126,4 @@ class LibraryEngineTests {
         var result = libraryEngine.resolveExpression(patientId, expression, null, null, null, null);
         assertEquals(((StringType) result.get(0)).getValue(), "me");
     }
-
 }

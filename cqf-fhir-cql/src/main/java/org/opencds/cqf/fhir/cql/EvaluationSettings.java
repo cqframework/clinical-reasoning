@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cql;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.cql.model.ModelIdentifier;
@@ -16,6 +18,7 @@ public class EvaluationSettings {
     private Map<ModelIdentifier, Model> modelCache;
     private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
     private Map<String, List<Code>> valueSetCache;
+    private List<LibrarySourceProvider> librarySourceProviders;
 
     private CqlOptions cqlOptions;
 
@@ -32,6 +35,7 @@ public class EvaluationSettings {
         settings.setValueSetCache(new ConcurrentHashMap<>());
         settings.setRetrieveSettings(new RetrieveSettings());
         settings.setTerminologySettings(new TerminologySettings());
+        settings.withLibrarySourceProviders(new ArrayList<>());
         return settings;
     }
 
@@ -111,5 +115,14 @@ public class EvaluationSettings {
 
     public void setTerminologySettings(TerminologySettings terminologySettings) {
         this.terminologySettings = terminologySettings;
+    }
+
+    public EvaluationSettings withLibrarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
+        this.librarySourceProviders = librarySourceProviders;
+        return this;
+    }
+
+    public List<LibrarySourceProvider> getLibrarySourceProviders() {
+        return librarySourceProviders;
     }
 }

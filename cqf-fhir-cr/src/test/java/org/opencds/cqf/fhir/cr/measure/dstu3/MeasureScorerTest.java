@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,11 @@ class MeasureScorerTest {
         var mr = new MeasureReport();
         mr.addGroup();
         Dstu3MeasureReportScorer scorer = new Dstu3MeasureReportScorer();
-
-        assertThrows(IllegalArgumentException.class, () -> scorer.score(null, mr));
+        try {
+            scorer.score(null, mr);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("MeasureDef is required in order to score a Measure."));
+        }
     }
 }

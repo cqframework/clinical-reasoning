@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
@@ -9,27 +8,33 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(Map<GroupDef, MeasureScoring> measureScoring, MeasureReport measureReport) {
+    public void score(MeasureDef measureDef, MeasureReport measureReport) {
+        // Measure Def Check
+        if (measureDef == null) {
+            throw new IllegalArgumentException("MeasureDef is required in order to score a Measure.");
+        }
         // No groups, nothing to score
         if (measureReport.getGroup().isEmpty()) {
             return;
         }
+        // Dstu3 doesn't have scoring on group level, extract first assigned groupDef measureScore
+        MeasureScoring measureScoring = measureDef.groups().get(0).measureScoring();
 
-        if (measureScoring == null || measureScoring.isEmpty()) {
+        // validate scoring
+        if (measureScoring == null) {
             throw new IllegalArgumentException(
                     "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
         }
 
-        var scoring = measureScoring.values().iterator().next();
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
-            scoreGroup(scoring, mrgc);
+            scoreGroup(measureScoring, mrgc);
         }
     }
 

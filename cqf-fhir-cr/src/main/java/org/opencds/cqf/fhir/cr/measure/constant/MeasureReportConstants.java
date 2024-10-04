@@ -8,6 +8,10 @@ constants used on MeasureReport resources
 public class MeasureReportConstants {
     private MeasureReportConstants() {}
 
+    public static final String IMPROVEMENT_NOTATION_SYSTEM_INCREASE = "increase";
+    public static final String IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY = "Increase";
+    public static final String IMPROVEMENT_NOTATION_SYSTEM_DECREASE = "decrease";
+    public static final String IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY = "Decrease";
     public static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM =
             "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
 

@@ -10,7 +10,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.opencds.cqf.fhir.api.Repository;
@@ -44,7 +43,7 @@ public class ProcessDefinition {
         requireNonNull(requestAction);
         IBaseResource resource = null;
         var definition = getDefinition(request, action);
-        if (isDefinitionCanonical(request, definition)) {
+        if (Boolean.TRUE.equals(isDefinitionCanonical(request, definition))) {
             resource = resolveDefinition(request, definition);
             if (resource != null) {
                 var actionId = request.resolvePathString(action, "id");
@@ -67,12 +66,10 @@ public class ProcessDefinition {
                     request.getRequestResources().add(resource);
                 }
             }
-        } else if (isDefinitionUri(request, definition)) {
+        } else if (Boolean.TRUE.equals(isDefinitionUri(request, definition))) {
             request.getModelResolver()
                     .setValue(
-                            requestAction,
-                            "resource",
-                            buildReference(request.getFhirVersion(), ((IPrimitiveType<String>) definition).getValue()));
+                            requestAction, "resource", buildReference(request.getFhirVersion(), definition.getValue()));
         }
         return resource;
     }
@@ -157,23 +154,15 @@ public class ProcessDefinition {
             var activityDefinition = (referenceToContained
                     ? resolveContained(request, definition.getValue())
                     : resolveRepository(definition));
-            // var activityDefParams = request.transformRequestParameters(activityDefinition);
-            // Map<String, String> headers = new HashMap<>();
-            // headers.put("Content-Type", "application/json+fhir");
-            // result = repository.invoke(
-            //         activityDefinition.getClass(), "$apply", activityDefParams, IBaseResource.class, headers);
             var activityRequest = request.toActivityRequest(activityDefinition);
             result = applyProcessor.applyActivityDefinition(activityRequest);
-            result.setId((IIdType)
-                    (referenceToContained
-                            ? Ids.newId(
-                                    request.getFhirVersion(),
-                                    result.fhirType(),
-                                    activityDefinition
-                                            .getIdElement()
-                                            .getIdPart()
-                                            .replaceFirst("#", ""))
-                            : activityDefinition.getIdElement().withResourceType(result.fhirType())));
+            var activityDefinitionId = referenceToContained
+                    ? Ids.newId(
+                            request.getFhirVersion(),
+                            result.fhirType(),
+                            activityDefinition.getIdElement().getIdPart().replaceFirst("#", ""))
+                    : activityDefinition.getIdElement().withResourceType(result.fhirType());
+            result.setId(activityDefinitionId);
             activityRequest.resolveOperationOutcome(result);
         } catch (Exception e) {
             var message = String.format(

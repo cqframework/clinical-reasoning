@@ -93,9 +93,12 @@ public class ExtractRequest implements IQuestionnaireRequest {
                 : null;
     }
 
-    public boolean isDefinitionItem(IBaseBackboneElement item, IBaseBackboneElement qrItem) {
-        return hasExtension(item == null ? qrItem : item, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-                || StringUtils.isNotBlank(resolvePathString(item == null ? qrItem : item, "definition"));
+    public boolean isDefinitionItem(ItemPair item) {
+        return hasExtension(
+                        item.getItem() == null ? item.getResponseItem() : item.getItem(),
+                        Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                || StringUtils.isNotBlank(resolvePathString(
+                        item.getItem() == null ? item.getResponseItem() : item.getItem(), "definition"));
     }
 
     public IBaseExtension<?, ?> getItemExtractionContext() {

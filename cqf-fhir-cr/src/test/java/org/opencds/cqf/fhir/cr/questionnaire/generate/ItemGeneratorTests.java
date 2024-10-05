@@ -8,7 +8,6 @@ import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -59,16 +58,6 @@ class ItemGeneratorTests {
     }
 
     /* Tests using TestItemGenerator class */
-
-    @Test
-    void generateItemDstu3() {
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .subjectId(ROUTE_ONE_PATIENT)
-                .profileUrl(new StringType(ROUTE_ONE_PATIENT_PROFILE))
-                .then()
-                .hasItemCount(6);
-    }
 
     @Test
     void generateItemR4() {

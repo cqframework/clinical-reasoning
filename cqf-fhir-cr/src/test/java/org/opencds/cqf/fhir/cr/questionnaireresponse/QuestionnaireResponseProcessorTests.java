@@ -14,7 +14,6 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
 class QuestionnaireResponseProcessorTests {
-    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
@@ -28,7 +27,6 @@ class QuestionnaireResponseProcessorTests {
 
     @Test
     void test() {
-        testExtract(fhirContextDstu3, "dstu3", "QRSharonDecision");
         testExtract(fhirContextR4, "r4", "QRSharonDecision");
         testExtract(fhirContextR5, "r5", "QRSharonDecision");
     }
@@ -42,7 +40,6 @@ class QuestionnaireResponseProcessorTests {
 
     @Test
     void isSubjectExtension() {
-        testExtract(fhirContextDstu3, "dstu3", "sdc-profile-example-multi-subject");
         testExtract(fhirContextR4, "r4", "sdc-profile-example-multi-subject");
         testExtract(fhirContextR5, "r5", "sdc-profile-example-multi-subject");
     }
@@ -106,11 +103,6 @@ class QuestionnaireResponseProcessorTests {
     @Test
     void extractWithQuestionnaireUnitExt() {
         var questionnaireResponseId = "NumericExtract";
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .questionnaireResponseId(questionnaireResponseId)
-                .extract()
-                .hasEntry(2);
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .questionnaireResponseId(questionnaireResponseId)

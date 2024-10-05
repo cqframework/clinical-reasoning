@@ -44,43 +44,6 @@ class PopulateProcessorTests {
     }
 
     @Test
-    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsDstu3() {
-        // setup
-        final String questionnaireUrl = "original-questionnaire-url";
-        final String prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
-        final var originalQuestionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
-        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
-        originalQuestionnaire.setUrl(questionnaireUrl);
-        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        final PopulateRequest request =
-                newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, originalQuestionnaire);
-        final var expectedResponses = getExpectedResponses(request);
-        doReturn(expectedResponses).when(fixture).processItems(request, Collections.emptyList());
-        // execute
-        final IBaseResource actual = fixture.populate(request);
-        // validate
-        assertEquals(
-                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
-                actual.getIdElement().getIdPart());
-        assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals(
-                "#" + prePopulatedQuestionnaireId,
-                request.resolvePath(actual, "questionnaire", IBaseReference.class)
-                        .getReferenceElement()
-                        .getValue());
-        assertEquals(
-                org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
-                ((org.hl7.fhir.dstu3.model.QuestionnaireResponse) actual).getStatus());
-        assertEquals(
-                "Patient/" + PATIENT_ID,
-                request.resolvePath(actual, "subject", IBaseReference.class)
-                        .getReferenceElement()
-                        .getValue());
-        assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.emptyList());
-    }
-
-    @Test
     void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR4() {
         // setup
         final String questionnaireUrl = "original-questionnaire-url";
@@ -148,11 +111,6 @@ class PopulateProcessorTests {
 
     private List<IBaseBackboneElement> getExpectedResponses(PopulateRequest request) {
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return List.of(
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent());
             case R4:
                 return List.of(
                         new QuestionnaireResponseItemComponent(),

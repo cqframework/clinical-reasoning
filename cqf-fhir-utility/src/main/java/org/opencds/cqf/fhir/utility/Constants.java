@@ -123,7 +123,7 @@ public class Constants {
     public static final String SDC_QUESTIONNAIRE_LAUNCH_CONTEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
 
-    public static enum SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE {
+    public enum SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE {
         PATIENT,
         ENCOUNTER,
         LOCATION,

@@ -25,14 +25,13 @@ import org.slf4j.LoggerFactory;
 
 public class ProcessItemWithContext extends ProcessItem {
     private static final Logger logger = LoggerFactory.getLogger(ProcessItemWithContext.class);
-    private final ExpressionProcessor expressionProcessor;
 
     public ProcessItemWithContext() {
-        this(new ExpressionProcessor());
+        super();
     }
 
     public ProcessItemWithContext(ExpressionProcessor expressionProcessor) {
-        this.expressionProcessor = expressionProcessor;
+        super(expressionProcessor);
     }
 
     List<IBaseBackboneElement> processContextItem(PopulateRequest request, IBaseBackboneElement item) {
@@ -95,7 +94,7 @@ public class ProcessItemWithContext extends ProcessItem {
                     var processedSubItem = createResponseContextItem(request, item, contextName, context, profile);
                     request.getModelResolver()
                             .setValue(contextItem, "item", Collections.singletonList(processedSubItem));
-                } catch (Exception | Error e) {
+                } catch (Exception e) {
                     logger.error(e.getMessage());
                     request.logException(e.getMessage());
                 }
@@ -119,13 +118,14 @@ public class ProcessItemWithContext extends ProcessItem {
         var definition = request.resolvePathString(item, "definition");
         if (StringUtils.isNotBlank(definition) && profile != null) {
             final var pathValue = getPathValue(request, context, definition, profile);
-            final List<IBase> answerValue = pathValue == null
-                    ? null
-                    : pathValue instanceof List ? (List<IBase>) pathValue : Arrays.asList((IBase) pathValue);
-            if (answerValue != null && !answerValue.isEmpty()) {
-                addAuthorExtension(request, responseItem);
+            if (pathValue != null) {
+                final List<IBase> answerValue =
+                        pathValue instanceof List ? (List<IBase>) pathValue : Arrays.asList((IBase) pathValue);
+                if (answerValue != null && !answerValue.isEmpty()) {
+                    addAuthorExtension(request, responseItem);
+                }
+                populateAnswer(request, responseItem, answerValue);
             }
-            populateAnswer(request, responseItem, answerValue);
         } else {
             var extension = request.getExtensionByUrl(item, Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
             // populate using expected initial expression extensions
@@ -138,62 +138,82 @@ public class ProcessItemWithContext extends ProcessItem {
         return responseItem;
     }
 
-    @SuppressWarnings("unchecked")
     public Object getPathValue(
             IOperationRequest request, IBaseResource context, String definition, StructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var pathSplit = elementId.split("\\.");
         if (pathSplit.length > 2) {
-            pathValue = context;
-            String slice = null;
-            for (int i = 1; i < pathSplit.length; i++) {
-                if (pathValue instanceof List && !((List<?>) pathValue).isEmpty()) {
-                    if (slice != null && ((List<?>) pathValue).size() > 1) {
-                        final var sliceName = slice;
-                        final var filterIndex = i;
-                        final var pathValues = ((List<?>) pathValue);
-                        var filterElements = profile.getDifferentialElements().stream()
-                                .filter(e -> {
-                                    var id = request.resolvePathString(e, "id");
-                                    return !id.equals(elementId)
-                                            && request.resolveRawPath(e, "sliceName") == null
-                                            && id.contains(sliceName);
-                                })
-                                .collect(Collectors.toList());
-                        var filterValues = new ArrayList<>();
-                        filterElements.forEach(e -> {
-                            var path = request.resolvePathString(e, "path");
-                            var elementPath = elementId.replace(":" + sliceName, "");
-                            var filterPath = path.replace(
-                                    elementPath.substring(0, elementPath.indexOf(pathSplit[filterIndex])), "");
-                            var filterValue = request.resolvePath(e, "fixed");
-                            pathValues.stream().forEach(v -> {
-                                var value = request.resolvePath((IBase) v, filterPath);
-                                if (value instanceof IPrimitiveType && filterValue instanceof IPrimitiveType) {
-                                    if (((IPrimitiveType<String>) value)
-                                            .getValueAsString()
-                                            .equals(((IPrimitiveType<String>) filterValue).getValueAsString())) {
-                                        filterValues.add(v);
-                                    }
-                                } else if (value.equals(filterValue)) {
-                                    filterValues.add(v);
-                                }
-                            });
-                        });
-                        pathValue = filterValues.isEmpty() ? null : filterValues.get(0);
-                    } else {
-                        pathValue = ((List<?>) pathValue).get(0);
-                    }
-                }
-                slice = pathSplit[i].contains(":") ? pathSplit[i].substring(pathSplit[i].indexOf(":") + 1) : null;
-                pathValue = request.resolveRawPath(
-                        pathValue, pathSplit[i].replace("[x]", "").replace(":" + slice, ""));
-            }
+            pathValue = getNestedPath(request, context, profile, elementId, pathSplit);
         } else {
             var path = pathSplit[pathSplit.length - 1].replace("[x]", "");
             pathValue = request.resolveRawPath(context, path);
         }
+        return pathValue;
+    }
+
+    private Object getNestedPath(
+            IOperationRequest request,
+            Object pathValue,
+            StructureDefinitionAdapter profile,
+            String elementId,
+            String[] pathSplit) {
+        String slice = null;
+        for (int i = 1; i < pathSplit.length; i++) {
+            if (pathValue instanceof List && !((List<?>) pathValue).isEmpty()) {
+                if (slice != null && ((List<?>) pathValue).size() > 1) {
+                    pathValue = getSliceValue(request, profile, pathValue, elementId, pathSplit, slice, i);
+                } else {
+                    pathValue = ((List<?>) pathValue).get(0);
+                }
+            }
+            slice = pathSplit[i].contains(":") ? pathSplit[i].substring(pathSplit[i].indexOf(":") + 1) : null;
+            pathValue = request.resolveRawPath(
+                    pathValue, pathSplit[i].replace("[x]", "").replace(":" + slice, ""));
+        }
+        return pathValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object getSliceValue(
+            IOperationRequest request,
+            StructureDefinitionAdapter profile,
+            Object pathValue,
+            String elementId,
+            String[] pathSplit,
+            String slice,
+            int i) {
+        final var sliceName = slice;
+        final var filterIndex = i;
+        final var pathValues = ((List<?>) pathValue);
+        var filterElements = profile.getDifferentialElements().stream()
+                .filter(e -> {
+                    var id = request.resolvePathString(e, "id");
+                    return !id.equals(elementId)
+                            && request.resolveRawPath(e, "sliceName") == null
+                            && id.contains(sliceName);
+                })
+                .collect(Collectors.toList());
+        var filterValues = new ArrayList<>();
+        filterElements.forEach(e -> {
+            var path = request.resolvePathString(e, "path");
+            var elementPath = elementId.replace(":" + sliceName, "");
+            var filterPath = path.replace(elementPath.substring(0, elementPath.indexOf(pathSplit[filterIndex])), "");
+            var filterValue = request.resolvePath(e, "fixed");
+            pathValues.stream().forEach(v -> {
+                var value = request.resolvePath((IBase) v, filterPath);
+                if (value instanceof IPrimitiveType && filterValue instanceof IPrimitiveType) {
+                    if (((IPrimitiveType<String>) value)
+                            .getValueAsString()
+                            .equals(((IPrimitiveType<String>) filterValue).getValueAsString())) {
+                        filterValues.add(v);
+                    }
+                } else if (value.equals(filterValue)) {
+                    filterValues.add(v);
+                }
+            });
+        });
+        pathValue = filterValues.isEmpty() ? null : filterValues.get(0);
         return pathValue;
     }
 }

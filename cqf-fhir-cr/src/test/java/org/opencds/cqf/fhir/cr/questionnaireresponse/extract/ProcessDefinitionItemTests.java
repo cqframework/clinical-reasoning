@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -66,14 +65,16 @@ class ProcessDefinitionItemTests {
         var fhirVersion = FhirVersionEnum.R4;
         var item = new QuestionnaireItemComponent();
         var responseItem = new QuestionnaireResponseItemComponent();
+        var itemPair = new ItemPair(item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var resources = new ArrayList<IBaseResource>();
         var subjectId = Ids.newId(fhirVersion, "Patient", "patient1");
+        var subjectReference = new Reference(subjectId);
         assertThrows(
                 IllegalArgumentException.class,
-                () -> fixture.processDefinitionItem(request, responseItem, item, resources, new Reference(subjectId)));
+                () -> fixture.processDefinitionItem(request, itemPair, resources, subjectReference));
     }
 
     @Test
@@ -82,14 +83,15 @@ class ProcessDefinitionItemTests {
         var item = new QuestionnaireItemComponent().setLinkId("1");
         item.addExtension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT, new CodeType("Condition"));
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
+        var itemPair = new ItemPair(item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var resources = new ArrayList<IBaseResource>();
         var subjectId = Ids.newId(fhirVersion, "Patient", "patient1");
-        fixture.processDefinitionItem(request, responseItem, item, resources, new Reference(subjectId));
-        assertTrue(resources.size() == 1);
-        assertTrue(resources.get(0).fhirType().equals("Condition"));
+        fixture.processDefinitionItem(request, itemPair, resources, new Reference(subjectId));
+        assertEquals(1, resources.size());
+        assertEquals("Condition", resources.get(0).fhirType());
     }
 
     @Test
@@ -104,17 +106,19 @@ class ProcessDefinitionItemTests {
                         .setExpression(expression.getExpression()));
         item.addExtension(extension);
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
+        var itemPair = new ItemPair(item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var resources = new ArrayList<IBaseResource>();
         var subjectId = Ids.newId(fhirVersion, "Patient", patientId);
+        var subjectReference = new Reference(subjectId);
         doThrow(UnprocessableEntityException.class)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(request), any(), eq("1"));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> fixture.processDefinitionItem(request, responseItem, item, resources, new Reference(subjectId)));
+                () -> fixture.processDefinitionItem(request, itemPair, resources, subjectReference));
     }
 
     @Test
@@ -129,6 +133,7 @@ class ProcessDefinitionItemTests {
                         .setExpression(expression.getExpression()));
         item.addExtension(extension);
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
+        var itemPair = new ItemPair(item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -138,8 +143,8 @@ class ProcessDefinitionItemTests {
         doReturn(Collections.singletonList(expectedCondition))
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(request), any(), eq("1"));
-        fixture.processDefinitionItem(request, responseItem, item, resources, new Reference(subjectId));
-        assertTrue(resources.size() == 1);
+        fixture.processDefinitionItem(request, itemPair, resources, new Reference(subjectId));
+        assertEquals(1, resources.size());
         assertEquals(expectedCondition, resources.get(0));
     }
 
@@ -155,6 +160,7 @@ class ProcessDefinitionItemTests {
                         .setExpression(expression.getExpression()));
         item.addExtension(extension);
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
+        var itemPair = new ItemPair(item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -164,8 +170,8 @@ class ProcessDefinitionItemTests {
         var expectedCondition2 = (IBase) new Condition();
         List<IBase> expectedConditions = Arrays.asList(expectedCondition1, expectedCondition2);
         doReturn(expectedConditions).when(expressionProcessor).getExpressionResultForItem(eq(request), any(), eq("1"));
-        fixture.processDefinitionItem(request, responseItem, item, resources, new Reference(subjectId));
-        assertTrue(resources.size() == 2);
+        fixture.processDefinitionItem(request, itemPair, resources, new Reference(subjectId));
+        assertEquals(2, resources.size());
         assertEquals(expectedCondition1, resources.get(0));
         assertEquals(expectedCondition2, resources.get(1));
     }

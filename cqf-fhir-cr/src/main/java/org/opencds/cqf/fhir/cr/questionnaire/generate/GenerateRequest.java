@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -189,10 +188,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
                         .equals(fhirVersion == FhirVersionEnum.DSTU3 ? Constants.CQIF_LIBRARY : Constants.CQF_LIBRARY))
                 .findFirst()
                 .orElse(null);
-        return libraryExt == null
-                ? null
-                : fhirVersion == FhirVersionEnum.DSTU3
-                        ? ((Reference) libraryExt.getValue()).getReference()
-                        : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+        return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 }

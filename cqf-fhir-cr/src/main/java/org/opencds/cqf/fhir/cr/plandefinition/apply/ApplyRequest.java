@@ -37,6 +37,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
+    private static final String ACTIVITY_DEFINITION = "ActivityDefinition";
     private final IBaseResource planDefinition;
     private final IIdType subjectId;
     private final IIdType encounterId;
@@ -355,7 +356,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     protected IBaseParameters transformRequestParametersDstu3(IBaseResource resource) {
-        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+        var resourceParameter = resource.fhirType().equals(ACTIVITY_DEFINITION)
                 ? APPLY_PARAMETER_ACTIVITY_DEFINITION
                 : APPLY_PARAMETER_PLAN_DEFINITION;
         var params = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters()
@@ -388,7 +389,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     protected IBaseParameters transformRequestParametersR4(IBaseResource resource) {
-        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+        var resourceParameter = resource.fhirType().equals(ACTIVITY_DEFINITION)
                 ? APPLY_PARAMETER_ACTIVITY_DEFINITION
                 : APPLY_PARAMETER_PLAN_DEFINITION;
         var params = org.opencds.cqf.fhir.utility.r4.Parameters.parameters()
@@ -421,7 +422,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     protected IBaseParameters transformRequestParametersR5(IBaseResource resource) {
-        var resourceParameter = resource.fhirType().equals("ActivityDefinition")
+        var resourceParameter = resource.fhirType().equals(ACTIVITY_DEFINITION)
                 ? APPLY_PARAMETER_ACTIVITY_DEFINITION
                 : APPLY_PARAMETER_PLAN_DEFINITION;
         var params = org.opencds.cqf.fhir.utility.r5.Parameters.parameters()

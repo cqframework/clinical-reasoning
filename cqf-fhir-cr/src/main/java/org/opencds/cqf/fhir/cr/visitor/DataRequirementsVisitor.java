@@ -173,7 +173,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                         Libraries.getContent(library, "text/cql").get()),
                 libraryManager);
         if (!translator.getErrors().isEmpty()) {
-            throw new RuntimeException(translator.getErrors().get(0).getMessage());
+            throw new IllegalArgumentException(translator.getErrors().get(0).getMessage());
         }
         return translator;
     }

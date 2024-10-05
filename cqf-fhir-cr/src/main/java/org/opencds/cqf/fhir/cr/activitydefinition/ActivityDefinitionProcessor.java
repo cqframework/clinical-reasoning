@@ -29,7 +29,6 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
 public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor {
-    // private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
@@ -207,13 +206,13 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     }
 
     protected void initApplyProcessor() {
-        applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(
-                        repository,
-                        requestResolverFactory != null
-                                ? requestResolverFactory
-                                : IRequestResolverFactory.getDefault(fhirVersion));
+        if (applyProcessor == null) {
+            applyProcessor = new ApplyProcessor(
+                    repository,
+                    requestResolverFactory != null
+                            ? requestResolverFactory
+                            : IRequestResolverFactory.getDefault(fhirVersion));
+        }
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveActivityDefinition(

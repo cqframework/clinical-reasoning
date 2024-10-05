@@ -99,25 +99,11 @@ public class GenerateProcessor implements IGenerateProcessor {
                 }
             }
         }
-        // generateProfile in the implementations of IFhirVersion does not create a snapshot and hapi has no
-        // implementation of the $snapshot operation.
-        // We can use the definition to construct a snapshot, but that should be done in hapi-fhir
-        // if (snapshot == null) {
-        //     var type = request.resolvePathString(profile, "type");
-        //     var definition = repository.fhirContext().getResourceDefinition(request.getFhirVersion(), type);
-        //     var typeProfile = definition == null ? null : definition.toProfile(null);
-        //     if (typeProfile != null) {
-        //         snapshot = request.resolvePath(typeProfile, "snapshot");
-        //     }
-        // }
         return snapshot;
     }
 
     protected IBaseResource createQuestionnaire() {
         switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Questionnaire()
-                        .setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire()
                         .setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);

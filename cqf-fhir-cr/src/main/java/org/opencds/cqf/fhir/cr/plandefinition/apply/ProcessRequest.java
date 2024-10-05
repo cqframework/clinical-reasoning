@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -28,12 +29,13 @@ public class ProcessRequest {
         }
     }
 
+    protected String getCanonical(String url, String version) {
+        return StringUtils.isBlank(version) ? url : String.format("%s|%s", url, version);
+    }
+
     protected IBaseResource generateOrchestrationDstu3(ApplyRequest request) {
         var planDefinition = (org.hl7.fhir.dstu3.model.PlanDefinition) request.getPlanDefinition();
-        var canonical = planDefinition.getUrl();
-        if (planDefinition.hasVersion()) {
-            canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
-        }
+        var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.dstu3.model.RequestGroup()
                 .setStatus(org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus.DRAFT)
                 .setIntent(org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent.PROPOSAL)
@@ -44,7 +46,6 @@ public class ProcessRequest {
                 requestOrchestration.fhirType(),
                 planDefinition.getIdElement().getIdPart());
         requestOrchestration.setId(requestId);
-        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (request.hasEncounterId()) {
             requestOrchestration.setContext(new org.hl7.fhir.dstu3.model.Reference(request.getEncounterId()));
         }
@@ -64,10 +65,7 @@ public class ProcessRequest {
 
     protected IBaseResource generateOrchestrationR4(ApplyRequest request) {
         var planDefinition = (org.hl7.fhir.r4.model.PlanDefinition) request.getPlanDefinition();
-        var canonical = planDefinition.getUrl();
-        if (planDefinition.hasVersion()) {
-            canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
-        }
+        var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.r4.model.RequestGroup()
                 .setStatus(org.hl7.fhir.r4.model.RequestGroup.RequestStatus.DRAFT)
                 .setIntent(org.hl7.fhir.r4.model.RequestGroup.RequestIntent.PROPOSAL)
@@ -78,7 +76,6 @@ public class ProcessRequest {
                 requestOrchestration.fhirType(),
                 planDefinition.getIdElement().getIdPart());
         requestOrchestration.setId(requestId);
-        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (request.hasEncounterId()) {
             requestOrchestration.setEncounter(new org.hl7.fhir.r4.model.Reference(request.getEncounterId()));
         }
@@ -98,10 +95,7 @@ public class ProcessRequest {
 
     protected IBaseResource generateOrchestrationR5(ApplyRequest request) {
         var planDefinition = (org.hl7.fhir.r5.model.PlanDefinition) request.getPlanDefinition();
-        var canonical = planDefinition.getUrl();
-        if (planDefinition.hasVersion()) {
-            canonical = String.format("%s|%s", canonical, planDefinition.getVersion());
-        }
+        var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.r5.model.RequestOrchestration()
                 .setStatus(org.hl7.fhir.r5.model.Enumerations.RequestStatus.DRAFT)
                 .setIntent(org.hl7.fhir.r5.model.Enumerations.RequestIntent.PROPOSAL)
@@ -112,7 +106,6 @@ public class ProcessRequest {
                 requestOrchestration.fhirType(),
                 planDefinition.getIdElement().getIdPart());
         requestOrchestration.setId(requestId);
-        // requestGroup.setMeta(new Meta().addProfile(Constants.CPG_STRATEGY));
         if (request.hasEncounterId()) {
             requestOrchestration.setEncounter(new org.hl7.fhir.r5.model.Reference(request.getEncounterId()));
         }
@@ -167,13 +160,13 @@ public class ProcessRequest {
             carePlan.setLanguage(requestOrchestration.getLanguage());
         }
         for (var goal : request.getRequestResources()) {
-            if (goal.fhirType().equals("Goal")) {
+            if (goal.fhirType().equals(org.hl7.fhir.dstu3.model.ResourceType.Goal.name())) {
                 carePlan.addGoal(new org.hl7.fhir.dstu3.model.Reference((org.hl7.fhir.dstu3.model.Resource) goal));
             }
         }
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
-                .filter(r -> r.fhirType().equals("OperationOutcome"))
+                .filter(r -> r.fhirType().equals(org.hl7.fhir.dstu3.model.ResourceType.OperationOutcome.name()))
                 .collect(Collectors.toList());
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
@@ -189,12 +182,6 @@ public class ProcessRequest {
             carePlan.addSupportingInfo(
                     new org.hl7.fhir.dstu3.model.Reference((org.hl7.fhir.dstu3.model.Resource) resource));
             carePlan.addContained((org.hl7.fhir.dstu3.model.Resource) resource);
-        }
-
-        var questionnaire = (org.hl7.fhir.dstu3.model.Questionnaire) request.getQuestionnaire();
-        if (questionnaire != null && questionnaire.hasItem()) {
-            carePlan.addContained((org.hl7.fhir.dstu3.model.Resource)
-                    populateProcessor.processResponse(request.toPopulateRequest(), request.getItems(questionnaire)));
         }
 
         return carePlan;
@@ -223,13 +210,13 @@ public class ProcessRequest {
             carePlan.setLanguage(requestOrchestration.getLanguage());
         }
         for (var goal : request.getRequestResources()) {
-            if (goal.fhirType().equals("Goal")) {
+            if (goal.fhirType().equals(org.hl7.fhir.r4.model.ResourceType.Goal.name())) {
                 carePlan.addGoal(new org.hl7.fhir.r4.model.Reference((org.hl7.fhir.r4.model.Resource) goal));
             }
         }
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
-                .filter(r -> r.fhirType().equals("OperationOutcome"))
+                .filter(r -> r.fhirType().equals(org.hl7.fhir.r4.model.ResourceType.OperationOutcome.name()))
                 .collect(Collectors.toList());
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
@@ -277,13 +264,13 @@ public class ProcessRequest {
             carePlan.setLanguage(requestOrchestration.getLanguage());
         }
         for (var goal : request.getRequestResources()) {
-            if (goal.fhirType().equals("Goal")) {
+            if (goal.fhirType().equals(org.hl7.fhir.r5.model.ResourceType.Goal.name())) {
                 carePlan.addGoal(new org.hl7.fhir.r5.model.Reference((org.hl7.fhir.r5.model.Resource) goal));
             }
         }
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
-                .filter(r -> r.fhirType().equals("OperationOutcome"))
+                .filter(r -> r.fhirType().equals(org.hl7.fhir.r5.model.ResourceType.OperationOutcome.name()))
                 .collect(Collectors.toList());
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(

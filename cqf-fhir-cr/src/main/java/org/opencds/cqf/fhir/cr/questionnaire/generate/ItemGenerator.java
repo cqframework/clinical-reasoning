@@ -184,9 +184,7 @@ public class ItemGenerator {
             String sliceName,
             Boolean requiredOnly) {
         var path = request.resolvePathString(element, "path");
-        if (existingElements != null
-                && !existingElements.isEmpty()
-                && existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")))) {
+        if (elementExists(request, existingElements, path)) {
             return false;
         }
 
@@ -194,27 +192,15 @@ public class ItemGenerator {
         if (request.resolvePath(element, "slicing") != null) {
             return false;
         }
-        var pathSplit = path.split("\\.");
-        if (parentPath == null) {
-            // grab only top level elements
-            if (pathSplit.length > 2) {
-                return false;
-            }
-        } else {
-            // grab only the next level of elements
-            var splitLength = parentPath.split("\\.").length + 1;
-            if (pathSplit.length > splitLength || !path.contains(parentPath + ".")) {
-                return false;
-            }
+        if (notInPath(path, parentPath)) {
+            return false;
         }
+
         if (sliceName != null && !request.resolvePathString(element, "id").contains(sliceName)) {
             return false;
         }
-        if (Boolean.TRUE.equals(requiredOnly)) {
-            var min = request.resolvePath(element, "min", IPrimitiveType.class);
-            if (min == null || (Integer) min.getValue() == 0) {
-                return false;
-            }
+        if (Boolean.TRUE.equals(requiredOnly) && !isRequiredPath(request, element)) {
+            return false;
         }
         if (Boolean.TRUE.equals(request.getSupportedOnly())) {
             var mustSupportElement = request.resolvePath(element, "mustSupport", IBaseBooleanDatatype.class);
@@ -223,6 +209,35 @@ public class ItemGenerator {
             }
         }
         return true;
+    }
+
+    protected <E extends ICompositeType> boolean elementExists(
+            GenerateRequest request, List<E> existingElements, String path) {
+        return existingElements != null
+                && !existingElements.isEmpty()
+                && existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")));
+    }
+
+    protected boolean notInPath(String path, String parentPath) {
+        var pathSplit = path.split("\\.");
+        if (parentPath == null) {
+            // grab only top level elements
+            if (pathSplit.length > 2) {
+                return true;
+            }
+        } else {
+            // grab only the next level of elements
+            var splitLength = parentPath.split("\\.").length + 1;
+            if (pathSplit.length > splitLength || !path.contains(parentPath + ".")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected <E extends ICompositeType> boolean isRequiredPath(GenerateRequest request, E element) {
+        var min = request.resolvePath(element, "min", IPrimitiveType.class);
+        return (min != null && (Integer) min.getValue() != 0);
     }
 
     protected IBaseBackboneElement createErrorItem(GenerateRequest request, String linkId, String errorMessage) {
@@ -268,15 +283,6 @@ public class ItemGenerator {
     protected IBaseBackboneElement createQuestionnaireItemComponent(
             GenerateRequest request, String text, String linkId, String definition, Boolean isDisplay) {
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(
-                                Boolean.TRUE.equals(isDisplay)
-                                        ? org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.DISPLAY
-                                        : org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.GROUP)
-                        .setDefinition(definition)
-                        .setLinkId(linkId)
-                        .setText(text);
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
                         .setType(

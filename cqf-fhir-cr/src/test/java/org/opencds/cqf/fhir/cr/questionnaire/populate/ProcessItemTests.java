@@ -52,37 +52,6 @@ class ProcessItemTests {
     }
 
     @Test
-    void processItemShouldReturnQuestionnaireResponseItemComponentDstu3() {
-        // setup
-        final org.hl7.fhir.dstu3.model.Questionnaire questionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
-        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        final PopulateRequest populateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, questionnaire);
-        final IBaseBackboneElement originalQuestionnaireItemComponent =
-                new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent().setLinkId("1");
-        final CqfExpression expression = withExpression();
-        final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.DSTU3);
-        doReturn(expression)
-                .when(expressionProcessor)
-                .getItemInitialExpression(populateRequest, originalQuestionnaireItemComponent);
-        doReturn(expressionResults)
-                .when(expressionProcessor)
-                .getExpressionResultForItem(populateRequest, expression, "1");
-        // execute
-        final IBaseBackboneElement actual =
-                processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
-        // validate
-        // verify(processItem).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
-        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        // assertEquals(1, extensions.size());
-        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
-        assertEquals(1, answers.size());
-        for (int i = 0; i < answers.size(); i++) {
-            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
-        }
-    }
-
-    @Test
     void processItemShouldReturnQuestionnaireResponseItemComponentR4() {
         // setup
         final Questionnaire questionnaire = new Questionnaire();
@@ -102,9 +71,6 @@ class ProcessItemTests {
         final IBaseBackboneElement actual =
                 processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
         // validate
-        // verify(processItem).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
-        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        // assertEquals(1, extensions.size());
         final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
@@ -133,9 +99,6 @@ class ProcessItemTests {
         final IBaseBackboneElement actual =
                 processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
         // validate
-        // verify(processItem).getInitialValue(populateRequest, originalQuestionnaireItemComponent);
-        // final var extensions = populateRequest.getExtensionsByUrl(actual, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR);
-        // assertEquals(1, extensions.size());
         final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
@@ -145,8 +108,6 @@ class ProcessItemTests {
 
     private List<IBase> withExpressionResults(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
-            case DSTU3:
-                return List.of(new org.hl7.fhir.dstu3.model.StringType("string type value"));
             case R4:
                 return List.of(
                         new org.hl7.fhir.r4.model.StringType("string type value"),

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
+    protected static final String QUESTIONNAIRE = "Questionnaire";
     protected final ResourceResolver questionnaireResponseResolver;
     protected final ResourceResolver questionnaireResolver;
     protected final ModelResolver modelResolver;
@@ -48,7 +49,7 @@ public class QuestionnaireResponseProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
-        this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
+        this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.extractProcessor = extractProcessor;
@@ -81,23 +82,14 @@ public class QuestionnaireResponseProcessor {
                     return null;
                 }
                 IBaseResource questionnaire = null;
-                var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
-                if (contained != null && !contained.isEmpty()) {
-                    questionnaire = contained.stream()
-                            .filter(r -> r.fhirType().equals("Questionnaire")
-                                    && canonical
-                                            .getValueAsString()
-                                            .equals(r.getIdElement().getIdPart()))
-                            .findFirst()
-                            .orElse(null);
-                }
+                questionnaire = getQuestionnaireFromContained(questionnaireResponse, canonical, questionnaire);
                 if (questionnaire == null) {
                     questionnaire = SearchHelper.searchRepositoryByCanonical(
                             repository,
                             canonical,
                             repository
                                     .fhirContext()
-                                    .getResourceDefinition("questionnaire")
+                                    .getResourceDefinition(QUESTIONNAIRE)
                                     .getImplementingClass());
                 }
                 return questionnaire;
@@ -106,6 +98,22 @@ public class QuestionnaireResponseProcessor {
                 return null;
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private IBaseResource getQuestionnaireFromContained(
+            IBaseResource questionnaireResponse, IPrimitiveType<String> canonical, IBaseResource questionnaire) {
+        var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
+        if (contained != null && !contained.isEmpty()) {
+            questionnaire = contained.stream()
+                    .filter(r -> r.fhirType().equals(QUESTIONNAIRE)
+                            && canonical
+                                    .getValueAsString()
+                                    .equals(r.getIdElement().getIdPart()))
+                    .findFirst()
+                    .orElse(null);
+        }
+        return questionnaire;
     }
 
     public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource) {

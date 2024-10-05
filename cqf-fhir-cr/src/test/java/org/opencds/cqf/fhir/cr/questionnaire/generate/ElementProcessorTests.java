@@ -24,7 +24,6 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 @ExtendWith(MockitoExtension.class)
 class ElementProcessorTests {
     private final FhirContext fhirContextDstu2 = FhirContext.forDstu2Cached();
-    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR4B = FhirContext.forR4BCached();
 
     @Mock
@@ -38,10 +37,6 @@ class ElementProcessorTests {
 
     @InjectMocks
     @Spy
-    org.opencds.cqf.fhir.cr.questionnaire.generate.dstu3.ElementProcessor elementProcessorDstu3;
-
-    @InjectMocks
-    @Spy
     org.opencds.cqf.fhir.cr.questionnaire.generate.r4.ElementProcessor elementProcessorR4;
 
     @InjectMocks
@@ -50,55 +45,8 @@ class ElementProcessorTests {
 
     @Test
     void nullElementTypeThrows() {
-        assertThrows(IllegalArgumentException.class, () -> elementProcessorDstu3.parseItemType(null, false));
         assertThrows(IllegalArgumentException.class, () -> elementProcessorR4.parseItemType(null, false));
         assertThrows(IllegalArgumentException.class, () -> elementProcessorR5.parseItemType(null, false));
-    }
-
-    @Test
-    void dstu3ItemTypes() {
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE,
-                elementProcessorDstu3.parseItemType("code", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE,
-                elementProcessorDstu3.parseItemType("coding", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE,
-                elementProcessorDstu3.parseItemType("CodeableConcept", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE,
-                elementProcessorDstu3.parseItemType("uri", true));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.URL,
-                elementProcessorDstu3.parseItemType("uri", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.URL,
-                elementProcessorDstu3.parseItemType("url", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.QUANTITY,
-                elementProcessorDstu3.parseItemType("Quantity", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.REFERENCE,
-                elementProcessorDstu3.parseItemType("Reference", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.STRING,
-                elementProcessorDstu3.parseItemType("oid", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.STRING,
-                elementProcessorDstu3.parseItemType("uuid", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.STRING,
-                elementProcessorDstu3.parseItemType("base64Binary", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.INTEGER,
-                elementProcessorDstu3.parseItemType("positiveInt", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.INTEGER,
-                elementProcessorDstu3.parseItemType("unsignedInt", false));
-        assertEquals(
-                org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.DATETIME,
-                elementProcessorDstu3.parseItemType("instant", false));
     }
 
     @Test
@@ -213,28 +161,4 @@ class ElementProcessorTests {
         var initial = createInitial(request, new BooleanType(true));
         assertNull(initial);
     }
-
-    // @Test
-    // void elementWithCqfExpressionWithResourceResult() {
-    //     doReturn(repository).when(libraryEngine).getRepository();
-    //     doReturn(fhirContextR4).when(repository).fhirContext();
-    //     var request = newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
-    //     var cqfExpression = new CqfExpression();
-    //     var expectedResource = new Patient().setId("test");
-    //     var item = new QuestionnaireItemComponent()
-    //             .setLinkId("test")
-    //             .setType(org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.REFERENCE);
-    //     doReturn(cqfExpression)
-    //             .when(expressionProcessor)
-    //             .getCqfExpression(request, Collections.emptyList(), Constants.CQF_EXPRESSION);
-    //     doReturn(Collections.singletonList(expectedResource))
-    //             .when(expressionProcessor)
-    //             .getExpressionResult(request, cqfExpression);
-    //     var actual = (QuestionnaireItemComponent)
-    //             new ElementHasCqfExpression(expressionProcessor).addProperties(request, Collections.emptyList(),
-    // item);
-    //     assertNotNull(actual);
-    //     assertTrue(actual.hasInitial());
-    //     assertEquals("test", actual.getInitial().get(0).getValueReference().getReference());
-    // }
 }

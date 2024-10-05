@@ -33,14 +33,13 @@ public class ProcessItem {
         return responseItem;
     }
 
-    protected void populateAnswer(
-            PopulateRequest request, IBaseBackboneElement responseItem, List<IBase> initialValue) {
-        if (initialValue == null || initialValue.isEmpty()) {
+    protected void populateAnswer(PopulateRequest request, IBaseBackboneElement responseItem, List<IBase> answerValue) {
+        if (answerValue == null || answerValue.isEmpty()) {
             return;
         }
         var answers = new ArrayList<>();
-        for (var value : (List<IBase>) initialValue) {
-            answers.add(createAnswer(request.getFhirVersion(), (IBase) value));
+        for (var value : answerValue) {
+            answers.add(createAnswer(request.getFhirVersion(), value));
         }
         request.getModelResolver().setValue(responseItem, "answer", answers);
     }
@@ -84,9 +83,6 @@ public class ProcessItem {
 
     protected IBaseBackboneElement createAnswer(FhirVersionEnum fhirVersion, IBase value) {
         switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                        .setValue(transformValueToItem((org.hl7.fhir.dstu3.model.Type) value));
             case R4:
                 return new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
                         .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value));
@@ -101,12 +97,6 @@ public class ProcessItem {
 
     protected IBaseBackboneElement createResponseItem(FhirVersionEnum fhirVersion, IBaseBackboneElement item) {
         switch (fhirVersion) {
-            case DSTU3:
-                var dstu3Item = (org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent) item;
-                return new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(
-                                dstu3Item.getLinkIdElement())
-                        .setDefinitionElement(dstu3Item.getDefinitionElement())
-                        .setTextElement(dstu3Item.getTextElement());
             case R4:
                 var r4Item = (org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent) item;
                 return new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(

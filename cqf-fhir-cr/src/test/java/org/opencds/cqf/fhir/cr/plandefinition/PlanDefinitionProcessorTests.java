@@ -329,29 +329,6 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void questionnaireResponseDstu3() {
-        // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
-        // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
-        // expected.
-        var planDefinitionID = "prepopulate";
-        var patientID = "OPA-Patient1";
-        var data = "dstu3/extract-questionnaireresponse/patient-data.json";
-        var content = "dstu3/prepopulate/prepopulate-content-bundle.json";
-        var parameters = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .useServerData(false)
-                .additionalData(data)
-                .content(content)
-                .parameters(parameters)
-                .thenApply()
-                .hasContained(3);
-    }
-
-    @Test
     void questionnaireResponseR4() {
         // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
         // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
@@ -400,22 +377,6 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(2);
-    }
-
-    @Test
-    void generateQuestionnaireDstu3() {
-        var planDefinitionID = "generate-questionnaire";
-        var patientID = "OPA-Patient1";
-        var parameters = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .parameters(parameters)
-                .thenApply()
-                .hasContained(4)
-                .hasQuestionnaire();
     }
 
     @Test

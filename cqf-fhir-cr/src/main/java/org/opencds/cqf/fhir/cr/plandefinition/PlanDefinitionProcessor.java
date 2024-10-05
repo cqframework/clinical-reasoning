@@ -75,13 +75,13 @@ public class PlanDefinitionProcessor {
     }
 
     protected void initApplyProcessor() {
-        activityProcessor = activityProcessor != null
-                ? activityProcessor
-                : new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
-                        repository,
-                        requestResolverFactory != null
-                                ? requestResolverFactory
-                                : IRequestResolverFactory.getDefault(fhirVersion));
+        if (activityProcessor == null) {
+            activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
+                    repository,
+                    requestResolverFactory != null
+                            ? requestResolverFactory
+                            : IRequestResolverFactory.getDefault(fhirVersion));
+        }
         applyProcessor = applyProcessor != null
                 ? applyProcessor
                 : new ApplyProcessor(repository, modelResolver, activityProcessor);

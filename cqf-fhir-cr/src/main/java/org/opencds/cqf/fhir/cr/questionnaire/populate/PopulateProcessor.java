@@ -92,13 +92,6 @@ public class PopulateProcessor implements IPopulateProcessor {
 
     protected IBaseResource createQuestionnaireResponse(PopulateRequest request) {
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.QuestionnaireResponse()
-                        .setStatus(
-                                org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                        .setQuestionnaire(new org.hl7.fhir.dstu3.model.Reference("#"
-                                + ((org.hl7.fhir.dstu3.model.Questionnaire) request.getQuestionnaire()).getIdPart()))
-                        .setSubject(new org.hl7.fhir.dstu3.model.Reference(request.getSubjectId()));
             case R4:
                 return new org.hl7.fhir.r4.model.QuestionnaireResponse()
                         .setStatus(org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)

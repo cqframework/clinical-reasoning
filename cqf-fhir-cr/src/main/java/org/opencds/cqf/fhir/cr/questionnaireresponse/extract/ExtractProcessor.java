@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
-import static org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ResponseBundle.createBundleDstu3;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ResponseBundle.createBundleR4;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ResponseBundle.createBundleR5;
 
@@ -44,15 +43,16 @@ public class ExtractProcessor implements IExtractProcessor {
         var subject = (IBaseReference) request.resolvePath(request.getQuestionnaireResponse(), "subject");
         var extractionContextExt = request.getItemExtractionContext();
         if (extractionContextExt != null) {
-            processDefinitionItem(request, null, null, resources, subject);
+            processDefinitionItem(request, new ItemPair(null, null), resources, subject);
         } else {
             var questionnaireCodeMap = CodeMap.create(request);
             request.getItems(request.getQuestionnaireResponse()).forEach(item -> {
                 var questionnaireItem = request.getQuestionnaireItem(item);
+                var itemPair = new ItemPair(questionnaireItem, item);
                 if (!request.getItems(item).isEmpty()) {
-                    processGroupItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
+                    processGroupItem(request, itemPair, questionnaireCodeMap, resources, subject);
                 } else {
-                    processItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
+                    processItem(request, itemPair, questionnaireCodeMap, resources, subject);
                 }
             });
         }
@@ -62,8 +62,6 @@ public class ExtractProcessor implements IExtractProcessor {
 
     protected IBaseBundle createBundle(ExtractRequest request, List<IBaseResource> resources) {
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return createBundleDstu3(request.getExtractId(), resources);
             case R4:
                 return createBundleR4(request.getExtractId(), resources);
             case R5:
@@ -76,12 +74,11 @@ public class ExtractProcessor implements IExtractProcessor {
 
     protected void processGroupItem(
             ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
+            ItemPair item,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             List<IBaseResource> resources,
             IBaseReference subject) {
-        var subjectItems = request.getItems(item).stream()
+        var subjectItems = request.getItems(item.getResponseItem()).stream()
                 .filter(child -> child.getExtension().stream()
                         .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT)))
                 .collect(Collectors.toList());
@@ -91,18 +88,19 @@ public class ExtractProcessor implements IExtractProcessor {
                                 .get(0),
                         "value")
                 : (IBaseReference) SerializationUtils.clone(subject);
-        if (request.isDefinitionItem(questionnaireItem, item)) {
-            processDefinitionItem(request, item, questionnaireItem, resources, groupSubject);
+        if (request.isDefinitionItem(item)) {
+            processDefinitionItem(request, item, resources, groupSubject);
         } else {
-            request.getItems(item).forEach(childItem -> {
-                if (childItem.getExtension().stream()
+            request.getItems(item.getResponseItem()).forEach(childResponseItem -> {
+                if (childResponseItem.getExtension().stream()
                         .noneMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))) {
-                    var childQ = request.getQuestionnaireItem(childItem, request.getItems(questionnaireItem));
-                    if (!request.getItems(childItem).isEmpty()) {
-                        processGroupItem(request, childItem, childQ, questionnaireCodeMap, resources, groupSubject);
+                    var childItem = new ItemPair(
+                            request.getQuestionnaireItem(childResponseItem, request.getItems(item.getItem())),
+                            childResponseItem);
+                    if (!request.getItems(childResponseItem).isEmpty()) {
+                        processGroupItem(request, childItem, questionnaireCodeMap, resources, groupSubject);
                     } else {
-                        processObservationItem(
-                                request, childItem, childQ, questionnaireCodeMap, resources, groupSubject);
+                        processObservationItem(request, childItem, questionnaireCodeMap, resources, groupSubject);
                     }
                 }
             });
@@ -111,27 +109,26 @@ public class ExtractProcessor implements IExtractProcessor {
 
     protected void processItem(
             ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
+            ItemPair item,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             List<IBaseResource> resources,
             IBaseReference subject) {
-        if (request.isDefinitionItem(questionnaireItem, item)) {
-            processDefinitionItem(request, item, questionnaireItem, resources, subject);
+        if (request.isDefinitionItem(item)) {
+            processDefinitionItem(request, item, resources, subject);
         } else {
-            processObservationItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
+            processObservationItem(request, item, questionnaireCodeMap, resources, subject);
         }
     }
 
     protected void processObservationItem(
             ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
+            ItemPair item,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             List<IBaseResource> resources,
             IBaseReference subject) {
         try {
-            itemProcessor.processItem(request, item, questionnaireItem, questionnaireCodeMap, resources, subject);
+            itemProcessor.processItem(
+                    request, item.getResponseItem(), item.getItem(), questionnaireCodeMap, resources, subject);
         } catch (Exception e) {
             request.logException(e.getMessage());
             throw e;
@@ -139,13 +136,9 @@ public class ExtractProcessor implements IExtractProcessor {
     }
 
     protected void processDefinitionItem(
-            ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
-            List<IBaseResource> resources,
-            IBaseReference subject) {
+            ExtractRequest request, ItemPair item, List<IBaseResource> resources, IBaseReference subject) {
         try {
-            definitionItemProcessor.processDefinitionItem(request, item, questionnaireItem, resources, subject);
+            definitionItemProcessor.processDefinitionItem(request, item, resources, subject);
         } catch (Exception e) {
             request.logException(e.getMessage());
             throw e;

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class VersionUtilities {
+    private static final String UNSUPPORTED = "unknown or unsupported FHIR version";
 
     private VersionUtilities() {
         // intentionally empty
@@ -46,7 +47,7 @@ public class VersionUtilities {
             case "5":
                 return FhirVersionEnum.R5;
             default:
-                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -78,7 +79,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.StringType(string);
             default:
-                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -110,7 +111,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.UriType(uri);
             default:
-                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -143,7 +144,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.CanonicalType(value);
             default:
-                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -165,7 +166,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.CodeType(code);
             default:
-                throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 }

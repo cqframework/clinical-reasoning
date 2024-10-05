@@ -8,7 +8,6 @@ import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,19 +40,15 @@ public class ProcessDefinitionItem {
     }
 
     public void processDefinitionItem(
-            ExtractRequest request,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
-            List<IBaseResource> resources,
-            IBaseReference subject) {
+            ExtractRequest request, ItemPair item, List<IBaseResource> resources, IBaseReference subject) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
-        var linkId = request.getItemLinkId(item);
-        var context = getContext(request, linkId, getContextExtension(request, item, questionnaireItem));
+        var linkId = request.getItemLinkId(item.getResponseItem());
+        var context = getContext(request, linkId, getContextExtension(request, item));
         var resourceType = context.left;
         var contextResource = context.right;
-        var definition = getDefinition(request, item, questionnaireItem);
+        var definition = getDefinition(request, item.getResponseItem(), item.getItem());
         if (resourceType == null && (contextResource == null || contextResource.isEmpty())) {
             if (definition == null) {
                 throw new IllegalArgumentException(String.format("Unable to retrieve definition for item: %s", linkId));
@@ -61,8 +56,7 @@ public class ProcessDefinitionItem {
             resourceType = getDefinitionType(definition);
         }
         if (contextResource != null && contextResource.size() > 1) {
-            contextResource.forEach(r -> processResource(
-                    request, linkId, r, false, definition, item, questionnaireItem, resources, subject));
+            contextResource.forEach(r -> processResource(request, r, false, definition, item, resources, subject));
         } else {
             var isCreatedResource = true;
             IBaseResource resource = null;
@@ -72,31 +66,23 @@ public class ProcessDefinitionItem {
             } else {
                 resource = (IBaseResource) newValue(request, resourceType);
             }
-            processResource(
-                    request,
-                    linkId,
-                    resource,
-                    isCreatedResource,
-                    definition,
-                    item,
-                    questionnaireItem,
-                    resources,
-                    subject);
+            processResource(request, resource, isCreatedResource, definition, item, resources, subject);
         }
     }
 
-    private IBaseExtension<?, ?> getContextExtension(
-            ExtractRequest request, IBaseBackboneElement item, IBaseBackboneElement questionnaireItem) {
+    private IBaseExtension<?, ?> getContextExtension(ExtractRequest request, ItemPair item) {
         // First, check the Questionnaire.item
         // Second, check the QuestionnaireResponse.item
         // Third, check the Questionnaire
-        return request.getExtensionByUrl(
-                request.hasExtension(questionnaireItem, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-                        ? questionnaireItem
-                        : request.hasExtension(item, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-                                ? item
-                                : request.getQuestionnaire(),
-                Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
+        IBase element;
+        if (request.hasExtension(item.getItem(), Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
+            element = item.getItem();
+        } else if (request.hasExtension(item.getResponseItem(), Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
+            element = item.getResponseItem();
+        } else {
+            element = request.getQuestionnaire();
+        }
+        return request.getExtensionByUrl(element, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
     }
 
     @SuppressWarnings("unchecked")
@@ -135,16 +121,15 @@ public class ProcessDefinitionItem {
 
     private void processResource(
             ExtractRequest request,
-            String linkId,
             IBaseResource resource,
             boolean isCreatedResource,
             String definition,
-            IBaseBackboneElement item,
-            IBaseBackboneElement questionnaireItem,
+            ItemPair item,
             List<IBaseResource> resources,
             IBaseReference subject) {
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
         if (isCreatedResource) {
+            var linkId = request.getItemLinkId(item.getResponseItem());
             var id = request.getExtractId();
             if (StringUtils.isNotBlank(linkId)) {
                 id = id.concat(String.format("-%s", linkId));
@@ -159,8 +144,9 @@ public class ProcessDefinitionItem {
                 request,
                 resourceDefinition,
                 resource,
-                request.getItems(item == null ? request.getQuestionnaireResponse() : item),
-                request.getItems(questionnaireItem == null ? request.getQuestionnaire() : questionnaireItem));
+                request.getItems(
+                        item.getResponseItem() == null ? request.getQuestionnaireResponse() : item.getResponseItem()),
+                request.getItems(item.getItem() == null ? request.getQuestionnaire() : item.getItem()));
 
         resources.add(resource);
     }
@@ -262,10 +248,10 @@ public class ProcessDefinitionItem {
     }
 
     private String getDefinition(
-            ExtractRequest request, IBaseBackboneElement item, IBaseBackboneElement questionnaireItem) {
+            ExtractRequest request, IBaseBackboneElement responseItem, IBaseBackboneElement questionnaireItem) {
         var definition = request.resolvePathString(questionnaireItem, "definition");
         if (definition == null) {
-            definition = request.resolvePathString(item, "definition");
+            definition = request.resolvePathString(responseItem, "definition");
         }
         return definition;
     }
@@ -279,15 +265,17 @@ public class ProcessDefinitionItem {
     }
 
     private String getSubjectPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("subject") != null
-                ? "subject"
-                : definition.getChildByName("patient") != null ? "patient" : null;
+        if (definition.getChildByName("subject") != null) {
+            return "subject";
+        }
+        return definition.getChildByName("patient") != null ? "patient" : null;
     }
 
     private String getAuthorPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("recorder") != null
-                ? "recorder"
-                : definition.getName().equals("Observation") ? "performer" : null;
+        if (definition.getChildByName("recorder") != null) {
+            return "recorder";
+        }
+        return definition.getName().equals("Observation") ? "performer" : null;
     }
 
     private List<BaseRuntimeChildDatatypeDefinition> getDateDefs(BaseRuntimeElementDefinition<?> definition) {
@@ -318,14 +306,8 @@ public class ProcessDefinitionItem {
                             request.getFhirVersion().toString().toLowerCase(), type))
                     .getConstructor()
                     .newInstance();
-        } catch (ClassNotFoundException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InstantiationException
-                | NoSuchMethodException
-                | SecurityException
-                | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 }

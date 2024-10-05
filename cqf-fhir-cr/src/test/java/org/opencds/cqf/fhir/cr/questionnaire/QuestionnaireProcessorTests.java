@@ -24,27 +24,12 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class QuestionnaireProcessorTests {
-    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final Repository repositoryDstu3 = new IgRepository(
-            fhirContextDstu3, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3"));
     private final Repository repositoryR4 =
             new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
     private final Repository repositoryR5 =
             new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
-
-    @Test
-    void populateDstu3() {
-        given().repository(repositoryDstu3)
-                .when()
-                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .subjectId("OPA-Patient1")
-                .parameters(org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                        org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1")))
-                .thenPopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.dstu3.model.QuestionnaireResponse.class);
-    }
 
     @Test
     void populateR4() {
@@ -179,16 +164,6 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
-    void questionnairePackageDstu3() {
-        given().repository(repositoryDstu3)
-                .when()
-                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .thenPackage()
-                .hasEntry(3)
-                .firstEntryIsType(org.hl7.fhir.dstu3.model.Questionnaire.class);
-    }
-
-    @Test
     void questionnairePackageR4() {
         given().repository(repositoryR4)
                 .when()
@@ -206,15 +181,6 @@ class QuestionnaireProcessorTests {
                 .thenPackage()
                 .hasEntry(3)
                 .firstEntryIsType(org.hl7.fhir.r5.model.Questionnaire.class);
-    }
-
-    @Test
-    void dataRequirementsDstu3() {
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .questionnaireId(Ids.newId(fhirContextDstu3, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .thenDataRequirements()
-                .hasDataRequirements(29);
     }
 
     @Test

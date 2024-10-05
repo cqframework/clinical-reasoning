@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
@@ -92,7 +91,6 @@ public class ApplyProcessor implements IApplyProcessor {
     @Override
     public IBaseResource apply(ApplyRequest request) {
         request.setContainResources(true);
-        initApply(request);
         var requestOrchestration = applyPlanDefinition(request);
         request.resolveOperationOutcome(requestOrchestration);
         var carePlan = processRequest.generateCarePlan(request, requestOrchestration);
@@ -165,7 +163,7 @@ public class ApplyProcessor implements IApplyProcessor {
                         addEntry(request.getData(), entry);
                         // Not adding extracted resources back into the response to reduce size of payload
                         // $extract can be called on the QuestionnaireResponse if these are desired
-                        // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry));
+                        // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry))
                     }
                 } catch (Exception e) {
                     request.logException(String.format(
@@ -212,7 +210,8 @@ public class ApplyProcessor implements IApplyProcessor {
             if (Boolean.TRUE.equals(request.getContainResources())) {
                 request.getModelResolver().setValue(requestOrchestration, "contained", Collections.singletonList(goal));
             } else {
-                goal.setId((IIdType) Ids.newId(request.getFhirVersion(), "Goal", String.valueOf(i + 1)));
+                var goalId = Ids.newId(request.getFhirVersion(), "Goal", String.valueOf(i + 1));
+                goal.setId(goalId);
                 request.getModelResolver()
                         .setValue(
                                 requestOrchestration,

@@ -8,6 +8,8 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -335,6 +337,18 @@ public class Measure {
             return this;
         }
 
+        public SelectedReport hasNoReportLevelImprovementNotation() {
+            assertFalse(this.value().hasImprovementNotation());
+
+            return this;
+        }
+
+        public SelectedReport hasReportLevelImprovementNotation() {
+            assertTrue(this.value().hasImprovementNotation());
+
+            return this;
+        }
+
         public SelectedReport hasSubjectReference(String subjectReference) {
             var ref = this.report().getSubject();
             assertEquals(ref.getReference(), subjectReference);
@@ -539,6 +553,15 @@ public class Measure {
 
         public SelectedGroup hasScore(String score) {
             MeasureValidationUtils.validateGroupScore(this.value(), score);
+            return this;
+        }
+
+        public SelectedGroup hasImprovementNotationExt(String code) {
+            var improvementNotationExt = value().getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+            assertNotNull(improvementNotationExt);
+            var codeConcept = (CodeableConcept) improvementNotationExt.getValue();
+            assertTrue(codeConcept.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, code));
+
             return this;
         }
 

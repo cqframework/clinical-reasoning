@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
 
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -83,13 +86,12 @@ public class R4CareGapStatusEvaluator {
         // default improvementNotation
         boolean isPositive = true;
 
-        // TODO: look for group specified 'improvement notation', if missing, then look on measure
-        /*if (groupHasImprovementNotation(measureReportGroup)) {
+        // look for group specified 'improvement notation', if missing, then look on measure
+        if (groupHasImprovementNotation(measureReportGroup)) {
             isPositive = groupImprovementNotationIsPositive(measureReportGroup);
-        } else if (measure.hasImprovementNotation()) {*/
-        if (measure.hasImprovementNotation()) {
-            isPositive =
-                    measure.getImprovementNotation().hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
+        } else if (measure.hasImprovementNotation()) {
+            isPositive = measure.getImprovementNotation()
+                    .hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
         }
 
         if (Boolean.FALSE.equals(inDenominator.getValue())) {
@@ -134,8 +136,7 @@ public class R4CareGapStatusEvaluator {
         return (Period) extValue;
     }
 
-    /*
-    // TODO implement Measure Group Level improvement notation extension
+    // Measure Group Level improvement notation extension
     private boolean groupHasImprovementNotation(MeasureReportGroupComponent groupComponent) {
         return groupComponent.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION) != null;
     }
@@ -144,6 +145,6 @@ public class R4CareGapStatusEvaluator {
         var code = (CodeableConcept) groupComponent
                 .getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
                 .getValue();
-        return code.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "increase");
-    }*/
+        return code.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
+    }
 }

@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class ProcessItemWithContext extends ProcessItem {
         }
         final var profileAdapter = profile == null
                 ? null
-                : (StructureDefinitionAdapter)
+                : (IStructureDefinitionAdapter)
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
@@ -82,7 +82,7 @@ public class ProcessItemWithContext extends ProcessItem {
             IBaseBackboneElement groupItem,
             String contextName,
             IBaseResource context,
-            StructureDefinitionAdapter profile) {
+            IStructureDefinitionAdapter profile) {
         final var contextItem = createResponseItem(request.getFhirVersion(), groupItem);
         request.getItems(groupItem).forEach(item -> {
             var childItems = request.getItems(item);
@@ -109,7 +109,7 @@ public class ProcessItemWithContext extends ProcessItem {
             IBaseBackboneElement item,
             String contextName,
             IBaseResource context,
-            StructureDefinitionAdapter profile) {
+            IStructureDefinitionAdapter profile) {
         if (request.resolveRawPath(item, "initial") != null) {
             return processItem(request, item);
         }
@@ -139,7 +139,7 @@ public class ProcessItemWithContext extends ProcessItem {
     }
 
     public Object getPathValue(
-            IOperationRequest request, IBaseResource context, String definition, StructureDefinitionAdapter profile) {
+            IOperationRequest request, IBaseResource context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var pathSplit = elementId.split("\\.");
@@ -155,7 +155,7 @@ public class ProcessItemWithContext extends ProcessItem {
     private Object getNestedPath(
             IOperationRequest request,
             Object pathValue,
-            StructureDefinitionAdapter profile,
+            IStructureDefinitionAdapter profile,
             String elementId,
             String[] pathSplit) {
         String slice = null;
@@ -177,7 +177,7 @@ public class ProcessItemWithContext extends ProcessItem {
     @SuppressWarnings("unchecked")
     private Object getSliceValue(
             IOperationRequest request,
-            StructureDefinitionAdapter profile,
+            IStructureDefinitionAdapter profile,
             Object pathValue,
             String elementId,
             String[] pathSplit,

@@ -16,8 +16,8 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
-import org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter;
 
 public class GenerateRequest implements IQuestionnaireRequest {
     private final boolean supportedOnly;
@@ -33,7 +33,7 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private String defaultLibraryUrl;
     private IBaseResource questionnaire;
     private QuestionnaireAdapter questionnaireAdapter;
-    private StructureDefinitionAdapter profileAdapter;
+    private IStructureDefinitionAdapter profileAdapter;
     private List<? extends ICompositeType> differentialElements;
     private List<? extends ICompositeType> snapshotElements;
 
@@ -67,9 +67,9 @@ public class GenerateRequest implements IQuestionnaireRequest {
         return profile;
     }
 
-    public StructureDefinitionAdapter getProfileAdapter() {
+    public IStructureDefinitionAdapter getProfileAdapter() {
         if (profileAdapter == null) {
-            profileAdapter = (StructureDefinitionAdapter)
+            profileAdapter = (IStructureDefinitionAdapter)
                     getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         }
         return profileAdapter;

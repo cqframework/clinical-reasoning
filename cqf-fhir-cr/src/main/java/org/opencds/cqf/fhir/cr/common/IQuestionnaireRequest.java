@@ -23,7 +23,7 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
         getModelResolver().setValue(getQuestionnaire(), "item", Collections.singletonList(item));
     }
 
-    default void addLaunchContextExtensions(List<IBaseExtension<?, ?>> launchContextExts) {
+    default <T extends IBaseExtension<?, ?>> void addLaunchContextExtensions(List<T> launchContextExts) {
         if (launchContextExts != null && !launchContextExts.isEmpty()) {
             launchContextExts.forEach(e -> {
                 var code = e.getExtension().stream()

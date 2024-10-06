@@ -53,7 +53,7 @@ public class ItemGenerator {
         extensionProcessor = new ExtensionProcessor();
     }
 
-    public Pair<IBaseBackboneElement, List<IBaseExtension<?, ?>>> generate(GenerateRequest request) {
+    public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generate(GenerateRequest request) {
         final String linkId =
                 String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
         try {
@@ -63,7 +63,7 @@ public class ItemGenerator {
             var parentElements = getElements(request, null, null);
             processElements(request, questionnaireItem, parentElements, childCount, linkId, caseFeature);
             // If we have a caseFeature we need to include launchContext extensions and Item Population Context
-            var launchContextExts = new ArrayList<IBaseExtension<?, ?>>();
+            List<T> launchContextExts = new ArrayList<>();
             if (caseFeature != null) {
                 var itemContextExt = questionnaireItem.addExtension();
                 itemContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);

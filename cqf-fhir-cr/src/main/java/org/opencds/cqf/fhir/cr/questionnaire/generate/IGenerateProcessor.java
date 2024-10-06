@@ -17,5 +17,5 @@ public interface IGenerateProcessor {
      * @param request
      * @return
      */
-    Pair<IBaseBackboneElement, List<IBaseExtension<?, ?>>> generateItem(GenerateRequest request);
+    <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generateItem(GenerateRequest request);
 }

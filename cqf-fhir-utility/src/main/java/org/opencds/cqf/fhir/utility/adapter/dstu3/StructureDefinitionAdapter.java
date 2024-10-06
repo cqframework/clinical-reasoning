@@ -8,9 +8,9 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
-public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter {
+public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter implements IStructureDefinitionAdapter {
 
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);
@@ -54,7 +54,7 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter
                     referenceSource,
                     get().getBaseDefinition(),
                     get().getBaseDefinitionElement().getExtension(),
-                    (reference) -> get().setBaseDefinition(reference)));
+                    reference -> get().setBaseDefinition(reference)));
         }
 
         get().getDifferential()
@@ -72,14 +72,14 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         type.getProfile(),
                         type.getProfileElement().getExtension(),
-                        (reference) -> type.setProfile(reference)));
+                        type::setProfile));
             }
             if (type.hasTargetProfile()) {
                 references.add(new DependencyInfo(
                         referenceSource,
                         type.getTargetProfile(),
                         type.getTargetProfileElement().getExtension(),
-                        (reference) -> type.setTargetProfile(reference)));
+                        type::setTargetProfile));
             }
         });
         if (element.getBinding().hasValueSet()) {
@@ -87,7 +87,7 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter
                     referenceSource,
                     element.getBinding().getValueSet().primitiveValue(),
                     element.getBinding().getExtension(),
-                    (reference) -> element.getBinding().setValueSet(new UriType(reference))));
+                    reference -> element.getBinding().setValueSet(new UriType(reference))));
         }
     }
 

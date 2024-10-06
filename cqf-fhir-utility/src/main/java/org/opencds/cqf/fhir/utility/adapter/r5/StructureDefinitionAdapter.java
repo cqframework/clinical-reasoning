@@ -19,9 +19,9 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
-public class StructureDefinitionAdapter extends ResourceAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.StructureDefinitionAdapter {
+public class StructureDefinitionAdapter extends ResourceAdapter implements IStructureDefinitionAdapter {
 
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);
@@ -65,7 +65,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter
                     referenceSource,
                     get().getBaseDefinition(),
                     get().getBaseDefinitionElement().getExtension(),
-                    (reference) -> get().setBaseDefinition(reference)));
+                    reference -> get().setBaseDefinition(reference)));
         }
         get().getExtensionsByUrl(Constants.CPG_ASSERTION_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
@@ -75,7 +75,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
-                        (reference) -> expression.setReference(reference))));
+                        expression::setReference)));
         get().getExtensionsByUrl(Constants.CPG_FEATURE_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
                 .map(e -> (Expression) e.getValue())
@@ -84,7 +84,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
-                        (reference) -> expression.setReference(reference))));
+                        expression::setReference)));
         get().getExtensionsByUrl(Constants.CPG_INFERENCE_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
                 .map(e -> (Expression) e.getValue())
@@ -93,7 +93,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
-                        (reference) -> expression.setReference(reference))));
+                        expression::setReference)));
         get().getDifferential()
                 .getElement()
                 .forEach(element -> getDependenciesOfDifferential(element, references, referenceSource));
@@ -106,23 +106,17 @@ public class StructureDefinitionAdapter extends ResourceAdapter
         element.getType().forEach(type -> {
             type.getProfile()
                     .forEach(profile -> references.add(new DependencyInfo(
-                            referenceSource,
-                            profile.getValueAsString(),
-                            profile.getExtension(),
-                            (reference) -> profile.setValue(reference))));
+                            referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
             type.getTargetProfile()
                     .forEach(profile -> references.add(new DependencyInfo(
-                            referenceSource,
-                            profile.getValueAsString(),
-                            profile.getExtension(),
-                            (reference) -> profile.setValue(reference))));
+                            referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
         });
         if (element.getBinding().hasValueSet()) {
             references.add(new DependencyInfo(
                     referenceSource,
                     element.getBinding().getValueSet(),
                     element.getBinding().getExtension(),
-                    (reference) -> element.getBinding().setValueSet(reference)));
+                    reference -> element.getBinding().setValueSet(reference)));
         }
     }
 

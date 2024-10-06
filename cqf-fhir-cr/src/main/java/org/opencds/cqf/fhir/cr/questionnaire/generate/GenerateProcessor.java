@@ -61,7 +61,7 @@ public class GenerateProcessor implements IGenerateProcessor {
     }
 
     @Override
-    public Pair<IBaseBackboneElement, List<IBaseExtension<?, ?>>> generateItem(GenerateRequest request) {
+    public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generateItem(GenerateRequest request) {
         logger.info(
                 "Generating Questionnaire Item for StructureDefinition/{}",
                 request.getProfile().getIdElement().getIdPart());

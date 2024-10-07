@@ -4,12 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
@@ -32,8 +26,6 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
@@ -46,7 +38,7 @@ import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 
 class DraftVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-    private Repository spyRepository;
+    private Repository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final String specificationLibReference = "Library/SpecificationLibrary";
     private final List<String> badVersionList = Arrays.asList(
@@ -69,26 +61,16 @@ class DraftVisitorTests {
 
     @BeforeEach
     void setup() {
-        spyRepository = spy(new InMemoryFhirRepository(fhirContext));
-        doAnswer(new Answer<Bundle>() {
-                    @Override
-                    public Bundle answer(InvocationOnMock a) throws Throwable {
-                        Bundle b = a.getArgument(0);
-                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
-                    }
-                })
-                .when(spyRepository)
-                .transaction(any());
+        repo = new InMemoryFhirRepository(fhirContext);
     }
 
     @Test
     void library_draft_test() {
         Bundle bundle = (Bundle)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
@@ -101,16 +83,15 @@ class DraftVisitorTests {
         assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
         assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
         assertTrue(library.hasApprovalDate());
-        Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, spyRepository, params);
-        // 1 time for setup
-        verify(spyRepository, times(2)).transaction(notNull());
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, repo, params);
+
         assertNotNull(returnedBundle);
         Optional<BundleEntryComponent> maybeLib = returnedBundle.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findAny();
         assertTrue(maybeLib.isPresent());
-        Library lib = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library lib =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         assertNotNull(lib);
         assertTrue(lib.getStatus() == Enumerations.PublicationStatus.DRAFT);
         assertEquals(lib.getVersion(), draftedVersion);
@@ -136,27 +117,26 @@ class DraftVisitorTests {
                         }
                     }
                 },
-                spyRepository);
+                repo);
     }
 
     @Test
     void draftOperation_no_effectivePeriod_test() {
         Bundle bundle = (Bundle)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
-        spyRepository.transaction(bundle);
-        Library baseLib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        repo.transaction(bundle);
+        Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
-        PlanDefinition planDef = spyRepository
-                .read(PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
+        PlanDefinition planDef = repo.read(
+                        PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
                 .copy();
         assertTrue(planDef.hasEffectivePeriod());
         String version = "1.01.21";
         Parameters params = parameters(part("version", version));
-        Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, spyRepository, params);
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, repo, params);
 
         MetadataResourceHelper.forEachMetadataResource(
                 returnedBundle.getEntry(),
@@ -165,7 +145,7 @@ class DraftVisitorTests {
                     assertFalse(((Period) adapter.getEffectivePeriod()).hasStart()
                             || ((Period) adapter.getEffectivePeriod()).hasEnd());
                 },
-                spyRepository);
+                repo);
     }
 
     @Test
@@ -174,18 +154,17 @@ class DraftVisitorTests {
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
         Library versionConflictLibrary = (Library)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
-        spyRepository.transaction(bundle);
-        spyRepository.update(versionConflictLibrary);
+        repo.transaction(bundle);
+        repo.update(versionConflictLibrary);
         Parameters params = parameters(part("version", "1.0.0"));
         String maybeException = null;
-        Library baseLib = spyRepository
-                .read(Library.class, new IdType(specificationLibReference))
-                .copy();
+        Library baseLib =
+                repo.read(Library.class, new IdType(specificationLibReference)).copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
 
         try {
-            libraryAdapter.accept(draftVisitor, spyRepository, params);
+            libraryAdapter.accept(draftVisitor, repo, params);
 
         } catch (Exception e) {
             maybeException = e.getMessage();
@@ -198,16 +177,15 @@ class DraftVisitorTests {
     void draftOperation_cannot_create_draft_of_draft_test() {
         Library versionConflictLibrary = (Library)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
-        spyRepository.update(versionConflictLibrary);
+        repo.update(versionConflictLibrary);
         Parameters params = parameters(part("version", "1.2.1"));
         String maybeException = "";
-        Library baseLib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
+        Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         try {
-            libraryAdapter.accept(draftVisitor, spyRepository, params);
+            libraryAdapter.accept(draftVisitor, repo, params);
         } catch (PreconditionFailedException e) {
             maybeException = e.getMessage();
         }
@@ -219,9 +197,8 @@ class DraftVisitorTests {
     void draftOperation_version_format_test() {
         Library versionConflictLibrary = (Library)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
-        spyRepository.update(versionConflictLibrary);
-        Library baseLib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
+        repo.update(versionConflictLibrary);
+        Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
@@ -230,7 +207,7 @@ class DraftVisitorTests {
             UnprocessableEntityException maybeException = null;
             Parameters params = parameters(part("version", new StringType(version)));
             try {
-                libraryAdapter.accept(draftVisitor, spyRepository, params);
+                libraryAdapter.accept(draftVisitor, repo, params);
             } catch (UnprocessableEntityException e) {
                 maybeException = e;
             }

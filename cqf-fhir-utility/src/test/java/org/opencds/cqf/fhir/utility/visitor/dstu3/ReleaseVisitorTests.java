@@ -3,9 +3,6 @@ package org.opencds.cqf.fhir.utility.visitor.dstu3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
@@ -41,8 +38,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -57,7 +52,7 @@ import org.slf4j.event.Level;
 
 class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-    private Repository spyRepository;
+    private Repository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final List<String> badVersionList = Arrays.asList(
             "11asd1",
@@ -81,26 +76,16 @@ class ReleaseVisitorTests {
     void setup() {
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
-        spyRepository = spy(new InMemoryFhirRepository(fhirContext));
-        spyRepository.update(sp);
-        doAnswer(new Answer<Bundle>() {
-                    @Override
-                    public Bundle answer(InvocationOnMock a) throws Throwable {
-                        Bundle b = a.getArgument(0);
-                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
-                    }
-                })
-                .when(spyRepository)
-                .transaction(any());
+        repo = new InMemoryFhirRepository(fhirContext);
+        repo.update(sp);
     }
 
     @Test
     void visitMeasureCollectionTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
-        spyRepository.transaction(bundle);
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+        repo.transaction(bundle);
+        Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
 
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -114,14 +99,14 @@ class ReleaseVisitorTests {
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // Set the ID to Manifest-Release
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .collect(Collectors.toList());
@@ -175,14 +160,12 @@ class ReleaseVisitorTests {
     void visitMeasureEffectiveDataRequirementsTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
-        spyRepository.transaction(bundle);
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+        repo.transaction(bundle);
+        Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
         Measure CervicalCancerScreeningFHIR =
-                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
-        Measure BreastCancerScreeningFHIR =
-                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+                repo.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         var versionParam = params.addParameter();
@@ -195,18 +178,18 @@ class ReleaseVisitorTests {
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // removing the effectiveDataRequirements changes the dependency count
         CervicalCancerScreeningFHIR.setContained(null);
-        spyRepository.update(CervicalCancerScreeningFHIR);
+        repo.update(CervicalCancerScreeningFHIR);
         BreastCancerScreeningFHIR.setContained(null);
-        spyRepository.update(BreastCancerScreeningFHIR);
+        repo.update(BreastCancerScreeningFHIR);
 
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .collect(Collectors.toList());
@@ -222,14 +205,12 @@ class ReleaseVisitorTests {
     void bothCRMIandCQFMEffectiveDataRequirementsTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ecqm-qicore-2024-simplified.json"));
-        spyRepository.transaction(bundle);
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+        repo.transaction(bundle);
+        Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
         Measure CervicalCancerScreeningFHIR =
-                spyRepository.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
-        Measure BreastCancerScreeningFHIR =
-                spyRepository.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+                repo.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
+        Measure BreastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter().setName("version").setValue(new StringType("1.0.0"));
@@ -251,17 +232,17 @@ class ReleaseVisitorTests {
         crmiEDRBreastCancer.setId(crmiEDRId);
         BreastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
         BreastCancerScreeningFHIR.addExtension(crmiEDRExtension);
-        spyRepository.update(CervicalCancerScreeningFHIR);
-        spyRepository.update(BreastCancerScreeningFHIR);
+        repo.update(CervicalCancerScreeningFHIR);
+        repo.update(BreastCancerScreeningFHIR);
 
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .collect(Collectors.toList());
@@ -278,10 +259,9 @@ class ReleaseVisitorTests {
     void visitLibraryTest() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-release-bundle.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
@@ -292,14 +272,14 @@ class ReleaseVisitorTests {
         var versionBehaviorParam = params.addParameter();
         versionBehaviorParam.setName("versionBehavior").setValue(new CodeType("default"));
 
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         // versionBehaviour == 'default' so version should be
         // existingVersion and not the new version provided in
         // the parameters
@@ -402,26 +382,25 @@ class ReleaseVisitorTests {
     void releaseResource_force_version() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         // Existing version should be "1.2.3";
         String newVersionToForce = "1.2.7";
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("version", new StringType(newVersionToForce)), part("versionBehavior", new CodeType("force")));
 
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
 
         assertNotNull(returnResource);
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         assertEquals(releasedLibrary.getVersion(), newVersionToForce);
     }
 
@@ -430,11 +409,11 @@ class ReleaseVisitorTests {
         // SpecificationLibrary - root is experimental but HAS experimental children
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
         Bundle bundle2 = (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
                 "Bundle-small-approved-draft-experimental-children.json"));
-        spyRepository.transaction(bundle2);
+        repo.transaction(bundle2);
         Parameters params = parameters(
                 part("version", new StringType("1.2.3")),
                 part("versionBehavior", new CodeType("default")),
@@ -442,24 +421,22 @@ class ReleaseVisitorTests {
         Exception notExpectingAnyException = null;
         // no Exception if root is experimental
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (Exception e) {
             notExpectingAnyException = e;
         }
         assertTrue(notExpectingAnyException == null);
 
         UnprocessableEntityException nonExperimentalChildException = null;
-        Library library2 = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary2"))
+        Library library2 = repo.read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
         LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
         try {
-            libraryAdapter2.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter2.accept(releaseVisitor, repo, params);
         } catch (UnprocessableEntityException e) {
             nonExperimentalChildException = e;
         }
@@ -472,18 +449,16 @@ class ReleaseVisitorTests {
         // SpecificationLibrary - root is experimental but HAS experimental children
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-experimental.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
         Bundle bundle2 = (Bundle) jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream(
                 "Bundle-small-approved-draft-experimental-children.json"));
-        spyRepository.transaction(bundle2);
+        repo.transaction(bundle2);
 
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        Library library2 = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary2"))
+        Library library2 = repo.read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
@@ -496,11 +471,11 @@ class ReleaseVisitorTests {
         var logger = TestLoggerFactory.getTestLogger(ReleaseVisitor.class);
         logger.clear();
 
-        libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        libraryAdapter.accept(releaseVisitor, repo, params);
         // no warning if the root is Experimental
         assertEquals(0, logger.getLoggingEvents().size());
 
-        libraryAdapter2.accept(releaseVisitor, spyRepository, params);
+        libraryAdapter2.accept(releaseVisitor, repo, params);
 
         var warningMessages = logger.getLoggingEvents().stream()
                 .filter(event -> event.getLevel().equals(Level.WARN))
@@ -519,17 +494,16 @@ class ReleaseVisitorTests {
     void releaseResource_propagate_effective_period() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-no-child-effective-period.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         String effectivePeriodToPropagate = "2020-12-11";
 
         Parameters params =
                 parameters(part("version", new StringType("1.2.7")), part("versionBehavior", new CodeType("default")));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         MetadataResourceHelper.forEachMetadataResource(
                 returnResource.getEntry(),
@@ -548,14 +522,14 @@ class ReleaseVisitorTests {
                         assertEquals(startString, effectivePeriodToPropagate);
                     }
                 },
-                spyRepository);
+                repo);
     }
 
     @Test
     void releaseResource_latestFromTx_NotSupported_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
 
         String actualErrorMessage = "";
 
@@ -564,13 +538,12 @@ class ReleaseVisitorTests {
                 part("versionBehavior", new CodeType("default")),
                 part("latestFromTxServer", new BooleanType(true)));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (Exception e) {
             actualErrorMessage = e.getMessage();
         }
@@ -581,19 +554,18 @@ class ReleaseVisitorTests {
     void release_missing_approvalDate_validation_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
 
         String versionData = "1.2.3";
         String actualErrorMessage = "";
 
         Parameters params1 = parameters(part("version", versionData), part("versionBehavior", new CodeType("default")));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params1);
+            libraryAdapter.accept(releaseVisitor, repo, params1);
         } catch (Exception e) {
             actualErrorMessage = e.getMessage();
         }
@@ -604,10 +576,9 @@ class ReleaseVisitorTests {
     void release_version_format_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         for (String version : badVersionList) {
@@ -615,7 +586,7 @@ class ReleaseVisitorTests {
             Parameters params = parameters(
                     part("version", new StringType(version)), part("versionBehavior", new CodeType("force")));
             try {
-                libraryAdapter.accept(releaseVisitor, spyRepository, params);
+                libraryAdapter.accept(releaseVisitor, repo, params);
 
             } catch (UnprocessableEntityException e) {
                 maybeException = e;
@@ -628,25 +599,24 @@ class ReleaseVisitorTests {
     void release_releaseLabel_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         String releaseLabel = "release label test";
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("releaseLabel", new StringType(releaseLabel)),
                 part("version", "1.2.3"),
                 part("versionBehavior", new CodeType("default")));
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
 
         Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
                 .findFirst();
         assertTrue(maybeLib.isPresent());
-        Library releasedLibrary = spyRepository.read(
-                Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         Optional<Extension> maybeReleaseLabel = releasedLibrary.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
                 .findFirst();
@@ -658,10 +628,9 @@ class ReleaseVisitorTests {
     void release_version_active_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
@@ -669,7 +638,7 @@ class ReleaseVisitorTests {
         Parameters params =
                 parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (PreconditionFailedException e) {
             maybeException = e;
         }
@@ -680,10 +649,9 @@ class ReleaseVisitorTests {
     void release_versionBehaviour_format_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        spyRepository.transaction(bundle);
+        repo.transaction(bundle);
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
-        Library library = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         List<String> badVersionBehaviors = Arrays.asList("not-a-valid-option", null);
@@ -692,7 +660,7 @@ class ReleaseVisitorTests {
             Parameters params = parameters(
                     part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType(versionBehaviour)));
             try {
-                libraryAdapter.accept(releaseVisitor, spyRepository, params);
+                libraryAdapter.accept(releaseVisitor, repo, params);
             } catch (FHIRException e) {
                 maybeException = e;
             } catch (UnprocessableEntityException e) {

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -273,7 +274,6 @@ public class CareGaps {
                     .get()
                     .getResource()));
         }
-        ;
 
         public SelectedDetectedIssue detectedIssue(Selector<DetectedIssue, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -371,7 +371,6 @@ public class CareGaps {
             }
             return this;
         }
-        ;
 
         public MeasureReport resourceToMeasureReport(Resource theResource) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
@@ -457,6 +456,12 @@ public class CareGaps {
                     .filter(x -> x.getReference().contains("MeasureReport"))
                     .findFirst()
                     .get());
+            return this;
+        }
+
+        public SelectedDetectedIssue hasGroupIdReportExtension(String groupId) {
+            var groupIdExt = detectedIssueReport().getExtensionByUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
+            assertEquals(groupIdExt.getValue().toString(), groupId);
             return this;
         }
     }

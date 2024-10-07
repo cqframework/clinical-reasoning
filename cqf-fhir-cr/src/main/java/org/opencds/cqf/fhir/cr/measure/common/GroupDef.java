@@ -11,15 +11,25 @@ public class GroupDef {
     private final ConceptDef code;
     private final List<StratifierDef> stratifiers;
     private final List<PopulationDef> populations;
+    private final MeasureScoring measureScoring;
+    private final boolean isPositiveImprovementNotation;
 
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
-    public GroupDef(String id, ConceptDef code, List<StratifierDef> stratifiers, List<PopulationDef> populations) {
+    public GroupDef(
+            String id,
+            ConceptDef code,
+            List<StratifierDef> stratifiers,
+            List<PopulationDef> populations,
+            MeasureScoring measureScoring,
+            boolean isPositiveImprovementNotation) {
         this.id = id;
         this.code = code;
         this.stratifiers = stratifiers;
         this.populations = populations;
         this.populationIndex = index(populations);
+        this.measureScoring = measureScoring;
+        this.isPositiveImprovementNotation = isPositiveImprovementNotation;
     }
 
     public String id() {
@@ -57,5 +67,13 @@ public class GroupDef {
 
     private Map<MeasurePopulationType, List<PopulationDef>> index(List<PopulationDef> populations) {
         return populations.stream().collect(Collectors.groupingBy(PopulationDef::type));
+    }
+
+    public MeasureScoring measureScoring() {
+        return this.measureScoring;
+    }
+
+    public boolean isPositiveImprovementNotation() {
+        return this.isPositiveImprovementNotation;
     }
 }

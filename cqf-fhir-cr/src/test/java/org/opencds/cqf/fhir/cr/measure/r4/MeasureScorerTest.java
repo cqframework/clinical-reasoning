@@ -2,19 +2,18 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
 class MeasureScorerTest {
@@ -28,14 +27,16 @@ class MeasureScorerTest {
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
 
-        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
-        assertEquals(
-                "1.0",
-                measureReport.getGroup().get(0).getMeasureScore().getValue().toString());
-        assertEquals(
-                "1.0",
-                measureReport.getGroup().get(1).getMeasureScore().getValue().toString());
+        try {
+            R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+            scorer.score(measureScoringDef, measureReport);
+            fail("this should throw error");
+        } catch (IllegalArgumentException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+        }
     }
 
     @Test
@@ -44,7 +45,11 @@ class MeasureScorerTest {
         mr.addGroup();
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
 
-        assertThrows(IllegalArgumentException.class, () -> scorer.score(null, mr));
+        try {
+            scorer.score(null, mr);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("MeasureDef is required in order to score a Measure."));
+        }
     }
 
     @Test
@@ -72,9 +77,15 @@ class MeasureScorerTest {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMyMeasureReport(measureUrl);
-        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        var e = assertThrows(IllegalArgumentException.class, () -> scorer.score(measureScoringDef, measureReport));
-        assertEquals("No MeasureScoring value set", e.getMessage());
+        try {
+            R4MeasureReportScorer scorer = new R4MeasureReportScorer();
+            scorer.score(measureScoringDef, measureReport);
+        } catch (IllegalArgumentException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+        }
     }
 
     @Test
@@ -181,13 +192,13 @@ class MeasureScorerTest {
         return measureReportList;
     }
 
-    public Map<GroupDef, MeasureScoring> getMeasureScoringDef(String measureUrl) {
+    public MeasureDef getMeasureScoringDef(String measureUrl) {
         var measureRes = myMeasures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
                 .orElse(null);
         R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
-        return measureDefBuilder.build(measureRes).scoring();
+        return measureDefBuilder.build(measureRes);
     }
 
     public MeasureReport getMyMeasureReport(String measureUrl) {

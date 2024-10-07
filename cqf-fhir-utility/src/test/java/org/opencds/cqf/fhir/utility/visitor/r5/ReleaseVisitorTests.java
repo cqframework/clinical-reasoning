@@ -192,9 +192,9 @@ class ReleaseVisitorTests {
         repo.transaction(bundle);
         Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
-        Measure CervicalCancerScreeningFHIR =
+        Measure cervicalCancerScreeningFHIR =
                 repo.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
-        Measure BreastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
+        Measure breastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter("version", "1.0.0");
@@ -207,17 +207,17 @@ class ReleaseVisitorTests {
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
         // if both cqfm and crmi effective data requirements are present then they will each be traced
-        var crmiEDRCervical = CervicalCancerScreeningFHIR.getContained().get(0).copy();
+        var crmiEDRCervical = cervicalCancerScreeningFHIR.getContained().get(0).copy();
         crmiEDRCervical.setId(crmiEDRId);
-        CervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
-        CervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        cervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
+        cervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
         var crmiEDRBreastCancer =
-                BreastCancerScreeningFHIR.getContained().get(0).copy();
+                breastCancerScreeningFHIR.getContained().get(0).copy();
         crmiEDRBreastCancer.setId(crmiEDRId);
-        BreastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
-        BreastCancerScreeningFHIR.addExtension(crmiEDRExtension);
-        repo.update(CervicalCancerScreeningFHIR);
-        repo.update(BreastCancerScreeningFHIR);
+        breastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
+        breastCancerScreeningFHIR.addExtension(crmiEDRExtension);
+        repo.update(cervicalCancerScreeningFHIR);
+        repo.update(breastCancerScreeningFHIR);
 
         Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);

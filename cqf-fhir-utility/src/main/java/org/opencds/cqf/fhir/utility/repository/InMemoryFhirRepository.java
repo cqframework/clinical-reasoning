@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 
 public class InMemoryFhirRepository implements Repository {
@@ -206,23 +205,20 @@ public class InMemoryFhirRepository implements Repository {
 
     @Override
     public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        throw new NotImplementedOperationException("The transaction operation is not currently supported");
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <B extends IBaseBundle> B transactionStub(B transaction, Repository repository) {
         var version = transaction.getStructureFhirVersionEnum();
+
+        @SuppressWarnings("unchecked")
         var returnBundle = (B) newBundle(version);
         BundleHelper.getEntry(transaction).forEach(e -> {
             if (BundleHelper.isEntryRequestPut(version, e)) {
-                var outcome = repository.update(BundleHelper.getEntryResource(version, e));
+                var outcome = this.update(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
                 BundleHelper.addEntry(
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestPost(version, e)) {
-                var outcome = repository.create(BundleHelper.getEntryResource(version, e));
+                var outcome = this.create(BundleHelper.getEntryResource(version, e));
                 var location = outcome.getId().getValue();
                 BundleHelper.addEntry(
                         returnBundle,
@@ -232,8 +228,9 @@ public class InMemoryFhirRepository implements Repository {
                 if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
                     var resourceType = Canonicals.getResourceType(
                             ((BundleEntryComponent) e).getRequest().getUrl());
-                    var resourceClass = SearchHelper.getResourceClass(repository, resourceType);
-                    var res = repository.delete(
+                    var resourceClass =
+                            this.context.getResourceDefinition(resourceType).getImplementingClass();
+                    var res = this.delete(
                             resourceClass,
                             BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
                     BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
@@ -245,6 +242,7 @@ public class InMemoryFhirRepository implements Repository {
                 throw new NotImplementedOperationException("Transaction stub only supports PUT, POST or DELETE");
             }
         });
+
         return returnBundle;
     }
 

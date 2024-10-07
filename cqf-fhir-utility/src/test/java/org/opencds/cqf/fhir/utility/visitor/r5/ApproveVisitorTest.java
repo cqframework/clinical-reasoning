@@ -4,9 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
@@ -31,8 +28,6 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
@@ -41,24 +36,15 @@ import org.opencds.cqf.fhir.utility.visitor.ApproveVisitor;
 
 class ApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
-    private Repository spyRepository;
+    private Repository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach
     void setup() {
         var lib = (Library)
                 jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream("Library-ersd-active.json"));
-        spyRepository = spy(new InMemoryFhirRepository(fhirContext));
-        spyRepository.update(lib);
-        doAnswer(new Answer<Bundle>() {
-                    @Override
-                    public Bundle answer(InvocationOnMock a) throws Throwable {
-                        Bundle b = a.getArgument(0);
-                        return InMemoryFhirRepository.transactionStub(b, spyRepository);
-                    }
-                })
-                .when(spyRepository)
-                .transaction(any());
+        repo = new InMemoryFhirRepository(fhirContext);
+        repo.update(lib);
     }
 
     @Test
@@ -67,13 +53,12 @@ class ApproveVisitorTest {
         var params = parameters(part("artifactAssessmentTarget", new CanonicalType(artifactAssessmentTarget)));
         UnprocessableEntityException maybeException = null;
         var releaseVisitor = new ApproveVisitor();
-        var lib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        var lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
@@ -83,7 +68,7 @@ class ApproveVisitorTest {
         artifactAssessmentTarget = "http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary|this-version-is-wrong";
         params = parameters(part("artifactAssessmentTarget", new CanonicalType(artifactAssessmentTarget)));
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
@@ -97,13 +82,12 @@ class ApproveVisitorTest {
         Parameters params = parameters(part("artifactAssessmentType", new CodeType(artifactAssessmentType)));
         UnprocessableEntityException maybeException = null;
         ApproveVisitor releaseVisitor = new ApproveVisitor();
-        Library lib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
-            libraryAdapter.accept(releaseVisitor, spyRepository, params);
+            libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (UnprocessableEntityException e) {
             maybeException = e;
         }
@@ -114,7 +98,7 @@ class ApproveVisitorTest {
     void approveOperation_test() {
         var practitioner = (Practitioner)
                 jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream("Practitioner-minimal.json"));
-        spyRepository.update(practitioner);
+        repo.update(practitioner);
         Date today = new Date();
         // get today's date in the form "2023-05-11"
         DateType approvalDate = new DateType(today, TemporalPrecisionEnum.DAY);
@@ -131,15 +115,13 @@ class ApproveVisitorTest {
                 part("artifactAssessmentRelatedArtifact", new CanonicalType(artifactAssessmentRelatedArtifact)),
                 part("artifactAssessmentAuthor", new Reference(artifactAssessmentAuthor)));
         ApproveVisitor approveVisitor = new ApproveVisitor();
-        Library lib = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
-        Bundle returnedResource = (Bundle) libraryAdapter.accept(approveVisitor, spyRepository, params);
+        Bundle returnedResource = (Bundle) libraryAdapter.accept(approveVisitor, repo, params);
 
         assertNotNull(returnedResource);
-        Library approvedLibrary = spyRepository
-                .read(Library.class, new IdType("Library/SpecificationLibrary"))
+        Library approvedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         assertNotNull(approvedLibrary);
         // Ensure Approval Date matches input parameter
@@ -152,7 +134,7 @@ class ApproveVisitorTest {
                 .filter(entry -> entry.getResponse().getLocation().contains("ArtifactAssessment"))
                 .findAny();
         assertTrue(maybeArtifactAssessment.isPresent());
-        var artifactAssessment = spyRepository.read(
+        var artifactAssessment = repo.read(
                 ArtifactAssessment.class,
                 new IdType(maybeArtifactAssessment.get().getResponse().getLocation()));
         assertNotNull(artifactAssessment);

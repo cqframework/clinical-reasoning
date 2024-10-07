@@ -17,7 +17,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,11 +93,7 @@ public class R4CareGapsBundleBuilder {
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            List<String> subjects,
-            List<String> statuses,
-            List<IdType> measureIds) {
+            List<String> subjects, R4CareGapsParameters r4CareGapsParameters, List<IdType> measureId) {
 
         // retrieve reporter from configuration
         String reporter = RESOURCE_TYPE_ORGANIZATION.concat("/" + careGapsProperties.getCareGapsReporter());
@@ -108,11 +103,11 @@ public class R4CareGapsBundleBuilder {
         for (String subject : subjects) {
             // Measure Reports
             Bundle result = r4MultiMeasureService.evaluate(
-                    measureIds,
+                    measureId,
                     null,
                     null,
-                    periodStart,
-                    periodEnd,
+                    r4CareGapsParameters.getPeriodStart(),
+                    r4CareGapsParameters.getPeriodEnd(),
                     MeasureEvalType.SUBJECT.toCode(),
                     subject,
                     null,
@@ -126,8 +121,10 @@ public class R4CareGapsBundleBuilder {
             // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.
             var patient = repository.read(Patient.class, new IdType(subject));
 
+            Bundle bundle;
             // finalize patient Bundle results
-            var bundle = makePatientBundle(result, statuses, patient);
+            bundle = makePatientBundle(
+                    result, r4CareGapsParameters.getStatus(), patient, r4CareGapsParameters.isNotDocument());
 
             // add parameter with results
             if (bundle != null && bundle.hasEntry()) {
@@ -136,14 +133,18 @@ public class R4CareGapsBundleBuilder {
         }
         return paramResults;
     }
-
+    /**
+     * method to use for creating Care-Gaps Bundle per Patient. IsDocumentMode will control which
+     * resources are added or excluded from the final bundle
+     */
     @Nullable
-    public Bundle makePatientBundle(Bundle bundle, List<String> statuses, Patient patient) {
+    public Bundle makePatientBundle(Bundle bundle, List<String> statuses, Patient patient, boolean notDocument) {
         Map<String, Resource> evalPlusSDE = new HashMap<>();
         List<DetectedIssue> detectedIssues = new ArrayList<>();
         List<MeasureReport> measureReports = new ArrayList<>();
         var gapEvaluator = new R4CareGapStatusEvaluator();
-        Composition composition = getComposition(patient);
+        var composition = getComposition(patient, notDocument);
+
         // get Evaluation Bundle Results
         for (BundleEntryComponent entry : bundle.getEntry()) {
             MeasureReport mr = (MeasureReport) entry.getResource();
@@ -154,28 +155,32 @@ public class R4CareGapsBundleBuilder {
             var gapStatus = gapEvaluator.getGroupGapStatus(measure, mr);
             var filteredGapStatus = filteredGapStatus(gapStatus, statuses);
             if (!filteredGapStatus.isEmpty()) {
-                // add Report to final Care-gap report
-                measureReports.add(mr);
+                if (!notDocument) {
+                    // add document mode required elements to final Care-gap report
+                    measureReports.add(mr);
+                    populateEvaluatedResources(mr, evalPlusSDE);
+                    populateSDEResources(mr, evalPlusSDE);
+                }
                 // Issue(s) Detected from MeasureReport
                 for (Map.Entry<String, CareGapsStatusCode> item : filteredGapStatus.entrySet()) {
                     String groupId = item.getKey();
                     CareGapsStatusCode careGapsStatusCode = item.getValue();
                     // create DetectedIssue per gap-status and MeasureReport.groupId
-                    DetectedIssue issue = getDetectedIssue(patient, mr, groupId, careGapsStatusCode);
+                    DetectedIssue issue =
+                            getDetectedIssue(patient, mr, groupId, careGapsStatusCode, measure, notDocument);
                     // add DetectedIssue list to set on Bundle
                     detectedIssues.add(issue);
                     // add sections for DetectedIssues created
-                    composition.addSection(getSection(measure, mr, issue, careGapsStatusCode));
+                    if (!notDocument) {
+                        composition.addSection(getSection(measure, mr, issue, careGapsStatusCode));
+                    }
                 }
-                // Track evaluated Resources
-                populateEvaluatedResources(mr, evalPlusSDE);
-                populateSDEResources(mr, evalPlusSDE);
             }
         }
 
-        if (!measureReports.isEmpty()) {
+        if (!detectedIssues.isEmpty()) {
             // only add if a DetectedIssue is found and has MeasureReports
-            return addBundleEntries(serverBase, composition, detectedIssues, measureReports, evalPlusSDE);
+            return addBundleEntries(serverBase, composition, detectedIssues, measureReports, evalPlusSDE, notDocument);
         } else {
             // return nothing if not-applicable
             return null;
@@ -215,18 +220,20 @@ public class R4CareGapsBundleBuilder {
                 .build();
     }
 
-    private Composition getComposition(Patient patient) {
-        return new CompositionBuilder<>(Composition.class)
-                .withProfile(CARE_GAPS_COMPOSITION_PROFILE)
-                .withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
-                .withStatus(Composition.CompositionStatus.FINAL.toString())
-                .withTitle("Care Gap Report for " + Ids.simplePart(patient))
-                .withSubject(Ids.simple(patient))
-                .withAuthor(Ids.simple(configuredResources.get("care_gaps_composition_section_author")))
-                // .withCustodian(organization) // TODO: Optional: identifies the organization
-                // who is responsible for ongoing maintenance of and accessing to this gaps in
-                // care report. Add as a setting and optionally read if it's there.
-                .build();
+    @Nullable
+    private Composition getComposition(Patient patient, boolean notDocument) {
+        Composition composition = null;
+        if (!notDocument) {
+            composition = new CompositionBuilder<>(Composition.class)
+                    .withProfile(CARE_GAPS_COMPOSITION_PROFILE)
+                    .withType(CARE_GAPS_CODES.get("http://loinc.org/96315-7"))
+                    .withStatus(Composition.CompositionStatus.FINAL.toString())
+                    .withTitle("Care Gap Report for " + Ids.simplePart(patient))
+                    .withSubject(Ids.simple(patient))
+                    .withAuthor(Ids.simple(configuredResources.get("care_gaps_composition_section_author")))
+                    .build();
+        }
+        return composition;
     }
 
     private boolean isMultiRateMeasure(MeasureReport measureReport) {
@@ -237,7 +244,9 @@ public class R4CareGapsBundleBuilder {
             Patient patient,
             MeasureReport measureReport,
             String measureReportGroupId,
-            CareGapsStatusCode careGapsStatusCode) {
+            CareGapsStatusCode careGapsStatusCode,
+            Measure measure,
+            boolean notDocument) {
 
         var detectedIssue = new DetectedIssueBuilder<>(DetectedIssue.class)
                 .withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
@@ -254,6 +263,11 @@ public class R4CareGapsBundleBuilder {
                                         careGapsStatusCode.toDisplayString())))
                 .build();
 
+        // add period from MeasureReport for Identified period of Issue
+        detectedIssue.setIdentified(measureReport.getPeriod());
+        // add Measure reference as Implicated reference for Issue
+        detectedIssue.setImplicated(Collections.singletonList(new Reference(Ids.simple(measure))));
+
         if (measureReportGroupId != null && isMultiRateMeasure(measureReport)) {
             // MeasureReportGroupComponent.id value set here to differentiate between DetectedIssue resources for the
             // same MeasureReport
@@ -261,6 +275,14 @@ public class R4CareGapsBundleBuilder {
             groupIdExt.setUrl(CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID);
             groupIdExt.setValue(new StringType(measureReportGroupId));
             detectedIssue.setExtension(Collections.singletonList(groupIdExt));
+        }
+        if (notDocument) {
+            // add Report as contained resource
+            detectedIssue.setContained(Collections.singletonList(measureReport));
+            // update evidence reference to '#' prefixed reference to indicate it is contained.
+            detectedIssue
+                    .getEvidenceFirstRep()
+                    .setDetail(Collections.singletonList(new Reference("#" + measureReport.getId())));
         }
         return detectedIssue;
     }
@@ -326,13 +348,20 @@ public class R4CareGapsBundleBuilder {
             Composition composition,
             List<DetectedIssue> detectedIssues,
             List<MeasureReport> measureReports,
-            Map<String, Resource> evalPlusSDEs) {
+            Map<String, Resource> evalPlusSDEs,
+            boolean notDocument) {
         Bundle reportBundle = makeNewBundle();
-        reportBundle.addEntry(getBundleEntry(serverBase, composition));
-        measureReports.forEach(report -> reportBundle.addEntry(getBundleEntry(serverBase, report)));
-        detectedIssues.forEach(detectedIssue -> reportBundle.addEntry(getBundleEntry(serverBase, detectedIssue)));
-        configuredResources.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(serverBase, resource)));
-        evalPlusSDEs.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(serverBase, resource)));
+        if (notDocument) {
+            detectedIssues.forEach(detectedIssue -> reportBundle.addEntry(getBundleEntry(serverBase, detectedIssue)));
+        } else {
+            reportBundle.addEntry(getBundleEntry(serverBase, composition));
+            measureReports.forEach(report -> reportBundle.addEntry(getBundleEntry(serverBase, report)));
+            detectedIssues.forEach(detectedIssue -> reportBundle.addEntry(getBundleEntry(serverBase, detectedIssue)));
+            configuredResources
+                    .values()
+                    .forEach(resource -> reportBundle.addEntry(getBundleEntry(serverBase, resource)));
+            evalPlusSDEs.values().forEach(resource -> reportBundle.addEntry(getBundleEntry(serverBase, resource)));
+        }
         return reportBundle;
     }
 

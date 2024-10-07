@@ -17,7 +17,7 @@ public class Try<T> extends Either<Exception, T> {
     }
 
     public Exception exception() {
-        return left();
+        return leftOrThrow();
     }
 
     @Override
@@ -28,7 +28,7 @@ public class Try<T> extends Either<Exception, T> {
         }
 
         try {
-            return Tries.of(map.apply(right()));
+            return Tries.of(map.apply(rightOrThrow()));
         } catch (Exception e) {
             return Tries.ofException(e);
         }
@@ -42,7 +42,7 @@ public class Try<T> extends Either<Exception, T> {
         }
 
         try {
-            return flatMapRight.apply(right()).fold(Tries::ofException, Tries::of);
+            return flatMapRight.apply(rightOrThrow()).fold(Tries::ofException, Tries::of);
         } catch (Exception e) {
             return Tries.ofException(e);
         }

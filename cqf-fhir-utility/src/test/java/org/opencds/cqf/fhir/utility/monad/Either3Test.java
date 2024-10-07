@@ -43,29 +43,29 @@ class Either3Test {
         assertTrue(one.isLeft());
         assertFalse(one.isMiddle());
         assertFalse(one.isRight());
-        assertEquals(1, one.left());
+        assertEquals(1, one.leftOrThrow());
         // Either is right-biased, meaning the "get" is for the right element
-        assertThrows(IllegalStateException.class, one::right);
-        assertThrows(IllegalStateException.class, one::middle);
-        assertThrows(IllegalStateException.class, one::get);
+        assertThrows(IllegalStateException.class, one::rightOrThrow);
+        assertThrows(IllegalStateException.class, one::middleOrThrow);
+        assertThrows(IllegalStateException.class, one::getOrThrow);
 
         var two = Eithers.forRight3(1);
         assertFalse(two.isLeft());
         assertFalse(two.isMiddle());
         assertTrue(two.isRight());
-        assertEquals(1, two.right());
-        assertEquals(1, two.get());
-        assertThrows(IllegalStateException.class, two::left);
-        assertThrows(IllegalStateException.class, two::middle);
+        assertEquals(1, two.rightOrThrow());
+        assertEquals(1, two.getOrThrow());
+        assertThrows(IllegalStateException.class, two::leftOrThrow);
+        assertThrows(IllegalStateException.class, two::middleOrThrow);
 
         var three = Eithers.forMiddle3(1);
         assertFalse(three.isLeft());
         assertTrue(three.isMiddle());
         assertFalse(three.isRight());
-        assertEquals(1, three.middle());
-        assertThrows(IllegalStateException.class, three::left);
-        assertThrows(IllegalStateException.class, three::right);
-        assertThrows(IllegalStateException.class, three::get);
+        assertEquals(1, three.middleOrThrow());
+        assertThrows(IllegalStateException.class, three::leftOrThrow);
+        assertThrows(IllegalStateException.class, three::rightOrThrow);
+        assertThrows(IllegalStateException.class, three::getOrThrow);
     }
 
     @Test
@@ -136,7 +136,7 @@ class Either3Test {
         var map = e.map(doubleInt);
 
         assertEquals(bound, map);
-        assertEquals(6, map.get());
+        assertEquals(6, map.getOrThrow());
 
         // But we also need to make sure we preserve left identity;
         Either3<String, Double, Integer> failed = Eithers.forLeft3("Failed either");
@@ -223,5 +223,64 @@ class Either3Test {
         assertFalse(left.optional().isPresent());
         assertFalse(middle.optional().isPresent());
         assertTrue(right.optional().isPresent());
+    }
+
+    @Test
+    void rotate() {
+        var left = Eithers.forLeft3(1);
+        var leftResult = left.rotate();
+        assertTrue(leftResult.isMiddle());
+        assertEquals(1, leftResult.middleOrThrow());
+
+        var middle = Eithers.forMiddle3(1);
+        var middleResult = middle.rotate();
+        assertTrue(middleResult.isRight());
+        assertEquals(1, middleResult.rightOrThrow());
+
+        var right = Eithers.forRight3(1);
+        var rightResult = right.rotate();
+        assertTrue(rightResult.isLeft());
+        assertEquals(1, rightResult.leftOrThrow());
+    }
+
+    @Test
+    void orElse() {
+        var left = Eithers.forLeft3(1);
+        var middle = Eithers.forMiddle3(1);
+        var right = Eithers.forRight3(1);
+
+        assertEquals(2, left.orElse(2));
+        assertEquals(2, middle.orElse(2));
+        assertEquals(1, right.orElse(2));
+    }
+
+    @Test
+    void orElseGet() {
+        var left = Eithers.forLeft3(1);
+        var middle = Eithers.forMiddle3(1);
+        var right = Eithers.forRight3(1);
+
+        assertEquals(2, left.orElseGet(() -> 2));
+        assertEquals(2, middle.orElseGet(() -> 2));
+        assertEquals(1, right.orElseGet(() -> 2));
+    }
+
+    @Test
+    void peek() {
+        var left = Eithers.<Integer, Integer, Integer>forLeft3(1);
+        var middle = Eithers.<Integer, Integer, Integer>forMiddle3(1);
+        var right = Eithers.<Integer, Integer, Integer>forRight3(1);
+
+        var leftResult = new int[1];
+        var middleResult = new int[1];
+        var rightResult = new int[1];
+
+        left.peek(x -> leftResult[0] = x);
+        middle.peek(x -> middleResult[0] = x);
+        right.peek(x -> rightResult[0] = x);
+
+        assertEquals(0, leftResult[0]);
+        assertEquals(0, middleResult[0]);
+        assertEquals(1, rightResult[0]);
     }
 }

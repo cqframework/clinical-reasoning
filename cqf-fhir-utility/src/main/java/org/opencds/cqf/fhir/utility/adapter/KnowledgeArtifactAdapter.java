@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Versions;
 import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,13 +312,12 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                 || resource instanceof org.hl7.fhir.r5.model.MetadataResource;
     }
 
-    // TODO: Make this a semver sort
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> isSupportedMetadataResource(r))
                 .map(r -> (KnowledgeArtifactAdapter) AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
-                .sorted((a, b) -> a.getVersion().compareTo(b.getVersion()))
+                .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
                 .collect(Collectors.toList());
         if (!sorted.isEmpty()) {
             return Optional.of(sorted.get(0).get());

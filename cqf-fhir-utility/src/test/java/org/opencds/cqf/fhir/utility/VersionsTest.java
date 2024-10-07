@@ -36,6 +36,33 @@ class VersionsTest {
 
         result = Versions.compareVersions("0", "1.1.2");
         assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1.1", "1.1.1-draft");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1.2", "1.1.1-draft");
+        assertEquals(1, result);
+
+        result = Versions.compareVersions("1.1.2invalid", "1.1.1-draft");
+        assertEquals(1, result);
+
+        result = Versions.compareVersions("1.1.2invalid", "1.1.1-draft-draft-draft");
+        assertEquals(1, result);
+
+        result = Versions.compareVersions("1.1.2-draft", "1.1.1-draft-draft-draft/+*'^%!@#$");
+        assertEquals(1, result);
+
+        result = Versions.compareVersions("1111", "2222");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("abc1", "xyz9");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1.1-draft", "1.1.1-draft-draft2-draft3/+*'^%!@#$");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1bleh.1", "1.1.1");
+        assertEquals(1, result);
     }
 
     @Test

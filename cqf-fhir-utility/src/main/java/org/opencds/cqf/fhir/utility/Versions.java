@@ -2,8 +2,10 @@ package org.opencds.cqf.fhir.utility;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -33,14 +35,65 @@ public class Versions {
             return 1;
         }
 
+        final var v1Valid = isValidSemver(version1);
+        final var v2Valid = isValidSemver(version2);
+
+        if (!v1Valid && !v2Valid) {
+            // try string and number compares if it's not semver
+            try {
+                final var c = Integer.parseInt(version1) - Integer.parseInt(version2);
+                return c > 0 ? 1 : (c < 0 ? -1 : 0);
+            } catch (NumberFormatException e) {
+                final var c = version1.compareTo(version2);
+                // compareTo returns numbers outside [-1,1]
+                return c > 0 ? 1 : (c < 0 ? -1 : 0);
+            }
+        }
+
+        if (v1Valid && !v2Valid) {
+            return -1;
+        }
+
+        if (!v1Valid) {
+            return 1;
+        }
+
         String[] string1Vals = version1.split("\\.");
         String[] string2Vals = version2.split("\\.");
 
         int length = Math.max(string1Vals.length, string2Vals.length);
 
         for (int i = 0; i < length; i++) {
-            Integer v1 = i < string1Vals.length ? Integer.parseInt(string1Vals[i]) : 0;
-            Integer v2 = i < string2Vals.length ? Integer.parseInt(string2Vals[i]) : 0;
+            if (i > string1Vals.length - 1) {
+                return -1;
+            }
+            if (i > string2Vals.length - 1) {
+                return 1;
+            }
+            Integer v1 = 0;
+            Integer v2 = 0;
+            if (i < length - 1) {
+                v1 = Integer.parseInt(string1Vals[i]);
+                v2 = Integer.parseInt(string2Vals[i]);
+            } else {
+                // handle "-whatever"
+                final var tail1 = parseTail(string1Vals[i]);
+                final var tail2 = parseTail(string2Vals[i]);
+                if (tail1.getRight().isEmpty() && tail2.getRight().isEmpty()
+                        || !tail1.getLeft().equals(tail2.getLeft())) {
+                    v1 = tail1.getLeft();
+                    v2 = tail2.getLeft();
+                    // if theres no "-whatever" then compare like normal
+                } else if (!tail1.getRight().isEmpty() && tail2.getRight().isEmpty()) {
+                    return 1;
+                } else if (tail1.getRight().isEmpty()) {
+                    return -1;
+                } else {
+                    final var c = tail1.getRight().compareTo(tail2.getRight());
+                    // compareTo returns numbers outside [-1,1]
+                    return c > 0 ? 1 : (c < 0 ? -1 : 0);
+                }
+            }
 
             // Making sure Version1 bigger than version2
             if (v1 > v2) {
@@ -54,6 +107,40 @@ public class Versions {
 
         // Both are equal
         return 0;
+    }
+
+    private static boolean isValidSemver(String check) {
+        if (check.length() > 1 && !check.contains(".")) {
+            return false;
+        }
+        String[] stringVals = check.split("\\.");
+        for (var i = 0; i < stringVals.length - 1; i++) {
+            try {
+                Integer.parseInt(stringVals[i]);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        try {
+            parseTail(stringVals[stringVals.length - 1]);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static Pair<Integer, String> parseTail(String tail) {
+        try {
+            return Pair.of(Integer.parseInt(tail), "");
+        } catch (NumberFormatException e) {
+            if (tail.contains("-")) {
+                final var splitDash = tail.split("-");
+                final var afterDash = String.join("-", Arrays.copyOfRange(splitDash, 1, splitDash.length));
+                return Pair.of(Integer.parseInt(splitDash[0]), afterDash);
+            } else {
+                throw e;
+            }
+        }
     }
 
     /***

@@ -155,13 +155,13 @@ public class CareGaps {
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
         private String subject;
-        private List<String> statuses = new ArrayList<>();
-        private List<IdType> measureIds = new ArrayList<>();
-        private List<String> measureIdentifiers = new ArrayList<>();
-        private List<CanonicalType> measureUrls = new ArrayList<>();
+        private List<String> status = new ArrayList<>();
+        private List<IdType> measureId = new ArrayList<>();
+        private List<String> measureIdentifier = new ArrayList<>();
+        private List<CanonicalType> measureUrl = new ArrayList<>();
         private Supplier<Parameters> operation;
 
-        private Boolean isDocumentMode;
+        private boolean notDocument;
 
         public CareGaps.When periodEnd(ZonedDateTime periodEnd) {
             this.periodEnd = periodEnd;
@@ -178,41 +178,34 @@ public class CareGaps {
             return this;
         }
 
-        public CareGaps.When statuses(String statuses) {
-            this.statuses.add(statuses);
+        public CareGaps.When status(String status) {
+            this.status.add(status);
             return this;
         }
 
-        public CareGaps.When measureIds(String measureIds) {
-            this.measureIds.add(new IdType("Measure", measureIds));
+        public CareGaps.When measureId(String measureId) {
+            this.measureId.add(new IdType("Measure", measureId));
             return this;
         }
 
-        public CareGaps.When measureUrls(String measureUrls) {
-            this.measureUrls.add(new CanonicalType(measureUrls));
+        public CareGaps.When measureUrl(String measureUrl) {
+            this.measureUrl.add(new CanonicalType(measureUrl));
             return this;
         }
 
-        public CareGaps.When measureIdentifiers(String measureIdentifiers) {
-            this.measureIdentifiers.add(measureIdentifiers);
+        public CareGaps.When measureIdentifier(String measureIdentifier) {
+            this.measureIdentifier.add(measureIdentifier);
             return this;
         }
 
-        public CareGaps.When isDocumentMode(Boolean isDocumentMode) {
-            this.isDocumentMode = isDocumentMode;
+        public CareGaps.When notDocument(boolean notDocument) {
+            this.notDocument = notDocument;
             return this;
         }
 
         public CareGaps.When getCareGapsReport() {
             this.operation = () -> service.getCareGapsReport(
-                    periodStart,
-                    periodEnd,
-                    subject,
-                    statuses,
-                    measureIds,
-                    measureIdentifiers,
-                    measureUrls,
-                    isDocumentMode);
+                    periodStart, periodEnd, subject, status, measureId, measureIdentifier, measureUrl, notDocument);
             return this;
         }
 

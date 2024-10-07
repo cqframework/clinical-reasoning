@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -27,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +43,6 @@ public class R4CareGapsProcessor {
     private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
-
-    private final Boolean isDocumentModeDefault = true;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -63,36 +63,38 @@ public class R4CareGapsProcessor {
                 measurePeriodValidator);
     }
 
-    public Parameters getCareGapsReport(
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String subject,
-            List<String> statuses,
-            List<IdType> measureIds,
-            List<String> measureIdentifiers,
-            List<CanonicalType> measureUrls,
-            Boolean isDocumentMode) {
+    public static class CareGapsParams {
+        @Nullable ZonedDateTime periodStart;
+        @Nullable ZonedDateTime periodEnd;
+        String subject;
+        List<String> statuses;
+        List<Either3<IdType, String, CanonicalType>> measures;
+        boolean isDocumentMode;
+    }
 
+    public Parameters getCareGapsReport(CareGapsParams careGapsParams)
+ {
         // validate and set required configuration resources for care-gaps
         checkConfigurationReferences();
 
         // Collect Measures to Evaluate
-        List<Measure> measures =
-                r4MeasureServiceUtils.getMeasures(measureIds, measureIdentifiers, canonicalToString(measureUrls));
+        List<Measure> measures = careGapsParams.measures
+            .stream()
+            .map(x -> x.fold(
+            id -> repository.read(Measure.class, id),
+            identifier -> r4MeasureServiceUtils.resolveByIdentifier(identifier),
+            canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
+            .collect(Collectors.toList());
+
         List<IdType> collectedMeasureIds =
                 measures.stream().map(Resource::getIdElement).collect(Collectors.toList());
 
         // validate required parameter values
-        checkValidStatusCode(statuses);
+        checkValidStatusCode(careGapsParams.statuses);
         measureCompatibilityCheck(measures);
 
-        // Set default for optional parameter value
-        if (isDocumentMode == null) {
-            isDocumentMode = isDocumentModeDefault;
-        }
-
         // Subject Population for Report
-        List<String> subjects = getSubjects(subject);
+        List<String> subjects = getSubjects(careGapsParams.subject);
 
         // Build Results
         Parameters result = initializeResult();
@@ -100,7 +102,7 @@ public class R4CareGapsProcessor {
         // Build Patient Bundles
 
         List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                periodStart, periodEnd, subjects, statuses, collectedMeasureIds, isDocumentMode);
+                careGapsParams.periodStart, careGapsParams.periodEnd, subjects, careGapsParams.statuses, collectedMeasureIds, careGapsParams.isDocumentMode);
 
         // Return Results with Bundles
         return result.setParameter(components);

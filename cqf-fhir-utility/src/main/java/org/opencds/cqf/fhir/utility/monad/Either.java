@@ -46,11 +46,11 @@ public class Either<L, R> {
      * @return a new Either instance with the left and right types swapped
      */
     public Either<R, L> swap() {
-        if (isLeft()) {
-            return Eithers.forRight(leftOrThrow());
+        if (isRight()) {
+            return Eithers.forLeft(right);
         }
 
-        return Eithers.forLeft(rightOrThrow());
+        return Eithers.forRight(left);
     }
 
     /**
@@ -145,7 +145,7 @@ public class Either<L, R> {
     public void forEach(Consumer<? super R> forRight) {
         checkNotNull(forRight);
         if (isRight()) {
-            forRight.accept(rightOrThrow());
+            forRight.accept(right);
         }
     }
 
@@ -158,7 +158,7 @@ public class Either<L, R> {
     public Either<L, R> peek(Consumer<? super R> forRight) {
         checkNotNull(forRight);
         if (isRight()) {
-            forRight.accept(rightOrThrow());
+            forRight.accept(right);
         }
 
         return this;
@@ -180,7 +180,7 @@ public class Either<L, R> {
             return (Either<L, T>) this;
         }
 
-        return Eithers.forRight(mapRight.apply(rightOrThrow()));
+        return Eithers.forRight(mapRight.apply(right));
     }
 
     /**
@@ -199,7 +199,7 @@ public class Either<L, R> {
             return (Either<L, T>) this;
         }
 
-        return (Either<L, T>) flatMapRight.apply(rightOrThrow());
+        return (Either<L, T>) flatMapRight.apply(right);
     }
 
     /**
@@ -219,9 +219,9 @@ public class Either<L, R> {
         checkNotNull(foldLeft);
         checkNotNull(foldRight);
         if (isRight()) {
-            return foldRight.apply(rightOrThrow());
+            return foldRight.apply(right);
         } else {
-            return foldLeft.apply(leftOrThrow());
+            return foldLeft.apply(left);
         }
     }
 
@@ -247,7 +247,7 @@ public class Either<L, R> {
      */
     public Stream<R> stream() {
         if (isRight()) {
-            return Stream.of(rightOrThrow());
+            return Stream.of(right);
         } else {
             return Stream.of();
         }
@@ -262,7 +262,7 @@ public class Either<L, R> {
      */
     public Optional<R> optional() {
         if (isRight()) {
-            return Optional.of(rightOrThrow());
+            return Optional.of(right);
         }
 
         return Optional.empty();

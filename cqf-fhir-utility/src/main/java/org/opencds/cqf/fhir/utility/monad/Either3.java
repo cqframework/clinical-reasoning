@@ -50,12 +50,12 @@ public class Either3<L, M, R> {
      * @return a new Either3 with the left and right types swapped
      */
     public Either3<R, M, L> swap() {
-        if (isLeft()) {
-            return Eithers.forRight3(leftOrThrow());
+        if (isRight()) {
+            return Eithers.forLeft3(right);
         } else if (isMiddle()) {
-            return Eithers.forMiddle3(middleOrThrow());
+            return Eithers.forMiddle3(middle);
         } else {
-            return Eithers.forLeft3(rightOrThrow());
+            return Eithers.forRight3(left);
         }
     }
 
@@ -66,12 +66,12 @@ public class Either3<L, M, R> {
      * @return new Either3 with the types rotated
      */
     public Either3<R, L, M> rotate() {
-        if (isLeft()) {
-            return Eithers.forMiddle3(leftOrThrow());
+        if (isRight()) {
+            return Eithers.forLeft3(right);
         } else if (isMiddle()) {
-            return Eithers.forRight3(middleOrThrow());
+            return Eithers.forRight3(middle);
         } else {
-            return Eithers.forLeft3(rightOrThrow());
+            return Eithers.forMiddle3(left);
         }
     }
 
@@ -191,7 +191,7 @@ public class Either3<L, M, R> {
     public void forEach(Consumer<? super R> forRight) {
         checkNotNull(forRight);
         if (isRight()) {
-            forRight.accept(rightOrThrow());
+            forRight.accept(right);
         }
     }
 
@@ -204,7 +204,7 @@ public class Either3<L, M, R> {
     public Either3<L, M, R> peek(Consumer<? super R> forRight) {
         checkNotNull(forRight);
         if (isRight()) {
-            forRight.accept(rightOrThrow());
+            forRight.accept(right);
         }
 
         return this;
@@ -222,7 +222,7 @@ public class Either3<L, M, R> {
     public <T> Either3<L, M, T> map(Function<? super R, ? extends T> mapRight) {
         checkNotNull(mapRight);
         if (isRight()) {
-            return Eithers.forRight3(mapRight.apply(rightOrThrow()));
+            return Eithers.forRight3(mapRight.apply(right));
         }
 
         return propagate();
@@ -242,7 +242,7 @@ public class Either3<L, M, R> {
     public <T> Either3<L, M, T> flatMap(Function<? super R, ? extends Either3<L, M, ? extends T>> flatMapRight) {
         checkNotNull(flatMapRight);
         if (isRight()) {
-            return narrow(flatMapRight.apply(rightOrThrow()));
+            return narrow(flatMapRight.apply(right));
         }
 
         return propagate();
@@ -271,12 +271,12 @@ public class Either3<L, M, R> {
         checkNotNull(foldMiddle);
         checkNotNull(foldRight);
         if (isRight()) {
-            return foldRight.apply(rightOrThrow());
+            return foldRight.apply(right);
         } else if (isMiddle()) {
-            return foldMiddle.apply(middleOrThrow());
+            return foldMiddle.apply(middle);
+        } else {
+            return foldLeft.apply(left);
         }
-
-        return foldLeft.apply(leftOrThrow());
     }
 
     /**
@@ -301,7 +301,7 @@ public class Either3<L, M, R> {
      */
     public Stream<R> stream() {
         if (isRight()) {
-            return Stream.of(rightOrThrow());
+            return Stream.of(right);
         } else {
             return Stream.of();
         }
@@ -316,7 +316,7 @@ public class Either3<L, M, R> {
      */
     public Optional<R> optional() {
         if (isRight()) {
-            return Optional.of(rightOrThrow());
+            return Optional.of(right);
         }
 
         return Optional.empty();

@@ -224,4 +224,63 @@ class Either3Test {
         assertFalse(middle.optional().isPresent());
         assertTrue(right.optional().isPresent());
     }
+
+    @Test
+    void rotate() {
+        var left = Eithers.forLeft3(1);
+        var leftResult = left.rotate();
+        assertTrue(leftResult.isMiddle());
+        assertEquals(1, leftResult.middleOrThrow());
+
+        var middle = Eithers.forMiddle3(1);
+        var middleResult = middle.rotate();
+        assertTrue(middleResult.isRight());
+        assertEquals(1, middleResult.rightOrThrow());
+
+        var right = Eithers.forRight3(1);
+        var rightResult = right.rotate();
+        assertTrue(rightResult.isLeft());
+        assertEquals(1, rightResult.leftOrThrow());
+    }
+
+    @Test
+    void orElse() {
+        var left = Eithers.forLeft3(1);
+        var middle = Eithers.forMiddle3(1);
+        var right = Eithers.forRight3(1);
+
+        assertEquals(2, left.orElse(2));
+        assertEquals(2, middle.orElse(2));
+        assertEquals(1, right.orElse(2));
+    }
+
+    @Test
+    void orElseGet() {
+        var left = Eithers.forLeft3(1);
+        var middle = Eithers.forMiddle3(1);
+        var right = Eithers.forRight3(1);
+
+        assertEquals(2, left.orElseGet(() -> 2));
+        assertEquals(2, middle.orElseGet(() -> 2));
+        assertEquals(1, right.orElseGet(() -> 2));
+    }
+
+    @Test
+    void peek() {
+        var left = Eithers.<Integer, Integer, Integer>forLeft3(1);
+        var middle = Eithers.<Integer, Integer, Integer>forMiddle3(1);
+        var right = Eithers.<Integer, Integer, Integer>forRight3(1);
+
+        var leftResult = new int[1];
+        var middleResult = new int[1];
+        var rightResult = new int[1];
+
+        left.peek(x -> leftResult[0] = x);
+        middle.peek(x -> middleResult[0] = x);
+        right.peek(x -> rightResult[0] = x);
+
+        assertEquals(0, leftResult[0]);
+        assertEquals(0, middleResult[0]);
+        assertEquals(1, rightResult[0]);
+    }
 }

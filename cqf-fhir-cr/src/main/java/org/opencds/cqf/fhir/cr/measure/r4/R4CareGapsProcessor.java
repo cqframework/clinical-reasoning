@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,26 +66,24 @@ public class R4CareGapsProcessor {
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String subject,
-            List<String> statuses,
-            List<IdType> measureIds,
-            List<String> measureIdentifiers,
-            List<CanonicalType> measureUrls) {
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument) {
+
+        // set Parameters
+        R4CareGapsParameters r4CareGapsParams =
+                setCareGapParameters(periodStart, periodEnd, subject, status, measure, notDocument);
 
         // validate and set required configuration resources for care-gaps
         checkConfigurationReferences();
 
-        // Collect Measures to Evaluate
-        List<Measure> measures =
-                r4MeasureServiceUtils.getMeasures(measureIds, measureIdentifiers, canonicalToString(measureUrls));
-        List<IdType> collectedMeasureIds =
-                measures.stream().map(Resource::getIdElement).collect(Collectors.toList());
-
         // validate required parameter values
-        checkValidStatusCode(statuses);
+        checkValidStatusCode(r4CareGapsParams.getStatus());
+        List<Measure> measures = resolveMeasure(r4CareGapsParams.getMeasure());
         measureCompatibilityCheck(measures);
 
         // Subject Population for Report
-        List<String> subjects = getSubjects(subject);
+        List<String> subjects = getSubjects(r4CareGapsParams.getSubject());
 
         // Build Results
         Parameters result = initializeResult();
@@ -92,10 +91,38 @@ public class R4CareGapsProcessor {
         // Build Patient Bundles
 
         List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                periodStart, periodEnd, subjects, statuses, collectedMeasureIds);
+                subjects,
+                r4CareGapsParams,
+                measures.stream().map(Resource::getIdElement).collect(Collectors.toList()));
 
         // Return Results with Bundles
         return result.setParameter(components);
+    }
+
+    private R4CareGapsParameters setCareGapParameters(
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument) {
+        R4CareGapsParameters r4CareGapsParams = new R4CareGapsParameters();
+        r4CareGapsParams.setMeasure(measure);
+        r4CareGapsParams.setPeriodStart(periodStart);
+        r4CareGapsParams.setPeriodEnd(periodEnd);
+        r4CareGapsParams.setStatus(status);
+        r4CareGapsParams.setSubject(subject);
+        r4CareGapsParams.setNotDocument(notDocument);
+        return r4CareGapsParams;
+    }
+
+    private List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
+        return measure.stream()
+                .map(x -> x.fold(
+                        id -> repository.read(Measure.class, id),
+                        r4MeasureServiceUtils::resolveByIdentifier,
+                        canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
+                .collect(Collectors.toList());
     }
 
     protected List<String> getSubjects(String subject) {

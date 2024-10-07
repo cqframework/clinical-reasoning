@@ -16,4 +16,19 @@ class TryTest {
         assertFalse(t.hasResult());
         assertEquals(exception, t.exception());
     }
+
+    @Test
+    void flatMap() {
+        var t = Tries.of(1);
+        var result = t.flatMap(i -> Tries.of(i + 1));
+        assertTrue(result.hasResult());
+        assertEquals(2, result.getOrThrow());
+
+        var e = new Exception();
+        t = Tries.<Integer>ofException(e);
+        result = t.flatMap(i -> Tries.of(i + 1));
+        assertFalse(result.hasResult());
+        assertTrue(result.hasException());
+        assertEquals(e, result.exception());
+    }
 }

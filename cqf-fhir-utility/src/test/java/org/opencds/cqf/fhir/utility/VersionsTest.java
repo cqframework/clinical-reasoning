@@ -40,6 +40,9 @@ class VersionsTest {
         result = Versions.compareVersions("1.1.1", "1.1.1-draft");
         assertEquals(-1, result);
 
+        result = Versions.compareVersions("1.1.1-draft", "1.1.1");
+        assertEquals(1, result);
+
         result = Versions.compareVersions("1.1.2", "1.1.1-draft");
         assertEquals(1, result);
 
@@ -62,6 +65,18 @@ class VersionsTest {
         assertEquals(-1, result);
 
         result = Versions.compareVersions("1.1bleh.1", "1.1.1");
+        assertEquals(1, result);
+
+        result = Versions.compareVersions("1.1.1", "1.1jah.1");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1ble.1", "1.1jah.1");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1", "1.1.1");
+        assertEquals(-1, result);
+
+        result = Versions.compareVersions("1.1.1", "1.1");
         assertEquals(1, result);
     }
 

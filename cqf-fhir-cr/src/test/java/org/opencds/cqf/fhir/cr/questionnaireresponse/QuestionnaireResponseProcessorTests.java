@@ -1,17 +1,19 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
 class QuestionnaireResponseProcessorTests {
-    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
@@ -25,7 +27,6 @@ class QuestionnaireResponseProcessorTests {
 
     @Test
     void test() {
-        testExtract(fhirContextDstu3, "dstu3", "QRSharonDecision");
         testExtract(fhirContextR4, "r4", "QRSharonDecision");
         testExtract(fhirContextR5, "r5", "QRSharonDecision");
     }
@@ -39,7 +40,6 @@ class QuestionnaireResponseProcessorTests {
 
     @Test
     void isSubjectExtension() {
-        testExtract(fhirContextDstu3, "dstu3", "sdc-profile-example-multi-subject");
         testExtract(fhirContextR4, "r4", "sdc-profile-example-multi-subject");
         testExtract(fhirContextR5, "r5", "sdc-profile-example-multi-subject");
     }
@@ -51,7 +51,7 @@ class QuestionnaireResponseProcessorTests {
                 .when()
                 .questionnaireResponseId(questionnaireResponseId)
                 .extract()
-                .hasEntry(2);
+                .hasEntry(4);
     }
 
     @Test
@@ -98,5 +98,35 @@ class QuestionnaireResponseProcessorTests {
         assertTrue(obs.hasCode());
         assertTrue(obs.hasSubject());
         assertTrue(obs.hasValueBooleanType());
+    }
+
+    @Test
+    void extractWithQuestionnaireUnitExt() {
+        var questionnaireResponseId = "NumericExtract";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2);
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(2);
+    }
+
+    @Test
+    void itemExtractionContextAtRoot() {
+        var questionnaireResponseId = "definition-OPA-Patient1";
+        var bundle = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .questionnaireResponseId(questionnaireResponseId)
+                .extract()
+                .hasEntry(1)
+                .getBundle();
+        var organization = (Organization) BundleHelper.getEntryResourceFirstRep(bundle);
+        assertNotNull(organization);
+        assertEquals(String.format("extract-%s", questionnaireResponseId), organization.getIdPart());
+        assertEquals("Acme Clinic", organization.getName());
     }
 }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -11,10 +12,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -26,7 +31,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -38,7 +45,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaire";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static Given given() {
         return new Given();
@@ -49,6 +56,7 @@ public class TestQuestionnaire {
         private EvaluationSettings evaluationSettings;
         private IGenerateProcessor generateProcessor;
         private IPackageProcessor packageProcessor;
+        private IDataRequirementsProcessor dataRequirementsProcessor;
         private IPopulateProcessor populateProcessor;
 
         public Given repository(Repository repository) {
@@ -77,6 +85,11 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public Given dataRequirementsProcessor(IDataRequirementsProcessor dataRequirementsProcessor) {
+            this.dataRequirementsProcessor = dataRequirementsProcessor;
+            return this;
+        }
+
         public Given populateProcessor(IPopulateProcessor populateProcessor) {
             this.populateProcessor = populateProcessor;
             return this;
@@ -95,7 +108,12 @@ public class TestQuestionnaire {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             return new QuestionnaireProcessor(
-                    repository, evaluationSettings, generateProcessor, packageProcessor, populateProcessor);
+                    repository,
+                    evaluationSettings,
+                    generateProcessor,
+                    packageProcessor,
+                    dataRequirementsProcessor,
+                    populateProcessor);
         }
 
         public When when() {
@@ -110,27 +128,33 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
-        private IBaseBundle bundle;
+        private List<IBaseBackboneElement> context;
+        private IBaseExtension<?, ?> launchContext;
+        private boolean useServerData;
+        private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
+        private IIdType profileId;
 
         When(Repository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
             this.processor = processor;
+            useServerData = true;
         }
 
         private FhirContext fhirContext() {
             return repository.fhirContext();
         }
 
-        private PopulateRequest buildRequest(String operationName) {
+        private PopulateRequest buildRequest() {
             return new PopulateRequest(
-                    operationName,
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     Ids.newId(fhirContext(), "Patient", subjectId),
+                    context,
+                    launchContext,
                     parameters,
-                    bundle,
-                    true,
+                    data,
+                    useServerData,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }
@@ -155,8 +179,23 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When additionalData(IBaseBundle bundle) {
-            this.bundle = bundle;
+        public When context(List<IBaseBackboneElement> context) {
+            this.context = context;
+            return this;
+        }
+
+        public When launchContext(IBaseExtension<?, ?> extension) {
+            launchContext = extension;
+            return this;
+        }
+
+        public When useServerData(boolean value) {
+            useServerData = value;
+            return this;
+        }
+
+        public When additionalData(IBaseBundle data) {
+            this.data = data;
             return this;
         }
 
@@ -170,33 +209,20 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaire thenPrepopulate(Boolean buildRequest) {
-            if (buildRequest) {
-                var populateRequest = buildRequest("prepopulate");
-                return new GeneratedQuestionnaire(repository, populateRequest, processor.prePopulate(populateRequest));
-            } else {
-                return new GeneratedQuestionnaire(
-                        repository,
-                        null,
-                        processor.prePopulate(
-                                Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
-                                subjectId,
-                                parameters,
-                                bundle,
-                                true,
-                                (IBaseResource) null,
-                                null,
-                                null));
-            }
+        public When profileId(IIdType id) {
+            profileId = id;
+            return this;
         }
 
         public IBaseResource runPopulate() {
             return processor.populate(
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
+                    context,
+                    launchContext,
                     parameters,
-                    bundle,
-                    true,
+                    data,
+                    useServerData,
                     (IBaseResource) null,
                     null,
                     null);
@@ -204,7 +230,7 @@ public class TestQuestionnaire {
 
         public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
             if (buildRequest) {
-                var populateRequest = buildRequest("populate");
+                var populateRequest = buildRequest();
                 return new GeneratedQuestionnaireResponse(
                         repository, populateRequest, processor.populate(populateRequest));
             } else {
@@ -220,13 +246,23 @@ public class TestQuestionnaire {
                             : processor.packageQuestionnaire(param, isPut),
                     fhirContext());
         }
+
+        public GeneratedQuestionnaire thenGenerate() {
+            return new GeneratedQuestionnaire(
+                    repository, null, processor.generateQuestionnaire(Eithers.for3(null, profileId, null)));
+        }
+
+        public DataRequirementsLibrary thenDataRequirements() {
+            var param = Eithers.for3(questionnaireUrl, questionnaireId, questionnaire);
+            return new DataRequirementsLibrary(processor.dataRequirements(param, parameters));
+        }
     }
 
     public static class GeneratedQuestionnaire {
+        public IBaseResource questionnaire;
         Repository repository;
         IParser jsonParser;
         PopulateRequest request;
-        IBaseResource questionnaire;
         List<IBaseBackboneElement> items;
         IIdType expectedQuestionnaireId;
 
@@ -301,12 +337,15 @@ public class TestQuestionnaire {
         IParser jsonParser;
         PopulateRequest request;
         IBaseResource questionnaireResponse;
-        List<IBaseBackboneElement> items;
+        Map<String, IBaseBackboneElement> items;
         IIdType expectedId;
 
         private void populateItems(List<IBaseBackboneElement> itemList) {
             for (var item : itemList) {
-                items.add(item);
+                @SuppressWarnings("unchecked")
+                var linkIdPath = (IPrimitiveType<String>) request.resolvePath(item, "linkId");
+                var linkId = linkIdPath == null ? null : linkIdPath.getValue();
+                items.put(linkId, item);
                 var childItems = request.getItems(item);
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
@@ -320,7 +359,7 @@ public class TestQuestionnaire {
             this.request = request;
             this.questionnaireResponse = questionnaireResponse;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            items = new ArrayList<>();
+            items = new HashMap<>();
             if (request != null) {
                 populateItems(request.getItems(questionnaireResponse));
                 expectedId = Ids.newId(
@@ -350,25 +389,29 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaireResponse itemHasAnswer(String theLinkId) {
-            var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
-                    .collect(Collectors.toList());
-            for (var item : matchingItems) {
-                assertFalse(request.resolvePathList(item, "answer").isEmpty());
-            }
-
+        public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
+            assertTrue(!request.resolvePathList(items.get(linkId), "answer").isEmpty());
             return this;
         }
 
-        public GeneratedQuestionnaireResponse itemHasAuthorExt(String theLinkId) {
-            var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
-                    .collect(Collectors.toList());
-            for (var item : matchingItems) {
-                assertNotNull(request.getExtensionByUrl(item, Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
-            }
+        public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {
+            var answer = request.resolvePathList(items.get(linkId), "answer", IBase.class);
+            var answers =
+                    answer.stream().map(a -> request.resolvePath(a, "value")).collect(Collectors.toList());
+            assertNotNull(answers);
+            assertTrue(
+                    answers.stream().anyMatch(a -> a.toString().equals(value.toString())),
+                    "expected answer to contain value: " + value);
+            return this;
+        }
 
+        public GeneratedQuestionnaireResponse itemHasAuthorExt(String linkId) {
+            assertNotNull(request.getExtensionByUrl(items.get(linkId), Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasNoAuthorExt(String linkId) {
+            assertNull(request.getExtensionByUrl(items.get(linkId), Constants.QUESTIONNAIRE_RESPONSE_AUTHOR));
             return this;
         }
 
@@ -377,6 +420,14 @@ public class TestQuestionnaire {
             assertTrue(request.hasContained(questionnaireResponse));
             assertTrue(request.getContained(questionnaireResponse).stream()
                     .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse hasNoErrors() {
+            assertFalse(request.hasExtension(questionnaireResponse, Constants.EXT_CRMI_MESSAGES));
+            assertTrue(request.getContained(questionnaireResponse).stream()
+                    .noneMatch(r -> r.fhirType().equals("OperationOutcome")));
 
             return this;
         }

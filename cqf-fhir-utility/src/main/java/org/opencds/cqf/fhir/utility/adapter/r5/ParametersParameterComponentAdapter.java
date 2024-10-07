@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -17,8 +16,8 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 class ParametersParameterComponentAdapter
         implements org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter {
 
+    private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final Parameters.ParametersParameterComponent parametersParametersComponent;
-    private final FhirContext fhirContext;
     private final ModelResolver modelResolver;
 
     protected Parameters.ParametersParameterComponent getParametersParameterComponent() {
@@ -36,7 +35,6 @@ class ParametersParameterComponentAdapter
         }
 
         this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
-        fhirContext = FhirContext.forCached(FhirVersionEnum.R5);
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }
@@ -59,6 +57,14 @@ class ParametersParameterComponentAdapter
     @Override
     public List<IBaseBackboneElement> getPart() {
         return this.getParametersParameterComponent().getPart().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IBaseDatatype> getPartValues(String name) {
+        return this.getParametersParameterComponent().getPart().stream()
+                .filter(p -> p.getName().equals(name))
+                .map(p -> p.getValue())
+                .collect(Collectors.toList());
     }
 
     @Override

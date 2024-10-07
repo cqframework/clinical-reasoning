@@ -5,42 +5,43 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExten
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
 
 public interface IOperationRequest {
     String getOperationName();
 
-    IIdType getSubjectId();
-
-    IBaseBundle getBundle();
-
-    IBaseParameters getParameters();
-
-    LibraryEngine getLibraryEngine();
-
     ModelResolver getModelResolver();
 
     FhirVersionEnum getFhirVersion();
+
+    Repository getRepository();
+
+    default FhirContext getFhirContext() {
+        return getRepository().fhirContext();
+    }
 
     String getDefaultLibraryUrl();
 
     IBaseOperationOutcome getOperationOutcome();
 
     void setOperationOutcome(IBaseOperationOutcome operationOutcome);
+
+    default AdapterFactory getAdapterFactory() {
+        return AdapterFactory.forFhirVersion(getFhirVersion());
+    }
 
     default void logException(String exceptionMessage) {
         if (getOperationOutcome() == null) {
@@ -82,7 +83,7 @@ public interface IOperationRequest {
         return getExtensionsByUrl(base, url).stream().findFirst().orElse(null);
     }
 
-    default Boolean hasExtension(IBase base, String url) {
+    default boolean hasExtension(IBase base, String url) {
         return getExtensions(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
@@ -90,7 +91,7 @@ public interface IOperationRequest {
         return resolvePathList(base, "contained", IBaseResource.class);
     }
 
-    default Boolean hasContained(IBaseResource base) {
+    default boolean hasContained(IBaseResource base) {
         return !getContained(base).isEmpty();
     }
 
@@ -107,12 +108,19 @@ public interface IOperationRequest {
 
     @SuppressWarnings("unchecked")
     default String resolvePathString(IBase base, String path) {
-        var result = (IPrimitiveType<String>) resolvePath(base, path);
-        return result == null ? null : result.getValue();
+        var pathResult = resolvePath(base, path);
+        if (pathResult instanceof IPrimitiveType) {
+            return ((IPrimitiveType<String>) pathResult).getValueAsString();
+        }
+        return null;
+    }
+
+    default Object resolveRawPath(Object base, String path) {
+        return this.getModelResolver().resolvePath(base, path);
     }
 
     default IBase resolvePath(IBase base, String path) {
-        return (IBase) this.getModelResolver().resolvePath(base, path);
+        return (IBase) resolveRawPath(base, path);
     }
 
     @SuppressWarnings("unchecked")

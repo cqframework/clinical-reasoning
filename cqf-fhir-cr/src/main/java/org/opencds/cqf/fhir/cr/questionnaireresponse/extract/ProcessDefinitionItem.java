@@ -8,20 +8,22 @@ import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
-import org.opencds.cqf.fhir.cr.common.ResolveExpressionException;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,49 +35,138 @@ public class ProcessDefinitionItem {
         this(new ExpressionProcessor());
     }
 
-    private ProcessDefinitionItem(ExpressionProcessor expressionProcessor) {
+    public ProcessDefinitionItem(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }
 
     public void processDefinitionItem(
-            ExtractRequest request, IBaseBackboneElement item, List<IBaseResource> resources, IBaseReference subject)
-            throws ResolveExpressionException {
-        processDefinitionItem(request, item, resources, subject, null);
-    }
-
-    public void processDefinitionItem(
-            ExtractRequest request,
-            IBaseBackboneElement item,
-            List<IBaseResource> resources,
-            IBaseReference subject,
-            IBaseExtension<?, ?> contextExtension)
-            throws ResolveExpressionException {
+            ExtractRequest request, ItemPair item, List<IBaseResource> resources, IBaseReference subject) {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
-        var contextExtensionUrl = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
-        var itemExtractionContext = request.hasExtension(item, contextExtensionUrl)
-                ? expressionProcessor.getCqfExpression(request, request.getExtensions(item), contextExtensionUrl)
-                : expressionProcessor.getCqfExpression(
-                        request, request.getExtensions(request.getQuestionnaireResponse()), contextExtensionUrl);
-        if (itemExtractionContext != null) {
-            var context = expressionProcessor.getExpressionResultForItem(
-                    request, itemExtractionContext, request.getItemLinkId(item));
-            if (context != null && !context.isEmpty()) {
-                // TODO: edit context instead of creating new resources
+        var linkId = request.getItemLinkId(item.getResponseItem());
+        var context = getContext(request, linkId, getContextExtension(request, item));
+        var resourceType = context.left;
+        var contextResource = context.right;
+        var definition = getDefinition(request, item.getResponseItem(), item.getItem());
+        if (resourceType == null && (contextResource == null || contextResource.isEmpty())) {
+            if (definition == null) {
+                throw new IllegalArgumentException(String.format("Unable to retrieve definition for item: %s", linkId));
+            }
+            resourceType = getDefinitionType(definition);
+        }
+        if (contextResource != null && contextResource.size() > 1) {
+            contextResource.forEach(r -> processResource(request, r, false, definition, item, resources, subject));
+        } else {
+            var isCreatedResource = true;
+            IBaseResource resource = null;
+            if (contextResource != null && !contextResource.isEmpty()) {
+                resource = contextResource.get(0);
+                isCreatedResource = false;
+            } else {
+                resource = (IBaseResource) newValue(request, resourceType);
+            }
+            processResource(request, resource, isCreatedResource, definition, item, resources, subject);
+        }
+    }
+
+    private IBaseExtension<?, ?> getContextExtension(ExtractRequest request, ItemPair item) {
+        // First, check the Questionnaire.item
+        // Second, check the QuestionnaireResponse.item
+        // Third, check the Questionnaire
+        IBase element;
+        if (request.hasExtension(item.getItem(), Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
+            element = item.getItem();
+        } else if (request.hasExtension(item.getResponseItem(), Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)) {
+            element = item.getResponseItem();
+        } else {
+            element = request.getQuestionnaire();
+        }
+        return request.getExtensionByUrl(element, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ImmutablePair<String, List<IBaseResource>> getContext(
+            ExtractRequest request, String linkId, IBaseExtension<?, ?> contextExtension) {
+        String resourceType = null;
+        List<IBaseResource> context = null;
+        if (contextExtension != null) {
+            var contextValue = contextExtension.getValue();
+            if (contextValue instanceof IPrimitiveType) {
+                // Extension value is a CodeType containing the Type of the Resource to be extracted.
+                resourceType = ((IPrimitiveType<String>) contextValue).getValueAsString();
+            } else if (contextValue instanceof ICompositeType) {
+                // Extension value is an Expression resulting in the Resource(s) to be modified by the extraction.
+                var contextExpression = CqfExpression.of(contextExtension, request.getDefaultLibraryUrl());
+                if (contextExpression != null) {
+                    try {
+                        context =
+                                expressionProcessor
+                                        .getExpressionResultForItem(request, contextExpression, linkId)
+                                        .stream()
+                                        .map(r -> (IBaseResource) r)
+                                        .collect(Collectors.toList());
+                    } catch (Exception e) {
+                        var message = String.format(
+                                "Error encountered processing item %s: Error resolving context expression %s: %s",
+                                linkId, contextExpression.getExpression(), e.getMessage());
+                        logger.error(message);
+                        throw new IllegalArgumentException(message);
+                    }
+                }
             }
         }
+        return new ImmutablePair<>(resourceType, context);
+    }
 
-        var definition = request.resolvePathString(item, "definition");
-        var resourceType = getDefinitionType(definition);
-        var resource = (IBaseResource) newValue(request, resourceType);
+    private void processResource(
+            ExtractRequest request,
+            IBaseResource resource,
+            boolean isCreatedResource,
+            String definition,
+            ItemPair item,
+            List<IBaseResource> resources,
+            IBaseReference subject) {
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
-        resource.setId(new IdType(resourceType, request.getExtractId() + "-" + request.getItemLinkId(item)));
-        resolveMeta(resource, definition);
+        if (isCreatedResource) {
+            var linkId = request.getItemLinkId(item.getResponseItem());
+            var id = request.getExtractId();
+            if (StringUtils.isNotBlank(linkId)) {
+                id = id.concat(String.format("-%s", linkId));
+            }
+            resource.setId(new IdType(resource.fhirType(), id));
+            resolveMeta(resource, definition);
+            resolveSubject(request, resource, subject, resourceDefinition);
+            resolveAuthored(request, linkId, resource, resourceDefinition);
+        }
+
+        processChildren(
+                request,
+                resourceDefinition,
+                resource,
+                request.getItems(
+                        item.getResponseItem() == null ? request.getQuestionnaireResponse() : item.getResponseItem()),
+                request.getItems(item.getItem() == null ? request.getQuestionnaire() : item.getItem()));
+
+        resources.add(resource);
+    }
+
+    private void resolveSubject(
+            ExtractRequest request,
+            IBaseResource resource,
+            IBaseReference subject,
+            BaseRuntimeElementDefinition<?> resourceDefinition) {
         var subjectPath = getSubjectPath(resourceDefinition);
         if (subjectPath != null) {
             request.getModelResolver().setValue(resource, subjectPath, subject);
         }
+    }
+
+    private void resolveAuthored(
+            ExtractRequest request,
+            String linkId,
+            IBaseResource resource,
+            BaseRuntimeElementDefinition<?> resourceDefinition) {
         var authorPath = getAuthorPath(resourceDefinition);
         if (authorPath != null) {
             var authorValue = request.resolvePath(request.getQuestionnaireResponse(), "author");
@@ -96,55 +187,73 @@ public class ProcessDefinitionItem {
                         request.getModelResolver().setValue(resource, dateDef.getElementName(), authoredValue);
                     } catch (Exception ex) {
                         var message = String.format(
-                                "Error encountered attempting to set property (%s) on resource type (%s): %s",
-                                dateDef.getElementName(), resource.fhirType(), ex.getMessage());
+                                "Error encountered processing item %s: Error setting property (%s) on resource type (%s): %s",
+                                linkId, dateDef.getElementName(), resource.fhirType(), ex.getMessage());
                         logger.error(message);
                         request.logException(message);
                     }
                 });
             }
         }
-        var items = request.getItems(item);
-        processChildren(request, resourceDefinition, resource, items);
-
-        resources.add(resource);
     }
 
     private void processChildren(
             ExtractRequest request,
             BaseRuntimeElementDefinition<?> resourceDefinition,
             IBaseResource resource,
-            List<IBaseBackboneElement> items) {
+            List<IBaseBackboneElement> items,
+            List<IBaseBackboneElement> questionnaireItems) {
         items.forEach(childItem -> {
-            var childDefinition = request.resolvePathString(childItem, "definition");
+            var questionnaireItem = questionnaireItems.stream()
+                    .filter(i -> request.getItemLinkId(i).equals(request.getItemLinkId(childItem)))
+                    .findFirst()
+                    .orElse(null);
+            var childDefinition = getDefinition(request, childItem, questionnaireItem);
             if (childDefinition != null) {
                 var path = childDefinition.split("#")[1];
                 // First element is always the resource type, so it can be ignored
                 path = path.replace(resource.fhirType() + ".", "");
                 var children = request.getItems(childItem);
                 if (!children.isEmpty()) {
-                    processChildren(request, resourceDefinition, resource, children);
+                    processChildren(request, resourceDefinition, resource, children, request.getItems(resource));
                 } else {
-                    var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
-                    var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-                    if (answerValue != null) {
-                        // Check if answer type matches path types available and transform if necessary
-                        var pathDefinition =
-                                (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
-                        if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
-                            var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
-                            if (!choices.contains(answerValue.getClass())) {
-                                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
-                            }
-                        } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
-                                && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
-                            answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
-                        }
-                        request.getModelResolver().setValue(resource, path, answerValue);
-                    }
+                    processChild(request, resourceDefinition, resource, childItem, path);
                 }
             }
         });
+    }
+
+    private void processChild(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IBaseResource resource,
+            IBaseBackboneElement childItem,
+            String path) {
+        var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
+        var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
+        if (answerValue != null) {
+            // Check if answer type matches path types available and transform if necessary
+            var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
+            if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
+                var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
+                if (!choices.contains(answerValue.getClass())) {
+                    answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                }
+            } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
+                    && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
+                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+            }
+            request.getModelResolver().setValue(resource, path, answerValue);
+        }
+    }
+
+    private String getDefinition(
+            ExtractRequest request, IBaseBackboneElement responseItem, IBaseBackboneElement questionnaireItem) {
+        var definition = request.resolvePathString(questionnaireItem, "definition");
+        if (definition == null) {
+            definition = request.resolvePathString(responseItem, "definition");
+        }
+        return definition;
     }
 
     private String getDefinitionType(String definition) {
@@ -156,15 +265,17 @@ public class ProcessDefinitionItem {
     }
 
     private String getSubjectPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("subject") != null
-                ? "subject"
-                : definition.getChildByName("patient") != null ? "patient" : null;
+        if (definition.getChildByName("subject") != null) {
+            return "subject";
+        }
+        return definition.getChildByName("patient") != null ? "patient" : null;
     }
 
     private String getAuthorPath(BaseRuntimeElementDefinition<?> definition) {
-        return definition.getChildByName("recorder") != null
-                ? "recorder"
-                : definition.getName().equals("Observation") ? "performer" : null;
+        if (definition.getChildByName("recorder") != null) {
+            return "recorder";
+        }
+        return definition.getName().equals("Observation") ? "performer" : null;
     }
 
     private List<BaseRuntimeChildDatatypeDefinition> getDateDefs(BaseRuntimeElementDefinition<?> definition) {
@@ -175,7 +286,7 @@ public class ProcessDefinitionItem {
         results.add(definition.getChildByName("recordDate"));
 
         return results.stream()
-                .filter(d -> d instanceof BaseRuntimeChildDatatypeDefinition)
+                .filter(BaseRuntimeChildDatatypeDefinition.class::isInstance)
                 .map(d -> (BaseRuntimeChildDatatypeDefinition) d)
                 .collect(Collectors.toList());
     }
@@ -195,14 +306,8 @@ public class ProcessDefinitionItem {
                             request.getFhirVersion().toString().toLowerCase(), type))
                     .getConstructor()
                     .newInstance();
-        } catch (ClassNotFoundException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InstantiationException
-                | NoSuchMethodException
-                | SecurityException
-                | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
         }
     }
 }

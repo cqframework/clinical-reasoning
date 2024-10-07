@@ -13,10 +13,11 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RequestResourceResolver {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/activitydefinition";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static class Given {
         private IRequestResolverFactory resolverFactory;
@@ -106,10 +107,11 @@ public class RequestResourceResolver {
                     null,
                     null,
                     null,
-                    null,
+                    true,
                     null,
                     new LibraryEngine(repository, EvaluationSettings.getDefault()),
-                    null));
+                    FhirModelResolverCache.resolverForVersion(
+                            repository.fhirContext().getVersion().getVersion())));
         }
     }
 }

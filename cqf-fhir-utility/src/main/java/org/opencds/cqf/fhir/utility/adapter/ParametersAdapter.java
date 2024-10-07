@@ -4,6 +4,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ParametersAdapter extends ResourceAdapter {
 
@@ -18,6 +19,8 @@ public interface ParametersAdapter extends ResourceAdapter {
     public void addParameter(IBase parameter);
 
     public void addParameter(String name, IBase value);
+
+    public void addParameter(String name, IBaseResource resource);
 
     public IBaseBackboneElement addParameter();
 }

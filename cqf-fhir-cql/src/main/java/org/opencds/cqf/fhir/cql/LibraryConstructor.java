@@ -5,7 +5,9 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
@@ -28,23 +30,36 @@ public class LibraryConstructor {
     public String constructCqlLibrary(
             String expression, List<Pair<String, String>> libraries, List<CqlParameterDefinition> parameters) {
         logger.debug("Constructing expression for local evaluation");
+        return constructCqlLibrary(
+                "expression",
+                "1.0.0",
+                Arrays.asList(String.format("%ndefine \"return\":%n       %s", expression)),
+                libraries,
+                parameters);
+    }
+
+    public String constructCqlLibrary(
+            String name,
+            String version,
+            List<String> expressions,
+            List<Pair<String, String>> libraries,
+            List<CqlParameterDefinition> parameters) {
 
         StringBuilder sb = new StringBuilder();
 
-        constructHeader(sb);
+        constructHeader(sb, name, version);
         constructUsings(sb);
         constructIncludes(sb, libraries);
         constructParameters(sb, parameters);
-        constructExpression(sb, expression);
+        constructContext(sb, null);
+        for (var expression : expressions) {
+            sb.append(String.format("%s%n%n", expression));
+        }
 
         String cql = sb.toString();
 
         logger.debug(cql);
         return cql;
-    }
-
-    private void constructExpression(StringBuilder sb, String expression) {
-        sb.append(String.format("%ndefine \"return\":%n       %s", expression));
     }
 
     private String getFhirVersionString(FhirVersionEnum fhirVersion) {
@@ -70,6 +85,7 @@ public class LibraryConstructor {
                 sb.append("\n");
             }
         }
+        sb.append("\n");
     }
 
     private void constructParameters(StringBuilder sb, List<CqlParameterDefinition> parameters) {
@@ -98,11 +114,16 @@ public class LibraryConstructor {
 
     private void constructUsings(StringBuilder sb) {
         sb.append(String.format(
-                "using FHIR version '%s'%n",
+                "using FHIR version '%s'%n%n",
                 getFhirVersionString(fhirContext.getVersion().getVersion())));
     }
 
-    private void constructHeader(StringBuilder sb) {
-        sb.append(String.format("library expression version '1.0.0'%n%n"));
+    private void constructHeader(StringBuilder sb, String name, String version) {
+        sb.append(String.format("library %s version '%s'%n%n", name, version));
+    }
+
+    private void constructContext(StringBuilder sb, String contextType) {
+        sb.append(String.format(
+                String.format("context %s%n%n", StringUtils.isBlank(contextType) ? "Patient" : contextType)));
     }
 }

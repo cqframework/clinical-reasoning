@@ -18,6 +18,8 @@ import org.hl7.fhir.r5.model.Enumerations.ObservationStatus;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.InstantType;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r5.model.Reference;
@@ -29,12 +31,14 @@ public class ObservationResolver {
     public IBaseResource resolve(
             ExtractRequest request,
             IBaseBackboneElement baseAnswer,
+            IBaseBackboneElement baseItem,
             String linkId,
             IBaseReference subject,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             IBaseExtension<?, ?> categoryExt) {
         var questionnaireResponse = (QuestionnaireResponse) request.getQuestionnaireResponse();
         var answer = (QuestionnaireResponseItemAnswerComponent) baseAnswer;
+        var item = (QuestionnaireItemComponent) baseItem;
         var obs = new Observation();
         obs.setId(request.getExtractId() + "." + linkId);
         obs.setBasedOn(questionnaireResponse.getBasedOn());
@@ -54,7 +58,6 @@ public class ObservationResolver {
                         .map(c -> (Coding) c)
                         .collect(Collectors.toList())));
         obs.setSubject((Reference) subject);
-        // obs.setFocus();
         obs.setEncounter(questionnaireResponse.getEncounter());
         var authoredDate = new DateTimeType((questionnaireResponse.hasAuthored()
                         ? questionnaireResponse.getAuthored().toInstant()
@@ -71,6 +74,14 @@ public class ObservationResolver {
             case "date":
                 obs.setValue(new DateTimeType(((DateType) answer.getValue()).getValue()));
                 break;
+            case "decimal":
+            case "integer":
+                if (item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
+                    obs.setValue(getQuantity(answer, item));
+                } else {
+                    obs.setValue(answer.getValue());
+                }
+                break;
             default:
                 obs.setValue(answer.getValue());
         }
@@ -84,5 +95,20 @@ public class ObservationResolver {
         linkIdExtension.setExtension(Collections.singletonList(innerLinkIdExtension));
         obs.addExtension(linkIdExtension);
         return obs;
+    }
+
+    protected Quantity getQuantity(QuestionnaireResponseItemAnswerComponent answer, QuestionnaireItemComponent item) {
+        var unit = (Coding) item.getExtensionByUrl(Constants.QUESTIONNAIRE_UNIT).getValue();
+        var quantity = new Quantity()
+                .setUnit(unit.getDisplay())
+                .setSystem(unit.getSystem())
+                .setCode(unit.getCode());
+        if (answer.hasValueDecimalType()) {
+            quantity.setValueElement(answer.getValueDecimalType());
+        }
+        if (answer.hasValueIntegerType()) {
+            quantity.setValue(answer.getValueIntegerType().getValue());
+        }
+        return quantity;
     }
 }

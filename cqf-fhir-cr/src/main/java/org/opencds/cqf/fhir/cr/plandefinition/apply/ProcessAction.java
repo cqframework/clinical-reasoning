@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
-import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,25 +47,14 @@ public class ProcessAction {
             IBaseResource requestOrchestration,
             Map<String, IBaseBackboneElement> metConditions,
             IBaseBackboneElement action) {
-        if (request.hasExtension(request.getPlanDefinition(), Constants.CPG_QUESTIONNAIRE_GENERATE)) {
+        // Create Questionnaire items for any input profiles that are present on the action
+        if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3) && request.getQuestionnaire() != null) {
             addQuestionnaireItemForInput(request, action);
         }
 
-        if (Boolean.TRUE.equals(meetsConditions(request, action, requestOrchestration))) {
-            // TODO: Figure out why this was here and what it was trying to do
-            // if (action.hasRelatedAction()) {
-            // for (var relatedActionComponent : action.getRelatedAction()) {
-            // if
-            // (relatedActionComponent.getRelationship().equals(ActionRelationshipType.AFTER)
-            // && metConditions.containsKey(relatedActionComponent.getActionId())) {
-            // metConditions.put(action.getId(), action);
-            // resolveDefinition(planDefinition, requestGroup, action);
-            // resolveDynamicValues(planDefinition, requestGroup, action);
-            // }
-            // }
-            // }
+        if (Boolean.TRUE.equals(meetsConditions(request, action))) {
             metConditions.put(request.resolvePathString(action, "id"), action);
-            var requestAction = generateRequestAction(request, action);
+            var requestAction = generateRequestAction(request.getFhirVersion(), action);
             extensionProcessor.processExtensions(request, requestAction, action, new ArrayList<>());
             var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
             for (var childAction : childActions) {
@@ -98,9 +86,10 @@ public class ProcessAction {
                 }
                 var profile = searchRepositoryByCanonical(repository, profiles.get(0));
                 var generateRequest = request.toGenerateRequest(profile);
-                request.addQuestionnaireItem(generateProcessor.generateItem(generateRequest));
+                var item = generateProcessor.generateItem(generateRequest);
+                request.addQuestionnaireItem(item.getLeft());
+                request.addLaunchContextExtensions(item.getRight());
                 // If input has text extension use it to override
-                // resolve extensions or not?
             }
         } catch (Exception e) {
             var message = String.format(
@@ -123,8 +112,7 @@ public class ProcessAction {
                 .collect(Collectors.toList()));
     }
 
-    protected Boolean meetsConditions(
-            ApplyRequest request, IBaseBackboneElement action, IBaseResource requestOrchestration) {
+    protected Boolean meetsConditions(ApplyRequest request, IBaseBackboneElement action) {
         var conditions = request.resolvePathList(action, "condition", IBaseBackboneElement.class);
         if (conditions.isEmpty()) {
             return true;
@@ -135,9 +123,9 @@ public class ProcessAction {
             if (conditionExpression != null) {
                 IBase result = null;
                 try {
-                    result = expressionProcessor
-                            .getExpressionResult(request, conditionExpression, inputParams)
-                            .get(0);
+                    var expressionResult =
+                            expressionProcessor.getExpressionResult(request, conditionExpression, inputParams);
+                    result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
                     var message = String.format(
                             "Condition expression %s encountered exception: %s",
@@ -145,19 +133,8 @@ public class ProcessAction {
                     logger.error(message);
                     request.logException(message);
                 }
-                if (result == null) {
-                    logger.warn("Condition expression {} returned null", conditionExpression.getExpression());
-                    return false;
-                }
-                if (!(result instanceof IBaseBooleanDatatype)) {
-                    logger.warn(
-                            "Condition expression {} returned a non-boolean value: {}",
-                            conditionExpression.getExpression(),
-                            result.getClass().getSimpleName());
-                    return false;
-                }
-                if (!((IBaseBooleanDatatype) result).getValue()) {
-                    logger.debug("The result of condition expression {} is false", conditionExpression.getExpression());
+                var valid = validateResult(result, conditionExpression.getExpression());
+                if (!valid) {
                     return false;
                 }
                 logger.debug("The result of condition expression {} is true", conditionExpression.getExpression());
@@ -166,21 +143,40 @@ public class ProcessAction {
         return true;
     }
 
-    protected IBaseBackboneElement generateRequestAction(ApplyRequest request, IBaseBackboneElement action) {
-        switch (request.getFhirVersion()) {
+    protected boolean validateResult(IBase result, String expression) {
+        if (result == null) {
+            logger.warn("Condition expression {} returned null", expression);
+            return false;
+        }
+        if (!(result instanceof IBaseBooleanDatatype)) {
+            logger.warn(
+                    "Condition expression {} returned a non-boolean value: {}",
+                    expression,
+                    result.getClass().getSimpleName());
+            return false;
+        }
+        if (Boolean.FALSE.equals(((IBaseBooleanDatatype) result).getValue())) {
+            logger.debug("The result of condition expression {} is false", expression);
+            return false;
+        }
+        return true;
+    }
+
+    protected IBaseBackboneElement generateRequestAction(FhirVersionEnum fhirVersion, IBaseBackboneElement action) {
+        switch (fhirVersion) {
             case DSTU3:
-                return generateRequestActionDstu3(request, action);
+                return generateRequestActionDstu3(action);
             case R4:
-                return generateRequestActionR4(request, action);
+                return generateRequestActionR4(action);
             case R5:
-                return generateRequestActionR5(request, action);
+                return generateRequestActionR5(action);
 
             default:
                 return null;
         }
     }
 
-    protected IBaseBackboneElement generateRequestActionDstu3(ApplyRequest request, IBaseBackboneElement a) {
+    protected IBaseBackboneElement generateRequestActionDstu3(IBaseBackboneElement a) {
         var action = (org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent) a;
         var requestAction = new org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent()
                 .setTitle(action.getTitle())
@@ -218,7 +214,7 @@ public class ProcessAction {
         return requestAction;
     }
 
-    protected IBaseBackboneElement generateRequestActionR4(ApplyRequest request, IBaseBackboneElement a) {
+    protected IBaseBackboneElement generateRequestActionR4(IBaseBackboneElement a) {
         var action = (org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent) a;
         var requestAction = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent()
                 .setTitle(action.getTitle())
@@ -259,7 +255,7 @@ public class ProcessAction {
         return requestAction;
     }
 
-    protected IBaseBackboneElement generateRequestActionR5(ApplyRequest request, IBaseBackboneElement a) {
+    protected IBaseBackboneElement generateRequestActionR5(IBaseBackboneElement a) {
         var action = (org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent) a;
         var requestAction = new org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent()
                 .setTitle(action.getTitle())

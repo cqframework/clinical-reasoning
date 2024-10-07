@@ -13,6 +13,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.ParameterDefinition;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Reference;
@@ -123,6 +124,11 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
             throw new UnprocessableEntityException("Invalid type: {}", type);
         }
         return this;
+    }
+
+    @Override
+    public List<ParameterDefinition> getParameter() {
+        return getLibrary().getParameter();
     }
 
     @Override

@@ -9,12 +9,14 @@ import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class LibraryProcessorTests {
+class LibraryProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
@@ -32,7 +34,14 @@ public class LibraryProcessorTests {
         var repository =
                 new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
-        var processor = new LibraryProcessor(repository, EvaluationSettings.getDefault(), packageProcessor);
+        var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
+        var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
+        var processor = new LibraryProcessor(
+                repository,
+                EvaluationSettings.getDefault(),
+                packageProcessor,
+                dataRequirementsProcessor,
+                evaluateProcessor);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));
@@ -72,5 +81,88 @@ public class LibraryProcessorTests {
                 .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(2);
+    }
+
+    @Test
+    void dataRequirementsDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(29);
+    }
+
+    @Test
+    void dataRequirementsR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void dataRequirementsR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void evaluateException() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("BadLibrary")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasOperationOutcome();
+    }
+
+    @Test
+    void evaluateDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(47);
+    }
+
+    @Test
+    void evaluateR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(50);
+    }
+
+    @Test
+    void evaluateR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .libraryId("OutpatientPriorAuthorizationPrepopulation")
+                .subjectId("OPA-Patient1")
+                .thenEvaluate()
+                .hasResults(48);
+    }
+
+    @Test
+    void testPrefetchData() {
+        var patientID = "patient-CdsHooksMultipleActions";
+        var data = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
+        var content = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryUrl("http://example.com/Library/CdsHooksMultipleActions")
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenEvaluate()
+                .hasResults(6);
     }
 }

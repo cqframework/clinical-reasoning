@@ -7,7 +7,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 /**
  * This interface exposes common functionality across all FHIR Questionnaire versions.
  */
-public interface QuestionnaireAdapter {
+public interface QuestionnaireAdapter extends KnowledgeArtifactAdapter {
     public static List<String> REFERENCE_EXTENSIONS = Arrays.asList(
             Constants.QUESTIONNAIRE_UNIT_VALUE_SET,
             Constants.QUESTIONNAIRE_REFERENCE_PROFILE,

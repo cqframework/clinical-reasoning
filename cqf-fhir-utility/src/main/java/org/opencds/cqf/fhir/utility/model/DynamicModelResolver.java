@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.utility.model;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -68,7 +71,6 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
 
         if (value instanceof org.hl7.fhir.dstu3.model.Coding) {
             var coding = (org.hl7.fhir.dstu3.model.Coding) value;
-            // var patient = new org.hl7.fhir.dstu3.model.Patient().setGender(null)
             switch (type.getSimpleName()) {
                 case CODE:
                 case PRIMITIVE:
@@ -188,45 +190,70 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     }
 
     public void setNestedValue(IBase target, String path, Object value, BaseRuntimeElementCompositeDefinition<?> def) {
-        // var def = (BaseRuntimeElementCompositeDefinition<?>) fhirContext
-        // .getElementDefinition(target.getClass());
         var identifiers = path.split("\\.");
         for (int i = 0; i < identifiers.length; i++) {
             var identifier = identifiers[i];
             var isList = identifier.contains("[");
+            var isSlice = identifier.contains(":");
+            var sliceName = isSlice ? identifier.split(":")[1] : null;
             var isLast = i == identifiers.length - 1;
             var index = isList ? Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1)) : 0;
-            var targetPath = isList ? identifier.replaceAll("\\[\\d\\]", "") : identifier;
+            var targetPath = getTargetPath(identifier, isList, isSlice);
             var targetDef = def.getChildByName(targetPath);
-
             var targetValues = targetDef.getAccessor().getValues(target);
-            IBase targetValue;
-            if (targetValues.size() >= index + 1 && !isLast) {
-                targetValue = targetValues.get(index);
-            } else {
-                var elementDef = targetDef.getChildByName(targetPath);
-                if (isLast) {
-                    var elementClass = elementDef.getImplementingClass();
-                    if (elementClass.getSimpleName().equals(ENUMERATION)) {
-                        targetValue = getEnumValue(
-                                (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
-                                ((IPrimitiveType<?>) this.as(value, IPrimitiveType.class, false)).getValueAsString());
-                    } else {
-                        targetValue = (IBase) this.as(value, elementClass, false);
-                    }
-                } else {
-                    targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());
-                }
-                if (targetValue != null) {
-                    targetDef.getMutator().addValue(target, targetValue);
-                }
-            }
+            var targetValue = (targetValues.size() >= index + 1 && !isLast)
+                    ? getTargetValueFromList(sliceName, index, targetValues)
+                    : getTargetValue(target, value, isLast, targetPath, targetDef);
             target = targetValue == null ? target : targetValue;
             if (!isLast) {
                 var nextDef = fhirContext.getElementDefinition(target.getClass());
                 def = (BaseRuntimeElementCompositeDefinition<?>) nextDef;
             }
         }
+    }
+
+    private String getTargetPath(String identifier, boolean isList, boolean isSlice) {
+        if (isList) {
+            return identifier.replaceAll("\\[\\d\\]", "");
+        }
+        if (isSlice) {
+            return identifier.substring(0, identifier.indexOf(":"));
+        }
+        return identifier;
+    }
+
+    private IBase getTargetValue(
+            IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
+        IBase targetValue;
+        var elementDef = targetDef.getChildByName(targetPath);
+        if (isLast) {
+            var elementClass = elementDef.getImplementingClass();
+            if (elementClass.getSimpleName().equals(ENUMERATION)) {
+                targetValue = getEnumValue(
+                        (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
+                        ((IPrimitiveType<?>) this.as(value, IPrimitiveType.class, false)).getValueAsString());
+            } else {
+                targetValue = (IBase) this.as(value, elementClass, false);
+            }
+        } else {
+            targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());
+        }
+        if (targetValue != null) {
+            targetDef.getMutator().addValue(target, targetValue);
+        }
+        return targetValue;
+    }
+
+    private IBase getTargetValueFromList(String sliceName, int index, List<IBase> targetValues) {
+        IBase targetValue;
+        if (targetValues.size() > 1 && StringUtils.isNotBlank(sliceName)) {
+            // TODO: handle slice names
+            // targetValue = targetValues.stream()
+            targetValue = targetValues.get(0);
+        } else {
+            targetValue = targetValues.get(index);
+        }
+        return targetValue;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

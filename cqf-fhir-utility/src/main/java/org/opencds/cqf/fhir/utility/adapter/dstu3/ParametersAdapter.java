@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -46,6 +47,15 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
             getParameters().addParameter(addParameter().setName(name).setValue((Type) value));
         } else {
             throw new IllegalArgumentException("element passed as value argument is not a valid type");
+        }
+    }
+
+    @Override
+    public void addParameter(String name, IBaseResource resource) {
+        if (resource instanceof Resource) {
+            getParameters().addParameter().setName(name).setResource((Resource) resource);
+        } else {
+            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
         }
     }
 

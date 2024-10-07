@@ -32,6 +32,7 @@ public class Constants {
             "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author";
     public static final String QUESTIONNAIRE_REFERENCE_PROFILE =
             "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceProfile";
+    public static final String QUESTIONNAIRE_UNIT = "http://hl7.org/fhir/StructureDefinition/questionnaire-unit";
     public static final String QUESTIONNAIRE_UNIT_VALUE_SET =
             "http://hl7.org/fhir/StructureDefinition/questionnaire-unitValueSet";
 
@@ -41,6 +42,8 @@ public class Constants {
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-assertionExpression";
     public static final String CPG_FEATURE_EXPRESSION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression";
+    public static final String CPG_FEATURE_EXPRESSION_ELEMENT =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpressionElement";
     public static final String CPG_INFERENCE_EXPRESSION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-inferenceExpression";
     public static final String CPG_KNOWLEDGE_CAPABILITY =
@@ -119,6 +122,15 @@ public class Constants {
     public static final String SDC_CATEGORY_SURVEY = "survey";
     public static final String SDC_QUESTIONNAIRE_LAUNCH_CONTEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
+
+    public enum SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE {
+        PATIENT,
+        ENCOUNTER,
+        LOCATION,
+        USER,
+        STUDY
+    }
+
     public static final String SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire";
     public static final String SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION =

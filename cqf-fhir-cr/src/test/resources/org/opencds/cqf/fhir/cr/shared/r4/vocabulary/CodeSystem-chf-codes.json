@@ -1,0 +1,111 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "chf-codes",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p class=\"res-header-id\"><b>Generated Narrative: CodeSystem chf-codes</b></p><a name=\"chf-codes\"> </a><a name=\"hcchf-codes\"> </a><a name=\"chf-codes-en-US\"> </a><p>This case-sensitive code system <code>http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes</code> defines the following codes:</p><table class=\"codes\"><tr><td style=\"white-space:nowrap\"><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr><tr><td style=\"white-space:nowrap\">body-weight-change<a name=\"chf-codes-body-weight-change\"> </a></td><td>Body weight change</td><td>The change in body weight between two body weight measurements, in kg. Typically captured daily.</td></tr><tr><td style=\"white-space:nowrap\">net-intake-output<a name=\"chf-codes-net-intake-output\"> </a></td><td>Net intake/output</td><td>The net intake and output, in Liters per day. Typically captured daily.</td></tr><tr><td style=\"white-space:nowrap\">measure-jvp<a name=\"chf-codes-measure-jvp\"> </a></td><td>Measure jugular venous pressure</td><td>Measure jugular venous pressure in cmH2O</td></tr><tr><td style=\"white-space:nowrap\">jvp<a name=\"chf-codes-jvp\"> </a></td><td>Jugular venous pressure</td><td>Jugular venous pressure in cmH2O. May be loinc#8595-1?</td></tr><tr><td style=\"white-space:nowrap\">egfr<a name=\"chf-codes-egfr\"> </a></td><td>eGFR result</td><td>eGFR result in mol/mm/m2. Too many codes to choose from, needs clinical/terminological SME input</td></tr><tr><td style=\"white-space:nowrap\">measure-egfr<a name=\"chf-codes-measure-egfr\"> </a></td><td>Measure eGFR</td><td>Measure eGFR, could not identify SNOMED code for this</td></tr><tr><td style=\"white-space:nowrap\">lasix-iv<a name=\"chf-codes-lasix-iv\"> </a></td><td>LASIX IV</td><td>LASIX IV</td></tr><tr><td style=\"white-space:nowrap\">lasix-po<a name=\"chf-codes-lasix-po\"> </a></td><td>LASIX PO</td><td>LASIX PO</td></tr><tr><td style=\"white-space:nowrap\">cardiology-consultation<a name=\"chf-codes-cardiology-consultation\"> </a></td><td>Cardiology Consultation</td><td>Cardiology consultation</td></tr></table></div>"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "shareable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "computable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "publishable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeRepresentationLevel",
+      "valueCode": "structured"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    }
+  ],
+  "url": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+  "version": "2.0.0-draft",
+  "name": "CHFCodes",
+  "title": "CHF Codes",
+  "status": "active",
+  "experimental": true,
+  "date": "2024-08-25T03:33:21+00:00",
+  "publisher": "HL7 International / Clinical Decision Support",
+  "contact": [
+    {
+      "name": "HL7 International / Clinical Decision Support",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/dss"
+        }
+      ]
+    }
+  ],
+  "description": "Codes used in the congestive heart failure pathway. Ideally these shouldn't exist, but where I couldn't find an appropriate code in a standard terminology, I defined codes here.",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "001",
+          "display": "World"
+        }
+      ]
+    }
+  ],
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 9,
+  "concept": [
+    {
+      "code": "body-weight-change",
+      "display": "Body weight change",
+      "definition": "The change in body weight between two body weight measurements, in kg. Typically captured daily."
+    },
+    {
+      "code": "net-intake-output",
+      "display": "Net intake/output",
+      "definition": "The net intake and output, in Liters per day. Typically captured daily."
+    },
+    {
+      "code": "measure-jvp",
+      "display": "Measure jugular venous pressure",
+      "definition": "Measure jugular venous pressure in cmH2O"
+    },
+    {
+      "code": "jvp",
+      "display": "Jugular venous pressure",
+      "definition": "Jugular venous pressure in cmH2O. May be loinc#8595-1?"
+    },
+    {
+      "code": "egfr",
+      "display": "eGFR result",
+      "definition": "eGFR result in mol/mm/m2. Too many codes to choose from, needs clinical/terminological SME input"
+    },
+    {
+      "code": "measure-egfr",
+      "display": "Measure eGFR",
+      "definition": "Measure eGFR, could not identify SNOMED code for this"
+    },
+    {
+      "code": "lasix-iv",
+      "display": "LASIX IV",
+      "definition": "LASIX IV"
+    },
+    {
+      "code": "lasix-po",
+      "display": "LASIX PO",
+      "definition": "LASIX PO"
+    },
+    {
+      "code": "cardiology-consultation",
+      "display": "Cardiology Consultation",
+      "definition": "Cardiology consultation"
+    }
+  ]
+}

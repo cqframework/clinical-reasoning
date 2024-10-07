@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.cr.inputparameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -15,20 +18,19 @@ public abstract class BaseInputParameterResolver implements IInputParameterResol
     protected final IIdType practitionerId;
     protected Repository repository;
 
-    public BaseInputParameterResolver(
+    protected BaseInputParameterResolver(
             Repository repository,
             IIdType subjectId,
             IIdType encounterId,
             IIdType practitionerId,
-            IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
+            boolean useServerData,
+            IBaseBundle data) {
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
         Repository bundleRepository = null;
-        if (bundle != null) {
-            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), bundle);
+        if (data != null) {
+            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), data);
         }
         this.repository = resolveRepository(useServerData, repository, bundleRepository);
     }
@@ -50,11 +52,14 @@ public abstract class BaseInputParameterResolver implements IInputParameterResol
 
     protected <R extends IBaseResource> R readRepository(Class<R> resourceType, IIdType id) {
         try {
-            return repository.read(resourceType, id, null);
+            return repository.read(resourceType, id);
         } catch (Exception e) {
             return null;
         }
     }
 
-    protected abstract IBaseParameters resolveParameters(IBaseParameters parameters);
+    protected abstract IBaseParameters resolveParameters(
+            IBaseParameters parameters,
+            List<? extends IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext);
 }

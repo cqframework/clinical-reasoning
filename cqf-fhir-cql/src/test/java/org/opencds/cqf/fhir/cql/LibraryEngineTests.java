@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
@@ -16,9 +17,12 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,12 +84,34 @@ class LibraryEngineTests {
     }
 
     @Test
+    void fhirPathWithContextAndResource() {
+        var patientId = "Patient/Patient1";
+        var patient = new Patient().addName(new HumanName().addGiven("Alice")).setId(patientId);
+        var encounter = new Encounter()
+                .setSubject(new Reference(patient.getIdElement()))
+                .setStatus(EncounterStatus.FINISHED);
+        var params = parameters();
+        params.addParameter(part("%subject", patient));
+        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
+        var expression = new CqfExpression(
+                "text/fhirpath",
+                "'Encounter: ' + %context.status + ' ' + %resource.code.coding[0].system + ' ' + %resource.code.coding[0].code",
+                null);
+
+        var task = new Task().setCode(new CodeableConcept(new Coding("test-system", "test-code", null)));
+
+        var result = libraryEngine.resolveExpression(patientId, expression, params, null, encounter, task);
+        assertNotNull(result);
+        assertEquals("Encounter: finished test-system test-code", ((StringType) result.get(0)).getValueAsString());
+    }
+
+    @Test
     void expressionWithLibraryReference() {
         var patientId = "Patient/Patient1";
         var expression =
                 new CqfExpression("text/cql", "TestLibrary.testExpression", "http://fhir.test/Library/TestLibrary");
         var result = libraryEngine.resolveExpression(patientId, expression, null, null, null, null);
-        assertEquals(((StringType) result.get(0)).getValue(), "I am a test");
+        assertEquals("I am a test", ((StringType) result.get(0)).getValue());
     }
 
     String libraryCql = "library MyLibrary version '1.0.0'\n"

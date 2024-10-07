@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
@@ -23,8 +24,20 @@ public class RequestHelpers {
     public static final String PROFILE_ID = "profileId";
     public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
+    public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+        return newPDApplyRequestForVersion(fhirVersion, libraryEngine, null, null);
+    }
+
     public static ApplyRequest newPDApplyRequestForVersion(
-            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IInputParameterResolver inputParameterResolver) {
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, ModelResolver modelResolver) {
+        return newPDApplyRequestForVersion(fhirVersion, libraryEngine, modelResolver, null);
+    }
+
+    public static ApplyRequest newPDApplyRequestForVersion(
+            FhirVersionEnum fhirVersion,
+            LibraryEngine libraryEngine,
+            ModelResolver modelResolver,
+            IInputParameterResolver inputParameterResolver) {
         var fhirContext = FhirContext.forCached(fhirVersion);
         IBaseResource planDefinition = null;
         try {
@@ -33,19 +46,22 @@ public class RequestHelpers {
                     .newInstance()
                     .setId(PLANDEFINITION_ID);
         } catch (Exception e) {
-            // TODO: handle exception
+            // Do nothing
         }
-        return newPDApplyRequestForVersion(fhirVersion, planDefinition, libraryEngine, inputParameterResolver);
+        return newPDApplyRequestForVersion(
+                fhirVersion, planDefinition, libraryEngine, modelResolver, inputParameterResolver);
     }
 
     public static ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion,
             IBaseResource planDefinition,
             LibraryEngine libraryEngine,
+            ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
-        ModelResolver modelResolver = null;
         try {
-            modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+            if (modelResolver == null) {
+                modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+            }
             var planDefinitionUrl = modelResolver.resolvePath(planDefinition, "url");
             if (planDefinitionUrl == null) {
                 var url = PLANDEFINITION_URL + planDefinition.getIdElement().getIdPart();
@@ -68,7 +84,7 @@ public class RequestHelpers {
                 modelResolver.setValue(planDefinition, "url", urlType);
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            // Do nothing
         }
         IBaseDatatype userLanguage;
         switch (fhirVersion) {
@@ -103,6 +119,7 @@ public class RequestHelpers {
                 null,
                 true,
                 null,
+                null,
                 libraryEngine,
                 modelResolver,
                 inputParameterResolver);
@@ -118,7 +135,7 @@ public class RequestHelpers {
                     .newInstance()
                     .setId(PROFILE_ID);
         } catch (Exception e) {
-            // TODO: handle exception
+            // Do nothing
         }
         return newGenerateRequestForVersion(fhirVersion, libraryEngine, profile);
     }
@@ -131,6 +148,7 @@ public class RequestHelpers {
                 true,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
+                true,
                 null,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
@@ -138,16 +156,25 @@ public class RequestHelpers {
 
     public static PopulateRequest newPopulateRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource questionnaire) {
-        return newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire, "populate");
+        return new PopulateRequest(
+                questionnaire,
+                Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
+                null,
+                null,
+                null,
+                null,
+                true,
+                libraryEngine,
+                FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 
-    public static PopulateRequest newPopulateRequestForVersion(
+    public static ExtractRequest newExtractRequestForVersion(
             FhirVersionEnum fhirVersion,
             LibraryEngine libraryEngine,
-            IBaseResource questionnaire,
-            String operationName) {
-        return new PopulateRequest(
-                operationName,
+            IBaseResource questionnaireResponse,
+            IBaseResource questionnaire) {
+        return new ExtractRequest(
+                questionnaireResponse,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,

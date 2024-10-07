@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 
 class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ParametersAdapter {
@@ -56,6 +57,15 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
             getParameters().addParameter(name, (Type) value);
         } else {
             throw new IllegalArgumentException("element passed as value argument is not a valid type");
+        }
+    }
+
+    @Override
+    public void addParameter(String name, IBaseResource resource) {
+        if (resource instanceof Resource) {
+            getParameters().addParameter().setName(name).setResource((Resource) resource);
+        } else {
+            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
         }
     }
 

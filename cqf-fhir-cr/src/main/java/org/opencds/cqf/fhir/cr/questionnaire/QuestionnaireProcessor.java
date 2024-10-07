@@ -7,8 +7,11 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -17,6 +20,8 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -41,6 +46,7 @@ public class QuestionnaireProcessor {
     protected Repository repository;
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
 
     public QuestionnaireProcessor(Repository repository) {
@@ -48,7 +54,7 @@ public class QuestionnaireProcessor {
     }
 
     public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null);
+        this(repository, evaluationSettings, null, null, null, null);
     }
 
     public QuestionnaireProcessor(
@@ -56,6 +62,7 @@ public class QuestionnaireProcessor {
             EvaluationSettings evaluationSettings,
             IGenerateProcessor generateProcessor,
             IPackageProcessor packageProcessor,
+            IDataRequirementsProcessor dataRequirementsProcessor,
             IPopulateProcessor populateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
@@ -63,23 +70,24 @@ public class QuestionnaireProcessor {
         this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.generateProcessor = generateProcessor != null ? generateProcessor : new GenerateProcessor(this.repository);
-        this.packageProcessor = packageProcessor != null ? packageProcessor : new PackageProcessor(this.repository);
-        this.populateProcessor = populateProcessor != null ? populateProcessor : new PopulateProcessor();
+        this.generateProcessor = generateProcessor;
+        this.packageProcessor = packageProcessor;
+        this.dataRequirementsProcessor = dataRequirementsProcessor;
+        this.populateProcessor = populateProcessor;
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
             Either3<C, IIdType, R> questionnaire) {
-        return (R) questionnaireResolver.resolve(questionnaire);
+        return questionnaireResolver.resolve(questionnaire);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveStructureDefinition(
             Either3<C, IIdType, R> structureDef) {
-        return (R) structureDefResolver.resolve(structureDef);
+        return structureDefResolver.resolve(structureDef);
     }
 
     public IBaseResource generateQuestionnaire(String id) {
-        return generateProcessor.generate(id);
+        return generateQuestionnaire(null, id);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
@@ -88,19 +96,19 @@ public class QuestionnaireProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile, Boolean supportedOnly, Boolean requiredOnly) {
+            Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly) {
         return generateQuestionnaire(
-                profile, supportedOnly, requiredOnly, null, null, null, null, (IBaseResource) null, null, null, null);
+                profile, supportedOnly, requiredOnly, null, null, null, true, (IBaseResource) null, null, null, null);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             String subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint,
@@ -111,7 +119,7 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 subjectId,
                 parameters,
-                bundle,
+                data,
                 useServerData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
@@ -121,12 +129,12 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             String subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository,
@@ -138,18 +146,20 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 subjectId,
                 parameters,
-                bundle,
+                data,
+                useServerData,
                 new LibraryEngine(repository, evaluationSettings),
                 id);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             String subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
+            IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine,
             String id) {
         var request = new GenerateRequest(
@@ -158,14 +168,16 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 parameters,
-                bundle,
+                useServerData,
+                data,
                 libraryEngine == null ? new LibraryEngine(repository, evaluationSettings) : libraryEngine,
                 modelResolver);
         return generateQuestionnaire(request, id);
     }
 
     public IBaseResource generateQuestionnaire(GenerateRequest request, String id) {
-        return generateProcessor.generate(request, id);
+        var processor = generateProcessor != null ? generateProcessor : new GenerateProcessor(this.repository);
+        return request == null ? processor.generate(id) : processor.generate(request, id);
     }
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
@@ -189,111 +201,64 @@ public class QuestionnaireProcessor {
     }
 
     public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, IBaseParameters parameters) {
-        return packageProcessor.packageResource(questionnaire, parameters);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        return processor.packageResource(questionnaire, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> questionnaire, IBaseParameters parameters) {
+        return dataRequirements(resolveQuestionnaire(questionnaire), parameters);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource questionnaire, IBaseParameters parameters) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository);
+        return processor.getDataRequirements(questionnaire, parameters);
     }
 
     public PopulateRequest buildPopulateRequest(
-            String operationName,
             IBaseResource questionnaire,
             String subjectId,
+            List<? extends IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subjectId)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
         }
         return new PopulateRequest(
-                operationName,
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
+                context,
+                launchContext,
                 parameters,
-                bundle,
+                data,
                 useServerData,
                 libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
                 modelResolver);
     }
 
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            IBaseResource dataEndpoint,
-            IBaseResource contentEndpoint,
-            IBaseResource terminologyEndpoint) {
-        return prePopulate(
-                questionnaire,
-                patientId,
-                parameters,
-                bundle,
-                useServerData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
-        return prePopulate(
-                questionnaire,
-                patientId,
-                parameters,
-                bundle,
-                useServerData,
-                new LibraryEngine(repository, evaluationSettings));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> R prePopulate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            LibraryEngine libraryEngine) {
-        return prePopulate(
-                resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
-    }
-
-    public <R extends IBaseResource> R prePopulate(
-            IBaseResource questionnaire,
             String subjectId,
+            List<? extends IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
-            LibraryEngine libraryEngine) {
-        return prePopulate(buildPopulateRequest(
-                "prepopulate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <R extends IBaseResource> R prePopulate(PopulateRequest request) {
-        return (R) populateProcessor.prePopulate(request);
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
-            Either3<C, IIdType, R> questionnaire,
-            String patientId,
-            IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
         return populate(
                 questionnaire,
-                patientId,
+                subjectId,
+                context,
+                launchContext,
                 parameters,
-                bundle,
+                data,
                 useServerData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
@@ -302,46 +267,62 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
+            String subjectId,
+            List<? extends IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return populate(
                 questionnaire,
-                patientId,
+                subjectId,
+                context,
+                launchContext,
                 parameters,
-                bundle,
+                data,
                 useServerData,
                 new LibraryEngine(repository, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
             Either3<C, IIdType, R> questionnaire,
-            String patientId,
+            String subjectId,
+            List<? extends IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(
-                resolveQuestionnaire(questionnaire), patientId, parameters, bundle, useServerData, libraryEngine);
+                resolveQuestionnaire(questionnaire),
+                subjectId,
+                context,
+                launchContext,
+                parameters,
+                data,
+                useServerData,
+                libraryEngine);
     }
 
     public IBaseResource populate(
             IBaseResource questionnaire,
             String subjectId,
+            List<? extends IBaseBackboneElement> context,
+            IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
-            IBaseBundle bundle,
-            Boolean useServerData,
+            IBaseBundle data,
+            boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(buildPopulateRequest(
-                "populate", questionnaire, subjectId, parameters, bundle, useServerData, libraryEngine));
+                questionnaire, subjectId, context, launchContext, parameters, data, useServerData, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {
-        return populateProcessor.populate(request);
+        var processor = populateProcessor != null ? populateProcessor : new PopulateProcessor();
+        return processor.populate(request);
     }
 }

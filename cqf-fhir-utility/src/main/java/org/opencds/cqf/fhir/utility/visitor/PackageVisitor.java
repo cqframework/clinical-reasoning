@@ -46,6 +46,7 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
     protected final FhirContext fhirContext;
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
+    protected List<String> packagedResources;
 
     public PackageVisitor(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
@@ -113,6 +114,7 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
             throw new UnprocessableEntityException("'count' must be non-negative");
         }
         var resource = adapter.get();
+        packagedResources = new ArrayList<>();
         // TODO: In the case of a released (active) root Library we can depend on the relatedArtifacts as a
         // comprehensive manifest
         var packagedBundle = BundleHelper.newBundle(fhirVersion);
@@ -195,7 +197,8 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
             List<String> forceArtifactVersion,
             boolean isPut)
             throws PreconditionFailedException {
-        if (resource != null) {
+        if (resource != null && !packagedResources.contains(resource.getId())) {
+            packagedResources.add(resource.getId());
             var fhirVersion = resource.getStructureFhirVersionEnum();
             var adapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
             findUnsupportedCapability(adapter, capability);

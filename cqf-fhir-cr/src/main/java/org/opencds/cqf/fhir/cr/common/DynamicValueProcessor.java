@@ -130,7 +130,7 @@ public class DynamicValueProcessor {
                         request.getSubjectId().getIdPart(),
                         cqfExpression,
                         request.getParameters(),
-                        request.getBundle(),
+                        request.getData(),
                         context,
                         resource);
     }

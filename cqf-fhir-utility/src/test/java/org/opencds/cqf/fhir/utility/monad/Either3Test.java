@@ -43,29 +43,29 @@ class Either3Test {
         assertTrue(one.isLeft());
         assertFalse(one.isMiddle());
         assertFalse(one.isRight());
-        assertEquals(1, one.left());
+        assertEquals(1, one.leftOrThrow());
         // Either is right-biased, meaning the "get" is for the right element
-        assertThrows(IllegalStateException.class, one::right);
-        assertThrows(IllegalStateException.class, one::middle);
-        assertThrows(IllegalStateException.class, one::get);
+        assertThrows(IllegalStateException.class, one::rightOrThrow);
+        assertThrows(IllegalStateException.class, one::middleOrThrow);
+        assertThrows(IllegalStateException.class, one::getOrThrow);
 
         var two = Eithers.forRight3(1);
         assertFalse(two.isLeft());
         assertFalse(two.isMiddle());
         assertTrue(two.isRight());
-        assertEquals(1, two.right());
-        assertEquals(1, two.get());
-        assertThrows(IllegalStateException.class, two::left);
-        assertThrows(IllegalStateException.class, two::middle);
+        assertEquals(1, two.rightOrThrow());
+        assertEquals(1, two.getOrThrow());
+        assertThrows(IllegalStateException.class, two::leftOrThrow);
+        assertThrows(IllegalStateException.class, two::middleOrThrow);
 
         var three = Eithers.forMiddle3(1);
         assertFalse(three.isLeft());
         assertTrue(three.isMiddle());
         assertFalse(three.isRight());
-        assertEquals(1, three.middle());
-        assertThrows(IllegalStateException.class, three::left);
-        assertThrows(IllegalStateException.class, three::right);
-        assertThrows(IllegalStateException.class, three::get);
+        assertEquals(1, three.middleOrThrow());
+        assertThrows(IllegalStateException.class, three::leftOrThrow);
+        assertThrows(IllegalStateException.class, three::rightOrThrow);
+        assertThrows(IllegalStateException.class, three::getOrThrow);
     }
 
     @Test
@@ -136,7 +136,7 @@ class Either3Test {
         var map = e.map(doubleInt);
 
         assertEquals(bound, map);
-        assertEquals(6, map.get());
+        assertEquals(6, map.getOrThrow());
 
         // But we also need to make sure we preserve left identity;
         Either3<String, Double, Integer> failed = Eithers.forLeft3("Failed either");

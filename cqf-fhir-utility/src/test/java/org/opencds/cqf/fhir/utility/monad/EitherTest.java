@@ -34,17 +34,17 @@ class EitherTest {
         var one = Eithers.forLeft(1);
         assertTrue(one.isLeft());
         assertFalse(one.isRight());
-        assertEquals(1, one.left());
+        assertEquals(1, one.leftOrThrow());
         // Either is right-biased, meaning the "get" is for the right element
-        assertThrows(IllegalStateException.class, one::right);
-        assertThrows(IllegalStateException.class, one::get);
+        assertThrows(IllegalStateException.class, one::rightOrThrow);
+        assertThrows(IllegalStateException.class, one::getOrThrow);
 
         var two = Eithers.forRight(1);
         assertTrue(two.isRight());
         assertFalse(two.isLeft());
-        assertEquals(1, two.right());
-        assertEquals(1, two.get());
-        assertThrows(IllegalStateException.class, two::left);
+        assertEquals(1, two.rightOrThrow());
+        assertEquals(1, two.getOrThrow());
+        assertThrows(IllegalStateException.class, two::leftOrThrow);
     }
 
     @Test
@@ -102,7 +102,7 @@ class EitherTest {
         var map = e.map(doubleInt);
 
         assertEquals(bound, map);
-        assertEquals(6, map.get());
+        assertEquals(6, map.getOrThrow());
 
         // But we also need to make sure we preserve left identity;
         Either<String, Integer> failed = Eithers.forLeft("Failed either");

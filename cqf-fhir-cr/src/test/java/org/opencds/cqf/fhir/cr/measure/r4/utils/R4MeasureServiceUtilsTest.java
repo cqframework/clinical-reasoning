@@ -52,7 +52,7 @@ class R4MeasureServiceUtilsTest {
         final R4MeasureServiceUtils subject = new R4MeasureServiceUtils(repository);
 
         if (theExpectedReporterOrError.isRight()) {
-            final Exception expectedException = theExpectedReporterOrError.right();
+            final Exception expectedException = theExpectedReporterOrError.rightOrThrow();
             assertThrows(
                     expectedException.getClass(),
                     () -> subject.getReporter(theReporter),
@@ -60,7 +60,7 @@ class R4MeasureServiceUtilsTest {
         } else if (theExpectedReporterOrError.isLeft()) {
             final Optional<Reference> optReporter = subject.getReporter(theReporter);
             assertEquals(
-                    theExpectedReporterOrError.left().map(Reference::getReference),
+                    theExpectedReporterOrError.leftOrThrow().map(Reference::getReference),
                     optReporter.map(Reference::getReference));
         } else {
             fail("Expecting an Either with only a left or a right but it has neither.");

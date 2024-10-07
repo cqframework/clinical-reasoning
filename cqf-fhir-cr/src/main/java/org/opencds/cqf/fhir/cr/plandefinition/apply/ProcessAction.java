@@ -123,9 +123,9 @@ public class ProcessAction {
             if (conditionExpression != null) {
                 IBase result = null;
                 try {
-                    result = expressionProcessor
-                            .getExpressionResult(request, conditionExpression, inputParams)
-                            .get(0);
+                    var expressionResult =
+                            expressionProcessor.getExpressionResult(request, conditionExpression, inputParams);
+                    result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
                     var message = String.format(
                             "Condition expression %s encountered exception: %s",

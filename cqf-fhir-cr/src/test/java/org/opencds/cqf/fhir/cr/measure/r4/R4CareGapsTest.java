@@ -671,7 +671,7 @@ class R4CareGapsTest {
 
     @Test
     void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode() {
-            GIVEN_REPO
+        GIVEN_REPO
                 .when()
                 .subject("Patient/male-2022")
                 .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
@@ -691,40 +691,40 @@ class R4CareGapsTest {
                 .hasContainedMeasureReport()
                 .hasIdentifiedPeriod()
                 .hasImplicatedMeasureReference();
-        }
+    }
 
     @Test
     void MinimalProportionBooleanBasisMultiGroupGroupImpNotation() {
         // 2 Detected issues,1 per groupId, one 'closed-gap' the other 'open-gap'
         // make sure each group matches the correct status and has extension reference
         GIVEN_REPO
-            .when()
-            .subject("Patient/female-1988")
-            .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .measureId("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
-            .status("closed-gap")
-            .getCareGapsReport()
-            .then()
-            .hasBundleCount(1)
-            .firstParameter()
-            .detectedIssueCount(1)
-            .detectedIssue()
-            .hasGroupIdReportExtension("group-2");
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+                .status("closed-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasGroupIdReportExtension("group-2");
 
         GIVEN_REPO
-            .when()
-            .subject("Patient/female-1988")
-            .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
-            .measureId("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
-            .status("open-gap")
-            .getCareGapsReport()
-            .then()
-            .hasBundleCount(1)
-            .firstParameter()
-            .detectedIssueCount(1)
-            .detectedIssue()
-            .hasGroupIdReportExtension("group-1");
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+                .status("open-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasGroupIdReportExtension("group-1");
     }
 }

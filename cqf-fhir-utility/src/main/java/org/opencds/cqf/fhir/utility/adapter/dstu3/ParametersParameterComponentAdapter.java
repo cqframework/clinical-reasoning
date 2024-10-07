@@ -56,6 +56,14 @@ class ParametersParameterComponentAdapter
     }
 
     @Override
+    public List<IBaseDatatype> getPartValues(String name) {
+        return this.parametersParametersComponent.getPart().stream()
+                .filter(p -> p.getName().equals(name))
+                .map(p -> p.getValue())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
         this.parametersParametersComponent.setPart(parametersParameterComponents.stream()
                 .map(x -> (ParametersParameterComponent) x)

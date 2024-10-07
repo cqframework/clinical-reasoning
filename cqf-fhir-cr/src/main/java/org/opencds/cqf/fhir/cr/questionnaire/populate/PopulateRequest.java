@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -23,7 +23,7 @@ import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
-    private final List<IBase> context;
+    private final List<? extends IBaseBackboneElement> context;
     private final List<IBaseExtension<?, ?>> launchContext;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
@@ -39,7 +39,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
     public PopulateRequest(
             IBaseResource questionnaire,
             IIdType subjectId,
-            List<IBase> context,
+            List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,

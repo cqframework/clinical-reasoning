@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,27 +93,27 @@ class InputParametersTest {
                 true,
                 null,
                 Arrays.asList(
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
                                 newPart(fhirContextR4, "Reference", "content", patient.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "encounter"),
                                 newPart(fhirContextR4, "Reference", "content", encounter.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "location"),
                                 newPart(fhirContextR4, "Reference", "content", location.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "user"),
                                 newPart(fhirContextR4, "Reference", "content", practitioner.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "study"),
@@ -194,7 +195,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -230,7 +231,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -266,7 +267,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -304,7 +305,7 @@ class InputParametersTest {
                         null,
                         true,
                         null,
-                        Arrays.asList(newPart(
+                        Arrays.asList((IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "user"),
@@ -360,7 +361,7 @@ class InputParametersTest {
                         null,
                         true,
                         null,
-                        Arrays.asList(newPart(
+                        Arrays.asList((IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "user"),
@@ -403,27 +404,27 @@ class InputParametersTest {
                 true,
                 null,
                 Arrays.asList(
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "patient"),
                                 newPart(fhirContextR5, "Reference", "content", patient.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "encounter"),
                                 newPart(fhirContextR5, "Reference", "content", encounter.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "location"),
                                 newPart(fhirContextR5, "Reference", "content", location.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),
                                 newPart(fhirContextR5, "Reference", "content", practitioner.getId())),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "study"),
@@ -505,7 +506,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
@@ -541,7 +542,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
@@ -577,7 +578,7 @@ class InputParametersTest {
                 null,
                 true,
                 null,
-                Arrays.asList(newPart(
+                Arrays.asList((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
@@ -615,7 +616,7 @@ class InputParametersTest {
                         null,
                         true,
                         null,
-                        Arrays.asList(newPart(
+                        Arrays.asList((IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),
@@ -671,7 +672,7 @@ class InputParametersTest {
                         null,
                         true,
                         null,
-                        Arrays.asList(newPart(
+                        Arrays.asList((IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),

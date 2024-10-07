@@ -128,7 +128,7 @@ public class TestQuestionnaire {
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
         private String subjectId;
-        private List<IBase> context;
+        private List<IBaseBackboneElement> context;
         private IBaseExtension<?, ?> launchContext;
         private boolean useServerData;
         private IBaseBundle data;
@@ -179,7 +179,7 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When context(List<IBase> context) {
+        public When context(List<IBaseBackboneElement> context) {
             this.context = context;
             return this;
         }

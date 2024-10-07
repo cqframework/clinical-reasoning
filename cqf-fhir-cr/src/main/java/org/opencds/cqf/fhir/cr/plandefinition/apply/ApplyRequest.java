@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_DATA;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ENCOUNTER;
@@ -17,7 +18,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -77,6 +78,7 @@ public class ApplyRequest implements ICpgRequest {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
@@ -84,6 +86,7 @@ public class ApplyRequest implements ICpgRequest {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.planDefinition = planDefinition;
+        fhirVersion = planDefinition.getStructureFhirVersionEnum();
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -95,10 +98,15 @@ public class ApplyRequest implements ICpgRequest {
         this.settingContext = settingContext;
         this.parameters = parameters;
         this.useServerData = useServerData;
+        if (prefetchData != null && !prefetchData.isEmpty()) {
+            if (data == null) {
+                data = newBundle(fhirVersion);
+            }
+            resolvePrefetchData(data, prefetchData);
+        }
         this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        fhirVersion = planDefinition.getStructureFhirVersionEnum();
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
                 : createResolver(
@@ -130,6 +138,7 @@ public class ApplyRequest implements ICpgRequest {
                         parameters,
                         useServerData,
                         data,
+                        null,
                         libraryEngine,
                         modelResolver,
                         inputParameterResolver)
@@ -164,7 +173,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public PopulateRequest toPopulateRequest() {
-        List<IBase> context = new ArrayList<>();
+        List<IBaseBackboneElement> context = new ArrayList<>();
         var launchContextExts =
                 getQuestionnaireAdapter().getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
         launchContextExts.forEach(lc -> {
@@ -188,7 +197,7 @@ public class ApplyRequest implements ICpgRequest {
                 default:
                     break;
             }
-            context.add(newPart(
+            context.add((IBaseBackboneElement) newPart(
                     getFhirContext(),
                     "context",
                     newStringPart(getFhirContext(), "name", code),

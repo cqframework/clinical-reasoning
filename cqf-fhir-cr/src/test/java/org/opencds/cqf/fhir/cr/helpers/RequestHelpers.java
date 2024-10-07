@@ -46,7 +46,6 @@ public class RequestHelpers {
                     .newInstance()
                     .setId(PLANDEFINITION_ID);
         } catch (Exception e) {
-            // TODO: handle exception
         }
         return newPDApplyRequestForVersion(
                 fhirVersion, planDefinition, libraryEngine, modelResolver, inputParameterResolver);
@@ -84,7 +83,6 @@ public class RequestHelpers {
                 modelResolver.setValue(planDefinition, "url", urlType);
             }
         } catch (Exception e) {
-            // TODO: handle exception
         }
         IBaseDatatype userLanguage;
         switch (fhirVersion) {
@@ -119,6 +117,7 @@ public class RequestHelpers {
                 null,
                 true,
                 null,
+                null,
                 libraryEngine,
                 modelResolver,
                 inputParameterResolver);
@@ -134,7 +133,6 @@ public class RequestHelpers {
                     .newInstance()
                     .setId(PROFILE_ID);
         } catch (Exception e) {
-            // TODO: handle exception
         }
         return newGenerateRequestForVersion(fhirVersion, libraryEngine, profile);
     }

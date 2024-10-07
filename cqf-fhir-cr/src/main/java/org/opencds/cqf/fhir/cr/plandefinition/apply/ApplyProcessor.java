@@ -49,7 +49,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final GenerateProcessor generateProcessor;
     protected final PopulateProcessor populateProcessor;
     protected final QuestionnaireResponseProcessor extractProcessor;
-    protected final ProcessRequest processRequest;
+    protected final ResponseBuilder processRequest;
     protected final ProcessGoal processGoal;
     protected final ProcessAction processAction;
     protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
@@ -65,7 +65,7 @@ public class ApplyProcessor implements IApplyProcessor {
         generateProcessor = new GenerateProcessor(this.repository);
         populateProcessor = new PopulateProcessor();
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
-        processRequest = new ProcessRequest(populateProcessor);
+        processRequest = new ResponseBuilder(populateProcessor);
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);
     }

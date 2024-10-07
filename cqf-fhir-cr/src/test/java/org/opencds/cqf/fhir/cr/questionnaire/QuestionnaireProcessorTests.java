@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
@@ -116,12 +117,12 @@ class QuestionnaireProcessorTests {
                         fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
                 .subjectId("OPA-Patient1")
                 .context(Arrays.asList(
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "user"),
                                 newPart(fhirContextR4, "Reference", "content", "Practitioner/OPA-AttendingPhysician1")),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
@@ -142,12 +143,12 @@ class QuestionnaireProcessorTests {
                         fhirContextR5, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
                 .subjectId("OPA-Patient1")
                 .context(Arrays.asList(
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),
                                 newPart(fhirContextR5, "Reference", "content", "Practitioner/OPA-AttendingPhysician1")),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "patient"),
@@ -269,12 +270,12 @@ class QuestionnaireProcessorTests {
                 .questionnaire(questionnaire)
                 .subjectId("chf-scenario1-patient")
                 .context(Arrays.asList(
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
                                 newPart(fhirContextR4, "Reference", "content", "Patient/chf-scenario1-patient")),
-                        newPart(
+                        (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "encounter"),

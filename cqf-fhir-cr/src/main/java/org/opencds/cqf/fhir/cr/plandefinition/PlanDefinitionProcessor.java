@@ -7,7 +7,9 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -143,7 +145,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subject)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
@@ -162,6 +164,7 @@ public class PlanDefinitionProcessor {
                 parameters,
                 useServerData,
                 data,
+                prefetchData,
                 libraryEngine,
                 modelResolver,
                 null);
@@ -210,7 +213,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
@@ -248,7 +251,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
@@ -285,7 +288,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
         if (fhirVersion == FhirVersionEnum.R5) {
             return applyR5(
@@ -305,8 +308,6 @@ public class PlanDefinitionProcessor {
                     prefetchData,
                     libraryEngine);
         }
-        // TODO: add prefetch bundles to data bundle?
-        // this.prefetchData = prefetchData;
         return apply(buildApplyRequest(
                 planDefinition,
                 subject,
@@ -344,7 +345,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
@@ -382,7 +383,7 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
@@ -419,10 +420,8 @@ public class PlanDefinitionProcessor {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            IBaseParameters prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
-        // TODO: add prefetch bundles to data bundle?
-        // this.prefetchData = prefetchData;
         return applyR5(buildApplyRequest(
                 planDefinition,
                 subject,

@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.library.evaluate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -22,7 +24,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
     private final IBaseParameters parameters;
     private final boolean useServerData;
     private final IBaseBundle data;
-    private final List<? extends IBaseParameters> prefetchData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -35,21 +36,27 @@ public class EvaluateRequest implements ICqlOperationRequest {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<? extends IBaseParameters> prefetchData,
+            List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(library, "expected non-null value for library");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.library = library;
+        fhirVersion = library.getStructureFhirVersionEnum();
         this.subjectId = subjectId;
         this.expression = expression == null ? null : new HashSet<>(expression);
         this.parameters = parameters;
         this.useServerData = useServerData;
+        if (prefetchData != null && !prefetchData.isEmpty()) {
+            if (data == null) {
+                data = newBundle(fhirVersion);
+            }
+            resolvePrefetchData(data, prefetchData);
+        }
         this.data = data;
-        this.prefetchData = prefetchData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        fhirVersion = library.getStructureFhirVersionEnum();
     }
 
     public IBaseResource getLibrary() {

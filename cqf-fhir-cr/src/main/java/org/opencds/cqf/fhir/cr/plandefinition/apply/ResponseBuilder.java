@@ -8,10 +8,10 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
-public class ProcessRequest {
+public class ResponseBuilder {
     protected final IPopulateProcessor populateProcessor;
 
-    public ProcessRequest(IPopulateProcessor populateProcessor) {
+    public ResponseBuilder(IPopulateProcessor populateProcessor) {
         this.populateProcessor = populateProcessor;
     }
 

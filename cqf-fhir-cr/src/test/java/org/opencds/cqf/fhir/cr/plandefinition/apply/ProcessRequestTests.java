@@ -31,7 +31,7 @@ class ProcessRequestTests {
     @Mock
     IPopulateProcessor populateProcessor;
 
-    ProcessRequest fixture = new ProcessRequest(populateProcessor);
+    ResponseBuilder fixture = new ResponseBuilder(populateProcessor);
 
     @BeforeEach
     void setup() {

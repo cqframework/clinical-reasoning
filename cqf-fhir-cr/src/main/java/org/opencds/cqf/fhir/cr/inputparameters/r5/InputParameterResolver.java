@@ -7,7 +7,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -53,15 +53,17 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<IBase> context,
+            List<? extends IBaseBackboneElement> context,
             List<IBaseExtension<?, ?>> launchContext) {
-        super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, data);
+        super(repository, subjectId, encounterId, practitionerId, useServerData, data);
         this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
     @Override
     protected final Parameters resolveParameters(
-            IBaseParameters baseParameters, List<IBase> context, List<IBaseExtension<?, ?>> launchContext) {
+            IBaseParameters baseParameters,
+            List<? extends IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
@@ -112,7 +114,9 @@ public class InputParameterResolver extends BaseInputParameterResolver {
     }
 
     protected void resolveLaunchContext(
-            Parameters params, List<IBase> contexts, List<IBaseExtension<?, ?>> launchContexts) {
+            Parameters params,
+            List<? extends IBaseBackboneElement> contexts,
+            List<IBaseExtension<?, ?>> launchContexts) {
         launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
             var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
             var type = launchContext
@@ -143,7 +147,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         });
     }
 
-    private List<ParametersParameterComponent> getContent(List<IBase> contexts, String name) {
+    private List<ParametersParameterComponent> getContent(List<? extends IBaseBackboneElement> contexts, String name) {
         return contexts == null
                 ? null
                 : contexts.stream()

@@ -48,7 +48,7 @@ public class ProcessAction {
             Map<String, IBaseBackboneElement> metConditions,
             IBaseBackboneElement action) {
         // Create Questionnaire items for any input profiles that are present on the action
-        if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
+        if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3) && request.getQuestionnaire() != null) {
             addQuestionnaireItemForInput(request, action);
         }
 

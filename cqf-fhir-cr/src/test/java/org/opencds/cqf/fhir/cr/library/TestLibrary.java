@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -114,6 +115,7 @@ public class TestLibrary {
         private Repository contentRepository;
         private Repository terminologyRepository;
         private IBaseBundle additionalData;
+        private List<IBaseBackboneElement> prefetchData;
         private IIdType additionalDataId;
         private IBaseParameters parameters;
         private Boolean isPackagePut;
@@ -180,6 +182,11 @@ public class TestLibrary {
             return this;
         }
 
+        public When prefetchData(List<IBaseBackboneElement> prefetchData) {
+            this.prefetchData = prefetchData;
+            return this;
+        }
+
         public When parameters(IBaseParameters params) {
             parameters = params;
             return this;
@@ -223,7 +230,7 @@ public class TestLibrary {
                             parameters,
                             useServerData,
                             additionalData,
-                            null,
+                            prefetchData,
                             dataRepository,
                             contentRepository,
                             terminologyRepository));

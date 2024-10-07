@@ -78,6 +78,8 @@ public class Either3<L, M, R> {
     /**
      * Returns the left value. Throws an exception if the left value is not present.
      *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
+     *
      * @throws IllegalStateException if the left value is not present
      * @return the left value
      */
@@ -88,6 +90,8 @@ public class Either3<L, M, R> {
 
     /**
      * Returns the middle value. Throws an exception if the middle value is not present.
+     *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
      *
      * @throws IllegalStateException if the middle value is not present
      * @return the middle value
@@ -100,6 +104,9 @@ public class Either3<L, M, R> {
     /**
      * Returns the right value. Throws an exception if the right value is not present.
      *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
+     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
+     *
      * @throws IllegalStateException if the right value is not present
      * @return the right value
      */
@@ -110,6 +117,9 @@ public class Either3<L, M, R> {
 
     /**
      * Alias for {@link #rightOrThrow()}.
+     *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
+     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
      *
      * @throws IllegalStateException if the right value is not present
      * @return the right value

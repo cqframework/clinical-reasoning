@@ -74,6 +74,8 @@ public class Either<L, R> {
     /**
      * Returns the left value if it is present, otherwise throws an IllegalStateException.
      *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
+     *
      * @throws IllegalStateException if the left value is not present
      * @return the left value
      */
@@ -83,7 +85,10 @@ public class Either<L, R> {
     }
 
     /**
-     * Returns the left value if it is present, otherwise throws an IllegalStateException.
+     * Returns the right value if it is present, otherwise throws an IllegalStateException.
+     *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
+     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
      *
      * @throws IllegalStateException if the right value is not present
      * @return the right value
@@ -95,6 +100,9 @@ public class Either<L, R> {
 
     /**
      * Alias for {@link #rightOrThrow()}.
+     *
+     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
+     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
      *
      * @throws IllegalStateException if the right value is not present
      * @return the right value

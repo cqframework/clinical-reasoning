@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +139,7 @@ public class PlanDefinition {
         private Repository terminologyRepository;
         private IBaseBundle additionalData;
         private IIdType additionalDataId;
+        private List<? extends IBaseBackboneElement> prefetchData;
         private IBaseParameters parameters;
         private boolean isPackagePut;
 
@@ -212,6 +215,17 @@ public class PlanDefinition {
             return this;
         }
 
+        public When prefetchData(List<? extends IBaseBackboneElement> data) {
+            prefetchData = data;
+            return this;
+        }
+
+        public When prefetchData(String name, String dataAssetName) {
+            var data = jsonParser.parseResource(open(dataAssetName));
+            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            return this;
+        }
+
         public When parameters(IBaseParameters params) {
             parameters = params;
             return this;
@@ -240,7 +254,7 @@ public class PlanDefinition {
                     parameters,
                     useServerData,
                     additionalData,
-                    null,
+                    prefetchData,
                     dataRepository,
                     contentRepository,
                     terminologyRepository);
@@ -270,7 +284,7 @@ public class PlanDefinition {
                             parameters,
                             useServerData,
                             additionalData,
-                            null,
+                            prefetchData,
                             dataRepository,
                             contentRepository,
                             terminologyRepository));

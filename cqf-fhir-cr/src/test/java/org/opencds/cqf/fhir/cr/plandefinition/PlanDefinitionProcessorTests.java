@@ -296,6 +296,32 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
+    void testPrefetchData() {
+        var planDefinitionID = "CdsHooksMultipleActions-PlanDefinition-1.0.0";
+        var patientID = "patient-CdsHooksMultipleActions";
+        var data = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
+        var content = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenApply()
+                .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_careplan.json");
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenApplyR5()
+                .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
+    }
+
+    @Test
     void multipleActionsUsingSameActivity() {
         var planDefinitionID = "multi-action-activity";
         var patientID = "OPA-Patient1";

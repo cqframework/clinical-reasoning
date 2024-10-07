@@ -149,4 +149,20 @@ class LibraryProcessorTests {
                 .thenEvaluate()
                 .hasResults(48);
     }
+
+    @Test
+    void testPrefetchData() {
+        var patientID = "patient-CdsHooksMultipleActions";
+        var data = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
+        var content = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .libraryUrl("http://example.com/Library/CdsHooksMultipleActions")
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenEvaluate()
+                .hasResults(6);
+    }
 }

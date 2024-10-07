@@ -6,14 +6,19 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -31,7 +36,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
-import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -42,7 +46,13 @@ public class TestLibrary {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        return PlanDefinition.class.getResourceAsStream(asset);
+        var path = Paths.get(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
+        var file = path.toFile();
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
     public static String load(InputStream asset) throws IOException {
@@ -107,6 +117,7 @@ public class TestLibrary {
         private final IParser jsonParser;
 
         private String libraryId;
+        private String libraryUrl;
 
         private String subjectId;
         private List<String> expression;
@@ -128,6 +139,11 @@ public class TestLibrary {
 
         public When libraryId(String id) {
             libraryId = id;
+            return this;
+        }
+
+        public When libraryUrl(String url) {
+            libraryUrl = url;
             return this;
         }
 
@@ -187,6 +203,12 @@ public class TestLibrary {
             return this;
         }
 
+        public When prefetchData(String name, String dataAssetName) {
+            var data = jsonParser.parseResource(open(dataAssetName));
+            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            return this;
+        }
+
         public When parameters(IBaseParameters params) {
             parameters = params;
             return this;
@@ -224,7 +246,19 @@ public class TestLibrary {
             return new Evaluation(
                     repository,
                     processor.evaluate(
-                            Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                            Eithers.for3(
+                                    libraryUrl == null
+                                            ? null
+                                            : canonicalTypeForVersion(
+                                                    repository
+                                                            .fhirContext()
+                                                            .getVersion()
+                                                            .getVersion(),
+                                                    libraryUrl),
+                                    libraryId == null
+                                            ? null
+                                            : Ids.newId(repository.fhirContext(), "Library", libraryId),
+                                    null),
                             subjectId,
                             expression,
                             parameters,

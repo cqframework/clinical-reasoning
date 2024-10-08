@@ -39,44 +39,25 @@ public class Versions {
 
         int length = Math.max(string1Vals.length, string2Vals.length);
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length - 1; i++) {
             if (i > string1Vals.length - 1) {
                 return -1;
             }
             if (i > string2Vals.length - 1) {
                 return 1;
             }
-            Integer v1 = 0;
-            Integer v2 = 0;
-            if (i < length - 1) {
-                v1 = Integer.parseInt(string1Vals[i]);
-                v2 = Integer.parseInt(string2Vals[i]);
-            } else {
-                // handle "-whatever"
-                final var tail1 = parseTail(string1Vals[i]);
-                final var tail2 = parseTail(string2Vals[i]);
-                if (tail1.getRight().isEmpty() && tail2.getRight().isEmpty()
-                        || !tail1.getLeft().equals(tail2.getLeft())) {
-                    v1 = tail1.getLeft();
-                    v2 = tail2.getLeft();
-                    // if theres no "-whatever" then compare like normal
-                } else {
-                    return compareTails(tail1, tail2);
-                }
-            }
-
-            // Making sure Version1 bigger than version2
-            if (v1 > v2) {
-                return 1;
-            }
-            // Making sure Version1 smaller than version2
-            else if (v1 < v2) {
-                return -1;
+            if (!string1Vals[i].equals(string2Vals[i])) {
+                return stringOrNumberCompare(string1Vals[i], string2Vals[i]);
             }
         }
-
-        // Both are equal
-        return 0;
+        final var tail1 = parseTail(string1Vals[length -1]);
+        final var tail2 = parseTail(string2Vals[length -1]);
+        
+        if (tail1.getLeft().equals(tail2.getLeft())) {
+            return compareTails(tail1,tail2);
+        } else {
+            return stringOrNumberCompare(string1Vals[length -1], string2Vals[length -1]);
+        }
     }
 
     private static Integer compareTails(Pair<Integer, String> tail1, Pair<Integer, String> tail2) {
@@ -120,10 +101,11 @@ public class Versions {
     private static Integer stringOrNumberCompare(String version1, String version2) {
         // try string and number compares if it's not semver
         try {
-            final var c = Integer.parseInt(version1) - Integer.parseInt(version2);
-            if (c > 0) {
+            final var d1 = Integer.parseInt(version1);
+            final var d2 = Integer.parseInt(version2);
+            if (d1 > d2) {
                 return 1;
-            } else if (c < 0) {
+            } else if (d2 < d1) {
                 return -1;
             } else {
                 return 0;

@@ -39,12 +39,15 @@ public class Versions {
 
         int length = Math.max(string1Vals.length, string2Vals.length);
 
-        for (int i = 0; i < length - 1; i++) {
+        for (int i = 0; i < length; i++) {
             if (i > string1Vals.length - 1) {
                 return -1;
             }
             if (i > string2Vals.length - 1) {
                 return 1;
+            }
+            if (i == length - 1) {
+                break;
             }
             if (!string1Vals[i].equals(string2Vals[i])) {
                 return stringOrNumberCompare(string1Vals[i], string2Vals[i]);
@@ -63,7 +66,7 @@ public class Versions {
     private static Integer compareTails(Pair<Integer, String> tail1, Pair<Integer, String> tail2) {
         if (!tail1.getRight().isEmpty() && tail2.getRight().isEmpty()) {
             return 1;
-        } else if (tail1.getRight().isEmpty()) {
+        } else if (tail1.getRight().isEmpty() && !tail2.getRight().isEmpty()) {
             return -1;
         } else {
             final var c = tail1.getRight().compareTo(tail2.getRight());
@@ -120,7 +123,7 @@ public class Versions {
     private static Integer intCompare(Integer d1, Integer d2) {
         if (d1 > d2) {
             return 1;
-        } else if (d2 < d1) {
+        } else if (d2 > d1) {
             return -1;
         } else {
             return 0;

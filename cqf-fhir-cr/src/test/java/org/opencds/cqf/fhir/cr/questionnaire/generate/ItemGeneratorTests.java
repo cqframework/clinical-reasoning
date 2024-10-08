@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 
 class ItemGeneratorTests {
@@ -15,6 +18,16 @@ class ItemGeneratorTests {
             "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order";
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
+
+    @Test
+    void testGenerateRequest() {
+        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4);
+        assertThrows(UnsupportedOperationException.class, () -> request.getSubjectId());
+        assertThrows(UnsupportedOperationException.class, () -> request.getData());
+        assertThrows(UnsupportedOperationException.class, () -> request.getUseServerData());
+        assertThrows(UnsupportedOperationException.class, () -> request.getParameters());
+        assertThrows(UnsupportedOperationException.class, () -> request.getLibraryEngine());
+    }
 
     @Test
     void generateItemR4() {

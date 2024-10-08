@@ -125,8 +125,7 @@ public class RequestHelpers {
                 inputParameterResolver);
     }
 
-    public static GenerateRequest newGenerateRequestForVersion(
-            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+    public static GenerateRequest newGenerateRequestForVersion(FhirVersionEnum fhirVersion) {
         IBaseResource profile = null;
         try {
             var fhirContext = FhirContext.forCached(fhirVersion);
@@ -137,21 +136,11 @@ public class RequestHelpers {
         } catch (Exception e) {
             // Do nothing
         }
-        return newGenerateRequestForVersion(fhirVersion, libraryEngine, profile);
+        return newGenerateRequestForVersion(fhirVersion, profile);
     }
 
-    public static GenerateRequest newGenerateRequestForVersion(
-            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource profile) {
-        return new GenerateRequest(
-                profile,
-                false,
-                true,
-                Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
-                null,
-                true,
-                null,
-                libraryEngine,
-                FhirModelResolverCache.resolverForVersion(fhirVersion));
+    public static GenerateRequest newGenerateRequestForVersion(FhirVersionEnum fhirVersion, IBaseResource profile) {
+        return new GenerateRequest(profile, false, true, FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 
     public static PopulateRequest newPopulateRequestForVersion(

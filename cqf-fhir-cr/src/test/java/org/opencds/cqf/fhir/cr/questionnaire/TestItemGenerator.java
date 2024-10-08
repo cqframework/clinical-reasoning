@@ -20,9 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -84,9 +82,6 @@ public class TestItemGenerator {
         private IPrimitiveType<String> profileUrl;
         private IBaseResource profile;
         private String id;
-        private String subjectId;
-        private IBaseBundle data;
-        private IBaseParameters parameters;
 
         When(Repository repository, QuestionnaireProcessor itemGenerator) {
             this.repository = repository;
@@ -113,35 +108,9 @@ public class TestItemGenerator {
             return this;
         }
 
-        public When subjectId(String id) {
-            subjectId = id;
-            return this;
-        }
-
-        public When bundle(IBaseBundle data) {
-            this.data = data;
-            return this;
-        }
-
-        public When parameters(IBaseParameters params) {
-            parameters = params;
-            return this;
-        }
-
         public GeneratedItem then() {
             IBaseResource result;
-            if (subjectId != null || parameters != null || data != null) {
-                result = processor.generateQuestionnaire(
-                        Eithers.for3(profileUrl, profileId, profile),
-                        false,
-                        true,
-                        subjectId,
-                        parameters,
-                        data,
-                        true,
-                        null,
-                        id);
-            } else if (profileUrl != null || profileId != null || profile != null) {
+            if (profileUrl != null || profileId != null || profile != null) {
                 result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile), false, true);
             } else {
                 result = processor.generateQuestionnaire(id);

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -105,11 +104,6 @@ public class ItemGenerator {
             expression.setName(request.getProfileAdapter().getName());
         }
         return expression;
-    }
-
-    protected List<IBase> getFeatureExpressionResults(
-            GenerateRequest request, CqfExpression featureExpression, String itemLinkId) {
-        return expressionProcessor.getExpressionResultForItem(request, featureExpression, itemLinkId);
     }
 
     protected <E extends ICompositeType> void processElements(

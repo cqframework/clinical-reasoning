@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -346,6 +347,7 @@ class R4CareGapsTest {
     void exm125_careGaps_byIdentifier() {
         given.when()
                 .measureIdentifier("80366f35-e0a0-4ba7-a746-ad5760b79e01")
+                .measureId(null)
                 .subject("Patient/numer-EXM125")
                 .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
@@ -703,6 +705,8 @@ class R4CareGapsTest {
                 .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .measureId("MinimalProportionBooleanBasisMultiGroupGroupImpNotation")
+                .measureIdentifier(null)
+                .measureUrl(null)
                 .status("closed-gap")
                 .getCareGapsReport()
                 .then()
@@ -726,5 +730,33 @@ class R4CareGapsTest {
                 .detectedIssueCount(1)
                 .detectedIssue()
                 .hasGroupIdReportExtension("group-1");
+    }
+
+    @Test
+    void noMeasureSpecified() {
+        try {
+            GIVEN_REPO
+                    .when()
+                    .subject("Patient/female-1988")
+                    .periodStart(
+                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
+                            .atStartOfDay()
+                            .atZone(ZoneId.systemDefault()))
+                    .measureId(null)
+                    .measureIdentifier(null)
+                    .measureUrl(null)
+                    .status("closed-gap")
+                    .getCareGapsReport()
+                    .then()
+                    .hasBundleCount(1)
+                    .firstParameter()
+                    .detectedIssueCount(1)
+                    .detectedIssue()
+                    .hasGroupIdReportExtension("group-2");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("no measure resolving parameter was specified"));
+        }
     }
 }

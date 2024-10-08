@@ -23,51 +23,15 @@ public class Versions {
      */
     public static int compareVersions(String version1, String version2) {
         // Treat null as MAX VERSION
-        if (version1 == null && version2 == null) {
-            return 0;
-        }
-
-        if (version1 != null && version2 == null) {
-            return -1;
-        }
-
-        if (version1 == null) {
-            return 1;
+        if (version1 == null || version2 == null) {
+            return handleNulls(version1, version2);
         }
 
         final var v1Valid = isValidSemver(version1);
         final var v2Valid = isValidSemver(version2);
 
-        if (!v1Valid && !v2Valid) {
-            // try string and number compares if it's not semver
-            try {
-                final var c = Integer.parseInt(version1) - Integer.parseInt(version2);
-                if (c > 0) {
-                    return 1;
-                } else if (c < 0) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            } catch (NumberFormatException e) {
-                final var c = version1.compareTo(version2);
-                // compareTo returns numbers outside [-1,1]
-                if (c > 0) {
-                    return 1;
-                } else if (c < 0) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-
-        if (v1Valid && !v2Valid) {
-            return -1;
-        }
-
-        if (!v1Valid) {
-            return 1;
+        if (!v1Valid || !v2Valid) {
+            return handleInvalids(version1, version2, v1Valid, v2Valid);
         }
 
         String[] string1Vals = version1.split("\\.");
@@ -96,20 +60,8 @@ public class Versions {
                     v1 = tail1.getLeft();
                     v2 = tail2.getLeft();
                     // if theres no "-whatever" then compare like normal
-                } else if (!tail1.getRight().isEmpty() && tail2.getRight().isEmpty()) {
-                    return 1;
-                } else if (tail1.getRight().isEmpty()) {
-                    return -1;
                 } else {
-                    final var c = tail1.getRight().compareTo(tail2.getRight());
-                    // compareTo returns numbers outside [-1,1]
-                    if (c > 0) {
-                        return 1;
-                    } else if (c < 0) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
+                    return compareTails(tail1, tail2);
                 }
             }
 
@@ -125,6 +77,68 @@ public class Versions {
 
         // Both are equal
         return 0;
+    }
+
+    private static Integer compareTails(Pair<Integer, String> tail1, Pair<Integer, String> tail2) {
+        if (!tail1.getRight().isEmpty() && tail2.getRight().isEmpty()) {
+            return 1;
+        } else if (tail1.getRight().isEmpty()) {
+            return -1;
+        } else {
+            final var c = tail1.getRight().compareTo(tail2.getRight());
+            // compareTo returns numbers outside [-1,1]
+            if (c > 0) {
+                return 1;
+            } else if (c < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    private static Integer handleNulls(String version1, String version2) {
+        if (version1 == null && version2 == null) {
+            return 0;
+        } else if (version1 != null && version2 == null) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    private static Integer handleInvalids(String version1, String version2, boolean v1Valid, boolean v2Valid) {
+        if (!v1Valid && !v2Valid) {
+            return stringOrNumberCompare(version1, version2);
+        } else if (v1Valid && !v2Valid) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    private static Integer stringOrNumberCompare(String version1, String version2) {
+        // try string and number compares if it's not semver
+        try {
+            final var c = Integer.parseInt(version1) - Integer.parseInt(version2);
+            if (c > 0) {
+                return 1;
+            } else if (c < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            final var c = version1.compareTo(version2);
+            // compareTo returns numbers outside [-1,1]
+            if (c > 0) {
+                return 1;
+            } else if (c < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
     }
 
     private static boolean isValidSemver(String check) {

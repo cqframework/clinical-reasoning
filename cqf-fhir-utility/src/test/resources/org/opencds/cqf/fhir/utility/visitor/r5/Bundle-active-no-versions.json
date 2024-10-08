@@ -18,7 +18,7 @@
             "resource": "http://to-add-missing-version/PlanDefinition/us-ecr-specification",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]
@@ -28,7 +28,7 @@
             "resource": "http://to-force-version/Library/rctc|2022-10-19",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]
@@ -111,7 +111,7 @@
             "resource": "http://to-add-missing-version/ValueSet/dxtc",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]

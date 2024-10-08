@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
-    private final String DEPENDSON = "depends-on";
+    private static final String dependsOn = "depends-on";
 
     @SuppressWarnings("unchecked")
     @Override
@@ -94,7 +94,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         // once iteration is complete, delete all depends-on RAs in the root artifact
         var noDeps = rootAdapter.getRelatedArtifact();
         noDeps.removeIf(
-                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
+                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(dependsOn));
         rootAdapter.setRelatedArtifact(noDeps);
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
@@ -145,7 +145,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                         .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
                                         .equals(Canonicals.getUrl(relatedArtifactReference))
                                 && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(DEPENDSON))
+                                        .equalsIgnoreCase(dependsOn))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
@@ -281,7 +281,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             }
             var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
                     fhirVersion,
-                    DEPENDSON,
+                    dependsOn,
                     updatedReference,
                     res.map(a -> a.getDescriptor()).orElse(null));
             var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
@@ -370,7 +370,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                 var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion,
-                        DEPENDSON,
+                        dependsOn,
                         dependency.getReference(),
                         dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
                 var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();

@@ -50,13 +50,13 @@ public class Versions {
                 return stringOrNumberCompare(string1Vals[i], string2Vals[i]);
             }
         }
-        final var tail1 = parseTail(string1Vals[length -1]);
-        final var tail2 = parseTail(string2Vals[length -1]);
-        
+        final var tail1 = parseTail(string1Vals[length - 1]);
+        final var tail2 = parseTail(string2Vals[length - 1]);
+
         if (tail1.getLeft().equals(tail2.getLeft())) {
-            return compareTails(tail1,tail2);
+            return compareTails(tail1, tail2);
         } else {
-            return stringOrNumberCompare(string1Vals[length -1], string2Vals[length -1]);
+            return intCompare(tail1.getLeft(), tail2.getLeft());
         }
     }
 
@@ -103,13 +103,7 @@ public class Versions {
         try {
             final var d1 = Integer.parseInt(version1);
             final var d2 = Integer.parseInt(version2);
-            if (d1 > d2) {
-                return 1;
-            } else if (d2 < d1) {
-                return -1;
-            } else {
-                return 0;
-            }
+            return intCompare(d1, d2);
         } catch (NumberFormatException e) {
             final var c = version1.compareTo(version2);
             // compareTo returns numbers outside [-1,1]
@@ -120,6 +114,16 @@ public class Versions {
             } else {
                 return 0;
             }
+        }
+    }
+
+    private static Integer intCompare(Integer d1, Integer d2) {
+        if (d1 > d2) {
+            return 1;
+        } else if (d2 < d1) {
+            return -1;
+        } else {
+            return 0;
         }
     }
 

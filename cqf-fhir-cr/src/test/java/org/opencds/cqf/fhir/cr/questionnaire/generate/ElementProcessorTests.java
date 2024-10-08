@@ -23,7 +23,6 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class ElementProcessorTests {
-    private final FhirContext fhirContextDstu2 = FhirContext.forDstu2Cached();
     private final FhirContext fhirContextR4B = FhirContext.forR4BCached();
 
     @Mock
@@ -155,9 +154,7 @@ class ElementProcessorTests {
 
     @Test
     void createInitialShouldReturnNullForUnsupportedVersion() {
-        doReturn(repository).when(libraryEngine).getRepository();
-        doReturn(fhirContextDstu2).when(repository).fhirContext();
-        var request = newGenerateRequestForVersion(FhirVersionEnum.DSTU2, libraryEngine);
+        var request = newGenerateRequestForVersion(FhirVersionEnum.DSTU2);
         var initial = createInitial(request, new BooleanType(true));
         assertNull(initial);
     }

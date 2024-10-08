@@ -339,5 +339,5 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
     String contextTypeUrl = "http://terminology.hl7.org/CodeSystem/usage-context-type";
     String contextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
+    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
 }

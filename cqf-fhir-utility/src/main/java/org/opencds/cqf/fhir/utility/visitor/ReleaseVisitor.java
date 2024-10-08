@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
 
+    @SuppressWarnings("unchecked")
     @Override
     public IBase visit(
             KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
@@ -89,8 +91,10 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 .filter(dep -> dep.getExtension() != null && dep.getExtension().size() > 0)
                 .collect(Collectors.toList());
         // once iteration is complete, delete all depends-on RAs in the root artifact
-        rootAdapter.getRelatedArtifact().removeIf(ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra)
-                .equalsIgnoreCase("depends-on"));
+        var noDeps = rootAdapter.getRelatedArtifact();
+        noDeps.removeIf(
+                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase("depends-on"));
+        rootAdapter.setRelatedArtifact(noDeps);
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
                 .map(p -> VisitorHelper.getListParameter(Constants.SYSTEM_VERSION, p, IPrimitiveType.class)
@@ -143,8 +147,8 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                                         .equalsIgnoreCase("depends-on"))
                         .findFirst()
                         .ifPresent(dep -> {
-                            // ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
-                            //         .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
+                            ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
+                                    .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
                             originalDependenciesWithExtensions.removeIf(
                                     ra -> ra.getReference().equals(relatedArtifactReference));
                         });

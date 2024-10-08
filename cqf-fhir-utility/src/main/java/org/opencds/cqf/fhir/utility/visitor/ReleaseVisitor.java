@@ -94,7 +94,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         // once iteration is complete, delete all depends-on RAs in the root artifact
         var noDeps = rootAdapter.getRelatedArtifact();
         noDeps.removeIf(
-                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(dependsOn));
+                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
         rootAdapter.setRelatedArtifact(noDeps);
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
@@ -145,7 +145,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                         .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
                                         .equals(Canonicals.getUrl(relatedArtifactReference))
                                 && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(dependsOn))
+                                        .equalsIgnoreCase(DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
@@ -281,7 +281,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             }
             var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
                     fhirVersion,
-                    dependsOn,
+                    DEPENDSON,
                     updatedReference,
                     res.map(a -> a.getDescriptor()).orElse(null));
             var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
@@ -370,7 +370,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                 var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion,
-                        dependsOn,
+                        DEPENDSON,
                         dependency.getReference(),
                         dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
                 var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();

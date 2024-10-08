@@ -22,11 +22,6 @@ import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 public class GenerateRequest implements IQuestionnaireRequest {
     private final boolean supportedOnly;
     private final boolean requiredOnly;
-    private final IIdType subjectId;
-    private final IBaseParameters parameters;
-    private final boolean useServerData;
-    private final IBaseBundle data;
-    private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final IBaseResource profile;
@@ -38,28 +33,14 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private List<? extends ICompositeType> snapshotElements;
 
     public GenerateRequest(
-            IBaseResource profile,
-            boolean supportedOnly,
-            boolean requiredOnly,
-            IIdType subjectId,
-            IBaseParameters parameters,
-            boolean useServerData,
-            IBaseBundle data,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
-        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+            IBaseResource profile, boolean supportedOnly, boolean requiredOnly, ModelResolver modelResolver) {
+        checkNotNull(profile, "expected non-null value for profile");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.profile = profile;
+        fhirVersion = this.profile.getStructureFhirVersionEnum();
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;
-        this.subjectId = subjectId;
-        this.parameters = parameters;
-        this.useServerData = useServerData;
-        this.data = data;
-        this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        fhirVersion =
-                this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         defaultLibraryUrl = resolveDefaultLibraryUrl();
     }
 
@@ -126,27 +107,27 @@ public class GenerateRequest implements IQuestionnaireRequest {
 
     @Override
     public IIdType getSubjectId() {
-        return subjectId;
+        throw new UnsupportedOperationException("Unimplemented method 'getSubjectId'");
     }
 
     @Override
     public IBaseBundle getData() {
-        return data;
+        throw new UnsupportedOperationException("Unimplemented method 'getData'");
     }
 
     @Override
     public boolean getUseServerData() {
-        return useServerData;
+        throw new UnsupportedOperationException("Unimplemented method 'getUseServerData'");
     }
 
     @Override
     public IBaseParameters getParameters() {
-        return parameters;
+        throw new UnsupportedOperationException("Unimplemented method 'getParameters'");
     }
 
     @Override
     public LibraryEngine getLibraryEngine() {
-        return libraryEngine;
+        throw new UnsupportedOperationException("Unimplemented method 'getLibraryEngine'");
     }
 
     @Override

@@ -166,8 +166,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(
-                        profile, false, true, subjectId, parameters, useServerData, data, libraryEngine, modelResolver)
+        return new GenerateRequest(profile, false, true, modelResolver)
                 .setDefaultLibraryUrl(defaultLibraryUrl)
                 .setQuestionnaire(questionnaire);
     }

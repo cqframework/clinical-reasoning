@@ -18,7 +18,7 @@
             "resource": "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|2.0.0",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]
@@ -28,7 +28,7 @@
             "resource": "http://ersd.aimsplatform.org/fhir/Library/rctc|2022-10-19",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]
@@ -124,7 +124,7 @@
             "resource": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|2022-10-19",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/StructureDefinition/crmi-isOwned",
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
                 "valueBoolean": true
               }
             ]

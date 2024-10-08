@@ -75,8 +75,8 @@ public class R4CareGapsService {
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
 
         measureId.stream()
-                .filter(x -> x.getIdPart() != null)
                 .filter(Objects::nonNull)
+                .filter(x -> x.getIdPart() != null)
                 .collect(Collectors.toList())
                 .forEach(id -> eitherList.add(Eithers.forLeft3(id)));
         measureIdentifier.stream()

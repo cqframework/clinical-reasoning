@@ -97,19 +97,13 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly) {
-        return generateQuestionnaire(
-                profile, supportedOnly, requiredOnly, null, null, null, true, (IBaseResource) null, null, null, null);
+        return generateQuestionnaire(profile, supportedOnly, requiredOnly, (IBaseResource) null, null, null);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile,
             boolean supportedOnly,
             boolean requiredOnly,
-            String subjectId,
-            IBaseParameters parameters,
-            IBaseBundle data,
-            boolean useServerData,
-            IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint,
             String id) {
@@ -117,11 +111,6 @@ public class QuestionnaireProcessor {
                 profile,
                 supportedOnly,
                 requiredOnly,
-                subjectId,
-                parameters,
-                data,
-                useServerData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
                 createRestRepository(repository.fhirContext(), terminologyEndpoint),
                 id);
@@ -131,47 +120,17 @@ public class QuestionnaireProcessor {
             Either3<C, IIdType, R> profile,
             boolean supportedOnly,
             boolean requiredOnly,
-            String subjectId,
-            IBaseParameters parameters,
-            IBaseBundle data,
-            boolean useServerData,
-            Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository,
             String id) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
-        return generateQuestionnaire(
-                profile,
-                supportedOnly,
-                requiredOnly,
-                subjectId,
-                parameters,
-                data,
-                useServerData,
-                new LibraryEngine(repository, evaluationSettings),
-                id);
+        repository = proxy(repository, true, null, contentRepository, terminologyRepository);
+        return generateQuestionnaire(profile, supportedOnly, requiredOnly, id);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile,
-            boolean supportedOnly,
-            boolean requiredOnly,
-            String subjectId,
-            IBaseParameters parameters,
-            IBaseBundle data,
-            boolean useServerData,
-            LibraryEngine libraryEngine,
-            String id) {
-        var request = new GenerateRequest(
-                resolveStructureDefinition(profile),
-                supportedOnly,
-                requiredOnly,
-                subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
-                parameters,
-                useServerData,
-                data,
-                libraryEngine == null ? new LibraryEngine(repository, evaluationSettings) : libraryEngine,
-                modelResolver);
+            Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly, String id) {
+        var request =
+                new GenerateRequest(resolveStructureDefinition(profile), supportedOnly, requiredOnly, modelResolver);
         return generateQuestionnaire(request, id);
     }
 

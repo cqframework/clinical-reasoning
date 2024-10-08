@@ -115,6 +115,7 @@ public class InMemoryFhirRepository implements Repository {
         var resources = resourceMap.computeIfAbsent(id.getResourceType(), r -> new HashMap<>());
         var keyId = id.toUnqualifiedVersionless();
         if (resources.containsKey(keyId)) {
+            outcome.setResource(resources.get(keyId));
             resources.remove(keyId);
         } else {
             throw new ResourceNotFoundException("Resource not found with id " + id);
@@ -232,7 +233,7 @@ public class InMemoryFhirRepository implements Repository {
                     var res = this.delete(
                             resourceClass,
                             BundleHelper.getEntryRequestId(version, e).get().withResourceType(resourceType));
-                    BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(version, res.getResource()));
+                    BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(res.getResource()));
                 } else {
                     throw new ResourceNotFoundException("Trying to delete an entry without id");
                 }

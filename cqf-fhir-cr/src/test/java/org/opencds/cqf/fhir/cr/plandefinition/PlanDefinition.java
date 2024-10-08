@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -10,19 +11,31 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
@@ -31,6 +44,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -40,10 +54,16 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/plandefinition";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        return PlanDefinition.class.getResourceAsStream(asset);
+        var path = Paths.get(getResourcePath(PlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
+        var file = path.toFile();
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
     public static String load(InputStream asset) throws IOException {
@@ -113,14 +133,15 @@ public class PlanDefinition {
         private String encounterId;
         private String practitionerId;
         private String organizationId;
-        private Boolean useServerData;
+        private boolean useServerData;
         private Repository dataRepository;
         private Repository contentRepository;
         private Repository terminologyRepository;
         private IBaseBundle additionalData;
         private IIdType additionalDataId;
+        private List<? extends IBaseBackboneElement> prefetchData;
         private IBaseParameters parameters;
-        private Boolean isPackagePut;
+        private boolean isPackagePut;
 
         public When(Repository repository, PlanDefinitionProcessor processor) {
             this.repository = repository;
@@ -153,7 +174,7 @@ public class PlanDefinition {
             return this;
         }
 
-        public When useServerData(Boolean value) {
+        public When useServerData(boolean value) {
             useServerData = value;
             return this;
         }
@@ -180,7 +201,7 @@ public class PlanDefinition {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
             additionalData = resource.getIdElement().getResourceType().equals("Bundle")
                     ? (IBaseBundle) resource
-                    : addEntry(newBundle(fhirVersion), newEntryWithResource(fhirVersion, resource));
+                    : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
         }
 
         public When additionalData(String dataAssetName) {
@@ -194,12 +215,23 @@ public class PlanDefinition {
             return this;
         }
 
+        public When prefetchData(List<? extends IBaseBackboneElement> data) {
+            prefetchData = data;
+            return this;
+        }
+
+        public When prefetchData(String name, String dataAssetName) {
+            var data = jsonParser.parseResource(open(dataAssetName));
+            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            return this;
+        }
+
         public When parameters(IBaseParameters params) {
             parameters = params;
             return this;
         }
 
-        public When isPut(Boolean value) {
+        public When isPut(boolean value) {
             isPackagePut = value;
             return this;
         }
@@ -222,7 +254,7 @@ public class PlanDefinition {
                     parameters,
                     useServerData,
                     additionalData,
-                    null,
+                    prefetchData,
                     dataRepository,
                     contentRepository,
                     terminologyRepository);
@@ -252,14 +284,14 @@ public class PlanDefinition {
                             parameters,
                             useServerData,
                             additionalData,
-                            null,
+                            prefetchData,
                             dataRepository,
                             contentRepository,
                             terminologyRepository));
         }
 
         public GeneratedPackage thenPackage() {
-            if (isPackagePut == null) {
+            if (isPackagePut) {
                 return new GeneratedPackage(
                         processor.packagePlanDefinition(Eithers.forMiddle3(
                                 Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId))),
@@ -273,6 +305,12 @@ public class PlanDefinition {
                         repository.fhirContext());
             }
         }
+
+        public DataRequirementsLibrary thenDataRequirements() {
+            return new DataRequirementsLibrary(processor.dataRequirements(
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
+                    parameters));
+        }
     }
 
     public static class GeneratedBundle {
@@ -280,6 +318,8 @@ public class PlanDefinition {
         final IBaseBundle generatedBundle;
         final IParser jsonParser;
         final ModelResolver modelResolver;
+        IBaseResource questionnaire;
+        Map<String, IBaseBackboneElement> items;
 
         public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
             this.repository = repository;
@@ -287,6 +327,40 @@ public class PlanDefinition {
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
+            var questionnaireResponse = getEntryResources(this.generatedBundle).stream()
+                    .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
+                    .findFirst()
+                    .orElse(null);
+            questionnaire = questionnaireResponse == null
+                    ? null
+                    : ((IDomainResource) questionnaireResponse)
+                            .getContained().stream()
+                                    .filter(c -> c.fhirType().equals("Questionnaire"))
+                                    .findFirst()
+                                    .orElse(null);
+            if (questionnaireResponse != null) {
+                items = new HashMap<>();
+                populateItems(getItems(questionnaireResponse));
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private List<IBaseBackboneElement> getItems(IBase base) {
+            var pathResult = modelResolver.resolvePath(base, "item");
+            return pathResult instanceof List ? (List<IBaseBackboneElement>) pathResult : new ArrayList<>();
+        }
+
+        private void populateItems(List<IBaseBackboneElement> itemList) {
+            for (var item : itemList) {
+                @SuppressWarnings("unchecked")
+                var linkIdPath = (IPrimitiveType<String>) modelResolver.resolvePath(item, "linkId");
+                var linkId = linkIdPath == null ? null : linkIdPath.getValue();
+                items.put(linkId, item);
+                var childItems = getItems(item);
+                if (!childItems.isEmpty()) {
+                    populateItems(childItems);
+                }
+            }
         }
 
         public GeneratedBundle isEqualsTo(String expectedBundleAssetName) {
@@ -326,8 +400,23 @@ public class PlanDefinition {
         }
 
         public GeneratedBundle hasQuestionnaire() {
-            assertTrue(getEntryResources(generatedBundle).stream()
-                    .anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            assertNotNull(questionnaire);
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
+            var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
+            var answers = answerPath instanceof List<?>
+                    ? ((List<?>) answerPath)
+                            .stream()
+                                    .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
+                                    .collect(Collectors.toList())
+                    : null;
+            assertNotNull(answers);
+            assertTrue(
+                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    "expected answer to contain value: " + value);
             return this;
         }
 

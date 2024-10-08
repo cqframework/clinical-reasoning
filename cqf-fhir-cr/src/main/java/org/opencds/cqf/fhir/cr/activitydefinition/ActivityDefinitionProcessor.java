@@ -29,13 +29,12 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
 public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor {
-    // private static final Logger logger = LoggerFactory.getLogger(ActivityDefinitionProcessor.class);
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected final ResourceResolver resourceResolver;
-    protected final IApplyProcessor applyProcessor;
-    protected final IRequestResolverFactory requestResolverFactory;
+    protected IApplyProcessor applyProcessor;
+    protected IRequestResolverFactory requestResolverFactory;
     protected Repository repository;
     protected ExtensionResolver extensionResolver;
 
@@ -57,12 +56,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.requestResolverFactory = requestResolverFactory == null
-                ? IRequestResolverFactory.getDefault(fhirVersion)
-                : requestResolverFactory;
-        this.applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(this.repository, this.requestResolverFactory);
+        this.requestResolverFactory = requestResolverFactory;
+        this.applyProcessor = applyProcessor;
     }
 
     @Override
@@ -109,8 +104,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
@@ -127,7 +122,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
                 createRestRepository(repository.fhirContext(), contentEndpoint),
                 createRestRepository(repository.fhirContext(), terminologyEndpoint));
@@ -145,8 +140,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
@@ -164,7 +159,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 new LibraryEngine(repository, evaluationSettings));
     }
 
@@ -180,8 +175,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subjectId)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
@@ -203,10 +198,21 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 useServerData,
-                bundle,
+                data,
                 libraryEngine,
                 modelResolver);
+        initApplyProcessor();
         return applyProcessor.apply(request);
+    }
+
+    protected void initApplyProcessor() {
+        if (applyProcessor == null) {
+            applyProcessor = new ApplyProcessor(
+                    repository,
+                    requestResolverFactory != null
+                            ? requestResolverFactory
+                            : IRequestResolverFactory.getDefault(fhirVersion));
+        }
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveActivityDefinition(

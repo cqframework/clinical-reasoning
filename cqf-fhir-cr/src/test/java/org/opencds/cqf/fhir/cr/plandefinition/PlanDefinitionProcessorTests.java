@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -42,12 +43,14 @@ class PlanDefinitionProcessorTests {
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
         var packageProcessor = new PackageProcessor(repository);
+        var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
+                dataRequirementsProcessor,
                 activityProcessor,
                 requestResolverFactory);
         assertNotNull(processor.evaluationSettings());
@@ -293,6 +296,32 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
+    void testPrefetchData() {
+        var planDefinitionID = "CdsHooksMultipleActions-PlanDefinition-1.0.0";
+        var patientID = "patient-CdsHooksMultipleActions";
+        var data = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_patient_data.json";
+        var content = "r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_plan_definition.json";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenApply()
+                .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_careplan.json");
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .prefetchData("patient", data)
+                .content(content)
+                .terminology(content)
+                .thenApplyR5()
+                .isEqualsTo("r4/cds-hooks-multiple-actions/cds_hooks_multiple_actions_bundle.json");
+    }
+
+    @Test
     void multipleActionsUsingSameActivity() {
         var planDefinitionID = "multi-action-activity";
         var patientID = "OPA-Patient1";
@@ -326,28 +355,6 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void questionnaireResponseDstu3() {
-        // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
-        // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
-        // expected.
-        var planDefinitionID = "prepopulate";
-        var patientID = "OPA-Patient1";
-        var data = "dstu3/extract-questionnaireresponse/patient-data.json";
-        var content = "dstu3/prepopulate/prepopulate-content-bundle.json";
-        var parameters = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .additionalData(data)
-                .content(content)
-                .parameters(parameters)
-                .thenApply()
-                .hasContained(3);
-    }
-
-    @Test
     void questionnaireResponseR4() {
         // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
         // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
@@ -365,7 +372,7 @@ class PlanDefinitionProcessorTests {
                 .additionalDataId(dataId)
                 .parameters(parameters)
                 .thenApply()
-                .hasContained(3);
+                .hasContained(2);
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
@@ -373,7 +380,7 @@ class PlanDefinitionProcessorTests {
                 .additionalDataId(dataId)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3);
+                .hasEntry(2);
     }
 
     @Test
@@ -395,23 +402,7 @@ class PlanDefinitionProcessorTests {
                 .content(content)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3);
-    }
-
-    @Test
-    void generateQuestionnaireDstu3() {
-        var planDefinitionID = "generate-questionnaire";
-        var patientID = "OPA-Patient1";
-        var parameters = org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.dstu3.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextDstu3, "dstu3")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .parameters(parameters)
-                .thenApply()
-                .hasContained(3)
-                .hasQuestionnaire();
+                .hasEntry(2);
     }
 
     @Test
@@ -427,7 +418,13 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(3)
-                .hasQuestionnaire();
+                .hasQuestionnaire()
+                .hasQuestionnaireResponseItemValue("1.1", "Claim/OPA-Claim1")
+                .hasQuestionnaireResponseItemValue("2.1", "Acme Clinic")
+                .hasQuestionnaireResponseItemValue("2.2.2", "1407071236")
+                .hasQuestionnaireResponseItemValue("3.4.2", "12345")
+                .hasQuestionnaireResponseItemValue("4.1.2", "1245319599")
+                .hasQuestionnaireResponseItemValue("4.2.2", "456789");
     }
 
     @Test
@@ -522,5 +519,32 @@ class PlanDefinitionProcessorTests {
                 .thenApplyR5()
                 .hasEntry(2)
                 .entryHasOperationOutcome(1);
+    }
+
+    @Test
+    void dataRequirementsDstu3() {
+        given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(29);
+    }
+
+    @Test
+    void dataRequirementsR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
+    }
+
+    @Test
+    void dataRequirementsR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .planDefinitionId("route-one")
+                .thenDataRequirements()
+                .hasDataRequirements(30);
     }
 }

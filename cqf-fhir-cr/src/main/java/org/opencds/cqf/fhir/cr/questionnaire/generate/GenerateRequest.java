@@ -1,65 +1,86 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class GenerateRequest implements IQuestionnaireRequest {
-    private final Boolean supportedOnly;
-    private final Boolean requiredOnly;
+    private final boolean supportedOnly;
+    private final boolean requiredOnly;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
+    private final boolean useServerData;
+    private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final IBaseResource profile;
-    private final String profileUrl;
     private String defaultLibraryUrl;
     private IBaseResource questionnaire;
+    private QuestionnaireAdapter questionnaireAdapter;
+    private IStructureDefinitionAdapter profileAdapter;
     private List<? extends ICompositeType> differentialElements;
     private List<? extends ICompositeType> snapshotElements;
 
     public GenerateRequest(
             IBaseResource profile,
-            Boolean supportedOnly,
-            Boolean requiredOnly,
+            boolean supportedOnly,
+            boolean requiredOnly,
             IIdType subjectId,
             IBaseParameters parameters,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.profile = profile;
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;
         this.subjectId = subjectId;
         this.parameters = parameters;
-        this.bundle = bundle;
+        this.useServerData = useServerData;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion =
                 this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         defaultLibraryUrl = resolveDefaultLibraryUrl();
-        profileUrl = resolvePathString(this.profile, "url");
     }
 
     public IBaseResource getProfile() {
         return profile;
     }
 
-    public String getProfileUrl() {
-        return profileUrl;
+    public IStructureDefinitionAdapter getProfileAdapter() {
+        if (profileAdapter == null) {
+            profileAdapter = (IStructureDefinitionAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
+        }
+        return profileAdapter;
+    }
+
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
+        if (questionnaireAdapter == null && questionnaire != null) {
+            questionnaireAdapter = (QuestionnaireAdapter)
+                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
+        }
+        return questionnaireAdapter;
     }
 
     public <E extends ICompositeType> void setDifferentialElements(List<E> elements) {
@@ -109,8 +130,13 @@ public class GenerateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
+    }
+
+    @Override
+    public boolean getUseServerData() {
+        return useServerData;
     }
 
     @Override
@@ -162,10 +188,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
                         .equals(fhirVersion == FhirVersionEnum.DSTU3 ? Constants.CQIF_LIBRARY : Constants.CQF_LIBRARY))
                 .findFirst()
                 .orElse(null);
-        return libraryExt == null
-                ? null
-                : fhirVersion == FhirVersionEnum.DSTU3
-                        ? ((Reference) libraryExt.getValue()).getReference()
-                        : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+        return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
     }
 }

@@ -330,6 +330,10 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         return Optional.empty();
     }
 
+    default IBaseResource getPrimaryLibrary(Repository repository) {
+        return get().fhirType().equals("Library") ? get() : null;
+    }
+
     String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
     String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";

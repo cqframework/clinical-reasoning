@@ -14,7 +14,7 @@ public class PackageHelper {
 
     public static IBaseBackboneElement createEntry(IBaseResource resource, boolean isPut) {
         final var fhirVersion = resource.getStructureFhirVersionEnum();
-        final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(), resource);
+        final var entry = BundleHelper.newEntryWithResource(resource);
         String method;
         var requestUrl = resource.fhirType();
         if (isPut) {
@@ -52,7 +52,7 @@ public class PackageHelper {
 
     public static IBaseBackboneElement deleteEntry(IBaseResource resource) {
         final var fhirVersion = resource.getStructureFhirVersionEnum();
-        final var entry = BundleHelper.newEntryWithResource(resource.getStructureFhirVersionEnum(), resource);
+        final var entry = BundleHelper.newEntryWithResource(resource);
         var requestUrl = resource.fhirType() + "/" + resource.getIdElement().getIdPart();
 
         final var request = BundleHelper.newRequest(fhirVersion, "DELETE", requestUrl);

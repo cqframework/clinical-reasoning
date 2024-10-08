@@ -37,7 +37,7 @@ class ActivityDefinitionProcessorTests {
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
-                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/activitydefinition/" + version));
+                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {
@@ -143,7 +143,6 @@ class ActivityDefinitionProcessorTests {
     }
 
     @Test
-    // @Disabled // Unable to load R5 packages and run CQL
     void activityDefinitionApplyR5() throws FHIRException {
         var result = this.activityDefinitionProcessorR5.apply(
                 Eithers.forMiddle3(Ids.newId(

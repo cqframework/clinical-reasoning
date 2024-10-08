@@ -30,6 +30,14 @@
       <artifactId>engine-fhir</artifactId>
     </dependency>
     <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cql-to-elm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>elm-fhir</artifactId>
+    </dependency>
+    <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-base</artifactId>
     </dependency>

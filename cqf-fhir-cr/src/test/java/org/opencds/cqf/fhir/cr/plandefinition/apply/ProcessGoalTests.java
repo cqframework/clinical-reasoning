@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
@@ -25,6 +26,9 @@ class ProcessGoalTests {
     @Mock
     LibraryEngine libraryEngine;
 
+    @Mock
+    ModelResolver modelResolver;
+
     ProcessGoal fixture = new ProcessGoal();
 
     @BeforeEach
@@ -35,7 +39,7 @@ class ProcessGoalTests {
     @Test
     void unsupportedVersionShouldReturnNull() {
         doReturn(FhirContext.forR4BCached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, modelResolver);
         var goalElement = new org.hl7.fhir.r4b.model.PlanDefinition.PlanDefinitionGoalComponent();
         var result = fixture.convertGoal(request, goalElement);
         assertNull(result);

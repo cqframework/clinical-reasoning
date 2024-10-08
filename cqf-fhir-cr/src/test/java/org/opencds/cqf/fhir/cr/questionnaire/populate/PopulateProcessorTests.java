@@ -16,7 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,44 +44,6 @@ class PopulateProcessorTests {
     }
 
     @Test
-    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsDstu3() {
-        // setup
-        final String questionnaireUrl = "original-questionnaire-url";
-        final String prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
-        final var originalQuestionnaire = new org.hl7.fhir.dstu3.model.Questionnaire();
-        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
-        originalQuestionnaire.setUrl(questionnaireUrl);
-        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        final PopulateRequest request =
-                newPopulateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, originalQuestionnaire);
-        final var expectedResponses = getExpectedResponses(request);
-        final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
-        doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
-        // execute
-        final IBaseResource actual = fixture.populate(request);
-        // validate
-        assertEquals(
-                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
-                actual.getIdElement().getIdPart());
-        assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals(
-                questionnaireUrl,
-                request.resolvePath(actual, "questionnaire", IBaseReference.class)
-                        .getReferenceElement()
-                        .getValue());
-        // assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
-        assertEquals(
-                "Patient/" + PATIENT_ID,
-                request.resolvePath(actual, "subject", IBaseReference.class)
-                        .getReferenceElement()
-                        .getValue());
-        assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.emptyList());
-        verify(fixture).processResponseItems(request, expectedItems);
-    }
-
-    @Test
     void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR4() {
         // setup
         final String questionnaireUrl = "original-questionnaire-url";
@@ -93,9 +55,7 @@ class PopulateProcessorTests {
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
-        final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
-        doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
+        doReturn(expectedResponses).when(fixture).processItems(request, Collections.emptyList());
         // execute
         final IBaseResource actual = fixture.populate(request);
         // validate
@@ -103,8 +63,10 @@ class PopulateProcessorTests {
                 prePopulatedQuestionnaireId + "-" + PATIENT_ID,
                 actual.getIdElement().getIdPart());
         assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
-        // assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
+        assertEquals("#" + prePopulatedQuestionnaireId, request.resolvePathString(actual, "questionnaire"));
+        assertEquals(
+                QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
+                ((QuestionnaireResponse) actual).getStatus());
         assertEquals(
                 "Patient/" + PATIENT_ID,
                 request.resolvePath(actual, "subject", IBaseReference.class)
@@ -112,7 +74,6 @@ class PopulateProcessorTests {
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
         verify(fixture).processItems(request, Collections.emptyList());
-        verify(fixture).processResponseItems(request, expectedItems);
     }
 
     @Test
@@ -127,9 +88,7 @@ class PopulateProcessorTests {
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
-        final var expectedItems = getExpectedItems(request);
-        doReturn(expectedItems).when(fixture).processItems(request, Collections.emptyList());
-        doReturn(expectedResponses).when(fixture).processResponseItems(request, expectedItems);
+        doReturn(expectedResponses).when(fixture).processItems(request, Collections.emptyList());
         // execute
         final IBaseResource actual = fixture.populate(request);
         // validate
@@ -137,8 +96,10 @@ class PopulateProcessorTests {
                 prePopulatedQuestionnaireId + "-" + PATIENT_ID,
                 actual.getIdElement().getIdPart());
         assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
-        // assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
+        assertEquals("#" + prePopulatedQuestionnaireId, request.resolvePathString(actual, "questionnaire"));
+        assertEquals(
+                org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
+                ((org.hl7.fhir.r5.model.QuestionnaireResponse) actual).getStatus());
         assertEquals(
                 "Patient/" + PATIENT_ID,
                 request.resolvePath(actual, "subject", IBaseReference.class)
@@ -146,16 +107,10 @@ class PopulateProcessorTests {
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
         verify(fixture).processItems(request, Collections.emptyList());
-        verify(fixture).processResponseItems(request, expectedItems);
     }
 
     private List<IBaseBackboneElement> getExpectedResponses(PopulateRequest request) {
         switch (request.getFhirVersion()) {
-            case DSTU3:
-                return List.of(
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                        new org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent());
             case R4:
                 return List.of(
                         new QuestionnaireResponseItemComponent(),
@@ -166,29 +121,6 @@ class PopulateProcessorTests {
                         new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
                         new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
                         new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent());
-
-            default:
-                return null;
-        }
-    }
-
-    private List<IBaseBackboneElement> getExpectedItems(PopulateRequest request) {
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return List.of(
-                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent(),
-                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent(),
-                        new org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent());
-            case R4:
-                return List.of(
-                        new QuestionnaireItemComponent(),
-                        new QuestionnaireItemComponent(),
-                        new QuestionnaireItemComponent());
-            case R5:
-                return List.of(
-                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent(),
-                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent(),
-                        new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent());
 
             default:
                 return null;

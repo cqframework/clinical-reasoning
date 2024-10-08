@@ -1,0 +1,86 @@
+{
+  "resourceType": "Encounter",
+  "id": "chf-scenario1-encounter",
+  "status": "in-progress",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "IMP",
+    "display": "inpatient encounter"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "183807002",
+          "display": "Inpatient stay 9 days"
+        }
+      ]
+    }
+  ],
+  "priority": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "394849002",
+        "display": "High priority"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/chf-scenario1-patient"
+  },
+  "episodeOfCare": [
+    {
+      "reference": "EpisodeOfCare/chf-scenario1-eoc"
+    }
+  ],
+  "participant": [
+    {
+      "type": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+              "code": "PPRF",
+              "display": "primary performer"
+            }
+          ]
+        }
+      ],
+      "individual": {
+        "reference": "PractitionerRole/chf-scenario1-practitionerrole"
+      }
+    }
+  ],
+  "period": {
+    "start": "2019-01-31T05:03:00Z"
+  },
+  "diagnosis": [
+    {
+      "condition": {
+        "reference": "Condition/chf-scenario1-condition"
+      },
+      "use": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/diagnosis-role",
+            "code": "AD",
+            "display": "Admission diagnosis"
+          }
+        ]
+      }
+    }
+  ],
+  "location": [
+    {
+      "location": {
+        "reference": "Location/chf-scenario1-location"
+      },
+      "status": "active",
+      "period": {
+        "start": "2019-01-31T05:03:00Z"
+      }
+    }
+  ]
+}

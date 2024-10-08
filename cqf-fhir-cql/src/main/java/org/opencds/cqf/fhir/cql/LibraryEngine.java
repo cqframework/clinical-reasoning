@@ -56,6 +56,10 @@ public class LibraryEngine {
         return repository;
     }
 
+    public EvaluationSettings getSettings() {
+        return settings;
+    }
+
     private Pair<String, Object> buildContextParameter(String patientId) {
         Pair<String, Object> contextParameter = null;
         if (patientId != null) {

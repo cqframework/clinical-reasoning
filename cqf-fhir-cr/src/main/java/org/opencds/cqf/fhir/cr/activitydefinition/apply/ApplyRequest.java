@@ -13,6 +13,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource activityDefinition;
@@ -27,7 +28,7 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
     private final Boolean useServerData;
-    private final IBaseBundle bundle;
+    private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -47,11 +48,13 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle,
+            boolean useServerData,
+            IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
+        checkNotNull(activityDefinition, "expected non-null value for activityDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.activityDefinition = activityDefinition;
         this.subjectId = subjectId;
         this.encounterId = encounterId;
@@ -64,7 +67,7 @@ public class ApplyRequest implements ICpgRequest {
         this.settingContext = settingContext;
         this.parameters = parameters;
         this.useServerData = useServerData;
-        this.bundle = bundle;
+        this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         fhirVersion = activityDefinition.getStructureFhirVersionEnum();
@@ -76,7 +79,7 @@ public class ApplyRequest implements ICpgRequest {
                 this.practitionerId,
                 this.parameters,
                 this.useServerData,
-                this.bundle);
+                this.data);
     }
 
     public IBaseResource getActivityDefinition() {
@@ -134,12 +137,12 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public IBaseBundle getBundle() {
-        return bundle;
+    public IBaseBundle getData() {
+        return data;
     }
 
     @Override
-    public Boolean getUseServerData() {
+    public boolean getUseServerData() {
         return useServerData;
     }
 
@@ -208,6 +211,11 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public IBaseResource getQuestionnaire() {
+        return null;
+    }
+
+    @Override
+    public QuestionnaireAdapter getQuestionnaireAdapter() {
         return null;
     }
 }

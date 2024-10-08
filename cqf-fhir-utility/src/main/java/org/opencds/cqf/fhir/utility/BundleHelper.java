@@ -400,12 +400,32 @@ public class BundleHelper {
     }
 
     /**
-     * Returns a new entry element with the Resource
+     * Returns a new entry element
      * @param fhirVersion
+     * @return
+     */
+    public static IBaseBackboneElement newEntry(FhirVersionEnum fhirVersion) {
+        switch (fhirVersion) {
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent();
+            case R4:
+                return new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent();
+            case R5:
+                return new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent();
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Returns a new entry element with the Resource
      * @param resource
      * @return
      */
-    public static IBaseBackboneElement newEntryWithResource(FhirVersionEnum fhirVersion, IBaseResource resource) {
+    public static IBaseBackboneElement newEntryWithResource(IBaseResource resource) {
+        var fhirVersion = resource.getStructureFhirVersionEnum();
         switch (fhirVersion) {
             case DSTU3:
                 return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
@@ -584,7 +604,7 @@ public class BundleHelper {
     public static IBaseBackboneElement setEntryFullUrl(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, String fullUrl) {
         if (entry == null) {
-            entry = newEntryWithResource(fhirVersion, null);
+            entry = newEntry(fhirVersion);
         }
         switch (fhirVersion) {
             case DSTU3:
@@ -610,7 +630,7 @@ public class BundleHelper {
     public static IBaseBackboneElement setEntryRequest(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, IBaseBackboneElement request) {
         if (entry == null) {
-            entry = newEntryWithResource(fhirVersion, null);
+            entry = newEntry(fhirVersion);
         }
         if (request == null) {
             request = newRequest(fhirVersion, null);

@@ -3,23 +3,35 @@ package org.opencds.cqf.fhir.cr.inputparameters.r5;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Practitioner;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.ResourceType;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
+import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +51,19 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            Boolean useServerData,
-            IBaseBundle bundle) {
-        super(repository, subjectId, encounterId, practitionerId, parameters, useServerData, bundle);
-        this.parameters = resolveParameters(parameters);
+            boolean useServerData,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
+        super(repository, subjectId, encounterId, practitionerId, useServerData, data);
+        this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
     @Override
-    protected final Parameters resolveParameters(IBaseParameters baseParameters) {
+    protected final Parameters resolveParameters(
+            IBaseParameters baseParameters,
+            List<? extends IBaseBackboneElement> context,
+            List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
@@ -69,7 +86,95 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                 params.addParameter(part("%practitioner", practitioner));
             }
         }
+        if (launchContext != null && !launchContext.isEmpty()) {
+            resolveLaunchContext(params, context, launchContext);
+        }
         return params;
+    }
+
+    protected boolean validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE code, String type) {
+        switch (code) {
+            case PATIENT:
+                return type.equals(ResourceType.Patient.name());
+            case ENCOUNTER:
+                return type.equals(ResourceType.Encounter.name());
+            case LOCATION:
+                return type.equals(ResourceType.Location.name());
+            case USER:
+                return type.equals(ResourceType.Patient.name())
+                        || type.equals(ResourceType.Practitioner.name())
+                        || type.equals(ResourceType.PractitionerRole.name())
+                        || type.equals(ResourceType.RelatedPerson.name());
+            case STUDY:
+                return type.equals(ResourceType.ResearchStudy.name());
+
+            default:
+                return false;
+        }
+    }
+
+    protected void resolveLaunchContext(
+            Parameters params,
+            List<? extends IBaseBackboneElement> contexts,
+            List<IBaseExtension<?, ?>> launchContexts) {
+        launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
+            var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
+            var type = launchContext
+                    .getExtensionByUrl("type")
+                    .getValueAsPrimitive()
+                    .getValueAsString();
+            if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
+                throw new IllegalArgumentException(String.format("Unsupported launch context for %s: %s", name, type));
+            }
+            var content = getContent(contexts, name);
+            if (content == null || content.isEmpty()) {
+                throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
+            }
+            var value = getValue(type, content);
+            if (!value.isEmpty()) {
+                var resource =
+                        (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R5));
+                if (value.size() > 1) {
+                    value.forEach(
+                            v -> ((Bundle) resource).addEntry(new BundleEntryComponent().setResource((Resource) v)));
+                }
+                params.addParameter(part("%" + name, resource));
+                var cqlParameterName = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+                params.addParameter(part(cqlParameterName, resource));
+            } else {
+                throw new IllegalArgumentException(String.format("Unable to retrieve resource for context: %s", name));
+            }
+        });
+    }
+
+    private List<ParametersParameterComponent> getContent(List<? extends IBaseBackboneElement> contexts, String name) {
+        return contexts == null
+                ? null
+                : contexts.stream()
+                        .map(c -> (ParametersParameterComponent) c)
+                        .filter(c -> c.getPart().stream()
+                                .filter(p -> p.getName().equals("name"))
+                                .anyMatch(p -> ((StringType) p.getValue())
+                                        .getValueAsString()
+                                        .equals(name)))
+                        .flatMap(c ->
+                                c.getPart().stream().filter(p -> p.getName().equals("content")))
+                        .collect(Collectors.toList());
+    }
+
+    private List<IBaseResource> getValue(String type, List<ParametersParameterComponent> content) {
+        return content.stream()
+                .map(p -> {
+                    if (p.getValue() instanceof Reference) {
+                        return readRepository(
+                                fhirContext().getResourceDefinition(type).getImplementingClass(),
+                                ((Reference) p.getValue()).getReferenceElement());
+                    } else {
+                        return (Resource) p.getResource();
+                    }
+                })
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -33,7 +33,7 @@ public interface IActivityDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            Boolean useServerData,
+            boolean useServerData,
             IBaseBundle data,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,

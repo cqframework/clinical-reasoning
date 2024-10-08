@@ -1,21 +1,28 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestForVersion;
+import static org.mockito.Mockito.doThrow;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Arrays;
+import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,55 +34,113 @@ class ProcessActionTests {
     LibraryEngine libraryEngine;
 
     @Mock
+    ModelResolver modelResolver;
+
+    @Mock
     ApplyProcessor applyProcessor;
 
     @Mock
     GenerateProcessor generateProcessor;
 
-    @InjectMocks
-    @Spy
-    ProcessAction fixture;
+    @Mock
+    private IInputParameterResolver inputParameterResolver;
 
-    @BeforeEach
-    void setup() {
-        doReturn(repository).when(libraryEngine).getRepository();
-    }
+    @Spy
+    @InjectMocks
+    ProcessAction fixture;
 
     @Test
     void unsupportedVersionShouldReturnNull() {
-        doReturn(FhirContext.forR4BCached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, null);
         var action = new org.hl7.fhir.r4b.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(request, action);
+        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R4B, action);
         assertNull(requestAction);
     }
 
     @Test
     void dstu3Request() {
-        doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
         var action = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(request, action);
+        var requestAction = fixture.generateRequestAction(FhirVersionEnum.DSTU3, action);
         assertTrue(requestAction instanceof org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent);
     }
 
     @Test
     void r4Request() {
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(request, action);
+        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R4, action);
         assertTrue(requestAction instanceof org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent);
     }
 
     @Test
     void r5Request() {
-        doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
         var action = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(request, action);
+        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R5, action);
         assertTrue(
                 requestAction
                         instanceof org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent);
+    }
+
+    @Test
+    void testExceptionDuringItemGeneration() {
+        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        action.addInput(new org.hl7.fhir.r4.model.DataRequirement()
+                .addProfile("http://fhir.org/test/StructureDefinition/test"));
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+        fixture.addQuestionnaireItemForInput(request, action);
+        var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertTrue(oc.hasIssue());
+        assertTrue(oc.getIssueFirstRep()
+                .getDiagnosticsElement()
+                .getValue()
+                .contains("An error occurred while generating Questionnaire items for action input:"));
+    }
+
+    @Test
+    void testExceptionDuringMeetsCondition() {
+        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        var expression = "test";
+        action.addCondition()
+                .setKind(ActionConditionKind.APPLICABILITY)
+                .setExpression(new Expression().setLanguage("text/cql").setExpression(expression));
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+        doThrow(new IllegalArgumentException())
+                .when(libraryEngine)
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null));
+        fixture.meetsConditions(request, action);
+        var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertTrue(oc.hasIssue());
+        assertTrue(oc.getIssueFirstRep()
+                .getDiagnosticsElement()
+                .getValue()
+                .contains(String.format("Condition expression %s encountered exception:", expression)));
+    }
+
+    @Test
+    void testConditionResultNull() {
+        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
+        action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+        doReturn(null).when(libraryEngine).resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null));
+        var result = fixture.meetsConditions(request, action);
+        assertFalse(result);
+        assertNull(request.getOperationOutcome());
+    }
+
+    @Test
+    void testConditionResultNotBoolean() {
+        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
+        action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+        doReturn(Arrays.asList(new org.hl7.fhir.r4.model.StringType("Test")))
+                .when(libraryEngine)
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null));
+        var result = fixture.meetsConditions(request, action);
+        assertFalse(result);
+        assertNull(request.getOperationOutcome());
     }
 }

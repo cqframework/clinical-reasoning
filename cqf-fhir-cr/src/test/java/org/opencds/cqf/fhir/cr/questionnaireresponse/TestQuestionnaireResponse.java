@@ -6,6 +6,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,10 +25,16 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaireResponse {
-    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/questionnaireresponse";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        return TestQuestionnaireResponse.class.getResourceAsStream(asset);
+        var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
+        var file = path.toFile();
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
     public static String load(InputStream asset) throws IOException {

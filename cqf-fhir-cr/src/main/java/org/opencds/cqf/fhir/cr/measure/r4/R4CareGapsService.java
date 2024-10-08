@@ -4,6 +4,8 @@ import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -71,10 +73,24 @@ public class R4CareGapsService {
             List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
-        measureId.forEach(id -> eitherList.add(Eithers.forLeft3(id)));
-        measureIdentifier.forEach(identifier -> eitherList.add(Eithers.forMiddle3(identifier)));
-        measureUrl.forEach(canonical -> eitherList.add(Eithers.forRight3(canonical)));
 
+        measureId.stream()
+                .filter(x -> x.getIdPart() != null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())
+                .forEach(id -> eitherList.add(Eithers.forLeft3(id)));
+        measureIdentifier.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())
+                .forEach(identifier -> eitherList.add(Eithers.forMiddle3(identifier)));
+        measureUrl.stream()
+                .filter(Objects::nonNull)
+                .filter(x -> !x.toString().contains("null"))
+                .collect(Collectors.toList())
+                .forEach(canonical -> eitherList.add(Eithers.forRight3(canonical)));
+        if (eitherList.isEmpty()) {
+            throw new IllegalArgumentException("no measure resolving parameter was specified");
+        }
         return eitherList;
     }
 }

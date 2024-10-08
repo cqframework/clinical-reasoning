@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
-    private static final String dependsOn = "depends-on";
+    private static final String DEPENDSON = "depends-on";
 
     @SuppressWarnings("unchecked")
     @Override

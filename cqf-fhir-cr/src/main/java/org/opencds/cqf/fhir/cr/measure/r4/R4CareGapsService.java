@@ -67,7 +67,7 @@ public class R4CareGapsService {
                 notDocument);
     }
 
-    private List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
+    protected List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
             List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();

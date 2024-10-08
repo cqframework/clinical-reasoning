@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
@@ -99,7 +98,7 @@ public class R4CareGapsProcessor {
         return result.setParameter(components);
     }
 
-    private R4CareGapsParameters setCareGapParameters(
+    protected R4CareGapsParameters setCareGapParameters(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String subject,
@@ -116,7 +115,7 @@ public class R4CareGapsProcessor {
         return r4CareGapsParams;
     }
 
-    private List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
+    protected List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
         return measure.stream()
                 .map(x -> x.fold(
                         id -> repository.read(Measure.class, id),
@@ -136,7 +135,7 @@ public class R4CareGapsProcessor {
         return subjects;
     }
 
-    private void addConfiguredResource(String id, String key) {
+    protected void addConfiguredResource(String id, String key) {
         // read resource from repository
         Resource resource = repository.read(Organization.class, new IdType(RESOURCE_TYPE_ORGANIZATION, id));
 
@@ -151,7 +150,7 @@ public class R4CareGapsProcessor {
         configuredResources.put(key, resource);
     }
 
-    private void checkMeasureImprovementNotation(Measure measure) {
+    protected void checkMeasureImprovementNotation(Measure measure) {
         if (!measure.hasImprovementNotation()) {
             ourLog.warn(
                     "Measure '{}' does not specify an improvement notation, defaulting to: '{}'.",
@@ -160,19 +159,11 @@ public class R4CareGapsProcessor {
         }
     }
 
-    private Parameters initializeResult() {
+    protected Parameters initializeResult() {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
     }
 
-    private List<String> canonicalToString(List<CanonicalType> measureUrls) {
-        return measureUrls.stream()
-                .map(PrimitiveType::toString)
-                .map(x -> x.replace("CanonicalType[", ""))
-                .map(x -> x.replace("]", ""))
-                .collect(Collectors.toList());
-    }
-
-    private void checkValidStatusCode(List<String> statuses) {
+    protected void checkValidStatusCode(List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -186,7 +177,7 @@ public class R4CareGapsProcessor {
         }
     }
 
-    private void measureCompatibilityCheck(List<Measure> measures) {
+    protected void measureCompatibilityCheck(List<Measure> measures) {
         for (Measure measure : measures) {
             checkMeasureScoringType(measure);
             checkMeasureImprovementNotation(measure);
@@ -195,7 +186,7 @@ public class R4CareGapsProcessor {
         }
     }
 
-    private void checkMeasureBasis(Measure measure) {
+    protected void checkMeasureBasis(Measure measure) {
         R4MeasureBasisDef measureDef = new R4MeasureBasisDef();
         if (!measureDef.isBooleanBasis(measure)) {
             throw new IllegalArgumentException(
@@ -208,7 +199,7 @@ public class R4CareGapsProcessor {
      * This is helpful when creating DetectedIssues per GroupComponent so endUsers can attribute evidence of a Care-Gap to the specific MeasureReport result
      * @param measure Measure resource
      */
-    private void checkMeasureGroupComponents(Measure measure) {
+    protected void checkMeasureGroupComponents(Measure measure) {
         // if a Multi-rate Measure, enforce groupId to be populated
         if (measure.getGroup().size() > 1) {
             for (MeasureGroupComponent group : measure.getGroup()) {
@@ -221,7 +212,7 @@ public class R4CareGapsProcessor {
         }
     }
 
-    private void checkMeasureScoringType(Measure measure) {
+    protected void checkMeasureScoringType(Measure measure) {
         List<MeasureScoring> scoringTypes = r4MeasureServiceUtils.getMeasureScoringDef(measure);
         for (MeasureScoring measureScoringType : scoringTypes) {
             if (!MeasureScoring.PROPORTION.equals(measureScoringType)
@@ -233,7 +224,7 @@ public class R4CareGapsProcessor {
         }
     }
 
-    private void checkConfigurationReferences() {
+    protected void checkConfigurationReferences() {
         careGapsProperties.validateRequiredProperties();
 
         addConfiguredResource(careGapsProperties.getCareGapsReporter(), CareGapsConstants.CARE_GAPS_REPORTER_KEY);

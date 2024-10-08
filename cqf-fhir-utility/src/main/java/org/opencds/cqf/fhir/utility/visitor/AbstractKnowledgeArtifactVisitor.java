@@ -13,7 +13,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
 public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
-    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/crmi-isOwned";
+    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
 
     protected List<IBaseBackboneElement> findArtifactCommentsToUpdate(
             IBaseResource artifact, String releaseVersion, Repository repository) {

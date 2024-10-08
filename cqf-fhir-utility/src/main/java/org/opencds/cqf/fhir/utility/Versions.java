@@ -42,11 +42,23 @@ public class Versions {
             // try string and number compares if it's not semver
             try {
                 final var c = Integer.parseInt(version1) - Integer.parseInt(version2);
-                return c > 0 ? 1 : (c < 0 ? -1 : 0);
+                if (c > 0) {
+                    return 1;
+                } else if (c < 0) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             } catch (NumberFormatException e) {
                 final var c = version1.compareTo(version2);
                 // compareTo returns numbers outside [-1,1]
-                return c > 0 ? 1 : (c < 0 ? -1 : 0);
+                if (c > 0) {
+                    return 1;
+                } else if (c < 0) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             }
         }
 
@@ -91,7 +103,13 @@ public class Versions {
                 } else {
                     final var c = tail1.getRight().compareTo(tail2.getRight());
                     // compareTo returns numbers outside [-1,1]
-                    return c > 0 ? 1 : (c < 0 ? -1 : 0);
+                    if (c > 0) {
+                        return 1;
+                    } else if (c < 0) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 }
             }
 

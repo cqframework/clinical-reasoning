@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -247,6 +248,8 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
+        library.addRelatedArtifact().setResource("should-be-deleted-1").setType(RelatedArtifactType.DEPENDSON);
+        library.addRelatedArtifact().setResource("should-be-deleted-2").setType(RelatedArtifactType.DEPENDSON);
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
         String existingVersion = "1.2.3";

@@ -30,7 +30,9 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -263,6 +265,12 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
+        library.addRelatedArtifact()
+                .setResource(new Reference("should-be-deleted-1"))
+                .setType(RelatedArtifactType.DEPENDSON);
+        library.addRelatedArtifact()
+                .setResource(new Reference("should-be-deleted-2"))
+                .setType(RelatedArtifactType.DEPENDSON);
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
         String existingVersion = "1.2.3";
@@ -670,44 +678,45 @@ class ReleaseVisitorTests {
         }
     }
 
-    // @Test
-    // void release_test_artifactComment_updated() {
-    //     Bundle bundle = (Bundle)
-    // jsonParser.parseResource(KnowledgeArtifactAdapterReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
-    //     spyRepository.transaction(bundle);
-    //     KnowledgeArtifactReleaseVisitor releaseVisitor = new KnowledgeArtifactReleaseVisitor();
-    //     Library library = spyRepository.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
-    //     dstu3LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-    // 	String versionData = "1.2.3";
-    // 	Parameters approveParams = parameters(
-    // 		part("approvalDate", new DateType(new Date(),TemporalPrecisionEnum.DAY))
-    // 	);
-    //     Bundle approvedBundle = (Bundle) libraryAdapter.accept(releaseVisitor, spyRepository, params);
-
-    // 	Optional<BundleEntryComponent> maybeArtifactAssessment = approvedBundle.getEntry().stream().filter(entry ->
-    // entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeArtifactAssessment.isPresent());
-    // 	ArtifactAssessment artifactAssessment =
-    // spyRepository.read(ArtifactAssessment.class,maybeArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(artifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3-draft"));
-    // 	Parameters releaseParams = parameters(
-    // 		part("version", versionData),
-    // 		part("versionBehavior", new CodeType("default"))
-    // 	);
-    // 	Bundle releasedBundle = getClient().operation()
-    // 			.onInstance("Library/ReleaseSpecificationLibrary")
-    // 			.named("$release")
-    // 			.withParameters(releaseParams)
-    // 			.useHttpGet()
-    // 			.returnResourceType(Bundle.class)
-    // 			.execute();
-    // 	Optional<BundleEntryComponent> maybeReleasedArtifactAssessment = releasedBundle.getEntry().stream().filter(entry
-    // -> entry.getResponse().getLocation().contains("Basic")).findAny();
-    // 	assertTrue(maybeReleasedArtifactAssessment.isPresent());
-    // 	ArtifactAssessment releasedArtifactAssessment =
-    // getClient().fetchResourceFromUrl(ArtifactAssessment.class,maybeReleasedArtifactAssessment.get().getResponse().getLocation());
-    //
-    //	assertTrue(releasedArtifactAssessment.getDerivedFromContentRelatedArtifact().get().getResourceElement().getValue().equals("http://ersd.aimsplatform.org/fhir/Library/ReleaseSpecificationLibrary|1.2.3"));
-    // }
+    @Test
+    void release_preserves_extensions() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor();
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        for (final var originalRelatedArtifact : originalLibrary.getRelatedArtifact()) {
+            releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
+                if (Canonicals.getUrl(releasedRelatedArtifact.getResource().getReference())
+                                .equals(Canonicals.getUrl(
+                                        originalRelatedArtifact.getResource().getReference()))
+                        && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
+                    assertEquals(
+                            releasedRelatedArtifact.getExtension().size(),
+                            originalRelatedArtifact.getExtension().size());
+                    releasedRelatedArtifact.getExtension().forEach(ext -> {
+                        assertEquals(
+                                originalRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size(),
+                                releasedRelatedArtifact
+                                        .getExtensionsByUrl(ext.getUrl())
+                                        .size());
+                    });
+                }
+            });
+        }
+    }
 }

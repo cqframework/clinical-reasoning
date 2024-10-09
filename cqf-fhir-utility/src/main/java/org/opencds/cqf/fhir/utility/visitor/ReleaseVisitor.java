@@ -202,55 +202,53 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         var resourcesToUpdate = new ArrayList<IDomainResource>();
         if (releasedResources.contains(artifactAdapter.getCanonical())) {
             return resourcesToUpdate;
-        } else {
-            releasedResources.add(artifactAdapter.getCanonical());
-            // Step 1: Update the Date, version and propagate effectivePeriod if it doesn't exist
-            updateMetadata(artifactAdapter, version, rootEffectivePeriod, current);
-            // Step 2: add the resource to the list of released resources
-            resourcesToUpdate.add(artifactAdapter.get());
-            // Step 3 : Go through all the components, update them and recursively release them if Owned
-            for (var component : artifactAdapter.getComponents()) {
-                final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
-                if (!StringUtils.isBlank(preReleaseReference)) {
-                    // For composed-of references, if a version is NOT specified in the reference
-                    // then the latest version of the referenced artifact should be used.
+        }
+        releasedResources.add(artifactAdapter.getCanonical());
+        // Step 1: Update the Date, version and propagate effectivePeriod if it doesn't exist
+        updateMetadata(artifactAdapter, version, rootEffectivePeriod, current);
+        // Step 2: add the resource to the list of released resources
+        resourcesToUpdate.add(artifactAdapter.get());
+        // Step 3 : Go through all the components, update them and recursively release them if Owned
+        for (var component : artifactAdapter.getComponents()) {
+            final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+            if (!StringUtils.isBlank(preReleaseReference)) {
+                // For composed-of references, if a version is NOT specified in the reference
+                // then the latest version of the referenced artifact should be used.
 
-                    //  If a version IS specified then `tryGetLatestVersion`
-                    //  will return that version.
-                    var alreadyUpdated = checkIfReferenceInList(preReleaseReference, resourcesToUpdate);
-                    if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)
-                            && !alreadyUpdated.isPresent()) {
-                        // get the latest version regardless of status because it's owned and we're releasing it
-                        var latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
-                        if (latest.isPresent()) {
-                            checkNonExperimental(latest.get().get(), experimentalBehavior, repository);
-                            // release components recursively
-                            resourcesToUpdate.addAll(internalRelease(
-                                    latest.get(),
-                                    version,
-                                    rootEffectivePeriod,
-                                    latestFromTxServer,
-                                    experimentalBehavior,
-                                    repository,
-                                    current,
-                                    releasedResources));
-                        } else {
-                            // if missing throw because it's an owned resource
-                            throw new ResourceNotFoundException(String.format(
-                                    "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
-                                    preReleaseReference, artifactAdapter.getUrl()));
-                        }
-                    } else if (!alreadyUpdated.isPresent()) {
-                        // if it's a not-owned component just try to get the latest active version
-                        VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, "active")
-                                .ifPresent(latestActive ->
-                                        // check if it's experimental
-                                        checkNonExperimental(latestActive.get(), experimentalBehavior, repository));
+                //  If a version IS specified then `tryGetLatestVersion`
+                //  will return that version.
+                var alreadyUpdated = checkIfReferenceInList(preReleaseReference, resourcesToUpdate);
+                if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !alreadyUpdated.isPresent()) {
+                    // get the latest version regardless of status because it's owned and we're releasing it
+                    var latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
+                    if (latest.isPresent()) {
+                        checkNonExperimental(latest.get().get(), experimentalBehavior, repository);
+                        // release components recursively
+                        resourcesToUpdate.addAll(internalRelease(
+                                latest.get(),
+                                version,
+                                rootEffectivePeriod,
+                                latestFromTxServer,
+                                experimentalBehavior,
+                                repository,
+                                current,
+                                releasedResources));
+                    } else {
+                        // if missing throw because it's an owned resource
+                        throw new ResourceNotFoundException(String.format(
+                                "Resource with URL '%s' is Owned by this repository and referenced by resource '%s', but no active version was found on the server.",
+                                preReleaseReference, artifactAdapter.getUrl()));
                     }
+                } else if (!alreadyUpdated.isPresent()) {
+                    // if it's a not-owned component just try to get the latest active version
+                    VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, "active")
+                            .ifPresent(latestActive ->
+                                    // check if it's experimental
+                                    checkNonExperimental(latestActive.get(), experimentalBehavior, repository));
                 }
             }
-            return resourcesToUpdate;
         }
+        return resourcesToUpdate;
     }
 
     private void gatherDependencies(

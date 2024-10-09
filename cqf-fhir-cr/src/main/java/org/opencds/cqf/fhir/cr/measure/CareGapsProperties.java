@@ -14,17 +14,7 @@ public class CareGapsProperties {
      * profile found in the <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci
      * DEQM FHIR Implementation Guide</a>.
      **/
-    private String fhirBaseUrl;
-
     private String careGapsCompositionSectionAuthor;
-
-    public String getMyFhirBaseUrl() {
-        return fhirBaseUrl;
-    }
-
-    public void setMyFhirBaseUrl(String fhirBaseUrl) {
-        this.fhirBaseUrl = fhirBaseUrl;
-    }
 
     public String getCareGapsReporter() {
         return careGapsReporter;
@@ -49,8 +39,5 @@ public class CareGapsProperties {
         checkArgument(
                 !Strings.isNullOrEmpty(getCareGapsCompositionSectionAuthor()),
                 "Setting care-gaps properties.care_gaps_composition_section_author is required for the $care-gaps operation.");
-        checkArgument(
-                !Strings.isNullOrEmpty(fhirBaseUrl),
-                "The fhirBaseUrl setting is required for the $care-gaps operation.");
     }
 }

@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - aphl-vsm-temp
 
 permissions:
   contents: write

@@ -72,19 +72,24 @@ public class R4CareGapsService {
             List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
-
-        measureId.stream()
-                .filter(this::isValidMeasureIdType)
-                .map(Eithers::<IdType, String, CanonicalType>forLeft3)
-                .forEach(eitherList::add);
-        measureIdentifier.stream()
-                .filter(Objects::nonNull)
-                .map(Eithers::<IdType, String, CanonicalType>forMiddle3)
-                .forEach(eitherList::add);
-        measureUrl.stream()
-                .filter(this::isValidCanonical)
-                .map(Eithers::<IdType, String, CanonicalType>forRight3)
-                .forEach(eitherList::add);
+        if (measureId != null) {
+            measureId.stream()
+                    .filter(this::isValidMeasureIdType)
+                    .map(Eithers::<IdType, String, CanonicalType>forLeft3)
+                    .forEach(eitherList::add);
+        }
+        if (measureIdentifier != null) {
+            measureIdentifier.stream()
+                    .filter(Objects::nonNull)
+                    .map(Eithers::<IdType, String, CanonicalType>forMiddle3)
+                    .forEach(eitherList::add);
+        }
+        if (measureUrl != null) {
+            measureUrl.stream()
+                    .filter(this::isValidCanonical)
+                    .map(Eithers::<IdType, String, CanonicalType>forRight3)
+                    .forEach(eitherList::add);
+        }
         if (eitherList.isEmpty()) {
             throw new IllegalArgumentException("no measure resolving parameter was specified");
         }

@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -36,7 +37,9 @@ import org.slf4j.LoggerFactory;
 
 public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private Logger log = LoggerFactory.getLogger(ReleaseVisitor.class);
+    private static final String DEPENDSON = "depends-on";
 
+    @SuppressWarnings("unchecked")
     @Override
     public IBase visit(
             KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
@@ -89,8 +92,10 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 .filter(dep -> dep.getExtension() != null && dep.getExtension().size() > 0)
                 .collect(Collectors.toList());
         // once iteration is complete, delete all depends-on RAs in the root artifact
-        rootAdapter.getRelatedArtifact().removeIf(ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra)
-                .equalsIgnoreCase("depends-on"));
+        var noDeps = rootAdapter.getRelatedArtifact();
+        noDeps.removeIf(
+                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
+        rootAdapter.setRelatedArtifact(noDeps);
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
                 .map(p -> VisitorHelper.getListParameter(Constants.SYSTEM_VERSION, p, IPrimitiveType.class)
@@ -140,11 +145,11 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                         .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
                                         .equals(Canonicals.getUrl(relatedArtifactReference))
                                 && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase("depends-on"))
+                                        .equalsIgnoreCase(DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
-                            // ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
-                            //         .addAll((List<IBaseExtension<?, ?>>) dep.getExtension());
+                            ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
+                                    .addAll(dep.getExtension());
                             originalDependenciesWithExtensions.removeIf(
                                     ra -> ra.getReference().equals(relatedArtifactReference));
                         });
@@ -276,7 +281,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             }
             var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
                     fhirVersion,
-                    "depends-on",
+                    DEPENDSON,
                     updatedReference,
                     res.map(a -> a.getDescriptor()).orElse(null));
             var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
@@ -365,7 +370,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                 var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion,
-                        "depends-on",
+                        DEPENDSON,
                         dependency.getReference(),
                         dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
                 var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();

@@ -719,4 +719,32 @@ class ReleaseVisitorTests {
             });
         }
     }
+
+    @Test
+    void release_should_not_duplicate_components_as_dependencies() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor();
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
+        Optional<BundleEntryComponent> maybeRCTCLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/rctc"))
+                .findFirst();
+        assertTrue(maybeRCTCLib.isPresent());
+        var releasedRCTCLibrary = repo.read(
+                Library.class, new IdType(maybeRCTCLib.get().getResponse().getLocation()));
+        assertEquals(2, releasedRCTCLibrary.getRelatedArtifact().size());
+        // 1 component
+        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
+                .anyMatch(ra -> ra.getType() == RelatedArtifactType.DEPENDSON));
+        // 1 dependency
+        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
+                .anyMatch(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF));
+    }
 }

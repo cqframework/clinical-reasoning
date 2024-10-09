@@ -716,12 +716,14 @@ class ReleaseVisitorTests {
                 .filter(entry -> entry.getResponse().getLocation().contains("Library/rctc"))
                 .findFirst();
         assertTrue(maybeRCTCLib.isPresent());
-        var releasedRCTCLibrary =
-                repo.read(Library.class, new IdType(maybeRCTCLib.get().getResponse().getLocation()));
-        assertEquals(2,releasedRCTCLibrary.getRelatedArtifact().size());
+        var releasedRCTCLibrary = repo.read(
+                Library.class, new IdType(maybeRCTCLib.get().getResponse().getLocation()));
+        assertEquals(2, releasedRCTCLibrary.getRelatedArtifact().size());
         // 1 component
-        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream().anyMatch(ra -> ra.getType() == RelatedArtifactType.DEPENDSON));
+        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
+                .anyMatch(ra -> ra.getType() == RelatedArtifactType.DEPENDSON));
         // 1 dependency
-        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream().anyMatch(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF));
+        assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
+                .anyMatch(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF));
     }
 }

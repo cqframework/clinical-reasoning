@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -102,7 +104,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
             library.setStatus(adapter.getStatus());
             library.setType("module-definition");
         }
-        var gatheredResources = new ArrayList<String>();
+        var gatheredResources = new HashSet<String>();
         var relatedArtifacts = stripInvalid(library);
         recursiveGather(
                 adapter.get(),
@@ -203,7 +205,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
 
     protected <T extends ICompositeType & IBaseHasExtensions> void recursiveGather(
             IDomainResource resource,
-            List<String> gatheredResources,
+            Set<String> gatheredResources,
             List<T> relatedArtifacts,
             Repository repository,
             List<String> capability,
@@ -212,10 +214,13 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
             List<String> checkArtifactVersion,
             List<String> forceArtifactVersion)
             throws PreconditionFailedException {
-        if (resource != null && !gatheredResources.contains(resource.getId())) {
-            gatheredResources.add(resource.getId());
-            var fhirVersion = resource.getStructureFhirVersionEnum();
-            var adapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
+        if (resource == null) {
+            return;
+        }
+        var fhirVersion = resource.getStructureFhirVersionEnum();
+        var adapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
+        if (!gatheredResources.contains(adapter.getCanonical())) {
+            gatheredResources.add(adapter.getCanonical());
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, artifactVersion, checkArtifactVersion, forceArtifactVersion);
             var reference = adapter.hasVersion()

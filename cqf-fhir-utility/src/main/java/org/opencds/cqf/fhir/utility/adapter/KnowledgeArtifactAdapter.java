@@ -98,6 +98,17 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         getModelResolver().setValue(get(), "version", newStringType(get().getStructureFhirVersionEnum(), version));
     }
 
+    /**
+     * Returns the url of the artifact appended with '|' version if the artifact has a version.
+     * @return
+     */
+    default String getCanonical() {
+        if (!hasUrl()) {
+            return getId().getValueAsString();
+        }
+        return getUrl().concat(hasVersion() ? String.format("|%s", getVersion()) : "");
+    }
+
     List<IDependencyInfo> getDependencies();
 
     default String getReferenceSource() {

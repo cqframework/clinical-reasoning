@@ -9,9 +9,11 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -111,9 +113,11 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 .orElse(new ArrayList<String>());
 
         // Report all dependencies, resolving unversioned dependencies to the latest known version, recursively
+        var gatheredResources = new HashSet<String>();
         gatherDependencies(
                 rootAdapter,
                 rootAdapter,
+                gatheredResources,
                 releasedResources,
                 fhirVersion,
                 repository,
@@ -243,139 +247,153 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     private void gatherDependencies(
             KnowledgeArtifactAdapter rootAdapter,
             KnowledgeArtifactAdapter artifactAdapter,
+            Set<String> gatheredResources,
             List<IDomainResource> releasedResources,
             FhirVersionEnum fhirVersion,
             Repository repository,
             Map<String, IDomainResource> alreadyUpdatedDependencies,
             List<String> systemVersionExpansionParameters,
             List<String> canonicalVersionExpansionParameters) {
-
-        // Step 1: Check components, add them to the cache and convert to dependencies
-        for (var component : artifactAdapter.getComponents()) {
-            // all components are already updated to latest as part of release
-            var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
-            var updatedReference = preReleaseReference;
-            Optional<KnowledgeArtifactAdapter> res = Optional.empty();
-            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
-                res = checkIfReferenceInList(preReleaseReference, releasedResources);
-                if (!res.isPresent()) {
-                    // should never happen since we check all references as part of `internalRelease`
-                    throw new InternalErrorException(
-                            "Owned resource reference not found during release: " + preReleaseReference);
-                }
-            } else {
-                res = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
-            }
-            if (res.isPresent()) {
-                // add to cache if resolvable
-                if (!alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(preReleaseReference))) {
-                    alreadyUpdatedDependencies.put(
-                            Canonicals.getUrl(preReleaseReference), res.get().get());
-                }
-                // update the reference to latest
-                updatedReference = res.get().hasVersion()
-                        ? String.format("%s|%s", res.get().getUrl(), res.get().getVersion())
-                        : res.get().getUrl();
-                KnowledgeArtifactAdapter.setRelatedArtifactReference(
-                        component, updatedReference, res.get().getDescriptor());
-            }
-            var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
-                    fhirVersion,
-                    DEPENDSON,
-                    updatedReference,
-                    res.map(a -> a.getDescriptor()).orElse(null));
-            var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
-            updatedRelatedArtifacts.add(componentToDependency);
-            artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+        if (artifactAdapter == null) {
+            return;
         }
-        var dependencies = artifactAdapter.getDependencies();
-        // Step 2: update dependencies recursively
-        for (var dependency : dependencies) {
-            KnowledgeArtifactAdapter dependencyAdapter = null;
-            if (alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(dependency.getReference()))) {
-                dependencyAdapter = AdapterFactory.forFhirVersion(fhirVersion)
-                        .createKnowledgeArtifactAdapter(
-                                alreadyUpdatedDependencies.get(Canonicals.getUrl(dependency.getReference())));
-                String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
-                dependency.setReference(versionedReference);
+        if (!gatheredResources.contains(artifactAdapter.getCanonical())) {
+            gatheredResources.add(artifactAdapter.getCanonical());
 
-                // the dependency is already updated we just need to recurse into it
-                gatherDependencies(
-                        rootAdapter,
-                        dependencyAdapter,
-                        releasedResources,
-                        fhirVersion,
-                        repository,
-                        alreadyUpdatedDependencies,
-                        systemVersionExpansionParameters,
-                        canonicalVersionExpansionParameters);
-            } else {
-                // try to get versions from expansion parameters if they are available
-                var resourceType = Canonicals.getResourceType(dependency.getReference()) == null
-                        ? null
-                        : SearchHelper.getResourceType(repository, dependency);
-                if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
-                    // TODO: update when we support requireVersionedDependencies
-                    Optional<String> expansionParametersVersion = Optional.empty();
-                    // assume if we can't figure out the resource type it's a CodeSystem
-                    if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
-                        expansionParametersVersion = systemVersionExpansionParameters.stream()
-                                .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
-                                .filter(canonical ->
-                                        Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                                .findAny();
-                    } else if (resourceType.getSimpleName().equals("ValueSet")) {
-                        expansionParametersVersion = canonicalVersionExpansionParameters.stream()
-                                .filter(canonical ->
-                                        Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                                .findAny();
+            // Step 1: Check components, add them to the cache and convert to dependencies
+            for (var component : artifactAdapter.getComponents()) {
+                // all components are already updated to latest as part of release
+                var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+                var updatedReference = preReleaseReference;
+                Optional<KnowledgeArtifactAdapter> res;
+                if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
+                    res = checkIfReferenceInList(preReleaseReference, releasedResources);
+                    if (!res.isPresent()) {
+                        // should never happen since we check all references as part of `internalRelease`
+                        throw new InternalErrorException(
+                                "Owned resource reference not found during release: " + preReleaseReference);
                     }
-                    expansionParametersVersion
-                            .map(canonical -> Canonicals.getVersion(canonical))
-                            .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
-                }
-
-                Optional<KnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
-                // if not available in expansion parameters then try to find the latest version and update the
-                // dependency
-                if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
-                    maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
-                                    dependency.getReference(), repository, "active")
-                            .map(adapter -> {
-                                String versionedReference = addVersionToReference(dependency.getReference(), adapter);
-                                dependency.setReference(versionedReference);
-                                alreadyUpdatedDependencies.put(
-                                        Canonicals.getUrl(dependency.getReference()), adapter.get());
-                                return adapter;
-                            });
                 } else {
-                    // This is a versioned reference, just get the dependency
-                    maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
+                    res = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
                 }
-                // if the dependency is resolvable then recurse into it
-                if (maybeAdapter.isPresent()) {
-                    dependencyAdapter = maybeAdapter.get();
+                if (res.isPresent()) {
+                    // add to cache if resolvable
+                    if (!alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(preReleaseReference))) {
+                        alreadyUpdatedDependencies.put(
+                                Canonicals.getUrl(preReleaseReference),
+                                res.get().get());
+                    }
+                    // update the reference to latest
+                    updatedReference = res.get().hasVersion()
+                            ? String.format(
+                                    "%s|%s", res.get().getUrl(), res.get().getVersion())
+                            : res.get().getUrl();
+                    KnowledgeArtifactAdapter.setRelatedArtifactReference(
+                            component, updatedReference, res.get().getDescriptor());
+                }
+                var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
+                        fhirVersion,
+                        DEPENDSON,
+                        updatedReference,
+                        res.map(a -> a.getDescriptor()).orElse(null));
+                var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
+                updatedRelatedArtifacts.add(componentToDependency);
+                artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+            }
+            var dependencies = artifactAdapter.getDependencies();
+            // Step 2: update dependencies recursively
+            for (var dependency : dependencies) {
+                KnowledgeArtifactAdapter dependencyAdapter = null;
+                if (alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(dependency.getReference()))) {
+                    dependencyAdapter = AdapterFactory.forFhirVersion(fhirVersion)
+                            .createKnowledgeArtifactAdapter(
+                                    alreadyUpdatedDependencies.get(Canonicals.getUrl(dependency.getReference())));
+                    String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
+                    dependency.setReference(versionedReference);
+
+                    // the dependency is already updated we just need to recurse into it
                     gatherDependencies(
                             rootAdapter,
                             dependencyAdapter,
+                            gatheredResources,
                             releasedResources,
                             fhirVersion,
                             repository,
                             alreadyUpdatedDependencies,
                             systemVersionExpansionParameters,
                             canonicalVersionExpansionParameters);
+                } else {
+                    // try to get versions from expansion parameters if they are available
+                    var resourceType = Canonicals.getResourceType(dependency.getReference()) == null
+                            ? null
+                            : SearchHelper.getResourceType(repository, dependency);
+                    if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
+                        // TODO: update when we support requireVersionedDependencies
+                        Optional<String> expansionParametersVersion = Optional.empty();
+                        // assume if we can't figure out the resource type it's a CodeSystem
+                        if (resourceType == null || resourceType.getSimpleName().equals("CodeSystem")) {
+                            expansionParametersVersion = systemVersionExpansionParameters.stream()
+                                    .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
+                                    .filter(canonical ->
+                                            Canonicals.getUrl(canonical).equals(dependency.getReference()))
+                                    .findAny();
+                        } else if (resourceType.getSimpleName().equals("ValueSet")) {
+                            expansionParametersVersion = canonicalVersionExpansionParameters.stream()
+                                    .filter(canonical ->
+                                            Canonicals.getUrl(canonical).equals(dependency.getReference()))
+                                    .findAny();
+                        }
+                        expansionParametersVersion
+                                .map(canonical -> Canonicals.getVersion(canonical))
+                                .ifPresent(
+                                        version -> dependency.setReference(dependency.getReference() + "|" + version));
+                    }
+
+                    Optional<KnowledgeArtifactAdapter> maybeAdapter;
+                    // if not available in expansion parameters then try to find the latest version and update the
+                    // dependency
+                    if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
+                        maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
+                                        dependency.getReference(), repository, "active")
+                                .map(adapter -> {
+                                    String versionedReference =
+                                            addVersionToReference(dependency.getReference(), adapter);
+                                    dependency.setReference(versionedReference);
+                                    alreadyUpdatedDependencies.put(
+                                            Canonicals.getUrl(dependency.getReference()), adapter.get());
+                                    return adapter;
+                                });
+                    } else {
+                        // This is a versioned reference, just get the dependency
+                        maybeAdapter =
+                                Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
+                    }
+                    // if the dependency is resolvable then recurse into it
+                    if (maybeAdapter.isPresent()) {
+                        dependencyAdapter = maybeAdapter.get();
+                        gatherDependencies(
+                                rootAdapter,
+                                dependencyAdapter,
+                                gatheredResources,
+                                releasedResources,
+                                fhirVersion,
+                                repository,
+                                alreadyUpdatedDependencies,
+                                systemVersionExpansionParameters,
+                                canonicalVersionExpansionParameters);
+                    }
                 }
-            }
-            // only add the dependency to the manifest if it is from a leaf artifact
-            if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
-                var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion,
-                        DEPENDSON,
-                        dependency.getReference(),
-                        dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
-                var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
-                updatedRelatedArtifacts.add(newDep);
-                rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+                // only add the dependency to the manifest if it is from a leaf artifact
+                if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
+                    var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
+                            fhirVersion,
+                            DEPENDSON,
+                            dependency.getReference(),
+                            dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
+                    var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
+                    updatedRelatedArtifacts.add(newDep);
+                    rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
+                }
             }
         }
     }

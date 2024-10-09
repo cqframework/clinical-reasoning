@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -72,24 +73,18 @@ public class R4CareGapsService {
             List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
-        if (measureId != null) {
-            measureId.stream()
-                    .filter(this::isValidMeasureIdType)
-                    .map(Eithers::<IdType, String, CanonicalType>forLeft3)
-                    .forEach(eitherList::add);
-        }
-        if (measureIdentifier != null) {
-            measureIdentifier.stream()
-                    .filter(Objects::nonNull)
-                    .map(Eithers::<IdType, String, CanonicalType>forMiddle3)
-                    .forEach(eitherList::add);
-        }
-        if (measureUrl != null) {
-            measureUrl.stream()
-                    .filter(this::isValidCanonical)
-                    .map(Eithers::<IdType, String, CanonicalType>forRight3)
-                    .forEach(eitherList::add);
-        }
+        Optional.ofNullable(measureId).ifPresent(list -> measureId.stream()
+                .filter(this::isValidMeasureIdType)
+                .map(Eithers::<IdType, String, CanonicalType>forLeft3)
+                .forEach(eitherList::add));
+        Optional.ofNullable(measureIdentifier).ifPresent(list -> measureIdentifier.stream()
+                .filter(Objects::nonNull)
+                .map(Eithers::<IdType, String, CanonicalType>forMiddle3)
+                .forEach(eitherList::add));
+        Optional.ofNullable(measureUrl).ifPresent(list -> measureUrl.stream()
+                .filter(this::isValidCanonical)
+                .map(Eithers::<IdType, String, CanonicalType>forRight3)
+                .forEach(eitherList::add));
         if (eitherList.isEmpty()) {
             throw new IllegalArgumentException("no measure resolving parameter was specified");
         }

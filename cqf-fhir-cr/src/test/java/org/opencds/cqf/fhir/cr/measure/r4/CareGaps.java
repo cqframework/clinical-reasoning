@@ -109,7 +109,6 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsReporter("alphora");
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
-            this.careGapsProperties.setMyFhirBaseUrl(this.serverBase);
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
         }
 

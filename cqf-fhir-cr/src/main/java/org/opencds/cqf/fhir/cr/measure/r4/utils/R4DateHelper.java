@@ -43,5 +43,4 @@ public class R4DateHelper {
         convertedDateTime.setPrecision(Precision.SECOND);
         return convertedDateTime;
     }
-
 }

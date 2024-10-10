@@ -14,10 +14,7 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 public class Dstu3MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
     public Dstu3MeasureEvaluation(
-            CqlEngine context,
-            Measure measure,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier) {
+            CqlEngine context, Measure measure, LibraryEngine libraryEngine, VersionedIdentifier versionIdentifier) {
         super(
                 context,
                 measure,

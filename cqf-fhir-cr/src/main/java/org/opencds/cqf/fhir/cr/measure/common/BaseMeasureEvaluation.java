@@ -74,8 +74,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         MeasureDef measureDef = this.measureDefBuilder.build(measure);
         MeasureEvaluator measureEvaluation =
                 new MeasureEvaluator(context, this.measurementPeriodParameterName, libraryEngine);
-        measureDef =
-                measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
+        measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
 
         Interval measurementPeriodInterval;
         if (measurementPeriod == null) {

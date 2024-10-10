@@ -250,8 +250,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 subjectIds,
                 measurementPeriod,
                 libraryEngine,
-                id
-        );
+                id);
         assertNotNull(report);
 
         // Simulate sending it across the wire

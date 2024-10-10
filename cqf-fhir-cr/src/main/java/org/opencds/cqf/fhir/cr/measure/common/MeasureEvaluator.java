@@ -95,33 +95,17 @@ public class MeasureEvaluator {
             case PATIENT:
             case SUBJECT:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.INDIVIDUAL,
-                        subjectIds,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, versionedIdentifier, zonedDateTime);
             case SUBJECTLIST:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.SUBJECTLIST,
-                        subjectIds,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, versionedIdentifier, zonedDateTime);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.PATIENTLIST,
-                        subjectIds,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, versionedIdentifier, zonedDateTime);
             case POPULATION:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.SUMMARY,
-                        subjectIds,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.SUMMARY, subjectIds, versionedIdentifier, zonedDateTime);
             default:
                 // never hit because this value is set upstream
                 throw new IllegalArgumentException(
@@ -314,8 +298,8 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
-            EvaluationResult result = libraryEngine.getEvaluationResult(
-                    id, subjectId, null, null, null, null, zonedDateTime, context);
+            EvaluationResult result =
+                    libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

@@ -18,15 +18,13 @@ public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureR
             CqlEngine context,
             Measure measure,
             LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier,
-            Parameters parameters) {
+            VersionedIdentifier versionIdentifier) {
         super(
                 context,
                 measure,
                 new R4MeasureDefBuilder(),
                 new R4MeasureReportBuilder(),
                 libraryEngine,
-                versionIdentifier,
-                parameters);
+                versionIdentifier);
     }
 }

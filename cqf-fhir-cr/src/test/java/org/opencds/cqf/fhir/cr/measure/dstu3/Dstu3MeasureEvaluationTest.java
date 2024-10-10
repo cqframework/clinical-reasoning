@@ -244,14 +244,14 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         var lib = engine.getEnvironment().getLibraryManager().resolveLibrary(id);
         engine.getState().init(lib.getLibrary());
         var libraryEngine = new LibraryEngine(repository, this.evaluationOptions.getEvaluationSettings());
-        Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure, libraryEngine, id, null);
+        Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure, libraryEngine, id);
         MeasureReport report = evaluation.evaluate(
                 subjectIds.size() == 1 ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION,
                 subjectIds,
                 measurementPeriod,
                 libraryEngine,
-                id,
-                null);
+                id
+        );
         assertNotNull(report);
 
         // Simulate sending it across the wire

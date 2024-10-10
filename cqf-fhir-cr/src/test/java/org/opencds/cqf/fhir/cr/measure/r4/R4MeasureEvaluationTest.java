@@ -373,14 +373,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         var libraryEngine = new LibraryEngine(repository, evaluationOptions.getEvaluationSettings());
 
-        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure, libraryEngine, id, null);
+        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure, libraryEngine, id);
         MeasureReport report = evaluation.evaluate(
                 subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
                 subjectIds,
                 measurementPeriod,
                 libraryEngine,
-                id,
-                null);
+                id
+        );
         assertNotNull(report);
 
         // Simulate sending it across the wire

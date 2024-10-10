@@ -138,22 +138,9 @@ public class Dstu3MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        var params = makeParameters(measurementPeriod);
         Dstu3MeasureEvaluation measureEvaluator =
-                new Dstu3MeasureEvaluation(context, measure, libraryEngine, id, params);
-        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id, params);
-    }
-
-    public Parameters makeParameters(Interval measurementPeriod) {
-        Parameters parameters = new Parameters();
-        if (measurementPeriod != null) {
-
-            Period period = new Period();
-            period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
-            period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
-            parameters.addParameter().setName(MEASUREMENT_PERIOD_PARAMETER_NAME).setValue(period);
-        }
-        return parameters;
+                new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
+        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

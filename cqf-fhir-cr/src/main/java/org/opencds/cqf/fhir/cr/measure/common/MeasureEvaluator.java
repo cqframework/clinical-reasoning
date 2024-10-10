@@ -30,7 +30,6 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -83,7 +82,6 @@ public class MeasureEvaluator {
             MeasureEvalType measureEvalType,
             List<String> subjectIds,
             @Nullable Interval measurementPeriod,
-            IBaseParameters parameters,
             VersionedIdentifier versionedIdentifier) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
@@ -100,7 +98,6 @@ public class MeasureEvaluator {
                         measureDef,
                         MeasureReportType.INDIVIDUAL,
                         subjectIds,
-                        parameters,
                         versionedIdentifier,
                         zonedDateTime);
             case SUBJECTLIST:
@@ -108,7 +105,6 @@ public class MeasureEvaluator {
                         measureDef,
                         MeasureReportType.SUBJECTLIST,
                         subjectIds,
-                        parameters,
                         versionedIdentifier,
                         zonedDateTime);
             case PATIENTLIST:
@@ -117,7 +113,6 @@ public class MeasureEvaluator {
                         measureDef,
                         MeasureReportType.PATIENTLIST,
                         subjectIds,
-                        parameters,
                         versionedIdentifier,
                         zonedDateTime);
             case POPULATION:
@@ -125,7 +120,6 @@ public class MeasureEvaluator {
                         measureDef,
                         MeasureReportType.SUMMARY,
                         subjectIds,
-                        parameters,
                         versionedIdentifier,
                         zonedDateTime);
             default:
@@ -300,7 +294,6 @@ public class MeasureEvaluator {
             MeasureDef measureDef,
             MeasureReportType type,
             List<String> subjectIds,
-            IBaseParameters parameters,
             VersionedIdentifier id,
             ZonedDateTime zonedDateTime) {
         var subjectSize = subjectIds.size();
@@ -322,7 +315,7 @@ public class MeasureEvaluator {
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
             EvaluationResult result = libraryEngine.getEvaluationResult(
-                    id, subjectId, parameters, null, null, null, zonedDateTime, context);
+                    id, subjectId, null, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

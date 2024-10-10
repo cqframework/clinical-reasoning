@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -17,7 +16,6 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
     protected MeasureT measure;
     protected LibraryEngine libraryEngine;
     protected String measurementPeriodParameterName;
-    protected IBaseParameters parameters;
     protected VersionedIdentifier versionIdentifier;
 
     protected BaseMeasureEvaluation(
@@ -26,8 +24,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             MeasureDefBuilder<MeasureT> measureDefBuilder,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier,
-            IBaseParameters parameters) {
+            VersionedIdentifier versionIdentifier) {
         this(
                 context,
                 measure,
@@ -35,8 +32,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
                 measureReportBuilder,
                 MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
                 libraryEngine,
-                versionIdentifier,
-                parameters);
+                versionIdentifier);
     }
 
     protected BaseMeasureEvaluation(
@@ -46,8 +42,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             String measurementPeriodParameterName,
             LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier,
-            IBaseParameters parameters) {
+            VersionedIdentifier versionIdentifier) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
         this.measure = Objects.requireNonNull(measure, "measure is a required argument");
         this.measureDefBuilder = Objects.requireNonNull(measureDefBuilder, "measureDefBuilder is a required argument");
@@ -56,7 +51,6 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         this.measurementPeriodParameterName = Objects.requireNonNull(
                 measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
         this.libraryEngine = libraryEngine;
-        this.parameters = parameters;
         this.versionIdentifier = versionIdentifier;
     }
 
@@ -64,9 +58,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             MeasureEvalType measureEvalType,
             List<String> subjectIds,
             LibraryEngine libraryEngine,
-            VersionedIdentifier id,
-            IBaseParameters parameters) {
-        return this.evaluate(measureEvalType, subjectIds, null, libraryEngine, id, parameters);
+            VersionedIdentifier id) {
+        return this.evaluate(measureEvalType, subjectIds, null, libraryEngine, id);
     }
 
     public MeasureReportT evaluate(
@@ -74,8 +67,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             List<String> subjectIds,
             Interval measurementPeriod,
             LibraryEngine libraryEngine,
-            VersionedIdentifier id,
-            IBaseParameters parameters) {
+            VersionedIdentifier id) {
         Objects.requireNonNull(subjectIds, "subjectIds is a required parameter");
         Objects.requireNonNull(measureEvalType, "measureEvalType is a required parameter");
 
@@ -83,7 +75,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         MeasureEvaluator measureEvaluation =
                 new MeasureEvaluator(context, this.measurementPeriodParameterName, libraryEngine);
         measureDef =
-                measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, parameters, id);
+                measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
 
         Interval measurementPeriodInterval;
         if (measurementPeriod == null) {

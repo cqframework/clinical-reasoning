@@ -78,16 +78,16 @@ public class R4DateHelperTest {
 
     public static Stream<Arguments> zonedDateTimesParams() {
         return Stream.of(
-                Arguments.of(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.DAY),
+                Arguments.of(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.SECOND),
                 Arguments.of(
                         LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
-                        Precision.HOUR),
+                        Precision.SECOND),
                 Arguments.of(
                         LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
-                        Precision.MINUTE),
+                        Precision.SECOND),
                 Arguments.of(
                         LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
-                        Precision.MINUTE),
+                        Precision.SECOND),
                 Arguments.of(
                         LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),

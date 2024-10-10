@@ -40,19 +40,8 @@ public class R4DateHelper {
     private DateTime convertToDateTime(ZonedDateTime zonedDateTime) {
         final OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime();
         final DateTime convertedDateTime = new DateTime(offsetDateTime);
-        convertedDateTime.setPrecision(derivePrecision(offsetDateTime));
+        convertedDateTime.setPrecision(Precision.SECOND);
         return convertedDateTime;
     }
 
-    private Precision derivePrecision(OffsetDateTime offsetDateTime) {
-        if (offsetDateTime.getHour() == 0 && offsetDateTime.getMinute() == 0 && offsetDateTime.getSecond() == 0) {
-            return Precision.DAY;
-        } else if (offsetDateTime.getMinute() == 0 && offsetDateTime.getSecond() == 0) {
-            return Precision.HOUR;
-        } else if (offsetDateTime.getSecond() == 0) {
-            return Precision.MINUTE;
-        }
-
-        return Precision.SECOND;
-    }
 }

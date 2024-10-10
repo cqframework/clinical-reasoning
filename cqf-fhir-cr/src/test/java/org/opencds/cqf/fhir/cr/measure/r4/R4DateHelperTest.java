@@ -1,17 +1,27 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import org.junit.Test;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Precision;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 public class R4DateHelperTest {
@@ -64,5 +74,30 @@ public class R4DateHelperTest {
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or Date"));
         }
+    }
+
+    public static Stream<Arguments> zonedDateTimesParams() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.DAY),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()), Precision.HOUR),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()), Precision.MINUTE),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()), Precision.MINUTE),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()), Precision.SECOND),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()), Precision.SECOND),
+            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()), Precision.SECOND)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("zonedDateTimesParams")
+    public void zonedDateTimes(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {
+        final Interval interval = new R4DateHelper()
+            .buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
+        final Object start = interval.getStart();
+        final Object end = interval.getEnd();
+        assertInstanceOf(DateTime.class, start);
+        assertInstanceOf(DateTime.class, end);
+        assertEquals(theExpectedPrecision, ((DateTime)start).getPrecision());
+        assertEquals(theExpectedPrecision, ((DateTime)end).getPrecision());
     }
 }

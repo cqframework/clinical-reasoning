@@ -151,16 +151,18 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public void naiveExpand() {
-        var expansion = newExpansion().addParameter(createNaiveParameter());
-
-        for (var code : getCodesInCompose(fhirContext, getValueSet())) {
-            expansion
-                    .addContains()
-                    .setCode(code.getCode())
-                    .setSystem(code.getSystem())
-                    .setVersion(code.getVersion())
-                    .setDisplay(code.getDisplay());
+        var codes = getCodesInCompose(fhirContext, getValueSet());
+        if (codes != null && !codes.isEmpty()) {
+            var expansion = newExpansion().addParameter(createNaiveParameter());
+            for (var code : codes) {
+                expansion
+                        .addContains()
+                        .setCode(code.getCode())
+                        .setSystem(code.getSystem())
+                        .setVersion(code.getVersion())
+                        .setDisplay(code.getDisplay());
+            }
+            getValueSet().setExpansion(expansion);
         }
-        getValueSet().setExpansion(expansion);
     }
 }

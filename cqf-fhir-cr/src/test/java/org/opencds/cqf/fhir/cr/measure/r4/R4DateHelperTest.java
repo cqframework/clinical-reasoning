@@ -78,26 +78,36 @@ public class R4DateHelperTest {
 
     public static Stream<Arguments> zonedDateTimesParams() {
         return Stream.of(
-            Arguments.of(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.DAY),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()), Precision.HOUR),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()), Precision.MINUTE),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()), Precision.MINUTE),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()), Precision.SECOND),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()), Precision.SECOND),
-            Arguments.of(LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()), Precision.SECOND)
-        );
+                Arguments.of(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.DAY),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
+                        Precision.HOUR),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.MINUTE),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.MINUTE),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND));
     }
 
     @ParameterizedTest
     @MethodSource("zonedDateTimesParams")
     public void zonedDateTimes(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {
-        final Interval interval = new R4DateHelper()
-            .buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
+        final Interval interval = new R4DateHelper().buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
         final Object start = interval.getStart();
         final Object end = interval.getEnd();
         assertInstanceOf(DateTime.class, start);
         assertInstanceOf(DateTime.class, end);
-        assertEquals(theExpectedPrecision, ((DateTime)start).getPrecision());
-        assertEquals(theExpectedPrecision, ((DateTime)end).getPrecision());
+        assertEquals(theExpectedPrecision, ((DateTime) start).getPrecision());
+        assertEquals(theExpectedPrecision, ((DateTime) end).getPrecision());
     }
 }

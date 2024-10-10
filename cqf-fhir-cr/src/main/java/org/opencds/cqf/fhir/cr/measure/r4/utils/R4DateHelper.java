@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Precision;
 
 public class R4DateHelper {
 
@@ -38,6 +39,8 @@ public class R4DateHelper {
 
     private DateTime convertToDateTime(ZonedDateTime zonedDateTime) {
         final OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime();
-        return new DateTime(offsetDateTime);
+        final DateTime convertedDateTime = new DateTime(offsetDateTime);
+        convertedDateTime.setPrecision(Precision.SECOND);
+        return convertedDateTime;
     }
 }

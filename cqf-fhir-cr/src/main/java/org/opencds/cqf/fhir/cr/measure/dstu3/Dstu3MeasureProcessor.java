@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,13 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
@@ -138,22 +134,8 @@ public class Dstu3MeasureProcessor {
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        var params = makeParameters(measurementPeriod);
-        Dstu3MeasureEvaluation measureEvaluator =
-                new Dstu3MeasureEvaluation(context, measure, libraryEngine, id, params);
-        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id, params);
-    }
-
-    public Parameters makeParameters(Interval measurementPeriod) {
-        Parameters parameters = new Parameters();
-        if (measurementPeriod != null) {
-
-            Period period = new Period();
-            period.setStartElement(new DateTimeType(measurementPeriod.getStart().toString()));
-            period.setEndElement(new DateTimeType(measurementPeriod.getEnd().toString()));
-            parameters.addParameter().setName(MEASUREMENT_PERIOD_PARAMETER_NAME).setValue(period);
-        }
-        return parameters;
+        Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
+        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

@@ -30,7 +30,6 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -83,7 +82,6 @@ public class MeasureEvaluator {
             MeasureEvalType measureEvalType,
             List<String> subjectIds,
             @Nullable Interval measurementPeriod,
-            IBaseParameters parameters,
             VersionedIdentifier versionedIdentifier) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
@@ -97,37 +95,17 @@ public class MeasureEvaluator {
             case PATIENT:
             case SUBJECT:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.INDIVIDUAL,
-                        subjectIds,
-                        parameters,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, versionedIdentifier, zonedDateTime);
             case SUBJECTLIST:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.SUBJECTLIST,
-                        subjectIds,
-                        parameters,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, versionedIdentifier, zonedDateTime);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.PATIENTLIST,
-                        subjectIds,
-                        parameters,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, versionedIdentifier, zonedDateTime);
             case POPULATION:
                 return this.evaluate(
-                        measureDef,
-                        MeasureReportType.SUMMARY,
-                        subjectIds,
-                        parameters,
-                        versionedIdentifier,
-                        zonedDateTime);
+                        measureDef, MeasureReportType.SUMMARY, subjectIds, versionedIdentifier, zonedDateTime);
             default:
                 // never hit because this value is set upstream
                 throw new IllegalArgumentException(
@@ -300,7 +278,6 @@ public class MeasureEvaluator {
             MeasureDef measureDef,
             MeasureReportType type,
             List<String> subjectIds,
-            IBaseParameters parameters,
             VersionedIdentifier id,
             ZonedDateTime zonedDateTime) {
         var subjectSize = subjectIds.size();
@@ -321,8 +298,8 @@ public class MeasureEvaluator {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
 
-            EvaluationResult result = libraryEngine.getEvaluationResult(
-                    id, subjectId, parameters, null, null, null, zonedDateTime, context);
+            EvaluationResult result =
+                    libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }

@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME;
-
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -164,19 +162,8 @@ public class R4MeasureProcessor {
         }
         // Library Evaluate
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        var params = makeParameters(measurementPeriod);
-        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id, params);
-        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod, libraryEngine, id, params);
-    }
-
-    public Parameters makeParameters(Interval measurementPeriod) {
-        Parameters parameters = new Parameters();
-        if (measurementPeriod != null) {
-            var helper = new R4DateHelper();
-            parameters.setParameter(
-                    MEASUREMENT_PERIOD_PARAMETER_NAME, helper.buildMeasurementPeriod(measurementPeriod));
-        }
-        return parameters;
+        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id);
+        return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod, libraryEngine, id);
     }
 
     protected Measure resolveByUrl(CanonicalType url) {

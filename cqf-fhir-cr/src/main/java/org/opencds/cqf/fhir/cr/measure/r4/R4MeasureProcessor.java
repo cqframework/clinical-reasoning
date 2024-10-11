@@ -121,8 +121,8 @@ public class R4MeasureProcessor {
         }
 
         var id = VersionedIdentifiers.forUrl(url);
-        var context = Engines.forRepositoryAndSettings(
-                this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         CompiledLibrary lib;
         try {

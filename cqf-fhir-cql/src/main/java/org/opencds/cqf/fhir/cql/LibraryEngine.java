@@ -134,7 +134,7 @@ public class LibraryEngine {
 
         var requestSettings = settings.toBuilder().libraryCache(null).build();
 
-        var engine = Engines.forRepositoryAndSettings(requestSettings, repository, bundle);
+        var engine = Engines.forRepository(repository, requestSettings, bundle);
         var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
         for (var source : librarySourceProviders) {
             providers.registerProvider(source);
@@ -319,7 +319,7 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            engine = Engines.forRepositoryAndSettings(settings, repository, additionalData);
+            engine = Engines.forRepository(repository, settings, additionalData);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

@@ -17,7 +17,7 @@ class EnginesTest {
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         var settings = EvaluationSettings.getDefault();
         settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(true);
-        var engine = Engines.forRepositoryAndSettings(settings, repository, null);
+        var engine = Engines.forRepository(repository, settings, null);
         assertTrue(engine.getState().getDebugMap().getIsLoggingEnabled());
     }
 
@@ -27,7 +27,7 @@ class EnginesTest {
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         var settings = EvaluationSettings.getDefault();
         settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(false);
-        var engine = Engines.forRepositoryAndSettings(settings, repository, null);
+        var engine = Engines.forRepository(repository, settings, null);
         assertNull(engine.getState().getDebugMap());
     }
 }

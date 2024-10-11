@@ -87,8 +87,8 @@ public class Dstu3MeasureProcessor {
         var library = this.repository.read(Library.class, reference.getReferenceElement());
 
         var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
-        var context = Engines.forRepositoryAndSettings(
-                this.measureEvaluationOptions.getEvaluationSettings(), this.repository, additionalData);
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         CompiledLibrary lib;
         try {

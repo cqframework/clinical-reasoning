@@ -9,6 +9,7 @@ htmlReport/
 .flattened-pom.xml
 .factorypath
 .DS_Store
+.cursorignore
 
 pom.xml.versionsBackup
 

@@ -16,7 +16,6 @@ import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
-import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -52,19 +51,13 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, true);
-    }
-
-    public static CqlEngine forRepository(
-            Repository repository, EvaluationSettings settings, NpmProcessor npmProcessor, Boolean useLibraryCache) {
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
         var sources = new ArrayList<LibrarySourceProvider>();
         sources.add(buildLibrarySource(repository));
 
         var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
-        var environment =
-                buildEnvironment(settings, sources, terminologyProvider, dataProviders, npmProcessor, useLibraryCache);
+        var environment = buildEnvironment(settings, sources, terminologyProvider, dataProviders);
 
         return createEngine(environment, settings);
     }
@@ -83,15 +76,6 @@ public class Engines {
 
     public static CqlEngine forRepositoryAndSettings(
             EvaluationSettings settings, Repository repository, IBaseBundle additionalData) {
-        return forRepositoryAndSettings(settings, repository, additionalData, null, true);
-    }
-
-    public static CqlEngine forRepositoryAndSettings(
-            EvaluationSettings settings,
-            Repository repository,
-            IBaseBundle additionalData,
-            NpmProcessor npmProcessor,
-            Boolean useLibraryCache) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -103,8 +87,7 @@ public class Engines {
 
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(
-                settings, sourceProviders, terminologyProvider, dataProviders, npmProcessor, useLibraryCache);
+        var environment = buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders);
         return createEngine(environment, settings);
     }
 
@@ -119,9 +102,7 @@ public class Engines {
             EvaluationSettings settings,
             List<LibrarySourceProvider> librarySourceProviders,
             TerminologyProvider terminologyProvider,
-            Map<String, DataProvider> dataProviders,
-            NpmProcessor npmProcessor,
-            Boolean useLibraryCache) {
+            Map<String, DataProvider> dataProviders) {
         if (settings.getCqlOptions().useEmbeddedLibraries()) {
             librarySourceProviders.add(new FhirLibrarySourceProvider());
         }
@@ -129,6 +110,7 @@ public class Engines {
         var modelManager =
                 settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
 
+        var npmProcessor = settings.getNpmProcessor();
         if (npmProcessor != null && npmProcessor.getIgContext() != null && npmProcessor.getPackageManager() != null) {
             ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
                     npmProcessor.getIgContext().getFhirVersion());
@@ -142,9 +124,7 @@ public class Engines {
         }
 
         LibraryManager libraryManager = new LibraryManager(
-                modelManager,
-                settings.getCqlOptions().getCqlCompilerOptions(),
-                Boolean.TRUE.equals(useLibraryCache) ? settings.getLibraryCache() : null);
+                modelManager, settings.getCqlOptions().getCqlCompilerOptions(), settings.getLibraryCache());
         libraryManager.getLibrarySourceLoader().clearProviders();
 
         if (npmProcessor != null) {

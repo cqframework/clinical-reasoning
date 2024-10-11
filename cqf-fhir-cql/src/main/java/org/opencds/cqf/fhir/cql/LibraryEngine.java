@@ -17,7 +17,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
-import org.cqframework.fhir.npm.NpmProcessor;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -39,17 +38,11 @@ public class LibraryEngine {
     protected final Repository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
-    protected NpmProcessor npmProcessor;
 
     public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null);
-    }
-
-    public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings, NpmProcessor npmProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
-        this.npmProcessor = npmProcessor;
     }
 
     public Repository getRepository() {
@@ -139,7 +132,9 @@ public class LibraryEngine {
         List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
         librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
-        var engine = Engines.forRepositoryAndSettings(settings, repository, bundle, npmProcessor, false);
+        var requestSettings = settings.toBuilder().libraryCache(null).build();
+
+        var engine = Engines.forRepositoryAndSettings(requestSettings, repository, bundle);
         var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
         for (var source : librarySourceProviders) {
             providers.registerProvider(source);
@@ -324,7 +319,7 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            engine = Engines.forRepositoryAndSettings(settings, repository, additionalData, npmProcessor, true);
+            engine = Engines.forRepositoryAndSettings(settings, repository, additionalData);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

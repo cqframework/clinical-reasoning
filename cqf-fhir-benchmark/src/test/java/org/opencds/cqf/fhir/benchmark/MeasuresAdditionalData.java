@@ -34,16 +34,22 @@ public class MeasuresAdditionalData {
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();
-        evaluationOptions.getEvaluationSettings().setLibraryCache(new HashMap<>());
-        evaluationOptions
-                .getEvaluationSettings()
-                .getRetrieveSettings()
+
+        var retrieveSettings = evaluationOptions.getEvaluationSettings().getRetrieveSettings();
+        retrieveSettings
                 .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
                 .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-        evaluationOptions
-                .getEvaluationSettings()
-                .getTerminologySettings()
-                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+        var terminologySettings = evaluationOptions.getEvaluationSettings().getTerminologySettings();
+        terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+        var settingsBuilder = evaluationOptions.getEvaluationSettings().toBuilder();
+
+        settingsBuilder.libraryCache(new HashMap<>());
+        settingsBuilder.retrieveSettings(retrieveSettings);
+        settingsBuilder.terminologySettings(terminologySettings);
+
+        evaluationOptions.setEvaluationSettings(settingsBuilder.build());
 
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
                 .newJsonParser()

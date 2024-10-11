@@ -24,9 +24,9 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -324,11 +324,26 @@ public class ExpandHelperTest {
         var expandHelper = new ExpandHelper(fhirContext, null);
         var dxtc = repository.read(ValueSet.class, new IdType("ValueSet", "dxtc"));
         var adapter = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(dxtc);
-        assertEquals(19797, ((ValueSetExpansionComponent) adapter.getExpansion()).getContains().size());
+        assertEquals(
+                19797,
+                ((ValueSetExpansionComponent) adapter.getExpansion())
+                        .getContains()
+                        .size());
         var adapters = new ArrayList<ValueSetAdapter>();
         var expandList = new ArrayList<String>();
-        expandHelper.expandValueSet(adapter, factory.createParameters(new Parameters()), Optional.empty(), adapters, expandList, repository, new Date());
-        assertEquals(28, ((ValueSetExpansionComponent) adapter.getExpansion()).getContains().size());
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                adapters,
+                expandList,
+                repository,
+                new Date());
+        assertEquals(
+                28,
+                ((ValueSetExpansionComponent) adapter.getExpansion())
+                        .getContains()
+                        .size());
     }
 
     ValueSet createLeafWithUrl(String url) {

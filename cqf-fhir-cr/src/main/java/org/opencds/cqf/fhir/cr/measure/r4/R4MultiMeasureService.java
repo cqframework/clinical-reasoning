@@ -23,6 +23,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.AdditionalDatas;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -55,9 +56,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         this.serverBase = serverBase;
 
         subjectProvider = new R4RepositorySubjectProvider();
-
         r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider);
-
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
 
@@ -66,28 +65,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
+            ZonedDateTime periodStart,
+            ZonedDateTime periodEnd,
             String reportType,
-            String subject, // practitioner passed in here
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            String subject,
             Parameters parameters,
             String productLine,
             String reporter) {
-
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
-
-        if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
-            // if needing to use proxy repository, override constructors
-            repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-            r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider);
-
-            r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        }
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
         List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
@@ -115,7 +100,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     subject,
                     subjects,
                     parameters,
-                    additionalData,
                     productLine,
                     reporter);
         } else {
@@ -128,12 +112,49 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     evalType,
                     subjects,
                     parameters,
-                    additionalData,
                     productLine,
                     reporter);
         }
 
         return bundle;
+    }
+
+    public Bundle evaluate(
+            List<IdType> measureId,
+            List<String> measureUrl,
+            List<String> measureIdentifier,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            String subject, // practitioner passed in here
+            Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint,
+            Bundle additionalData,
+            Parameters parameters,
+            String productLine,
+            String reporter) {
+
+        Repository repo = this.repository;
+        if (contentEndpoint != null || terminologyEndpoint != null || dataEndpoint != null) {
+            repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        }
+        if (additionalData != null) {
+            repo = AdditionalDatas.addAdditionalData(repo, additionalData);
+        }
+
+        var delegated = new R4MultiMeasureService(repo, measureEvaluationOptions, serverBase, measurePeriodValidator);
+        return delegated.evaluate(
+                measureId,
+                measureUrl,
+                measureIdentifier,
+                periodStart,
+                periodEnd,
+                reportType,
+                subject,
+                parameters,
+                productLine,
+                reporter);
     }
 
     protected void populationMeasureReport(
@@ -146,7 +167,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String subjectParam,
             List<String> subjects,
             Parameters parameters,
-            Bundle additionalData,
             String productLine,
             String reporter) {
 
@@ -156,7 +176,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+                    measure, periodStart, periodEnd, reportType, subjects, parameters, evalType);
 
             // add ProductLine after report is generated
             measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -195,7 +215,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureEvalType evalType,
             List<String> subjects,
             Parameters parameters,
-            Bundle additionalData,
             String productLine,
             String reporter) {
 
@@ -216,7 +235,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         periodEnd,
                         reportType,
                         Collections.singletonList(subject),
-                        additionalData,
                         parameters,
                         evalType);
 

@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -33,8 +32,6 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
@@ -56,7 +53,6 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
             Parameters parameters) {
 
         var evalType = MeasureEvalType.fromCode(reportType)
@@ -65,16 +61,11 @@ public class R4MeasureProcessor {
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 
-        var actualRepo = this.repository;
-        if (additionalData != null) {
-            actualRepo = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        }
-        var subjects =
-                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider
+                .getSubjects(this.repository, evalType, subjectIds)
+                .collect(Collectors.toList());
 
-        return this.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+        return this.evaluateMeasure(measure, periodStart, periodEnd, reportType, subjects, parameters, evalType);
     }
 
     public MeasureReport evaluateMeasure(
@@ -83,12 +74,10 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+        return this.evaluateMeasure(m, periodStart, periodEnd, reportType, subjectIds, parameters, evalType);
     }
 
     protected MeasureReport evaluateMeasure(
@@ -97,7 +86,6 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType) {
 
@@ -121,8 +109,7 @@ public class R4MeasureProcessor {
         }
 
         var id = VersionedIdentifiers.forUrl(url);
-        var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+        var context = Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings());
 
         CompiledLibrary lib;
         try {

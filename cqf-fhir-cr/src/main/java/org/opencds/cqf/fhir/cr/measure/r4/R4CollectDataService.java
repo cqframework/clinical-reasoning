@@ -92,7 +92,6 @@ public class R4CollectDataService {
                 MeasureEvalType.SUBJECT.toCode(),
                 subjects,
                 null,
-                null,
                 null);
 
         report.setType(MeasureReport.MeasureReportType.DATACOLLECTION);

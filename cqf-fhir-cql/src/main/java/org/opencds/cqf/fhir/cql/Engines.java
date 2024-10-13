@@ -100,12 +100,6 @@ public class Engines {
         loader.registerProvider(buildLibrarySource(repository));
     }
 
-    private static LibrarySourceProvider buildLibrarySource(Repository repository) {
-        var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
-        return new RepositoryFhirLibrarySourceProvider(
-                repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
-    }
-
     private static void registerNpmSupport(
             EvaluationSettings settings, LibraryManager libraryManager, ModelManager modelManager) {
         var npmProcessor = settings.getNpmProcessor();
@@ -138,6 +132,12 @@ public class Engines {
                 uris.add(n.getUri());
             }
         }
+    }
+
+    private static LibrarySourceProvider buildLibrarySource(Repository repository) {
+        var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
+        return new RepositoryFhirLibrarySourceProvider(
+                repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
     private static Map<String, DataProvider> buildDataProviders(

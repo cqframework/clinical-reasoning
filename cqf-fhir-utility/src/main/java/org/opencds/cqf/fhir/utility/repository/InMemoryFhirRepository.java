@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 
 public class InMemoryFhirRepository implements Repository {
@@ -40,11 +41,13 @@ public class InMemoryFhirRepository implements Repository {
     private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
     private final FhirContext context;
     private final OperationRegistry operationRegistry;
+    private final ResourceMatcher resourceMatcher;
 
     public InMemoryFhirRepository(FhirContext context) {
         this.context = context;
         this.resourceMap = new HashMap<>();
         this.operationRegistry = new OperationRegistry();
+        this.resourceMatcher = Repositories.getResourceMatcher(this.context);
     }
 
     public InMemoryFhirRepository(FhirContext context, IBaseBundle bundle) {
@@ -55,6 +58,7 @@ public class InMemoryFhirRepository implements Repository {
                         IBaseResource::fhirType,
                         Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless(), Function.identity())));
         this.operationRegistry = new OperationRegistry();
+        this.resourceMatcher = Repositories.getResourceMatcher(this.context);
     }
 
     @Override
@@ -100,8 +104,7 @@ public class InMemoryFhirRepository implements Repository {
             outcome.setCreated(true);
         }
         if (resource.fhirType().equals("SearchParameter")) {
-            var resourceMatcher = Repositories.getResourceMatcher(this.context);
-            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+            this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
         }
         resources.put(theId, resource);
 
@@ -164,12 +167,11 @@ public class InMemoryFhirRepository implements Repository {
         }
 
         // Apply the rest of the filters
-        var resourceMatcher = Repositories.getResourceMatcher(this.context);
         for (var resource : candidates) {
             boolean include = true;
             for (var nextEntry : searchParameters.entrySet()) {
                 var paramName = nextEntry.getKey();
-                if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
+                if (!this.resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                     include = false;
                     break;
                 }

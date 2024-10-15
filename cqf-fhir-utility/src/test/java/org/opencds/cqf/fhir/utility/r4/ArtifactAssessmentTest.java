@@ -437,14 +437,14 @@ class ArtifactAssessmentTest {
                 "http://hl7.org/fhir/ValueSet/certainty-type",
                 "LargeEffect",
                 "higher certainty due to large effect size");
-        var classifer = new CodeableConcept();
-        classifer.addCoding(classifierCoding);
-        contentExtension.addClassifierExtension(classifer);
+        var classifier = new CodeableConcept();
+        classifier.addCoding(classifierCoding);
+        contentExtension.addClassifierExtension(classifier);
         Optional<Extension> contentClassifierExtension = Optional.of(
                         artifactAssessment.getExtensionByUrl(ArtifactAssessment.CONTENT))
                 .map(ext -> ext.getExtensionByUrl(ArtifactAssessmentContentExtension.CLASSIFIER));
         assertTrue(contentClassifierExtension.isPresent());
-        assertEquals(((CodeableConcept) contentClassifierExtension.get().getValue()), classifer);
+        assertEquals(((CodeableConcept) contentClassifierExtension.get().getValue()), classifier);
         var path = new UriType("path/test/thing");
         contentExtension.addPathExtension(path);
         Optional<Extension> contentPathExtension = Optional.of(

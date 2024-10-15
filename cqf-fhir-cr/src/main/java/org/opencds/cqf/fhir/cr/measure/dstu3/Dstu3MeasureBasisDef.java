@@ -19,7 +19,7 @@ public class Dstu3MeasureBasisDef implements MeasureBasisDef<Measure> {
         return true;
     }
 
-    private boolean isBooleanBasisExtension(IBaseExtension item) {
+    private boolean isBooleanBasisExtension(IBaseExtension<?, ?> item) {
         return (item.getUrl().equalsIgnoreCase(MeasureConstants.POPULATION_BASIS_URL)
                 && item.getValue().toString().equalsIgnoreCase("boolean"));
     }

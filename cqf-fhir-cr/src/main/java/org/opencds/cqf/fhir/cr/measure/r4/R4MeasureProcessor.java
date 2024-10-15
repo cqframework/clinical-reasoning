@@ -195,7 +195,9 @@ public class R4MeasureProcessor {
             if (parameterMap.containsKey(param.getName())) {
                 if (parameterMap.get(param.getName()) instanceof List) {
                     if (value != null) {
-                        ((List) parameterMap.get(param.getName())).add(value);
+                        @SuppressWarnings("unchecked")
+                        var list = (List<Object>) parameterMap.get(param.getName());
+                        list.add(value);
                     }
                 } else {
                     parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));

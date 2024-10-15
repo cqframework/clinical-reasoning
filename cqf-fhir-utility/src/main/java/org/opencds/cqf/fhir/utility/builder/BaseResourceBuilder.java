@@ -43,7 +43,6 @@ public abstract class BaseResourceBuilder<SELF, T extends IBaseResource> {
         return (SELF) this;
     }
 
-    @SuppressWarnings("null")
     public static String ensurePatientReference(String patientId) {
         if (Strings.isNullOrEmpty(patientId) || patientId.startsWith("Patient/")) {
             return patientId;

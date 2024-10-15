@@ -340,9 +340,6 @@ class ReleaseVisitorTests {
                 .collect(Collectors.toList());
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
-            if (!dependenciesOnReleasedArtifact.contains(dependency)) {
-                var s = dependency;
-            }
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
         }
         // and components

@@ -22,9 +22,12 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -169,7 +172,6 @@ public class R4MeasureServiceUtils {
     }
 
     public Measure resolveByUrl(String url) {
-        Bundle bundle;
         Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
         if (url.contains("|")) {
             // uri & version
@@ -219,40 +221,36 @@ public class R4MeasureServiceUtils {
 
     public List<Measure> getMeasures(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
-        boolean hasMeasureIds = measureIds != null && !measureIds.isEmpty();
-        boolean hasMeasureIdentifiers = measureIdentifiers != null && !measureIdentifiers.isEmpty();
-        boolean hasMeasureUrls = measureCanonicals != null && !measureCanonicals.isEmpty();
-        if (!hasMeasureIds && !hasMeasureIdentifiers && !hasMeasureUrls) {
-            return Collections.emptyList();
-        }
-
-        List<Measure> measureList = new ArrayList<>();
-
-        if (hasMeasureIds) {
+        List<Measure> measures = new ArrayList<>();
+        if (measureIds != null && !measureIds.isEmpty()) {
             for (IdType measureId : measureIds) {
                 Measure measureById = resolveById(measureId);
-                measureList.add(measureById);
+                measures.add(measureById);
             }
         }
 
-        if (hasMeasureUrls) {
+        if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
                 Measure measureByUrl = resolveByUrl(measureCanonical);
-                measureList.add(measureByUrl);
+                measures.add(measureByUrl);
             }
         }
 
-        if (hasMeasureIdentifiers) {
+        if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
             for (String measureIdentifier : measureIdentifiers) {
                 Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
-                measureList.add(measureByIdentifier);
+                measures.add(measureByIdentifier);
             }
         }
 
-        Map<String, Measure> result = new HashMap<>();
-        measureList.forEach(measure -> result.putIfAbsent(measure.getUrl(), measure));
+        return distinctByKey(measures, Measure::getUrl);
+    }
 
-        return new ArrayList<>(result.values());
+    public static <T> List<T> distinctByKey(List<T> list, Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = new HashSet<>();
+        return list.stream()
+                .filter(element -> seen.add(keyExtractor.apply(element)))
+                .collect(Collectors.toList());
     }
 
     public List<MeasureScoring> getMeasureGroupScoringTypes(Measure measure) {

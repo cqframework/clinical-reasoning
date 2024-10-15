@@ -7,7 +7,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -57,15 +57,15 @@ public class RetireVisitorTest {
         var res = returnedBundle.getEntry();
 
         assert (res.size() == 9);
-        var libraries = repo.search(Bundle.class, Library.class, new HashMap()).getEntry().stream()
+        var libraries = repo.search(Bundle.class, Library.class, Map.of()).getEntry().stream()
                 .filter(x -> ((Library) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
                 .collect(Collectors.toList());
 
-        var valueSets = repo.search(Bundle.class, ValueSet.class, new HashMap()).getEntry().stream()
+        var valueSets = repo.search(Bundle.class, ValueSet.class, Map.of()).getEntry().stream()
                 .filter(x -> ((ValueSet) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
                 .collect(Collectors.toList());
 
-        var planDefinitions = repo.search(Bundle.class, PlanDefinition.class, new HashMap()).getEntry().stream()
+        var planDefinitions = repo.search(Bundle.class, PlanDefinition.class, Map.of()).getEntry().stream()
                 .filter(x ->
                         ((PlanDefinition) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
                 .collect(Collectors.toList());

@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
@@ -71,15 +70,9 @@ public interface ResourceMatcher {
 
     public Map<SPPathKey, IParsedExpression> getPathCache();
 
-    public Map<String, RuntimeSearchParam> customSearchParams = new HashMap<>();
+    public void addCustomParameter(RuntimeSearchParam searchParam);
 
-    default void addCustomParameter(RuntimeSearchParam searchParam) {
-        this.customSearchParams.put(searchParam.getName(), searchParam);
-    }
-
-    default Map<String, RuntimeSearchParam> getCustomParameters() {
-        return this.customSearchParams;
-    }
+    public Map<String, RuntimeSearchParam> getCustomParameters();
 
     // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {

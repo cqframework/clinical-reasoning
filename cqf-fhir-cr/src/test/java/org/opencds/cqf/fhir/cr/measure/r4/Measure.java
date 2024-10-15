@@ -139,10 +139,6 @@ public class Measure {
             return this;
         }
 
-        private R4MeasureProcessor buildProcessor() {
-            return new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider());
-        }
-
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
         }
@@ -163,7 +159,6 @@ public class Measure {
         private String measureId;
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
-        private List<String> subjectIds;
         private String subject;
         private String reportType;
         private Bundle additionalData;
@@ -202,11 +197,6 @@ public class Measure {
 
         public When subject(String subjectId) {
             this.subject = subjectId;
-            return this;
-        }
-
-        public When subjects(List<String> subjectIds) {
-            this.subjectIds = subjectIds;
             return this;
         }
 

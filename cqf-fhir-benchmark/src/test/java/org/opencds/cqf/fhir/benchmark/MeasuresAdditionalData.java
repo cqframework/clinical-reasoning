@@ -78,7 +78,6 @@ public class MeasuresAdditionalData {
         bh.consume(when.then().report());
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(MeasuresAdditionalData.class.getSimpleName())

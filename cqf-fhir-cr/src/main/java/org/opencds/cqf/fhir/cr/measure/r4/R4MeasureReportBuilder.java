@@ -303,7 +303,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         .findFirst()
                         .orElse(null)
                 != null) {
-            // dateofNonCompliance is another population not calculated
+            // dateOfNonCompliance is another population not calculated
             groupDefSizeDiff = 3;
         }
 

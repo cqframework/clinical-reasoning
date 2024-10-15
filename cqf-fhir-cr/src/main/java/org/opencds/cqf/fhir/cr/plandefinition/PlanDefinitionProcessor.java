@@ -33,7 +33,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
-@SuppressWarnings({"unused", "squid:S107", "squid:S1172"})
+@SuppressWarnings({"squid:S107", "squid:S1172"})
 public class PlanDefinitionProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;

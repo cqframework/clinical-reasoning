@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -73,7 +72,7 @@ public class ExpandHelperTest {
         var baseUrl = "www.test.com/fhir";
         var endpoint = new Endpoint();
         endpoint.setAddress(baseUrl);
-        // setup Vsets
+        // setup ValueSets
         var leafUrl = baseUrl + "/ValueSet/leaf";
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.different-base-url.com/fhir/ValueSet/grouper";
@@ -111,7 +110,7 @@ public class ExpandHelperTest {
         var baseUrl = "www.test.com/fhir";
         var endpoint = new Endpoint();
         endpoint.setAddress(baseUrl);
-        // setup Vsets
+        // setup ValueSets
         var leafUrl = baseUrl + "/ValueSet/leaf";
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.different-base-url.com/fhir/ValueSet/grouper";
@@ -148,11 +147,13 @@ public class ExpandHelperTest {
         var childExpParams = parametersCaptor.getValue();
         assertNotNull(childExpParams.getParameter(TerminologyServerClient.urlParamName));
         // leaf is expanded with Leaf url not Grouper url
-        assertTrue(((IPrimitiveType<String>) ((ParametersParameterComponent)
+
+        @SuppressWarnings("unchecked")
+        var url = ((IPrimitiveType<String>) ((ParametersParameterComponent)
                                 childExpParams.getParameter(TerminologyServerClient.urlParamName))
                         .getValue())
-                .getValue()
-                .equals(leafUrl));
+                .getValue();
+        assertEquals(leafUrl, url);
         // the Version parameter is removed because leaf has no version
         assertNull(childExpParams.getParameter(TerminologyServerClient.versionParamName));
     }
@@ -212,7 +213,7 @@ public class ExpandHelperTest {
         var baseUrl = "www.test.com/fhir";
         var endpoint = new Endpoint();
         endpoint.setAddress(baseUrl);
-        // setup Vsets
+        // setup ValueSets
         var leafUrl = baseUrl + "/ValueSet/leaf";
         var leaf = new ValueSet();
         leaf.setUrl(leafUrl);
@@ -265,7 +266,7 @@ public class ExpandHelperTest {
         var baseUrl = "www.test.com/fhir";
         var endpoint = new Endpoint();
         endpoint.setAddress(baseUrl);
-        // setup Vsets
+        // setup ValueSets
         var leafUrl = baseUrl + "/ValueSet/leaf";
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.different-base-url.com/fhir/ValueSet/grouper";

@@ -133,10 +133,6 @@ public class MultiMeasure {
             return this;
         }
 
-        private R4MeasureProcessor buildProcessor() {
-            return new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider());
-        }
-
         private R4MultiMeasureService buildMeasureService() {
             return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
@@ -159,7 +155,6 @@ public class MultiMeasure {
         private List<String> measureIdentifier = new ArrayList<>();
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
-        private List<String> subjectIds;
         private String subject;
         private String reportType;
         private Bundle additionalData;
@@ -198,11 +193,6 @@ public class MultiMeasure {
 
         public MultiMeasure.When subject(String subjectId) {
             this.subject = subjectId;
-            return this;
-        }
-
-        public MultiMeasure.When subjects(List<String> subjectIds) {
-            this.subjectIds = subjectIds;
             return this;
         }
 

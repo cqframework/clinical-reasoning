@@ -56,6 +56,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
         return getLibrary().hasContent();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Attachment> getContent() {
         return getLibrary().getContent().stream().collect(Collectors.toList());
@@ -126,11 +127,13 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ParameterDefinition> getParameter() {
         return getLibrary().getParameter();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<DataRequirement> getDataRequirement() {
         return getLibrary().getDataRequirement();
@@ -150,6 +153,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<UsageContext> getUseContext() {
         return getLibrary().getUseContext();

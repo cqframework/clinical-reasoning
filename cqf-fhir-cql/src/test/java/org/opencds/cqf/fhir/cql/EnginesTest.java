@@ -47,9 +47,7 @@ class EnginesTest {
 
         var igContext = new IGContext(new LoggerAdapter(log));
         igContext.initializeFromIni("todo.ini");
-        var settings = EvaluationSettings
-                .getDefault()
-                .toBuilder()
+        var settings = EvaluationSettings.getDefault().toBuilder()
                 .npmProcessor(new NpmProcessor(igContext))
                 .build();
 

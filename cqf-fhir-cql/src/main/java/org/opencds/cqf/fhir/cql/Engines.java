@@ -97,7 +97,6 @@ public class Engines {
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
-    // TODO: Add NPM library source loader support
     private static Environment buildEnvironment(
             EvaluationSettings settings,
             List<LibrarySourceProvider> librarySourceProviders,

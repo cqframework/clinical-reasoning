@@ -365,23 +365,27 @@ class ArtifactAssessmentTest {
                 new ArtifactAssessment.ArtifactAssessmentWorkflowStatusEnumFactory());
         workflowStatus.setValue(workflowStatusCode);
         artifactAssessment.setArtifactAssessmentWorkflowStatusExtension(workflowStatus);
-        assertEquals(
-                ((Enumeration<ArtifactAssessmentWorkflowStatus>) artifactAssessment
-                                .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
-                                .getValue())
-                        .getValue(),
-                workflowStatusCode);
+
+        var workflowStatusExtension = artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.WORKFLOW_STATUS)
+                .getValue();
+
+        @SuppressWarnings("unchecked")
+        var workflowStatusValue = ((Enumeration<ArtifactAssessmentWorkflowStatus>) workflowStatusExtension).getValue();
+        assertEquals(workflowStatusValue, workflowStatusCode);
         var dispositionCode = ArtifactAssessmentDisposition.PERSUASIVE;
         var disposition = new Enumeration<ArtifactAssessmentDisposition>(
                 new ArtifactAssessment.ArtifactAssessmentDispositionEnumFactory());
         disposition.setValue(dispositionCode);
         artifactAssessment.setArtifactAssessmentDispositionExtension(disposition);
-        assertEquals(
-                ((Enumeration<ArtifactAssessmentDisposition>) artifactAssessment
-                                .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
-                                .getValue())
-                        .getValue(),
-                dispositionCode);
+
+        var dispositionExtension = artifactAssessment
+                .getExtensionByUrl(ArtifactAssessment.DISPOSITION)
+                .getValue();
+
+        @SuppressWarnings("unchecked")
+        var dispositionValue = ((Enumeration<ArtifactAssessmentDisposition>) dispositionExtension).getValue();
+        assertEquals(dispositionValue, dispositionCode);
         var contentExtension = artifactAssessment.new ArtifactAssessmentContentExtension();
         artifactAssessment.addExtension(contentExtension);
         var authorReference = new Reference("Practitioner/author");

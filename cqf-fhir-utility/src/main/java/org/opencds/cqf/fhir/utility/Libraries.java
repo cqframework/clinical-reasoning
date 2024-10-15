@@ -75,11 +75,9 @@ public class Libraries {
                 fhirContext.getResourceDefinition(LIBRARY_RESOURCE_TYPE).getImplementingClass();
         Function<IBase, List<IBase>> attachments = Reflections.getFunction(libraryClass, "content");
 
-        @SuppressWarnings("null")
         Function<IBase, String> contentType = Reflections.getPrimitiveFunction(
                 fhirContext.getElementDefinition("Attachment").getImplementingClass(), "contentType");
 
-        @SuppressWarnings("null")
         Function<IBase, byte[]> content = Reflections.getPrimitiveFunction(
                 fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
         Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);

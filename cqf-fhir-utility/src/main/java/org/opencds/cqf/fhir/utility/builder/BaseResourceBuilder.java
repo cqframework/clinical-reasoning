@@ -50,7 +50,6 @@ public abstract class BaseResourceBuilder<SELF, T extends IBaseResource> {
         return "Patient/" + patientId;
     }
 
-    @SuppressWarnings("null")
     public static String ensureOrganizationReference(String organizationId) {
         if (Strings.isNullOrEmpty(organizationId) || organizationId.startsWith("Organization/")) {
             return organizationId;

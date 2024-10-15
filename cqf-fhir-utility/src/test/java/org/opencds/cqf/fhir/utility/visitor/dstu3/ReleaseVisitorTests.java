@@ -123,7 +123,10 @@ class ReleaseVisitorTests {
                     .equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Library BreastCancerScreeningFHIR, 0.0.001"));
             }
-            if (dependency.getResource().equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
+            if (dependency
+                    .getResource()
+                    .getReference()
+                    .equals("https://madie.cms.gov/Measure/BreastCancerScreeningFHIR|0.0.001")) {
                 assertTrue(dependency.getDisplay().equals("Measure Breast Cancer ScreeningFHIR, 0.0.001"));
             }
             if (dependency

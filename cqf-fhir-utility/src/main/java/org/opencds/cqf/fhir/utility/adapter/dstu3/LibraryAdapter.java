@@ -10,13 +10,11 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.ParameterDefinition;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -57,7 +55,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     }
 
     @Override
-    public List<Attachment> getContent() {
+    public List<ICompositeType> getContent() {
         return getLibrary().getContent().stream().collect(Collectors.toList());
     }
 
@@ -121,18 +119,18 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
             getLibrary()
                     .setType(new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/library-type", type, "")));
         } else {
-            throw new UnprocessableEntityException("Invalid type: {}", type);
+            throw new UnprocessableEntityException(String.format("Invalid type: %s", type));
         }
         return this;
     }
 
     @Override
-    public List<ParameterDefinition> getParameter() {
+    public List<? extends ICompositeType> getParameter() {
         return getLibrary().getParameter();
     }
 
     @Override
-    public List<DataRequirement> getDataRequirement() {
+    public List<? extends ICompositeType> getDataRequirement() {
         return getLibrary().getDataRequirement();
     }
 
@@ -143,7 +141,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     }
 
     @Override
-    public <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement) {
+    public LibraryAdapter setDataRequirement(List<ICompositeType> dataRequirement) {
         getLibrary()
                 .setDataRequirement(
                         dataRequirement.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
@@ -151,7 +149,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
     }
 
     @Override
-    public List<UsageContext> getUseContext() {
+    public List<? extends ICompositeType> getUseContext() {
         return getLibrary().getUseContext();
     }
 

@@ -35,13 +35,8 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private static final Logger ourLog = LoggerFactory.getLogger(R4MeasureDefBuilder.class);
-
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);

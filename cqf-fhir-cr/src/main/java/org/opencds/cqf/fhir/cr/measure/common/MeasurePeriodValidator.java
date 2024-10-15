@@ -13,15 +13,15 @@ import org.opencds.cqf.cql.engine.exception.InvalidInterval;
  */
 public class MeasurePeriodValidator {
     public void validatePeriodStartAndEnd(@Nullable ZonedDateTime periodStart, @Nullable ZonedDateTime periodEnd) {
-        if ((periodStart == null && periodEnd != null) || (periodStart != null && periodEnd == null)) {
-            throw new InvalidInterval(String.format(
-                    "Invalid Period - Either both or neither should be null: start date: %s and end date: %s",
-                    periodStart, periodEnd));
-        }
-
         if (periodStart == null && periodEnd == null) {
             // Nothing more to do
             return;
+        }
+
+        if ((periodStart == null || periodEnd == null)) {
+            throw new InvalidInterval(String.format(
+                    "Invalid Period - Either both or neither should be null: start date: %s and end date: %s",
+                    periodStart, periodEnd));
         }
 
         // This should probably never happen

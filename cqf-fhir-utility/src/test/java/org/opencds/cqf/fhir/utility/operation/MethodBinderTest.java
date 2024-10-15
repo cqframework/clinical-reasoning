@@ -272,6 +272,7 @@ public class MethodBinderTest {
     @Test
     public void missingOperationAnnotation_throws() {
         final class MissingOperationAnnotation {
+            @SuppressWarnings("unused")
             public IBaseResource function(@IdParam IdType id) {
                 return null;
             }

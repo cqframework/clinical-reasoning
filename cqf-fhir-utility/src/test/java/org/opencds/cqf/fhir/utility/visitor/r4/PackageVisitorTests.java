@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,13 +96,11 @@ class PackageVisitorTests {
         LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters();
 
-        UnprocessableEntityException maybeException = null;
-        try {
+        var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, repo, params);
-        } catch (UnprocessableEntityException e) {
-            maybeException = e;
-        }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without a terminology server: "));
+        });
+
+        assertTrue(exception.getMessage().contains("Cannot expand ValueSet without a terminology server: "));
     }
 
     @Test
@@ -118,13 +117,11 @@ class PackageVisitorTests {
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        UnprocessableEntityException maybeException = null;
-        try {
+        var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, repo, params);
-        } catch (UnprocessableEntityException e) {
-            maybeException = e;
-        }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username."));
+        });
+
+        assertTrue(exception.getMessage().contains("Cannot expand ValueSet without VSAC Username."));
     }
 
     @Test
@@ -141,13 +138,11 @@ class PackageVisitorTests {
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        UnprocessableEntityException maybeException = null;
-        try {
+        var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, repo, params);
-        } catch (UnprocessableEntityException e) {
-            maybeException = e;
-        }
-        assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key."));
+        });
+
+        assertTrue(exception.getMessage().contains("Cannot expand ValueSet without VSAC API Key."));
     }
 
     @Test
@@ -164,13 +159,11 @@ class PackageVisitorTests {
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        UnprocessableEntityException maybeException = null;
-        try {
+        var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, repo, params);
-        } catch (UnprocessableEntityException e) {
-            maybeException = e;
-        }
-        assertTrue(maybeException.getMessage().contains("Terminology Server expansion failed for ValueSet "));
+        });
+
+        assertTrue(exception.getMessage().contains("Terminology Server expansion failed for ValueSet "));
     }
 
     @Test
@@ -188,13 +181,13 @@ class PackageVisitorTests {
         // any one capability
         for (String capability : capabilities) {
             Parameters params = parameters(part("capability", capability));
-            PreconditionFailedException maybeException = null;
+            PreconditionFailedException exception = null;
             try {
                 libraryAdapter.accept(packageVisitor, repo, params);
             } catch (PreconditionFailedException e) {
-                maybeException = e;
+                exception = e;
             }
-            assertNotNull(maybeException);
+            assertNotNull(exception);
         }
         Parameters allParams = parameters(
                 part("capability", "computable"), part("capability", "publishable"), part("capability", "executable"));

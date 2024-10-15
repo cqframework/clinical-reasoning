@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -28,6 +29,7 @@ import org.opencds.cqf.fhir.utility.FhirPathCache;
 public class ResourceMatcherR4 implements ResourceMatcher {
 
     private Map<SPPathKey, IParsedExpression> pathCache = new HashMap<>();
+    private Map<String, RuntimeSearchParam> searchParams = new HashMap<>();
 
     @Override
     public IFhirPath getEngine() {
@@ -121,5 +123,15 @@ public class ResourceMatcherR4 implements ResourceMatcher {
         }
 
         return false;
+    }
+
+    @Override
+    public void addCustomParameter(RuntimeSearchParam searchParam) {
+        this.searchParams.put(searchParam.getName(), searchParam);
+    }
+
+    @Override
+    public Map<String, RuntimeSearchParam> getCustomParameters() {
+        return this.searchParams;
     }
 }

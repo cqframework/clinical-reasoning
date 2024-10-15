@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Bundle;
@@ -194,7 +193,7 @@ class LibraryAdapterTest {
         assertEquals(contentList, adapter.getContent());
         adapter.addContent().setContentType("text/xml").setData(new byte[20]);
         assertEquals(2, adapter.getContent().size());
-        assertEquals("text/xml", library.getContent().get(1).getContentType());
+        assertEquals("text/xml", adapter.getContent().get(1).getContentType());
     }
 
     @Test
@@ -218,7 +217,7 @@ class LibraryAdapterTest {
     void adapter_get_and_set_dataRequirement() {
         var library = new Library();
         var adapter = new LibraryAdapter(library);
-        var dataRequirements = new ArrayList<ICompositeType>();
+        var dataRequirements = new ArrayList<DataRequirement>();
         dataRequirements.add(new DataRequirement().setType(FHIRTypes.PATIENT));
         adapter.setDataRequirement(dataRequirements);
         assertEquals(dataRequirements, library.getDataRequirement());

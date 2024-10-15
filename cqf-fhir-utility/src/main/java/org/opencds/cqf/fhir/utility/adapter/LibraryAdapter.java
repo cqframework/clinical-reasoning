@@ -14,7 +14,7 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
 
     boolean hasContent();
 
-    List<? extends ICompositeType> getContent();
+    <T extends ICompositeType> List<T> getContent();
 
     void setContent(List<? extends ICompositeType> attachments);
 
@@ -24,15 +24,15 @@ public interface LibraryAdapter extends KnowledgeArtifactAdapter {
 
     LibraryAdapter setType(String type);
 
-    List<? extends ICompositeType> getParameter();
+    <T extends ICompositeType> List<T> getParameter();
 
-    List<? extends ICompositeType> getDataRequirement();
+    <T extends ICompositeType> List<T> getDataRequirement();
 
     LibraryAdapter addDataRequirement(ICompositeType dataRequirement);
 
-    LibraryAdapter setDataRequirement(List<ICompositeType> dataRequirement);
+    <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement);
 
-    List<? extends ICompositeType> getUseContext();
+    <T extends ICompositeType> List<T> getUseContext();
 
     void setExpansionParameters(
             List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters);

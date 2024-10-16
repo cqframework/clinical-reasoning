@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
@@ -37,13 +36,12 @@ public class ExpandHelper {
         terminologyServerClient = server;
     }
 
-    @SuppressWarnings("unchecked")
     private static void filterOutUnsupportedParameters(IParametersAdapter parameters) {
         var paramsToSet = parameters.getParameter();
         unsupportedParametersToRemove.forEach(parameterUrl -> {
             while (parameters.getParameter(parameterUrl) != null) {
                 paramsToSet.remove(parameters.getParameter(parameterUrl));
-                parameters.setParameter((List<IBaseBackboneElement>) paramsToSet);
+                parameters.setParameter(paramsToSet);
             }
         });
     }

@@ -46,7 +46,10 @@ class EnginesTest {
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
 
         var igContext = new IGContext(new LoggerAdapter(log));
-        igContext.initializeFromIni("todo.ini");
+
+        var resourceDirectory = ResourceDirectoryResolver.getResourceDirectory();
+        var ini = resourceDirectory.resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");
+        igContext.initializeFromIni(ini.toString());
         var settings = EvaluationSettings.getDefault().toBuilder()
                 .npmProcessor(new NpmProcessor(igContext))
                 .build();
@@ -54,8 +57,8 @@ class EnginesTest {
         var engine = Engines.forRepository(repository, settings);
         var lm = engine.getEnvironment().getLibraryManager();
 
-        var ni = lm.getNamespaceManager().getNamespaceInfoFromUri("");
+        var ni = lm.getNamespaceManager().getNamespaceInfoFromUri("http://fhir.org/guides/cqf/common");
         assertNotNull(ni);
-        assertEquals("FHIR", ni.getName());
+        assertEquals("fhir.cqf.common", ni.getName());
     }
 }

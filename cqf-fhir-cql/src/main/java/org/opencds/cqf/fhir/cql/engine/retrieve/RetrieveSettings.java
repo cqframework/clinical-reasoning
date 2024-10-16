@@ -6,6 +6,23 @@ public class RetrieveSettings {
     private PROFILE_MODE profileMode = PROFILE_MODE.OFF;
     private TERMINOLOGY_FILTER_MODE terminologyParameterMode = TERMINOLOGY_FILTER_MODE.AUTO;
 
+    /**
+     * Default constructor for RetrieveSettings
+     */
+    public RetrieveSettings() {
+        // intentionally empty
+    }
+
+    /**
+     * Copy constructor for RetrieveSettings
+     * @param retrieveSettings
+     */
+    public RetrieveSettings(RetrieveSettings retrieveSettings) {
+        this.searchParameterMode = retrieveSettings.searchParameterMode;
+        this.profileMode = retrieveSettings.profileMode;
+        this.terminologyParameterMode = retrieveSettings.terminologyParameterMode;
+    }
+
     // Decreasing order of performance
     // Applies to all search parameters
     // EXCEPT terminology search parameters, which are controlled by the terminology settings.

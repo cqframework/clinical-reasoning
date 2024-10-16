@@ -60,6 +60,24 @@ public class TerminologySettings {
     private CODE_LOOKUP_MODE codeLookupMode = CODE_LOOKUP_MODE.AUTO;
     private VALUESET_PRE_EXPANSION_MODE valueSetPreExpansionMode = VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT;
 
+    /*
+     * Default constructor for TerminologySettings
+     */
+    public TerminologySettings() {
+        // intentionally empty
+    }
+
+    /**
+     * Copy constructor for TerminologySettings
+     * @param terminologySettings
+     */
+    public TerminologySettings(TerminologySettings terminologySettings) {
+        this.valuesetExpansionMode = terminologySettings.valuesetExpansionMode;
+        this.valuesetMembershipMode = terminologySettings.valuesetMembershipMode;
+        this.codeLookupMode = terminologySettings.codeLookupMode;
+        this.valueSetPreExpansionMode = terminologySettings.valueSetPreExpansionMode;
+    }
+
     public VALUESET_EXPANSION_MODE getValuesetExpansionMode() {
         return valuesetExpansionMode;
     }

@@ -45,14 +45,12 @@ class EnginesTest {
         var repository = mock(Repository.class);
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
 
-        var igContext = new IGContext(new LoggerAdapter(log));
-
         var resourceDirectory = ResourceDirectoryResolver.getResourceDirectory();
         var ini = resourceDirectory.resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");
+
+        var igContext = new IGContext(new LoggerAdapter(log));
         igContext.initializeFromIni(ini.toString());
-        var settings = EvaluationSettings.getDefault().toBuilder()
-                .npmProcessor(new NpmProcessor(igContext))
-                .build();
+        var settings = EvaluationSettings.getDefault().withNpmProcessor(new NpmProcessor(igContext));
 
         var engine = Engines.forRepository(repository, settings);
         var lm = engine.getEnvironment().getLibraryManager();

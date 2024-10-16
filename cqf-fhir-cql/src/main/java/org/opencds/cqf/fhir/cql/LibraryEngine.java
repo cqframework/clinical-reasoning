@@ -15,7 +15,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -129,16 +128,12 @@ public class LibraryEngine {
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-        librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        var requestSettings = new EvaluationSettings(settings);
 
-        var requestSettings = settings.toBuilder().libraryCache(null).build();
+        requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
         var engine = Engines.forRepository(repository, requestSettings, bundle);
-        var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
-        for (var source : librarySourceProviders) {
-            providers.registerProvider(source);
-        }
+
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             evaluationParameters.put("%fhirpathcontext", contextParameter);

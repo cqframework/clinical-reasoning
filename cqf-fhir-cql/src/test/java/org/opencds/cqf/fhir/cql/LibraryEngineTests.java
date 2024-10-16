@@ -142,9 +142,7 @@ class LibraryEngineTests {
                 else return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
             }
         });
-        var evaluationSettings = EvaluationSettings.getDefault().toBuilder()
-                .librarySourceProviders(libraryResourceProvider)
-                .build();
+        var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
         repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));

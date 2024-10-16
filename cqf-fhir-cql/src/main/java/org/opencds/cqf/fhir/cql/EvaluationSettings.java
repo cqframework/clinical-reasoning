@@ -28,18 +28,34 @@ public class EvaluationSettings {
     private NpmProcessor npmProcessor;
 
     public static EvaluationSettings getDefault() {
-        EvaluationSettings settings = new EvaluationSettings();
+        return new EvaluationSettings();
+    }
 
-        var options = CqlOptions.defaultOptions();
-        settings.withCqlOptions(options)
-                .withModelCache(new ConcurrentHashMap<>())
-                .withLibraryCache(new ConcurrentHashMap<>())
-                .withValueSetCache(new ConcurrentHashMap<>())
-                .withRetrieveSettings(new RetrieveSettings())
-                .withTerminologySettings(new TerminologySettings())
-                .withLibrarySourceProviders(new ArrayList<>())
-                .withNpmProcessor(null);
-        return settings;
+    EvaluationSettings() {
+        this.modelCache = new ConcurrentHashMap<>();
+        this.libraryCache = new ConcurrentHashMap<>();
+        this.valueSetCache = new ConcurrentHashMap<>();
+        this.librarySourceProviders = new ArrayList<>();
+        this.cqlOptions = CqlOptions.defaultOptions();
+        this.retrieveSettings = new RetrieveSettings();
+        this.terminologySettings = new TerminologySettings();
+        this.npmProcessor = null;
+    }
+
+    /**
+     * Copy constructor for EvaluationSettings
+     * @param settings
+     */
+    public EvaluationSettings(EvaluationSettings settings) {
+        this.modelCache = new ConcurrentHashMap<>(settings.modelCache);
+        this.libraryCache = new ConcurrentHashMap<>(settings.libraryCache);
+        this.valueSetCache = new ConcurrentHashMap<>(settings.valueSetCache);
+        this.cqlOptions = settings.cqlOptions;
+        this.retrieveSettings = new RetrieveSettings(settings.retrieveSettings);
+        this.terminologySettings = new TerminologySettings(settings.terminologySettings);
+        this.librarySourceProviders = new ArrayList<>(settings.librarySourceProviders);
+        this.npmProcessor =
+                settings.npmProcessor != null ? new NpmProcessor(settings.npmProcessor.getIgContext()) : null;
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {
@@ -144,22 +160,5 @@ public class EvaluationSettings {
     public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
         setNpmProcessor(npmProcessor);
         return this;
-    }
-
-    /**
-     * Clones the EvaluationSettings object. Caches are copied so that the originals
-     * and not modified.
-     * @return A new EvaluationSettings object with the same values as the original.
-     */
-    public EvaluationSettings clone() {
-        return new EvaluationSettings()
-                .withCqlOptions(this.getCqlOptions()) // NOTE: Not yet cloned, needs upstream support from CQL
-                .withLibraryCache(new ConcurrentHashMap<>(this.libraryCache))
-                .withModelCache(new ConcurrentHashMap<>(this.modelCache))
-                .withValueSetCache(new ConcurrentHashMap<>(this.valueSetCache))
-                .withLibrarySourceProviders(new ArrayList<>(this.librarySourceProviders))
-                .withNpmProcessor(this.npmProcessor != null ? new NpmProcessor(this.npmProcessor.getIgContext()) : null)
-                .withRetrieveSettings(this.retrieveSettings.clone())
-                .withTerminologySettings(this.terminologySettings.clone());
     }
 }

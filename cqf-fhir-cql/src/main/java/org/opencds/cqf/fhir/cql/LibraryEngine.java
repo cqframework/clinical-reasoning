@@ -128,7 +128,7 @@ public class LibraryEngine {
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        var requestSettings = settings.clone();
+        var requestSettings = new EvaluationSettings(settings);
 
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 

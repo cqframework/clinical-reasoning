@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.repository.operations.OperationParametersParser;
@@ -39,7 +39,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     public RepositoryOperationProvider(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
         this.operationParametersParser = new OperationParametersParser(
-                AdapterFactory.forFhirVersion(this.fhirContext.getVersion().getVersion()));
+                IAdapterFactory.forFhirVersion(this.fhirContext.getVersion().getVersion()));
     }
 
     public void setActivityDefinitionProcessorFactory(

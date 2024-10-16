@@ -18,7 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 public interface IOperationRequest {
     String getOperationName();
@@ -39,8 +39,8 @@ public interface IOperationRequest {
 
     void setOperationOutcome(IBaseOperationOutcome operationOutcome);
 
-    default AdapterFactory getAdapterFactory() {
-        return AdapterFactory.forFhirVersion(getFhirVersion());
+    default IAdapterFactory getAdapterFactory() {
+        return IAdapterFactory.forFhirVersion(getFhirVersion());
     }
 
     default void logException(String exceptionMessage) {

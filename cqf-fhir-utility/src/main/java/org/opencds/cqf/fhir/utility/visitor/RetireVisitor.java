@@ -9,14 +9,14 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
 public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
 
     @Override
     public IBase visit(
-            KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
+            IKnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
         if (!rootAdapter.getStatus().equals("active")) {
             throw new PreconditionFailedException("Cannot retire an artifact that is not in active status");
         }
@@ -31,7 +31,7 @@ public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
         var nowDate = new Date();
 
         for (var resource : resourcesToUpdate) {
-            var artifact = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
+            var artifact = IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                     .createKnowledgeArtifactAdapter(resource);
             updateMetadata(artifact, nowDate);
             var entry = PackageHelper.createEntry(artifact.get(), true);
@@ -41,7 +41,7 @@ public class RetireVisitor extends AbstractKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private static void updateMetadata(KnowledgeArtifactAdapter artifactAdapter, Date date) {
+    private static void updateMetadata(IKnowledgeArtifactAdapter artifactAdapter, Date date) {
         artifactAdapter.setDate(date);
         artifactAdapter.setStatus("retired");
     }

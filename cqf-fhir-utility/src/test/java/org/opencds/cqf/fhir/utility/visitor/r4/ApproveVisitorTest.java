@@ -28,7 +28,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -84,7 +84,7 @@ class ApproveVisitorTest {
         ApproveVisitor releaseVisitor = new ApproveVisitor();
         Library lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
 
         try {
             libraryAdapter.accept(releaseVisitor, repo, params);
@@ -117,7 +117,7 @@ class ApproveVisitorTest {
         ApproveVisitor approveVisitor = new ApproveVisitor();
         Library lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib);
         Bundle returnedResource = (Bundle) libraryAdapter.accept(approveVisitor, repo, params);
 
         assertNotNull(returnedResource);

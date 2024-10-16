@@ -28,8 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.dstu3.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -72,7 +72,7 @@ class DraftVisitorTests {
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
         String draftedVersion = version + "-draft";
         Parameters params = new Parameters();
@@ -80,8 +80,8 @@ class DraftVisitorTests {
         newParam.setName("version").setValue(new StringType(version));
         // Root Artifact must have approval date, releaseLabel and releaseDescription for this test
         assertTrue(library.hasApprovalDate());
-        assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
-        assertTrue(library.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
+        assertTrue(library.hasExtension(IKnowledgeArtifactAdapter.RELEASE_DESCRIPTION_URL));
+        assertTrue(library.hasExtension(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL));
         assertTrue(library.hasApprovalDate());
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, repo, params);
 
@@ -96,8 +96,8 @@ class DraftVisitorTests {
         assertTrue(lib.getStatus() == Enumerations.PublicationStatus.DRAFT);
         assertEquals(lib.getVersion(), draftedVersion);
         assertFalse(lib.hasApprovalDate());
-        assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
-        assertFalse(lib.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
+        assertFalse(lib.hasExtension(IKnowledgeArtifactAdapter.RELEASE_DESCRIPTION_URL));
+        assertFalse(lib.hasExtension(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL));
         List<RelatedArtifact> relatedArtifacts = lib.getRelatedArtifact();
         assertFalse(relatedArtifacts.isEmpty());
         MetadataResourceHelper.forEachMetadataResource(
@@ -108,7 +108,7 @@ class DraftVisitorTests {
                                     .getRelatedArtifact();
                     if (relatedArtifacts2 != null && relatedArtifacts2.size() > 0) {
                         for (RelatedArtifact relatedArtifact : relatedArtifacts2) {
-                            if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
+                            if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(relatedArtifact)) {
                                 assertEquals(
                                         Canonicals.getVersion(
                                                 relatedArtifact.getResource().getReference()),
@@ -128,7 +128,7 @@ class DraftVisitorTests {
         Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         PlanDefinition planDef = repo.read(
                         PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
@@ -141,7 +141,7 @@ class DraftVisitorTests {
         MetadataResourceHelper.forEachMetadataResource(
                 returnedBundle.getEntry(),
                 resource -> {
-                    LibraryAdapter adapter = new AdapterFactory().createLibrary(baseLib);
+                    ILibraryAdapter adapter = new AdapterFactory().createLibrary(baseLib);
                     assertFalse(((Period) adapter.getEffectivePeriod()).hasStart()
                             || ((Period) adapter.getEffectivePeriod()).hasEnd());
                 },
@@ -160,7 +160,7 @@ class DraftVisitorTests {
         String maybeException = null;
         Library baseLib =
                 repo.read(Library.class, new IdType(specificationLibReference)).copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
 
         try {
@@ -182,7 +182,7 @@ class DraftVisitorTests {
         String maybeException = "";
         Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         try {
             libraryAdapter.accept(draftVisitor, repo, params);
@@ -200,7 +200,7 @@ class DraftVisitorTests {
         repo.update(versionConflictLibrary);
         Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
 
         for (String version : badVersionList) {

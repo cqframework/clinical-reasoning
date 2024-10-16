@@ -30,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class RepositoryOperationProvider implements IRepositoryOperationProvider {
@@ -55,7 +55,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
             IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory) {
         this.fhirContext = fhirContext;
         this.operationParametersParser = new OperationParametersParser(
-                AdapterFactory.forFhirVersion(this.fhirContext.getVersion().getVersion()));
+                IAdapterFactory.forFhirVersion(this.fhirContext.getVersion().getVersion()));
         this.activityDefinitionProcessorFactory = activityDefinitionProcessorFactory;
         this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
         this.questionnaireProcessorFactory = questionnaireProcessorFactory;

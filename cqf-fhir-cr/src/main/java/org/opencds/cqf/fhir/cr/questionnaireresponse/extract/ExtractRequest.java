@@ -18,7 +18,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ExtractRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaireResponse;
@@ -33,7 +33,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
     private IBaseOperationOutcome operationOutcome;
-    private QuestionnaireAdapter questionnaireAdapter;
+    private IQuestionnaireAdapter questionnaireAdapter;
 
     public ExtractRequest(
             IBaseResource questionnaireResponse,
@@ -72,9 +72,9 @@ public class ExtractRequest implements IQuestionnaireRequest {
         return questionnaire;
     }
 
-    public QuestionnaireAdapter getQuestionnaireAdapter() {
+    public IQuestionnaireAdapter getQuestionnaireAdapter() {
         if (questionnaireAdapter == null && questionnaire != null) {
-            questionnaireAdapter = (QuestionnaireAdapter)
+            questionnaireAdapter = (IQuestionnaireAdapter)
                     getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
         }
         return questionnaireAdapter;

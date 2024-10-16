@@ -13,9 +13,9 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
-public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter {
+public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQuestionnaireAdapter {
 
     public QuestionnaireAdapter(IDomainResource questionnaire) {
         super(questionnaire);

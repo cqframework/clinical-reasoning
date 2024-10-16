@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
@@ -61,7 +61,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
 
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, repo, params);
@@ -93,7 +93,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
 
         var exception = assertThrows(UnprocessableEntityException.class, () -> {
@@ -112,7 +112,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
@@ -135,7 +135,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
@@ -158,7 +158,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
@@ -182,7 +182,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         // the library contains all three capabilities
         // so we should get an error when trying with
         // any one capability
@@ -213,7 +213,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String versionToUpdateTo = "1.3.1.23";
         Parameters params = parameters(
                 part(
@@ -273,7 +273,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, repo, countZeroParams);
         // when count = 0 only show the total
@@ -310,7 +310,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, repo, countZeroParams);
         assertTrue(countZeroBundle.getType() == BundleType.SEARCHSET);
@@ -347,7 +347,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters emptyParams = parameters();
         Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, repo, emptyParams);
         for (BundleEntryComponent component : packagedBundle.getEntry()) {
@@ -366,7 +366,7 @@ class PackageVisitorTests {
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Map<String, List<String>> includeOptions = new HashMap<String, List<String>>();
         includeOptions.put("artifact", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         includeOptions.put(

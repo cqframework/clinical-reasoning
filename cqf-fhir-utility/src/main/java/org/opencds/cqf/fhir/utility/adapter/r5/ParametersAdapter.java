@@ -9,8 +9,9 @@ import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Resource;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 
-class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ParametersAdapter {
+class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
     public ParametersAdapter(IBaseResource parameters) {
         super(parameters);
@@ -28,11 +29,13 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
         return this.parameters;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ParametersParameterComponent> getParameter() {
         return this.getParameters().getParameter().stream().collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<DataType> getParameterValues(String name) {
         return this.getParameters().getParameterValues(name);

@@ -15,10 +15,10 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
-import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 /**
@@ -35,7 +35,7 @@ public class TerminologyServerClient {
         this.ctx = ctx;
     }
 
-    public IBaseResource expand(ValueSetAdapter valueSet, EndpointAdapter endpoint, ParametersAdapter parameters) {
+    public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {
         checkNotNull(valueSet, "expected non-null value for valueSet");
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
@@ -47,7 +47,7 @@ public class TerminologyServerClient {
                 valueSet.get().getStructureFhirVersionEnum());
     }
 
-    public IBaseResource expand(EndpointAdapter endpoint, ParametersAdapter parameters, FhirVersionEnum fhirVersion) {
+    public IBaseResource expand(IEndpointAdapter endpoint, IParametersAdapter parameters, FhirVersionEnum fhirVersion) {
         checkNotNull(endpoint, "expected non-null value for endpoint");
         checkNotNull(parameters, "expected non-null value for parameters");
         checkNotNull(fhirVersion, "expected non-null value for fhirVersion");
@@ -56,8 +56,8 @@ public class TerminologyServerClient {
     }
 
     public IBaseResource expand(
-            EndpointAdapter endpoint,
-            ParametersAdapter parameters,
+            IEndpointAdapter endpoint,
+            IParametersAdapter parameters,
             String url,
             String valueSetVersion,
             FhirVersionEnum fhirVersion) {
@@ -86,7 +86,7 @@ public class TerminologyServerClient {
                 .execute();
     }
 
-    private IGenericClient initializeClientWithAuth(EndpointAdapter endpoint) {
+    private IGenericClient initializeClientWithAuth(IEndpointAdapter endpoint) {
         var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
                 .findFirst()
                 .map(ext -> ext.getValue().toString())
@@ -101,8 +101,8 @@ public class TerminologyServerClient {
     }
 
     public java.util.Optional<IDomainResource> getResource(
-            EndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
-        return KnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+            IEndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+        return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass(versionEnum))
                 .where(Searches.byCanonical(url))

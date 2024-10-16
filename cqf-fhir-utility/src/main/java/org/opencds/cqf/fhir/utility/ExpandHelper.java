@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static org.opencds.cqf.fhir.utility.ValueSets.addCodeToExpansion;
 import static org.opencds.cqf.fhir.utility.ValueSets.addParameterToExpansion;
 import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInExpansion;
-import static org.opencds.cqf.fhir.utility.adapter.AdapterFactory.createAdapterForResource;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -16,12 +16,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 
@@ -37,22 +36,21 @@ public class ExpandHelper {
         terminologyServerClient = server;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void filterOutUnsupportedParameters(ParametersAdapter parameters) {
+    private static void filterOutUnsupportedParameters(IParametersAdapter parameters) {
         var paramsToSet = parameters.getParameter();
         unsupportedParametersToRemove.forEach(parameterUrl -> {
             while (parameters.getParameter(parameterUrl) != null) {
                 paramsToSet.remove(parameters.getParameter(parameterUrl));
-                parameters.setParameter((List<IBaseBackboneElement>) paramsToSet);
+                parameters.setParameter(paramsToSet);
             }
         });
     }
 
     public void expandValueSet(
-            ValueSetAdapter valueSet,
-            ParametersAdapter expansionParameters,
-            Optional<EndpointAdapter> terminologyEndpoint,
-            List<ValueSetAdapter> valueSets,
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            Optional<IEndpointAdapter> terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
             List<String> expandedList,
             Repository repository,
             Date expansionTimestamp) {
@@ -77,7 +75,7 @@ public class ExpandHelper {
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
             try {
-                var expandedValueSet = (ValueSetAdapter) createAdapterForResource(
+                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
@@ -110,11 +108,11 @@ public class ExpandHelper {
                                                 terminologyEndpoint.get(),
                                                 reference,
                                                 valueSet.get().getStructureFhirVersionEnum())
-                                        .map(r -> (ValueSetAdapter) createAdapterForResource(r))
+                                        .map(r -> (IValueSetAdapter) createAdapterForResource(r))
                                         .orElse(null);
                             } else {
                                 return VisitorHelper.tryGetLatestVersion(reference, repository)
-                                        .map(a -> (ValueSetAdapter) a)
+                                        .map(a -> (IValueSetAdapter) a)
                                         .orElse(null);
                             }
                         });
@@ -122,7 +120,7 @@ public class ExpandHelper {
                     // Expand the ValueSet if we haven't already
                     if (!expandedList.contains(url)) {
                         // update url and version exp params for child expansions
-                        var childExpParams = (ParametersAdapter) createAdapterForResource(expansionParameters.copy());
+                        var childExpParams = (IParametersAdapter) createAdapterForResource(expansionParameters.copy());
                         var urlParam = childExpParams.getParameter(TerminologyServerClient.urlParamName);
                         if (urlParam != null) {
                             var ind = childExpParams.getParameter().indexOf(urlParam);

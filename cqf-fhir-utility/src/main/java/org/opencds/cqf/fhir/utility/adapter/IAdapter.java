@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> An HL7 Structure Type
  */
-public interface Adapter<T extends IBase> {
-    public static final Logger logger = LoggerFactory.getLogger(Adapter.class);
+public interface IAdapter<T extends IBase> {
+    public static final Logger logger = LoggerFactory.getLogger(IAdapter.class);
+
+    String UNSUPPORTED_VERSION = "Unsupported version: %s";
 
     /**
      * @return returns the underlying HL7 Structure for this adapter
@@ -56,15 +58,15 @@ public interface Adapter<T extends IBase> {
         return hasExtension(get(), url);
     }
 
-    public default List<IBaseExtension<?, ?>> getExtension() {
+    public default <E extends IBaseExtension<?, ?>> List<E> getExtension() {
         return getExtension(get());
     }
 
-    public default IBaseExtension<?, ?> getExtensionByUrl(String url) {
+    public default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(String url) {
         return getExtensionByUrl(get(), url);
     }
 
-    public default List<? extends IBaseExtension<?, ?>> getExtensionsByUrl(String url) {
+    public default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(String url) {
         return getExtensionsByUrl(get(), url);
     }
 
@@ -77,12 +79,20 @@ public interface Adapter<T extends IBase> {
         return resolvePathList(base, "extension").stream().map(e -> (E) e).collect(Collectors.toList());
     }
 
-    public default List<IBaseExtension<?, ?>> getExtensionsByUrl(IBase base, String url) {
-        return getExtension(base).stream().filter(e -> e.getUrl().equals(url)).collect(Collectors.toList());
+    @SuppressWarnings("unchecked")
+    public default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(IBase base, String url) {
+        return getExtension(base).stream()
+                .filter(e -> e.getUrl().equals(url))
+                .map(e -> (E) e)
+                .collect(Collectors.toList());
     }
 
-    public default IBaseExtension<?, ?> getExtensionByUrl(IBase base, String url) {
-        return getExtensionsByUrl(base, url).stream().findFirst().orElse(null);
+    @SuppressWarnings("unchecked")
+    public default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(IBase base, String url) {
+        return getExtensionsByUrl(base, url).stream()
+                .map(e -> (E) e)
+                .findFirst()
+                .orElse(null);
     }
 
     public default Boolean hasExtension(IBase base, String url) {
@@ -125,7 +135,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.Period();
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 
@@ -139,7 +149,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.StringType(string);
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 
@@ -153,7 +163,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.UriType(string);
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 
@@ -167,7 +177,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.UrlType(string);
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 
@@ -181,7 +191,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.DateType(date);
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 
@@ -195,7 +205,7 @@ public interface Adapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.DateTimeType(date);
             default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
         }
     }
 }

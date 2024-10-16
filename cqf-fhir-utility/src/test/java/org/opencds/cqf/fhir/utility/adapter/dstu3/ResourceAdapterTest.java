@@ -24,12 +24,12 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.Adapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.slf4j.event.Level;
 
 public class ResourceAdapterTest {
-    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
-    private static final TestLogger logger = TestLoggerFactory.getTestLogger(Adapter.class);
+    private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+    private static final TestLogger logger = TestLoggerFactory.getTestLogger(IAdapter.class);
 
     @BeforeEach
     void setUp() {

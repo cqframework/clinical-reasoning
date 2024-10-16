@@ -26,13 +26,13 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class ExpandHelperTest {
-    private final AdapterFactory factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+    private final IAdapterFactory factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
     // we need to test that when expanding a grouper, we actually add child codes to the expansion.contains
     @Test
     void expandGrouperAddsLeafCodesToGrouperExpansionWithoutEndpointTest() {
@@ -50,11 +50,11 @@ public class ExpandHelperTest {
 
         var expandHelper = new ExpandHelper(rep.fhirContext(), client);
         expandHelper.expandValueSet(
-                (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(new Parameters()),
                 // important part of the test
                 Optional.empty(),
-                new ArrayList<ValueSetAdapter>(),
+                new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 rep,
                 expansionDate);
@@ -63,7 +63,7 @@ public class ExpandHelperTest {
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
-        verify(client, never()).expand(any(ValueSetAdapter.class), any(), any());
+        verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
     }
 
     @Test
@@ -90,18 +90,18 @@ public class ExpandHelperTest {
 
         var expandHelper = new ExpandHelper(rep.fhirContext(), client);
         expandHelper.expandValueSet(
-                (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(new Parameters()),
                 // important part of the test
                 Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<ValueSetAdapter>(),
+                new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 rep,
                 new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, times(1)).getResource(any(), any(), any());
-        verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), any());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
     }
 
     @Test
@@ -134,15 +134,15 @@ public class ExpandHelperTest {
         expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
         expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
         expandHelper.expandValueSet(
-                (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(expansionParams),
                 Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<ValueSetAdapter>(),
+                new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 rep,
                 new Date());
-        var parametersCaptor = ArgumentCaptor.forClass(ParametersAdapter.class);
-        verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), parametersCaptor.capture());
+        var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), parametersCaptor.capture());
         verify(rep, times(0)).search(any(), any(), any(), any());
         var childExpParams = parametersCaptor.getValue();
         assertNotNull(childExpParams.getParameter(TerminologyServerClient.urlParamName));
@@ -187,10 +187,10 @@ public class ExpandHelperTest {
         Exception notExpectingAnyException = null;
         try {
             expandHelper.expandValueSet(
-                    (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                     factory.createParameters(expansionParams),
                     Optional.of(factory.createEndpoint(endpoint)),
-                    new ArrayList<ValueSetAdapter>(),
+                    new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     rep,
                     new Date());
@@ -200,7 +200,7 @@ public class ExpandHelperTest {
         // should not error on empty Grouper
         assertNull(notExpectingAnyException);
         // should not call the client
-        verify(client, times(0)).expand(any(ValueSetAdapter.class), any(), any());
+        verify(client, times(0)).expand(any(IValueSetAdapter.class), any(), any());
         // should not search the repository
         verify(rep, times(0)).search(any(), any(), any(), any());
         // should not add any expansions
@@ -240,10 +240,10 @@ public class ExpandHelperTest {
         Exception notExpectingAnyException = null;
         try {
             expandHelper.expandValueSet(
-                    (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                     factory.createParameters(expansionParams),
                     Optional.of(factory.createEndpoint(endpoint)),
-                    new ArrayList<ValueSetAdapter>(),
+                    new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     rep,
                     new Date());
@@ -253,7 +253,7 @@ public class ExpandHelperTest {
         // should not error on empty leaf
         assertNull(notExpectingAnyException);
         // should call the client
-        verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), any());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
         // should not search the repository
         verify(rep, times(0)).search(any(), any(), any(), any());
         // should not add any expansions
@@ -295,15 +295,15 @@ public class ExpandHelperTest {
             expansionParams.addParameter(unsupportedParam, "test");
         });
         expandHelper.expandValueSet(
-                (ValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(expansionParams),
                 Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<ValueSetAdapter>(),
+                new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 rep,
                 new Date());
-        var parametersCaptor = ArgumentCaptor.forClass(ParametersAdapter.class);
-        verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), parametersCaptor.capture());
+        var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), parametersCaptor.capture());
         var filteredExpansionParams = parametersCaptor.getValue();
         assertEquals(2, filteredExpansionParams.getParameter().size());
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
@@ -336,7 +336,7 @@ public class ExpandHelperTest {
     TerminologyServerClient mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
         var mockClient = mock(TerminologyServerClient.class);
         when(mockClient.getResource(any(), anyString(), any())).thenReturn(java.util.Optional.of(valueSet));
-        when(mockClient.expand(any(ValueSetAdapter.class), any(), any())).thenReturn(valueSet);
+        when(mockClient.expand(any(IValueSetAdapter.class), any(), any())).thenReturn(valueSet);
         return mockClient;
     }
 }

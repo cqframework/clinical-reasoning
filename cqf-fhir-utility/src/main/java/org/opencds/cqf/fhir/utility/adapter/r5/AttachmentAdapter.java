@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-class AttachmentAdapter implements org.opencds.cqf.fhir.utility.adapter.AttachmentAdapter {
+class AttachmentAdapter implements IAttachmentAdapter {
 
     private final Attachment attachment;
     private final FhirContext fhirContext;

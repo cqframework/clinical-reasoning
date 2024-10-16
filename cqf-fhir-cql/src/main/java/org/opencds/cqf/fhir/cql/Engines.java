@@ -34,7 +34,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class Engines {
     }
 
     private static LibrarySourceProvider buildLibrarySource(Repository repository) {
-        var adapterFactory = AdapterFactory.forFhirContext(repository.fhirContext());
+        var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
@@ -185,6 +185,6 @@ public class Engines {
         var fhirTypeConverter =
                 new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
         return new CqlFhirParametersConverter(
-                fhirContext, AdapterFactory.forFhirContext(fhirContext), fhirTypeConverter);
+                fhirContext, IAdapterFactory.forFhirContext(fhirContext), fhirTypeConverter);
     }
 }

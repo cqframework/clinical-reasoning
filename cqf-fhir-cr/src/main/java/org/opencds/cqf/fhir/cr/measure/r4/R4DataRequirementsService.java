@@ -53,7 +53,7 @@ import org.opencds.cqf.fhir.cr.measure.helper.SubjectContext;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
 import org.opencds.cqf.fhir.utility.Libraries;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -310,7 +310,7 @@ public class R4DataRequirementsService {
                 } else {
                     AdapterFactory adapterFactory = new AdapterFactory();
                     LibraryVersionSelector libraryVersionSelector = new LibraryVersionSelector(adapterFactory);
-                    LibraryAdapter libAdapter =
+                    ILibraryAdapter libAdapter =
                             adapterFactory.createLibrary(bundleList.get(0).getResource());
                     VersionedIdentifier identifier = new VersionedIdentifier();
                     if (StringUtils.isNotBlank(libAdapter.getName())) {

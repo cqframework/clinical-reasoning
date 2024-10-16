@@ -9,7 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -20,7 +20,7 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
     private final LibraryVersionSelector libraryVersionSelector;
 
     public RepositoryFhirLibrarySourceProvider(
-            Repository repository, AdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+            Repository repository, IAdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         super(adapterFactory);
         this.repository = requireNonNull(repository, "repository can not be null");
         this.fhirContext = repository.fhirContext();

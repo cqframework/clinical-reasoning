@@ -6,13 +6,13 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ParametersAdapter extends ResourceAdapter {
+public interface IParametersAdapter extends IResourceAdapter {
 
-    public List<? extends IBaseBackboneElement> getParameter();
+    public <T extends IBaseBackboneElement> List<T> getParameter();
 
     public IBaseBackboneElement getParameter(String name);
 
-    public List<? extends IBaseDatatype> getParameterValues(String name);
+    public <T extends IBaseDatatype> List<T> getParameterValues(String name);
 
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
 

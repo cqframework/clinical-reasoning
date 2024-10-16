@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
-import static org.opencds.cqf.fhir.utility.adapter.Adapter.newDateTimeType;
-import static org.opencds.cqf.fhir.utility.adapter.Adapter.newDateType;
-import static org.opencds.cqf.fhir.utility.adapter.Adapter.newPeriod;
-import static org.opencds.cqf.fhir.utility.adapter.Adapter.newStringType;
-import static org.opencds.cqf.fhir.utility.adapter.Adapter.newUriType;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateTimeType;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateType;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -31,8 +31,8 @@ import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public interface KnowledgeArtifactAdapter extends ResourceAdapter {
-    public static final Logger logger = LoggerFactory.getLogger(KnowledgeArtifactAdapter.class);
+public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
+    public static final Logger logger = LoggerFactory.getLogger(IKnowledgeArtifactAdapter.class);
 
     IDomainResource get();
 
@@ -115,14 +115,12 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         return hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
     }
 
+    @SuppressWarnings({"squid:S1612"})
     default void addProfileReferences(List<IDependencyInfo> references, String referenceSource) {
         get().getMeta().getProfile().stream()
                 .map(p -> (IBaseHasExtensions & IPrimitiveType<String>) p)
                 .forEach(profile -> references.add(new DependencyInfo(
-                        referenceSource,
-                        profile.getValueAsString(),
-                        profile.getExtension(),
-                        (reference) -> profile.setValue(reference))));
+                        referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
     }
 
     @SuppressWarnings("unchecked")
@@ -179,8 +177,8 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     @SuppressWarnings("unchecked")
     default boolean getExperimental() {
-        var experimental = (IPrimitiveType<Boolean>) resolvePath(get(), "experimental", IPrimitiveType.class);
-        return experimental == null ? false : experimental.getValue();
+        var experimental = resolvePath(get(), "experimental", IPrimitiveType.class);
+        return experimental != null && ((IPrimitiveType<Boolean>) experimental).getValue();
     }
 
     @SuppressWarnings("unchecked")
@@ -221,7 +219,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
             return ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact).getResource();
         } else {
-            throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
+            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }
     }
 
@@ -239,7 +237,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                     .getType()
                     .toCode();
         } else {
-            throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
+            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }
     }
 
@@ -259,7 +257,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
                     .setResource(reference)
                     .setDisplay(display);
         } else {
-            throw new UnprocessableEntityException("Must be a valid RelatedArtifact");
+            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }
     }
 
@@ -292,9 +290,10 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
 
     static <T extends ICompositeType & IBaseHasExtensions> boolean checkIfRelatedArtifactIsOwned(T relatedArtifact) {
         return relatedArtifact.getExtension().stream()
-                .anyMatch(ext -> ext.getUrl().equals(isOwnedUrl));
+                .anyMatch(ext -> ext.getUrl().equals(IS_OWNED_URL));
     }
 
+    @SuppressWarnings({"squid:S1612"})
     default List<IDependencyInfo> combineComponentsAndDependencies() {
         final String referenceSource = hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
         return Stream.concat(
@@ -326,7 +325,7 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> isSupportedMetadataResource(r))
-                .map(r -> (KnowledgeArtifactAdapter) AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
                 .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
                 .collect(Collectors.toList());
@@ -345,10 +344,11 @@ public interface KnowledgeArtifactAdapter extends ResourceAdapter {
         return get().fhirType().equals("Library") ? get() : null;
     }
 
-    String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
-    String releaseDescriptionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
-    String usPhContextTypeUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
-    String contextTypeUrl = "http://terminology.hl7.org/CodeSystem/usage-context-type";
-    String contextUrl = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
+    String VALID_RELATED_ARTIFACT = "Must be a valid RelatedArtifact";
+    String RELEASE_LABEL_URL = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
+    String RELEASE_DESCRIPTION_URL = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
+    String US_PH_CONTEXT_TYPE_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
+    String CONTEXT_TYPE_URL = "http://terminology.hl7.org/CodeSystem/usage-context-type";
+    String CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
+    String IS_OWNED_URL = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
 }

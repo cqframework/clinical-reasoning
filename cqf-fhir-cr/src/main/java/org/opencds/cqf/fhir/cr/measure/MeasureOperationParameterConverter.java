@@ -11,9 +11,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
 /**
  * This class maps the standard input parameters of the Measure evaluate operation to FHIR
@@ -21,10 +21,10 @@ import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
  */
 public class MeasureOperationParameterConverter {
 
-    protected AdapterFactory adapterFactory;
+    protected IAdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
 
-    public MeasureOperationParameterConverter(AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
+    public MeasureOperationParameterConverter(IAdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         this.adapterFactory = adapterFactory;
         this.fhirTypeConverter = fhirTypeConverter;
     }
@@ -55,12 +55,12 @@ public class MeasureOperationParameterConverter {
     }
 
     protected void addChild(IBaseParameters parameters, String name, IBaseDatatype value) {
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
-        ParametersParameterComponentAdapter part =
+        IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
             part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());

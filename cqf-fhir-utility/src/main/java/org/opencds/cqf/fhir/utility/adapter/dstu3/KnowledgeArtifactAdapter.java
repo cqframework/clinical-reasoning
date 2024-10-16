@@ -17,9 +17,9 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter {
+public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowledgeArtifactAdapter {
     MetadataResource adaptedResource;
 
     public KnowledgeArtifactAdapter(IDomainResource resource) {
@@ -51,7 +51,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         if (date != null && !(date instanceof DateTimeType)) {
             throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
         }
-        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setDateElement(date);
+        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setDateElement(date);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
         if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
             throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
         }
-        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setEffectivePeriod(effectivePeriod);
+        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setEffectivePeriod(effectivePeriod);
     }
 
     @Override
@@ -104,15 +104,16 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
             throws UnprocessableEntityException {
-        org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter.super.setRelatedArtifact(relatedArtifacts.stream()
-                .map(ra -> {
-                    try {
-                        return (RelatedArtifact) ra;
-                    } catch (ClassCastException e) {
-                        throw new UnprocessableEntityException(
-                                "All related artifacts must be of type " + RelatedArtifact.class.getName());
-                    }
-                })
-                .collect(Collectors.toList()));
+        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setRelatedArtifact(
+                relatedArtifacts.stream()
+                        .map(ra -> {
+                            try {
+                                return (RelatedArtifact) ra;
+                            } catch (ClassCastException e) {
+                                throw new UnprocessableEntityException(
+                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
+                            }
+                        })
+                        .collect(Collectors.toList()));
     }
 }

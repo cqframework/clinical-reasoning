@@ -35,7 +35,7 @@ import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private static final String ACTIVITY_DEFINITION = "ActivityDefinition";
@@ -61,7 +61,7 @@ public class ApplyRequest implements ICpgRequest {
     private final Collection<IBaseResource> extractedResources;
     private IBaseOperationOutcome operationOutcome;
     private IBaseResource questionnaire;
-    private QuestionnaireAdapter questionnaireAdapter;
+    private IQuestionnaireAdapter questionnaireAdapter;
     private Boolean containResources;
 
     public ApplyRequest(
@@ -311,9 +311,9 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public QuestionnaireAdapter getQuestionnaireAdapter() {
+    public IQuestionnaireAdapter getQuestionnaireAdapter() {
         if (questionnaireAdapter == null && questionnaire != null) {
-            questionnaireAdapter = (QuestionnaireAdapter)
+            questionnaireAdapter = (IQuestionnaireAdapter)
                     getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
         }
         return questionnaireAdapter;

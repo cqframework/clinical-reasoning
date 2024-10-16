@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class TerminologyServerClientTest {
     private static final String url = "www.test.com";
@@ -38,8 +38,8 @@ public class TerminologyServerClientTest {
 
     @Test
     void testR4UrlAndVersion() {
-        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R4);
-        var valueSet = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.ValueSet());
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+        var valueSet = (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.ValueSet());
         valueSet.setUrl(url);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
         endpoint.setAddress(authoritativeSource);
@@ -102,8 +102,8 @@ public class TerminologyServerClientTest {
 
     @Test
     void testR5UrlAndVersion() {
-        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.R5);
-        var valueSet = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.ValueSet());
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R5);
+        var valueSet = (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r5.model.ValueSet());
         valueSet.setUrl(url);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r5.model.Endpoint());
         endpoint.setAddress(authoritativeSource);
@@ -165,9 +165,9 @@ public class TerminologyServerClientTest {
 
     @Test
     void testDstu3UrlAndVersion() {
-        var factory = AdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
         var valueSet =
-                (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.dstu3.model.ValueSet());
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.dstu3.model.ValueSet());
         valueSet.setUrl(url);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
         endpoint.setAddress(authoritativeSource);

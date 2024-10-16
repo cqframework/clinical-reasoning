@@ -9,9 +9,9 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.AttachmentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 /**
  * This class implements logic for extracting content from a FHIR Library resource and provides an
@@ -19,9 +19,9 @@ import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
  */
 public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProvider {
 
-    protected AdapterFactory adapterFactory;
+    protected IAdapterFactory adapterFactory;
 
-    protected BaseFhirLibrarySourceProvider(AdapterFactory adapterFactory) {
+    protected BaseFhirLibrarySourceProvider(IAdapterFactory adapterFactory) {
         this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
     }
 
@@ -40,11 +40,11 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
 
     protected InputStream getContentStream(IBaseResource library, String contentType) {
 
-        LibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
+        ILibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
 
         if (libraryAdapter.hasContent()) {
             for (ICompositeType attachment : libraryAdapter.getContent()) {
-                AttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
+                IAttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
                 if (attachmentAdapter.getContentType().equals(contentType)) {
                     // get externalized extension if present and add custom load data
                     return new ByteArrayInputStream(attachmentAdapter.getData());

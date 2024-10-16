@@ -10,7 +10,7 @@ import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
                                 && BundleHelper.getEntryResources(bundle).stream()
                                         .noneMatch(r -> r.getIdElement().equals(resource.getIdElement()))) {
                             BundleHelper.addEntry(bundle, createEntry(resource, isPut));
-                            final var adapter = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
+                            final var adapter = IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                                     .createKnowledgeArtifactAdapter((IDomainResource) resource);
                             if (adapter.hasRelatedArtifact()) {
                                 addRelatedArtifacts(bundle, adapter.getRelatedArtifact(), repository, isPut);

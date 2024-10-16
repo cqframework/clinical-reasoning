@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.spring.fhir.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class AdapterConfiguration {
 
     @Bean
-    AdapterFactory adapterFactory(FhirContext fhirContext) {
+    IAdapterFactory adapterFactory(FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();

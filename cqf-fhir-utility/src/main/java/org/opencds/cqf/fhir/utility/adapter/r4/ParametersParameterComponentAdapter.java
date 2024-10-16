@@ -11,10 +11,10 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-class ParametersParameterComponentAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter {
+class ParametersParameterComponentAdapter implements IParametersParameterComponentAdapter {
 
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final Parameters.ParametersParameterComponent parametersParametersComponent;

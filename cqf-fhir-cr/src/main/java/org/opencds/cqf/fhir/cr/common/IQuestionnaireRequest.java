@@ -12,12 +12,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public interface IQuestionnaireRequest extends ICqlOperationRequest {
     IBaseResource getQuestionnaire();
 
-    QuestionnaireAdapter getQuestionnaireAdapter();
+    IQuestionnaireAdapter getQuestionnaireAdapter();
 
     default void addQuestionnaireItem(IBaseBackboneElement item) {
         getModelResolver().setValue(getQuestionnaire(), "item", Collections.singletonList(item));

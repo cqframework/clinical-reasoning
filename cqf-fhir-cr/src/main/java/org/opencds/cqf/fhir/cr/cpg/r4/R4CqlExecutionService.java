@@ -77,7 +77,7 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, null);
+            var engine = Engines.forRepository(repository, evaluationSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 

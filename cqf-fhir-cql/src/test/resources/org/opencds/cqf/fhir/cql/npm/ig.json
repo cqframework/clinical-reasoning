@@ -1,0 +1,16 @@
+{
+  "resourceType" : "ImplementationGuide",
+  "id" : "ig",
+  "url" : "http://example.com/ImplementationGuide/ig",
+  "version" : "0",
+  "name" : "ExampleIG",
+  "status" : "draft",
+  "packageId" : "com.example.ig",
+  "fhirVersion" : ["4.0.1"],
+  "dependsOn" : [{
+    "id": "fhir.cqf.common",
+    "uri": "http://fhir.org/guides/cqf/common/ImplementationGuide/fhir.cqf.common",
+    "packageId": "fhir.cqf.common",
+    "version": "4.0.1"
+  }]
+}

@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
-import org.cqframework.fhir.npm.NpmProcessor;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -38,17 +37,11 @@ public class LibraryEngine {
     protected final Repository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
-    protected NpmProcessor npmProcessor;
 
     public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null);
-    }
-
-    public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings, NpmProcessor npmProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
-        this.npmProcessor = npmProcessor;
     }
 
     public Repository getRepository() {
@@ -135,7 +128,7 @@ public class LibraryEngine {
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        var requestSettings = settings.clone().withNpmProcessor(npmProcessor);
+        var requestSettings = settings.clone();
 
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 

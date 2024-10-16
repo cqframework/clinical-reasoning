@@ -144,7 +144,7 @@ class LibraryEngineTests {
         });
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
-        libraryEngine = new LibraryEngine(repository, evaluationSettings, null);
+        libraryEngine = new LibraryEngine(repository, evaluationSettings);
         repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression =

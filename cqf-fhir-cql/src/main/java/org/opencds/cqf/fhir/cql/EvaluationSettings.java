@@ -14,162 +14,152 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 
-/**
- * This class contains settings used to set up CQL evaluation. This class is immutable once constructed.
- * Use the Builder to create and instance of this class, and the "toBuilder()" function to create a
- * new mutable builder to clone these settings if required.
- */
 public class EvaluationSettings {
 
-    private final Map<ModelIdentifier, Model> modelCache;
-    private final Map<VersionedIdentifier, CompiledLibrary> libraryCache;
-    private final Map<String, List<Code>> valueSetCache;
-    private final List<LibrarySourceProvider> librarySourceProviders;
-    private final CqlOptions cqlOptions;
-    private final RetrieveSettings retrieveSettings;
-    private final TerminologySettings terminologySettings;
-    private final NpmProcessor npmProcessor;
+    private Map<ModelIdentifier, Model> modelCache;
+    private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
+    private Map<String, List<Code>> valueSetCache;
+    private List<LibrarySourceProvider> librarySourceProviders;
 
-    private EvaluationSettings(
-            Map<ModelIdentifier, Model> modelCache,
-            Map<VersionedIdentifier, CompiledLibrary> libraryCache,
-            Map<String, List<Code>> valueSetCache,
-            List<LibrarySourceProvider> librarySourceProviders,
-            CqlOptions cqlOptions,
-            RetrieveSettings retrieveSettings,
-            TerminologySettings terminologySettings,
-            NpmProcessor npmProcessor) {
-        this.modelCache = modelCache;
-        this.libraryCache = libraryCache;
-        this.valueSetCache = valueSetCache;
-        this.librarySourceProviders = librarySourceProviders;
-        this.cqlOptions = cqlOptions;
-        this.retrieveSettings = retrieveSettings;
-        this.terminologySettings = terminologySettings;
-        this.npmProcessor = npmProcessor;
-    }
+    private CqlOptions cqlOptions;
 
-    public static EvaluationSettings.Builder builder() {
-        return new Builder();
-    }
-
-    public EvaluationSettings.Builder toBuilder() {
-        return new EvaluationSettings.Builder()
-                .cqlOptions(this.cqlOptions)
-                .modelCache(this.modelCache)
-                .libraryCache(this.libraryCache)
-                .valueSetCache(this.valueSetCache)
-                .retrieveSettings(this.retrieveSettings)
-                .terminologySettings(this.terminologySettings)
-                .librarySourceProviders(new ArrayList<>(this.librarySourceProviders))
-                .npmProcessor(this.npmProcessor);
-    }
+    private RetrieveSettings retrieveSettings;
+    private TerminologySettings terminologySettings;
+    private NpmProcessor npmProcessor;
 
     public static EvaluationSettings getDefault() {
+        EvaluationSettings settings = new EvaluationSettings();
+
         var options = CqlOptions.defaultOptions();
-        var builder = new EvaluationSettings.Builder()
-                .cqlOptions(options)
-                .modelCache(new ConcurrentHashMap<>())
-                .libraryCache(new ConcurrentHashMap<>())
-                .valueSetCache(new ConcurrentHashMap<>())
-                .retrieveSettings(new RetrieveSettings())
-                .terminologySettings(new TerminologySettings())
-                .librarySourceProviders(new ArrayList<>());
-        return builder.build();
+        settings.withCqlOptions(options)
+                .withModelCache(new ConcurrentHashMap<>())
+                .withLibraryCache(new ConcurrentHashMap<>())
+                .withValueSetCache(new ConcurrentHashMap<>())
+                .withRetrieveSettings(new RetrieveSettings())
+                .withTerminologySettings(new TerminologySettings())
+                .withLibrarySourceProviders(new ArrayList<>())
+                .withNpmProcessor(null);
+        return settings;
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {
         return this.modelCache;
     }
 
+    public void setModelCache(Map<ModelIdentifier, Model> modelCache) {
+        this.modelCache = modelCache;
+    }
+
+    public EvaluationSettings withModelCache(Map<ModelIdentifier, Model> modelCache) {
+        setModelCache(modelCache);
+        return this;
+    }
+
     public Map<VersionedIdentifier, CompiledLibrary> getLibraryCache() {
         return this.libraryCache;
+    }
+
+    public void setLibraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
+        this.libraryCache = libraryCache;
+    }
+
+    public EvaluationSettings withLibraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
+        setLibraryCache(libraryCache);
+        return this;
     }
 
     public Map<String, List<Code>> getValueSetCache() {
         return this.valueSetCache;
     }
 
+    public void setValueSetCache(Map<String, List<Code>> valueSetCache) {
+        this.valueSetCache = valueSetCache;
+    }
+
+    public EvaluationSettings withValueSetCache(Map<String, List<Code>> valueSetCache) {
+        setValueSetCache(valueSetCache);
+        return this;
+    }
+
     public CqlOptions getCqlOptions() {
         return this.cqlOptions;
+    }
+
+    public EvaluationSettings withCqlOptions(CqlOptions cqlOptions) {
+        setCqlOptions(cqlOptions);
+        return this;
+    }
+
+    public void setCqlOptions(CqlOptions cqlOptions) {
+        this.cqlOptions = cqlOptions;
     }
 
     public RetrieveSettings getRetrieveSettings() {
         return this.retrieveSettings;
     }
 
+    public EvaluationSettings withRetrieveSettings(RetrieveSettings retrieveSettings) {
+        setRetrieveSettings(retrieveSettings);
+        return this;
+    }
+
+    public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
+        this.retrieveSettings = retrieveSettings;
+    }
+
     public TerminologySettings getTerminologySettings() {
         return this.terminologySettings;
+    }
+
+    public EvaluationSettings withTerminologySettings(TerminologySettings terminologySettings) {
+        setTerminologySettings(terminologySettings);
+        return this;
+    }
+
+    public void setTerminologySettings(TerminologySettings terminologySettings) {
+        this.terminologySettings = terminologySettings;
     }
 
     public List<LibrarySourceProvider> getLibrarySourceProviders() {
         return librarySourceProviders;
     }
 
-    public NpmProcessor getNpmProcessor() {
-        return this.npmProcessor;
+    public void setLibrarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
+        this.librarySourceProviders = librarySourceProviders;
     }
 
-    public static class Builder {
-        private Map<ModelIdentifier, Model> modelCache;
-        private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
-        private Map<String, List<Code>> valueSetCache;
-        private List<LibrarySourceProvider> librarySourceProviders;
-        private CqlOptions cqlOptions;
-        private RetrieveSettings retrieveSettings;
-        private TerminologySettings terminologySettings;
-        private NpmProcessor npmProcessor;
+    public EvaluationSettings withLibrarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
+        setLibrarySourceProviders(librarySourceProviders);
+        return this;
+    }
 
-        public Builder modelCache(Map<ModelIdentifier, Model> modelCache) {
-            this.modelCache = modelCache;
-            return this;
-        }
+    public NpmProcessor getNpmProcessor() {
+        return npmProcessor;
+    }
 
-        public Builder libraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
-            this.libraryCache = libraryCache;
-            return this;
-        }
+    public void setNpmProcessor(NpmProcessor npmProcessor) {
+        this.npmProcessor = npmProcessor;
+    }
 
-        public Builder valueSetCache(Map<String, List<Code>> valueSetCache) {
-            this.valueSetCache = valueSetCache;
-            return this;
-        }
+    public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
+        setNpmProcessor(npmProcessor);
+        return this;
+    }
 
-        public Builder librarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
-            this.librarySourceProviders = librarySourceProviders;
-            return this;
-        }
-
-        public Builder cqlOptions(CqlOptions cqlOptions) {
-            this.cqlOptions = cqlOptions;
-            return this;
-        }
-
-        public Builder retrieveSettings(RetrieveSettings retrieveSettings) {
-            this.retrieveSettings = retrieveSettings;
-            return this;
-        }
-
-        public Builder terminologySettings(TerminologySettings terminologySettings) {
-            this.terminologySettings = terminologySettings;
-            return this;
-        }
-
-        public Builder npmProcessor(NpmProcessor npmProcessor) {
-            this.npmProcessor = npmProcessor;
-            return this;
-        }
-
-        public EvaluationSettings build() {
-            return new EvaluationSettings(
-                    this.modelCache,
-                    this.libraryCache,
-                    this.valueSetCache,
-                    this.librarySourceProviders,
-                    this.cqlOptions,
-                    this.retrieveSettings,
-                    this.terminologySettings,
-                    this.npmProcessor);
-        }
+    /**
+     * Clones the EvaluationSettings object. Caches are copied so that the originals
+     * and not modified.
+     * @return A new EvaluationSettings object with the same values as the original.
+     */
+    public EvaluationSettings clone() {
+        return new EvaluationSettings()
+                .withCqlOptions(this.getCqlOptions()) // NOTE: Not yet cloned, needs upstream support from CQL
+                .withLibraryCache(new ConcurrentHashMap<>(this.libraryCache))
+                .withModelCache(new ConcurrentHashMap<>(this.modelCache))
+                .withValueSetCache(new ConcurrentHashMap<>(this.valueSetCache))
+                .withLibrarySourceProviders(new ArrayList<>(this.librarySourceProviders))
+                .withNpmProcessor(this.npmProcessor != null ? new NpmProcessor(this.npmProcessor.getIgContext()) : null)
+                .withRetrieveSettings(this.retrieveSettings.clone())
+                .withTerminologySettings(this.terminologySettings.clone());
     }
 }

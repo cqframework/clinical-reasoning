@@ -87,4 +87,16 @@ public class RetrieveSettings {
         this.profileMode = profileMode;
         return this;
     }
+
+    /**
+     * Clone this instance with the same values.
+     * @return a new instance with the same values.
+     */
+    public RetrieveSettings clone() {
+        // Enum values are immutable, so we can just return a new instance with the same values
+        return new RetrieveSettings()
+                .setSearchParameterMode(this.searchParameterMode)
+                .setTerminologyParameterMode(this.terminologyParameterMode)
+                .setProfileMode(this.profileMode);
+    }
 }

@@ -15,8 +15,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmProcessor;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -38,11 +38,17 @@ public class LibraryEngine {
     protected final Repository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
+    protected NpmProcessor npmProcessor;
 
     public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
+        this(repository, evaluationSettings, null);
+    }
+
+    public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings, NpmProcessor npmProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
+        this.npmProcessor = npmProcessor;
     }
 
     public Repository getRepository() {
@@ -129,16 +135,12 @@ public class LibraryEngine {
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        List<LibrarySourceProvider> librarySourceProviders = new ArrayList<>();
-        librarySourceProviders.add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        var requestSettings = settings.clone().withNpmProcessor(npmProcessor);
 
-        var requestSettings = settings.toBuilder().libraryCache(null).build();
+        requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
         var engine = Engines.forRepository(repository, requestSettings, bundle);
-        var providers = engine.getEnvironment().getLibraryManager().getLibrarySourceLoader();
-        for (var source : librarySourceProviders) {
-            providers.registerProvider(source);
-        }
+
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             evaluationParameters.put("%fhirpathcontext", contextParameter);

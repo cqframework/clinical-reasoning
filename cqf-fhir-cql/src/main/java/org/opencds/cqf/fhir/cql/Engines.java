@@ -150,8 +150,7 @@ public class Engines {
         var providers = new ArrayList<RetrieveProvider>();
         var modelResolver = FhirModelResolverCache.resolverForVersion(
                 repository.fhirContext().getVersion().getVersion());
-        // TODO: Make a federated repository here once that is ready for sure
-        // var fedRepo = new FederatedRepository(repository, bundleRepo);
+
         var retrieveProvider = new RepositoryRetrieveProvider(repository, terminologyProvider, retrieveSettings);
         providers.add(retrieveProvider);
         if (additionalData != null && modelResolver.resolvePath(additionalData, "entry") != null) {

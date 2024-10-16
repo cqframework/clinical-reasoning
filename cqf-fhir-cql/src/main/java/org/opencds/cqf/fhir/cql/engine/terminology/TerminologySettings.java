@@ -95,4 +95,17 @@ public class TerminologySettings {
         this.valueSetPreExpansionMode = valuesetPreExpansionMode;
         return this;
     }
+
+    /**
+     * Clone this instance with the same values
+     * @return a new instance with the same values
+     */
+    public TerminologySettings clone() {
+        // Enum values are immutable, so we can just return a new instance with the same values
+        return new TerminologySettings()
+                .setValuesetExpansionMode(this.valuesetExpansionMode)
+                .setValuesetMembershipMode(this.valuesetMembershipMode)
+                .setCodeLookupMode(this.codeLookupMode)
+                .setValuesetPreExpansionMode(this.valueSetPreExpansionMode);
+    }
 }

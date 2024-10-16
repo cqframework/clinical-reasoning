@@ -189,16 +189,16 @@ public class CqlCommand implements Callable<Integer> {
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
         retrieveSettings.setProfileMode(PROFILE_MODE.DECLARED);
 
-        var settingsBuilder = EvaluationSettings.getDefault().toBuilder()
-                .cqlOptions(cqlOptions)
-                .terminologySettings(terminologySettings)
-                .retrieveSettings(retrieveSettings)
-                .npmProcessor(new NpmProcessor(igContext));
+        var evaluationSettings = EvaluationSettings.getDefault();
+        evaluationSettings.setCqlOptions(cqlOptions);
+        evaluationSettings.setTerminologySettings(terminologySettings);
+        evaluationSettings.setRetrieveSettings(retrieveSettings);
+        evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
         for (LibraryParameter library : libraries) {
             var repository = createRepository(
                     fhirContext, library.terminologyUrl, library.model.modelUrl, library.context.contextValue);
-            var engine = Engines.forRepository(repository, settingsBuilder.build());
+            var engine = Engines.forRepository(repository, evaluationSettings);
 
             if (library.libraryUrl != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));

@@ -8,14 +8,14 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
 
 public class DeleteVisitor extends AbstractKnowledgeArtifactVisitor {
 
     public static final String RETIRED_STATUS = "retired";
 
     @Override
-    public IBase visit(IKnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParams) {
+    public IBase visit(KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParams) {
         if (!rootAdapter.getStatus().equals(RETIRED_STATUS)) {
             throw new PreconditionFailedException("Cannot delete an artifact that is not in retired status");
         }

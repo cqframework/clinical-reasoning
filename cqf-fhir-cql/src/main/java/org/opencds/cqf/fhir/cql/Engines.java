@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -51,109 +50,94 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        var terminologyProvider = new RepositoryTerminologyProvider(
-                repository, settings.getValueSetCache(), settings.getTerminologySettings());
-        var sources = new ArrayList<LibrarySourceProvider>();
-        sources.add(buildLibrarySource(repository));
-
-        var dataProviders = buildDataProviders(repository, null, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(settings, sources, terminologyProvider, dataProviders);
-
-        return createEngine(environment, settings);
+        return forRepository(repository, settings, null);
     }
 
-    private static CqlEngine createEngine(Environment environment, EvaluationSettings settings) {
-        var engine = new CqlEngine(
-                environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-        if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
-            var map = new DebugMap();
-            map.setIsLoggingEnabled(true);
-            engine.getState().setDebugMap(map);
-        }
-
-        return engine;
-    }
-
-    public static CqlEngine forRepositoryAndSettings(
-            EvaluationSettings settings, Repository repository, IBaseBundle additionalData) {
+    public static CqlEngine forRepository(
+            Repository repository, EvaluationSettings settings, IBaseBundle additionalData) {
         checkNotNull(settings);
         checkNotNull(repository);
 
         var terminologyProvider = new RepositoryTerminologyProvider(
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
-        var sourceProviders = new ArrayList<LibrarySourceProvider>();
-
-        sourceProviders.add(buildLibrarySource(repository));
-
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(settings, sourceProviders, terminologyProvider, dataProviders);
+        var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders);
         return createEngine(environment, settings);
+    }
+
+    private static Environment buildEnvironment(
+            Repository repository,
+            EvaluationSettings settings,
+            TerminologyProvider terminologyProvider,
+            Map<String, DataProvider> dataProviders) {
+
+        var modelManager =
+                settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
+
+        var libraryManager = new LibraryManager(
+                modelManager, settings.getCqlOptions().getCqlCompilerOptions(), settings.getLibraryCache());
+
+        registerLibrarySourceProviders(settings, libraryManager, repository);
+        registerNpmSupport(settings, libraryManager, modelManager);
+
+        return new Environment(libraryManager, dataProviders, terminologyProvider);
+    }
+
+    private static void registerLibrarySourceProviders(
+            EvaluationSettings settings, LibraryManager manager, Repository repository) {
+        var loader = manager.getLibrarySourceLoader();
+        loader.clearProviders();
+
+        for (var s : settings.getLibrarySourceProviders()) {
+            loader.registerProvider(s);
+        }
+
+        if (settings.getCqlOptions().useEmbeddedLibraries()) {
+            loader.registerProvider(new FhirLibrarySourceProvider());
+        }
+
+        loader.registerProvider(buildLibrarySource(repository));
+    }
+
+    private static void registerNpmSupport(
+            EvaluationSettings settings, LibraryManager libraryManager, ModelManager modelManager) {
+        var npmProcessor = settings.getNpmProcessor();
+        if (npmProcessor == null || npmProcessor.getIgContext() == null || npmProcessor.getPackageManager() == null) {
+            return;
+        }
+
+        ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
+                npmProcessor.getIgContext().getFhirVersion());
+        LoggerAdapter adapter = new LoggerAdapter(logger);
+        libraryManager
+                .getLibrarySourceLoader()
+                .registerProvider(new NpmLibrarySourceProvider(
+                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+        modelManager
+                .getModelInfoLoader()
+                .registerModelInfoProvider(new NpmModelInfoProvider(
+                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+
+        // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
+        // list, and b) there are packages with different package ids but the same base canonical (e.g.
+        // fhir.r4.examples has the same base canonical as fhir.r4)
+        // NOTE: Using ensureNamespaceRegistered works around a but not b
+        Set<String> keys = new HashSet<String>();
+        Set<String> uris = new HashSet<String>();
+        for (var n : npmProcessor.getNamespaces()) {
+            if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
+                libraryManager.getNamespaceManager().addNamespace(n);
+                keys.add(n.getName());
+                uris.add(n.getUri());
+            }
+        }
     }
 
     private static LibrarySourceProvider buildLibrarySource(Repository repository) {
         var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
-    }
-
-    private static Environment buildEnvironment(
-            EvaluationSettings settings,
-            List<LibrarySourceProvider> librarySourceProviders,
-            TerminologyProvider terminologyProvider,
-            Map<String, DataProvider> dataProviders) {
-        if (settings.getCqlOptions().useEmbeddedLibraries()) {
-            librarySourceProviders.add(new FhirLibrarySourceProvider());
-        }
-
-        var modelManager =
-                settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
-
-        var npmProcessor = settings.getNpmProcessor();
-        if (npmProcessor != null && npmProcessor.getIgContext() != null && npmProcessor.getPackageManager() != null) {
-            ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
-                    npmProcessor.getIgContext().getFhirVersion());
-            LoggerAdapter adapter = new LoggerAdapter(logger);
-            librarySourceProviders.add(new NpmLibrarySourceProvider(
-                    npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-            modelManager
-                    .getModelInfoLoader()
-                    .registerModelInfoProvider(new NpmModelInfoProvider(
-                            npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-        }
-
-        LibraryManager libraryManager = new LibraryManager(
-                modelManager, settings.getCqlOptions().getCqlCompilerOptions(), settings.getLibraryCache());
-        libraryManager.getLibrarySourceLoader().clearProviders();
-
-        if (npmProcessor != null) {
-            // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
-            // list, and b) there are packages with different package ids but the same base canonical (e.g.
-            // fhir.r4.examples has the same base canonical as fhir.r4)
-            // NOTE: Using ensureNamespaceRegistered works around a but not b
-            Set<String> keys = new HashSet<String>();
-            Set<String> uris = new HashSet<String>();
-            for (var n : npmProcessor.getNamespaces()) {
-                if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
-                    libraryManager.getNamespaceManager().addNamespace(n);
-                    keys.add(n.getName());
-                    uris.add(n.getUri());
-                }
-            }
-        }
-
-        librarySourceProviders.forEach(lsp -> {
-            libraryManager.getLibrarySourceLoader().registerProvider(lsp);
-        });
-        settings.getLibrarySourceProviders().forEach(lsp -> {
-            libraryManager.getLibrarySourceLoader().registerProvider(lsp);
-        });
-
-        if (settings.getCqlOptions().useEmbeddedLibraries()) {
-            libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-        }
-
-        return new Environment(libraryManager, dataProviders, terminologyProvider);
     }
 
     private static Map<String, DataProvider> buildDataProviders(
@@ -179,6 +163,18 @@ public class Engines {
         dataProviders.put(Constants.FHIR_MODEL_URI, new FederatedDataProvider(modelResolver, providers));
 
         return dataProviders;
+    }
+
+    private static CqlEngine createEngine(Environment environment, EvaluationSettings settings) {
+        var engine = new CqlEngine(
+                environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
+        if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
+            var map = new DebugMap();
+            map.setIsLoggingEnabled(true);
+            engine.getState().setDebugMap(map);
+        }
+
+        return engine;
     }
 
     public static CqlFhirParametersConverter getCqlFhirParametersConverter(FhirContext fhirContext) {

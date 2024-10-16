@@ -18,6 +18,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.fhir
+          key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
+          restore-keys: |
+            ${{ runner.os }}-fhir-
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'

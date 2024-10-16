@@ -52,7 +52,7 @@ public class R4LibraryEvaluationService {
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);
-        var engine = Engines.forRepositoryAndSettings(evaluationSettings, repository, data);
+        var engine = Engines.forRepository(repository, evaluationSettings, data);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);
 

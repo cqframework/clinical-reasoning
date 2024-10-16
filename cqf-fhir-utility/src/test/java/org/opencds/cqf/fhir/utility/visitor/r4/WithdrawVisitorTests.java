@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
@@ -43,7 +43,7 @@ class WithdrawVisitorTests {
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
         Library library = repo.read(Library.class, new IdType(id)).copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
         Parameters params = parameters(part("version", version));
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, repo, params);
@@ -65,7 +65,7 @@ class WithdrawVisitorTests {
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.1.0-draft";
         Library library = repo.read(Library.class, new IdType(id)).copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
         Parameters params = parameters(part("version", version));
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(withdrawVisitor, repo, params);
@@ -84,7 +84,7 @@ class WithdrawVisitorTests {
             String version = "1.01.21";
             Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                     .copy();
-            LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+            ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
             IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
             Parameters params = parameters(part("version", version));
             libraryAdapter.accept(withdrawVisitor, repo, params);

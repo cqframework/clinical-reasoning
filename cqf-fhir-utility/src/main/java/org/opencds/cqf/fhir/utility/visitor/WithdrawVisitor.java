@@ -8,13 +8,13 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
 public class WithdrawVisitor extends AbstractKnowledgeArtifactVisitor {
 
     @Override
     public IBase visit(
-            KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
+            IKnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
         if (!rootAdapter.getStatus().equals("draft")) {
             throw new PreconditionFailedException("Cannot withdraw an artifact that is not in draft status");
         }

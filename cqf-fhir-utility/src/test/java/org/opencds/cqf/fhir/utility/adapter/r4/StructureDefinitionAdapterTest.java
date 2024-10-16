@@ -31,7 +31,7 @@ import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class StructureDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private final org.opencds.cqf.fhir.utility.adapter.AdapterFactory adapterFactory = new AdapterFactory();
+    private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {

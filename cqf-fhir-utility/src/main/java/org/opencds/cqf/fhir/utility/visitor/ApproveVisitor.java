@@ -15,11 +15,11 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
 public class ApproveVisitor implements IKnowledgeArtifactVisitor {
     @Override
-    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters approveParameters) {
+    public IBase visit(IKnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters approveParameters) {
         Date currentDate = new Date();
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
         Date approvalDate = VisitorHelper.getParameter("approvalDate", approveParameters, IPrimitiveType.class)
@@ -117,7 +117,7 @@ public class ApproveVisitor implements IKnowledgeArtifactVisitor {
         }
     }
 
-    private void setDateElement(KnowledgeArtifactAdapter adapter, Date currentDate, FhirVersionEnum fhirVersion) {
+    private void setDateElement(IKnowledgeArtifactAdapter adapter, Date currentDate, FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
                 adapter.setDateElement(

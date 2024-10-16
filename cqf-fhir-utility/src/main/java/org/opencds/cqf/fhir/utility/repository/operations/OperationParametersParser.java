@@ -11,19 +11,19 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
 /**
  * This class maps the standard input parameters of an Operation to key, value pairs.
  */
 public class OperationParametersParser {
 
-    protected AdapterFactory adapterFactory;
+    protected IAdapterFactory adapterFactory;
     // protected FhirTypeConverter fhirTypeConverter;
 
-    public OperationParametersParser(AdapterFactory adapterFactory) {
+    public OperationParametersParser(IAdapterFactory adapterFactory) {
         requireNonNull(adapterFactory, "adapterFactory must not be null");
         // requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");
         this.adapterFactory = adapterFactory;
@@ -33,12 +33,12 @@ public class OperationParametersParser {
     public void addResourceChild(IBaseParameters parameters, String name, IBaseResource resource) {
         requireNonNull(parameters, "parameters must not be null");
         requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
-        ParametersParameterComponentAdapter part =
+        IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
             part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
@@ -52,12 +52,12 @@ public class OperationParametersParser {
     public void addValueChild(IBaseParameters parameters, String name, IBaseDatatype value) {
         requireNonNull(parameters, "parameters must not be null");
         requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
-        ParametersParameterComponentAdapter part =
+        IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
             part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
@@ -73,8 +73,8 @@ public class OperationParametersParser {
             return null;
         }
         requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
@@ -92,8 +92,8 @@ public class OperationParametersParser {
             return null;
         }
         requireNonNull(parameters, "parameters must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
@@ -109,8 +109,8 @@ public class OperationParametersParser {
         }
         requireNonNull(parameters, "parameters must not be null");
         requireNonNull(name, "name must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 
@@ -128,8 +128,8 @@ public class OperationParametersParser {
             return null;
         }
         requireNonNull(parameters, "parameters must not be null");
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        List<ParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .collect(Collectors.toList());
 

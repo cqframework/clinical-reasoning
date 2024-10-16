@@ -43,8 +43,8 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.dstu3.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -90,7 +90,7 @@ class ReleaseVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
 
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         var versionParam = params.addParameter();
         versionParam.setName("version").setValue(new StringType("1.0.0"));
@@ -171,7 +171,7 @@ class ReleaseVisitorTests {
         Measure cervicalCancerScreeningFHIR =
                 repo.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
         Measure breastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         var versionParam = params.addParameter();
         versionParam.setName("version").setValue(new StringType("1.0.0"));
@@ -216,7 +216,7 @@ class ReleaseVisitorTests {
         Measure cervicalCancerScreeningFHIR =
                 repo.read(Measure.class, new IdType("Measure/CervicalCancerScreeningFHIR"));
         Measure breastCancerScreeningFHIR = repo.read(Measure.class, new IdType("Measure/BreastCancerScreeningFHIR"));
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter().setName("version").setValue(new StringType("1.0.0"));
         params.addParameter().setName("versionBehavior").setValue(new CodeType("default"));
@@ -274,7 +274,7 @@ class ReleaseVisitorTests {
         library.addRelatedArtifact()
                 .setResource(new Reference("should-be-deleted-2"))
                 .setType(RelatedArtifactType.DEPENDSON);
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         String version = "1.0.1";
         String existingVersion = "1.2.3";
         Parameters params = new Parameters();
@@ -399,7 +399,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("version", new StringType(newVersionToForce)), part("versionBehavior", new CodeType("force")));
 
@@ -434,7 +434,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
             libraryAdapter.accept(releaseVisitor, repo, params);
         } catch (Exception e) {
@@ -445,7 +445,7 @@ class ReleaseVisitorTests {
         UnprocessableEntityException nonExperimentalChildException = null;
         Library library2 = repo.read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
-        LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
+        ILibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
         try {
             libraryAdapter2.accept(releaseVisitor, repo, params);
         } catch (UnprocessableEntityException e) {
@@ -471,8 +471,8 @@ class ReleaseVisitorTests {
                 .copy();
         Library library2 = repo.read(Library.class, new IdType("Library/SpecificationLibrary2"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        LibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter2 = new AdapterFactory().createLibrary(library2);
 
         Parameters params = parameters(
                 part("version", new StringType("1.2.3")),
@@ -513,7 +513,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, repo, params);
         assertNotNull(returnResource);
         MetadataResourceHelper.forEachMetadataResource(
@@ -521,7 +521,7 @@ class ReleaseVisitorTests {
                 resource -> {
                     assertNotNull(resource);
                     if (!resource.getClass().getSimpleName().equals("ValueSet")) {
-                        KnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
+                        IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();
                         Calendar calendar = new GregorianCalendar();
@@ -551,7 +551,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         try {
             libraryAdapter.accept(releaseVisitor, repo, params);
@@ -574,7 +574,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
             libraryAdapter.accept(releaseVisitor, repo, params1);
         } catch (Exception e) {
@@ -591,7 +591,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;
             Parameters params = parameters(
@@ -615,7 +615,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(
                 part("releaseLabel", new StringType(releaseLabel)),
                 part("version", "1.2.3"),
@@ -629,7 +629,7 @@ class ReleaseVisitorTests {
         Library releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         Optional<Extension> maybeReleaseLabel = releasedLibrary.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
+                .filter(ext -> ext.getUrl().equals(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL))
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
         assertEquals(((StringType) maybeReleaseLabel.get().getValue()).getValue(), releaseLabel);
@@ -643,7 +643,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         PreconditionFailedException maybeException = null;
         Parameters params =
@@ -664,7 +664,7 @@ class ReleaseVisitorTests {
         ReleaseVisitor releaseVisitor = new ReleaseVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        LibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         List<String> badVersionBehaviors = Arrays.asList("not-a-valid-option", null);
         for (String versionBehaviour : badVersionBehaviors) {
             Exception maybeException = null;

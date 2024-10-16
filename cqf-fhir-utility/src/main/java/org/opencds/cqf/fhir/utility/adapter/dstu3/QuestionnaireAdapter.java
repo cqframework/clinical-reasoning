@@ -13,9 +13,9 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
-public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter {
+public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQuestionnaireAdapter {
 
     public QuestionnaireAdapter(IDomainResource questionnaire) {
         super(questionnaire);
@@ -80,18 +80,9 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((Reference) libraryExt.getValue()).getReference(),
                         libraryExt.getExtension(),
-                        (reference) -> libraryExt.setValue(new Reference(reference)))));
+                        reference -> libraryExt.setValue(new Reference(reference)))));
 
         // Expression type does not exist in Stu3.
-        // var variableExtensions = getQuestionnaire().getExtensionsByUrl(Constants.VARIABLE_EXTENSION);
-        // for (var variableExt : variableExtensions) {
-        //     var expression = CqfExpression.of(variableExt, null);
-        //     if (!StringUtils.isEmpty(expression.getLibraryUrl())) {
-        //         var dependency = new DependencyInfo(
-        //                 referenceSource, expression.getLibraryUrl(), variableExt.getExtension(), (reference) -> {});
-        //         references.add(dependency);
-        //     }
-        // }
 
         getQuestionnaire().getItem().forEach(item -> getDependenciesOfItem(item, references, referenceSource));
 
@@ -110,7 +101,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                     referenceSource,
                     item.getOptions().getReference(),
                     item.getExtension(),
-                    (reference) -> item.setOptions(new Reference(reference))));
+                    reference -> item.setOptions(new Reference(reference))));
         }
         item.getExtension().stream()
                 .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
@@ -118,7 +109,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((UriType) referenceExt.getValue()).asStringValue(),
                         referenceExt.getExtension(),
-                        (reference) -> referenceExt.setValue(new UriType(reference)))));
+                        reference -> referenceExt.setValue(new UriType(reference)))));
         item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
     }
 

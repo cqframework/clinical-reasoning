@@ -20,14 +20,14 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.r4.PackageHelper;
 
 public class DraftVisitor implements IKnowledgeArtifactVisitor {
     @Override
-    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters draftParameters) {
+    public IBase visit(IKnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters draftParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
         String version = VisitorHelper.getParameter("version", draftParameters, IPrimitiveType.class)
                 .map(r -> (String) r.getValue())
@@ -38,8 +38,8 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
 
         // remove release label and extension
         List<IBaseExtension<?, ?>> removeReleaseLabelAndDescription = libRes.getExtension().stream()
-                .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
-                        && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
+                .filter(ext -> !ext.getUrl().equals(IKnowledgeArtifactAdapter.RELEASE_DESCRIPTION_URL)
+                        && !ext.getUrl().equals(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL))
                 .collect(Collectors.toList());
         adapter.setExtension(removeReleaseLabelAndDescription);
         // remove approval date
@@ -73,8 +73,8 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
         TreeSet<String> ownedResourceUrls = createOwnedResourceUrlCache(resourcesToCreate, fhirVersion);
         for (int i = 0; i < resourcesToCreate.size(); i++) {
-            KnowledgeArtifactAdapter newResourceAdapter =
-                    AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
+            IKnowledgeArtifactAdapter newResourceAdapter = IAdapterFactory.forFhirVersion(fhirVersion)
+                    .createKnowledgeArtifactAdapter(resourcesToCreate.get(i));
             updateUsageContextReferencesWithUrns(resourcesToCreate.get(i), resourcesToCreate, urnList, fhirVersion);
             updateRelatedArtifactUrlsWithNewVersions(
                     newResourceAdapter.combineComponentsAndDependencies(), draftVersion, ownedResourceUrls);
@@ -96,14 +96,15 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
             List<IDomainResource> resourcesToCreate,
             FhirVersionEnum fhirVersion) {
         String draftVersion = version + "-draft";
-        var sourceResourceAdapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
+        var sourceResourceAdapter =
+                IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
         String draftVersionUrl = Canonicals.getUrl(sourceResourceAdapter.getUrl()) + "|" + draftVersion;
 
         // TODO: Decide if we need both of these checks
-        var existingArtifactsWithMatchingUrl = KnowledgeArtifactAdapter.findLatestVersion(
+        var existingArtifactsWithMatchingUrl = IKnowledgeArtifactAdapter.findLatestVersion(
                 SearchHelper.searchRepositoryByCanonicalWithPaging(repository, draftVersionUrl));
         var draftVersionAlreadyInBundle = resourcesToCreate.stream()
-                .map(res -> AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(res))
+                .map(res -> IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(res))
                 .filter(a -> a.getUrl().equals(Canonicals.getUrl(draftVersionUrl))
                         && a.getVersion().equals(draftVersion))
                 .findAny();
@@ -118,7 +119,7 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
             sourceResourceAdapter.setEffectivePeriod(null);
             newResource = sourceResourceAdapter.copy();
             var newResourceAdapter =
-                    AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(newResource);
+                    IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(newResource);
             newResourceAdapter.setStatus("draft");
             newResourceAdapter.setVersion(draftVersion);
             resourcesToCreate.add(newResource);
@@ -204,10 +205,10 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
     private TreeSet<String> createOwnedResourceUrlCache(List<IDomainResource> resources, FhirVersionEnum fhirVersion) {
         TreeSet<String> retval = new TreeSet<String>();
         resources.stream()
-                .map(resource -> AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource))
-                .map(KnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
+                .map(resource -> IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource))
+                .map(IKnowledgeArtifactAdapter::getOwnedRelatedArtifacts)
                 .flatMap(List::stream)
-                .map(KnowledgeArtifactAdapter::getRelatedArtifactReference)
+                .map(IKnowledgeArtifactAdapter::getRelatedArtifactReference)
                 .filter(r -> r != null)
                 .map(Canonicals::getUrl)
                 .forEach(retval::add);

@@ -20,9 +20,9 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +30,14 @@ public class CqlFhirParametersConverter {
 
     org.slf4j.Logger logger = LoggerFactory.getLogger(CqlFhirParametersConverter.class);
 
-    protected AdapterFactory adapterFactory;
+    protected IAdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
     // private IFhirPath fhirPath;
     private ModelResolver modelResolver;
 
     public CqlFhirParametersConverter(
-            FhirContext fhirContext, AdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
+            FhirContext fhirContext, IAdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         this.fhirContext = requireNonNull(fhirContext);
         this.adapterFactory = requireNonNull(adapterFactory);
         this.fhirTypeConverter = requireNonNull(fhirTypeConverter);
@@ -60,7 +60,7 @@ public class CqlFhirParametersConverter {
             throw new RuntimeException(e);
         }
 
-        ParametersAdapter pa = this.adapterFactory.createParameters(params);
+        IParametersAdapter pa = this.adapterFactory.createParameters(params);
 
         for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults.entrySet()) {
             String name = entry.getKey();
@@ -84,17 +84,17 @@ public class CqlFhirParametersConverter {
         return params;
     }
 
-    protected ParametersParameterComponentAdapter addPart(ParametersAdapter pa, String name) {
+    protected IParametersParameterComponentAdapter addPart(IParametersAdapter pa, String name) {
         IBaseBackboneElement ppc = pa.addParameter();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
     }
 
     @SuppressWarnings("unchecked")
-    protected void addPart(ParametersAdapter pa, String name, Object value) {
-        ParametersParameterComponentAdapter ppca = this.addPart(pa, name);
+    protected void addPart(IParametersAdapter pa, String name, Object value) {
+        IParametersParameterComponentAdapter ppca = this.addPart(pa, name);
 
         if (value == null) {
             return;
@@ -124,18 +124,18 @@ public class CqlFhirParametersConverter {
         }
     }
 
-    protected ParametersParameterComponentAdapter addSubPart(
-            ParametersParameterComponentAdapter ppcAdapter, String name) {
+    protected IParametersParameterComponentAdapter addSubPart(
+            IParametersParameterComponentAdapter ppcAdapter, String name) {
         IBaseBackboneElement ppc = ppcAdapter.addPart();
-        ParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
         ppca.setName(name);
 
         return ppca;
     }
 
     @SuppressWarnings("unchecked")
-    protected void addSubPart(ParametersParameterComponentAdapter ppcAdapter, String name, Object value) {
-        ParametersParameterComponentAdapter ppca = this.addSubPart(ppcAdapter, name);
+    protected void addSubPart(IParametersParameterComponentAdapter ppcAdapter, String name, Object value) {
+        IParametersParameterComponentAdapter ppca = this.addSubPart(ppcAdapter, name);
 
         if (value == null) {
             return;
@@ -170,15 +170,15 @@ public class CqlFhirParametersConverter {
             return Collections.emptyList();
         }
 
-        ParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
+        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
-        Map<String, List<ParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
+        Map<String, List<IParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
                 .map(x -> this.adapterFactory.createParametersParameters(x))
                 .filter(x -> x.getName() != null)
-                .collect(Collectors.groupingBy(ParametersParameterComponentAdapter::getName));
+                .collect(Collectors.groupingBy(IParametersParameterComponentAdapter::getName));
 
         List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
-        for (Map.Entry<String, List<ParametersParameterComponentAdapter>> entry : children.entrySet()) {
+        for (Map.Entry<String, List<IParametersParameterComponentAdapter>> entry : children.entrySet()) {
             // Meta data extension, if present
             Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream()
                     .filter(x -> x.hasExtension())
@@ -299,7 +299,7 @@ public class CqlFhirParametersConverter {
         return false;
     }
 
-    private Object convertToCql(ParametersParameterComponentAdapter ppca) {
+    private Object convertToCql(IParametersParameterComponentAdapter ppca) {
         if (ppca.hasValue()) {
             return this.fhirTypeConverter.toCqlType(ppca.getValue());
         } else if (ppca.hasResource()) {

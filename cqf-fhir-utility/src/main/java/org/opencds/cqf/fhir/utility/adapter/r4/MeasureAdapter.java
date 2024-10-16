@@ -16,9 +16,9 @@ import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 
-public class MeasureAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
+public class MeasureAdapter extends KnowledgeArtifactAdapter implements IMeasureAdapter {
 
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
@@ -57,20 +57,20 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
 
     private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")
-                ? (reference) -> edrExtension.setValue(new Reference(reference))
-                : (reference) -> edrExtension.setValue(new CanonicalType(reference));
+                ? reference -> edrExtension.setValue(new Reference(reference))
+                : reference -> edrExtension.setValue(new CanonicalType(reference));
     }
 
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             var edrExtensions = this.getMeasure().getExtension().stream()
                     .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
-                    .filter(ext -> ext.hasValue())
+                    .filter(Extension::hasValue)
                     .collect(Collectors.toList());
 
             var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
             // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a canonical
-            var maybeEdrReference = Optional.ofNullable(edrExtension).map(e -> getEdrReferenceString(e));
+            var maybeEdrReference = Optional.ofNullable(edrExtension).map(this::getEdrReferenceString);
             if (edrExtension != null) {
                 var edrReference = maybeEdrReference.get();
                 for (var c : getMeasure().getContained()) {
@@ -123,61 +123,48 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
 
         // library[]
         for (var library : getMeasure().getLibrary()) {
-            DependencyInfo dependency = new DependencyInfo(
-                    referenceSource,
-                    library.getValue(),
-                    library.getExtension(),
-                    (reference) -> library.setValue(reference));
+            DependencyInfo dependency =
+                    new DependencyInfo(referenceSource, library.getValue(), library.getExtension(), library::setValue);
             references.add(dependency);
         }
 
         for (final var group : getMeasure().getGroup()) {
-            for (final var population : group.getPopulation()) {
-                // group[].population[].criteria.reference
-                if (population.getCriteria().hasReference()) {
-                    final var dependency = new DependencyInfo(
+            // group[].population[].criteria.reference
+            group.getPopulation().stream()
+                    .filter(p -> p.getCriteria().hasReference())
+                    .forEach(p -> references.add(new DependencyInfo(
                             referenceSource,
-                            population.getCriteria().getReference(),
-                            population.getCriteria().getExtension(),
-                            (reference) -> population.getCriteria().setReference(reference));
-                    references.add(dependency);
-                }
-            }
+                            p.getCriteria().getReference(),
+                            p.getCriteria().getExtension(),
+                            reference -> p.getCriteria().setReference(reference))));
             for (final var stratifier : group.getStratifier()) {
                 // group[].stratifier[].criteria.reference
                 if (stratifier.getCriteria().hasReference()) {
-                    final var dependency = new DependencyInfo(
+                    references.add(new DependencyInfo(
                             referenceSource,
                             stratifier.getCriteria().getReference(),
                             stratifier.getCriteria().getExtension(),
-                            (reference) -> stratifier.getCriteria().setReference(reference));
-                    references.add(dependency);
+                            reference -> stratifier.getCriteria().setReference(reference)));
                 }
-                for (final var component : stratifier.getComponent()) {
-                    // group[].stratifier[].component[].criteria.reference
-                    if (component.getCriteria().hasReference()) {
-                        final var stratifierComponentDep = new DependencyInfo(
+                // group[].stratifier[].component[].criteria.reference
+                stratifier.getComponent().stream()
+                        .filter(c -> c.getCriteria().hasReference())
+                        .forEach(component -> references.add(new DependencyInfo(
                                 referenceSource,
                                 component.getCriteria().getReference(),
                                 component.getCriteria().getExtension(),
-                                (reference) -> component.getCriteria().setReference(reference));
-                        references.add(stratifierComponentDep);
-                    }
-                }
+                                reference -> component.getCriteria().setReference(reference))));
             }
         }
 
-        for (final var supplement : getMeasure().getSupplementalData()) {
-            // supplementalData[].criteria.reference
-            if (supplement.getCriteria().hasReference()) {
-                final var dependency = new DependencyInfo(
+        // supplementalData[].criteria.reference
+        getMeasure().getSupplementalData().stream()
+                .filter(s -> s.getCriteria().hasReference())
+                .forEach(supplement -> references.add(new DependencyInfo(
                         referenceSource,
                         supplement.getCriteria().getReference(),
                         supplement.getCriteria().getExtension(),
-                        (reference) -> supplement.getCriteria().setReference(reference));
-                references.add(dependency);
-            }
-        }
+                        reference -> supplement.getCriteria().setReference(reference))));
 
         // extension[cqfm-effectiveDataRequirements]
         // extension[crmi-effectiveDataRequirements]
@@ -198,17 +185,14 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((Reference) referenceExt.getValue()).getReference(),
                         referenceExt.getExtension(),
-                        (reference) -> referenceExt.setValue(new Reference(reference)))));
+                        reference -> referenceExt.setValue(new Reference(reference)))));
 
         // extension[cqfm-component][].resource
         get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
             final var ref = (RelatedArtifact) ext.getValue();
             if (ref.hasResource()) {
-                final var dep = new DependencyInfo(
-                        referenceSource,
-                        ref.getResource(),
-                        ref.getExtension(),
-                        (reference) -> ref.setResource(reference));
+                final var dep =
+                        new DependencyInfo(referenceSource, ref.getResource(), ref.getExtension(), ref::setResource);
                 references.add(dep);
             }
         });

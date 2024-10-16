@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.utility.visitor;
 
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
-import static org.opencds.cqf.fhir.utility.adapter.AdapterFactory.createAdapterForResource;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.findUnsupportedCapability;
 import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.processCanonicals;
 
@@ -36,12 +36,12 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.ExpandHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.EndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class PackageVisitor implements IKnowledgeArtifactVisitor {
@@ -56,7 +56,7 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
     }
 
     @Override
-    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters packageParameters) {
+    public IBase visit(IKnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters packageParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
 
         Optional<String> artifactRoute = VisitorHelper.getParameter(
@@ -168,19 +168,19 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
                                 .getValueAsString());
             }
         }
-        var params = (ParametersAdapter) createAdapterForResource(expansionParams);
+        var params = (IParametersAdapter) createAdapterForResource(expansionParams);
         var expandedList = new ArrayList<String>();
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals("ValueSet"))
-                .map(v -> (ValueSetAdapter) createAdapterForResource(v))
+                .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
 
         valueSets.stream().forEach(valueSet -> {
             expandHelper.expandValueSet(
                     valueSet,
                     params,
-                    terminologyEndpoint.map(e -> (EndpointAdapter) createAdapterForResource(e)),
+                    terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
                     valueSets,
                     expandedList,
                     repository,
@@ -204,13 +204,13 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
             return;
         }
         var fhirVersion = resource.getStructureFhirVersionEnum();
-        var adapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
+        var adapter = IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
         if (!packagedResources.contains(adapter.getCanonical())) {
             packagedResources.add(adapter.getCanonical());
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, artifactVersion, checkArtifactVersion, forceArtifactVersion);
             boolean entryExists = BundleHelper.getEntryResources(bundle).stream()
-                    .map(e -> AdapterFactory.forFhirVersion(fhirVersion)
+                    .map(e -> IAdapterFactory.forFhirVersion(fhirVersion)
                             .createKnowledgeArtifactAdapter((IDomainResource) e))
                     .filter(mr -> mr.getUrl() != null)
                     .anyMatch(mr -> mr.getUrl().equals(adapter.getUrl())
@@ -324,10 +324,10 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
         }
     }
 
-    protected static LibraryAdapter getRootSpecificationLibrary(IBaseBundle bundle) {
-        Optional<LibraryAdapter> rootSpecLibrary = BundleHelper.getEntryResources(bundle).stream()
+    protected static ILibraryAdapter getRootSpecificationLibrary(IBaseBundle bundle) {
+        Optional<ILibraryAdapter> rootSpecLibrary = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> r.fhirType().equals("Library"))
-                .map(r -> AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                .map(r -> IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createLibrary(r))
                 // .filter(a -> a.getType().hasCoding(Constants.LIBRARY_TYPE, Constants.ASSET_COLLECTION)
                 //         && a.getUseContext().stream()
@@ -357,7 +357,7 @@ public class PackageVisitor implements IKnowledgeArtifactVisitor {
         return rootSpecLibrary.orElse(null);
     }
 
-    protected static IBaseParameters getExpansionParams(LibraryAdapter rootSpecificationLibrary, String reference) {
+    protected static IBaseParameters getExpansionParams(ILibraryAdapter rootSpecificationLibrary, String reference) {
         Optional<? extends IBaseResource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
                 .filter(contained -> contained.getIdElement().getValue().equals(reference))
                 .findFirst();

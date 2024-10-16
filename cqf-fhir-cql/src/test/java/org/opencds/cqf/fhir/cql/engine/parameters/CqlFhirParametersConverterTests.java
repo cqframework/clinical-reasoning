@@ -27,7 +27,7 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 class CqlFhirParametersConverterTests {
 
@@ -37,7 +37,7 @@ class CqlFhirParametersConverterTests {
     static void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-        AdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
+        IAdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter =
                 new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 

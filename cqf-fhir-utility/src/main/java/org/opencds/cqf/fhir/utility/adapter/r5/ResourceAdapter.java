@@ -37,10 +37,6 @@ class ResourceAdapter extends BaseResourceAdapter {
         return ofNullable(resource instanceof DomainResource ? (DomainResource) resource : null);
     }
 
-    public IBaseResource get() {
-        return resource;
-    }
-
     @Override
     public IBase setProperty(String name, IBase value) throws FHIRException {
         return getResource().setProperty(name, (Base) value);

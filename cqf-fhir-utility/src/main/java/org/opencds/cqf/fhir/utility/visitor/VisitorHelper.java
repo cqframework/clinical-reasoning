@@ -17,8 +17,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class VisitorHelper {
@@ -26,7 +26,7 @@ public class VisitorHelper {
     @SuppressWarnings("unchecked")
     public static <T extends IBaseDatatype> Optional<T> getParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
-        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
+        var factory = IAdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
@@ -37,7 +37,7 @@ public class VisitorHelper {
     @SuppressWarnings("unchecked")
     public static <T extends IBaseResource> Optional<T> getResourceParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
-        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
+        var factory = IAdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameter(name))
@@ -48,7 +48,7 @@ public class VisitorHelper {
     @SuppressWarnings("unchecked")
     public static <T extends IBaseDatatype> Optional<List<T>> getListParameter(
             String name, IBaseParameters operationParameters, Class<T> type) {
-        var factory = AdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
+        var factory = IAdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
         return Optional.ofNullable(operationParameters)
                 .map(p -> factory.createParameters(p))
                 .map(p -> p.getParameterValues(name))
@@ -88,7 +88,7 @@ public class VisitorHelper {
         return resourceList;
     }
 
-    public static void findUnsupportedCapability(KnowledgeArtifactAdapter resource, List<String> capability)
+    public static void findUnsupportedCapability(IKnowledgeArtifactAdapter resource, List<String> capability)
             throws PreconditionFailedException {
         if (capability != null && !capability.isEmpty()) {
             List<IBaseExtension<?, ?>> knowledgeCapabilityExtension = resource.get().getExtension().stream()
@@ -111,7 +111,7 @@ public class VisitorHelper {
     }
 
     public static void processCanonicals(
-            KnowledgeArtifactAdapter resource,
+            IKnowledgeArtifactAdapter resource,
             List<String> canonicalVersion,
             List<String> checkArtifactVersion,
             List<String> forceArtifactVersion)
@@ -137,7 +137,7 @@ public class VisitorHelper {
     }
 
     private static Optional<String> findVersionInListMatchingResource(
-            List<String> list, KnowledgeArtifactAdapter resource) {
+            List<String> list, IKnowledgeArtifactAdapter resource) {
         return list.stream()
                 .filter((canonical) -> Canonicals.getUrl(canonical).equals(resource.getUrl()))
                 .map((canonical) -> Canonicals.getVersion(canonical))
@@ -148,18 +148,19 @@ public class VisitorHelper {
         return false;
     }
 
-    public static Optional<KnowledgeArtifactAdapter> tryGetLatestVersion(String inputReference, Repository repository) {
-        return KnowledgeArtifactAdapter.findLatestVersion(
+    public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersion(
+            String inputReference, Repository repository) {
+        return IKnowledgeArtifactAdapter.findLatestVersion(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
-                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }
 
-    public static Optional<KnowledgeArtifactAdapter> tryGetLatestVersionWithStatus(
+    public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersionWithStatus(
             String inputReference, Repository repository, String status) {
-        return KnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+        return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
                         repository, inputReference, Searches.byStatus(status)))
-                .map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }
 }

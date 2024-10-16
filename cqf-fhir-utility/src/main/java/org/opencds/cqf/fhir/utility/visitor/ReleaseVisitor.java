@@ -30,10 +30,10 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     @SuppressWarnings("unchecked")
     @Override
     public IBase visit(
-            KnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
+            IKnowledgeArtifactAdapter rootAdapter, Repository repository, IBaseParameters operationParameters) {
         Optional<Boolean> latestFromTxServer = VisitorHelper.getParameter(
                         "latestFromTxServer", operationParameters, IPrimitiveType.class)
                 .map(t -> (Boolean) t.getValue());
@@ -97,7 +97,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         // once iteration is complete, delete all depends-on RAs in the root artifact
         var noDeps = rootAdapter.getRelatedArtifact();
         noDeps.removeIf(
-                ra -> KnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
+                ra -> IKnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
         rootAdapter.setRelatedArtifact(noDeps);
         var expansionParameters = rootAdapter.getExpansionParameters();
         var systemVersionParams = expansionParameters
@@ -126,7 +126,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 systemVersionParams,
                 canonicalVersionParams);
         if (rootAdapter.get().fhirType().equals("Library")) {
-            ((LibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
+            ((ILibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
         }
 
         // removed duplicates and add
@@ -135,12 +135,12 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         distinctResolvedRelatedArtifacts.clear();
         for (var resolvedRelatedArtifact : relatedArtifacts) {
             var relatedArtifactReference =
-                    KnowledgeArtifactAdapter.getRelatedArtifactReference(resolvedRelatedArtifact);
+                    IKnowledgeArtifactAdapter.getRelatedArtifactReference(resolvedRelatedArtifact);
             boolean isDistinct = !distinctResolvedRelatedArtifacts.stream().anyMatch(distinctRelatedArtifact -> {
                 boolean referenceNotInArray = relatedArtifactReference.equals(
-                        KnowledgeArtifactAdapter.getRelatedArtifactReference(distinctRelatedArtifact));
-                boolean typeMatches = KnowledgeArtifactAdapter.getRelatedArtifactType(distinctRelatedArtifact)
-                        .equals(KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact));
+                        IKnowledgeArtifactAdapter.getRelatedArtifactReference(distinctRelatedArtifact));
+                boolean typeMatches = IKnowledgeArtifactAdapter.getRelatedArtifactType(distinctRelatedArtifact)
+                        .equals(IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact));
                 return referenceNotInArray && typeMatches;
             });
             if (isDistinct) {
@@ -149,7 +149,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 originalDependenciesWithExtensions.stream()
                         .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
                                         .equals(Canonicals.getUrl(relatedArtifactReference))
-                                && KnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
+                                && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
                                         .equalsIgnoreCase(DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
@@ -179,7 +179,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     }
 
     private static void updateMetadata(
-            KnowledgeArtifactAdapter artifactAdapter,
+            IKnowledgeArtifactAdapter artifactAdapter,
             String version,
             ICompositeType rootEffectivePeriod,
             Date current) {
@@ -190,7 +190,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     }
 
     private List<IDomainResource> internalRelease(
-            KnowledgeArtifactAdapter artifactAdapter,
+            IKnowledgeArtifactAdapter artifactAdapter,
             String version,
             ICompositeType rootEffectivePeriod,
             boolean latestFromTxServer,
@@ -210,7 +210,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         resourcesToUpdate.add(artifactAdapter.get());
         // Step 3 : Go through all the components, update them and recursively release them if Owned
         for (var component : artifactAdapter.getComponents()) {
-            final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+            final var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
             if (!StringUtils.isBlank(preReleaseReference)) {
                 // For composed-of references, if a version is NOT specified in the reference
                 // then the latest version of the referenced artifact should be used.
@@ -218,7 +218,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 //  If a version IS specified then `tryGetLatestVersion`
                 //  will return that version.
                 var alreadyUpdated = checkIfReferenceInList(preReleaseReference, resourcesToUpdate);
-                if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !alreadyUpdated.isPresent()) {
+                if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !alreadyUpdated.isPresent()) {
                     // get the latest version regardless of status because it's owned and we're releasing it
                     var latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
                     if (latest.isPresent()) {
@@ -252,8 +252,8 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     }
 
     private void gatherDependencies(
-            KnowledgeArtifactAdapter rootAdapter,
-            KnowledgeArtifactAdapter artifactAdapter,
+            IKnowledgeArtifactAdapter rootAdapter,
+            IKnowledgeArtifactAdapter artifactAdapter,
             Set<String> gatheredResources,
             List<IDomainResource> releasedResources,
             FhirVersionEnum fhirVersion,
@@ -270,10 +270,10 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             // Step 1: Check components, add them to the cache and convert to dependencies
             for (var component : artifactAdapter.getComponents()) {
                 // all components are already updated to latest as part of release
-                var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+                var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
                 var updatedReference = preReleaseReference;
-                Optional<KnowledgeArtifactAdapter> res;
-                if (KnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
+                Optional<IKnowledgeArtifactAdapter> res;
+                if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component)) {
                     res = checkIfReferenceInList(preReleaseReference, releasedResources);
                     if (!res.isPresent()) {
                         // should never happen since we check all references as part of `internalRelease`
@@ -295,10 +295,10 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                             ? String.format(
                                     "%s|%s", res.get().getUrl(), res.get().getVersion())
                             : res.get().getUrl();
-                    KnowledgeArtifactAdapter.setRelatedArtifactReference(
+                    IKnowledgeArtifactAdapter.setRelatedArtifactReference(
                             component, updatedReference, res.get().getDescriptor());
                 }
-                var componentToDependency = KnowledgeArtifactAdapter.newRelatedArtifact(
+                var componentToDependency = IKnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion,
                         DEPENDSON,
                         updatedReference,
@@ -310,9 +310,9 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             var dependencies = artifactAdapter.getDependencies();
             // Step 2: update dependencies recursively
             for (var dependency : dependencies) {
-                KnowledgeArtifactAdapter dependencyAdapter = null;
+                IKnowledgeArtifactAdapter dependencyAdapter = null;
                 if (alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(dependency.getReference()))) {
-                    dependencyAdapter = AdapterFactory.forFhirVersion(fhirVersion)
+                    dependencyAdapter = IAdapterFactory.forFhirVersion(fhirVersion)
                             .createKnowledgeArtifactAdapter(
                                     alreadyUpdatedDependencies.get(Canonicals.getUrl(dependency.getReference())));
                     String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
@@ -356,7 +356,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                                         version -> dependency.setReference(dependency.getReference() + "|" + version));
                     }
 
-                    Optional<KnowledgeArtifactAdapter> maybeAdapter;
+                    Optional<IKnowledgeArtifactAdapter> maybeAdapter;
                     // if not available in expansion parameters then try to find the latest version and update the
                     // dependency
                     if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
@@ -392,7 +392,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
-                    var newDep = KnowledgeArtifactAdapter.newRelatedArtifact(
+                    var newDep = IKnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion,
                             DEPENDSON,
                             dependency.getReference(),
@@ -438,7 +438,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
     }
 
     private static void propagateEffectivePeriod(
-            ICompositeType rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
+            ICompositeType rootEffectivePeriod, IKnowledgeArtifactAdapter artifactAdapter) {
         if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period) {
             org.opencds.cqf.fhir.utility.visitor.dstu3.ReleaseVisitor.propagateEffectivePeriod(
                     (org.hl7.fhir.dstu3.model.Period) rootEffectivePeriod, artifactAdapter);
@@ -454,11 +454,11 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         }
     }
 
-    private KnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, Repository repository) {
-        List<KnowledgeArtifactAdapter> matchingResources = VisitorHelper.getMetadataResourcesFromBundle(
+    private IKnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, Repository repository) {
+        List<IKnowledgeArtifactAdapter> matchingResources = VisitorHelper.getMetadataResourcesFromBundle(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
                 .stream()
-                .map(r -> AdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                .map(r -> IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(r))
                 .collect(Collectors.toList());
         if (matchingResources.isEmpty()) {
@@ -471,7 +471,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         }
     }
 
-    private String addVersionToReference(String inputReference, KnowledgeArtifactAdapter adapter) {
+    private String addVersionToReference(String inputReference, IKnowledgeArtifactAdapter adapter) {
         if (adapter != null) {
             String versionedReference = adapter.hasVersion()
                     ? String.format("%s|%s", adapter.getUrl(), adapter.getVersion())
@@ -519,22 +519,23 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<KnowledgeArtifactAdapter> checkIfReferenceInList(
+    private Optional<IKnowledgeArtifactAdapter> checkIfReferenceInList(
             String referenceToCheck, List<IDomainResource> resourceList) {
         for (var resource : resourceList) {
             String referenceURL = Canonicals.getUrl(referenceToCheck);
-            String currentResourceURL = AdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
+            String currentResourceURL = IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
                     .createKnowledgeArtifactAdapter(resource)
                     .getUrl();
             if (referenceURL.equals(currentResourceURL)) {
-                return Optional.of(resource).map(res -> AdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
-                        .createKnowledgeArtifactAdapter(res));
+                return Optional.of(resource)
+                        .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                                .createKnowledgeArtifactAdapter(res));
             }
         }
         return Optional.empty();
     }
 
-    private void checkReleasePreconditions(KnowledgeArtifactAdapter artifact, Date approvalDate)
+    private void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
             throws PreconditionFailedException {
         if (artifact == null) {
             throw new ResourceNotFoundException("Resource not found.");

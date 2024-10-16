@@ -6,14 +6,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 
-public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
+public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDefinitionAdapter {
 
     public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
@@ -70,25 +73,21 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
         // library[]
         List<CanonicalType> libraries = getPlanDefinition().getLibrary();
         for (CanonicalType ct : libraries) {
-            DependencyInfo dependency = new DependencyInfo(
-                    referenceSource, ct.getValue(), ct.getExtension(), (reference) -> ct.setValue(reference));
+            DependencyInfo dependency =
+                    new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension(), ct::setValue);
             references.add(dependency);
         }
         // action[]
         getPlanDefinition().getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
         getPlanDefinition().getExtension().stream()
                 .filter(ext -> ext.getUrl().contains("cpg-partOf"))
-                .filter(ext -> ext.hasValue())
+                .filter(Extension::hasValue)
                 .findAny()
-                .ifPresent(ext -> {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            ((CanonicalType) ext.getValue()).getValue(),
-                            ext.getExtension(),
-                            (reference) -> ext.setValue(new CanonicalType(reference))));
-                });
-        // TODO: Ideally use $data-requirements code
-
+                .ifPresent(ext -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((CanonicalType) ext.getValue()).getValue(),
+                        ext.getExtension(),
+                        reference -> ext.setValue(new CanonicalType(reference)))));
         return references;
     }
 
@@ -99,47 +98,35 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
         action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
             // trigger[].dataRequirement[].profile[]
             eventData.getProfile().stream()
-                    .filter(profile -> profile.hasValue())
-                    .forEach(profile -> {
-                        references.add(new DependencyInfo(
-                                referenceSource,
-                                profile.getValue(),
-                                profile.getExtension(),
-                                (reference) -> profile.setValue(reference)));
-                    });
+                    .filter(IPrimitiveType::hasValue)
+                    .forEach(profile -> references.add(new DependencyInfo(
+                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
             // trigger[].dataRequirement[].codeFilter[].valueSet
-            eventData.getCodeFilter().stream().filter(cf -> cf.hasValueSet()).forEach(cf -> {
-                references.add(new DependencyInfo(
-                        referenceSource,
-                        cf.getValueSet(),
-                        cf.getExtension(),
-                        (reference) -> cf.setValueSet(reference)));
-            });
+            eventData.getCodeFilter().stream()
+                    .filter(cf -> cf.hasValueSet())
+                    .forEach(cf -> references.add(
+                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
         });
         // condition[].expression.reference
         action.getCondition().stream()
                 .filter(c -> c.hasExpression())
                 .map(c -> c.getExpression())
                 .filter(e -> e.hasReference())
-                .forEach(expression -> {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            expression.getReference(),
-                            expression.getExtension(),
-                            (reference) -> expression.setReference(reference)));
-                });
+                .forEach(expression -> references.add(new DependencyInfo(
+                        referenceSource,
+                        expression.getReference(),
+                        expression.getExtension(),
+                        expression::setReference)));
         // dynamicValue[].expression.reference
         action.getDynamicValue().stream()
                 .filter(dv -> dv.hasExpression())
                 .map(dv -> dv.getExpression())
                 .filter(e -> e.hasReference())
-                .forEach(expression -> {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            expression.getReference(),
-                            expression.getExtension(),
-                            (reference) -> expression.setReference(reference)));
-                });
+                .forEach(expression -> references.add(new DependencyInfo(
+                        referenceSource,
+                        expression.getReference(),
+                        expression.getExtension(),
+                        expression::setReference)));
         Stream.concat(
                         action.getInput().stream().map(i -> i.getRequirement()),
                         action.getOutput().stream().map(o -> o.getRequirement()))
@@ -147,34 +134,21 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter {
                     // ..input[].profile[]
                     // ..output[].profile[]
                     inputOrOutput.getProfile().stream()
-                            .filter(profile -> profile.hasValue())
-                            .forEach(profile -> {
-                                references.add(new DependencyInfo(
-                                        referenceSource,
-                                        profile.getValue(),
-                                        profile.getExtension(),
-                                        (reference) -> profile.setValue(reference)));
-                            });
+                            .filter(IPrimitiveType::hasValue)
+                            .forEach(profile -> references.add(new DependencyInfo(
+                                    referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
                     // input[].codeFilter[].valueSet
                     // output[].codeFilter[].valueSet
                     inputOrOutput.getCodeFilter().stream()
                             .filter(cf -> cf.hasValueSet())
-                            .forEach(cf -> {
-                                references.add(new DependencyInfo(
-                                        referenceSource,
-                                        cf.getValueSet(),
-                                        cf.getExtension(),
-                                        (reference) -> cf.setValueSet(reference)));
-                            });
+                            .forEach(cf -> references.add(new DependencyInfo(
+                                    referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
                 });
         // action..definitionCanonical
         var definition = action.getDefinitionCanonicalType();
         if (definition != null && definition.hasValue()) {
             references.add(new DependencyInfo(
-                    referenceSource,
-                    definition.getValue(),
-                    definition.getExtension(),
-                    (reference) -> definition.setValue(reference)));
+                    referenceSource, definition.getValue(), definition.getExtension(), definition::setValue));
         }
         action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
     }

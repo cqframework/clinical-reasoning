@@ -10,7 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
 public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
@@ -41,10 +41,10 @@ public abstract class AbstractKnowledgeArtifactVisitor implements IKnowledgeArti
     }
 
     protected List<IDomainResource> getComponents(
-            KnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
+            IKnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
         adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
-            final var preReleaseReference = KnowledgeArtifactAdapter.getRelatedArtifactReference(c);
-            Optional<KnowledgeArtifactAdapter> maybeArtifact =
+            final var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(c);
+            Optional<IKnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (resourcesToUpdate.stream().noneMatch(rtu -> rtu.getId()

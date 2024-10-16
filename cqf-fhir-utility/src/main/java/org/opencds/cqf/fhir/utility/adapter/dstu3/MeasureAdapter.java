@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class MeasureAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.MeasureAdapter {
+        implements org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter {
 
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
@@ -56,20 +56,20 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
 
     private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")
-                ? (reference) -> edrExtension.setValue(new Reference(reference))
-                : (reference) -> edrExtension.setValue(new UriType(reference));
+                ? reference -> edrExtension.setValue(new Reference(reference))
+                : reference -> edrExtension.setValue(new UriType(reference));
     }
 
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             List<Extension> edrExtensions = this.getMeasure().getExtension().stream()
                     .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
-                    .filter(ext -> ext.hasValue())
+                    .filter(Extension::hasValue)
                     .collect(Collectors.toList());
 
             var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
             // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a canonical
-            var maybeEdrReference = Optional.ofNullable(edrExtension).map(e -> getEdrReferenceString(e));
+            var maybeEdrReference = Optional.ofNullable(edrExtension).map(this::getEdrReferenceString);
             if (maybeEdrReference.isPresent()) {
                 var edrReference = maybeEdrReference.get();
                 for (var c : getMeasure().getContained()) {
@@ -123,10 +123,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
         // library[]
         for (var library : getMeasure().getLibrary()) {
             final var dependency = new DependencyInfo(
-                    referenceSource,
-                    library.getReference(),
-                    library.getExtension(),
-                    (reference) -> library.setReference(reference));
+                    referenceSource, library.getReference(), library.getExtension(), library::setReference);
             references.add(dependency);
         }
 
@@ -149,7 +146,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ((Reference) referenceExt.getValue()).getReference(),
                         referenceExt.getExtension(),
-                        (reference) -> referenceExt.setValue(new Reference(reference)))));
+                        reference -> referenceExt.setValue(new Reference(reference)))));
 
         // extension[cqfm-component][].resource
         get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
@@ -159,7 +156,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
                         referenceSource,
                         ref.getResource().getReference(),
                         ref.getExtension(),
-                        (reference) -> ref.getResource().setReference(reference));
+                        reference -> ref.getResource().setReference(reference));
                 references.add(dep);
             }
         });

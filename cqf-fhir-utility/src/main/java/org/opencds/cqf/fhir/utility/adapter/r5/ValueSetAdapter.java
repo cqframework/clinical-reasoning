@@ -16,9 +16,9 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
-public class ValueSetAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.ValueSetAdapter {
+public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueSetAdapter {
 
     public ValueSetAdapter(IDomainResource valueSet) {
         super(valueSet);
@@ -67,24 +67,19 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter
                         getValueSet().getCompose().getExclude().stream())
                 .forEach(component -> {
                     if (component.hasValueSet()) {
-                        component.getValueSet().forEach(ct -> {
-                            references.add(new DependencyInfo(
-                                    referenceSource,
-                                    ct.getValue(),
-                                    ct.getExtension(),
-                                    (reference) -> ct.setValue(reference)));
-                        });
+                        component
+                                .getValueSet()
+                                .forEach(ct -> references.add(new DependencyInfo(
+                                        referenceSource, ct.getValue(), ct.getExtension(), ct::setValue)));
                     }
                     if (component.hasSystem()) {
                         references.add(new DependencyInfo(
                                 referenceSource,
                                 component.getSystem(),
                                 component.getSystemElement().getExtension(),
-                                (reference) -> component.setSystem(reference)));
+                                component::setSystem));
                     }
                 });
-
-        // TODO: Ideally this would use the $data-requirements code
         return references;
     }
 

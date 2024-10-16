@@ -11,11 +11,11 @@ class AdapterTest {
     @Test
     void testUnsupportedVersion() {
         var version = FhirVersionEnum.DSTU2;
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newPeriod(version));
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newStringType(version, "string"));
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newUriType(version, "uri"));
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newUrlType(version, "url"));
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newDateType(version, new Date()));
-        assertThrows(UnprocessableEntityException.class, () -> Adapter.newDateTimeType(version, new Date()));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newPeriod(version));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newStringType(version, "string"));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newUriType(version, "uri"));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newUrlType(version, "url"));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateType(version, new Date()));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateTimeType(version, new Date()));
     }
 }

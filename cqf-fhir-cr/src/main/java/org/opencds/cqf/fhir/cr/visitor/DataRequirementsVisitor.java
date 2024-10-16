@@ -43,9 +43,9 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Libraries;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 
@@ -59,7 +59,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
     }
 
     @Override
-    public IBase visit(KnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters drParameters) {
+    public IBase visit(IKnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters drParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
         Optional<IBaseParameters> parameters =
                 VisitorHelper.getResourceParameter("parameters", drParameters, IBaseParameters.class);
@@ -76,7 +76,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                 .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
                 .orElseGet(() -> new ArrayList<>());
 
-        LibraryAdapter library;
+        ILibraryAdapter library;
         var primaryLibrary = adapter.getPrimaryLibrary(repository);
         if (primaryLibrary != null) {
             var libraryManager = createLibraryManager(repository);
@@ -95,7 +95,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                     true);
             library = convertAndCreateAdapter(fhirVersion, r5Library);
         } else {
-            library = AdapterFactory.forFhirContext(repository.fhirContext())
+            library = IAdapterFactory.forFhirContext(repository.fhirContext())
                     .createLibrary(repository
                             .fhirContext()
                             .getResourceDefinition("Library")
@@ -122,7 +122,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends ICompositeType & IBaseHasExtensions> List<T> stripInvalid(LibraryAdapter library) {
+    private <T extends ICompositeType & IBaseHasExtensions> List<T> stripInvalid(ILibraryAdapter library) {
         // Until we support passing the Manifest we do not know the IG context and cannot correctly setup the
         // NamespaceManager
         // This method will strip out any relatedArtifacts that do not have a full valid canonical
@@ -139,8 +139,8 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
     }
 
-    private LibraryAdapter convertAndCreateAdapter(FhirVersionEnum fhirVersion, Library r5Library) {
-        var adapterFactory = AdapterFactory.forFhirVersion(fhirVersion);
+    private ILibraryAdapter convertAndCreateAdapter(FhirVersionEnum fhirVersion, Library r5Library) {
+        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
         switch (fhirVersion) {
             case DSTU3:
                 var versionConvertor3050 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
@@ -181,7 +181,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
     }
 
     protected static LibrarySourceProvider buildLibrarySource(Repository repository) {
-        AdapterFactory adapterFactory = AdapterFactory.forFhirContext(repository.fhirContext());
+        IAdapterFactory adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
@@ -218,7 +218,7 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
             return;
         }
         var fhirVersion = resource.getStructureFhirVersionEnum();
-        var adapter = AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
+        var adapter = IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
         if (!gatheredResources.contains(adapter.getCanonical())) {
             gatheredResources.add(adapter.getCanonical());
             findUnsupportedCapability(adapter, capability);
@@ -227,10 +227,10 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                     ? adapter.getUrl().concat(String.format("|%s", adapter.getVersion()))
                     : adapter.getUrl();
             boolean addArtifact = relatedArtifacts.stream()
-                    .noneMatch(ra -> KnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
+                    .noneMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
                             .equals(reference));
             if (addArtifact) {
-                relatedArtifacts.add(KnowledgeArtifactAdapter.newRelatedArtifact(
+                relatedArtifacts.add(IKnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion, "depends-on", reference, adapter.getDescriptor()));
             }
 

@@ -13,7 +13,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private final IBaseResource activityDefinition;
@@ -215,7 +215,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public QuestionnaireAdapter getQuestionnaireAdapter() {
+    public IQuestionnaireAdapter getQuestionnaireAdapter() {
         return null;
     }
 }

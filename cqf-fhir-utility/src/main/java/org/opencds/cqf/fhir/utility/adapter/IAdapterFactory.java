@@ -8,13 +8,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 
-public interface AdapterFactory {
+public interface IAdapterFactory {
 
-    public static AdapterFactory forFhirContext(FhirContext fhirContext) {
+    public static IAdapterFactory forFhirContext(FhirContext fhirContext) {
         return forFhirVersion(fhirContext.getVersion().getVersion());
     }
 
-    public static AdapterFactory forFhirVersion(FhirVersionEnum fhirVersion) {
+    public static IAdapterFactory forFhirVersion(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:
                 return new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
@@ -29,7 +29,7 @@ public interface AdapterFactory {
         }
     }
 
-    public static ResourceAdapter createAdapterForResource(IBaseResource resource) {
+    public static IResourceAdapter createAdapterForResource(IBaseResource resource) {
         return forFhirVersion(resource.getStructureFhirVersionEnum()).createResource(resource);
     }
 
@@ -39,7 +39,7 @@ public interface AdapterFactory {
      * @param resource A FHIR Resource
      * @return an adapter exposing common api calls
      */
-    public ResourceAdapter createResource(IBaseResource resource);
+    public IResourceAdapter createResource(IBaseResource resource);
 
     /**
      * Creates an adapter that exposes common MetadataResource operations across multiple versions of FHIR
@@ -47,7 +47,7 @@ public interface AdapterFactory {
      * @param metadataResource A FHIR MetadataResource
      * @return an adapter exposing common api calls
      */
-    public KnowledgeArtifactAdapter createKnowledgeArtifactAdapter(IDomainResource metadataResource);
+    public IKnowledgeArtifactAdapter createKnowledgeArtifactAdapter(IDomainResource metadataResource);
 
     /**
      * Creates an adapter that exposes common Library operations across multiple versions of FHIR
@@ -55,7 +55,7 @@ public interface AdapterFactory {
      * @param library a FHIR Library Resource
      * @return an adapter exposing common api calls
      */
-    public LibraryAdapter createLibrary(IBaseResource library);
+    public ILibraryAdapter createLibrary(IBaseResource library);
 
     /**
      * Creates an adapter that exposes common Attachment operations across multiple versions of FHIR
@@ -63,7 +63,7 @@ public interface AdapterFactory {
      * @param attachment a FHIR Attachment Structure
      * @return an adapter exposing common api calls
      */
-    public AttachmentAdapter createAttachment(ICompositeType attachment);
+    public IAttachmentAdapter createAttachment(ICompositeType attachment);
 
     /**
      * Creates an adapter that exposes common Parameters operations across multiple versions of FHIR
@@ -71,7 +71,7 @@ public interface AdapterFactory {
      * @param parameters a FHIR Parameters Resource
      * @return an adapter exposing common api calls
      */
-    public ParametersAdapter createParameters(IBaseParameters parameters);
+    public IParametersAdapter createParameters(IBaseParameters parameters);
 
     /**
      * Creates an adapter that exposes common ParametersParameterComponent operations across multiple
@@ -80,7 +80,7 @@ public interface AdapterFactory {
      * @param parametersParametersComponent a FHIR ParametersParameterComponent Structure
      * @return an adapter exposing common api calls
      */
-    public ParametersParameterComponentAdapter createParametersParameters(
+    public IParametersParameterComponentAdapter createParametersParameters(
             IBaseBackboneElement parametersParametersComponent);
 
     /**
@@ -89,5 +89,5 @@ public interface AdapterFactory {
      * @param endpoint a FHIR Endpoint Resource
      * @return an adapter exposing common api calls
      */
-    public EndpointAdapter createEndpoint(IBaseResource endpoint);
+    public IEndpointAdapter createEndpoint(IBaseResource endpoint);
 }

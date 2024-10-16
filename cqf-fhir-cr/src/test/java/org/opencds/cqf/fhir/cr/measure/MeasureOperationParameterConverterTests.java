@@ -17,7 +17,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
-import org.opencds.cqf.fhir.utility.adapter.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class MeasureOperationParameterConverterTests {
@@ -27,7 +27,7 @@ class MeasureOperationParameterConverterTests {
     @BeforeAll
     void setup() {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
-        AdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
+        IAdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
         FhirTypeConverter fhirTypeConverter =
                 new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
 

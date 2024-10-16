@@ -31,6 +31,7 @@ public class DependencyInfo implements IDependencyInfo {
         return this.referenceSource;
     }
 
+    @SuppressWarnings("unchecked")
     public List<? extends IBaseExtension<?, ?>> getExtension() {
         return this.extensionList;
     }
@@ -58,28 +59,20 @@ public class DependencyInfo implements IDependencyInfo {
 
     public static IDependencyInfo convertRelatedArtifact(ICompositeType ra, String source) {
         if (ra instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
+            final var reference = (org.hl7.fhir.dstu3.model.RelatedArtifact) ra;
             return new DependencyInfo(
-                    source,
-                    ((org.hl7.fhir.dstu3.model.RelatedArtifact) ra)
+                    source, reference.getResource().getReference(), reference.getExtension(), ref -> reference
                             .getResource()
-                            .getReference(),
-                    ((org.hl7.fhir.dstu3.model.RelatedArtifact) ra).getExtension(),
-                    (reference) -> ((org.hl7.fhir.dstu3.model.RelatedArtifact) ra)
-                            .getResource()
-                            .setReference(reference));
+                            .setReference(ref));
         } else if (ra instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
+            final var reference = (org.hl7.fhir.r4.model.RelatedArtifact) ra;
             return new DependencyInfo(
-                    source,
-                    ((org.hl7.fhir.r4.model.RelatedArtifact) ra).getResource(),
-                    ((org.hl7.fhir.r4.model.RelatedArtifact) ra).getExtension(),
-                    (reference) -> ((org.hl7.fhir.r4.model.RelatedArtifact) ra).setResource(reference));
+                    source, reference.getResource(), reference.getExtension(), reference::setResource);
 
         } else if (ra instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
+            final var reference = (org.hl7.fhir.r5.model.RelatedArtifact) ra;
             return new DependencyInfo(
-                    source,
-                    ((org.hl7.fhir.r5.model.RelatedArtifact) ra).getResource(),
-                    ((org.hl7.fhir.r5.model.RelatedArtifact) ra).getExtension(),
-                    (reference) -> ((org.hl7.fhir.r5.model.RelatedArtifact) ra).setResource(reference));
+                    source, reference.getResource(), reference.getExtension(), reference::setResource);
         } else {
             throw new UnprocessableEntityException("A valid RelatedArtifact object must be provided");
         }

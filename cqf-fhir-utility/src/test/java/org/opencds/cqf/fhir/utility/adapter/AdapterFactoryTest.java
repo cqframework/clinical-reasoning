@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 class AdapterFactoryTest {
     @Test
     void testUnsupportedVersion() {
-        assertThrows(IllegalArgumentException.class, () -> AdapterFactory.forFhirVersion(FhirVersionEnum.DSTU2));
+        assertThrows(IllegalArgumentException.class, () -> IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU2));
     }
 
     @Test
     void testFhirContext() {
         var context = FhirContext.forR4Cached();
-        var adapterFactory = AdapterFactory.forFhirContext(context);
+        var adapterFactory = IAdapterFactory.forFhirContext(context);
         assertNotNull(adapterFactory);
         var adapter = adapterFactory.createResource(new Patient());
         assertNotNull(adapter);

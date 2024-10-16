@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.KnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.utility.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
@@ -56,7 +56,7 @@ public class ReleaseVisitor {
                         .flatMap(include -> include.getValueSet().stream())
                         .collect(Collectors.toList());
                 for (var value : valueSets) {
-                    KnowledgeArtifactAdapter.findLatestVersion(
+                    IKnowledgeArtifactAdapter.findLatestVersion(
                                     SearchHelper.searchRepositoryByCanonicalWithPaging(repository, value))
                             .ifPresent(childVs -> checkNonExperimental(
                                     (MetadataResource) childVs, experimentalBehavior, repository, log));
@@ -65,7 +65,7 @@ public class ReleaseVisitor {
         }
     }
 
-    public static void propagateEffectivePeriod(Period rootEffectivePeriod, KnowledgeArtifactAdapter artifactAdapter) {
+    public static void propagateEffectivePeriod(Period rootEffectivePeriod, IKnowledgeArtifactAdapter artifactAdapter) {
         Period effectivePeriod = (Period) artifactAdapter.getEffectivePeriod();
         // if the root artifact period is NOT null AND HAS a start or an end date
         if ((rootEffectivePeriod != null && (rootEffectivePeriod.hasStart() || rootEffectivePeriod.hasEnd()))
@@ -78,10 +78,10 @@ public class ReleaseVisitor {
     public static void updateReleaseLabel(MetadataResource artifact, String releaseLabel)
             throws IllegalArgumentException {
         if (releaseLabel != null) {
-            var releaseLabelExtension = artifact.getExtensionByUrl(KnowledgeArtifactAdapter.releaseLabelUrl);
+            var releaseLabelExtension = artifact.getExtensionByUrl(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL);
             if (releaseLabelExtension == null) {
                 // create the Extension and add it to the artifact if it doesn't exist
-                releaseLabelExtension = new Extension(KnowledgeArtifactAdapter.releaseLabelUrl);
+                releaseLabelExtension = new Extension(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL);
                 artifact.addExtension(releaseLabelExtension);
             }
             releaseLabelExtension.setValue(new StringType(releaseLabel));

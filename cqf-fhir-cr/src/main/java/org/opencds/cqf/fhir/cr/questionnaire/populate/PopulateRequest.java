@@ -18,7 +18,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.QuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
@@ -33,7 +33,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
     private final IInputParameterResolver inputParameterResolver;
-    private final QuestionnaireAdapter questionnaireAdapter;
+    private final IQuestionnaireAdapter questionnaireAdapter;
     private IBaseOperationOutcome operationOutcome;
 
     public PopulateRequest(
@@ -63,7 +63,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
         }
         this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
-        questionnaireAdapter = (QuestionnaireAdapter)
+        questionnaireAdapter = (IQuestionnaireAdapter)
                 getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) this.questionnaire);
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
@@ -88,7 +88,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public QuestionnaireAdapter getQuestionnaireAdapter() {
+    public IQuestionnaireAdapter getQuestionnaireAdapter() {
         return questionnaireAdapter;
     }
 

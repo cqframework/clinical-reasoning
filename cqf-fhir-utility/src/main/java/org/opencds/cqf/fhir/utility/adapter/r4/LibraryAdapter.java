@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,9 +24,9 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
-public class LibraryAdapter extends KnowledgeArtifactAdapter
-        implements org.opencds.cqf.fhir.utility.adapter.LibraryAdapter {
+public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibraryAdapter {
     public LibraryAdapter(IDomainResource library) {
         super(library);
         if (!(library instanceof Library)) {
@@ -76,7 +77,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<IDependencyInfo>();
+        List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = getReferenceSource();
         addProfileReferences(references, referenceSource);
 
@@ -85,24 +86,18 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter
                 .map(ra -> (RelatedArtifact) ra)
                 .filter(ra -> ra.hasResource())
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(ra -> references.add(ra));
+                .forEach(references::add);
         getLibrary().getDataRequirement().stream().forEach(dr -> {
             // dataRequirement[].profile[]
             dr.getProfile().stream()
-                    .filter(profile -> profile.hasValue())
+                    .filter(IPrimitiveType::hasValue)
                     .forEach(profile -> references.add(new DependencyInfo(
-                            referenceSource,
-                            profile.getValue(),
-                            profile.getExtension(),
-                            (reference) -> profile.setValue(reference))));
+                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
             // dataRequirement[].codeFilter[].valueSet
             dr.getCodeFilter().stream()
                     .filter(cf -> cf.hasValueSet())
-                    .forEach(cf -> references.add(new DependencyInfo(
-                            referenceSource,
-                            cf.getValueSet(),
-                            cf.getExtension(),
-                            (reference) -> cf.setValueSet(reference))));
+                    .forEach(cf -> references.add(
+                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
         });
         return references;
     }

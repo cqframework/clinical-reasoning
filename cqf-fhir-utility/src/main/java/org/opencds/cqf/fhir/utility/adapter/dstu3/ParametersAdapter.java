@@ -9,8 +9,9 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 
-class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.utility.adapter.ParametersAdapter {
+class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
     public ParametersAdapter(IBaseResource parameters) {
         super(parameters);
@@ -28,6 +29,7 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
         return this.parameters;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ParametersParameterComponent> getParameter() {
         return this.getParameters().getParameter();
@@ -74,6 +76,7 @@ class ParametersAdapter extends ResourceAdapter implements org.opencds.cqf.fhir.
         return this.getParameters().addParameter();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Type> getParameterValues(String name) {
         return this.getParameters().getParameter().stream()

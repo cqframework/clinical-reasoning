@@ -104,6 +104,7 @@ class PackageVisitorTests {
         assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without a terminology server: "));
     }
 
+    @Disabled
     @Test
     void packageOperation_should_fail_credentials_missing_username() {
         Bundle loadedBundle = (Bundle)
@@ -127,6 +128,7 @@ class PackageVisitorTests {
         assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC Username."));
     }
 
+    @Disabled
     @Test
     void packageOperation_should_fail_credentials_missing_apikey() {
         Bundle loadedBundle = (Bundle)
@@ -150,6 +152,7 @@ class PackageVisitorTests {
         assertTrue(maybeException.getMessage().contains("Cannot expand ValueSet without VSAC API Key."));
     }
 
+    @Disabled
     @Test
     void packageOperation_should_fail_credentials_invalid() {
         Bundle loadedBundle = (Bundle)

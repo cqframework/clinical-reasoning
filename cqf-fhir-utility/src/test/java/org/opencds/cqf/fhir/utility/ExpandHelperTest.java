@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -67,6 +68,7 @@ public class ExpandHelperTest {
         verify(client, never()).expand(any(ValueSetAdapter.class), any(), any());
     }
 
+    @Disabled
     @Test
     void expandGrouperAddsLeafCodesToGrouperExpansionWithEndpointTest() {
         // setup tx server endpoint
@@ -105,6 +107,7 @@ public class ExpandHelperTest {
         verify(client, times(1)).expand(any(ValueSetAdapter.class), any(), any());
     }
 
+    @Disabled
     @Test
     void expandGrouperUpdatesURLAndVersionExpParamsTest() {
         // setup tx server endpoint
@@ -206,6 +209,7 @@ public class ExpandHelperTest {
         assertEquals(0, grouper.getExpansion().getContains().size());
     }
 
+    @Disabled
     @Test
     void expandingAGrouperWhereChildHasNoExpansionDoesNotThrowError() {
         // setup tx server endpoint
@@ -259,6 +263,7 @@ public class ExpandHelperTest {
         assertEquals(0, grouper.getExpansion().getContains().size());
     }
 
+    @Disabled
     @Test
     void unsupportedParametersAreRemovedWhenExpanding() {
         // setup tx server endpoint

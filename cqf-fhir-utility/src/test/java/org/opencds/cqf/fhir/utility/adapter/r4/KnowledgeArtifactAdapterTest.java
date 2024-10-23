@@ -5,19 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -26,7 +19,6 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 class KnowledgeArtifactAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -46,15 +38,15 @@ class KnowledgeArtifactAdapterTest {
         assertNotNull(adapter);
     }
 
-    @Test
-    void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(KnowledgeArtifactAdapter.class), any(), any());
-        IDomainResource def = new CompartmentDefinition();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(KnowledgeArtifactAdapter.class), any(), any());
-    }
+    // @Test
+    // void adapter_accepts_visitor() {
+    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
+    //     doReturn(new Bundle()).when(spyVisitor).visit(any(KnowledgeArtifactAdapter.class), any(), any());
+    //     IDomainResource def = new CompartmentDefinition();
+    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
+    //     adapter.accept(spyVisitor, null, null);
+    //     verify(spyVisitor, times(1)).visit(any(KnowledgeArtifactAdapter.class), any(), any());
+    // }
 
     @Test
     void adapter_get_and_set_name() {

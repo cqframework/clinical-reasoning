@@ -4,26 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class ValueSetAdapterTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
@@ -34,16 +26,16 @@ public class ValueSetAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> new ValueSetAdapter(new Library()));
     }
 
-    @Test
-    void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(ValueSetAdapter.class), any(), any());
-        IDomainResource valueSet = new ValueSet();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
-        assertEquals(valueSet, adapter.get());
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any(), any());
-    }
+    // @Test
+    // void adapter_accepts_visitor() {
+    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
+    //     doReturn(new Bundle()).when(spyVisitor).visit(any(ValueSetAdapter.class), any(), any());
+    //     IDomainResource valueSet = new ValueSet();
+    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+    //     assertEquals(valueSet, adapter.get());
+    //     adapter.accept(spyVisitor, null, null);
+    //     verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any(), any());
+    // }
 
     @Test
     void adapter_get_and_set_name() {

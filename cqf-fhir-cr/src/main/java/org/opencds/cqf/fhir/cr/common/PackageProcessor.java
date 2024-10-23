@@ -9,8 +9,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final Repository repository;
@@ -20,7 +20,7 @@ public class PackageProcessor implements IPackageProcessor {
     public PackageProcessor(Repository repository) {
         this.repository = repository;
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        packageVisitor = new PackageVisitor(this.repository.fhirContext());
+        packageVisitor = new PackageVisitor(this.repository);
     }
 
     @Override
@@ -42,7 +42,6 @@ public class PackageProcessor implements IPackageProcessor {
     public IBaseBundle packageResource(IBaseResource resource, IBaseParameters parameters) {
         return (IBaseBundle) packageVisitor.visit(
                 IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter((IDomainResource) resource),
-                repository,
                 parameters);
     }
 }

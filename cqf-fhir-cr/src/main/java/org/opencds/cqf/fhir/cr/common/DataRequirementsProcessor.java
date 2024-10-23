@@ -23,14 +23,13 @@ public class DataRequirementsProcessor implements IDataRequirementsProcessor {
     public DataRequirementsProcessor(Repository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        dataRequirementsVisitor = new DataRequirementsVisitor(evaluationSettings);
+        dataRequirementsVisitor = new DataRequirementsVisitor(this.repository, evaluationSettings);
     }
 
     @Override
     public IBaseResource getDataRequirements(IBaseResource resource, IBaseParameters parameters) {
         return (IBaseResource) dataRequirementsVisitor.visit(
                 IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter((IDomainResource) resource),
-                repository,
                 parameters == null ? newParameters(repository.fhirContext()) : parameters);
     }
 }

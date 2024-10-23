@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -37,6 +38,12 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
 
     protected StructureDefinition getStructureDefinition() {
         return (StructureDefinition) resource;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<UsageContext> getUseContext() {
+        return get().getUseContext();
     }
 
     @Override

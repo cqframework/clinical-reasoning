@@ -90,4 +90,6 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     public IEndpointAdapter createEndpoint(IBaseResource endpoint);
+
+    public ICodeableConceptAdapter createCodeableConcept(ICompositeType codeableConcept);
 }

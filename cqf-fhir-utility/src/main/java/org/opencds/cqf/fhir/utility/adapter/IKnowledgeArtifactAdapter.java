@@ -27,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Versions;
-import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,10 +116,11 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     @SuppressWarnings({"squid:S1612"})
     default void addProfileReferences(List<IDependencyInfo> references, String referenceSource) {
-        get().getMeta().getProfile().stream()
+        var profiles = get().getMeta().getProfile().stream()
                 .map(p -> (IBaseHasExtensions & IPrimitiveType<String>) p)
-                .forEach(profile -> references.add(new DependencyInfo(
-                        referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
+                .collect(Collectors.toList());
+        profiles.forEach(profile -> references.add(new DependencyInfo(
+                referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
     }
 
     @SuppressWarnings("unchecked")
@@ -156,6 +156,8 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     default String getPurpose() {
         return resolvePathString(get(), "purpose");
     }
+
+    <T extends ICompositeType> List<T> getUseContext();
 
     String getStatus();
 
@@ -304,9 +306,8 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
                 .collect(Collectors.toList());
     }
 
-    default IBase accept(
-            IKnowledgeArtifactVisitor visitor, Repository repository, IBaseParameters operationParameters) {
-        return visitor.visit(this, repository, operationParameters);
+    default IBase accept(IKnowledgeArtifactVisitor visitor, IBaseParameters operationParameters) {
+        return visitor.visit(this, operationParameters);
     }
 
     @SuppressWarnings("unchecked")

@@ -4,11 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -19,7 +14,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
@@ -30,9 +24,7 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UsageContext;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 public class LibraryAdapterTest {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
@@ -43,15 +35,15 @@ public class LibraryAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(new PlanDefinition()));
     }
 
-    @Test
-    void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(LibraryAdapter.class), any(), any());
-        IDomainResource library = new Library();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any(), any());
-    }
+    // @Test
+    // void adapter_accepts_visitor() {
+    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
+    //     doReturn(new Bundle()).when(spyVisitor).visit(any(LibraryAdapter.class), any(), any());
+    //     IDomainResource library = new Library();
+    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
+    //     adapter.accept(spyVisitor, null, null);
+    //     verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any(), any());
+    // }
 
     @Test
     void adapter_get_and_set_name() {

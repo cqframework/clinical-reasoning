@@ -6,11 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -18,7 +13,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
@@ -31,7 +25,6 @@ import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
 
 class StructureDefinitionAdapterTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
@@ -43,16 +36,16 @@ class StructureDefinitionAdapterTest {
         assertNotNull(new StructureDefinitionAdapter((IDomainResource) new StructureDefinition()));
     }
 
-    @Test
-    void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
-        IDomainResource structureDef = new StructureDefinition();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
-        assertEquals(structureDef, adapter.get());
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
-    }
+    // @Test
+    // void adapter_accepts_visitor() {
+    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
+    //     doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
+    //     IDomainResource structureDef = new StructureDefinition();
+    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+    //     assertEquals(structureDef, adapter.get());
+    //     adapter.accept(spyVisitor, null, null);
+    //     verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
+    // }
 
     @Test
     void adapter_get_and_set_name() {

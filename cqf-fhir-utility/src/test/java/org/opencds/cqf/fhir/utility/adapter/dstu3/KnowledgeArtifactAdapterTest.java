@@ -11,12 +11,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -24,19 +22,16 @@ import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class KnowledgeArtifactAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new KnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.Library()));
+        var library = new org.hl7.fhir.r4.model.Library();
+        assertThrows(IllegalArgumentException.class, () -> new KnowledgeArtifactAdapter(library));
     }
 
     @Test
@@ -48,12 +43,12 @@ class KnowledgeArtifactAdapterTest {
 
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(KnowledgeArtifactAdapter.class), any(), any());
-        IDomainResource def = new CompartmentDefinition();
+        var spyVisitor = spy(new TestVisitor());
+        var def = new CompartmentDefinition();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(KnowledgeArtifactAdapter.class), any(), any());
+        doReturn(def).when(spyVisitor).visit(any(KnowledgeArtifactAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(KnowledgeArtifactAdapter.class), any());
     }
 
     @Test
@@ -117,11 +112,13 @@ class KnowledgeArtifactAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, def.getDate());
-        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(new DateType()));
+        var dateType = new DateType();
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(dateType));
         var newDateElement = new DateTimeType().setValue(new Date());
         adapter.setDateElement(newDateElement);
         assertEquals(newDateElement, def.getDateElement());
-        assertThrows(UnprocessableEntityException.class, () -> adapter.setEffectivePeriod(new Extension()));
+        var extension = new Extension();
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setEffectivePeriod(extension));
     }
 
     @Test
@@ -140,7 +137,8 @@ class KnowledgeArtifactAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
         adapter.setRelatedArtifact(relatedArtifactList);
         assertEquals(0, adapter.getRelatedArtifact().size());
-        assertThrows(UnprocessableEntityException.class, () -> adapter.setRelatedArtifact(Arrays.asList(new Period())));
+        var periodList = Arrays.asList(new Period());
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setRelatedArtifact(periodList));
         assertThrows(UnprocessableEntityException.class, () -> adapter.getRelatedArtifactsOfType("depends"));
     }
 
@@ -153,6 +151,6 @@ class KnowledgeArtifactAdapterTest {
         copy.setId("def-2");
         assertNotEquals(def.getId(), copy.getId());
         def.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 }

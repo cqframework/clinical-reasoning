@@ -15,7 +15,8 @@ class AdapterTest {
         assertThrows(UnprocessableEntityException.class, () -> IAdapter.newStringType(version, "string"));
         assertThrows(UnprocessableEntityException.class, () -> IAdapter.newUriType(version, "uri"));
         assertThrows(UnprocessableEntityException.class, () -> IAdapter.newUrlType(version, "url"));
-        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateType(version, new Date()));
-        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateTimeType(version, new Date()));
+        var date = new Date();
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateType(version, date));
+        assertThrows(UnprocessableEntityException.class, () -> IAdapter.newDateTimeType(version, date));
     }
 }

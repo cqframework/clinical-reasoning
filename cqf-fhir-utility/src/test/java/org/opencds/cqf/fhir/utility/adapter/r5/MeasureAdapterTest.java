@@ -10,14 +10,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -31,25 +28,26 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class MeasureAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
+class MeasureAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new MeasureAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new MeasureAdapter(library));
     }
 
+    // @Test
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(MeasureAdapter.class), any(), any());
-        IDomainResource measure = new Measure();
+        var spyVisitor = spy(new TestVisitor());
+        var measure = new Measure();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(MeasureAdapter.class), any(), any());
+        doReturn(measure).when(spyVisitor).visit(any(MeasureAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(MeasureAdapter.class), any());
     }
 
     @Test
@@ -161,7 +159,7 @@ public class MeasureAdapterTest {
         adapterCopy.setId(new IdDt("Measure", "plan-2"));
         assertNotEquals(measure.getId(), copy.getId());
         measure.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

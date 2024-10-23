@@ -11,8 +11,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -92,47 +92,20 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         return resourcesToUpdate;
     }
 
-    protected <T extends ICompositeType & IBaseHasExtensions> void recursiveGather(
-            IDomainResource resource,
-            Set<String> gatheredResources,
+    protected void recursiveGather(
+            IKnowledgeArtifactAdapter adapter,
+            Map<String, IKnowledgeArtifactAdapter> gatheredResources,
             List<String> capability,
             List<String> include,
-            ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
-            List<T> relatedArtifacts) {
-        recursiveGather(resource, gatheredResources, capability, include, versionTuple, relatedArtifacts, null, false);
-    }
-
-    protected <T extends ICompositeType & IBaseHasExtensions> void recursiveGather(
-            IDomainResource resource,
-            Set<String> gatheredResources,
-            List<String> capability,
-            List<String> include,
-            ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
-            IBaseBundle bundle,
-            boolean isPut) {
-        recursiveGather(resource, gatheredResources, capability, include, versionTuple, null, bundle, isPut);
-    }
-
-    protected <T extends ICompositeType & IBaseHasExtensions> void recursiveGather(
-            IDomainResource resource,
-            Set<String> gatheredResources,
-            List<String> capability,
-            List<String> include,
-            ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
-            List<T> relatedArtifacts,
-            IBaseBundle bundle,
-            boolean isPut)
+            ImmutableTriple<List<String>, List<String>, List<String>> versionTuple)
             throws PreconditionFailedException {
-        if (resource == null) {
+        if (adapter == null) {
             return;
         }
-        var adapter = IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(resource);
-        if (!gatheredResources.contains(adapter.getCanonical())) {
-            gatheredResources.add(adapter.getCanonical());
+        if (!gatheredResources.keySet().contains(adapter.getCanonical())) {
+            gatheredResources.put(adapter.getCanonical(), adapter);
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, versionTuple);
-            addBundleEntry(resource, bundle, isPut, adapter);
-            addRelatedArtifact(relatedArtifacts, adapter);
 
             adapter.combineComponentsAndDependencies().stream()
                     // sometimes VS dependencies aren't FHIR resources
@@ -153,20 +126,14 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                     })
                     .map(ra -> SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getReference()))
                     .map(searchBundle -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(searchBundle))
-                    .forEach(component -> recursiveGather(
-                            component,
-                            gatheredResources,
-                            capability,
-                            include,
-                            versionTuple,
-                            relatedArtifacts,
-                            bundle,
-                            isPut));
+                    .filter(r -> r != null)
+                    .map(r -> IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(r))
+                    .forEach(component ->
+                            recursiveGather(component, gatheredResources, capability, include, versionTuple));
         }
     }
 
-    protected void addBundleEntry(
-            IDomainResource resource, IBaseBundle bundle, boolean isPut, IKnowledgeArtifactAdapter adapter) {
+    protected void addBundleEntry(IBaseBundle bundle, boolean isPut, IKnowledgeArtifactAdapter adapter) {
         if (bundle == null) {
             return;
         }
@@ -176,7 +143,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                 .filter(mr -> mr.getUrl() != null)
                 .noneMatch(mr -> mr.getUrl().equals(adapter.getUrl())
                         && (!mr.hasVersion() || mr.getVersion().equals(adapter.getVersion())))) {
-            var entry = PackageHelper.createEntry(resource, isPut);
+            var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(bundle, entry);
         }
     }

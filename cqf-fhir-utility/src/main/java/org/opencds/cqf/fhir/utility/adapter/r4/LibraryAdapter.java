@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -148,12 +147,6 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                 .setDataRequirement(
                         dataRequirement.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
         return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<UsageContext> getUseContext() {
-        return getLibrary().getUseContext();
     }
 
     @Override

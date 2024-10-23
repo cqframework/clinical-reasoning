@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -135,19 +134,22 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         if (count.isPresent() && count.get() < 0) {
             throw new UnprocessableEntityException("'count' must be non-negative");
         }
-        var resource = adapter.get();
-        var packagedResources = new HashSet<String>();
         // In the case of a released (active) root Library we can depend on the relatedArtifacts as a
         // comprehensive manifest
         var versionTuple = new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion);
         var packagedBundle = BundleHelper.newBundle(fhirVersion);
+        addBundleEntry(packagedBundle, isPut, adapter);
         if (include.size() == 1 && include.stream().anyMatch(includedType -> includedType.equals("artifact"))) {
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, versionTuple);
-            var entry = PackageHelper.createEntry(resource, isPut);
+            var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
-            recursiveGather(resource, packagedResources, capability, include, versionTuple, packagedBundle, isPut);
+            var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
+            recursiveGather(adapter, packagedResources, capability, include, versionTuple);
+            packagedResources.values().stream()
+                    .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
+                    .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
             BundleHelper.setEntry(packagedBundle, included);
         }

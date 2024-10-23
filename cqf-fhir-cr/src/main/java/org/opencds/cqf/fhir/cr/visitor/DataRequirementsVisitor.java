@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,16 +85,15 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             library.setStatus(adapter.getStatus());
             library.setType("module-definition");
         }
-        var gatheredResources = new HashSet<String>();
+        var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
         var relatedArtifacts = stripInvalid(library);
         recursiveGather(
-                adapter.get(),
+                adapter,
                 gatheredResources,
                 forceArtifactVersion,
                 forceArtifactVersion,
-                new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion),
-                relatedArtifacts);
-
+                new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion));
+        gatheredResources.values().stream().forEach(r -> addRelatedArtifact(relatedArtifacts, r));
         library.setRelatedArtifact(relatedArtifacts);
         return library.get();
     }

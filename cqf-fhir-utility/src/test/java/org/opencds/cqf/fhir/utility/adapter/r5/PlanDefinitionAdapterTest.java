@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
@@ -19,9 +23,9 @@ import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class PlanDefinitionAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
@@ -30,15 +34,15 @@ class PlanDefinitionAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> new PlanDefinitionAdapter(library));
     }
 
-    // @Test
-    // void adapter_accepts_visitor() {
-    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
-    //     doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
-    //     IDomainResource planDef = new PlanDefinition();
-    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
-    //     adapter.accept(spyVisitor, null, null);
-    //     verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any(), any());
-    // }
+    @Test
+    void adapter_accepts_visitor() {
+        var spyVisitor = spy(new TestVisitor());
+        var planDef = new PlanDefinition();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
+        doReturn(planDef).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any());
+    }
 
     @Test
     void adapter_get_and_set_name() {

@@ -7,12 +7,13 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
 
-public class EndpointAdapterTest {
+class EndpointAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(new PlanDefinition()));
+        var planDefinition = new PlanDefinition();
+        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(planDefinition));
     }
 
     @Test

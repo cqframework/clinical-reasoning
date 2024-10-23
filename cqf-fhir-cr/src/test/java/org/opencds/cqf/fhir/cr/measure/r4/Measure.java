@@ -604,6 +604,13 @@ public class Measure {
             return this.stratifier(MeasureReport.MeasureReportGroupComponent::getStratifierFirstRep);
         }
 
+        public SelectedStratifier stratifierById(String stratId) {
+            return this.stratifier(g -> g.getStratifier().stream()
+                    .filter(t -> t.getId().equals(stratId))
+                    .findFirst()
+                    .get());
+        }
+
         public SelectedStratifier stratifier(
                 Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
             var s = stratifierSelector.select(value());
@@ -675,6 +682,11 @@ public class Measure {
 
         public SelectedStratum firstStratum() {
             return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
+        }
+
+        public SelectedStratifier stratumCount(int stratumCount) {
+            assertEquals(stratumCount, value().getStratum().size());
+            return this;
         }
 
         public SelectedStratum stratum(CodeableConcept value) {

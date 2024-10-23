@@ -72,13 +72,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    protected static final String MISSING_ID_NO_CRITERIA_REF_EXT = String.join(
-            "Id for a Measure element is null.",
-            "Unable to create criteriaReference extensions.",
-            "Ensure all groups, populations, SDEs, and stratifiers",
-            "in your Measure have ids set.",
-            " ");
-
     protected MeasureReportScorer<MeasureReport> measureReportScorer;
 
     public R4MeasureReportBuilder() {
@@ -93,7 +86,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         private final HashMap<String, Reference> evaluatedResourceReferences = new HashMap<>();
         private final HashMap<String, Reference> supplementalDataReferences = new HashMap<>();
         private final Map<String, Resource> contained = new HashMap<>();
-        private final Set<String> issues = new HashSet<>();
 
         public BuilderContext(Measure measure, MeasureDef measureDef, MeasureReport measureReport) {
             this.measure = measure;
@@ -145,11 +137,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         public void addCriteriaExtensionToReference(Reference reference, String criteriaId) {
-            if (criteriaId == null) {
-                addIssue(MISSING_ID_NO_CRITERIA_REF_EXT);
-                return;
-            }
-
+            if (criteriaId == null) throw new AssertionError("CriteriaId is required for extension references");
             var ext = new Extension(EXT_CRITERIA_REFERENCE_URL, new StringType(criteriaId));
             addExtensionIfNotExists(reference, ext);
         }
@@ -184,14 +172,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             element.addExtension(ext);
-        }
-
-        public void addIssue(String issue) {
-            this.issues.add(issue);
-        }
-
-        public Set<String> issues() {
-            return this.issues;
         }
 
         private void validateReference(String reference) {
@@ -401,6 +381,25 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    /**
+     *
+     * Resource result --> Patient Key, Resource result --> can intersect on patient for Boolean basis, can't for Resource
+     * boolean result --> Patient Key, Boolean result --> can intersect on Patient
+     * code result --> Patient Key, Code result --> can intersect on Patient
+     */
+    protected void validateStratifierBasisType(Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
+
+        if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
+            var list = subjectValues.values().stream()
+                    .filter(x -> x.rawValue() instanceof Resource)
+                    .collect(Collectors.toList());
+            if (list.size() != subjectValues.values().size()) {
+                throw new IllegalArgumentException(
+                        "stratifier expression criteria results must match the same type as population.");
+            }
+        }
+    }
+
     protected void buildStratifier(
             BuilderContext bc,
             MeasureGroupStratifierComponent measureStratifier,
@@ -419,16 +418,36 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
-        // Because most of the types we're dealing with don't implement hashCode or
-        // equals
-        // the ValueWrapper does it for them.
-        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(
-                        x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+        validateStratifierBasisType(subjectValues, bc.measureDef.isBooleanBasis());
 
-        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
-            var reportStratum = reportStratifier.addStratum();
-            buildStratum(bc, reportStratum, stratValue.getKey(), stratValue.getValue(), populations, groupDef);
+        // Stratifiers should be of the same basis as population
+        if (bc.measureDef.isBooleanBasis()) {
+            // ValueWrapper is used because most of the types we're dealing with don't implement hashCode or equals
+            Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+                    .collect(Collectors.groupingBy(
+                            x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+
+            for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+                var reportStratum = reportStratifier.addStratum();
+                var patients = stratValue.getValue().stream()
+                        .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                        .collect(Collectors.toList());
+                buildStratum(bc, reportStratum, stratValue.getKey(), patients, populations, groupDef);
+            }
+        } else {
+            var values = subjectValues.values().stream()
+                    .map(t -> (Resource) t.rawValue())
+                    .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
+                    .collect(Collectors.toList());
+            for (String value : values) {
+                buildStratum(
+                        bc,
+                        reportStratifier.addStratum(),
+                        new ValueWrapper(value),
+                        Collections.singletonList(value),
+                        populations,
+                        groupDef);
+            }
         }
     }
 
@@ -481,8 +500,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add totalDenominator and totalNumerator extensions
-        buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
-        buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
+        buildStratumExtPopulation(
+                groupDef,
+                TOTALDENOMINATOR,
+                subjectIds,
+                stratum,
+                EXT_TOTAL_DENOMINATOR_URL,
+                bc.measureDef.isBooleanBasis());
+        buildStratumExtPopulation(
+                groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL, bc.measureDef.isBooleanBasis());
     }
 
     protected void buildStratumExtPopulation(
@@ -490,13 +516,23 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasurePopulationType measurePopulationType,
             List<String> subjectIds,
             StratifierGroupComponent stratum,
-            String extUrl) {
-        var subjectPop = getReportPopulation(groupDef, measurePopulationType).getSubjects();
-
-        int count;
-        if (subjectPop == null) {
-            return;
+            String extUrl,
+            boolean isBooleanBasis) {
+        Set<String> subjectPop;
+        var reportPopulation = getReportPopulation(groupDef, measurePopulationType);
+        assert reportPopulation != null;
+        if (isBooleanBasis) {
+            subjectPop = reportPopulation.getSubjects().stream()
+                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .collect(Collectors.toSet());
+        } else {
+            subjectPop = reportPopulation.getResources().stream()
+                    .map(t -> (Resource) t)
+                    .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
+                    .collect(Collectors.toSet());
         }
+        int count;
+
         Set<String> intersection = new HashSet<>(subjectIds);
         intersection.retainAll(subjectPop);
         count = intersection.size();
@@ -525,15 +561,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return;
         }
 
-        // temporarily adding prefix of resourceType to match pattern in build population
-        // TODO: do Stratum receive resource based subjects?
-
-        subjectIds = subjectIds.stream()
-                .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                .collect(Collectors.toList());
-
         Set<String> intersection = new HashSet<>(subjectIds);
-
+        // subjectIds.get(0).split("/")
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 

@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -60,6 +61,12 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
             throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
         }
         org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setEffectivePeriod(effectivePeriod);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<UsageContext> getUseContext() {
+        return get().getUseContext();
     }
 
     @Override

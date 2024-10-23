@@ -39,7 +39,8 @@ class ResourceAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(null));
-        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(new org.hl7.fhir.r4.model.Library()));
+        var library = new org.hl7.fhir.r4.model.Library();
+        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(library));
     }
 
     @Test

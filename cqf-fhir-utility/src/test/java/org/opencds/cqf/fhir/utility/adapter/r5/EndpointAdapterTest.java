@@ -12,7 +12,8 @@ class EndpointAdapterTest {
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(new PlanDefinition()));
+        var planDefinition = new PlanDefinition();
+        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(planDefinition));
     }
 
     @Test

@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
@@ -25,25 +29,26 @@ import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class LibraryAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(new PlanDefinition()));
+        var planDefinition = new PlanDefinition();
+        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(planDefinition));
     }
 
-    // @Test
-    // void adapter_accepts_visitor() {
-    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
-    //     doReturn(new Bundle()).when(spyVisitor).visit(any(LibraryAdapter.class), any(), any());
-    //     IDomainResource library = new Library();
-    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
-    //     adapter.accept(spyVisitor, null, null);
-    //     verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any(), any());
-    // }
+    @Test
+    void adapter_accepts_visitor() {
+        var spyVisitor = spy(new TestVisitor());
+        var library = new Library();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
+        doReturn(library).when(spyVisitor).visit(any(LibraryAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any());
+    }
 
     @Test
     void adapter_get_and_set_name() {
@@ -154,7 +159,7 @@ class LibraryAdapterTest {
         adapterCopy.setId(new IdDt("Library", "library-2"));
         assertNotEquals(library.getId(), copy.getId());
         library.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

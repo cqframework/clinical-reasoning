@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
@@ -22,25 +26,26 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class MeasureAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class MeasureAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new MeasureAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new MeasureAdapter(library));
     }
 
-    // @Test
-    // void adapter_accepts_visitor() {
-    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
-    //     doReturn(new Bundle()).when(spyVisitor).visit(any(MeasureAdapter.class), any(), any());
-    //     IDomainResource measure = new Measure();
-    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
-    //     adapter.accept(spyVisitor, null, null);
-    //     verify(spyVisitor, times(1)).visit(any(MeasureAdapter.class), any(), any());
-    // }
+    @Test
+    void adapter_accepts_visitor() {
+        var spyVisitor = spy(new TestVisitor());
+        var measure = new Measure();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
+        doReturn(measure).when(spyVisitor).visit(any(MeasureAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(MeasureAdapter.class), any());
+    }
 
     @Test
     void adapter_get_and_set_name() {
@@ -151,7 +156,7 @@ public class MeasureAdapterTest {
         adapterCopy.setId(new IdDt("Measure", "plan-2"));
         assertNotEquals(measure.getId(), copy.getId());
         measure.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

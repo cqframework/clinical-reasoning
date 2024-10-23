@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -25,27 +29,27 @@ import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class StructureDefinitionAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
         assertNotNull(new StructureDefinitionAdapter((IDomainResource) new StructureDefinition()));
     }
 
-    // @Test
-    // void adapter_accepts_visitor() {
-    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
-    //     doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
-    //     IDomainResource structureDef = new StructureDefinition();
-    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
-    //     assertEquals(structureDef, adapter.get());
-    //     adapter.accept(spyVisitor, null, null);
-    //     verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
-    // }
+    @Test
+    void adapter_accepts_visitor() {
+        var spyVisitor = spy(new TestVisitor());
+        var structureDef = new StructureDefinition();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        doReturn(structureDef).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any());
+    }
 
     @Test
     void adapter_get_and_set_name() {
@@ -116,7 +120,8 @@ class StructureDefinitionAdapterTest {
         newDate.setTime(100);
         adapter.setDate(newDate);
         assertEquals(newDate, structureDef.getDate());
-        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(new DateType()));
+        var dateType = new DateType();
+        assertThrows(UnprocessableEntityException.class, () -> adapter.setDateElement(dateType));
         var newDateElement = new DateTimeType().setValue(new Date());
         adapter.setDateElement(newDateElement);
         assertEquals(newDateElement, structureDef.getDateElement());

@@ -4,8 +4,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
@@ -21,25 +25,26 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class PlanDefinitionAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class PlanDefinitionAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new PlanDefinitionAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new PlanDefinitionAdapter(library));
     }
 
-    // @Test
-    // void adapter_accepts_visitor() {
-    //     var spyVisitor = spy(new PackageVisitor(fhirContext));
-    //     doReturn(new Bundle()).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any(), any());
-    //     IDomainResource planDef = new PlanDefinition();
-    //     var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
-    //     adapter.accept(spyVisitor, null, null);
-    //     verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any(), any());
-    // }
+    @Test
+    void adapter_accepts_visitor() {
+        var spyVisitor = spy(new TestVisitor());
+        var planDef = new PlanDefinition();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
+        doReturn(planDef).when(spyVisitor).visit(any(PlanDefinitionAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(PlanDefinitionAdapter.class), any());
+    }
 
     @Test
     void adapter_get_and_set_name() {
@@ -150,7 +155,7 @@ public class PlanDefinitionAdapterTest {
         adapterCopy.setId(new IdDt("PlanDefinition", "plan-2"));
         assertNotEquals(planDef.getId(), copy.getId());
         planDef.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

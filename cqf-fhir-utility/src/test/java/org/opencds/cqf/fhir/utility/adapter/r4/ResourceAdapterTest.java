@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.slf4j.event.Level;
 
-public class ResourceAdapterTest {
+class ResourceAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
     private static final TestLogger logger = TestLoggerFactory.getTestLogger(IAdapter.class);
 
@@ -39,7 +39,8 @@ public class ResourceAdapterTest {
     @Test
     void invalid_object_fails() {
         assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(null));
-        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(new org.hl7.fhir.r5.model.Library()));
+        var library = new org.hl7.fhir.r5.model.Library();
+        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(library));
     }
 
     @Test

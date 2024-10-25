@@ -8,7 +8,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_SYSTEM_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
 import java.util.ArrayList;
@@ -170,7 +169,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkSDEUsage(MeasureSupplementalDataComponent measureSupplementalDataComponent) {
         var hasUsage = measureSupplementalDataComponent.getUsage().stream()
-                .filter(t -> t.hasCoding(SDE_SYSTEM_URL, SDE_USAGE_CODE))
+                .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
                 .collect(Collectors.toList());
         if (hasUsage == null || hasUsage.isEmpty()) {
             throw new IllegalArgumentException(

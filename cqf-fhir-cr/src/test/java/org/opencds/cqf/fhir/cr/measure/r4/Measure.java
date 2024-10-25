@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_DAVINCI_DEQM_EXT_URL;
@@ -505,15 +504,6 @@ public class Measure {
                 }
             }
             return containedIds;
-        }
-
-        private List<String> getExtensionIds() {
-            List<String> extReferences = new ArrayList<>();
-            List<Extension> exts = value().getExtensionsByUrl(EXT_SDE_REFERENCE_URL);
-            for (Extension ext : exts) {
-                extReferences.add(ext.getValue().toString());
-            }
-            return extReferences;
         }
 
         public SelectedReport subjectResultsValidation() {

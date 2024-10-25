@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanValueStrat",
+  "id": "CohortBooleanSDESingleValue",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanValueStrat",
+  "url": "http://example.com/Measure/CohortBooleanSDESingleValue",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],

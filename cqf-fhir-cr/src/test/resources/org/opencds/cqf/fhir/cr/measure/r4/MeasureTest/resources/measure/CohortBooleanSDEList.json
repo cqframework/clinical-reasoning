@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanDifferentTypeStrat",
+  "id": "CohortBooleanSDEList",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanDifferentTypeStrat",
+  "url": "http://example.com/Measure/CohortBooleanSDEList",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -39,19 +39,10 @@
             "expression": "Initial Population Boolean"
           }
         }
-      ],
-      "stratifier": [
-        {
-          "id": "stratifier-1",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "resource strat not finished"
-          }
-        }
       ]
     }],
   "supplementalData": [ {
-    "id": "sde-patient-sex",
+    "id": "sde-patient-encounters",
     "usage": [ {
       "coding": [ {
         "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
@@ -60,7 +51,7 @@
     } ],
     "criteria": {
       "language": "text/cql.identifier",
-      "expression": "SDE Sex"
+      "expression": "SDE Encounters"
     }
   } ]
 }

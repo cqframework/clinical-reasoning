@@ -5,13 +5,13 @@ using FHIR version '4.0.1'
 include FHIRHelpers version '4.0.1' called FHIRHelpers
 
 parameter "Measurement Period" Interval<DateTime> default Interval[@2024-01-01T00:00:00, @2024-12-31T23:59:59]
-//# cql parameter that can pass in fhir id of an encounter
+// cql parameter that can pass in fhir id of an encounter
 parameter practitionerParam String
 
 context Patient
 
-//# boolean population results
-//# has matching encounter
+// boolean population results
+// has matching encounter
 
 define "Initial Population Boolean":
   exists "All Encounters"
@@ -37,8 +37,8 @@ define "Measure Population Exclusions Boolean":
 define "Measure Population Boolean":
     "Denominator Boolean"
 
-//# resource population results
-//# qty of matching encounters
+// resource population results
+// qty of matching encounters
 
 define "Initial Population Resource":
     "All Encounters"
@@ -64,18 +64,18 @@ define "Measure Population Exclusions Resource":
 define "Measure Population Resource":
     "Denominator Resource"
 
-//# for prospective gap calculations
+// for prospective gap calculations
 define "date of compliance":
     "Measurement Period"
 
-//# cql to force results
+// cql to force results
 define "always false":
     false
 
 define "always true":
     true
 
-//# sde
+// sde single value
 
 define "SDE Sex":
   case
@@ -84,34 +84,39 @@ define "SDE Sex":
       else null
     end
 
-//# Continuous Variable
-//# number of hours for encounter
+// sde list of values
+
+ define "SDE Encounters":
+    "All Encounters"
+
+// Continuous Variable
+// number of hours for encounter
 
 define function "MeasureObservation"(Encounter Encounter):
     Encounter e
         where (difference in hours between start of e.period and end of e.period)>0
 
-//# component stratifier
+// component stratifier
 
 define "Gender Stratification":
   "SDE Sex"
 
-//# boolean criteria stratifier
+// boolean criteria stratifier
 
 define "boolean strat not finished":
   exists "Encounter Not Finished"
 
-//# cql parameter boolean criteria stratifier
+// cql parameter boolean criteria stratifier
 
 define "boolean strat has practitioner":
   exists "Matching General Practitioner"
 
-//# resource criteria stratifier
+// resource criteria stratifier
 
 define "resource strat not finished":
     "Encounter Not Finished"
 
-//# main criteria logic
+// main criteria logic
 
 define "All Encounters":
      [Encounter] E

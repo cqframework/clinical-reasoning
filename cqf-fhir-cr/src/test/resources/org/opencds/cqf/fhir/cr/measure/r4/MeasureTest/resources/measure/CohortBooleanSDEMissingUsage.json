@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanMultiStrat",
+  "id": "CohortBooleanSDEMissingUsage",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanMultiStrat",
+  "url": "http://example.com/Measure/CohortBooleanSDEMissingUsage",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -24,7 +24,7 @@
       "id": "group-1",
       "population": [
         {
-          "id": "initial-population-1",
+          "id": "initial-population",
           "code": {
             "coding": [
               {
@@ -47,24 +47,11 @@
             "language": "text/cql.identifier",
             "expression": "boolean strat not finished"
           }
-        },
-        {
-          "id": "stratifier-2",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Gender Stratification"
-          }
         }
       ]
     }],
   "supplementalData": [ {
     "id": "sde-patient-sex",
-    "usage": [ {
-      "coding": [ {
-        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
-        "code": "supplemental-data"
-      } ]
-    } ],
     "criteria": {
       "language": "text/cql.identifier",
       "expression": "SDE Sex"

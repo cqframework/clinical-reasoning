@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanNoIdStrat",
+  "id": "CohortBooleanStratNoId",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanNoIdStrat",
+  "url": "http://example.com/Measure/CohortBooleanStratNoId",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],

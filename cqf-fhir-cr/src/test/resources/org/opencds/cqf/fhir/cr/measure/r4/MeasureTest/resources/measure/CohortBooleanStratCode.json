@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanComponentStrat",
+  "id": "CohortBooleanStratCode",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanComponentStrat",
+  "url": "http://example.com/Measure/CohortBooleanStratCode",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -43,12 +43,17 @@
       "stratifier": [
         {
           "id": "stratifier-1",
-          "component": {
-            "id": "stratifier-comp-1",
-            "criteria": {
-              "language": "text/cql.identifier",
-              "expression": "Gender Stratification"
-            }
+          "code": {
+            "coding": [ {
+              "system": "http://loinc.org",
+              "code": "72143-1",
+              "display": "Sex [HL7.v3]"
+            } ],
+            "text": "stratifier-sex"
+          },
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Gender Stratification"
           }
         }
       ]

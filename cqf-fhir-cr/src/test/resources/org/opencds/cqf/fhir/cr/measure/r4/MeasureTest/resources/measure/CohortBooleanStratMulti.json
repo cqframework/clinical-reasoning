@@ -1,21 +1,21 @@
 {
-  "id": "RatioResourceValueStrat",
+  "id": "CohortBooleanStratMulti",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioResourceValueStrat",
+  "url": "http://example.com/Measure/CohortBooleanStratMulti",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "encounter"
+      "valueCode": "boolean"
     }
   ],
   "scoring": {
     "coding": [
       {
         "system": "http://hl7.org/fhir/measure-scoring",
-        "code": "ratio"
+        "code": "cohort"
       }
     ]
   },
@@ -24,7 +24,7 @@
       "id": "group-1",
       "population": [
         {
-          "id": "initial-population",
+          "id": "initial-population-1",
           "code": {
             "coding": [
               {
@@ -36,48 +36,23 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Resource"
-          }
-        },
-        {
-          "id": "denominator",
-          "code": {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-                "code": "denominator",
-                "display": "Denominator"
-              }
-            ]
-          },
-          "criteria": {
-            "language": "text/cql-identifier",
-            "expression": "Denominator Resource"
-          }
-        },
-        {
-          "id": "numerator",
-          "code": {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-                "code": "numerator",
-                "display": "Numerator"
-              }
-            ]
-          },
-          "criteria": {
-            "language": "text/cql-identifier",
-            "expression": "Numerator Resource"
+            "expression": "Initial Population Boolean"
           }
         }
       ],
       "stratifier": [
         {
+          "id": "stratifier-1",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "boolean strat not finished"
+          }
+        },
+        {
           "id": "stratifier-2",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "resource strat not finished"
+            "expression": "Gender Stratification"
           }
         }
       ]

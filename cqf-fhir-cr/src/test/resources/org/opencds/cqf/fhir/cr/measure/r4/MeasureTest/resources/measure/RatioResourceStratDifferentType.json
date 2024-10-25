@@ -1,7 +1,7 @@
 {
-  "id": "RatioResourceDifferentTypeStrat",
+  "id": "RatioResourceStratDifferentType",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioResourceDifferentTypeStrat",
+  "url": "http://example.com/Measure/RatioResourceStratDifferentType",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],

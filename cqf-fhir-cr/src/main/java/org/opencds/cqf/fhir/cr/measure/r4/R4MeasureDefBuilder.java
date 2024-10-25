@@ -8,10 +8,13 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_SYSTEM_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -45,6 +48,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         List<SdeDef> sdes = new ArrayList<>();
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
+            checkSDEUsage(s);
             var sdeDef = new SdeDef(
                     s.getId(), conceptToConceptDef(s.getCode()), s.getCriteria().getExpression());
             sdes.add(sdeDef);
@@ -162,6 +166,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 Collections.singletonList(
                         new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
                 null);
+    }
+
+    private void checkSDEUsage(MeasureSupplementalDataComponent measureSupplementalDataComponent) {
+        var hasUsage = measureSupplementalDataComponent.getUsage().stream()
+                .filter(t -> t.hasCoding(SDE_SYSTEM_URL, SDE_USAGE_CODE))
+                .collect(Collectors.toList());
+        if (hasUsage == null || hasUsage.isEmpty()) {
+            throw new IllegalArgumentException(
+                    String.format("SupplementalDataComponent usage is missing code: %s", SDE_USAGE_CODE));
+        }
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

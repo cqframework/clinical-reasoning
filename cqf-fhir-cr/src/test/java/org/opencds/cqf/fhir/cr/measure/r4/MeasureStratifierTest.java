@@ -44,7 +44,7 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
 
         given.when()
-                .measureId("CohortBooleanCodeStrat")
+                .measureId("CohortBooleanStratCode")
                 .subject("Patient/patient-9")
                 .evaluate()
                 .then()
@@ -69,7 +69,7 @@ class MeasureStratifierTest {
         var fCC = new CodeableConcept().setText("F");
 
         given.when()
-                .measureId("CohortBooleanCodeStrat")
+                .measureId("CohortBooleanStratCode")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -98,7 +98,7 @@ class MeasureStratifierTest {
         var notUnfinished = new CodeableConcept().setText("false");
 
         given.when()
-                .measureId("CohortBooleanValueStrat")
+                .measureId("CohortBooleanStratValue")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -132,7 +132,7 @@ class MeasureStratifierTest {
         var fCC = new CodeableConcept().setText("F");
 
         given.when()
-                .measureId("CohortBooleanMultiStrat")
+                .measureId("CohortBooleanStratMulti")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -171,7 +171,7 @@ class MeasureStratifierTest {
     @Test
     void cohortBooleanNoIdStrat() {
         try {
-            given.when().measureId("CohortBooleanNoIdStrat").evaluate().then().report();
+            given.when().measureId("CohortBooleanStratNoId").evaluate().then().report();
             fail();
         } catch (NullPointerException e) {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
@@ -187,7 +187,7 @@ class MeasureStratifierTest {
     @Test
     void cohortBooleanDifferentTypeStrat() {
         given.when()
-                .measureId("CohortBooleanDifferentTypeStrat")
+                .measureId("CohortBooleanStratDifferentType")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -206,7 +206,7 @@ class MeasureStratifierTest {
     void cohortBooleanComponentStrat() {
         try {
             given.when()
-                    .measureId("CohortBooleanComponentStrat")
+                    .measureId("CohortBooleanStratComponent")
                     .evaluate()
                     .then()
                     .report();
@@ -224,7 +224,7 @@ class MeasureStratifierTest {
     void ratioResourceValueStrat() {
 
         given.when()
-                .measureId("RatioResourceValueStrat")
+                .measureId("RatioResourceStratValue")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -249,7 +249,7 @@ class MeasureStratifierTest {
     void ratioResourceDifferentTypeStrat() {
         try {
             given.when()
-                    .measureId("RatioResourceDifferentTypeStrat")
+                    .measureId("RatioResourceStratDifferentType")
                     .evaluate()
                     .then()
                     .report();
@@ -268,7 +268,7 @@ class MeasureStratifierTest {
     void ratioBooleanValueStrat() {
 
         given.when()
-                .measureId("RatioBooleanValueStrat")
+                .measureId("RatioBooleanStratValue")
                 .evaluate()
                 .then()
                 .firstGroup()

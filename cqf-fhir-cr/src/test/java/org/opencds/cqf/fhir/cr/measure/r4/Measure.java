@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_DAVINCI_DEQM_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_REFERENCE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_SYSTEM_URL;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,7 +24,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -42,6 +46,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -283,12 +288,12 @@ public class Measure {
             return new SelectedGroup(g, this);
         }
 
-        public SelectedReference<SelectedReport> reference(Selector<Reference, MeasureReport> referenceSelector) {
+        public SelectedReference reference(Selector<Reference, MeasureReport> referenceSelector) {
             var r = referenceSelector.select(value());
-            return new SelectedReference<>(r, this);
+            return new SelectedReference(r, this);
         }
 
-        public SelectedReference<SelectedReport> evaluatedResource(String name) {
+        public SelectedReference evaluatedResource(String name) {
             return this.reference(x -> x.getEvaluatedResource().stream()
                     .filter(y -> y.getReference().equals(name))
                     .findFirst()
@@ -297,6 +302,14 @@ public class Measure {
 
         public SelectedReport hasEvaluatedResourceCount(int count) {
             assertEquals(count, report().getEvaluatedResource().size());
+            return this;
+        }
+
+        public SelectedReport evaluatedResourceHasNoDuplicateReferences() {
+            var rawRefs = report().getEvaluatedResource().size();
+            var distinctRefs =
+                    (int) report().getEvaluatedResource().stream().distinct().count();
+            assertEquals(rawRefs, distinctRefs, "duplicate reference found in evaluatedResources");
             return this;
         }
 
@@ -312,18 +325,9 @@ public class Measure {
             return this;
         }
 
-        // TODO: SelectedContained resource class?
         public SelectedReport hasContainedResource(Predicate<Resource> criteria) {
             var contained = this.report().getContained().stream();
             assertTrue(contained.anyMatch(criteria), "Did not find a resource matching this criteria ");
-            return this;
-        }
-
-        // TODO: SelectedExtension class?
-        public SelectedReport hasExtension(String url, int count) {
-            var ex = this.value().getExtensionsByUrl(url);
-            assertEquals(ex.size(), count);
-
             return this;
         }
 
@@ -373,22 +377,80 @@ public class Measure {
             return this;
         }
 
+        public SelectedExtension extension(Selector<Extension, MeasureReport> extensionSelector) {
+            var e = extensionSelector.select(value());
+            return new SelectedExtension(e, this);
+        }
+
+        public SelectedExtension extension(String supplementalDataId) {
+            return this.extension(t -> getExtensions(t).stream()
+                    .filter(x -> x.getValue()
+                            .getExtensionByUrl(SDE_DAVINCI_DEQM_EXT_URL)
+                            .getValue()
+                            .toString()
+                            .equals(supplementalDataId))
+                    .findFirst()
+                    .orElseThrow());
+        }
+
+        /**
+         * for looking up resource reference values for List SDE
+         * @param resourceReference example Encounter/{id}
+         * @return SelectedExtension
+         */
+        public SelectedExtension extensionByValueReference(String resourceReference) {
+            return this.extension(t -> getExtensions(t).stream()
+                    .filter(y -> ((Reference) y.getValue()).getReference().equals(resourceReference))
+                    .findFirst()
+                    .orElseThrow());
+        }
+
+        public List<Extension> getExtensions(MeasureReport measureReport) {
+            return measureReport.getExtension();
+        }
+
+        public SelectedReport hasExtension(String url, int count) {
+            var ex = this.value().getExtensionsByUrl(url);
+            assertEquals(ex.size(), count);
+
+            return this;
+        }
+
         public SelectedContained contained(Selector<Resource, MeasureReport> containedSelector) {
             var c = containedSelector.select(value());
             return new SelectedContained(c, this);
         }
 
-        public SelectedContained contained(ResourceType theResourceType, String theId) {
+        public SelectedContained containedByValue(String theCodeValue) {
             /*
              * SelectedContained will only be useful for Observation resources
-             * Explanation: Contained resourceIds are randomly generated at runtime and are not searchable or known before testing.
-             * List resources can only be verified from population reference id, which is generated at runtime.
-             * There are no other unique references on List to Measure Report population, so it is not reverse searchable.
-             * Observation resources will leverage sde-code reference to isolate contained resources.
+             * Explanation: This will retrieve the CodeableConcept value for individual Measure Reports
+             * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x.getResourceType().equals(theResourceType))
-                    .filter(y -> y.getId().equals(theId))
+                    .filter(x -> x instanceof Observation)
+                    .filter(y -> ((Observation) y)
+                            .getValueCodeableConcept()
+                            .getCodingFirstRep()
+                            .getCode()
+                            .equals(theCodeValue))
+                    .findFirst()
+                    .orElseThrow());
+        }
+
+        public SelectedContained containedByCoding(String theCodeCoding) {
+            /*
+             * SelectedContained will only be useful for Observation resources
+             * Explanation: This will retrieve the Observation.Coding.code for Summary Measure Reports, as value then becomes a count
+             * Example: "M" for 'Male' gender code
+             */
+            return this.contained(t -> getContainedResources(t).stream()
+                    .filter(x -> x instanceof Observation)
+                    .filter(y -> ((Observation) y)
+                            .getCode()
+                            .getCodingFirstRep()
+                            .getCode()
+                            .equals(theCodeCoding))
                     .findFirst()
                     .orElseThrow());
         }
@@ -398,22 +460,25 @@ public class Measure {
         }
 
         public SelectedReport containedObservationsHaveMatchingExtension() {
-            List<String> contained = getContainedIdsPerResourceType(ResourceType.Observation);
-            List<String> extIds = getExtensionIds();
+            Set<String> contained = value().getContained().stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.Observation))
+                    .map(Resource::getIdPart)
+                    .collect(Collectors.toSet());
+
+            Set<String> extIds = value().getExtensionsByUrl(SDE_REFERENCE_EXT_URL).stream()
+                    .map(x -> (Reference) x.getValue())
+                    .map(t -> t.getReference().replace("#", ""))
+                    .collect(Collectors.toSet());
 
             assertEquals(
                     contained.size(),
                     extIds.size(),
-                    "Qty of SDE Observation resources don't match qty of Extension references");
+                    "Qty of SDE Observation resources don't match qty of SDE Extension references");
             // contained Observations have a matching extension reference
-            for (String s : contained) {
-                assertTrue(extIds.stream().anyMatch(t -> t.replace("#", "").equals(s)));
-            }
-            // extension references have a matching contained Observation resource
-            for (String extId : extIds) {
-                // inline resource references concat prefix '#' to indicate they are not persisted
-                assertTrue(contained.contains(extId.replace("#", "")));
-            }
+            Set<String> intersection = new HashSet<>(contained);
+            intersection.retainAll(extIds);
+            assertEquals(intersection.size(), contained.size());
+
             return this;
         }
 
@@ -439,15 +504,6 @@ public class Measure {
                 }
             }
             return containedIds;
-        }
-
-        private List<String> getExtensionIds() {
-            List<String> extReferences = new ArrayList<>();
-            List<Extension> exts = value().getExtensionsByUrl(EXT_SDE_REFERENCE_URL);
-            for (Extension ext : exts) {
-                extReferences.add(ext.getValue().toString());
-            }
-            return extReferences;
         }
 
         public SelectedReport subjectResultsValidation() {
@@ -510,6 +566,28 @@ public class Measure {
         }
     }
 
+    static class SelectedExtension extends Selected<Extension, SelectedReport> {
+
+        public SelectedExtension(Extension value, SelectedReport parent) {
+            super(value, parent);
+        }
+
+        public SelectedExtension extensionHasSDEUrl() {
+            assertEquals(SDE_REFERENCE_EXT_URL, value().getUrl());
+            return this;
+        }
+
+        public SelectedExtension extensionHasSDEId(String id) {
+            assertEquals(
+                    id,
+                    value().getValue()
+                            .getExtensionByUrl(EXT_CRITERIA_REFERENCE_URL)
+                            .getValue()
+                            .toString());
+            return this;
+        }
+    }
+
     static class SelectedContained extends Selected<Resource, SelectedReport> {
 
         public SelectedContained(Resource value, SelectedReport parent) {
@@ -519,6 +597,18 @@ public class Measure {
         public SelectedContained observationHasExtensionUrl() {
             var obs = (Observation) value();
             assertEquals(EXT_URL, obs.getExtension().get(0).getUrl());
+            return this;
+        }
+
+        /**
+         * only applicable to individual reports
+         * @return
+         */
+        public SelectedContained observationHasSDECoding() {
+            assert value() instanceof Observation;
+            var obs = (Observation) value();
+            assertEquals(SDE_SYSTEM_URL, obs.getCode().getCodingFirstRep().getSystem());
+            assertEquals("supplemental-data", obs.getCode().getCodingFirstRep().getCode());
             return this;
         }
 
@@ -604,20 +694,57 @@ public class Measure {
             return this.stratifier(MeasureReport.MeasureReportGroupComponent::getStratifierFirstRep);
         }
 
+        public SelectedStratifier stratifierById(String stratId) {
+            return this.stratifier(g -> g.getStratifier().stream()
+                    .filter(t -> t.getId().equals(stratId))
+                    .findFirst()
+                    .get());
+        }
+
         public SelectedStratifier stratifier(
                 Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
             var s = stratifierSelector.select(value());
             return new SelectedStratifier(s, this);
         }
 
-        static class SelectedReference<P> extends Selected<Reference, P> {
+        static class SelectedReference extends Selected<Reference, SelectedReport> {
 
-            public SelectedReference(Reference value, P parent) {
+            public SelectedReference(Reference value, SelectedReport parent) {
                 super(value, parent);
             }
 
+            public SelectedReference hasNoDuplicateExtensions() {
+                var exts = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
+                var extsCount = exts.size();
+                var distinctExtCount = (int) exts.stream()
+                        .map(t -> ((StringType) t.getValue()).getValue())
+                        .distinct()
+                        .count();
+                assertEquals(extsCount, distinctExtCount, "extension contain duplicate values");
+                return this;
+            }
+
+            public SelectedReference referenceHasExtension(String extValueRef) {
+                var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
+                if (ex.isEmpty()) {
+                    throw new IllegalStateException(
+                            String.format("no evaluated resource extensions were found, and expected %s", extValueRef));
+                }
+                String foundRef = null;
+                for (Extension extension : ex) {
+                    assert extension.getValue() instanceof StringType;
+                    StringType extValue = (StringType) extension.getValue();
+                    if (extValue.getValue().equals(extValueRef)) {
+                        foundRef = extValue.getValue();
+                        break;
+                    }
+                }
+                assertNotNull(foundRef);
+                return this;
+            }
+
             // Hmm.. may need to rethink this one a bit.
-            public SelectedReference<P> hasPopulations(String... population) {
+            public SelectedReference hasPopulations(String... population) {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
                     throw new IllegalStateException(String.format(
@@ -675,6 +802,11 @@ public class Measure {
 
         public SelectedStratum firstStratum() {
             return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
+        }
+
+        public SelectedStratifier stratumCount(int stratumCount) {
+            assertEquals(stratumCount, value().getStratum().size());
+            return this;
         }
 
         public SelectedStratum stratum(CodeableConcept value) {

@@ -28,6 +28,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
@@ -457,9 +458,13 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private void addSDEComponent(Measure measure) {
+        CodeableConcept cc = new CodeableConcept()
+                .addCoding(new Coding(
+                        "http://terminology.hl7.org/CodeSystem/measure-data-usage", "supplemental-data", null));
         MeasureSupplementalDataComponent sde = measure.getSupplementalDataFirstRep();
         sde.setId("sde-race");
         sde.getCode().setText("sde-race");
+        sde.getUsage().add(cc);
         sde.getCriteria().setLanguage("text/cql").setExpression("SDE Race");
     }
 

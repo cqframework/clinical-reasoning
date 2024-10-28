@@ -81,15 +81,15 @@ class WithdrawVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        String version = "2022-11-19";
+        String version = "1.2.3";
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
         Parameters params = parameters(part("version", version));
 
-
-        var exception = assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, repo, params));
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, repo, params));
         assertTrue(exception.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
     }
 }

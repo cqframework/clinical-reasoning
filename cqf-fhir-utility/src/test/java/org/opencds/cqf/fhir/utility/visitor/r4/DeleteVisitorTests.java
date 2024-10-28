@@ -38,8 +38,8 @@ public class DeleteVisitorTests {
 
     @Test
     void library_delete_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-small-retired.json"));
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-small-retired.json"));
         Bundle tsBundle = repo.transaction(bundle);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
@@ -60,21 +60,22 @@ public class DeleteVisitorTests {
         Bundle bundle = (Bundle)
                 jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        String version = "2022-11-19";
+        String version = "1.2.3";
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
         assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
     }
 
     @Test
     void library_delete_draft_test() {
-        Bundle bundle = (Bundle)
-                jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                DeleteVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         Bundle tsBundle = repo.transaction(bundle);
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
         String version = "1.2.3-draft";
@@ -83,8 +84,8 @@ public class DeleteVisitorTests {
         IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
         assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
-
     }
 }

@@ -43,12 +43,12 @@ public class RetireVisitorTest {
 
     @Test
     void library_retire_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         Bundle tsBundle = repo.transaction(bundle);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "2022-11-10";
+        String version = "1.2.3";
         Library library = repo.read(Library.class, new IdType(id)).copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
@@ -88,7 +88,8 @@ public class RetireVisitorTest {
         IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(retireVisitor, repo, params));
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(retireVisitor, repo, params));
         assertTrue(exception.getMessage().contains("Cannot retire an artifact that is not in active status"));
     }
 }

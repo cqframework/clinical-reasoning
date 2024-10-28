@@ -19,14 +19,13 @@ public class TestDataGenerator {
     private final Logger ourLog = LoggerFactory.getLogger(TestDataGenerator.class);
 
     public TestDataGenerator(Repository repository) {
-
         this.repository = repository;
     }
 
     public void makePatient(String practitioner, String organization, Period encounterPeriod) {
         int patientQty = 10;
-        int i = 0;
-        while (i < patientQty) {
+        int i;
+        for (i = 0; i < patientQty; i++) {
             // Patient Creation
             var patientId = "Patient/patient-" + i;
             createPatient(patientId, practitioner, organization, i);
@@ -56,8 +55,6 @@ public class TestDataGenerator {
                     createEncounter(patientId, encounterPeriod, EncounterStatus.INPROGRESS, i, 2);
                 }
             }
-            // increment
-            i++;
         }
         ourLog.info(String.format("Patients created: %s", i));
     }

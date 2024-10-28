@@ -436,7 +436,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
         } else {
             var values = subjectValues.values().stream()
-                    .map(t -> (Resource) t.rawValue())
+                    .map(CriteriaResult::rawValue)
+                    .filter(Resource.class::isInstance)
+                    .map(Resource.class::cast)
                     .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
                     .collect(Collectors.toList());
             for (String value : values) {
@@ -527,7 +529,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             subjectPop = reportPopulation.getResources().stream()
-                    .map(t -> (Resource) t)
+                    .filter(Resource.class::isInstance)
+                    .map(Resource.class::cast)
                     .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
                     .collect(Collectors.toSet());
         }
@@ -562,7 +565,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         Set<String> intersection = new HashSet<>(subjectIds);
-        // subjectIds.get(0).split("/")
         intersection.retainAll(popSubjectIds);
         sgpc.setCount(intersection.size());
 

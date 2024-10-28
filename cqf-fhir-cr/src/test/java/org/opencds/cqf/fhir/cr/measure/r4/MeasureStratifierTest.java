@@ -172,7 +172,7 @@ class MeasureStratifierTest {
     void cohortBooleanNoIdStrat() {
         try {
             given.when().measureId("CohortBooleanStratNoId").evaluate().then().report();
-            fail();
+            fail("should throw a missing Id scenario");
         } catch (NullPointerException e) {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
         }
@@ -210,7 +210,7 @@ class MeasureStratifierTest {
                     .evaluate()
                     .then()
                     .report();
-            fail();
+            fail("components are not implemented and should fail");
         } catch (UnsupportedOperationException e) {
             assertTrue(e.getMessage().contains("multi-component stratifiers are not yet supported"));
         }
@@ -253,7 +253,7 @@ class MeasureStratifierTest {
                     .evaluate()
                     .then()
                     .report();
-            fail();
+            fail("Since this is Resource based, it can't intersect with subject based expression");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage()
                     .contains("stratifier expression criteria results must match the same type as population"));

@@ -605,6 +605,7 @@ public class Measure {
          * @return
          */
         public SelectedContained observationHasSDECoding() {
+            assert value() instanceof Observation;
             var obs = (Observation) value();
             assertEquals(SDE_SYSTEM_URL, obs.getCode().getCodingFirstRep().getSystem());
             assertEquals("supplemental-data", obs.getCode().getCodingFirstRep().getCode());
@@ -731,6 +732,7 @@ public class Measure {
                 }
                 String foundRef = null;
                 for (Extension extension : ex) {
+                    assert extension.getValue() instanceof StringType;
                     StringType extValue = (StringType) extension.getValue();
                     if (extValue.getValue().equals(extValueRef)) {
                         foundRef = extValue.getValue();

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,11 +22,14 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -174,5 +178,31 @@ class ProcessDefinitionItemTests {
         assertEquals(2, resources.size());
         assertEquals(expectedCondition1, resources.get(0));
         assertEquals(expectedCondition2, resources.get(1));
+    }
+
+    @Test
+    void testItemWithContextExtensionWithMultipleAnswers() {
+        var fhirVersion = FhirVersionEnum.R4;
+        var patientId = "patient1";
+        var item = new QuestionnaireItemComponent().setLinkId("1");
+        item.setDefinition("http://hl7.org/fhir/Patient#Patient.name.given");
+        var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
+        responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test1")));
+        responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test2")));
+        var questionnaire = new Questionnaire().setItem(Arrays.asList(item));
+        var extension =
+                new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT).setValue(new CodeType("Patient"));
+        questionnaire.addExtension(extension);
+        var response = new QuestionnaireResponse().setItem(Arrays.asList(responseItem));
+        var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
+        var resources = new ArrayList<IBaseResource>();
+        var subjectId = Ids.newId(fhirVersion, "Patient", patientId);
+        var itemPair = new ItemPair(null, null);
+        fixture.processDefinitionItem(request, itemPair, resources, new Reference(subjectId));
+        assertEquals(1, resources.size());
+        assertInstanceOf(Patient.class, resources.get(0));
+        var patient = (Patient) resources.get(0);
+        assertEquals("test1", patient.getNameFirstRep().getGiven().get(0).asStringValue());
+        assertEquals("test2", patient.getNameFirstRep().getGiven().get(1).asStringValue());
     }
 }

@@ -69,6 +69,7 @@ public class ProcessItemWithContext extends ProcessItem {
                                 return null;
                             }
                         })
+                        // filtering nulls here to prevent unnecessary duplicate responseItems
                         .filter(r -> nonNull(r))
                         .collect(Collectors.toList());
         if (populationContext.isEmpty()) {

@@ -71,6 +71,10 @@ public class ProcessItemWithContext extends ProcessItem {
                         })
                         .filter(r -> nonNull(r))
                         .collect(Collectors.toList());
+        if (populationContext.isEmpty()) {
+            // We always want to return a responseItem even if we have nothing to populate
+            populationContext.add(null);
+        }
         return populationContext.stream()
                 .map(context ->
                         processPopulationContext(request, item, contextExpression.getName(), context, profileAdapter))

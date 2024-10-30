@@ -891,43 +891,6 @@
         "language": "text/cql-identifier",
         "expression": "Numerator"
       }
-    } ],
-    "stratifier": [ {
-      "id": "historic",
-      "code": {
-        "coding": [ {
-          "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/suspect-type",
-          "code": "historic"
-        } ]
-      },
-      "criteria": {
-        "language": "text/cql.identifier",
-        "expression": "Historic Population"
-      }
-    }, {
-      "id": "suspected",
-      "code": {
-        "coding": [ {
-          "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/suspect-type",
-          "code": "suspected"
-        } ]
-      },
-      "criteria": {
-        "language": "text/cql.identifier",
-        "expression": "Suspected Population"
-      }
-    }, {
-      "id": "net-new",
-      "code": {
-        "coding": [ {
-          "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/suspect-type",
-          "code": "net-new"
-        } ]
-      },
-      "criteria": {
-        "language": "text/cql.identifier",
-        "expression": "Net-New Population"
-      }
     } ]
   } ],
   "supplementalData": [ {

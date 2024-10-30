@@ -268,14 +268,14 @@ class ReleaseVisitorTests {
         // the parameters
         assertEquals(releasedLibrary.getVersion(), existingVersion);
         var expectedErsdTestArtifactDependencies = Arrays.asList(
-            "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
-            "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
-            "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|" + existingVersion,
-            "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526",
-            "http://snomed.info/sct");
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
+                "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
+                "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|" + existingVersion,
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526",
+                "http://snomed.info/sct");
         var expectedErsdTestArtifactComponents = Arrays.asList(
-            "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
-            "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion);
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
+                "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion);
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .map(ra -> ra.getResource())

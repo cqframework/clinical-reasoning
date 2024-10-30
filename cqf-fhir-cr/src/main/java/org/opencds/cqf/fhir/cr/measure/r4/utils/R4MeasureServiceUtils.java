@@ -50,6 +50,12 @@ public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final Repository repository;
 
+    // LUKETODO: pass in some sort of state indicating that the Extension SearchParameter has been laoded
+    // 1. hapi-fhir/JPA server starter
+    // 2. cdr
+
+    // LUKETODO:  do NOT call the DB/repository to check if the SP exists, that will be highly inefficient
+
     public R4MeasureServiceUtils(Repository repository) {
         this.repository = repository;
     }
@@ -106,13 +112,42 @@ public class R4MeasureServiceUtils {
         return String.format("%s%s/%s", serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
     }
 
+    // LUKETODO: what queries are we running Period Start and Period End that we can't run against the Period SearchParameter :  look at Measure.effectivePeriod
+
+    // LUKETODO: create search BEFORE batch2 job
+    // LUKETODO: force refresh on SearchParameter registry
     public void ensureSupplementalDataElementSearchParameter() {
+        // LUKETODO:  Buckley
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        log.info("6723: ensureSupplementalDataElementSearchParameter()");
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        log.info("6723: &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+
+//        final Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
+
+//        searchParameters.put("url", Collections.singletonList(new UriParam(R4MeasureServiceUtils.SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl())));
+
+//        Bundle searchParameterFromSearch = this.repository.search(Bundle.class, SearchParameter.class, searchParameters);
+
+//        // LUKETODO:  SearchParameterLoaderBean :   systemDao
+//        // LUKETODO:  ClinicalReasoning IG:  add SUPPLEMENTAL_DATA_SEARCHPARAMETER
+//        // LUKETODO:  careful as this will potentially perform badly
+//        final SearchParameter searchParameterFromRead = this.repository.read(
+//            SearchParameter.class,
+//            new IdType("SearchParameter", "deqm-measurereport-supplemental-data"));
+
+
         // create a transaction bundle
         ca.uhn.fhir.util.BundleBuilder builder = new ca.uhn.fhir.util.BundleBuilder(repository.fhirContext());
 
+//        ISearchParamRegistry.requestRefresh()
         // set the request to be condition on code == supplemental data
         builder.addTransactionCreateEntry(R4MeasureServiceUtils.SUPPLEMENTAL_DATA_SEARCHPARAMETER)
                 .conditional("code=supplemental-data");
+        // LUKETODO: Buckley: uncomment this
         try {
             repository.transaction(builder.getBundle());
         } catch (NotImplementedOperationException e) {

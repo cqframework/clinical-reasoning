@@ -67,8 +67,11 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureDefBuilder.class);
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
@@ -219,6 +222,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
+
+        logger.info("6723: measureReportType: {}", measureReportType);
 
         var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
@@ -662,6 +667,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // if not an evaluated resource, add to contained
     protected void buildSDE(BuilderContext bc, SdeDef sde) {
         var report = bc.report();
+        logger.info("6723: reportType: {}, sde.getResults().keySet().size(): {}", report.getType(), sde.getResults().keySet().size());
 
         // No SDEs were calculated, do nothing
         if (sde.getResults().isEmpty()) {

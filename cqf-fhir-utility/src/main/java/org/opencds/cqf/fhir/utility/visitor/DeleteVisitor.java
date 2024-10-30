@@ -26,8 +26,14 @@ public class DeleteVisitor extends AbstractKnowledgeArtifactVisitor {
         var resToUpdate = new ArrayList<IDomainResource>();
         resToUpdate.add(rootAdapter.get());
 
-        var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
+        findArtifactCommentsToUpdate(rootAdapter.get(), fhirVersion.getFhirVersionString(), repository)
+                .forEach(artifact -> {
+                    var approval = BundleHelper.getEntryResource(fhirVersion, artifact);
+                    var entry = PackageHelper.deleteEntry(approval);
+                    BundleHelper.addEntry(transactionBundle, entry);
+                });
 
+        var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
         for (var res : resourcesToUpdate) {
             var entry = PackageHelper.deleteEntry(res);
             BundleHelper.addEntry(transactionBundle, entry);

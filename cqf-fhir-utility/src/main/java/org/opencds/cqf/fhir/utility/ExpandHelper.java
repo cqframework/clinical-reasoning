@@ -73,8 +73,7 @@ public class ExpandHelper {
         // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
         // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()
-                && authoritativeSourceUrl.equals(
-                                terminologyEndpoint.get().getAddress())) {
+                && authoritativeSourceUrl.equals(terminologyEndpoint.get().getAddress())) {
             try {
                 var expandedValueSet = (ValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));

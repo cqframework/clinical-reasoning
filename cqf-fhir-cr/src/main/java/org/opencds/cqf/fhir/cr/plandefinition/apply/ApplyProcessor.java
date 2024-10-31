@@ -127,7 +127,7 @@ public class ApplyProcessor implements IApplyProcessor {
         var version = request.resolvePathString(request.getPlanDefinition(), "version");
         if (version != null) {
             var subject = request.getSubjectId().getIdPart();
-            var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ssZ");
+            var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
             request.getModelResolver()
                     .setValue(
                             questionnaire,

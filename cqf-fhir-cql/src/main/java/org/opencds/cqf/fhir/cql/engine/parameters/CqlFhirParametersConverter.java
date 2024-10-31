@@ -94,13 +94,12 @@ public class CqlFhirParametersConverter {
 
     @SuppressWarnings("unchecked")
     protected void addPart(IParametersAdapter pa, String name, Object value) {
-        IParametersParameterComponentAdapter ppca = this.addPart(pa, name);
-
         if (value == null) {
             return;
         }
 
         if (value instanceof Iterable) {
+            var ppca = this.addPart(pa, name);
             Iterable<Object> values = (Iterable<Object>) value;
             for (Object o : values) {
                 this.addSubPart(ppca, "element", o);
@@ -113,9 +112,16 @@ public class CqlFhirParametersConverter {
             value = this.fhirTypeConverter.toFhirType(value);
         }
 
-        if (value instanceof IBaseDatatype) {
+        // Likely already a parameter part
+        if (value instanceof IBaseBackboneElement) {
+            var ppca = this.adapterFactory.createParametersParameters((IBaseBackboneElement) value);
+            ppca.setName(name);
+            pa.addParameter(ppca.get());
+        } else if (value instanceof IBaseDatatype) {
+            var ppca = this.addPart(pa, name);
             ppca.setValue((IBaseDatatype) value);
         } else if (value instanceof IBaseResource) {
+            var ppca = this.addPart(pa, name);
             ppca.setResource((IBaseResource) value);
         } else {
             throw new IllegalArgumentException(String.format(

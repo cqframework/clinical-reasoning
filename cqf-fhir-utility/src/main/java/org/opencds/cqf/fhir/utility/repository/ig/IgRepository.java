@@ -50,6 +50,19 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * with metadata that indicates the source encoding and whether the resource is an
  * external resource. External resources are read-only.
  */
+// LUKETODO:  JP:
+    /*
+    for SearchParameters:  in CR… create InMemoryRepository. create SearchParameter:  pass to Operation implementation and it should just work
+IGRepository doesn’t have that functionality
+try to add functionality to IGRepository
+look at InMemoryRepository
+take code from InMemoryRepo to IGRepository
+first seed search param and then run operaion
+so hapi-fhir. for production seeding
+probably need a check… just not an update
+test at the very first “partition step” to check to see if the SearchParameter is there
+and override function to skip that evaluate check
+     */
 public class IgRepository implements Repository {
     private final FhirContext fhirContext;
     private final Path root;

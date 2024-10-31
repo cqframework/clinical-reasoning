@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTAL
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUBJECT_REPORTS_PER_POPULATION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
@@ -346,6 +347,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             buildPopulation(bc, measurePop, reportPop, defPop);
         }
 
+        // LUKETODO:  unit test?
+        // LUKETODO:  how to pass down List reference here?
+        // LUKETODO:  consider doing this for the population instead
+        if (! bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
+            reportGroup.addExtension()
+                .setUrl(EXT_SUBJECT_REPORTS_PER_POPULATION)
+                // LUKETODO:  where do I find the reference?
+                .setValue(new Reference("List/meaurereport-groupid-populationid"));
+
+//            getReportPopulation(reportGroup, )
+        }
+
         // add extension to group for totalDenominator and totalNumerator
         if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
                 || groupDef.measureScoring().equals(MeasureScoring.RATIO)) {
@@ -368,6 +381,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                                 .setValue(helper.buildMeasurementPeriod((docInterval)));
                     }
                 }
+
             }
 
             if (bc.measureDef.isBooleanBasis()) {

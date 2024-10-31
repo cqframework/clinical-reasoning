@@ -23,34 +23,25 @@ import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
  */
 public class R4CareGapStatusEvaluator {
     /**
-     * <p>
-     * GapStatus is determined by interpreting a MeasureReport resource of Type Ratio or Proportion that contain the populations: Numerator & Denominator
-     * </p>
-     *<p>
-     * <ul>
-     *   <li>'not-applicable': When a subject does not meet the criteria for the Measure scenario, whether by exclusion or exception criteria, or just by not meeting any required criteria, they will not show membership results in the 'Denominator'.</li>
-     *   <li> subject is applicable (not a status): When a subject meets the criteria for a Measure they will have membership results in the 'Denominator', indicating they are of the appropriate criteria for the Measure scenario.</li>
-     * If in membership of 'Denominator', the subject will be assigned a 'closed-gap' or 'open-gap' status based on membership in 'Numerator' and the 'improvement notation'.
-     *</ul>
-     * </p>
-     * <p>
-     * Improvement Notation of Scoring Algorithm indicates whether the ratio of Numerator over Denominator populations represents a scenario to increase the Numerator to improve outcomes, or to decrease the Numerator count. If this value is not set on a Measure resource, then it is defaulted to 'Increase' under the IsPositive variable.
-     * </p>
-     * <ul>
-     * <li>ex: 1/10 with improvementNotation "decrease" means that the measureScore is 90%, therefore absence from 'Numerator' means criteria for care was met</li>
-     * <li>ex: 1/10 with improvementNotation "increase" means that the measureScore is 10%, therefore absence from 'Numerator' means criteria for care was NOT met.</li>
-     * </ul>
-     * <ul>
-     * <li>'open-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = increase. Then the subject is 'open-gap'</li>
-     * <li>'open-gap': if in 'Denominator' & in 'Numerator', where 'improvement notation' = decrease. Then the subject is 'open-gap'</li>
-     * <li>'closed-gap': if in 'Denominator' & NOT in 'Numerator', where 'improvement notation' = decrease. Then the subject is 'closed-gap'</li>
-     * <li>'closed-gap': if in 'Denominator' & in 'Numerator', where 'improvement notation' = increase. Then the subject is 'closed-gap'</li>
-     * </ul>
-     * <p>'prospective-gap' is a concept that represents a period of time where a 'care-gap' measure has opportunity to address recommended care in a specific window of time. This 'window of time' we call the 'Date of Compliance' to indicate a range of time that optimally represents when care is meant to be provided.</p>
-     *<br/>
-     * <p>If care has not been provided ('open-gap'), and the date (reportDate) of evaluating for the Measure is before or within the 'Date of Compliance' interval, then the Measure is considered a 'prospective-gap' for the subject evaluated.</p>
+     * Below table is a mapping of expected behavior of the care-gap-status to Measure Report score
+     * | Gap-Status        | initial-population | denominator | denominator-exclusion | denominator-exception\*\* | numerator-exclusion | numerator | Improvement Notation\*\*\* |
+     * | ----------------- | ------------------ | ----------- | --------------------- | ------------------------- | ------------------- | --------- | -------------------------- |
+     * | not-applicable    | FALSE              | N/A         | N/A                   | N/A                       | N/A                 | N/A       | N/A                        |
+     * | closed-gap        | TRUE               | FALSE       | FALSE                 | FALSE                     | FALSE               | FALSE     | N/A                        |
+     * | closed-gap        | TRUE               | FALSE       | TRUE                  | FALSE                     | FALSE               | FALSE     | N/A                        |
+     * | closed-gap        | TRUE               | FALSE       | FALSE                 | TRUE                      | FALSE               | FALSE     | N/A                        |
+     * | prospective-gap\* | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | N/A                        |
+     * | prospective-gap\* | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | N/A                        |
+     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | increase                   |
+     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | increase                   |
+     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | TRUE      | decrease                   |
+     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | decrease                   |
+     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | TRUE      | increase                   |
+     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | decrease                   |
      *
-     * <p></p>
+     * *`prospective-gap` status requires additional data points than just population-code values within a MeasureReport in order to determine if ‘prospective-gap’ or just ‘open-gap’.
+     * **denominator-exception: is only for ‘proportion’ scoring type.
+     * ***improvement Notation: is a Measure defined value that tells users how to view results of the Measure Report.
      */
     public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
         Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();
@@ -67,10 +58,18 @@ public class R4CareGapStatusEvaluator {
 
     private CareGapsStatusCode getGapStatus(
             Measure measure, MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
+        Pair<String, Boolean> inInitialPopulation = new MutablePair<>("initial-population", false);
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
         Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
         // get Numerator and Denominator membership
         measureReportGroup.getPopulation().forEach(population -> {
+            if (population.hasCode()
+                    && population
+                            .getCode()
+                            .hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inInitialPopulation.getKey())
+                    && population.getCount() == 1) {
+                inInitialPopulation.setValue(true);
+            }
             if (population.hasCode()
                     && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumerator.getKey())
                     && population.getCount() == 1) {
@@ -83,6 +82,10 @@ public class R4CareGapStatusEvaluator {
             }
         });
 
+        // is subject eligible for measure?
+        if (Boolean.FALSE.equals(inInitialPopulation.getValue())) {
+            return CareGapsStatusCode.NOT_APPLICABLE;
+        }
         // default improvementNotation
         boolean isPositive = true;
 
@@ -92,11 +95,6 @@ public class R4CareGapStatusEvaluator {
         } else if (measure.hasImprovementNotation()) {
             isPositive = measure.getImprovementNotation()
                     .hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
-        }
-
-        if (Boolean.FALSE.equals(inDenominator.getValue())) {
-            // patient is not in eligible population
-            return CareGapsStatusCode.NOT_APPLICABLE;
         }
 
         if (Boolean.TRUE.equals(inDenominator.getValue())

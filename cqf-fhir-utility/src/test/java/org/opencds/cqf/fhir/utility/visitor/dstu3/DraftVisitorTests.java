@@ -103,6 +103,8 @@ class DraftVisitorTests {
         MetadataResourceHelper.forEachMetadataResource(
                 returnedBundle.getEntry(),
                 resource -> {
+                    assertFalse(resource.hasExtension(KnowledgeArtifactAdapter.releaseDescriptionUrl));
+                    assertFalse(resource.hasExtension(KnowledgeArtifactAdapter.releaseLabelUrl));
                     List<RelatedArtifact> relatedArtifacts2 =
                             new org.opencds.cqf.fhir.utility.adapter.dstu3.KnowledgeArtifactAdapter(resource)
                                     .getRelatedArtifact();

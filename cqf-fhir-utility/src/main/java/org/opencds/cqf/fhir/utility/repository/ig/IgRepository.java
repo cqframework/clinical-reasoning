@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -384,6 +385,11 @@ public class IgRepository implements Repository {
         requireNonNull(resource, "resource can not be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id can not be null");
 
+        // LUKETODO:  test this
+        if (resource.fhirType().equals("SearchParameter")) {
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+        }
+
         var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
         writeResource(resource, path);
 
@@ -451,6 +457,11 @@ public class IgRepository implements Repository {
             }
 
             actual = preferred;
+        }
+
+        // LUKETODO:  test this
+        if (resource.fhirType().equals("SearchParameter")) {
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
         }
 
         writeResource(resource, actual);

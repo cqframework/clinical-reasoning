@@ -2126,6 +2126,16 @@
                 "name": "Reportable_Condition_Trigger_Codes",
                 "title": "Reportable Condition Trigger Codes (RCTC) Example Library",
                 "status": "active",
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                    "valueString": "Sample release label"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                    "valueMarkdown": "Sample release description"
+                  }
+                ],
                 "experimental": true,
                 "type": {
                     "coding": [
@@ -2299,6 +2309,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                        "valueString": "Sample release label"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                        "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc",
@@ -2741,6 +2759,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                      "valueString": "Sample release label"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                      "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/lotc",
@@ -2993,6 +3019,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                      "valueString": "Sample release label"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                      "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/lrtc",
@@ -3825,6 +3859,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                      "valueString": "Sample release label"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                      "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc",
@@ -4137,6 +4179,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                      "valueString": "Sample release label"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                      "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/ostc",
@@ -4669,6 +4719,14 @@
                         "valueContactDetail": {
                             "name": "CSTE Steward"
                         }
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                      "valueString": "Sample release label"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                      "valueMarkdown": "Sample release description"
                     }
                 ],
                 "url": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc",

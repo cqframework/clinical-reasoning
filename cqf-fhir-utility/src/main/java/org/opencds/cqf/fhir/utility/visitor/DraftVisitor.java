@@ -37,18 +37,15 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
         checkVersionValidSemver(version);
 
         // remove release label and extension
-        List<IBaseExtension<?, ?>> removeReleaseLabelAndDescription = libRes.getExtension().stream()
-                .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
-                        && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
-                .collect(Collectors.toList());
-        adapter.setExtension(removeReleaseLabelAndDescription);
+        List<IBaseExtension<?, ?>> extensionsWithoutReleaseExtensions = removeReleaseExtensions(libRes);
+        adapter.setExtension(extensionsWithoutReleaseExtensions);
         // remove approval date
         adapter.setApprovalDate(null);
         // new draft version
         String draftVersion = version + "-draft";
         String draftVersionUrl = Canonicals.getUrl(adapter.getUrl()) + "|" + draftVersion;
 
-        // Root artifact must NOT have status of 'Active'. Existing drafts of
+        // Root artifact must have status of 'Active'. Existing drafts of
         // reference artifacts with the right verison number will be adopted.
         // This check is performed here to facilitate that different treatment
         // for the root artifact and those referenced by it.
@@ -121,6 +118,7 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
                     AdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(newResource);
             newResourceAdapter.setStatus("draft");
             newResourceAdapter.setVersion(draftVersion);
+            newResourceAdapter.setExtension(removeReleaseExtensions(newResource));
             resourcesToCreate.add(newResource);
             var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts();
             for (var ra : ownedRelatedArtifacts) {
@@ -271,5 +269,12 @@ public class DraftVisitor implements IKnowledgeArtifactVisitor {
                     ra.setReference(Canonicals.getUrl(ra.getReference()) + "|" + updatedVersion);
                     return ra;
                 });
+    }
+
+    private static List<IBaseExtension<?, ?>> removeReleaseExtensions(IDomainResource resource) {
+        return resource.getExtension().stream()
+                .filter(ext -> !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseDescriptionUrl)
+                        && !ext.getUrl().equals(KnowledgeArtifactAdapter.releaseLabelUrl))
+                .collect(Collectors.toList());
     }
 }

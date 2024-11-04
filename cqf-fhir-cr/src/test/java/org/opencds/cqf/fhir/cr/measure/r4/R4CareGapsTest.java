@@ -85,6 +85,7 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_NA() {
+        // validates initial-population=false returns 'not-applicable' status
         given.when()
                 .subject("Patient/neg-denom-EXM125")
                 .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
@@ -758,5 +759,28 @@ class R4CareGapsTest {
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("no measure resolving parameter was specified"));
         }
+    }
+    // MinimalProportionDenominatorExclusion
+    @Test
+    void InInitalPopulationAndDenominatorExclusion() {
+        // when subject is in initial population
+        // not in Denominator
+        // they should produce 'closed-gap'
+        GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionDenominatorExclusion")
+                .measureIdentifier(null)
+                .measureUrl(null)
+                .status("closed-gap")
+                .getCareGapsReport()
+                .then()
+                .hasBundleCount(1)
+                .firstParameter()
+                .detectedIssueCount(1)
+                .detectedIssue()
+                .hasCareGapStatus("closed-gap");
     }
 }

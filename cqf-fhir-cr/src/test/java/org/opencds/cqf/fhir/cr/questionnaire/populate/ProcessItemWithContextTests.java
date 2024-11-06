@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,5 +75,29 @@ class ProcessItemWithContextTests {
         var operationOutcome = (OperationOutcome) populateRequest.getOperationOutcome();
         assertTrue(operationOutcome.hasIssue());
         assertEquals(2, operationOutcome.getIssue().size());
+    }
+
+    @Test
+    void testNoContextStillReturnsResponseItem() {
+        var questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var questionnaireItem = new QuestionnaireItemComponent()
+                .setLinkId("1")
+                .setDefinition("http://hl7.org/fhir/Patient#Patient.name.given");
+        var extensions = Arrays.asList(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        questionnaireItem.setExtension(extensions);
+        var expression = new CqfExpression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
+        List<IBase> expressionResults = new ArrayList<>();
+        doReturn(expression)
+                .when(expressionProcessor)
+                .getCqfExpression(populateRequest, extensions, Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
+        doReturn(expressionResults)
+                .when(expressionProcessor)
+                .getExpressionResultForItem(populateRequest, expression, "1");
+        var actual = processItemWithContext.processContextItem(populateRequest, questionnaireItem);
+        assertEquals(1, actual.size());
+        assertTrue(
+                ((QuestionnaireResponseItemComponent) actual.get(0)).getAnswer().isEmpty());
     }
 }

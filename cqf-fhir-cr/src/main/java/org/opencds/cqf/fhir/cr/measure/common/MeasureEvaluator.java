@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
@@ -69,6 +70,38 @@ public class MeasureEvaluator {
     protected String measurementPeriodParameterName;
 
     protected LibraryEngine libraryEngine;
+
+    protected Set<MeasurePopulationType> allowedProportion = Set.of(
+            INITIALPOPULATION,
+            DENOMINATOR,
+            DENOMINATOREXCLUSION,
+            DENOMINATOREXCEPTION,
+            NUMERATOREXCLUSION,
+            NUMERATOR,
+            DATEOFCOMPLIANCE,
+            TOTALDENOMINATOR,
+            TOTALNUMERATOR);
+    protected Set<MeasurePopulationType> requiredProportion = Set.of(INITIALPOPULATION, DENOMINATOR, NUMERATOR);
+    protected Set<MeasurePopulationType> allowedRatio = Set.of(
+            INITIALPOPULATION,
+            DENOMINATOR,
+            DENOMINATOREXCLUSION,
+            NUMERATOREXCLUSION,
+            NUMERATOR,
+            DATEOFCOMPLIANCE,
+            TOTALDENOMINATOR,
+            TOTALNUMERATOR);
+    protected Set<MeasurePopulationType> requiredRatio = Set.of(INITIALPOPULATION, DENOMINATOR, NUMERATOR);
+    protected Set<MeasurePopulationType> allowedContinuousVariable = Set.of(
+            INITIALPOPULATION,
+            MEASUREPOPULATION,
+            MEASUREPOPULATIONEXCLUSION,
+            TOTALDENOMINATOR,
+            TOTALNUMERATOR,
+            MEASUREOBSERVATION);
+    protected Set<MeasurePopulationType> requiredContinuousVariable = Set.of(INITIALPOPULATION, MEASUREPOPULATION);
+    protected Set<MeasurePopulationType> allowedCohort = Set.of(INITIALPOPULATION, TOTALDENOMINATOR, TOTALNUMERATOR);
+    protected Set<MeasurePopulationType> requiredCohort = Set.of(INITIALPOPULATION);
 
     public MeasureEvaluator(CqlEngine context, String measurementPeriodParameterName, LibraryEngine libraryEngine) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
@@ -410,6 +443,23 @@ public class MeasureEvaluator {
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
+
+        // check populations
+        if (groupDef.measureScoring().toCode().equals("ratio")) {
+            checkScoringType(
+                    "ratio",
+                    allowedRatio,
+                    requiredRatio,
+                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+        }
+        if (groupDef.measureScoring().toCode().equals("proportion")) {
+            checkScoringType(
+                    "proportion",
+                    allowedProportion,
+                    requiredProportion,
+                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+        }
+
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
         PopulationDef denominator = groupDef.getSingle(DENOMINATOR);
@@ -419,22 +469,8 @@ public class MeasureEvaluator {
         PopulationDef dateOfCompliance = groupDef.getSingle(DATEOFCOMPLIANCE);
 
         // Retrieve intersection of populations and results
-
         // add resources
         // add subject
-
-        // Validate Required Populations are Present
-        if (initialPopulation == null || denominator == null || numerator == null) {
-            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay() + "`, `" + NUMERATOR.getDisplay()
-                    + "`, `" + DENOMINATOR.getDisplay()
-                    + "` are required Population Definitions for Measure Scoring Type: "
-                    + groupDef.measureScoring().toCode());
-        }
-        // Ratio Populations Check
-        if (groupDef.measureScoring().toCode().equals("ratio") && denominatorException != null) {
-            throw new IllegalArgumentException("`" + DENOMINATOREXCEPTION.getDisplay() + "` are not permitted "
-                    + "for MeasureScoring type: " + groupDef.measureScoring().toCode());
-        }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
 
@@ -520,12 +556,11 @@ public class MeasureEvaluator {
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
-        if (initialPopulation == null || measurePopulation == null) {
-            throw new NullPointerException(
-                    "`" + INITIALPOPULATION.getDisplay() + "` & `" + MEASUREPOPULATION.getDisplay()
-                            + "` are required Population Definitions for Measure Scoring Type: "
-                            + groupDef.measureScoring().toCode());
-        }
+        checkScoringType(
+                "continuous-variable",
+                allowedContinuousVariable,
+                requiredContinuousVariable,
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
@@ -566,11 +601,11 @@ public class MeasureEvaluator {
             GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
-        if (initialPopulation == null) {
-            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay()
-                    + "` is a required Population Definition for Measure Scoring Type: "
-                    + groupDef.measureScoring().toCode());
-        }
+        checkScoringType(
+                "cohort",
+                allowedCohort,
+                requiredCohort,
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
     }
@@ -650,6 +685,34 @@ public class MeasureEvaluator {
             }
 
             clearEvaluatedResources();
+        }
+    }
+
+    protected void checkScoringType(
+            String scoringType,
+            Set<MeasurePopulationType> allowedPopulations,
+            Set<MeasurePopulationType> requiredPopulations,
+            Set<MeasurePopulationType> groupDef) {
+
+        // within allowed?
+        if (!allowedPopulations.containsAll(groupDef)) {
+            groupDef.removeAll(allowedPopulations);
+            throw new IllegalArgumentException(String.format(
+                    "GroupDef has population(s): %s, that are outside allowed populations for scoringType: %s",
+                    groupDef.stream()
+                            .map(MeasurePopulationType::toCode)
+                            .findFirst()
+                            .orElse(null),
+                    scoringType));
+        }
+        if (!groupDef.containsAll(requiredPopulations)) {
+            var missingPop = requiredPopulations.stream()
+                    .filter(t -> !groupDef.contains(t))
+                    .map(MeasurePopulationType::toCode)
+                    .findFirst()
+                    .orElse(null);
+            throw new IllegalArgumentException(String.format(
+                    "GroupDef is missing required population(s): %s, for scoringType: %s", missingPop, scoringType));
         }
     }
 }

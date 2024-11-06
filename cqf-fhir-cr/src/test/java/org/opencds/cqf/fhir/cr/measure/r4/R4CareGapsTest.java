@@ -546,7 +546,7 @@ class R4CareGapsTest {
                     .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
                             .atStartOfDay()
                             .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
+                    .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
                     .status("closed-gap")
                     .status("open-gap")
                     .status("not-applicable")

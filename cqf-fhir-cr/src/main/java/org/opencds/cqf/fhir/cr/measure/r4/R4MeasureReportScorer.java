@@ -51,7 +51,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             scoreGroup(
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
-                    getGroupDef(measureDef, mrgc).isPositiveImprovementNotation());
+                    getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation());
         }
     }
 

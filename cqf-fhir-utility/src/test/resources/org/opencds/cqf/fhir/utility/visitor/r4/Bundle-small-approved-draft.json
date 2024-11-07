@@ -86,9 +86,14 @@
         "status": "draft",
         "relatedArtifact": [
           {
-            "type": "depends-on",
-            "label": "RCTC Value Set Library of Trigger Codes",
-            "resource": "http://ersd.aimsplatform.org/fhir/Library/rctc|1.2.3-draft"
+            "type": "composed-of",
+            "resource": "http://ersd.aimsplatform.org/fhir/Library/rctc|1.2.3-draft",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
+                "valueBoolean": true
+              }
+            ]
           }
         ]
       },

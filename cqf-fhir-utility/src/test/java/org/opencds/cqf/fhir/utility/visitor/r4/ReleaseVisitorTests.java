@@ -273,11 +273,14 @@ class ReleaseVisitorTests {
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|" + existingVersion,
+                "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library",
+                "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526",
                 "http://snomed.info/sct");
         var expectedErsdTestArtifactComponents = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
-                "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion);
+                "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
+                "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .map(ra -> ra.getResource())

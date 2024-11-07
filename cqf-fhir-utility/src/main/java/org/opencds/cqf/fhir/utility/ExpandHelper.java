@@ -70,11 +70,11 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext))
                 .orElse(null);
-        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
+        // If terminologyEndpoint exists and we have an authoritativeSourceUrl that matches the
         // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()
-                && (authoritativeSourceUrl == null
-                        || authoritativeSourceUrl.equals(
+                && (authoritativeSourceUrl != null
+                        && authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
             try {
                 var expandedValueSet = (ValueSetAdapter) createAdapterForResource(

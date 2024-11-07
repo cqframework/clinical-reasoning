@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -57,7 +56,7 @@ public class RetireVisitorTest {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 4);
+        assertEquals(4, res.size());
         var libraries = repo.search(Bundle.class, Library.class, Map.of()).getEntry().stream()
                 .filter(x -> ((Library) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
                 .collect(Collectors.toList());
@@ -71,9 +70,9 @@ public class RetireVisitorTest {
                         ((PlanDefinition) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
                 .collect(Collectors.toList());
 
-        assert (libraries.size() == 2);
-        assert (valueSets.size() == 1);
-        assert (planDefinitions.size() == 1);
+        assertEquals(2, libraries.size());
+        assertEquals(1, valueSets.size());
+        assertEquals(1, planDefinitions.size());
     }
 
     @Test

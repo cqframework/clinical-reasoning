@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -51,7 +50,7 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 4);
+        assertEquals(4, res.size());
     }
 
     @Test
@@ -73,7 +72,7 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 4);
+        assertTrue(res.size() == 5);
     }
 
     @Test

@@ -230,6 +230,17 @@
         "url": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
         "version": "2022-11-19",
         "status": "active",
+        "useContext": [
+          {
+            "code": {
+              "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+              "code": "program"
+            },
+            "valueReference": {
+              "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/us-ecr-specification"
+            }
+          }
+        ],
         "compose": {
           "include": [
             {

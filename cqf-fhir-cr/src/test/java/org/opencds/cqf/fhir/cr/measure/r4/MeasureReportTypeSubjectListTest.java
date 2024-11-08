@@ -32,7 +32,8 @@ public class MeasureReportTypeSubjectListTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(
             FhirContext.forR4Cached(),
-            Paths.get(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
+            Paths.get(
+                    getResourcePath(MeasureReportTypeSubjectListTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     protected Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 

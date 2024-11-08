@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -37,12 +37,12 @@ public class DeleteVisitorTests {
 
     @Test
     void library_delete_test() {
-        Bundle bundle =
-                (Bundle) jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-delete.json"));
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-small-retired.json"));
         Bundle tsBundle = repo.transaction(bundle);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "1.1.0";
+        String version = "1.2.3";
         Library library = repo.read(Library.class, new IdType(id)).copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
@@ -51,46 +51,40 @@ public class DeleteVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 9);
+        assertEquals(4, res.size());
     }
 
     @Test
     void library_delete_active_test() {
-        try {
-            Bundle bundle = (Bundle)
-                    jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
-            repo.transaction(bundle);
-            String version = "1.0.0";
-            Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                    .copy();
-            ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-            IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
-            Parameters params = parameters(part("version", version));
-            libraryAdapter.accept(deleteVisitor, repo, params);
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        String version = "1.2.3";
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
+        Parameters params = parameters(part("version", version));
 
-            fail("Trying to withdraw an active Library should throw an Exception");
-        } catch (PreconditionFailedException e) {
-            assert (e.getMessage().contains("Cannot delete an artifact that is not in retired status"));
-        }
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
     }
 
     @Test
     void library_delete_draft_test() {
-        try {
-            Bundle bundle = (Bundle)
-                    jsonParser.parseResource(DeleteVisitorTests.class.getResourceAsStream("Bundle-withdraw.json"));
-            Bundle tsBundle = repo.transaction(bundle);
-            String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-            String version = "1.1.0-draft";
-            Library library = repo.read(Library.class, new IdType(id)).copy();
-            ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-            IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
-            Parameters params = parameters(part("version", version));
-            libraryAdapter.accept(deleteVisitor, repo, params);
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                DeleteVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        Bundle tsBundle = repo.transaction(bundle);
+        String id = tsBundle.getEntry().get(0).getResponse().getLocation();
+        String version = "1.2.3-draft";
+        Library library = repo.read(Library.class, new IdType(id)).copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
+        Parameters params = parameters(part("version", version));
 
-            fail("Trying to withdraw a draft Library should throw an Exception");
-        } catch (PreconditionFailedException e) {
-            assert (e.getMessage().contains("Cannot delete an artifact that is not in retired status"));
-        }
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
     }
 }

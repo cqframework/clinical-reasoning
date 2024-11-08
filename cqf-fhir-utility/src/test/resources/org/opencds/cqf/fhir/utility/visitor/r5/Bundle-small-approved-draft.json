@@ -36,6 +36,10 @@
             ]
           },
           {
+            "type": "composed-of",
+            "resource": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
+          },
+          {
             "extension": [
               {
                 "url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority",
@@ -98,6 +102,11 @@
       "resource": {
         "resourceType": "Library",
         "id": "rctc",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library"
+          ]
+        },
         "url": "http://ersd.aimsplatform.org/fhir/Library/rctc",
         "version": "1.2.3-draft",
         "status": "draft",

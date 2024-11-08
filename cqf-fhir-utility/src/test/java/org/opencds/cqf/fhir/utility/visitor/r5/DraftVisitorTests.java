@@ -67,7 +67,7 @@ class DraftVisitorTests {
     @Test
     void library_draft_test() {
         Bundle bundle = (Bundle)
-                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -118,15 +118,14 @@ class DraftVisitorTests {
     @Test
     void draftOperation_no_effectivePeriod_test() {
         Bundle bundle = (Bundle)
-                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
         Library baseLib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
         IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor();
-        PlanDefinition planDef = repo.read(
-                        PlanDefinition.class, new IdType("PlanDefinition/plandefinition-ersd-instance-example"))
+        PlanDefinition planDef = repo.read(PlanDefinition.class, new IdType("PlanDefinition/us-ecr-specification"))
                 .copy();
         assertTrue(planDef.hasEffectivePeriod());
         String version = "1.01.21";
@@ -146,12 +145,12 @@ class DraftVisitorTests {
     @Test
     void draftOperation_version_conflict_test() {
         Bundle bundle = (Bundle)
-                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         Library versionConflictLibrary = (Library)
                 jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Library-version-conflict.json"));
         repo.transaction(bundle);
         repo.update(versionConflictLibrary);
-        Parameters params = parameters(part("version", "1.0.0"));
+        Parameters params = parameters(part("version", "1.2.3"));
         String maybeException = null;
         Library baseLib =
                 repo.read(Library.class, new IdType(specificationLibReference)).copy();

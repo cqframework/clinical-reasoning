@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.utility.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -37,11 +37,11 @@ class WithdrawVisitorTests {
     @Test
     void library_withdraw_test() {
         Bundle bundle = (Bundle)
-                jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw.json"));
+                jsonParser.parseResource(WithdrawVisitorTests.class.getResourceAsStream("Bundle-small-draft.json"));
         Bundle tsBundle = repo.transaction(bundle);
         // InMemoryFhirRepository bug - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "1.1.0-draft";
+        String version = "1.2.3-draft";
         Library library = repo.read(Library.class, new IdType(id)).copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
@@ -50,20 +50,20 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 9);
+        assertEquals(4, res.size());
     }
 
     @Test
     void library_withdraw_with_approval_test() throws Exception {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-                WithdrawVisitorTests.class.getResourceAsStream("Bundle-withdraw-with-approval.json"));
+                WithdrawVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("SearchParameter-artifactAssessment.json"));
         Bundle tsBundle = repo.transaction(bundle);
         repo.update(sp);
         // Resource is uploaded using POST - need to get id like this
         String id = tsBundle.getEntry().get(0).getResponse().getLocation();
-        String version = "1.1.0-draft";
+        String version = "1.2.3-draft";
         Library library = repo.read(Library.class, new IdType(id)).copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
@@ -72,26 +72,23 @@ class WithdrawVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assert (res.size() == 10);
+        assertTrue(res.size() == 5);
     }
 
     @Test
     void library_withdraw_No_draft_test() {
-        try {
-            Bundle bundle = (Bundle) jsonParser.parseResource(
-                    WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
-            repo.transaction(bundle);
-            String version = "1.01.21";
-            Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                    .copy();
-            ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-            IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
-            Parameters params = parameters(part("version", version));
-            libraryAdapter.accept(withdrawVisitor, repo, params);
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                WithdrawVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        String version = "1.2.3";
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+        Parameters params = parameters(part("version", version));
 
-            fail("Trying to withdraw an active Library should throw an Exception");
-        } catch (PreconditionFailedException e) {
-            assert (e.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
-        }
+        var exception = assertThrows(
+                PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, repo, params));
+        assertTrue(exception.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
     }
 }

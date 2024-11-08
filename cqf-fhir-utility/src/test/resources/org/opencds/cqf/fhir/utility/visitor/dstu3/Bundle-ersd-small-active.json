@@ -10,7 +10,22 @@
                 "resourceType": "Library",
                 "id": "SpecificationLibrary",
                 "url": "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
-                "version": "2022-11-19",
+                "version": "1.2.3",
+                "approvalDate": "1990-01-01",
+                "effectivePeriod": {
+                  "start": "2023-01-01",
+                  "end": "2023-12-01"
+                },
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel",
+                    "valueString": "Sample release label"
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription",
+                    "valueMarkdown": "Sample release description"
+                  }
+                ],
                 "status": "active",
                 "useContext": [
                     {
@@ -169,6 +184,9 @@
                 "url": "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
                 "version": "2.0.0",
                 "status": "active",
+                "effectivePeriod": {
+                  "start": "2020-12-01"
+                },
                 "relatedArtifact": [
                     {
                         "type": "depends-on",

@@ -235,7 +235,7 @@ class MeasureProcessorEvaluateTest {
                 .subject(null)
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
-                .reportType("summary")
+                .reportType("population")
                 .evaluate();
         MeasureReport report = when.then().report();
         assertNotNull(report);
@@ -253,7 +253,7 @@ class MeasureProcessorEvaluateTest {
                 .subject(null)
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
-                .reportType("summary")
+                .reportType("population")
                 .evaluate();
 
         String errorMsg = "MeasureScoring must be specified on Group or Measure";

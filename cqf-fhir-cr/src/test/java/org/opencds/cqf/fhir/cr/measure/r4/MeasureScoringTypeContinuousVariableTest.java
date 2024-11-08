@@ -125,11 +125,9 @@ public class MeasureScoringTypeContinuousVariableTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "GroupDef is missing required population(s): initial-population, for scoringType: continuous-variable"));
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage()
+                    .contains("'continuous-variable' measure is missing required population: initial-population"));
         }
     }
 
@@ -175,11 +173,11 @@ public class MeasureScoringTypeContinuousVariableTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedOperationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "GroupDef has population(s): denominator, that are outside allowed populations for scoringType: continuous-variable"));
+                                    "MeasurePopulationType: denominator, is not a member of allowed 'continuous-variable' populations"));
         }
     }
 

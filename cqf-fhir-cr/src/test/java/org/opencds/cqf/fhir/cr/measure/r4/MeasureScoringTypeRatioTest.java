@@ -150,9 +150,8 @@ public class MeasureScoringTypeRatioTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage()
-                    .contains("GroupDef is missing required population(s): denominator, for scoringType: ratio"));
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage().contains("'ratio' measure is missing required population: denominator"));
         }
     }
 
@@ -209,11 +208,11 @@ public class MeasureScoringTypeRatioTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedOperationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "GroupDef has population(s): measure-population, that are outside allowed populations for scoringType: ratio"));
+                                    "MeasurePopulationType: measure-population, is not a member of allowed 'ratio' populations"));
         }
     }
 

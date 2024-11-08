@@ -9,7 +9,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -174,8 +173,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void validateImprovementNotationCode(String improvementNotationValue) {
-        Set<String> acceptedCodes = Set.of(IMPROVEMENT_NOTATION_SYSTEM_INCREASE, IMPROVEMENT_NOTATION_SYSTEM_DECREASE);
-        boolean hasValidCode = acceptedCodes.contains(improvementNotationValue);
+        boolean hasValidCode = IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(improvementNotationValue)
+                || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(improvementNotationValue);
         if (!hasValidCode) {
             throw new IllegalArgumentException(String.format(
                     "ImprovementNotation Coding has invalid code: %s, combination for Measure.",

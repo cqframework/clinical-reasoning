@@ -101,11 +101,9 @@ public class MeasureScoringTypeCohortTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "GroupDef has population(s): numerator, that are outside allowed populations for scoringType: cohort"));
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage()
+                    .contains("MeasurePopulationType: numerator, is not a member of allowed 'cohort' populations"));
         }
     }
 
@@ -139,11 +137,9 @@ public class MeasureScoringTypeCohortTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "GroupDef has population(s): denominator, that are outside allowed populations for scoringType: cohort"));
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage()
+                    .contains("MeasurePopulationType: denominator, is not a member of allowed 'cohort' populations"));
         }
     }
 

@@ -14,7 +14,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SD
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -251,11 +250,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private void validateImprovementNotationCode(CodeableConcept improvementNotationValue) {
-        Set<String> acceptedCodes = Set.of(IMPROVEMENT_NOTATION_SYSTEM_INCREASE, IMPROVEMENT_NOTATION_SYSTEM_DECREASE);
         var code = improvementNotationValue.getCodingFirstRep().getCode();
         var system = improvementNotationValue.getCodingFirstRep().getSystem();
         boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
-        boolean hasValidCode = acceptedCodes.contains(code);
+        boolean hasValidCode =
+                IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
         if (!hasValidCode || !hasValidSystem) {
             throw new IllegalArgumentException(String.format(
                     "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure.",

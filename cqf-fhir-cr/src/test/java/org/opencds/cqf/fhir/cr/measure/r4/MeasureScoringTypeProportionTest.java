@@ -163,9 +163,8 @@ public class MeasureScoringTypeProportionTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage()
-                    .contains("GroupDef is missing required population(s): denominator, for scoringType: proportion"));
+        } catch (UnsupportedOperationException e) {
+            assertTrue(e.getMessage().contains("'proportion' measure is missing required population: denominator"));
         }
     }
 
@@ -228,11 +227,11 @@ public class MeasureScoringTypeProportionTest {
                     .up()
                     .report();
             fail("This should throw error");
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedOperationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "GroupDef has population(s): measure-population, that are outside allowed populations for scoringType: proportion"));
+                                    "MeasurePopulationType: measure-population, is not a member of allowed 'proportion' populations"));
         }
     }
 

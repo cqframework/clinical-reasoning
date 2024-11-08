@@ -40,6 +40,7 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,38 +71,6 @@ public class MeasureEvaluator {
     protected String measurementPeriodParameterName;
 
     protected LibraryEngine libraryEngine;
-
-    protected Set<MeasurePopulationType> allowedProportion = Set.of(
-            INITIALPOPULATION,
-            DENOMINATOR,
-            DENOMINATOREXCLUSION,
-            DENOMINATOREXCEPTION,
-            NUMERATOREXCLUSION,
-            NUMERATOR,
-            DATEOFCOMPLIANCE,
-            TOTALDENOMINATOR,
-            TOTALNUMERATOR);
-    protected Set<MeasurePopulationType> requiredProportion = Set.of(INITIALPOPULATION, DENOMINATOR, NUMERATOR);
-    protected Set<MeasurePopulationType> allowedRatio = Set.of(
-            INITIALPOPULATION,
-            DENOMINATOR,
-            DENOMINATOREXCLUSION,
-            NUMERATOREXCLUSION,
-            NUMERATOR,
-            DATEOFCOMPLIANCE,
-            TOTALDENOMINATOR,
-            TOTALNUMERATOR);
-    protected Set<MeasurePopulationType> requiredRatio = Set.of(INITIALPOPULATION, DENOMINATOR, NUMERATOR);
-    protected Set<MeasurePopulationType> allowedContinuousVariable = Set.of(
-            INITIALPOPULATION,
-            MEASUREPOPULATION,
-            MEASUREPOPULATIONEXCLUSION,
-            TOTALDENOMINATOR,
-            TOTALNUMERATOR,
-            MEASUREOBSERVATION);
-    protected Set<MeasurePopulationType> requiredContinuousVariable = Set.of(INITIALPOPULATION, MEASUREPOPULATION);
-    protected Set<MeasurePopulationType> allowedCohort = Set.of(INITIALPOPULATION, TOTALDENOMINATOR, TOTALNUMERATOR);
-    protected Set<MeasurePopulationType> requiredCohort = Set.of(INITIALPOPULATION);
 
     public MeasureEvaluator(CqlEngine context, String measurementPeriodParameterName, LibraryEngine libraryEngine) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
@@ -446,18 +415,15 @@ public class MeasureEvaluator {
 
         // check populations
         if (groupDef.measureScoring().toCode().equals("ratio")) {
-            checkScoringType(
-                    "ratio",
-                    allowedRatio,
-                    requiredRatio,
-                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+            R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                    MeasureScoring.RATIO);
         }
         if (groupDef.measureScoring().toCode().equals("proportion")) {
-            checkScoringType(
-                    "proportion",
-                    allowedProportion,
-                    requiredProportion,
-                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+
+            R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                    MeasureScoring.PROPORTION);
         }
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
@@ -556,11 +522,9 @@ public class MeasureEvaluator {
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
-        checkScoringType(
-                "continuous-variable",
-                allowedContinuousVariable,
-                requiredContinuousVariable,
-                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
@@ -601,11 +565,9 @@ public class MeasureEvaluator {
             GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
-        checkScoringType(
-                "cohort",
-                allowedCohort,
-                requiredCohort,
-                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toSet()));
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
     }

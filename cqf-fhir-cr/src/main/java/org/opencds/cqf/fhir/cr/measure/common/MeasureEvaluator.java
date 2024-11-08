@@ -293,7 +293,7 @@ public class MeasureEvaluator {
 
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
-                throw new RuntimeException("SubjectId is required in order to calculate.");
+                throw new NullPointerException("SubjectId is required in order to calculate.");
             }
             Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
             String subjectTypePart = subjectInfo.getLeft();
@@ -412,19 +412,10 @@ public class MeasureEvaluator {
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
-
         // check populations
-        if (groupDef.measureScoring().toCode().equals("ratio")) {
-            R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                    MeasureScoring.RATIO);
-        }
-        if (groupDef.measureScoring().toCode().equals("proportion")) {
-
-            R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                    groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                    MeasureScoring.PROPORTION);
-        }
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                MeasureScoring.fromCode(groupDef.measureScoring().toCode()));
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
@@ -647,34 +638,6 @@ public class MeasureEvaluator {
             }
 
             clearEvaluatedResources();
-        }
-    }
-
-    protected void checkScoringType(
-            String scoringType,
-            Set<MeasurePopulationType> allowedPopulations,
-            Set<MeasurePopulationType> requiredPopulations,
-            Set<MeasurePopulationType> groupDef) {
-
-        // within allowed?
-        if (!allowedPopulations.containsAll(groupDef)) {
-            groupDef.removeAll(allowedPopulations);
-            throw new IllegalArgumentException(String.format(
-                    "GroupDef has population(s): %s, that are outside allowed populations for scoringType: %s",
-                    groupDef.stream()
-                            .map(MeasurePopulationType::toCode)
-                            .findFirst()
-                            .orElse(null),
-                    scoringType));
-        }
-        if (!groupDef.containsAll(requiredPopulations)) {
-            var missingPop = requiredPopulations.stream()
-                    .filter(t -> !groupDef.contains(t))
-                    .map(MeasurePopulationType::toCode)
-                    .findFirst()
-                    .orElse(null);
-            throw new IllegalArgumentException(String.format(
-                    "GroupDef is missing required population(s): %s, for scoringType: %s", missingPop, scoringType));
         }
     }
 }

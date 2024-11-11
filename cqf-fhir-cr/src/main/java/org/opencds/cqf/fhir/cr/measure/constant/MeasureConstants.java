@@ -46,5 +46,5 @@ public class MeasureConstants {
     public static final String EXT_TOTAL_NUMERATOR_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership";
 
-    public static final String EXT_SUBJECT_REPORTS_PER_POPULATION = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/subjectReports-per-population";
+    public static final String EXT_SUBJECT_REPORTS = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-subject-reports";
 }

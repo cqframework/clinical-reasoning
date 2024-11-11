@@ -6,7 +6,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTAL
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUBJECT_REPORTS_PER_POPULATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUBJECT_REPORTS;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
@@ -347,17 +347,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             buildPopulation(bc, measurePop, reportPop, defPop);
         }
 
-        // LUKETODO:  unit test?
+        // LUKETODO:  is there a way to do subjectReport Lists here, or do we not have enough info?
         // LUKETODO:  how to pass down List reference here?
-        // LUKETODO:  consider doing this for the population instead
-        if (! bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-            reportGroup.addExtension()
-                .setUrl(EXT_SUBJECT_REPORTS_PER_POPULATION)
-                // LUKETODO:  where do I find the reference?
-                .setValue(new Reference("List/meaurereport-groupid-populationid"));
-
-//            getReportPopulation(reportGroup, )
-        }
+//        if (! bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
+//            reportGroup.addExtension()
+//                .setUrl(EXT_SUBJECT_REPORTS)
+//                // LUKETODO:  where do I find the reference?
+//                .setValue(new Reference("List/meaurereport-groupid-populationid"));
+//
+////            getReportPopulation(reportGroup, )
+//        }
 
         // add extension to group for totalDenominator and totalNumerator
         if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
@@ -381,7 +380,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                                 .setValue(helper.buildMeasurementPeriod((docInterval)));
                     }
                 }
-
             }
 
             if (bc.measureDef.isBooleanBasis()) {
@@ -558,7 +556,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         if (!intersection.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
-            ListResource popSubjectList = this.createIdList(UUID.randomUUID().toString(), intersection);
+            ListResource popSubjectList = createIdList(UUID.randomUUID().toString(), intersection);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
@@ -596,23 +594,30 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // subjectResult set defined by basis of Measure
         Set<String> populationSet;
         if (bc.measureDef.isBooleanBasis()) {
+            // LUKETODO: for the first measureId, this is a Boolean basis, so we have an empty populationSet, therefore, no subjectResults
             populationSet = populationDef.getSubjects().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toSet());
+            logger.info("6723: BOOLEAN basis: {} populationSet: {}", bc.report().getSubject().getReference(), populationSet);
         } else {
             populationSet = populationDef.getResources().stream()
                     .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
+            logger.info("6723: NON-BOOLEAN basis: {} populationSet: {}", bc.report().getSubject().getReference(), populationSet);
         }
 
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
+        // LUKETODO:  this is triggered from STEP2 and adds ListResources!!!!
+        // LUKETODO:  write a smaller DqmR4IT that has SUBJECTLIST but also populationSet greater than ZERO
+        // LUKETODO:  probably need a MeasureReport where the Group matches the Populations.... where to find that?
         // Report Type behavior
         if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST
                 && !populationSet.isEmpty()) {
             ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
             bc.addContained(subjectList);
+            // LUKETODO:  what's with? LenientErrorHandler.java:207 - Resource has invalid reference: #438f3c7b-33e1-4400-8492-186e7f0441ea
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
 
@@ -631,17 +636,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected ListResource createList(String id) {
+    // LUKETODO:  is this advisable?
+    public static ListResource createList(String id) {
         ListResource list = new ListResource();
         list.setId(id);
         return list;
     }
 
-    protected ListResource createIdList(String id, Collection<String> ids) {
-        return this.createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
+    public static ListResource createIdList(String id, Collection<String> ids) {
+        return createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
     }
 
-    protected ListResource createReferenceList(String id, Collection<Reference> references) {
+    public static ListResource createReferenceList(String id, Collection<Reference> references) {
         ListResource referenceList = createList(id);
         for (Reference reference : references) {
             referenceList.addEntry().setItem(reference);
@@ -681,7 +687,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // if not an evaluated resource, add to contained
     protected void buildSDE(BuilderContext bc, SdeDef sde) {
         var report = bc.report();
-        logger.info("6723: reportType: {}, sde.getResults().keySet().size(): {}", report.getType(), sde.getResults().keySet().size());
 
         // No SDEs were calculated, do nothing
         if (sde.getResults().isEmpty()) {

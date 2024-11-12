@@ -87,8 +87,8 @@ class PackageVisitorTests {
     @Test
     @Disabled("This test needs a ValueSet that cannot be naively expanded")
     void packageOperation_should_fail_no_credentials() {
-        Bundle loadedBundle = (Bundle)
-                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -105,8 +105,8 @@ class PackageVisitorTests {
 
     @Test
     void packageOperation_should_fail_credentials_missing_username() {
-        Bundle loadedBundle = (Bundle)
-                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -126,8 +126,8 @@ class PackageVisitorTests {
 
     @Test
     void packageOperation_should_fail_credentials_missing_apikey() {
-        Bundle loadedBundle = (Bundle)
-                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -147,8 +147,8 @@ class PackageVisitorTests {
 
     @Test
     void packageOperation_should_fail_credentials_invalid() {
-        Bundle loadedBundle = (Bundle)
-                jsonParser.parseResource(PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example.json"));
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(fhirContext);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))

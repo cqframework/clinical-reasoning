@@ -552,7 +552,7 @@ public class Measure {
          */
         public SelectedReport subjectResultsHaveResourceType(String resourceType) {
             var lists = value().getContained().stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.List))
+                    .filter(t -> t instanceof ListResource)
                     .map(x -> (ListResource) x)
                     .collect(Collectors.toList());
             for (ListResource list : lists) {

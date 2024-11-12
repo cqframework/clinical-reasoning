@@ -183,16 +183,18 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     public String getGroupImprovementNotationExt(Measure.MeasureGroupComponent group) {
-        StringType value = (StringType) group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
+        var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
                 .getValue();
+        assert ext instanceof StringType;
+        StringType value = (StringType) ext;
         return value.getValue();
     }
 
-    public boolean groupHasImprovementNotationExt(MeasureGroupComponent group) {
+    private boolean groupHasImprovementNotationExt(MeasureGroupComponent group) {
         return group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION) != null;
     }
 
-    public boolean isGroupIncreaseImprovementNotation(Measure measure, MeasureGroupComponent group) {
+    private boolean isGroupIncreaseImprovementNotation(Measure measure, MeasureGroupComponent group) {
         // default improvement Notation
         boolean isIncreaseImpNotation = true;
         boolean useGroupImpNotation = groupHasImprovementNotationExt(group);
@@ -205,7 +207,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return isIncreaseImpNotation;
     }
 
-    public boolean useMeasureImprovementNotation(List<GroupDef> groups) {
+    private boolean useMeasureImprovementNotation(List<GroupDef> groups) {
         // if no groups are present then useMeasure
         if (groups == null || groups.isEmpty()) {
             return true;

@@ -34,7 +34,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(PROPORTION_ALLOWED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void isMember(List<MeasurePopulationType> populations) {
+        public static void validateMember(List<MeasurePopulationType> populations) {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
@@ -66,7 +66,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(PROPORTION_REQUIRED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void hasRequired(List<MeasurePopulationType> populations) {
+        public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
                     throw new UnsupportedOperationException(String.format(
@@ -100,7 +100,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(RATIO_ALLOWED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void isMember(List<MeasurePopulationType> populations) {
+        public static void validateMember(List<MeasurePopulationType> populations) {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
@@ -131,7 +131,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(RATIO_REQUIRED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void hasRequired(List<MeasurePopulationType> populations) {
+        public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
                     throw new UnsupportedOperationException(
@@ -166,7 +166,7 @@ public class R4MeasureScoringTypePopulations {
                     .collect(Collectors.toSet());
         }
 
-        public static void isMember(List<MeasurePopulationType> populations) {
+        public static void validateMember(List<MeasurePopulationType> populations) {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
@@ -199,7 +199,7 @@ public class R4MeasureScoringTypePopulations {
                     .collect(Collectors.toSet());
         }
 
-        public static void hasRequired(List<MeasurePopulationType> populations) {
+        public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
                     throw new UnsupportedOperationException(String.format(
@@ -228,7 +228,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(COHORT_ALLOWED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void isMember(List<MeasurePopulationType> populations) {
+        public static void validateMember(List<MeasurePopulationType> populations) {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
@@ -257,7 +257,7 @@ public class R4MeasureScoringTypePopulations {
             return data.stream().map(COHORT_REQUIRED::getPopulationType).collect(Collectors.toSet());
         }
 
-        public static void hasRequired(List<MeasurePopulationType> populations) {
+        public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
                     throw new UnsupportedOperationException(String.format(
@@ -276,20 +276,20 @@ public class R4MeasureScoringTypePopulations {
             List<MeasurePopulationType> populations, MeasureScoring measureScoring) {
         switch (measureScoring) {
             case RATIO:
-                RATIO_ALLOWED.isMember(populations);
-                RATIO_REQUIRED.hasRequired(populations);
+                RATIO_ALLOWED.validateMember(populations);
+                RATIO_REQUIRED.validateRequired(populations);
                 break;
             case PROPORTION:
-                PROPORTION_ALLOWED.isMember(populations);
-                PROPORTION_REQUIRED.hasRequired(populations);
+                PROPORTION_ALLOWED.validateMember(populations);
+                PROPORTION_REQUIRED.validateRequired(populations);
                 break;
             case COHORT:
-                COHORT_ALLOWED.isMember(populations);
-                COHORT_REQUIRED.hasRequired(populations);
+                COHORT_ALLOWED.validateMember(populations);
+                COHORT_REQUIRED.validateRequired(populations);
                 break;
             case CONTINUOUSVARIABLE:
-                CONTINUOUS_VARIABLE_ALLOWED.isMember(populations);
-                CONTINUOUS_VARIABLE_REQUIRED.hasRequired(populations);
+                CONTINUOUS_VARIABLE_ALLOWED.validateMember(populations);
+                CONTINUOUS_VARIABLE_REQUIRED.validateRequired(populations);
                 break;
             default:
                 throw new UnsupportedOperationException(

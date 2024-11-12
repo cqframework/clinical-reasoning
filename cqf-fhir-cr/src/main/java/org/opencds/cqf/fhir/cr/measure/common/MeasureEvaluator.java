@@ -415,7 +415,7 @@ public class MeasureEvaluator {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                MeasureScoring.fromCode(groupDef.measureScoring().toCode()));
+                groupDef.measureScoring());
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);

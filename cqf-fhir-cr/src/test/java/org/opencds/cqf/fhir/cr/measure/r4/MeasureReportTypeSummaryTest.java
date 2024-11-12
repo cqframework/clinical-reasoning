@@ -22,8 +22,6 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  *     has measure url
  *     has correct status
  *     has period
- *     errors when missing required population
- *     errors when using not allowed population
  */
 public class MeasureReportTypeSummaryTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";

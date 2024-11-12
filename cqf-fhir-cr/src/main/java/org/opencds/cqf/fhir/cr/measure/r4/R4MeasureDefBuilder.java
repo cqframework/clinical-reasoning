@@ -262,16 +262,18 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    public CodeableConcept getGroupImprovementNotationExt(MeasureGroupComponent group) {
-        return (CodeableConcept) group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
+    private CodeableConcept getGroupImprovementNotationExt(MeasureGroupComponent group) {
+        var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION)
                 .getValue();
+        assert ext instanceof CodeableConcept;
+        return (CodeableConcept) ext;
     }
 
-    public boolean groupHasImprovementNotationExt(MeasureGroupComponent group) {
+    private boolean groupHasImprovementNotationExt(MeasureGroupComponent group) {
         return group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION) != null;
     }
 
-    public boolean isGroupIncreaseImprovementNotation(Measure measure, MeasureGroupComponent group) {
+    private boolean isGroupIncreaseImprovementNotation(Measure measure, MeasureGroupComponent group) {
         // default improvement Notation
         boolean isIncreaseImpNotation = true;
         boolean useGroupImpNotation = groupHasImprovementNotationExt(group);

@@ -28,7 +28,7 @@ public class MeasureReportTypeIndividualTest {
     private static final Repository repository = new IgRepository(
             FhirContext.forR4Cached(),
             Paths.get(getResourcePath(MeasureReportTypeIndividualTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    protected Given given = Measure.given().repository(repository);
+    private final Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 
     @BeforeAll

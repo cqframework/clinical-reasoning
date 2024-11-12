@@ -32,7 +32,7 @@ public class MeasureScoringTypeProportionTest {
             FhirContext.forR4Cached(),
             Paths.get(
                     getResourcePath(MeasureScoringTypeProportionTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    protected Given given = Measure.given().repository(repository);
+    private final Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 
     @BeforeAll

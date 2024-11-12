@@ -45,10 +45,48 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
- * This class implements the Repository interface on onto a directory structure
- * that matches some common IG layouts. Resources read by the class will be tagged
- * with metadata that indicates the source encoding and whether the resource is an
- * external resource. External resources are read-only.
+ * Provides access to FHIR resources stored in a directory structure following
+ * Implementation Guide (IG) conventions.
+ * Supports CRUD operations and resource management based on IG directory and
+ * file naming conventions.
+ *
+ * <p>
+ * <strong>Directory Structure Overview (based on conventions):</strong>
+ * </p>
+ * 
+ * <pre>
+ * /path/to/ig/root/          (CategoryLayout.FLAT)
+ * ├── Patient-001.json
+ * ├── Observation-002.json
+ * ├── or
+ * ├── [resources/]             (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ * │   ├── Patient-789.json       (FhirTypeLayout.FLAT)
+ * │   ├── or
+ * │   ├── [patient/]           (FhirTypeLayout.DIRECTORY_PER_TYPE)
+ * │   │   ├── Patient-123.json   (FilenameMode.TYPE_AND_ID)
+ * │   │   ├── or
+ * │   │   ├── 456.json           (FilenameMode.ID_ONLY)
+ * │   │   └── ...
+ * │   └── ...
+ * └── vocabulary/              (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ *     ├── ValueSet-abc.json
+ *     ├── def.json
+ *     └── external/            (External Resources - Read-only, Terminology-only)
+ *         └── CodeSystem-external.json
+ * </pre>
+ * <p>
+ * <strong>Key Features:</strong>
+ * </p>
+ * <ul>
+ * <li>Supports CRUD operations on FHIR resources.</li>
+ * <li>Handles different directory layouts and filename conventions based on IG
+ * conventions.</li>
+ * <li>Annotates resources with metadata like source path and external
+ * designation.</li>
+ * <li>Supports invoking FHIR operations through an
+ * {@link IRepositoryOperationProvider}.</li>
+ * <li>Utilizes caching for efficient resource access.</li>
+ * </ul>
  */
 public class IgRepository implements Repository {
     private final FhirContext fhirContext;
@@ -67,8 +105,7 @@ public class IgRepository implements Repository {
 
     // Directory names
     static final String EXTERNAL_DIRECTORY = "external";
-    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<
-                    ResourceCategory, String>()
+    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<ResourceCategory, String>()
             .put(ResourceCategory.CONTENT, "resources")
             .put(ResourceCategory.DATA, "tests")
             .put(ResourceCategory.TERMINOLOGY, "vocabulary")
@@ -95,27 +132,30 @@ public class IgRepository implements Repository {
     }
 
     /**
-     * Create a new IGRepository instance. The repository configuration is
-     * auto-detected, and the encoding is set to JSON.
+     * Creates a new {@code IgRepository} with auto-detected conventions and default
+     * encoding behavior.
+     * The repository configuration is determined based on the directory structure.
      *
-     * @param fhirContext
-     * @param root
+     * @param fhirContext The FHIR context to use for parsing and encoding
+     *                    resources.
+     * @param root        The root directory of the IG.
+     * @see IgConventions#autoDetect(Path)
      */
     public IgRepository(FhirContext fhirContext, Path root) {
         this(fhirContext, root, IgConventions.autoDetect(root), EncodingBehavior.DEFAULT, null);
     }
 
     /**
-     * Create a new IGRepository instance.
+     * Creates a new {@code IgRepository} with specified conventions and encoding
+     * behavior.
      *
-     * @param fhirContext       The FHIR context to use for parsing and encoding
+     * @param fhirContext       The FHIR context to use.
+     * @param root              The root directory of the IG.
+     * @param conventions       The conventions defining directory and filename
+     *                          structures.
+     * @param encodingBehavior  The encoding behavior for parsing and encoding
      *                          resources.
-     * @param root              The root directory of the IG
-     * @param conventions       The conventions for the IG
-     * @param encodingBehavior   The encoding behavior to use for parsing and encoding
-     *                          resources.
-     * @param operationProvider The operation provider to use for invoking
-     *                          operations.
+     * @param operationProvider The operation provider for invoking FHIR operations.
      */
     public IgRepository(
             FhirContext fhirContext,
@@ -123,8 +163,8 @@ public class IgRepository implements Repository {
             IgConventions conventions,
             EncodingBehavior encodingBehavior,
             IRepositoryOperationProvider operationProvider) {
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.root = requireNonNull(root, "root can not be null");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext cannot be null");
+        this.root = requireNonNull(root, "root cannot be null");
         this.conventions = requireNonNull(conventions, "conventions is required");
         this.encodingBehavior = requireNonNull(encodingBehavior, "encodingBehavior is required");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
@@ -139,12 +179,37 @@ public class IgRepository implements Repository {
         this.resourceCache.clear();
     }
 
-    private boolean isExternaPath(Path path) {
+    private boolean isExternalPath(Path path) {
         return path.getParent() != null
                 && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
     }
 
-    // This method is used to determine the preferred path for a resource.
+    /**
+     * Determines the preferred file system path for storing or retrieving a FHIR
+     * resource based on its resource type and identifier.
+     * 
+     * <p>
+     * Example (based on conventions):
+     * </p>
+     * 
+     * <pre>
+     * /path/to/ig/root/[[resources/]][[patient/]]Patient-123.json
+     * </pre>
+     * 
+     * - The presence of `resources/` depends on
+     * `CategoryLayout.DIRECTORY_PER_CATEGORY`.
+     * - The presence of `patient/` depends on `FhirTypeLayout.DIRECTORY_PER_TYPE`.
+     * - The filename format depends on `FilenameMode`:
+     * - `TYPE_AND_ID`: `Patient-123.json`
+     * - `ID_ONLY`: `123.json`
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param <I>          The type of the resource identifier.
+     * @param resourceType The class representing the FHIR resource type.
+     * @param id           The identifier of the resource.
+     * @return The {@code Path} representing the preferred location for the
+     *         resource.
+     */
     protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(Class<T> resourceType, I id) {
         var directory = directoryForResource(resourceType);
         var fileName = fileNameForResource(
@@ -152,9 +217,17 @@ public class IgRepository implements Repository {
         return directory.resolve(fileName);
     }
 
-    // Based on the current IG layout, there are a few potential path for a resource
-    // For example, a resource could be in the "external" directory, or it may be json or xml.
-    <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(Class<T> resourceType, I id) {
+    /**
+     * Generates all possible file paths where a resource might be found.
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param <I>          The type of the resource identifier.
+     * @param resourceType The class representing the FHIR resource type.
+     * @param id           The identifier of the resource.
+     * @return A list of potential paths for the resource.
+     */
+    <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(
+            Class<T> resourceType, I id) {
 
         var potentialDirectories = new ArrayList<Path>();
         var directory = directoryForResource(resourceType);
@@ -168,16 +241,26 @@ public class IgRepository implements Repository {
 
         var potentialPaths = new ArrayList<Path>();
 
-        // Cross product of directories and encodings gives us all potential paths
-        for (var d : potentialDirectories) {
-            for (var e : FILE_EXTENSIONS.keySet()) {
-                potentialPaths.add(d.resolve(fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), e)));
+        for (var dir : potentialDirectories) {
+            for (var encoding : FILE_EXTENSIONS.keySet()) {
+                potentialPaths.add(
+                        dir.resolve(fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), encoding)));
             }
         }
 
         return potentialPaths;
     }
 
+    /**
+     * Constructs the filename based on conventions:
+     * - ID_ONLY: "123.json"
+     * - TYPE_AND_ID: "Patient-123.json"
+     *
+     * @param resourceType The resource type (e.g., "Patient").
+     * @param resourceId   The resource ID (e.g., "123").
+     * @param encoding     The encoding (e.g., JSON).
+     * @return The filename.
+     */
     protected String fileNameForResource(String resourceType, String resourceId, EncodingEnum encoding) {
         var name = resourceId + "." + FILE_EXTENSIONS.get(encoding);
         if (FilenameMode.ID_ONLY.equals(conventions.filenameMode())) {
@@ -187,6 +270,17 @@ public class IgRepository implements Repository {
         }
     }
 
+    /**
+     * Determines the directory path for a resource category.
+     *
+     * - `CategoryLayout.FLAT`: Returns the root directory.
+     * - `CategoryLayout.DIRECTORY_PER_CATEGORY`: Returns the category-specific
+     * subdirectory (e.g., `/resources/`).
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param resourceType The class representing the FHIR resource type.
+     * @return The path representing the directory for the resource category.
+     */
     protected <T extends IBaseResource> Path directoryForCategory(Class<T> resourceType) {
         if (this.conventions.categoryLayout() == CategoryLayout.FLAT) {
             return this.root;
@@ -197,6 +291,28 @@ public class IgRepository implements Repository {
         return root.resolve(directory);
     }
 
+    /**
+     * Determines the directory path for a resource type.
+     *
+     * - If `FhirTypeLayout.FLAT`, returns the base directory (could be root or
+     * category directory).
+     * - If `FhirTypeLayout.DIRECTORY_PER_TYPE`, returns the type-specific
+     * subdirectory within the base directory.
+     *
+     * <p>
+     * Example (based on `FhirTypeLayout`):
+     * </p>
+     * 
+     * <pre>
+     * /path/to/ig/root/[[patient/]]
+     * </pre>
+     *
+     * - `[[patient/]]` is present if `FhirTypeLayout.DIRECTORY_PER_TYPE` is used.
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param resourceType The class representing the FHIR resource type.
+     * @return The path representing the directory for the resource type.
+     */
     protected <T extends IBaseResource> Path directoryForResource(Class<T> resourceType) {
         var directory = directoryForCategory(resourceType);
         if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
@@ -206,6 +322,13 @@ public class IgRepository implements Repository {
         return directory.resolve(resourceType.getSimpleName().toLowerCase());
     }
 
+    /**
+     * Reads a resource from the given file path.
+     *
+     * @param path The path to the resource file.
+     * @return An {@code Optional} containing the resource if found; otherwise,
+     *         empty.
+     */
     protected Optional<IBaseResource> readResource(Path path) {
         var file = path.toFile();
         if (!file.exists()) {
@@ -214,7 +337,6 @@ public class IgRepository implements Repository {
 
         var extension = fileExtension(path);
         if (extension == null) {
-            // No file extension means not a possible resource file
             return Optional.empty();
         }
 
@@ -223,9 +345,8 @@ public class IgRepository implements Repository {
         try (var stream = new FileInputStream(file)) {
             var resource = parserForEncoding(fhirContext, encoding).parseResource(stream);
 
-            // Attach metadata to the resource
             resource.setUserData(SOURCE_PATH_TAG, path);
-            CqlContent.loadCqlContent(resource, path.getParent()); // Use the directory as the root, not the filename
+            CqlContent.loadCqlContent(resource, path.getParent());
 
             return Optional.of(resource);
         } catch (FileNotFoundException e) {
@@ -247,6 +368,13 @@ public class IgRepository implements Repository {
         return FILE_EXTENSIONS.inverse().get(extension);
     }
 
+    /**
+     * Writes a resource to the specified file path.
+     *
+     * @param <T>      The type of the FHIR resource.
+     * @param resource The resource to write.
+     * @param path     The file path to write the resource to.
+     */
     protected <T extends IBaseResource> void writeResource(T resource, Path path) {
         try {
             if (path.getParent() != null) {
@@ -298,6 +426,23 @@ public class IgRepository implements Repository {
         return path.getFileName().toString().toLowerCase().startsWith(prefix.toLowerCase() + "-");
     }
 
+    /**
+     * Reads all resources of a given type from the directory.
+     *
+     * Directory structure depends on conventions:
+     * - Flat layout: resources are located in the root directory (e.g.,
+     * "/path/to/ig/root/")
+     * - Directory for category: resources are in subdirectories (e.g.,
+     * "/resources/patient/")
+     *
+     * Filenames depend on conventions:
+     * - ID_ONLY: "123.json"
+     * - TYPE_AND_ID: "Patient-123.json"
+     *
+     * @param <T>           The resource type.
+     * @param resourceClass The resource class.
+     * @return Map of resource IDs to resources.
+     */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(Class<T> resourceClass) {
         var path = this.directoryForResource(resourceClass);
         var resources = new HashMap<IIdType, T>();
@@ -323,13 +468,13 @@ public class IgRepository implements Repository {
                     .map(Optional::get)
                     .collect(Collectors.toList());
 
-            for (var r : recursiveResources) {
-                if (!r.fhirType().equals(resourceClass.getSimpleName())) {
+            for (var resource : recursiveResources) {
+                if (!resource.fhirType().equals(resourceClass.getSimpleName())) {
                     continue;
                 }
 
-                T t = validateResource(resourceClass, r, r.getIdElement());
-                resources.put(r.getIdElement().toUnqualifiedVersionless(), t);
+                T validatedResource = validateResource(resourceClass, resource, resource.getIdElement());
+                resources.put(resource.getIdElement().toUnqualifiedVersionless(), validatedResource);
             }
         } catch (IOException e) {
             throw new UnclassifiedServerFailureException(
@@ -344,11 +489,38 @@ public class IgRepository implements Repository {
         return this.fhirContext;
     }
 
+    /**
+     * Reads a resource from the repository.
+     *
+     * Locates files like:
+     * - ID_ONLY: "123.json" (in the appropriate directory based on layout)
+     * - TYPE_AND_ID: "Patient-123.json"
+     *
+     * Utilizes cache to improve performance.
+     *
+     * <p>
+     * <strong>Example Usage:</strong>
+     * </p>
+     *
+     * <pre>{@code
+     * IIdType resourceId = new IdType("Patient", "12345");
+     * Map<String, String> headers = new HashMap<>();
+     * Patient patient = repository.read(Patient.class, resourceId, headers);
+     * }</pre>
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param <I>          The type of the resource identifier.
+     * @param resourceType The class representing the FHIR resource type.
+     * @param id           The identifier of the resource.
+     * @param headers      Additional headers (not used in this implementation).
+     * @return The resource if found.
+     * @throws ResourceNotFoundException if the resource is not found.
+     */
     @Override
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
-        requireNonNull(resourceType, "resourceType can not be null");
-        requireNonNull(id, "id can not be null");
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(id, "id cannot be null");
 
         var paths = this.potentialPathsForResource(resourceType, id);
         for (var path : paths) {
@@ -358,18 +530,39 @@ public class IgRepository implements Repository {
 
             var optionalResource = cachedReadResource(path);
             if (optionalResource.isPresent()) {
-                var r = optionalResource.get();
-                return validateResource(resourceType, r, id);
+                var resource = optionalResource.get();
+                return validateResource(resourceType, resource, id);
             }
         }
 
         throw new ResourceNotFoundException(id);
     }
 
+    /**
+     * Creates a new resource in the repository.
+     *
+     * <p>
+     * <strong>Example Usage:</strong>
+     * </p>
+     *
+     * <pre>{@code
+     * Patient newPatient = new Patient();
+     * newPatient.setId("67890");
+     * newPatient.addName().setFamily("Doe").addGiven("John");
+     * Map<String, String> headers = new HashMap<>();
+     * MethodOutcome outcome = repository.create(newPatient, headers);
+     * }</pre>
+     *
+     * @param <T>      The type of the FHIR resource.
+     * @param resource The resource to create.
+     * @param headers  Additional headers (not used in this implementation).
+     * @return A {@link MethodOutcome} containing the outcome of the create
+     *         operation.
+     */
     @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        requireNonNull(resource, "resource can not be null");
-        requireNonNull(resource.getIdElement().getIdPart(), "resource id can not be null");
+        requireNonNull(resource, "resource cannot be null");
+        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
         var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
         writeResource(resource, path);
@@ -377,42 +570,62 @@ public class IgRepository implements Repository {
         return new MethodOutcome(resource.getIdElement(), true);
     }
 
-    private <T extends IBaseResource> T validateResource(Class<T> resourceType, IBaseResource r, IIdType id) {
+    private <T extends IBaseResource> T validateResource(Class<T> resourceType, IBaseResource resource, IIdType id) {
         // All freshly read resources are tagged with their source path
-        var path = (Path) r.getUserData(SOURCE_PATH_TAG);
+        var path = (Path) resource.getUserData(SOURCE_PATH_TAG);
 
-        if (!resourceType.getSimpleName().equals(r.fhirType())) {
+        if (!resourceType.getSimpleName().equals(resource.fhirType())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead.",
-                    resourceType.getSimpleName(), path, r.fhirType()));
+                    resourceType.getSimpleName(), path, resource.fhirType()));
         }
 
-        if (!r.getIdElement().hasIdPart()) {
+        if (!resource.getIdElement().hasIdPart()) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at path: %s. Found resource without an id instead.",
                     id.toUnqualifiedVersionless(), path));
         }
 
-        if (!id.getIdPart().equals(r.getIdElement().getIdPart())) {
+        if (!id.getIdPart().equals(resource.getIdElement().getIdPart())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead.",
-                    id.getIdPart(), path, r.getIdElement().getIdPart()));
+                    id.getIdPart(), path, resource.getIdElement().getIdPart()));
         }
 
         if (id.hasVersionIdPart()
-                && !id.getVersionIdPart().equals(r.getIdElement().getVersionIdPart())) {
+                && !id.getVersionIdPart().equals(resource.getIdElement().getVersionIdPart())) {
             throw new ResourceNotFoundException(String.format(
                     "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead.",
-                    id.getVersionIdPart(), path, r.getIdElement().getVersionIdPart()));
+                    id.getVersionIdPart(), path, resource.getIdElement().getVersionIdPart()));
         }
 
-        return resourceType.cast(r);
+        return resourceType.cast(resource);
     }
 
+    /**
+     * Updates an existing resource in the repository.
+     *
+     * <p>
+     * <strong>Example Usage:</strong>
+     * </p>
+     *
+     * <pre>{@code
+     * Map<String, String> headers = new HashMap<>();
+     * Patient existingPatient = repository.read(Patient.class, new IdType("Patient", "12345"), headers);
+     * existingPatient.addAddress().setCity("New City");
+     * MethodOutcome updateOutcome = repository.update(existingPatient, headers);
+     * }</pre>
+     *
+     * @param <T>      The type of the FHIR resource.
+     * @param resource The resource to update.
+     * @param headers  Additional headers (not used in this implementation).
+     * @return A {@link MethodOutcome} containing the outcome of the update
+     *         operation.
+     */
     @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        requireNonNull(resource, "resource can not be null");
-        requireNonNull(resource.getIdElement().getIdPart(), "resource id can not be null");
+        requireNonNull(resource, "resource cannot be null");
+        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
         var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
         var actual = (Path) resource.getUserData(SOURCE_PATH_TAG);
@@ -420,18 +633,19 @@ public class IgRepository implements Repository {
             actual = preferred;
         }
 
-        if (isExternaPath(actual)) {
+        if (isExternalPath(actual)) {
             throw new ForbiddenOperationException(String.format(
                     "Unable to create or update: %s. Resource is marked as external, and external resources are read-only.",
                     resource.getIdElement().toUnqualifiedVersionless()));
         }
 
-        // If the preferred path and the actual path are different, and the encoding behavior is set to overwrite,
+        // If the preferred path and the actual path are different, and the encoding
+        // behavior is set to overwrite,
         // move the resource to the preferred path and delete the old one.
         if (!preferred.equals(actual)
                 && this.encodingBehavior.preserveEncoding() == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
             try {
-                java.nio.file.Files.deleteIfExists(actual);
+                Files.deleteIfExists(actual);
             } catch (IOException e) {
                 throw new UnclassifiedServerFailureException(
                         500, String.format("Couldn't change encoding for %s", actual));
@@ -445,11 +659,32 @@ public class IgRepository implements Repository {
         return new MethodOutcome(resource.getIdElement(), false);
     }
 
+    /**
+     * Deletes a resource from the repository.
+     *
+     * <p>
+     * <strong>Example Usage:</strong>
+     * </p>
+     *
+     * <pre>{@code
+     * IIdType deleteId = new IdType("Patient", "67890");
+     * Map<String, String> headers = new HashMap<>();
+     * MethodOutcome deleteOutcome = repository.delete(Patient.class, deleteId, headers);
+     * }</pre>
+     *
+     * @param <T>          The type of the FHIR resource.
+     * @param <I>          The type of the resource identifier.
+     * @param resourceType The class representing the FHIR resource type.
+     * @param id           The identifier of the resource to delete.
+     * @param headers      Additional headers (not used in this implementation).
+     * @return A {@link MethodOutcome} containing the outcome of the delete
+     *         operation.
+     */
     @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
-        requireNonNull(resourceType, "resourceType can not be null");
-        requireNonNull(id, "id can not be null");
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(id, "id cannot be null");
 
         var paths = this.potentialPathsForResource(resourceType, id);
 
@@ -472,6 +707,28 @@ public class IgRepository implements Repository {
         return new MethodOutcome(id);
     }
 
+    /**
+     * Searches for resources matching the given search parameters.
+     *
+     * <p>
+     * <strong>Example Usage:</strong>
+     * </p>
+     *
+     * <pre>{@code
+     * Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
+     * searchParameters.put("family", Arrays.asList(new StringParam("Doe")));
+     * Map<String, String> headers = new HashMap<>();
+     * IBaseBundle bundle = repository.search(Bundle.class, Patient.class, searchParameters, headers);
+     * }</pre>
+     *
+     * @param <B>              The type of the bundle to return.
+     * @param <T>              The type of the FHIR resource.
+     * @param bundleType       The class representing the bundle type.
+     * @param resourceType     The class representing the FHIR resource type.
+     * @param searchParameters The search parameters.
+     * @param headers          Additional headers (not used in this implementation).
+     * @return A bundle containing the matching resources.
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <B extends IBaseBundle, T extends IBaseResource> B search(
@@ -501,9 +758,9 @@ public class IgRepository implements Repository {
                 // indexed by. If an id has a version it won't match. Need apples-to-apples Id
                 // types
                 var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
-                var r = resourceIdMap.get(id);
-                if (r != null) {
-                    idResources.add(r);
+                var resource = resourceIdMap.get(id);
+                if (resource != null) {
+                    idResources.add(resource);
                 }
             }
 
@@ -533,12 +790,39 @@ public class IgRepository implements Repository {
         return true;
     }
 
+    /**
+     * Invokes a FHIR operation on a resource type.
+     *
+     * @param <R>          The type of the resource returned by the operation.
+     * @param <P>          The type of the parameters for the operation.
+     * @param <T>          The type of the resource on which the operation is
+     *                     invoked.
+     * @param resourceType The class representing the FHIR resource type.
+     * @param name         The name of the operation.
+     * @param parameters   The operation parameters.
+     * @param returnType   The expected return type.
+     * @param headers      Additional headers (not used in this implementation).
+     * @return The result of the operation.
+     */
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         return invokeOperation(null, resourceType.getSimpleName(), name, parameters);
     }
 
+    /**
+     * Invokes a FHIR operation on a specific resource instance.
+     *
+     * @param <R>        The type of the resource returned by the operation.
+     * @param <P>        The type of the parameters for the operation.
+     * @param <I>        The type of the resource identifier.
+     * @param id         The identifier of the resource.
+     * @param name       The name of the operation.
+     * @param parameters The operation parameters.
+     * @param returnType The expected return type.
+     * @param headers    Additional headers (not used in this implementation).
+     * @return The result of the operation.
+     */
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
@@ -548,7 +832,7 @@ public class IgRepository implements Repository {
     protected <R extends IBaseResource> R invokeOperation(
             IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
         if (operationProvider == null) {
-            throw new IllegalArgumentException("No operation provider found.  Unable to invoke operations.");
+            throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
     }

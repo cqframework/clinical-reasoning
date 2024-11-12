@@ -464,7 +464,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent reportGroup, MeasureDef measureDef, GroupDef groupDef) {
         // if already set on Measure, don't set on groups too
         if (!measureDef.useMeasureImpNotation()) {
-            if (groupDef.isPositiveImprovementNotation()) {
+            if (groupDef.isIncreaseImprovementNotation()) {
                 reportGroup.addExtension(
                         MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
                         new CodeableConcept(new Coding(

@@ -12,7 +12,8 @@ public class GroupDef {
     private final List<StratifierDef> stratifiers;
     private final List<PopulationDef> populations;
     private final MeasureScoring measureScoring;
-    private final boolean isPositiveImprovementNotation;
+    private final boolean useGroupDefImprovementNotation;
+    private final boolean isIncreaseImprovementNotation;
 
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
@@ -22,14 +23,16 @@ public class GroupDef {
             List<StratifierDef> stratifiers,
             List<PopulationDef> populations,
             MeasureScoring measureScoring,
-            boolean isPositiveImprovementNotation) {
+            boolean isIncreaseImprovementNotation,
+            boolean useGroupDefImprovementNotation) {
         this.id = id;
         this.code = code;
         this.stratifiers = stratifiers;
         this.populations = populations;
         this.populationIndex = index(populations);
         this.measureScoring = measureScoring;
-        this.isPositiveImprovementNotation = isPositiveImprovementNotation;
+        this.isIncreaseImprovementNotation = isIncreaseImprovementNotation;
+        this.useGroupDefImprovementNotation = useGroupDefImprovementNotation;
     }
 
     public String id() {
@@ -73,7 +76,11 @@ public class GroupDef {
         return this.measureScoring;
     }
 
-    public boolean isPositiveImprovementNotation() {
-        return this.isPositiveImprovementNotation;
+    public boolean isIncreaseImprovementNotation() {
+        return this.isIncreaseImprovementNotation;
+    }
+
+    public boolean useGroupDefImprovementNotation() {
+        return this.useGroupDefImprovementNotation;
     }
 }

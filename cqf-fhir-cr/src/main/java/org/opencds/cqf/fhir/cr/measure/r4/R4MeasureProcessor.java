@@ -59,11 +59,16 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters) {
 
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
+        var evalType = MeasureEvalType.fromCode(
+                        // validate in R4 accepted values
+                        R4MeasureEvalType.fromCode(reportType)
+                                .orElse(
+                                        // map null reportType parameter to evalType if no subject parameter is provided
+                                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                                                ? R4MeasureEvalType.POPULATION
+                                                : R4MeasureEvalType.SUBJECT)
+                                .toCode())
+                .orElse(MeasureEvalType.SUBJECT);
 
         var actualRepo = this.repository;
         if (additionalData != null) {

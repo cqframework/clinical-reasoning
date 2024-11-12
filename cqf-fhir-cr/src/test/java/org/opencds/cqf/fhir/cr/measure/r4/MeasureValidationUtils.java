@@ -25,7 +25,7 @@ public class MeasureValidationUtils {
 
     protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, BigDecimal score) {
         assertTrue(group.hasMeasureScore(), String.format("group \"%s\" does not have a score", group.getId()));
-        assertEquals(group.getMeasureScore().getValue(), score);
+        assertEquals(score, group.getMeasureScore().getValue());
     }
 
     protected static void validateGroup(
@@ -101,7 +101,7 @@ public class MeasureValidationUtils {
 
     protected static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, BigDecimal score) {
         assertTrue(stratum.hasMeasureScore(), String.format("stratum \"%s\" does not have a score", stratum.getId()));
-        assertEquals(stratum.getMeasureScore().getValue(), score);
+        assertEquals(score, stratum.getMeasureScore().getValue());
     }
 
     protected static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, String score) {

@@ -78,8 +78,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-//        log.info("6723: START evaluate: measureIds: {}, subject: {}, reportType: {}", measureId, subject, reportType);
-
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
@@ -97,14 +95,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         var evalType = MeasureEvalType.fromCode(reportType)
                 .orElse(subject == null || subject.isEmpty() ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT);
-
-//        log.info("6723: ************************************");
-//        log.info("6723: ************************************");
-//        log.info("6723: ************************************");
-//        log.info("6723: R4MultiMeasureService: reportType: {}, subject: {}, evalType: {}", reportType, subject, evalType);
-//        log.info("6723: ************************************");
-//        log.info("6723: ************************************");
-//        log.info("6723: ************************************");
 
         // get subjects
         var subjects = getSubjects(subjectProvider, subject, evalType);

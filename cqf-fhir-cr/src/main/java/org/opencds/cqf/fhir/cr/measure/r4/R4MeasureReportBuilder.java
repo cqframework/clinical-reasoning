@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTAL
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUBJECT_REPORTS;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
@@ -68,11 +67,8 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
-    private static final Logger logger = LoggerFactory.getLogger(R4MeasureDefBuilder.class);
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
@@ -224,8 +220,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Interval measurementPeriod,
             List<String> subjectIds) {
 
-        logger.info("6723: measureReportType: {}", measureReportType);
-
         var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
         var bc = new BuilderContext(measure, measureDef, report);
@@ -309,7 +303,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         .findFirst()
                         .orElse(null)
                 != null) {
-            // dateofNonCompliance is another population not calculated
+            // dateOfNonCompliance is another population not calculated
             groupDefSizeDiff = 3;
         }
 
@@ -346,17 +340,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var reportPop = reportGroup.addPopulation();
             buildPopulation(bc, measurePop, reportPop, defPop);
         }
-
-        // LUKETODO:  is there a way to do subjectReport Lists here, or do we not have enough info?
-        // LUKETODO:  how to pass down List reference here?
-//        if (! bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-//            reportGroup.addExtension()
-//                .setUrl(EXT_SUBJECT_REPORTS)
-//                // LUKETODO:  where do I find the reference?
-//                .setValue(new Reference("List/meaurereport-groupid-populationid"));
-//
-////            getReportPopulation(reportGroup, )
-//        }
 
         // add extension to group for totalDenominator and totalNumerator
         if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
@@ -556,7 +539,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         if (!intersection.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
-            ListResource popSubjectList = createIdList(UUID.randomUUID().toString(), intersection);
+            ListResource popSubjectList = this.createIdList(UUID.randomUUID().toString(), intersection);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
@@ -594,30 +577,23 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // subjectResult set defined by basis of Measure
         Set<String> populationSet;
         if (bc.measureDef.isBooleanBasis()) {
-            // LUKETODO: for the first measureId, this is a Boolean basis, so we have an empty populationSet, therefore, no subjectResults
             populationSet = populationDef.getSubjects().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toSet());
-            logger.info("6723: BOOLEAN basis: {} populationSet: {}", bc.report().getSubject().getReference(), populationSet);
         } else {
             populationSet = populationDef.getResources().stream()
                     .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
-            logger.info("6723: NON-BOOLEAN basis: {} populationSet: {}", bc.report().getSubject().getReference(), populationSet);
         }
 
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
-        // LUKETODO:  this is triggered from STEP2 and adds ListResources!!!!
-        // LUKETODO:  write a smaller DqmR4IT that has SUBJECTLIST but also populationSet greater than ZERO
-        // LUKETODO:  probably need a MeasureReport where the Group matches the Populations.... where to find that?
         // Report Type behavior
         if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST
                 && !populationSet.isEmpty()) {
             ListResource subjectList = createIdList(UUID.randomUUID().toString(), populationSet);
             bc.addContained(subjectList);
-            // LUKETODO:  what's with? LenientErrorHandler.java:207 - Resource has invalid reference: #438f3c7b-33e1-4400-8492-186e7f0441ea
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
 
@@ -636,18 +612,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    // LUKETODO:  is this advisable?
-    public static ListResource createList(String id) {
+    protected ListResource createList(String id) {
         ListResource list = new ListResource();
         list.setId(id);
         return list;
     }
 
-    public static ListResource createIdList(String id, Collection<String> ids) {
-        return createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
+    protected ListResource createIdList(String id, Collection<String> ids) {
+        return this.createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
     }
 
-    public static ListResource createReferenceList(String id, Collection<Reference> references) {
+    protected ListResource createReferenceList(String id, Collection<Reference> references) {
         ListResource referenceList = createList(id);
         for (Reference reference : references) {
             referenceList.addEntry().setItem(reference);

@@ -53,7 +53,7 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * <p>
  * <strong>Directory Structure Overview (based on conventions):</strong>
  * </p>
- * 
+ *
  * <pre>
  * /path/to/ig/root/          (CategoryLayout.FLAT)
  * ├── Patient-001.json
@@ -105,7 +105,8 @@ public class IgRepository implements Repository {
 
     // Directory names
     static final String EXTERNAL_DIRECTORY = "external";
-    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<ResourceCategory, String>()
+    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<
+                    ResourceCategory, String>()
             .put(ResourceCategory.CONTENT, "resources")
             .put(ResourceCategory.DATA, "tests")
             .put(ResourceCategory.TERMINOLOGY, "vocabulary")
@@ -187,15 +188,15 @@ public class IgRepository implements Repository {
     /**
      * Determines the preferred file system path for storing or retrieving a FHIR
      * resource based on its resource type and identifier.
-     * 
+     *
      * <p>
      * Example (based on conventions):
      * </p>
-     * 
+     *
      * <pre>
      * /path/to/ig/root/[[resources/]][[patient/]]Patient-123.json
      * </pre>
-     * 
+     *
      * - The presence of `resources/` depends on
      * `CategoryLayout.DIRECTORY_PER_CATEGORY`.
      * - The presence of `patient/` depends on `FhirTypeLayout.DIRECTORY_PER_TYPE`.
@@ -226,8 +227,7 @@ public class IgRepository implements Repository {
      * @param id           The identifier of the resource.
      * @return A list of potential paths for the resource.
      */
-    <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(
-            Class<T> resourceType, I id) {
+    <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(Class<T> resourceType, I id) {
 
         var potentialDirectories = new ArrayList<Path>();
         var directory = directoryForResource(resourceType);
@@ -302,7 +302,7 @@ public class IgRepository implements Repository {
      * <p>
      * Example (based on `FhirTypeLayout`):
      * </p>
-     * 
+     *
      * <pre>
      * /path/to/ig/root/[[patient/]]
      * </pre>

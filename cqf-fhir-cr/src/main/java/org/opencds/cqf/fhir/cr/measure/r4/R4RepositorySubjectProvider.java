@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.Group.GroupType;
@@ -18,16 +19,21 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluator;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
+
     @Override
     public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
-        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
+        return getSubjects(repository, measureEvalType, List.of(subjectId));
     }
 
     @Override
@@ -48,7 +54,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         List<String> subjects = new ArrayList<>();
         subjectIds.forEach(subjectId -> {
             // add resource reference if missing
-            if (subjectId.indexOf("/") == -1) {
+            if (!subjectId.contains("/")) {
                 subjectId = "Patient/".concat(subjectId);
             }
             // Single Patient
@@ -91,7 +97,9 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                         addPractitionerSubjectIds(practitioner, repository, subjects);
                     }
                 }
-
+                // LUKETODO: can we have a Group with Organizations?
+            } else if (subjectId.startsWith("Organization")) {
+                subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
             } else {
                 throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
             }
@@ -115,7 +123,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
         map.put(
                 "general-practitioner",
-                Collections.singletonList(new ReferenceParam(
+                List.of(new ReferenceParam(
                         practitioner.startsWith("Practitioner/") ? practitioner : "Practitioner/" + practitioner)));
 
         var bundle = repository.search(Bundle.class, Patient.class, map);
@@ -127,5 +135,50 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                     + patient.getIdElement().getIdPart();
             patients.add(refString);
         }
+    }
+
+    private List<String> getOrganizationSubjectIds(String organization, Repository repository) {
+
+        return Stream.concat(
+                        getManagingOrganizationSubjectIds(organization, repository),
+                        getPartOfSubjectIds(organization, repository))
+                .toList();
+    }
+
+    private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {
+        final Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+
+        searchParams.put("organization", Collections.singletonList(new ReferenceParam(organization)));
+
+        var bundle = repository.search(Bundle.class, Patient.class, searchParams);
+
+        var bundleEntries = bundle.getEntry();
+
+        if (bundleEntries == null || bundleEntries.isEmpty()) {
+            return Stream.empty();
+        }
+
+        return bundleEntries.stream()
+                .map(BundleEntryComponent::getResource)
+                .map(idElement -> idElement.getResourceType() + "/" + idElement.getIdPart());
+    }
+
+    private Stream<String> getPartOfSubjectIds(String organization, Repository repository) {
+
+        final Map<String, List<IQueryParameterType>> searchParam = new HashMap<>();
+
+        searchParam.put(
+                "organization",
+                Collections.singletonList(new ReferenceParam("organization", organization).setChain("partof")));
+
+        return repository.search(Bundle.class, Patient.class, searchParam).getEntry().stream()
+                .map(BundleEntryComponent::getResource)
+                .filter(Patient.class::isInstance)
+                .map(Patient.class::cast)
+                // LUKETODO: do we keep this limitation or not?  if so, test for it
+                // TODO: JM, address next link if populated in future interation of feature.
+                // if results expand beyond paging limit of a bundle, a warning will pop to the user.
+                // This is unlikely to ever be an issue in a real deployment, but should be addressed at some point.
+                .map(Patient::getIdPart);
     }
 }

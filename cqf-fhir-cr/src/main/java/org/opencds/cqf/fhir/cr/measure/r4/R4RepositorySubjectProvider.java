@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -142,7 +143,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return Stream.concat(
                         getManagingOrganizationSubjectIds(organization, repository),
                         getPartOfSubjectIds(organization, repository))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {

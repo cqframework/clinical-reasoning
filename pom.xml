@@ -9,7 +9,7 @@
     <version>3.15.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
-    <description>FHIR Clinical Reasoning Im mentations</description>
+    <description>FHIR Clinical Reasoning Implentations</description>
     <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
 

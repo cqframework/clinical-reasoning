@@ -63,15 +63,14 @@ class R4RepositorySubjectProviderTest {
                 List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
                 Stream.of(PAT_ID_1, PAT_ID_2)
                         .map(id -> resourcify(ResourceType.Patient, id))
-                        .collect(Collectors.toUnmodifiableList())));
+                        .collect(Collectors.toList())));
     }
 
     @ParameterizedTest
     @MethodSource("getSubjectsParams")
     void getSubjects(MeasureEvalType measureEvalType, List<String> subjectIds, List<String> expectedSubjects) {
-        final List<String> actualSubjects = testSubject
-                .getSubjects(repository, measureEvalType, subjectIds)
-                .collect(Collectors.toUnmodifiableList());
+        final List<String> actualSubjects =
+                testSubject.getSubjects(repository, measureEvalType, subjectIds).collect(Collectors.toList());
 
         assertThat(actualSubjects, equalTo(expectedSubjects));
     }

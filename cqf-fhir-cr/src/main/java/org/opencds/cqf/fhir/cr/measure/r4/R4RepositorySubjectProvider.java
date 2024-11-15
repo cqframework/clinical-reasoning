@@ -143,7 +143,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return Stream.concat(
                         getManagingOrganizationSubjectIds(organization, repository),
                         getPartOfSubjectIds(organization, repository))
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
     }
 
     private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {

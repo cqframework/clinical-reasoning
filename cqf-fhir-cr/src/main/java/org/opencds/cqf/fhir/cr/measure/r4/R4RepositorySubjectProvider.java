@@ -34,7 +34,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
     @Override
     public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
-        return getSubjects(repository, measureEvalType, List.of(subjectId));
+        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
         map.put(
                 "general-practitioner",
-                List.of(new ReferenceParam(
+                Collections.singletonList(new ReferenceParam(
                         practitioner.startsWith("Practitioner/") ? practitioner : "Practitioner/" + practitioner)));
 
         var bundle = repository.search(Bundle.class, Patient.class, map);

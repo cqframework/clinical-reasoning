@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,7 +61,7 @@ class R4RepositorySubjectProviderTest {
     public static Stream<Arguments> getSubjectsParams() {
         return Stream.of(Arguments.of(
                 MeasureEvalType.SUBJECT,
-                List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                Collections.singletonList(resourcify(ResourceType.Organization, ORG_ID_1)),
                 Stream.of(PAT_ID_1, PAT_ID_2)
                         .map(id -> resourcify(ResourceType.Patient, id))
                         .collect(Collectors.toList())));

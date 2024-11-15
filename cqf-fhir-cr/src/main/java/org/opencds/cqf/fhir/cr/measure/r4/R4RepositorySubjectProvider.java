@@ -18,9 +18,9 @@ import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluator;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(R4RepositorySubjectProvider.class);
 
     @Override
     public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
@@ -101,6 +101,10 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 // LUKETODO: can we have a Group with Organizations?
             } else if (subjectId.startsWith("Organization")) {
                 subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
+
+                final List<String> partOfOrgIds = getPartOfOrgIds(subjectId, repository);
+
+                logger.info("partOfOrgIds: {}", partOfOrgIds);
             } else {
                 throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
             }
@@ -180,6 +184,30 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 // TODO: JM, address next link if populated in future interation of feature.
                 // if results expand beyond paging limit of a bundle, a warning will pop to the user.
                 // This is unlikely to ever be an issue in a real deployment, but should be addressed at some point.
-                .map(Patient::getIdPart);
+                .map(Patient::getIdElement)
+                .map(idElement -> String.format("%s/%s", ResourceType.Patient, idElement.getIdPart()));
+    }
+
+    private List<String> getPartOfOrgIds(String organization, Repository repository) {
+        return null;
+        //        final Map<String, List<IQueryParameterType>> searchParam = new HashMap<>();
+        //
+        ////        searchParam.put("partof", Collections.singletonList(new ReferenceParam(organization)));
+        //
+        //        searchParam.put("partof", Collections.singletonList(new ReferenceAndListParam().addValue(new
+        // ReferenceOrListParam().add(new ReferenceParam().setValue(organization)))));
+        //
+        //        return repository.search(Bundle.class, Organization.class, searchParam).getEntry().stream()
+        //            .map(BundleEntryComponent::getResource)
+        //            .filter(Patient.class::isInstance)
+        //            .map(Patient.class::cast)
+        //            // LUKETODO: do we keep this limitation or not?  if so, test for it
+        //            // TODO: JM, address next link if populated in future interation of feature.
+        //            // if results expand beyond paging limit of a bundle, a warning will pop to the user.
+        //            // This is unlikely to ever be an issue in a real deployment, but should be addressed at some
+        // point.
+        //            .map(Patient::getIdElement)
+        //            .map(idElement -> String.format("%s/%s", ResourceType.Patient, idElement.getIdPart()))
+        //            .collect(Collectors.toList());
     }
 }

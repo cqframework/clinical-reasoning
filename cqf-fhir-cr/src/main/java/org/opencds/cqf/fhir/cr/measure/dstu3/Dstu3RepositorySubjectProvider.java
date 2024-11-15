@@ -72,4 +72,16 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
 
         return subjects.stream();
     }
+
+    @Override
+    public Stream<String> getSubjectsWithPartOf(Repository repository,
+            MeasureEvalType measureEvalType, String subjectId) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public Stream<String> getSubjectsWithPartOf(Repository repository,
+            MeasureEvalType measureEvalType, List<String> subjectIds) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }

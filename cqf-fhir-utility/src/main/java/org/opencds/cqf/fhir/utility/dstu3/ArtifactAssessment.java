@@ -736,15 +736,10 @@ public class ArtifactAssessment extends Basic {
         }
 
         public String getSystem() {
-            switch (this) {
-                case UNRESOLVED:
-                case NOTPERSUASIVE:
-                case PERSUASIVE:
-                case PERSUASIVEWITHMODIFICATION:
-                case NOTPERSUASIVEWITHMODIFICATION:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                default:
-                    return "?";
+            if (this.equals(NULL)) {
+                return "?";
+            } else {
+                return "http://hl7.org/fhir/artifactassessment-disposition";
             }
         }
 

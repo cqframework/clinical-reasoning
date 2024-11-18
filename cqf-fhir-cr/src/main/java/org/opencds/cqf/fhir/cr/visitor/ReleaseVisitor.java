@@ -304,7 +304,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     if (alreadyUpdatedDependencies.get(dependencyUrl) == null) {
                         continue;
                     }
-                    dependencyAdapter = IAdapterFactory.forFhirVersion(fhirVersion)
+                    dependencyAdapter = IAdapterFactory.forFhirVersion(fhirVersion())
                             .createKnowledgeArtifactAdapter(alreadyUpdatedDependencies.get(dependencyUrl));
                     String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
                     dependency.setReference(versionedReference);

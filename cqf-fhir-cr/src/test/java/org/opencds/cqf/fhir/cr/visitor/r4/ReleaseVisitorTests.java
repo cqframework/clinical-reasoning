@@ -246,7 +246,7 @@ class ReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor();
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         library.addRelatedArtifact().setResource("should-be-deleted-1").setType(RelatedArtifactType.DEPENDSON);

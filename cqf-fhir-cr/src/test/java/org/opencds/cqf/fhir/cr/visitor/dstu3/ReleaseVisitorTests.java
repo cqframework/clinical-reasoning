@@ -266,7 +266,7 @@ class ReleaseVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
-        var releaseVisitor = new ReleaseVisitor();
+        var releaseVisitor = new ReleaseVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         library.addRelatedArtifact()

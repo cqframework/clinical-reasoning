@@ -84,11 +84,11 @@ class WithdrawVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor();
+        IKnowledgeArtifactVisitor withdrawVisitor = new WithdrawVisitor(repo);
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(
-                PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, repo, params));
+        var exception =
+                assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, params));
         assertTrue(exception.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
     }
 }

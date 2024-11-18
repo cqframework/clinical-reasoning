@@ -60,9 +60,7 @@ public class CRMIReleaseVersionBehavior {
 
         public String getSystem() {
             switch (this) {
-                case DEFAULT:
-                case CHECK:
-                case FORCE:
+                case DEFAULT, CHECK, FORCE:
                     return "http://hl7.org/fhir/uv/crmi/ValueSet/crmi-release-version-behavior";
                 case NULL:
                     return null;

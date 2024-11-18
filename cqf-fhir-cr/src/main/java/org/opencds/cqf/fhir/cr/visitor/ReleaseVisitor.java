@@ -471,9 +471,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             case R5:
                 return org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.getReleaseVersion(
                         version, versionBehavior, existingVersion);
-            case DSTU2:
-            case DSTU2_1:
-            case DSTU2_HL7ORG:
+            case DSTU2, DSTU2_1, DSTU2_HL7ORG:
             default:
                 throw new UnprocessableEntityException(
                         String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));

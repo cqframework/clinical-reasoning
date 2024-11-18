@@ -311,10 +311,16 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
             // Step 2: update dependencies recursively
             for (var dependency : dependencies) {
                 IKnowledgeArtifactAdapter dependencyAdapter = null;
-                if (alreadyUpdatedDependencies.containsKey(Canonicals.getUrl(dependency.getReference()))) {
+                var dependencyUrl = Canonicals.getUrl(dependency.getReference());
+                if (dependencyUrl == null) {
+                    dependencyUrl = dependency.getReference();
+                }
+                if (alreadyUpdatedDependencies.containsKey(dependencyUrl)) {
+                    if (alreadyUpdatedDependencies.get(dependencyUrl) == null) {
+                        continue;
+                    }
                     dependencyAdapter = IAdapterFactory.forFhirVersion(fhirVersion)
-                            .createKnowledgeArtifactAdapter(
-                                    alreadyUpdatedDependencies.get(Canonicals.getUrl(dependency.getReference())));
+                            .createKnowledgeArtifactAdapter(alreadyUpdatedDependencies.get(dependencyUrl));
                     String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
                     dependency.setReference(versionedReference);
 
@@ -360,14 +366,14 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                     // if not available in expansion parameters then try to find the latest version and update the
                     // dependency
                     if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
+                        final var url = dependencyUrl;
                         maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
                                         dependency.getReference(), repository, "active")
                                 .map(adapter -> {
                                     String versionedReference =
                                             addVersionToReference(dependency.getReference(), adapter);
                                     dependency.setReference(versionedReference);
-                                    alreadyUpdatedDependencies.put(
-                                            Canonicals.getUrl(dependency.getReference()), adapter.get());
+                                    alreadyUpdatedDependencies.put(url, adapter.get());
                                     return adapter;
                                 });
                     } else {
@@ -388,6 +394,8 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                                 alreadyUpdatedDependencies,
                                 systemVersionExpansionParameters,
                                 canonicalVersionExpansionParameters);
+                    } else {
+                        alreadyUpdatedDependencies.put(dependencyUrl, null);
                     }
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact

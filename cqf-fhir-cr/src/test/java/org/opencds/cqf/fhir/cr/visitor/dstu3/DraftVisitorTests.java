@@ -129,7 +129,7 @@ class DraftVisitorTests {
                 .copy();
         assertTrue(baseLib.hasEffectivePeriod());
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(baseLib);
-        var draftVisitor = new DraftVisitor();
+        var draftVisitor = new DraftVisitor(repo);
         PlanDefinition planDef = repo.read(PlanDefinition.class, new IdType("PlanDefinition/us-ecr-specification"))
                 .copy();
         assertTrue(planDef.hasEffectivePeriod());

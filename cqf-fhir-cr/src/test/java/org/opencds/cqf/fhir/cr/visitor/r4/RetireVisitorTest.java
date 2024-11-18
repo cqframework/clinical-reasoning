@@ -84,11 +84,11 @@ class RetireVisitorTest {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor();
+        IKnowledgeArtifactVisitor retireVisitor = new RetireVisitor(repo);
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(
-                PreconditionFailedException.class, () -> libraryAdapter.accept(retireVisitor, repo, params));
+        var exception =
+                assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(retireVisitor, params));
         assertTrue(exception.getMessage().contains("Cannot retire an artifact that is not in active status"));
     }
 }

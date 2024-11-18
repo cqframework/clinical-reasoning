@@ -62,11 +62,11 @@ class DeleteVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
+        var deleteVisitor = new DeleteVisitor(repo);
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(
-                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        var exception =
+                assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, params));
         assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
     }
 
@@ -79,11 +79,11 @@ class DeleteVisitorTests {
         String version = "1.2.3-draft";
         Library library = repo.read(Library.class, new IdType(id)).copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IKnowledgeArtifactVisitor deleteVisitor = new DeleteVisitor();
+        var deleteVisitor = new DeleteVisitor(repo);
         Parameters params = parameters(part("version", version));
 
-        var exception = assertThrows(
-                PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, repo, params));
+        var exception =
+                assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(deleteVisitor, params));
         assertTrue(exception.getMessage().contains("Cannot delete an artifact that is not in retired status"));
     }
 }

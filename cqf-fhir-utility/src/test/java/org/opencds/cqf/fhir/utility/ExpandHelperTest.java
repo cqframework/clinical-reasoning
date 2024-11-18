@@ -17,12 +17,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opencds.cqf.fhir.api.Repository;
@@ -30,6 +33,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class ExpandHelperTest {
     private final IAdapterFactory factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
@@ -309,6 +313,38 @@ public class ExpandHelperTest {
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
             assertNull(filteredExpansionParams.getParameter(parameterUrl));
         });
+    }
+
+    @Test
+    void expandingAGrouperWhereChildHasExpansionButNoCompose() {
+        var fhirContext = FhirContext.forR4Cached();
+        var jsonParser = fhirContext.newJsonParser();
+        var bundle = (Bundle) jsonParser.parseResource(
+                ExpandHelperTest.class.getResourceAsStream("Bundle-grouper-expansion-repro.json"));
+        var repository = new InMemoryFhirRepository(fhirContext, bundle);
+        var expandHelper = new ExpandHelper(fhirContext, null);
+        var dxtc = repository.read(ValueSet.class, new IdType("ValueSet", "dxtc"));
+        var adapter = (ValueSetAdapter) factory.createKnowledgeArtifactAdapter(dxtc);
+        assertEquals(
+                19797,
+                ((ValueSetExpansionComponent) adapter.getExpansion())
+                        .getContains()
+                        .size());
+        var adapters = new ArrayList<ValueSetAdapter>();
+        var expandList = new ArrayList<String>();
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                adapters,
+                expandList,
+                repository,
+                new Date());
+        assertEquals(
+                28,
+                ((ValueSetExpansionComponent) adapter.getExpansion())
+                        .getContains()
+                        .size());
     }
 
     ValueSet createLeafWithUrl(String url) {

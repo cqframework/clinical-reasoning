@@ -114,12 +114,7 @@ public class ArtifactAssessment extends Basic {
 
         public String getSystem() {
             switch (this) {
-                case COMMENT:
-                case CLASSIFIER:
-                case RATING:
-                case CONTAINER:
-                case RESPONSE:
-                case CHANGEREQUEST:
+                case COMMENT, CLASSIFIER, RATING, CONTAINER, RESPONSE, CHANGEREQUEST:
                     return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
                 case NULL:
                     return null;
@@ -352,22 +347,22 @@ public class ArtifactAssessment extends Basic {
 
         public String getSystem() {
             switch (this) {
-                case HIGH:
-                case MODERATE:
-                case LOW:
-                case VERY_LOW:
-                case NO_CONCERN:
-                case SERIOUS_CONCERN:
-                case VERY_SERIOUS_CONCERN:
-                case EXTREMELY_SERIOUS_CONCERN:
-                case PRESENT:
-                case ABSENT:
-                case NO_CHANGE:
-                case DOWNCODE1:
-                case DOWNCODE2:
-                case DOWNCODE3:
-                case UPCODE1:
-                case UPCODE2:
+                case HIGH,
+                        MODERATE,
+                        LOW,
+                        VERY_LOW,
+                        NO_CONCERN,
+                        SERIOUS_CONCERN,
+                        VERY_SERIOUS_CONCERN,
+                        EXTREMELY_SERIOUS_CONCERN,
+                        PRESENT,
+                        ABSENT,
+                        NO_CHANGE,
+                        DOWNCODE1,
+                        DOWNCODE2,
+                        DOWNCODE3,
+                        UPCODE1,
+                        UPCODE2:
                     return "http://terminology.hl7.org/CodeSystem/certainty-rating";
                 case NULL:
                     return null;
@@ -588,19 +583,10 @@ public class ArtifactAssessment extends Basic {
         }
 
         public String getSystem() {
-            switch (this) {
-                case SUBMITTED:
-                case TRIAGED:
-                case WAITINGFORINPUT:
-                case RESOLVEDNOCHANGE:
-                case RESOLVEDCHANGEREQUIRED:
-                case DEFERRED:
-                case DUPLICATE:
-                case APPLIED:
-                case PUBLISHED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                default:
-                    return "?";
+            if (this.equals(NULL)) {
+                return "?";
+            } else {
+                return "http://hl7.org/fhir/artifactassessment-workflow-status";
             }
         }
 

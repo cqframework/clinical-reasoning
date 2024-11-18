@@ -61,9 +61,7 @@ public class CRMIReleaseExperimentalBehavior {
 
         public String getSystem() {
             switch (this) {
-                case ERROR:
-                case WARN:
-                case NONE:
+                case ERROR, WARN, NONE:
                     return "http://hl7.org/fhir/uv/crmi/CodeSystem/crmi-release-experimental-behavior-codes";
                 case NULL:
                     return null;

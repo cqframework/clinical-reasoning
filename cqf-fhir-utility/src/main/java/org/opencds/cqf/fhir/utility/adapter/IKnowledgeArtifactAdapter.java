@@ -330,7 +330,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
                 .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
                 .collect(Collectors.toList());
         if (!sorted.isEmpty()) {
-            return Optional.of(sorted.get(0).get());
+            return Optional.of(sorted.get(sorted.size() - 1).get());
         } else {
             return Optional.ofNullable(null);
         }

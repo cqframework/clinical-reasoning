@@ -123,7 +123,7 @@ define "All Encounters":
 
 define "Encounters in Period":
      [Encounter] E
-       where E.period during "Measurement Period"
+       where E.period during "Measurement Period" and E.status='finished'
 
 define "Encounter Cancelled":
     [Encounter] E

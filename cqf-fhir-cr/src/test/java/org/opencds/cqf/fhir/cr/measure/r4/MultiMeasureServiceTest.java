@@ -18,13 +18,12 @@ class MultiMeasureServiceTest {
                 .when()
                 .measureIdentifier("test123")
                 .measureIdentifier("124")
-                .measureIdentifier("test126")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
                 .evaluate();
 
-        when.then().hasMeasureReportCount(3).report();
+        when.then().hasMeasureReportCount(2).report();
     }
 
     @Test
@@ -38,14 +37,13 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
                 .firstGroup()
@@ -163,17 +161,7 @@ class MultiMeasureServiceTest {
                 .hasCount(8)
                 .up()
                 .up()
-                .up()
-                .measureReport("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(9)
-                .up()
-                .population("measure-population")
-                .hasCount(7)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(2);
+                .up();
     }
 
     @Test
@@ -187,14 +175,13 @@ class MultiMeasureServiceTest {
                 .measureUrl("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureUrl("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
                 .firstGroup()
@@ -312,17 +299,7 @@ class MultiMeasureServiceTest {
                 .hasCount(8)
                 .up()
                 .up()
-                .up()
-                .measureReport("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(9)
-                .up()
-                .population("measure-population")
-                .hasCount(7)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(2);
+                .up();
     }
 
     @Test
@@ -336,14 +313,13 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject")
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(72)
+                .hasMeasureReportCount(63)
                 .hasMeasureReportCountPerUrl(9, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(9, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(9, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -352,8 +328,6 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(9, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(
                         9, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
-                .hasMeasureReportCountPerUrl(
-                        9, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
                 .getFirstMeasureReport()
                 .hasReportType("Individual");
     }
@@ -369,7 +343,6 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject")
@@ -377,7 +350,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(64)
+                .hasMeasureReportCount(56)
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -386,8 +359,6 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(
                         8, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
-                .hasMeasureReportCountPerUrl(
-                        8, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
                 .getFirstMeasureReport()
                 .hasReportType("Individual");
     }
@@ -403,7 +374,6 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject")
@@ -411,7 +381,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -420,8 +390,6 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(
                         1, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
-                .hasMeasureReportCountPerUrl(
-                        1, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
                 .getFirstMeasureReport()
                 .hasReportType("Individual");
     }
@@ -437,7 +405,6 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject")
@@ -445,7 +412,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -454,8 +421,6 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(
                         1, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
-                .hasMeasureReportCountPerUrl(
-                        1, "http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
                 .getFirstMeasureReport()
                 .hasReportType("Individual");
     }
@@ -471,7 +436,6 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject")
@@ -479,7 +443,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
@@ -616,20 +580,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .up()
-                .up()
-                .measureReport("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
-                .hasReportType("Individual")
-                .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(1)
-                .up()
-                .population("measure-population")
-                .hasCount(1)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0);
+                .up();
     }
 
     @Test
@@ -643,7 +594,6 @@ class MultiMeasureServiceTest {
                 .measureId("MinimalCohortResourceBasisSingleGroup")
                 .measureId("MinimalCohortBooleanBasisSingleGroup")
                 .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                .measureId("MinimalContinuousVariableBooleanBasisSingleGroup")
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("subject-list")
@@ -651,7 +601,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-                .hasMeasureReportCount(8)
+                .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Subject List")
                 .hasSubjectReference("Patient/female-1988")
@@ -797,21 +747,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .up()
-                .up()
-                .measureReport("http://example.com/Measure/MinimalContinuousVariableBooleanBasisSingleGroup")
-                .hasReportType("Subject List")
-                .hasSubjectReference("Patient/female-1988")
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(1)
-                .hasSubjectResults()
-                .up()
-                .population("measure-population")
-                .hasCount(1)
-                .hasSubjectResults()
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0);
+                .up();
     }
 
     @Test

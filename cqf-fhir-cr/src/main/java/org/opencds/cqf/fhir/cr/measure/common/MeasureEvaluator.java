@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
@@ -39,6 +40,7 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -291,7 +293,7 @@ public class MeasureEvaluator {
 
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
-                throw new RuntimeException("SubjectId is required in order to calculate.");
+                throw new NullPointerException("SubjectId is required in order to calculate.");
             }
             Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
             String subjectTypePart = subjectInfo.getLeft();
@@ -410,6 +412,11 @@ public class MeasureEvaluator {
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
+        // check populations
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                groupDef.measureScoring());
+
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
         PopulationDef denominator = groupDef.getSingle(DENOMINATOR);
@@ -419,22 +426,8 @@ public class MeasureEvaluator {
         PopulationDef dateOfCompliance = groupDef.getSingle(DATEOFCOMPLIANCE);
 
         // Retrieve intersection of populations and results
-
         // add resources
         // add subject
-
-        // Validate Required Populations are Present
-        if (initialPopulation == null || denominator == null || numerator == null) {
-            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay() + "`, `" + NUMERATOR.getDisplay()
-                    + "`, `" + DENOMINATOR.getDisplay()
-                    + "` are required Population Definitions for Measure Scoring Type: "
-                    + groupDef.measureScoring().toCode());
-        }
-        // Ratio Populations Check
-        if (groupDef.measureScoring().toCode().equals("ratio") && denominatorException != null) {
-            throw new IllegalArgumentException("`" + DENOMINATOREXCEPTION.getDisplay() + "` are not permitted "
-                    + "for MeasureScoring type: " + groupDef.measureScoring().toCode());
-        }
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
 
@@ -520,12 +513,9 @@ public class MeasureEvaluator {
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
-        if (initialPopulation == null || measurePopulation == null) {
-            throw new NullPointerException(
-                    "`" + INITIALPOPULATION.getDisplay() + "` & `" + MEASUREPOPULATION.getDisplay()
-                            + "` are required Population Definitions for Measure Scoring Type: "
-                            + groupDef.measureScoring().toCode());
-        }
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
@@ -566,11 +556,9 @@ public class MeasureEvaluator {
             GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
-        if (initialPopulation == null) {
-            throw new NullPointerException("`" + INITIALPOPULATION.getDisplay()
-                    + "` is a required Population Definition for Measure Scoring Type: "
-                    + groupDef.measureScoring().toCode());
-        }
+        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
+                MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
     }

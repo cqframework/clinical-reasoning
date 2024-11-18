@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
@@ -40,6 +41,9 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
@@ -313,6 +317,31 @@ public class Measure {
             return this;
         }
 
+        public SelectedReport hasMeasureUrl(String url) {
+            assertEquals(url, report().getMeasure());
+            return this;
+        }
+
+        public SelectedReport hasMeasureReportDate() {
+            assertNotNull(report().getDate());
+            return this;
+        }
+
+        public SelectedReport hasStatus(MeasureReportStatus status) {
+            assertEquals(status, report().getStatus());
+            return this;
+        }
+
+        public SelectedReport hasEmptySubject() {
+            assertNull(report().getSubject().getReference());
+            return this;
+        }
+
+        public SelectedReport hasMeasureReportPeriod() {
+            assertNotNull(report().getPeriod());
+            return this;
+        }
+
         public SelectedReport hasMeasureVersion(String version) {
             assertEquals(
                     version,
@@ -339,6 +368,14 @@ public class Measure {
 
         public SelectedReport hasReportLevelImprovementNotation() {
             assertTrue(this.value().hasImprovementNotation());
+
+            return this;
+        }
+
+        public SelectedReport improvementNotationCode(String code) {
+            assertEquals(
+                    code,
+                    this.value().getImprovementNotation().getCodingFirstRep().getCode());
 
             return this;
         }
@@ -506,6 +543,35 @@ public class Measure {
             return containedIds;
         }
 
+        /**
+         * Subject-List will contain Lists of resource references to represent population. This test validates that correct resourceType is present.
+         * TODO: if group specifies basis instead of Measure then this will need to be updated.
+         * @param resourceType resource basis of population (encounter or patient)
+         * @return value allowing chaining of more methods
+         */
+        public SelectedReport subjectResultsHaveResourceType(String resourceType) {
+            var lists = value().getContained().stream()
+                    .filter(t -> t instanceof ListResource)
+                    .map(x -> (ListResource) x)
+                    .collect(Collectors.toList());
+            for (ListResource list : lists) {
+                // all contained lists have correct ResourceType
+                var size = list.getEntry().size();
+                var matchSize = (int) list.getEntry().stream()
+                        .filter(x -> x.getItem().getReference().startsWith(resourceType))
+                        .count();
+                assertEquals(size, matchSize, "SubjectResult List does not have correct ResourceType");
+            }
+            return this;
+        }
+
+        /**
+         * This method is a top level validation that all subjectResult lists accurately represent population counts
+         *
+         * This gets all contained Lists and checks for a matching reference on a report population
+         * It then checks that each population.count matches the size of the List (ex population.count=10, subjectResult list has 10 items)
+         * @return
+         */
         public SelectedReport subjectResultsValidation() {
             List<String> contained = getContainedIdsPerResourceType(ResourceType.List);
             List<String> subjectRefs = subjectResultReferences();
@@ -530,15 +596,39 @@ public class Measure {
         }
 
         private int getPopulationCount(MeasureReport theMeasureReport, String theSubjectResultId) {
-            return theMeasureReport.getGroup().stream()
-                    .map(t -> t.getPopulation().stream()
-                            .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
-                            .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
-                            .findFirst()
-                            .orElseThrow())
-                    .findFirst()
-                    .orElseThrow()
-                    .getCount();
+            // find population with reference to contained List resource
+            var groups = theMeasureReport.getGroup();
+            for (MeasureReportGroupComponent group : groups) {
+                var population = group.getPopulation().stream()
+                        .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
+                        .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
+                        .findFirst()
+                        .orElse(null);
+                if (population == null && group.getStratifier() != null) {
+                    var stratifiers = group.getStratifier();
+                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                        var stratifierGroups = strat.getStratum();
+                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                            var stratumPops = stratGroup.getPopulation();
+                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                                // empty results could omit subjectResult reference
+                                if (stratumPopulation.getSubjectResults().hasReference()
+                                        && stratumPopulation
+                                                .getSubjectResults()
+                                                .getReference()
+                                                .contains(theSubjectResultId)) {
+                                    return stratumPopulation.getCount();
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // population != null
+                    return population.getCount();
+                }
+            }
+            // if reached then no match found
+            return 0;
         }
 
         private int getListEntrySize(MeasureReport theMeasureReport, String theResourceId) {
@@ -555,10 +645,29 @@ public class Measure {
             // loop through all groups and populations
             var groupPops = value().getGroup();
             for (MeasureReportGroupComponent groupPop : groupPops) {
+                // standard population elements
                 var pops = groupPop.getPopulation();
                 for (MeasureReportGroupPopulationComponent pop : pops) {
                     if (pop.getSubjectResults().hasReference()) {
                         refs.add(pop.getSubjectResults().getReference());
+                    }
+                }
+                // stratifier results have references too
+                if (groupPop.getStratifier() != null) {
+                    var stratifiers = groupPop.getStratifier();
+                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                        var stratifierGroups = strat.getStratum();
+                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                            var stratumPops = stratGroup.getPopulation();
+                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                                // empty results could omit subjectResult reference
+                                if (stratumPopulation.getSubjectResults().hasReference()) {
+                                    refs.add(stratumPopulation
+                                            .getSubjectResults()
+                                            .getReference());
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -642,6 +751,12 @@ public class Measure {
             var codeConcept = (CodeableConcept) improvementNotationExt.getValue();
             assertTrue(codeConcept.hasCoding(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, code));
 
+            return this;
+        }
+
+        public SelectedGroup hasNoImprovementNotationExt() {
+            var improvementNotationExt = value().getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+            assertNull(improvementNotationExt);
             return this;
         }
 
@@ -874,6 +989,23 @@ public class Measure {
 
         public SelectedStratumPopulation hasCount(int count) {
             assertEquals(count, this.value().getCount());
+            return this;
+        }
+
+        /**
+         * if population has a count>0 and mode= subject-list, then population should have a subjectResult reference
+         * @return assertNotNull
+         */
+        public SelectedStratumPopulation hasStratumPopulationSubjectResults() {
+            assertNotNull(value().getSubjectResults().getReference());
+            return this;
+        }
+        /**
+         * if population has a count=0 and mode= subject-list, then population should NOT have a subjectResult reference
+         * @return assertNull
+         */
+        public SelectedStratumPopulation hasNoStratumPopulationSubjectResults() {
+            assertNull(value().getSubjectResults().getReference());
             return this;
         }
     }

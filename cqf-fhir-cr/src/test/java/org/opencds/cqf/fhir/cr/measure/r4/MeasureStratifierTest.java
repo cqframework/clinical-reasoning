@@ -26,7 +26,7 @@ class MeasureStratifierTest {
     private static final Repository repository = new IgRepository(
             FhirContext.forR4Cached(),
             Paths.get(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    protected Given given = Measure.given().repository(repository);
+    private final Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 
     @BeforeAll
@@ -231,7 +231,7 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 .stratumCount(9) // one per Encounter resource
                 .stratum("Encounter/patient-1-encounter-1")
-                .hasScore("1.0") // make sure stratum score
+                .hasScore("0.0") // make sure stratum score
                 .firstPopulation()
                 .hasCount(1)
                 .up()
@@ -278,7 +278,7 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 .stratumCount(2)
                 .stratum("M")
-                .hasScore("1.0") // make sure stratum are scored
+                .hasScore("0.2") // make sure stratum are scored
                 .population("initial-population")
                 .hasCount(5)
                 .up()

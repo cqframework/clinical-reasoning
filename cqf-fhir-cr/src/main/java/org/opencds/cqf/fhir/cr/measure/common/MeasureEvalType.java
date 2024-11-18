@@ -54,10 +54,12 @@ public enum MeasureEvalType {
 
     // This method can be used for reverse lookup purposes
     public static Optional<MeasureEvalType> fromCode(String code) {
-        // checkNotNull(code);
-        // checkArgument(!code.isEmpty());
-
-        return Optional.ofNullable(lookup.get(code));
+        MeasureEvalType evalType = lookup.get(code);
+        if (code != null && evalType == null) {
+            throw new UnsupportedOperationException(
+                    String.format("ReportType: %s, is not an accepted EvalType value.", code));
+        }
+        return Optional.ofNullable(evalType);
     }
 
     public String getSystem() {

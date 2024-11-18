@@ -1,0 +1,44 @@
+{
+  "id": "CohortBooleanMissingReqdPopulation",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/CohortBooleanMissingReqdPopulation",
+  "library": [
+    "http://example.com/Library/LibrarySimple"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "numerator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator Boolean"
+          }
+        }
+      ]
+    }]
+}

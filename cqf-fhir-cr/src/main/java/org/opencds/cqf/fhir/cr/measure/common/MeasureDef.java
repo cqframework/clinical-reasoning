@@ -15,14 +15,20 @@ public class MeasureDef {
     private final boolean useMeasureImpNotation;
 
     public MeasureDef(
-            String id, String url, String version, List<GroupDef> groups, List<SdeDef> sdes, boolean isBooleanBasis) {
+            String id,
+            String url,
+            String version,
+            List<GroupDef> groups,
+            List<SdeDef> sdes,
+            boolean isBooleanBasis,
+            boolean useMeasureImprovementNotation) {
         this.id = id;
         this.url = url;
         this.version = version;
         this.groups = groups;
         this.sdes = sdes;
         this.isBooleanBasis = isBooleanBasis;
-        this.useMeasureImpNotation = groupDefAllSameImpNotation(groups);
+        this.useMeasureImpNotation = useMeasureImprovementNotation;
     }
 
     public String id() {
@@ -55,10 +61,5 @@ public class MeasureDef {
 
     public boolean useMeasureImpNotation() {
         return this.useMeasureImpNotation;
-    }
-
-    public boolean groupDefAllSameImpNotation(List<GroupDef> groupDefs) {
-        // if single rate, then always true
-        return groupDefs.stream().allMatch(GroupDef::isPositiveImprovementNotation);
     }
 }

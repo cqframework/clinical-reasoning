@@ -16,17 +16,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 
-        <junit.version>5.9.1</junit.version>
+        <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
         <cql.version>3.18.0</cql.version>
         <jmh.version>1.36</jmh.version>
-        <spring.version>5.3.39</spring.version>
+        <spring.version>6.1.14</spring.version>
         <hapi.version>7.4.5</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
-        <error-prone.version>2.24.1</error-prone.version>
+        <error-prone.version>2.35.1</error-prone.version>
         <checkstyle.version>10.12.7</checkstyle.version>
     </properties>
 
@@ -422,7 +424,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.13.0</version>
                     <configuration>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
@@ -458,8 +460,8 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.3.1</version>
                     <configuration>
-                        <source>11</source>
-                        <release>11</release>
+                        <source>17</source>
+                        <release>17</release>
                         <doclint>-missing</doclint>
                         <quiet>true</quiet>
                         <detectOfflineLinks>false</detectOfflineLinks>
@@ -566,12 +568,12 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.22</version>
+                    <version>1.23</version>
                     <configuration>
                         <signature>
-                            <groupId>net.sf.androidscents.signature</groupId>
-                            <artifactId>android-api-level-26</artifactId>
-                            <version>8.0.0_r2</version>
+                            <groupId>com.toasttab.android</groupId>
+                            <artifactId>gummy-bears-api-26</artifactId>
+                            <version>0.10.0</version>
                         </signature>
                     </configuration>
                     <executions>

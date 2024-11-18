@@ -320,8 +320,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                         continue;
                     }
                     dependencyAdapter = IAdapterFactory.forFhirVersion(fhirVersion)
-                            .createKnowledgeArtifactAdapter(
-                                    alreadyUpdatedDependencies.get(dependencyUrl));
+                            .createKnowledgeArtifactAdapter(alreadyUpdatedDependencies.get(dependencyUrl));
                     String versionedReference = addVersionToReference(dependency.getReference(), dependencyAdapter);
                     dependency.setReference(versionedReference);
 
@@ -374,8 +373,7 @@ public class ReleaseVisitor extends AbstractKnowledgeArtifactVisitor {
                                     String versionedReference =
                                             addVersionToReference(dependency.getReference(), adapter);
                                     dependency.setReference(versionedReference);
-                                    alreadyUpdatedDependencies.put(
-                                            url, adapter.get());
+                                    alreadyUpdatedDependencies.put(url, adapter.get());
                                     return adapter;
                                 });
                     } else {

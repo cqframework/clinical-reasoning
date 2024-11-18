@@ -28,8 +28,6 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
 
     <T extends ICompositeType> ILibraryAdapter setDataRequirement(List<T> dataRequirement);
 
-    <T extends ICompositeType> List<T> getUseContext();
-
     void setExpansionParameters(
             List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters);
 }

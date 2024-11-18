@@ -20,6 +20,8 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r5.model.PrimitiveType;
 
 public class BundleHelper {
+    private static final String UNSUPPORTED_VERSION_OF_FHIR = "Unsupported version of FHIR: %s";
+
     private BundleHelper() {}
 
     /**
@@ -40,7 +42,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -65,7 +67,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -106,7 +108,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
 
         return resources;
@@ -130,7 +132,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -161,7 +163,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -192,7 +194,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -223,7 +225,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -233,19 +235,20 @@ public class BundleHelper {
      * @param bundle IBaseBundle type
      * @return
      */
-    public static List<? extends IBaseBackboneElement> getEntry(IBaseBundle bundle) {
+    @SuppressWarnings("unchecked")
+    public static <T extends IBaseBackboneElement> List<T> getEntry(IBaseBundle bundle) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
         switch (fhirVersion) {
             case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntry();
+                return (List<T>) ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntry();
             case R4:
-                return ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
+                return (List<T>) ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
             case R5:
-                return ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
+                return (List<T>) ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -279,7 +282,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -307,7 +310,7 @@ public class BundleHelper {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -336,7 +339,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
 
         return bundle;
@@ -395,7 +398,54 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Sets the BundleType of the Bundle and returns the Bundle
+     * @param bundle
+     * @param bundleType
+     * @return
+     */
+    public static IBaseBundle setBundleType(IBaseBundle bundle, String bundleType) {
+        var fhirVersion = bundle.getStructureFhirVersionEnum();
+        switch (fhirVersion) {
+            case DSTU3:
+                return ((org.hl7.fhir.dstu3.model.Bundle) bundle)
+                        .setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.fromCode(bundleType));
+            case R4:
+                return ((org.hl7.fhir.r4.model.Bundle) bundle)
+                        .setType(org.hl7.fhir.r4.model.Bundle.BundleType.fromCode(bundleType));
+            case R5:
+                return ((org.hl7.fhir.r5.model.Bundle) bundle)
+                        .setType(org.hl7.fhir.r5.model.Bundle.BundleType.fromCode(bundleType));
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+        }
+    }
+
+    /**
+     * Sets the total property of the Bundle and returns the Bundle
+     * @param bundle
+     * @param total
+     * @return
+     */
+    public static IBaseBundle setBundleTotal(IBaseBundle bundle, int total) {
+        var fhirVersion = bundle.getStructureFhirVersionEnum();
+        switch (fhirVersion) {
+            case DSTU3:
+                return ((org.hl7.fhir.dstu3.model.Bundle) bundle).setTotal(total);
+            case R4:
+                return ((org.hl7.fhir.r4.model.Bundle) bundle).setTotal(total);
+            case R5:
+                return ((org.hl7.fhir.r5.model.Bundle) bundle).setTotal(total);
+
+            default:
+                throw new IllegalArgumentException(
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -415,7 +465,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -439,7 +489,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -464,7 +514,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -485,7 +535,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -513,7 +563,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -537,7 +587,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -563,7 +613,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -590,7 +640,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -616,7 +666,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -635,36 +685,34 @@ public class BundleHelper {
         if (request == null) {
             request = newRequest(fhirVersion, null);
         }
+        String requestTypeError = "Request should be of type: %s";
         switch (fhirVersion) {
             case DSTU3:
                 if (request != null
                         && !(request instanceof org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(String.format(
-                            "Request should be of type: %s",
-                            "org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent"));
+                            requestTypeError, "org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent) request);
             case R4:
                 if (request != null && !(request instanceof org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(String.format(
-                            "Request should be of type: %s",
-                            "org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent"));
+                            requestTypeError, "org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent) request);
             case R5:
                 if (request != null && !(request instanceof org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(String.format(
-                            "Request should be of type: %s",
-                            "org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent"));
+                            requestTypeError, "org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request);
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -717,7 +765,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
         }
     }
 }

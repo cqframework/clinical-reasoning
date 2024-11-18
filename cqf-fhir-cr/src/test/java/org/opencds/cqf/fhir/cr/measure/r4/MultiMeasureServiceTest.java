@@ -932,11 +932,6 @@ class MultiMeasureServiceTest {
                 .hasReporter("Patient/male-2022"));
     }
 
-    // LUKETODO: consider adding resources to test Bundle for richer test cases, such as multiple orgs, patients,
-    // partofs, etc
-    // LUKETODO:  one org ... one patient managingOrganization pointing to that org
-    // LUKETODO:  one org with part of pointing to the first org... one patient managingOrganization pointing to the
-    // second org
     @Test
     void MultiMeasure_EightMeasures_SubjectOrganization() {
         var when = GIVEN_REPO
@@ -945,13 +940,13 @@ class MultiMeasureServiceTest {
                 .periodStart("2024-01-01")
                 .periodEnd("2024-12-31")
                 .reportType("population")
-                .subject("Organization/tester")
+                .subject("Organization/organization-linked-by-managingOrganization")
                 .evaluate();
 
         when.then()
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
-                .hasSubjectReference("Organization/tester");
+                .hasSubjectReference("Organization/organization-linked-by-managingOrganization");
     }
 }

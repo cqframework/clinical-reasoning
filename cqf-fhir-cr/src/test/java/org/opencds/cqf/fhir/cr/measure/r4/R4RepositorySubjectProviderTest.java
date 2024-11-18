@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,11 +14,11 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -30,8 +29,12 @@ class R4RepositorySubjectProviderTest {
     private static final String ORG_ID_1 = "org1";
     private static final String ORG_ID_2 = "org2";
 
+    private static final R4RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF =
+            new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
+    private static final R4RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF =
+            new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(false));
+
     private final Repository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
-    private final R4RepositorySubjectProvider testSubject = new R4RepositorySubjectProvider();
 
     @BeforeEach
     void beforeEach() {
@@ -42,56 +45,52 @@ class R4RepositorySubjectProviderTest {
         final Organization org2 = (Organization) new Organization()
                 .setPartOf(new Reference(orgId1.toUnqualifiedVersionless().getValue()))
                 .setId(new IdType(ResourceType.Organization.toString(), ORG_ID_2));
+
         final IIdType orgId2 = repository.update(org2).getId().toUnqualifiedVersionless();
 
-        final Patient patient1 = (Patient) new Patient()
-                .setManagingOrganization(
-                        new Reference(orgId1.toUnqualifiedVersionless().getValue()))
-                .setId(new IdType(ResourceType.Patient.toString(), PAT_ID_1));
+        final Patient patient1 = new Patient();
+        patient1.setId(PAT_ID_1);
+        patient1.setManagingOrganization(
+                new Reference(orgId1.toUnqualifiedVersionless().getValue()));
 
-        final Patient patient2 = (Patient) new Patient()
-                .setManagingOrganization(
-                        new Reference(orgId2.toUnqualifiedVersionless().getValue()))
-                .setId(new IdType(ResourceType.Patient.toString(), PAT_ID_2));
+        final Patient patient2 = new Patient();
+        patient2.setId(PAT_ID_2);
+        patient2.setManagingOrganization(
+                new Reference(orgId2.toUnqualifiedVersionless().getValue()));
 
-        final IIdType patientId1 = repository.update(patient1).getId().toUnqualifiedVersionless();
-        final IIdType patientId2 = repository.update(patient2).getId().toUnqualifiedVersionless();
-
-        //        final Organization org1 = (Organization)new Organization().setId(new IdType("Organization",
-        // ORG_ID_1));
-        //        final IIdType orgId1 = myOrganizationDao.update(org1, mySrd).getId().toUnqualifiedVersionless();
-        //
-        //        final Organization org2 = (Organization)new Organization()
-        //            .setPartOf(new Reference(orgId1.toUnqualifiedVersionless().getValue()))
-        //            .setId(new IdType("Organization", ORG_ID_2));
-        //
-        //        final IIdType orgId2 = myOrganizationDao.update(org2, mySrd).getId().toUnqualifiedVersionless();
-        //
-        //        final Patient patient1 = new Patient();
-        //        patient1.setId(PAT_ID_1);
-        //        patient1.setManagingOrganization(new Reference(orgId1.toUnqualifiedVersionless().getValue()));
-        //
-        //        final Patient patient2 = new Patient();
-        //        patient2.setId(PAT_ID_2);
-        //        patient2.setManagingOrganization(new Reference(orgId2.toUnqualifiedVersionless().getValue()));
-        //
-        //        final IIdType patientId1 = myPatientDao.update(patient1, mySrd).getId().toUnqualifiedVersionless();
-        //        final IIdType patientId2 = myPatientDao.update(patient2, mySrd).getId().toUnqualifiedVersionless();
+        repository.update(patient1).getId().toUnqualifiedVersionless();
+        repository.update(patient2).getId().toUnqualifiedVersionless();
     }
 
     public static Stream<Arguments> getSubjectsParams() {
-        return Stream.of(Arguments.of(
-                MeasureEvalType.SUBJECT,
-                Collections.singletonList(resourcify(ResourceType.Organization, ORG_ID_1)),
-                Stream.of(PAT_ID_1, PAT_ID_2)
-                        .map(id -> resourcify(ResourceType.Patient, id))
-                        .collect(Collectors.toList())));
+        return Stream.of(
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        MeasureEvalType.SUBJECT,
+                        List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                        // TODO:  LD:  this is technically incorrect:  it should be PAT_ID_1, PAT_ID_2
+                        // However, due to the fact that both InMemoryFhirRepository and IgRepository
+                        // do NOT support chained searches, the results can only be accurately verified
+                        // with a repository that supports DAOs.
+                        Stream.of(PAT_ID_1, PAT_ID_1)
+                                .map(id -> resourcify(ResourceType.Patient, id))
+                                .collect(Collectors.toList())),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        MeasureEvalType.SUBJECT,
+                        List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                        Stream.of(PAT_ID_1)
+                                .map(id -> resourcify(ResourceType.Patient, id))
+                                .collect(Collectors.toList())));
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("getSubjectsParams")
-    void getSubjects(MeasureEvalType measureEvalType, List<String> subjectIds, List<String> expectedSubjects) {
+    void getSubjects(
+            R4RepositorySubjectProvider testSubject,
+            MeasureEvalType measureEvalType,
+            List<String> subjectIds,
+            List<String> expectedSubjects) {
         final List<String> actualSubjects =
                 testSubject.getSubjects(repository, measureEvalType, subjectIds).collect(Collectors.toList());
 

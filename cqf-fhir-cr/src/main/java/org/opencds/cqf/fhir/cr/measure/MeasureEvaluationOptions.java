@@ -14,6 +14,7 @@ public class MeasureEvaluationOptions {
 
     private boolean isValidationEnabled = false;
     private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
+    private SubjectProviderOptions subjectProviderOptions;
 
     private EvaluationSettings evaluationSettings = null;
 
@@ -21,23 +22,33 @@ public class MeasureEvaluationOptions {
         return this.isValidationEnabled;
     }
 
-    public void setValidationEnabled(boolean enableValidation) {
+    public MeasureEvaluationOptions setValidationEnabled(boolean enableValidation) {
         this.isValidationEnabled = enableValidation;
+        return this;
     }
 
     public Map<String, ValidationProfile> getValidationProfiles() {
         return validationProfiles;
     }
 
-    public void setValidationProfiles(Map<String, ValidationProfile> validationProfiles) {
+    public MeasureEvaluationOptions setValidationProfiles(Map<String, ValidationProfile> validationProfiles) {
         this.validationProfiles = validationProfiles;
+        return this;
     }
 
-    public void setEvaluationSettings(EvaluationSettings evaluationSettings) {
+    public MeasureEvaluationOptions setEvaluationSettings(EvaluationSettings evaluationSettings) {
         this.evaluationSettings = evaluationSettings;
+        return this;
     }
 
     public EvaluationSettings getEvaluationSettings() {
         return this.evaluationSettings;
+    }
+
+    public SubjectProviderOptions getSubjectProviderOptions() {
+        if (this.subjectProviderOptions == null) {
+            subjectProviderOptions = new SubjectProviderOptions();
+        }
+        return subjectProviderOptions;
     }
 }

@@ -23,10 +23,13 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class R4CollectDataService {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final R4RepositorySubjectProvider subjectProvider;
 
     public R4CollectDataService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        subjectProvider = new R4RepositorySubjectProvider(
+            measureEvaluationOptions.getSubjectProviderOptions());
     }
 
     /**
@@ -57,7 +60,6 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var subjectProvider = new R4RepositorySubjectProvider();
         var processor = new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, subjectProvider);
 
         // getSubjects

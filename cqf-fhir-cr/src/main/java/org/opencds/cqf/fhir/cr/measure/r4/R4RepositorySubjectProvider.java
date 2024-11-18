@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -17,8 +18,11 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluator;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -32,14 +36,15 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
-    private enum OrganizationMode {
-        NONE,
-        PART_OF
+    private final SubjectProviderOptions subjectProviderOptions;
+
+    public R4RepositorySubjectProvider(SubjectProviderOptions subjectProviderOptions) {
+        this.subjectProviderOptions = subjectProviderOptions;
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
-        return getSubjects(repository, measureEvalType, List.of(subjectId));
+    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, @Nullable String subjectId) {
+        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
     }
 
     @Override
@@ -165,7 +170,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return Stream.concat(
                 getManagingOrganizationSubjectIds(organization, repository),
                 getPartOfSubjectIds(organization, repository)
-            ).toList();
+            ).collect(Collectors.toUnmodifiableList());
     }
 
     private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {
@@ -189,6 +194,10 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
     private Stream<String> getPartOfSubjectIds(String organization, Repository repository) {
 
+        if (! subjectProviderOptions.isPartOfEnabled()) {
+            return Stream.empty();
+        }
+
         final Map<String, List<IQueryParameterType>> searchParam = new HashMap<>();
 
         searchParam.put(
@@ -207,6 +216,6 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             // TODO: JM, address next link if populated in future interation of feature.
             // if results expand beyond paging limit of a bundle, a warning will pop to the user.
             // This is unlikely to ever be an issue in a real deployment, but should be addressed at some point.
-            .map(Patient::getIdPart);
+            .map(idElement -> String.format("%s/%s", ResourceType.Patient, idElement.getIdPart()));
     }
 }

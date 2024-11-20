@@ -671,7 +671,7 @@ class ReleaseVisitorTests {
         assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
                 .anyMatch(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF));
     }
-    
+
     @Test
     void release_should_pin_the_latest_version_of_dependencies() {
         var bundle = (Bundle) jsonParser.parseResource(

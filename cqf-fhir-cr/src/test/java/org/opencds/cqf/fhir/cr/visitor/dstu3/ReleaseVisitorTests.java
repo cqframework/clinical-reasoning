@@ -722,6 +722,7 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getResource().getReference().contains("2.16.840.1.113762.1.4.1146.6"))
                 .findFirst();
         assertTrue(maybeLeafRA.isPresent());
-        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource().getReference()).equals("1.0.1"));
+        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource().getReference())
+                .equals("1.0.1"));
     }
 }

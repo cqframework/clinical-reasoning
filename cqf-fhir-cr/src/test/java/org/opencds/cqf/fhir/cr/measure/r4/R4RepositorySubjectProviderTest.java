@@ -1,10 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -23,13 +24,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class R4RepositorySubjectProviderTest {
 
     private static final String PAT_ID_1 = "pat1";
     private static final String PAT_ID_2 = "pat2";
+    private static final String PAT_ID_3 = "pat3";
+
     private static final String ORG_ID_1 = "org1";
     private static final String ORG_ID_2 = "org2";
 
@@ -37,6 +39,9 @@ class R4RepositorySubjectProviderTest {
     private static final String PRACTITIONER_ID_2 = "pra2";
 
     private static final String GROUP_1 = "grp1";
+    private static final String GROUP_2 = "grp2";
+
+    private static final List<String> LIST_SINGLE_NULL = Collections.singletonList(null);
 
     private static final R4RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF =
             new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
@@ -70,15 +75,18 @@ class R4RepositorySubjectProviderTest {
                 .setManagingOrganization(
                         new Reference(orgId1.toUnqualifiedVersionless().getValue()))
                 .setId(idify(ResourceType.Patient, PAT_ID_1));
+        repository.update(patient1);
 
         final Patient patient2 = (Patient) new Patient()
                 .addGeneralPractitioner(new Reference(resourcify(ResourceType.Practitioner, PRACTITIONER_ID_2)))
                 .setManagingOrganization(
                         new Reference(orgId2.toUnqualifiedVersionless().getValue()))
                 .setId(idify(ResourceType.Patient, PAT_ID_2));
+        repository.update(patient2);
 
-        repository.update(patient1).getId().toUnqualifiedVersionless();
-        repository.update(patient2).getId().toUnqualifiedVersionless();
+        // Not associated with any other resource
+        final Patient patient3 = (Patient) new Patient().setId(idify(ResourceType.Patient, PAT_ID_3));
+        repository.update(patient3);
 
         final Group group1 = (Group) new Group()
                 .setType(GroupType.PRACTITIONER)
@@ -86,14 +94,33 @@ class R4RepositorySubjectProviderTest {
                 .addMember(new GroupMemberComponent(referencifiy(ResourceType.Practitioner, PRACTITIONER_ID_2)))
                 .setId(idify(ResourceType.Group, GROUP_1));
 
-        repository.update(group1).getId().toUnqualifiedVersionless();
+        repository.update(group1);
+
+        final Group group2 = (Group) new Group()
+                .setType(GroupType.PERSON)
+                .addMember(new GroupMemberComponent(referencifiy(ResourceType.Patient, PAT_ID_1)))
+                .addMember(new GroupMemberComponent(referencifiy(ResourceType.Patient, PAT_ID_2)))
+                .setId(idify(ResourceType.Group, GROUP_2));
+
+        repository.update(group2);
     }
 
     public static Stream<Arguments> getSubjectsParams() {
         return Stream.of(
+
+                // Null subject ID:  all patients
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
+                        LIST_SINGLE_NULL,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2, PAT_ID_3)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        LIST_SINGLE_NULL,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2, PAT_ID_3)),
+
+                // subject ID:  Organization/{orgid}
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Organization, ORG_ID_1),
                         // TODO:  LD:  this is technically incorrect:  it should be PAT_ID_1, PAT_ID_2
                         // However, due to the fact that both InMemoryFhirRepository and IgRepository
@@ -102,96 +129,111 @@ class R4RepositorySubjectProviderTest {
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_1)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
                         resourcifyList(ResourceType.Organization, ORG_ID_1),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1)),
+
+                // subject ID:  {patid}
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF, List.of(PAT_ID_1), resourcifyList(ResourceType.Patient, PAT_ID_1)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        List.of(PAT_ID_1),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1)),
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF, List.of(PAT_ID_2), resourcifyList(ResourceType.Patient, PAT_ID_2)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        List.of(PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2)),
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        List.of(PAT_ID_1, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        List.of(PAT_ID_1, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+
+                // subject ID:  Patient/{patid}
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Organization, ORG_ID_1),
-                        // TODO:  LD:  this is technically incorrect:  it should be PAT_ID_1, PAT_ID_2
-                        // However, due to the fact that both InMemoryFhirRepository and IgRepository
-                        // do NOT support chained searches, the results can only be accurately verified
-                        // with a repository that supports DAOs.
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_1)),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2)),
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+
+                // subject ID:  Practitioner/{praid}
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1),
+                        resourcifyList(ResourceType.Patient, PAT_ID_1)),
+                Arguments.of(
+                        TEST_SUBJECT_DISABLE_PART_OF,
+                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_2),
+                        resourcifyList(ResourceType.Patient, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
-                        TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
-                        TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+
+                // Group: Practitioner
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
-                        TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
-                        resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
-                        TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
                         resourcifyList(ResourceType.Group, GROUP_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.SUBJECT,
                         resourcifyList(ResourceType.Group, GROUP_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
+
+                // Group: Person
                 Arguments.of(
                         TEST_SUBJECT_ENABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Group, GROUP_1),
+                        resourcifyList(ResourceType.Group, GROUP_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
-                        MeasureEvalType.POPULATION,
-                        resourcifyList(ResourceType.Group, GROUP_1),
+                        resourcifyList(ResourceType.Group, GROUP_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)));
     }
 
     @ParameterizedTest
     @MethodSource("getSubjectsParams")
-    void getSubjects(
-            R4RepositorySubjectProvider testSubject,
-            MeasureEvalType measureEvalType,
-            List<String> subjectIds,
-            List<String> expectedSubjects) {
+    void getSubjects(R4RepositorySubjectProvider testSubject, List<String> subjectIds, List<String> expectedSubjects) {
         final List<String> actualSubjects =
-                testSubject.getSubjects(repository, measureEvalType, subjectIds).toList();
+                testSubject.getSubjects(repository, subjectIds).toList();
 
-        assertThat(actualSubjects, equalTo(expectedSubjects));
+        assertThat(actualSubjects, containsInAnyOrder(expectedSubjects.toArray()));
     }
 
     private static Reference referencifiy(ResourceType resourceType, String rawId) {

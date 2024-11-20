@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
@@ -40,13 +39,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
     }
 
     @Override
-    public Stream<String> getSubjects(
-            Repository repository, MeasureEvalType measureEvalType, @Nullable String subjectId) {
-        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
+    public Stream<String> getSubjects(Repository repository, @Nullable String subjectId) {
+        return getSubjects(repository, Collections.singletonList(subjectId));
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, List<String> subjectIds) {
+    public Stream<String> getSubjects(Repository repository, List<String> subjectIds) {
         // All patients in system
         if (subjectIds == null
                 || subjectIds.isEmpty()

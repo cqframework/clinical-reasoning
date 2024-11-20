@@ -118,9 +118,7 @@ public class R4CollectDataService {
             subject = practitioner;
         }
 
-        return subjectProvider
-                .getSubjects(repository, MeasureEvalType.SUBJECT, subject)
-                .collect(Collectors.toList());
+        return subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
     }
 
     protected void populateEvaluatedResources(MeasureReport measureReport, Parameters parameters, String subject) {

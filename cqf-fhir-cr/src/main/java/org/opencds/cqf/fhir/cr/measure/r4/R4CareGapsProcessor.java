@@ -127,7 +127,7 @@ public class R4CareGapsProcessor {
     }
 
     protected List<String> getSubjects(String subject) {
-        var subjects = subjectProvider.getSubjects(repository, null, subject).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
         if (!subjects.isEmpty()) {
             ourLog.info(String.format("care-gaps report requested for: %s subjects.", subjects.size()));
         } else {

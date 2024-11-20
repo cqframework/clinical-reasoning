@@ -671,4 +671,30 @@ class ReleaseVisitorTests {
         assertTrue(releasedRCTCLibrary.getRelatedArtifact().stream()
                 .anyMatch(ra -> ra.getType() == RelatedArtifactType.COMPOSEDOF));
     }
+
+    @Test
+    void release_should_pin_the_latest_version_of_dependencies() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var maybeLeafRA = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.6"))
+                .findFirst();
+        assertTrue(maybeLeafRA.isPresent());
+        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource()).equals("1.0.1"));
+    }
 }

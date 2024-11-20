@@ -932,6 +932,9 @@ class MultiMeasureServiceTest {
                 .hasReporter("Patient/male-2022"));
     }
 
+    // This test is effectively a sanity test to ensure that Organization subjects
+    // do not error out as they did previous to the new feature that enables to this feature./
+    // For more complex scenarios please see R4RepositorySubjectProviderTest.
     @Test
     void MultiMeasure_EightMeasures_SubjectOrganization() {
         var when = GIVEN_REPO

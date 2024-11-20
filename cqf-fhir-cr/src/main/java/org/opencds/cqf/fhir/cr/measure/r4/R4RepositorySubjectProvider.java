@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.Group.GroupType;
@@ -159,17 +158,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
         searchParams.put("organization", Collections.singletonList(new ReferenceParam(organization)));
 
-        var bundle = repository.search(Bundle.class, Patient.class, searchParams);
-
-        var bundleEntries = bundle.getEntry();
-
-        if (bundleEntries == null || bundleEntries.isEmpty()) {
-            return Stream.empty();
-        }
-
-        return bundleEntries.stream()
-                .map(BundleEntryComponent::getResource)
-                .map(idElement -> idElement.getResourceType() + "/" + idElement.getIdPart());
+        return handlePatientBundle(repository, searchParams);
     }
 
     private Stream<String> getPartOfSubjectIds(String organization, Repository repository) {
@@ -184,10 +173,28 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 "organization",
                 Collections.singletonList(new ReferenceParam("organization", organization).setChain("partof")));
 
-        return repository.search(Bundle.class, Patient.class, searchParam).getEntry().stream()
-                .map(BundleEntryComponent::getResource)
-                .filter(Patient.class::isInstance)
-                .map(Patient.class::cast)
-                .map(idElement -> String.format("%s/%s", ResourceType.Patient, idElement.getIdPart()));
+        return handlePatientBundle(repository, searchParam);
+    }
+
+    private static Stream<String> handlePatientBundle(
+            Repository repository, Map<String, List<IQueryParameterType>> searchParam) {
+        var bundle = repository.search(Bundle.class, Patient.class, searchParam);
+
+        var bundleEntries = bundle.getEntry();
+
+        if (bundleEntries == null || bundleEntries.isEmpty()) {
+            return Stream.empty();
+        }
+
+        var iterator = new BundleIterator<>(repository, bundle);
+        var patientIds = new ArrayList<String>();
+
+        iterator.forEachRemaining(item -> {
+            var resource = item.getResource();
+            var idElement = resource.getIdElement();
+            patientIds.add(ResourceType.Patient + "/" + idElement.getIdPart());
+        });
+
+        return patientIds.stream();
     }
 }

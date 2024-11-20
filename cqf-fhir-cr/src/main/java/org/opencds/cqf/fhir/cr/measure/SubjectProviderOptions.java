@@ -8,6 +8,13 @@ public class SubjectProviderOptions {
 
     private boolean isPartOfEnabled;
 
+    /**
+     * @return true if clinical-reasoning is configured to resolve subject Organization queries
+     * in which Organizations related by partOf when compiling the list of Patients related by
+     * managingOrganization.
+     * <p/>
+     * false to disregard any Organizations and patients related by partOf.
+     */
     public boolean isPartOfEnabled() {
         return isPartOfEnabled;
     }

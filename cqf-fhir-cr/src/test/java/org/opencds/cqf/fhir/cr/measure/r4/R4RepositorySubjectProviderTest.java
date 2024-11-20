@@ -29,6 +29,8 @@ class R4RepositorySubjectProviderTest {
     private static final String ORG_ID_1 = "org1";
     private static final String ORG_ID_2 = "org2";
 
+    private static final String PRACTITIONER_ID_1 = "pra1";
+
     private static final R4RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF =
             new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
     private static final R4RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF =
@@ -74,14 +76,62 @@ class R4RepositorySubjectProviderTest {
                         // with a repository that supports DAOs.
                         Stream.of(PAT_ID_1, PAT_ID_1)
                                 .map(id -> resourcify(ResourceType.Patient, id))
-                                .collect(Collectors.toList())),
+                                .toList()),
                 Arguments.of(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         MeasureEvalType.SUBJECT,
                         List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
                         Stream.of(PAT_ID_1)
                                 .map(id -> resourcify(ResourceType.Patient, id))
-                                .collect(Collectors.toList())));
+                                .toList()),
+                Arguments.of(
+                        TEST_SUBJECT_ENABLE_PART_OF,
+                        MeasureEvalType.POPULATION,
+                        List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                        // TODO:  LD:  this is technically incorrect:  it should be PAT_ID_1, PAT_ID_2
+                        // However, due to the fact that both InMemoryFhirRepository and IgRepository
+                        // do NOT support chained searches, the results can only be accurately verified
+                        // with a repository that supports DAOs.
+                        Stream.of(PAT_ID_1, PAT_ID_1)
+                                .map(id -> resourcify(ResourceType.Patient, id))
+                                .toList())
+                //            ,
+                //                Arguments.of(
+                //                        TEST_SUBJECT_DISABLE_PART_OF,
+                //                        MeasureEvalType.POPULATION,
+                //                        List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                //                        Stream.of(PAT_ID_1)
+                //                                .map(id -> resourcify(ResourceType.Patient, id))
+                //                                .toList()),
+                //                Arguments.of(
+                //                        TEST_SUBJECT_ENABLE_PART_OF,
+                //                        MeasureEvalType.SUBJECT,
+                //                        List.of(resourcify(ResourceType.Practitioner, PRACTITIONER_ID_1)),
+                //                        Stream.of(PAT_ID_1, PAT_ID_1)
+                //                                .map(id -> resourcify(ResourceType.Patient, id))
+                //                                .toList()),
+                //                Arguments.of(
+                //                        TEST_SUBJECT_DISABLE_PART_OF,
+                //                        MeasureEvalType.SUBJECT,
+                //                        List.of(resourcify(ResourceType.Practitioner, PRACTITIONER_ID_1)),
+                //                        Stream.of(PAT_ID_1)
+                //                                .map(id -> resourcify(ResourceType.Patient, id))
+                //                                .toList()),
+                //                Arguments.of(
+                //                        TEST_SUBJECT_ENABLE_PART_OF,
+                //                        MeasureEvalType.POPULATION,
+                //                        List.of(resourcify(ResourceType.Practitioner, PRACTITIONER_ID_1)),
+                //                        Stream.of(PAT_ID_1, PAT_ID_1)
+                //                                .map(id -> resourcify(ResourceType.Patient, id))
+                //                                .toList()),
+                //                Arguments.of(
+                //                        TEST_SUBJECT_DISABLE_PART_OF,
+                //                        MeasureEvalType.POPULATION,
+                //                        List.of(resourcify(ResourceType.Practitioner, PRACTITIONER_ID_1)),
+                //                        Stream.of(PAT_ID_1)
+                //                                .map(id -> resourcify(ResourceType.Patient, id))
+                //                                .toList())
+                );
     }
 
     @ParameterizedTest

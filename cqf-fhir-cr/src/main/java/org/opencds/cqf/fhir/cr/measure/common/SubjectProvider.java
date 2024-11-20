@@ -8,4 +8,9 @@ public interface SubjectProvider {
     Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId);
 
     Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, List<String> subjectIds);
+
+    // LUKETODO:  consider these contracts carefully
+    Stream<String> getSubjectsWithPartOf(Repository repository, MeasureEvalType measureEvalType, String subjectId);
+
+    Stream<String> getSubjectsWithPartOf(Repository repository, MeasureEvalType measureEvalType, List<String> subjectIds);
 }

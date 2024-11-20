@@ -54,7 +54,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
 
-        subjectProvider = new R4RepositorySubjectProvider();
+        subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider);
 

@@ -12,7 +12,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -20,12 +19,12 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 public class Dstu3RepositorySubjectProvider implements SubjectProvider {
 
     @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
-        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
+    public Stream<String> getSubjects(Repository repository, String subjectId) {
+        return getSubjects(repository, Collections.singletonList(subjectId));
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, List<String> subjectIds) {
+    public Stream<String> getSubjects(Repository repository, List<String> subjectIds) {
         if (subjectIds == null
                 || subjectIds.isEmpty()
                 || subjectIds.get(0) == null

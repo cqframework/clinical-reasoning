@@ -75,8 +75,7 @@ public class R4MeasureProcessor {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-        var subjects =
-                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
 
         return this.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);

@@ -2,5 +2,8 @@
   "resourceType": "Patient",
   "id": "female-1931",
   "gender": "female",
-  "birthDate": "1931-01-01"
+  "birthDate": "1931-01-01",
+  "managingOrganization" : {
+    "reference": "Organization/organization-linked-by-partOf"
+  }
 }

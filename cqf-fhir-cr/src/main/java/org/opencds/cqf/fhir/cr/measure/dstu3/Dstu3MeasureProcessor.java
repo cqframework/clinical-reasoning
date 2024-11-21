@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -125,11 +126,13 @@ public class Dstu3MeasureProcessor {
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
 
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
+        // LUKETODO:
+//        var evalType = MeasureEvalType.fromCode(reportType)
+//                .orElse(
+//                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+//                                ? MeasureEvalType.POPULATION
+//                                : MeasureEvalType.SUBJECT);
+        var evalType = R4MeasureProcessor.someSortOfMeasureTypeCodeConversion(null, reportType, subjectIds);
 
         var subjects =
                 subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());

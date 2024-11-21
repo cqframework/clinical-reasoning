@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
@@ -29,6 +30,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -36,8 +38,12 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureProcessor {
+
+    private static final Logger log = LoggerFactory.getLogger(R4MeasureProcessor.class);
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
@@ -59,11 +65,17 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters) {
 
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                                ? MeasureEvalType.POPULATION
-                                : MeasureEvalType.SUBJECT);
+        var evalType = MeasureEvalType.fromCode(
+                        // validate in R4 accepted values
+                        MeasureEvalType.fromCode(reportType)
+                                .orElse(
+                                        // map null reportType parameter to evalType if no subject parameter is provided
+                                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                                                ? MeasureEvalType.POPULATION
+                                                : MeasureEvalType.SUBJECT)
+                                .toCode())
+                .orElse(MeasureEvalType.SUBJECT);
+//        var evalType = R4MeasureProcessor.someSortOfMeasureTypeCodeConversion(null, reportType, subjectIds);
 
         var actualRepo = this.repository;
         if (additionalData != null) {
@@ -160,6 +172,8 @@ public class R4MeasureProcessor {
                                     ? MeasureEvalType.POPULATION
                                     : MeasureEvalType.SUBJECT);
         }
+//        evalType = someSortOfMeasureTypeCodeConversion(evalType, reportType, subjectIds);
+        log.info("592: NEW evalType: {}, reportType: {}, subjectIds: {}", evalType, reportType, subjectIds);
         // Library Evaluate
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
         R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id);
@@ -205,5 +219,59 @@ public class R4MeasureProcessor {
             }
         });
         return parameterMap;
+    }
+
+    // LUKETODO:  this is one part of the logic for converting null to INDIVIDUAL
+    /*
+
+| Number | ReportType   | subject           | EvalType     | MeasureReportType | Note                                                 |
+|        | param        | param             | used         | returned          |                                                      |
+| ------ | ------------ | ----------------- | ------------ | ----------------- | ---------------------------------------------------- |
+| 1      | empty        | empty             | population   | summary           | default behavior, when NO subject parameter provided |
+| 2      | empty        | Patient/{id}      | subject      | individual        | default behavior, when subject parameter provided    |
+| 2      | empty        | Practitioner/{id} | subject      | individual        | default behavior, when subject parameter provided    |
+| 2      | empty        | Organization/{id} | subject      | individual        | default behavior, when subject parameter provided    |
+| 3      | empty        | Group/{id}        | subject      | individual        | default behavior, when subject parameter provided    |
+| 4      | subject      | empty             | subject      | individual        |                                                      | >>> currently this is an error?
+| 5      | subject      | Patient/{id}      | subject      | individual        |                                                      |
+| 5      | subject      | Practitioner/{id} | subject      | individual        |                                                      |
+| 5      | subject      | Organization/{id} | subject      | individual        |                                                      |
+| 6      | subject      | Group/{id}        | subject      | individual        |                                                      |
+| 7      | population   | empty             | population   | summary           |                                                      |
+| 8      | population   | Patient/{id}      | population   | summary           |                                                      |
+| 8      | population   | Practitioner/{id} | population   | summary           |                                                      |
+| 8      | population   | Organization/{id} | population   | summary           |                                                      |
+| 9      | population   | Group/{id}        | population   | summary           |                                                      |
+| 10     | subject-list | empty             | subject-list | subject-list      |                                                      |
+| 11     | subject-list | Patient/{id}      | subject-list | subject-list      |                                                      |
+| 11     | subject-list | Practitioner/{id} | subject-list | subject-list      |                                                      |
+| 11     | subject-list | Organization/{id} | subject-list | subject-list      |                                                      |
+| 12     | subject-list | Group/{id}        | subject-list | subject-list      |                                                      |
+     */
+    public static MeasureEvalType someSortOfMeasureTypeCodeConversion(MeasureEvalType evalType, String reportType, List<String> subjectIds) {
+        log.info("592: OLD evalType: {}, reportType: {}, subjectIds: {}", evalType, reportType, subjectIds);
+
+        return Optional.ofNullable(evalType)
+            .orElse(MeasureEvalType.fromCode(reportType)
+                .orElse(
+                    subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                        ? MeasureEvalType.POPULATION
+                        : MeasureEvalType.SUBJECT));
+
+        // LUKETODO:  will this work?
+        // LUKETODO:  does this conflict with the changes we made in cdr?
+//        return Optional.ofNullable(evalType)
+//            .orElse(MeasureEvalType.fromCode(reportType)
+//                .orElseGet(() -> {
+//                  if (isSubjectListEffectivelyEmpty(subjectIds)) {
+//                      return MeasureEvalType.POPULATION;
+//                  }
+//
+//                  return MeasureEvalType.SUBJECT;
+//                }));
+    }
+
+    public static boolean isSubjectListEffectivelyEmpty(List<String> subjectIds) {
+        return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
     }
 }

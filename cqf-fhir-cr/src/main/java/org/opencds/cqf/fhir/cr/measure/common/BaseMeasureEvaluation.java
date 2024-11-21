@@ -7,8 +7,11 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> {
+    private static final Logger log = LoggerFactory.getLogger(BaseMeasureEvaluation.class);
 
     protected MeasureDefBuilder<MeasureT> measureDefBuilder;
     protected MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder;
@@ -83,6 +86,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         } else {
             measurementPeriodInterval = measurementPeriod;
         }
+        final MeasureReportType measureReportType = this.evalTypeToReportType(measureEvalType);
+        log.info("592: measureEvalType: {}, measureReportType: {}", measureEvalType, measureReportType);
         return this.measureReportBuilder.build(
                 measure, measureDef, this.evalTypeToReportType(measureEvalType), measurementPeriodInterval, subjectIds);
     }

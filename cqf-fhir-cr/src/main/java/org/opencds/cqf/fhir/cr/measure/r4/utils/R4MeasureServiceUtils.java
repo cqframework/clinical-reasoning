@@ -19,6 +19,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -45,8 +47,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class R4MeasureServiceUtils {
@@ -302,5 +306,35 @@ public class R4MeasureServiceUtils {
         if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException(parameterName + " parameter requires a value.");
         }
+    }
+
+    public MeasureEvalType getMeasureEvalType(String reportType, @Nullable String subjectId) {
+        return convertToNonVersionedMeasureEvalTypeOrDefault(
+                getR4MeasureEvalType(reportType, Collections.singletonList(subjectId)));
+    }
+
+    public MeasureEvalType getMeasureEvalType(String reportType, List<String> subjectIds) {
+        return convertToNonVersionedMeasureEvalTypeOrDefault(getR4MeasureEvalType(reportType, subjectIds));
+    }
+
+    @Nonnull
+    public R4MeasureEvalType getR4MeasureEvalType(String reportType, List<String> subjectIds) {
+        return
+        // validate in R4 accepted values
+        R4MeasureEvalType.fromCode(reportType)
+                .orElse(
+                        // map null reportType parameter to evalType if no subject parameter is provided
+                        isSubjectListEffectivelyEmpty(subjectIds)
+                                ? R4MeasureEvalType.POPULATION
+                                : R4MeasureEvalType.SUBJECT);
+    }
+
+    @Nonnull
+    public MeasureEvalType convertToNonVersionedMeasureEvalTypeOrDefault(R4MeasureEvalType r4MeasureEvalType) {
+        return MeasureEvalType.fromCode(r4MeasureEvalType.toCode()).orElse(MeasureEvalType.SUBJECT);
+    }
+
+    public boolean isSubjectListEffectivelyEmpty(List<String> subjectIds) {
+        return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
     }
 }

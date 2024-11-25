@@ -287,7 +287,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     public MeasureScoring getGroupMeasureScoring(MeasureGroupComponent group) {
         var ext = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
         if (ext != null) {
-            return getMeasureScoring(ext.getValue().toString());
+            var extVal = ext.getValue();
+            assert extVal instanceof CodeableConcept;
+            CodeableConcept coding = (CodeableConcept) extVal;
+            return getMeasureScoring(coding.getCodingFirstRep().getCode());
         }
         return null;
     }

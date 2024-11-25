@@ -774,7 +774,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         report.setMeasure(getMeasure(measure));
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());
-        if (!measureDef.groups().get(0).isGroupImprovementNotation()) {
+        if (measureDef.groups().isEmpty() || !measureDef.groups().get(0).isGroupImprovementNotation()) {
             // if true, all group components have the same improvement Notation
             report.setImprovementNotation(measure.getImprovementNotation());
         }

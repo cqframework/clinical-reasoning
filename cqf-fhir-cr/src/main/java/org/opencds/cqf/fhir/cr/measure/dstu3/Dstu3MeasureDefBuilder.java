@@ -62,7 +62,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // empty measure we simply generate an empty MeasureReport.
         // This might not be the best behavior, but we want to ensure that the behavior is the same
         // between versions
-        if (measureScoring == null) {
+        if (measureScoring == null && measure.hasGroup()) {
             throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
         }
         List<GroupDef> groups = new ArrayList<>();

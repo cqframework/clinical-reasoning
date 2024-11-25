@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -68,7 +67,10 @@ public class MeasureDefBuilderTest {
         if (group1Scoring != null) {
             group1.addExtension(new Extension()
                     .setUrl(MeasureConstants.CQFM_SCORING_EXT_URL)
-                    .setValue(new StringType(group1Scoring)));
+                    .setValue(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setCode(group1Scoring)
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring"))));
         }
         if (group1ImpNotation != null) {
             group1.addExtension(new Extension()
@@ -87,7 +89,10 @@ public class MeasureDefBuilderTest {
         if (group2Scoring != null) {
             group2.addExtension(new Extension()
                     .setUrl(MeasureConstants.CQFM_SCORING_EXT_URL)
-                    .setValue(new StringType(group2Scoring)));
+                    .setValue(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setCode(group2Scoring)
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring"))));
         }
         if (group2ImpNotation != null) {
             group2.addExtension(new Extension()
@@ -95,7 +100,10 @@ public class MeasureDefBuilderTest {
                     .setValue(group2ImpNotation));
         }
         if (measureScoring != null) {
-            measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode(measureScoring)));
+            measure.setScoring(new CodeableConcept()
+                    .addCoding(new Coding()
+                            .setCode(measureScoring)
+                            .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")));
         }
         if (measureImpNotation != null) {
             measure.setImprovementNotation(measureImpNotation);

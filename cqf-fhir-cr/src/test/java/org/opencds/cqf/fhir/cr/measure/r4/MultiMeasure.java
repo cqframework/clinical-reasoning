@@ -92,6 +92,7 @@ public class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
+        private R4RepositorySubjectProvider subjectProvider;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -109,6 +110,9 @@ public class MultiMeasure {
             this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
+
+            this.subjectProvider = new R4RepositorySubjectProvider(
+                evaluationOptions.getSubjectProviderOptions());
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -134,7 +138,7 @@ public class MultiMeasure {
         }
 
         private R4MeasureProcessor buildProcessor() {
-            return new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider());
+            return new R4MeasureProcessor(repository, evaluationOptions, subjectProvider);
         }
 
         private R4MultiMeasureService buildMeasureService() {

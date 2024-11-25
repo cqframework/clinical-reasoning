@@ -104,6 +104,7 @@ public class Measure {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private MeasurePeriodValidator measurePeriodValidator;
+        private R4RepositorySubjectProvider subjectProvider;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -119,6 +120,9 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
+
+            this.subjectProvider = new R4RepositorySubjectProvider(
+                evaluationOptions.getSubjectProviderOptions());
         }
 
         public Given repository(Repository repository) {
@@ -140,7 +144,7 @@ public class Measure {
         }
 
         private R4MeasureProcessor buildProcessor() {
-            return new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider());
+            return new R4MeasureProcessor(repository, evaluationOptions, subjectProvider);
         }
 
         private R4MeasureService buildMeasureService() {

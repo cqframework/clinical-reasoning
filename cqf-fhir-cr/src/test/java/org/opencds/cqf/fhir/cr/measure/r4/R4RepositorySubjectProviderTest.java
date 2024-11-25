@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
@@ -9,11 +8,11 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import java.util.List;
@@ -30,8 +29,10 @@ class R4RepositorySubjectProviderTest {
     private static final String ORG_ID_1 = "org1";
     private static final String ORG_ID_2 = "org2";
 
+    private static final R4RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF = new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
+    private static final R4RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF = new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(false));
+
     private final Repository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
-    private final R4RepositorySubjectProvider testSubject = new R4RepositorySubjectProvider();
 
     @BeforeEach
     void beforeEach() {
@@ -53,19 +54,35 @@ class R4RepositorySubjectProviderTest {
         patient2.setId(PAT_ID_2);
         patient2.setManagingOrganization(new Reference(orgId2.toUnqualifiedVersionless().getValue()));
 
-        final IIdType patientId1 = repository.update(patient1).getId().toUnqualifiedVersionless();
-        final IIdType patientId2 = repository.update(patient2).getId().toUnqualifiedVersionless();
+        repository.update(patient1).getId().toUnqualifiedVersionless();
+        repository.update(patient2).getId().toUnqualifiedVersionless();
     }
 
     public static Stream<Arguments> getSubjectsParams() {
         return Stream.of(
-            Arguments.of(MeasureEvalType.SUBJECT, List.of(resourcify(ResourceType.Organization, ORG_ID_1), Stream.of(PAT_ID_1, PAT_ID_2).map(id -> resourcify(ResourceType.Patient, id)).toList()))
+            Arguments.of(
+                TEST_SUBJECT_ENABLE_PART_OF,
+                MeasureEvalType.SUBJECT,
+                List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                // LUKETODO:  comment about why this doesn't work
+                Stream.of(PAT_ID_1, PAT_ID_2)
+                    .map(id -> resourcify(ResourceType.Patient, id))
+                    .collect(Collectors.toUnmodifiableList())
+            ),
+            Arguments.of(
+                TEST_SUBJECT_DISABLE_PART_OF,
+                MeasureEvalType.SUBJECT,
+                List.of(resourcify(ResourceType.Organization, ORG_ID_1)),
+                Stream.of(PAT_ID_1)
+                    .map(id -> resourcify(ResourceType.Patient, id))
+                    .collect(Collectors.toUnmodifiableList())
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("getSubjectsParams")
-    void getSubjects(MeasureEvalType measureEvalType, List<String> subjectIds, List<String> expectedSubjects) {
+    void getSubjects(R4RepositorySubjectProvider testSubject, MeasureEvalType measureEvalType, List<String> subjectIds, List<String> expectedSubjects) {
         final List<String> actualSubjects = testSubject.getSubjects(repository, measureEvalType,
             subjectIds).collect(Collectors.toList());
 

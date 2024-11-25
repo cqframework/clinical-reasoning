@@ -167,9 +167,13 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             String organization,
             Repository repository ) {
 
+        final List<String> managingOrganizationSubjectIds = getManagingOrganizationSubjectIds(
+            organization, repository).collect(Collectors.toList());
+        final List<String> partOfSubjectIds = getPartOfSubjectIds(organization, repository).collect(
+            Collectors.toList());
         return Stream.concat(
-                getManagingOrganizationSubjectIds(organization, repository),
-                getPartOfSubjectIds(organization, repository)
+            managingOrganizationSubjectIds.stream(),
+            partOfSubjectIds.stream()
             ).collect(Collectors.toUnmodifiableList());
     }
 

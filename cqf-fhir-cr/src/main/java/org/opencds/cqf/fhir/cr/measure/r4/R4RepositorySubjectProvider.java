@@ -3,11 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,22 +18,33 @@ import org.hl7.fhir.r4.model.Group.GroupMemberComponent;
 import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
 
-    @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, String subjectId) {
-        return getSubjects(repository, measureEvalType, Collections.singletonList(subjectId));
+    private static final Logger logger = LoggerFactory.getLogger(R4RepositorySubjectProvider.class);
+
+    private final SubjectProviderOptions subjectProviderOptions;
+
+    public R4RepositorySubjectProvider(SubjectProviderOptions subjectProviderOptions) {
+        this.subjectProviderOptions = subjectProviderOptions;
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, MeasureEvalType measureEvalType, List<String> subjectIds) {
+    public Stream<String> getSubjects(Repository repository, @Nullable String subjectId) {
+        return getSubjects(repository, Collections.singletonList(subjectId));
+    }
+
+    @Override
+    public Stream<String> getSubjects(Repository repository, List<String> subjectIds) {
         // All patients in system
         if (subjectIds == null
                 || subjectIds.isEmpty()
@@ -48,7 +61,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         List<String> subjects = new ArrayList<>();
         subjectIds.forEach(subjectId -> {
             // add resource reference if missing
-            if (subjectId.indexOf("/") == -1) {
+            if (!subjectId.contains("/")) {
                 subjectId = "Patient/".concat(subjectId);
             }
             // Single Patient
@@ -91,7 +104,8 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                         addPractitionerSubjectIds(practitioner, repository, subjects);
                     }
                 }
-
+            } else if (subjectId.startsWith("Organization")) {
+                subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
             } else {
                 throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
             }
@@ -127,5 +141,58 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                     + patient.getIdElement().getIdPart();
             patients.add(refString);
         }
+    }
+
+    private List<String> getOrganizationSubjectIds(String organization, Repository repository) {
+
+        return Stream.concat(
+                        getManagingOrganizationSubjectIds(organization, repository),
+                        getPartOfSubjectIds(organization, repository))
+                .collect(Collectors.toList());
+    }
+
+    private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {
+        final Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+
+        searchParams.put("organization", Collections.singletonList(new ReferenceParam(organization)));
+
+        return handlePatientBundle(repository, searchParams);
+    }
+
+    private Stream<String> getPartOfSubjectIds(String organization, Repository repository) {
+
+        if (!subjectProviderOptions.isPartOfEnabled()) {
+            return Stream.empty();
+        }
+
+        final Map<String, List<IQueryParameterType>> searchParam = new HashMap<>();
+
+        searchParam.put(
+                "organization",
+                Collections.singletonList(new ReferenceParam("organization", organization).setChain("partof")));
+
+        return handlePatientBundle(repository, searchParam);
+    }
+
+    private static Stream<String> handlePatientBundle(
+            Repository repository, Map<String, List<IQueryParameterType>> searchParam) {
+        var bundle = repository.search(Bundle.class, Patient.class, searchParam);
+
+        var bundleEntries = bundle.getEntry();
+
+        if (bundleEntries == null || bundleEntries.isEmpty()) {
+            return Stream.empty();
+        }
+
+        var iterator = new BundleIterator<>(repository, bundle);
+        var patientIds = new ArrayList<String>();
+
+        iterator.forEachRemaining(item -> {
+            var resource = item.getResource();
+            var idElement = resource.getIdElement();
+            patientIds.add(ResourceType.Patient + "/" + idElement.getIdPart());
+        });
+
+        return patientIds.stream();
     }
 }

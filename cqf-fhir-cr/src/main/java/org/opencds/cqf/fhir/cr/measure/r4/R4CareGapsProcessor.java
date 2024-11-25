@@ -42,6 +42,7 @@ public class R4CareGapsProcessor {
     private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
+    private final R4RepositorySubjectProvider subjectProvider;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -60,6 +61,7 @@ public class R4CareGapsProcessor {
                 serverBase,
                 configuredResources,
                 measurePeriodValidator);
+        subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
     public Parameters getCareGapsReport(
@@ -126,8 +128,7 @@ public class R4CareGapsProcessor {
     }
 
     protected List<String> getSubjects(String subject) {
-        R4RepositorySubjectProvider subjectProvider = new R4RepositorySubjectProvider();
-        var subjects = subjectProvider.getSubjects(repository, null, subject).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
         if (!subjects.isEmpty()) {
             ourLog.info(String.format("care-gaps report requested for: %s subjects.", subjects.size()));
         } else {

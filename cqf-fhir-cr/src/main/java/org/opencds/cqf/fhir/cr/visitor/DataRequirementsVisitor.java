@@ -1,22 +1,16 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
-import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.findUnsupportedCapability;
-import static org.opencds.cqf.fhir.utility.visitor.VisitorHelper.processCanonicals;
-
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -31,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Library;
 import org.opencds.cqf.fhir.api.Repository;
@@ -39,49 +32,39 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
-import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Libraries;
-import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.visitor.IKnowledgeArtifactVisitor;
-import org.opencds.cqf.fhir.utility.visitor.VisitorHelper;
 
-public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
+public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;
     protected EvaluationSettings evaluationSettings;
 
-    public DataRequirementsVisitor(EvaluationSettings evaluationSettings) {
+    public DataRequirementsVisitor(Repository repository, EvaluationSettings evaluationSettings) {
+        super(repository);
         dataRequirementsProcessor = new DataRequirementsProcessor();
         this.evaluationSettings = evaluationSettings;
     }
 
     @Override
-    public IBase visit(IKnowledgeArtifactAdapter adapter, Repository repository, IBaseParameters drParameters) {
-        var fhirVersion = adapter.get().getStructureFhirVersionEnum();
-        Optional<IBaseParameters> parameters =
-                VisitorHelper.getResourceParameter("parameters", drParameters, IBaseParameters.class);
-        List<String> artifactVersion = VisitorHelper.getListParameter(
-                        "artifactVersion", drParameters, IPrimitiveType.class)
-                .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
+    public IBase visit(IKnowledgeArtifactAdapter adapter, IBaseParameters operationParameters) {
+        Optional<IBaseParameters> parameters = VisitorHelper.getResourceParameter("parameters", operationParameters);
+        List<String> artifactVersion = VisitorHelper.getStringListParameter("artifactVersion", operationParameters)
                 .orElseGet(() -> new ArrayList<>());
-        List<String> checkArtifactVersion = VisitorHelper.getListParameter(
-                        "checkArtifactVersion", drParameters, IPrimitiveType.class)
-                .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
+        List<String> checkArtifactVersion = VisitorHelper.getStringListParameter(
+                        "checkArtifactVersion", operationParameters)
                 .orElseGet(() -> new ArrayList<>());
-        List<String> forceArtifactVersion = VisitorHelper.getListParameter(
-                        "forceArtifactVersion", drParameters, IPrimitiveType.class)
-                .map(l -> l.stream().map(t -> (String) t.getValue()).collect(Collectors.toList()))
+        List<String> forceArtifactVersion = VisitorHelper.getStringListParameter(
+                        "forceArtifactVersion", operationParameters)
                 .orElseGet(() -> new ArrayList<>());
 
         ILibraryAdapter library;
         var primaryLibrary = adapter.getPrimaryLibrary(repository);
         if (primaryLibrary != null) {
-            var libraryManager = createLibraryManager(repository);
+            var libraryManager = createLibraryManager();
             CqlTranslator translator = translateLibrary(primaryLibrary, libraryManager);
-            var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
+            var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext());
             var evaluationParameters =
                     parameters.isPresent() ? cqlFhirParametersConverter.toCqlParameters(parameters.get()) : null;
 
@@ -93,30 +76,24 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                     evaluationParameters,
                     true,
                     true);
-            library = convertAndCreateAdapter(fhirVersion, r5Library);
+            library = convertAndCreateAdapter(r5Library);
         } else {
-            library = IAdapterFactory.forFhirContext(repository.fhirContext())
-                    .createLibrary(repository
-                            .fhirContext()
-                            .getResourceDefinition("Library")
-                            .newInstance());
+            library = IAdapterFactory.forFhirContext(fhirContext())
+                    .createLibrary(
+                            fhirContext().getResourceDefinition("Library").newInstance());
             library.setName("EffectiveDataRequirements");
             library.setStatus(adapter.getStatus());
             library.setType("module-definition");
         }
-        var gatheredResources = new HashSet<String>();
+        var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
         var relatedArtifacts = stripInvalid(library);
         recursiveGather(
-                adapter.get(),
+                adapter,
                 gatheredResources,
-                relatedArtifacts,
-                repository,
                 forceArtifactVersion,
                 forceArtifactVersion,
-                artifactVersion,
-                checkArtifactVersion,
-                forceArtifactVersion);
-
+                new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion));
+        gatheredResources.values().stream().forEach(r -> addRelatedArtifact(relatedArtifacts, r));
         library.setRelatedArtifact(relatedArtifacts);
         return library.get();
     }
@@ -139,9 +116,9 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
     }
 
-    private ILibraryAdapter convertAndCreateAdapter(FhirVersionEnum fhirVersion, Library r5Library) {
-        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
-        switch (fhirVersion) {
+    private ILibraryAdapter convertAndCreateAdapter(Library r5Library) {
+        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion());
+        switch (fhirVersion()) {
             case DSTU3:
                 var versionConvertor3050 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
                 return adapterFactory.createLibrary(versionConvertor3050.convertResource(r5Library));
@@ -152,8 +129,8 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
                 return adapterFactory.createLibrary(r5Library);
 
             default:
-                throw new IllegalArgumentException(
-                        String.format("FHIR version %s is not supported.", fhirVersion.toString()));
+                throw new IllegalArgumentException(String.format(
+                        "FHIR version %s is not supported.", fhirVersion().getFhirVersionString()));
         }
     }
 
@@ -180,14 +157,14 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
         return translator;
     }
 
-    protected static LibrarySourceProvider buildLibrarySource(Repository repository) {
-        IAdapterFactory adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
+    protected LibrarySourceProvider buildLibrarySource() {
+        IAdapterFactory adapterFactory = IAdapterFactory.forFhirContext(fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
-    protected LibraryManager createLibraryManager(Repository repository) {
-        var librarySourceProvider = buildLibrarySource(repository);
+    protected LibraryManager createLibraryManager() {
+        var librarySourceProvider = buildLibrarySource();
         var sourceProviders = new ArrayList<>(Arrays.asList(librarySourceProvider, librarySourceProvider));
         var modelManager = evaluationSettings.getModelCache() != null
                 ? new ModelManager(evaluationSettings.getModelCache())
@@ -201,69 +178,5 @@ public class DataRequirementsVisitor implements IKnowledgeArtifactVisitor {
             libraryManager.getLibrarySourceLoader().registerProvider(provider);
         }
         return libraryManager;
-    }
-
-    protected <T extends ICompositeType & IBaseHasExtensions> void recursiveGather(
-            IDomainResource resource,
-            Set<String> gatheredResources,
-            List<T> relatedArtifacts,
-            Repository repository,
-            List<String> capability,
-            List<String> include,
-            List<String> artifactVersion,
-            List<String> checkArtifactVersion,
-            List<String> forceArtifactVersion)
-            throws PreconditionFailedException {
-        if (resource == null) {
-            return;
-        }
-        var fhirVersion = resource.getStructureFhirVersionEnum();
-        var adapter = IAdapterFactory.forFhirVersion(fhirVersion).createKnowledgeArtifactAdapter(resource);
-        if (!gatheredResources.contains(adapter.getCanonical())) {
-            gatheredResources.add(adapter.getCanonical());
-            findUnsupportedCapability(adapter, capability);
-            processCanonicals(adapter, artifactVersion, checkArtifactVersion, forceArtifactVersion);
-            var reference = adapter.hasVersion()
-                    ? adapter.getUrl().concat(String.format("|%s", adapter.getVersion()))
-                    : adapter.getUrl();
-            boolean addArtifact = relatedArtifacts.stream()
-                    .noneMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
-                            .equals(reference));
-            if (addArtifact) {
-                relatedArtifacts.add(IKnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion, "depends-on", reference, adapter.getDescriptor()));
-            }
-
-            adapter.combineComponentsAndDependencies().stream()
-                    // sometimes VS dependencies aren't FHIR resources
-                    .filter(ra -> StringUtils.isNotBlank(ra.getReference())
-                            && StringUtils.isNotBlank(Canonicals.getResourceType(ra.getReference())))
-                    .filter(ra -> {
-                        try {
-                            var resourceDef = repository
-                                    .fhirContext()
-                                    .getResourceDefinition(Canonicals.getResourceType(ra.getReference()));
-                            return resourceDef != null;
-                        } catch (DataFormatException e) {
-                            if (e.getMessage().contains("1684")) {
-                                return false;
-                            } else {
-                                throw new DataFormatException(e.getMessage());
-                            }
-                        }
-                    })
-                    .map(ra -> SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getReference()))
-                    .map(searchBundle -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(searchBundle))
-                    .forEach(component -> recursiveGather(
-                            component,
-                            gatheredResources,
-                            relatedArtifacts,
-                            repository,
-                            capability,
-                            include,
-                            artifactVersion,
-                            checkArtifactVersion,
-                            forceArtifactVersion));
-        }
     }
 }

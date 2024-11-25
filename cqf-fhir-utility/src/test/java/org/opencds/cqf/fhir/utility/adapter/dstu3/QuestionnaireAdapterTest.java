@@ -10,12 +10,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
@@ -23,28 +21,27 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class QuestionnaireAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class QuestionnaireAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new QuestionnaireAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new QuestionnaireAdapter(library));
     }
 
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(QuestionnaireAdapter.class), any(), any());
-        IDomainResource questionnaire = new Questionnaire();
+        var spyVisitor = spy(new TestVisitor());
+        var questionnaire = new Questionnaire();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(questionnaire);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(QuestionnaireAdapter.class), any(), any());
+        doReturn(questionnaire).when(spyVisitor).visit(any(QuestionnaireAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(QuestionnaireAdapter.class), any());
     }
 
     @Test
@@ -154,7 +151,7 @@ public class QuestionnaireAdapterTest {
         copy.setId("plan-2");
         assertNotEquals(questionnaire.getId(), copy.getId());
         questionnaire.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test
@@ -162,27 +159,15 @@ public class QuestionnaireAdapterTest {
         var dependencies = List.of(
                 "profileRef",
                 "cqfLibraryRef",
-                // "variableRef",
                 "itemDefinitionRef",
                 "answerValueSetRef",
-                // "itemMediaRef",
-                // "itemAnswerMediaRef",
                 "unitValueSetRef",
                 "referenceProfileRef",
-                // "candidateExpressionRef",
                 "lookupQuestionnaireRef",
-                // "itemVariableRef",
-                // "initialExpressionRef",
-                // "calculatedExpressionRef",
-                // "calculatedValueRef",
-                // "expressionRef",
                 "subQuestionnaireRef");
         var questionnaire = new Questionnaire();
         questionnaire.getMeta().addProfile(dependencies.get(0));
         questionnaire.addExtension(Constants.CQIF_LIBRARY, new Reference(dependencies.get(1)));
-        // var variableExt = new Extension(Constants.VARIABLE_EXTENSION).setValue(new
-        // Expression().setReference(dependencies.get(2)));
-        // questionnaire.addExtension(variableExt);
         questionnaire.addItem().setDefinition(dependencies.get(2) + "#Observation");
         questionnaire.addItem().setOptions(new Reference(dependencies.get(3)));
         questionnaire.addItem().addExtension(Constants.QUESTIONNAIRE_UNIT_VALUE_SET, new UriType(dependencies.get(4)));

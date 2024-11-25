@@ -131,8 +131,7 @@ public class Dstu3MeasureProcessor {
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 
-        var subjects =
-                subjectProvider.getSubjects(actualRepo, evalType, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
         Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
         return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);

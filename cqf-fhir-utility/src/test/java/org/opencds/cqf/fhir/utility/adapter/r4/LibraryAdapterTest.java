@@ -10,7 +10,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
@@ -18,9 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
@@ -31,25 +28,25 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class LibraryAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
+class LibraryAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(new PlanDefinition()));
+        var planDefinition = new PlanDefinition();
+        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(planDefinition));
     }
 
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(LibraryAdapter.class), any(), any());
-        IDomainResource library = new Library();
+        var spyVisitor = spy(new TestVisitor());
+        var library = new Library();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any(), any());
+        doReturn(library).when(spyVisitor).visit(any(LibraryAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(LibraryAdapter.class), any());
     }
 
     @Test
@@ -161,7 +158,7 @@ public class LibraryAdapterTest {
         adapterCopy.setId(new IdDt("Library", "library-2"));
         assertNotEquals(library.getId(), copy.getId());
         library.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

@@ -687,12 +687,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return;
         }
 
-        // This is an individual report... shouldn't have more than one subject!
-        if (report.getType() == MeasureReport.MeasureReportType.INDIVIDUAL
-                && sde.getResults().keySet().size() > 1) {
-            throw new IllegalArgumentException();
-        }
-
         // Add all evaluated resources
         for (var e : sde.getResults().entrySet()) {
             addEvaluatedResourceReferences(bc, sde.id(), e.getValue().evaluatedResources());

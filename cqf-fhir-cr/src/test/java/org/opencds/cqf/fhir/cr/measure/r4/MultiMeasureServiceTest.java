@@ -931,4 +931,25 @@ class MultiMeasureServiceTest {
                 .hasSubjectReference("Practitioner/tester")
                 .hasReporter("Patient/male-2022"));
     }
+
+    // This test is effectively a sanity test to ensure that Organization subjects
+    // do not error out as they did previous to the new feature that enables to this feature./
+    // For more complex scenarios please see R4RepositorySubjectProviderTest.
+    @Test
+    void MultiMeasure_EightMeasures_SubjectOrganization() {
+        var when = GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionNoBasisSingleGroup")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .subject("Organization/organization-linked-by-managingOrganization")
+                .evaluate();
+
+        when.then()
+                .hasMeasureReportCount(1)
+                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .hasReportType("Summary")
+                .hasSubjectReference("Organization/organization-linked-by-managingOrganization");
+    }
 }

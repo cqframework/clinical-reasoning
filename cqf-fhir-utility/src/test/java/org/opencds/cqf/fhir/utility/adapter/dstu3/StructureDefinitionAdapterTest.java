@@ -10,12 +10,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
@@ -23,28 +21,26 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.visitor.PackageVisitor;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-public class StructureDefinitionAdapterTest {
-    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+class StructureDefinitionAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(new Library()));
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
     }
 
     @Test
     void adapter_accepts_visitor() {
-        var spyVisitor = spy(new PackageVisitor(fhirContext));
-        doReturn(new Bundle()).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any(), any());
-        IDomainResource structureDef = new StructureDefinition();
+        var spyVisitor = spy(new TestVisitor());
+        var structureDef = new StructureDefinition();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
-        assertEquals(structureDef, adapter.get());
-        adapter.accept(spyVisitor, null, null);
-        verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any(), any());
+        doReturn(structureDef).when(spyVisitor).visit(any(StructureDefinitionAdapter.class), any());
+        adapter.accept(spyVisitor, null);
+        verify(spyVisitor, times(1)).visit(any(StructureDefinitionAdapter.class), any());
     }
 
     @Test
@@ -154,7 +150,7 @@ public class StructureDefinitionAdapterTest {
         copy.setId("plan-2");
         assertNotEquals(structureDef.getId(), copy.getId());
         structureDef.setStatus(PublicationStatus.ACTIVE);
-        assertNotEquals(adapter.getStatus(), copy.getStatus());
+        assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
     }
 
     @Test

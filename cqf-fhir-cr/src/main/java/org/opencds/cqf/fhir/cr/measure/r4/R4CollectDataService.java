@@ -17,16 +17,24 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class R4CollectDataService {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final R4RepositorySubjectProvider subjectProvider;
+    private final R4MeasureServiceUtils measureServiceUtils;
 
-    public R4CollectDataService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public R4CollectDataService(
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            R4MeasureServiceUtils measureServiceUtils) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.measureServiceUtils = measureServiceUtils;
     }
 
     /**
@@ -57,8 +65,8 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var subjectProvider = new R4RepositorySubjectProvider();
-        var processor = new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, subjectProvider);
+        var processor = new R4MeasureProcessor(
+                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
@@ -117,9 +125,7 @@ public class R4CollectDataService {
             subject = practitioner;
         }
 
-        return subjectProvider
-                .getSubjects(repository, MeasureEvalType.SUBJECT, subject)
-                .collect(Collectors.toList());
+        return subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
     }
 
     protected void populateEvaluatedResources(MeasureReport measureReport, Parameters parameters, String subject) {

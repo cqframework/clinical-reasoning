@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 
+@SuppressWarnings({"squid:S110", "squid:S1192"})
 @ResourceDef(
         id = "ArtifactAssessment",
         profile = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment")
@@ -65,15 +66,30 @@ public class ArtifactAssessment extends Basic {
         NULL;
 
         public static ArtifactAssessmentContentInformationType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("comment".equals(codeString)) return COMMENT;
-            if ("classifier".equals(codeString)) return CLASSIFIER;
-            if ("rating".equals(codeString)) return RATING;
-            if ("container".equals(codeString)) return CONTAINER;
-            if ("response".equals(codeString)) return RESPONSE;
-            if ("change-request".equals(codeString)) return CHANGEREQUEST;
-            if (Configuration.isAcceptInvalidEnums()) return null;
-            else throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
+            if (StringUtils.isBlank(codeString)) {
+                return null;
+            }
+            switch (codeString) {
+                case "comment":
+                    return COMMENT;
+                case "classifier":
+                    return CLASSIFIER;
+                case "rating":
+                    return RATING;
+                case "container":
+                    return CONTAINER;
+                case "response":
+                    return RESPONSE;
+                case "change-request":
+                    return CHANGEREQUEST;
+
+                default:
+                    if (Configuration.isAcceptInvalidEnums()) {
+                        return null;
+                    } else {
+                        throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
+                    }
+            }
         }
 
         public String toCode() {
@@ -99,17 +115,7 @@ public class ArtifactAssessment extends Basic {
 
         public String getSystem() {
             switch (this) {
-                case COMMENT:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case CLASSIFIER:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case RATING:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case CONTAINER:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case RESPONSE:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case CHANGEREQUEST:
+                case COMMENT, CLASSIFIER, RATING, CONTAINER, RESPONSE, CHANGEREQUEST:
                     return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
                 case NULL:
                     return null;
@@ -164,52 +170,18 @@ public class ArtifactAssessment extends Basic {
     public static class ArtifactAssessmentContentInformationTypeEnumFactory
             implements EnumFactory<ArtifactAssessmentContentInformationType> {
         public ArtifactAssessmentContentInformationType fromCode(String codeString) throws IllegalArgumentException {
-            if (codeString == null || "".equals(codeString))
-                if (codeString == null || "".equals(codeString)) return null;
-            if ("comment".equals(codeString)) return ArtifactAssessmentContentInformationType.COMMENT;
-            if ("classifier".equals(codeString)) return ArtifactAssessmentContentInformationType.CLASSIFIER;
-            if ("rating".equals(codeString)) return ArtifactAssessmentContentInformationType.RATING;
-            if ("container".equals(codeString)) return ArtifactAssessmentContentInformationType.CONTAINER;
-            if ("response".equals(codeString)) return ArtifactAssessmentContentInformationType.RESPONSE;
-            if ("change-request".equals(codeString)) return ArtifactAssessmentContentInformationType.CHANGEREQUEST;
-            throw new IllegalArgumentException("Unknown ArtifactCommentType code '" + codeString + "'");
+            return ArtifactAssessmentContentInformationType.fromCode(codeString);
         }
 
         public Enumeration<ArtifactAssessmentContentInformationType> fromType(Base code) throws FHIRException {
             if (code == null) return null;
-            if (code.isEmpty()) return new Enumeration<ArtifactAssessmentContentInformationType>(this);
-            String codeString = ((PrimitiveType<?>) code).asStringValue();
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("comment".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.COMMENT);
-            if ("classifier".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.CLASSIFIER);
-            if ("rating".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.RATING);
-            if ("container".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.CONTAINER);
-            if ("response".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.RESPONSE);
-            if ("change-request".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentInformationType>(
-                        this, ArtifactAssessmentContentInformationType.CHANGEREQUEST);
-
-            throw new FHIRException("Unknown ArtifactCommentType code '" + codeString + "'");
+            if (code.isEmpty()) return new Enumeration<>(this);
+            return new Enumeration<>(
+                    this, ArtifactAssessmentContentInformationType.fromCode(((PrimitiveType<?>) code).asStringValue()));
         }
 
         public String toCode(ArtifactAssessmentContentInformationType code) {
-            if (code == ArtifactAssessmentContentInformationType.COMMENT) return "comment";
-            if (code == ArtifactAssessmentContentInformationType.CLASSIFIER) return "classifier";
-            if (code == ArtifactAssessmentContentInformationType.RATING) return "rating";
-            if (code == ArtifactAssessmentContentInformationType.CONTAINER) return "container";
-            if (code == ArtifactAssessmentContentInformationType.RESPONSE) return "response";
-            if (code == ArtifactAssessmentContentInformationType.CHANGEREQUEST) return "change-request";
-            return "?";
+            return code.toCode();
         }
 
         public String toSystem(ArtifactAssessmentContentInformationType code) {
@@ -288,25 +260,49 @@ public class ArtifactAssessment extends Basic {
         NULL;
 
         public static ArtifactAssessmentContentClassifier fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("high".equals(codeString)) return HIGH;
-            if ("moderate".equals(codeString)) return MODERATE;
-            if ("low".equals(codeString)) return LOW;
-            if ("very-low".equals(codeString)) return VERY_LOW;
-            if ("no-concern".equals(codeString)) return NO_CONCERN;
-            if ("serious-concern".equals(codeString)) return SERIOUS_CONCERN;
-            if ("very-serious-concern".equals(codeString)) return VERY_SERIOUS_CONCERN;
-            if ("extremely-serious-concern".equals(codeString)) return EXTREMELY_SERIOUS_CONCERN;
-            if ("present".equals(codeString)) return PRESENT;
-            if ("absent".equals(codeString)) return ABSENT;
-            if ("no-change".equals(codeString)) return NO_CHANGE;
-            if ("downcode1".equals(codeString)) return DOWNCODE1;
-            if ("downcode2".equals(codeString)) return DOWNCODE2;
-            if ("downcode3".equals(codeString)) return DOWNCODE3;
-            if ("upcode1".equals(codeString)) return UPCODE1;
-            if ("upcode2".equals(codeString)) return UPCODE2;
-            if (Configuration.isAcceptInvalidEnums()) return null;
-            else throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
+            if (StringUtils.isBlank(codeString)) {
+                return null;
+            }
+            switch (codeString) {
+                case "high":
+                    return HIGH;
+                case "moderate":
+                    return MODERATE;
+                case "low":
+                    return LOW;
+                case "very-low":
+                    return VERY_LOW;
+                case "no-concern":
+                    return NO_CONCERN;
+                case "serious-concern":
+                    return SERIOUS_CONCERN;
+                case "very-serious-concern":
+                    return VERY_SERIOUS_CONCERN;
+                case "extremely-serious-concern":
+                    return EXTREMELY_SERIOUS_CONCERN;
+                case "present":
+                    return PRESENT;
+                case "absent":
+                    return ABSENT;
+                case "no-change":
+                    return NO_CHANGE;
+                case "downcode1":
+                    return DOWNCODE1;
+                case "downcode2":
+                    return DOWNCODE2;
+                case "downcode3":
+                    return DOWNCODE3;
+                case "upcode1":
+                    return UPCODE1;
+                case "upcode2":
+                    return UPCODE2;
+                default:
+                    if (Configuration.isAcceptInvalidEnums()) {
+                        return null;
+                    } else {
+                        throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
+                    }
+            }
         }
 
         public String toCode() {
@@ -352,37 +348,22 @@ public class ArtifactAssessment extends Basic {
 
         public String getSystem() {
             switch (this) {
-                case HIGH:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case MODERATE:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case LOW:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case VERY_LOW:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case NO_CONCERN:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case SERIOUS_CONCERN:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case VERY_SERIOUS_CONCERN:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case EXTREMELY_SERIOUS_CONCERN:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case PRESENT:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case ABSENT:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case NO_CHANGE:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case DOWNCODE1:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case DOWNCODE2:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case DOWNCODE3:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case UPCODE1:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case UPCODE2:
+                case HIGH,
+                        MODERATE,
+                        LOW,
+                        VERY_LOW,
+                        NO_CONCERN,
+                        SERIOUS_CONCERN,
+                        VERY_SERIOUS_CONCERN,
+                        EXTREMELY_SERIOUS_CONCERN,
+                        PRESENT,
+                        ABSENT,
+                        NO_CHANGE,
+                        DOWNCODE1,
+                        DOWNCODE2,
+                        DOWNCODE3,
+                        UPCODE1,
+                        UPCODE2:
                     return "http://terminology.hl7.org/CodeSystem/certainty-rating";
                 case NULL:
                     return null;
@@ -477,104 +458,22 @@ public class ArtifactAssessment extends Basic {
     public static class ArtifactAssessmentContentClassifierEnumFactory
             implements EnumFactory<ArtifactAssessmentContentClassifier> {
         public ArtifactAssessmentContentClassifier fromCode(String codeString) throws IllegalArgumentException {
-            if (codeString == null || "".equals(codeString))
-                if (codeString == null || "".equals(codeString)) return null;
-            if ("high".equals(codeString)) return ArtifactAssessmentContentClassifier.HIGH;
-            if ("moderate".equals(codeString)) return ArtifactAssessmentContentClassifier.MODERATE;
-            if ("low".equals(codeString)) return ArtifactAssessmentContentClassifier.LOW;
-            if ("very-low".equals(codeString)) return ArtifactAssessmentContentClassifier.VERY_LOW;
-            if ("no-concern".equals(codeString)) return ArtifactAssessmentContentClassifier.NO_CONCERN;
-            if ("serious-concern".equals(codeString)) return ArtifactAssessmentContentClassifier.SERIOUS_CONCERN;
-            if ("very-serious-concern".equals(codeString))
-                return ArtifactAssessmentContentClassifier.VERY_SERIOUS_CONCERN;
-            if ("extremely-serious-concern".equals(codeString))
-                return ArtifactAssessmentContentClassifier.EXTREMELY_SERIOUS_CONCERN;
-            if ("present".equals(codeString)) return ArtifactAssessmentContentClassifier.PRESENT;
-            if ("absent".equals(codeString)) return ArtifactAssessmentContentClassifier.ABSENT;
-            if ("no-change".equals(codeString)) return ArtifactAssessmentContentClassifier.NO_CHANGE;
-            if ("downcode1".equals(codeString)) return ArtifactAssessmentContentClassifier.DOWNCODE1;
-            if ("downcode2".equals(codeString)) return ArtifactAssessmentContentClassifier.DOWNCODE2;
-            if ("downcode3".equals(codeString)) return ArtifactAssessmentContentClassifier.DOWNCODE3;
-            if ("upcode1".equals(codeString)) return ArtifactAssessmentContentClassifier.UPCODE1;
-            if ("upcode2".equals(codeString)) return ArtifactAssessmentContentClassifier.UPCODE2;
-            throw new IllegalArgumentException("Unknown ArtifactCommentType code '" + codeString + "'");
+            return ArtifactAssessmentContentClassifier.fromCode(codeString);
         }
 
         public Enumeration<ArtifactAssessmentContentClassifier> fromType(Base code) throws FHIRException {
-            if (code == null) return null;
-            if (code.isEmpty()) return new Enumeration<ArtifactAssessmentContentClassifier>(this);
-            String codeString = ((PrimitiveType<?>) code).asStringValue();
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("high".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.HIGH);
-            if ("moderate".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.MODERATE);
-            if ("low".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.LOW);
-            if ("very-low".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.VERY_LOW);
-            if ("no-concern".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.NO_CONCERN);
-            if ("serious-concern".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.SERIOUS_CONCERN);
-            if ("very-serious-concern".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.VERY_SERIOUS_CONCERN);
-            if ("extremely-serious-concern".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.EXTREMELY_SERIOUS_CONCERN);
-            if ("present".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.PRESENT);
-            if ("absent".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.ABSENT);
-            if ("no-change".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.NO_CHANGE);
-            if ("downcode1".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.DOWNCODE1);
-            if ("downcode2".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.DOWNCODE2);
-            if ("downcode3".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.DOWNCODE3);
-            if ("upcode1".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.UPCODE1);
-            if ("upcode2".equals(codeString))
-                return new Enumeration<ArtifactAssessmentContentClassifier>(
-                        this, ArtifactAssessmentContentClassifier.UPCODE2);
-            throw new FHIRException("Unknown ArtifactCommentType code '" + codeString + "'");
+            if (code == null) {
+                return null;
+            }
+            if (code.isEmpty()) {
+                return new Enumeration<>(this);
+            }
+            return new Enumeration<>(
+                    this, ArtifactAssessmentContentClassifier.fromCode(((PrimitiveType<?>) code).asStringValue()));
         }
 
         public String toCode(ArtifactAssessmentContentClassifier code) {
-            if (code == ArtifactAssessmentContentClassifier.HIGH) return "high";
-            if (code == ArtifactAssessmentContentClassifier.MODERATE) return "moderate";
-            if (code == ArtifactAssessmentContentClassifier.LOW) return "low";
-            if (code == ArtifactAssessmentContentClassifier.VERY_LOW) return "very-low";
-            if (code == ArtifactAssessmentContentClassifier.NO_CONCERN) return "no-concern";
-            if (code == ArtifactAssessmentContentClassifier.SERIOUS_CONCERN) return "serious-concern";
-            if (code == ArtifactAssessmentContentClassifier.VERY_SERIOUS_CONCERN) return "very-serious-concern";
-            if (code == ArtifactAssessmentContentClassifier.EXTREMELY_SERIOUS_CONCERN)
-                return "extremely-serious-concern";
-            if (code == ArtifactAssessmentContentClassifier.PRESENT) return "present";
-            if (code == ArtifactAssessmentContentClassifier.ABSENT) return "absent";
-            if (code == ArtifactAssessmentContentClassifier.NO_CHANGE) return "no-change";
-            if (code == ArtifactAssessmentContentClassifier.DOWNCODE1) return "downcode1";
-            if (code == ArtifactAssessmentContentClassifier.DOWNCODE2) return "downcode2";
-            if (code == ArtifactAssessmentContentClassifier.DOWNCODE3) return "downcode3";
-            if (code == ArtifactAssessmentContentClassifier.UPCODE1) return "upcode1";
-            if (code == ArtifactAssessmentContentClassifier.UPCODE2) return "upcode2";
-            return "?";
+            return code.toCode();
         }
 
         public String toSystem(ArtifactAssessmentContentClassifier code) {
@@ -627,18 +526,36 @@ public class ArtifactAssessment extends Basic {
         NULL;
 
         public static ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("submitted".equals(codeString)) return SUBMITTED;
-            if ("triaged".equals(codeString)) return TRIAGED;
-            if ("waiting-for-input".equals(codeString)) return WAITINGFORINPUT;
-            if ("resolved-no-change".equals(codeString)) return RESOLVEDNOCHANGE;
-            if ("resolved-change-required".equals(codeString)) return RESOLVEDCHANGEREQUIRED;
-            if ("deferred".equals(codeString)) return DEFERRED;
-            if ("duplicate".equals(codeString)) return DUPLICATE;
-            if ("applied".equals(codeString)) return APPLIED;
-            if ("published".equals(codeString)) return PUBLISHED;
-            if (Configuration.isAcceptInvalidEnums()) return null;
-            else throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+            if (StringUtils.isBlank(codeString)) {
+                return null;
+            }
+            switch (codeString) {
+                case "submitted":
+                    return SUBMITTED;
+                case "triaged":
+                    return TRIAGED;
+                case "waiting-for-input":
+                    return WAITINGFORINPUT;
+                case "resolved-no-change":
+                    return RESOLVEDNOCHANGE;
+                case "resolved-change-required":
+                    return RESOLVEDCHANGEREQUIRED;
+                case "deferred":
+                    return DEFERRED;
+                case "duplicate":
+                    return DUPLICATE;
+                case "applied":
+                    return APPLIED;
+                case "published":
+                    return PUBLISHED;
+
+                default:
+                    if (Configuration.isAcceptInvalidEnums()) {
+                        return null;
+                    } else {
+                        throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+                    }
+            }
         }
 
         public String toCode() {
@@ -667,27 +584,10 @@ public class ArtifactAssessment extends Basic {
         }
 
         public String getSystem() {
-            switch (this) {
-                case SUBMITTED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case TRIAGED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case WAITINGFORINPUT:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case RESOLVEDNOCHANGE:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case RESOLVEDCHANGEREQUIRED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case DEFERRED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case DUPLICATE:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case APPLIED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                case PUBLISHED:
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status";
-                default:
-                    return "?";
+            if (this.equals(NULL)) {
+                return "?";
+            } else {
+                return "http://hl7.org/fhir/artifactassessment-workflow-status";
             }
         }
 
@@ -745,69 +645,22 @@ public class ArtifactAssessment extends Basic {
     public static class ArtifactAssessmentWorkflowStatusEnumFactory
             implements EnumFactory<ArtifactAssessmentWorkflowStatus> {
         public ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws IllegalArgumentException {
-            if (codeString == null || "".equals(codeString))
-                if (codeString == null || "".equals(codeString)) return null;
-            if ("submitted".equals(codeString)) return ArtifactAssessmentWorkflowStatus.SUBMITTED;
-            if ("triaged".equals(codeString)) return ArtifactAssessmentWorkflowStatus.TRIAGED;
-            if ("waiting-for-input".equals(codeString)) return ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT;
-            if ("resolved-no-change".equals(codeString)) return ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE;
-            if ("resolved-change-required".equals(codeString))
-                return ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED;
-            if ("deferred".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DEFERRED;
-            if ("duplicate".equals(codeString)) return ArtifactAssessmentWorkflowStatus.DUPLICATE;
-            if ("applied".equals(codeString)) return ArtifactAssessmentWorkflowStatus.APPLIED;
-            if ("published".equals(codeString)) return ArtifactAssessmentWorkflowStatus.PUBLISHED;
-            else
-                throw new IllegalArgumentException(
-                        "Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+            return ArtifactAssessmentWorkflowStatus.fromCode(codeString);
         }
 
         public Enumeration<ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
-            if (code == null) return null;
-            if (code.isEmpty()) return new Enumeration<ArtifactAssessmentWorkflowStatus>(this);
-            String codeString = ((PrimitiveType<?>) code).asStringValue();
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("submitted".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.SUBMITTED);
-            if ("triaged".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.TRIAGED);
-            if ("waiting-for-input".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT);
-            if ("resolved-no-change".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE);
-            if ("resolved-change-required".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED);
-            if ("deferred".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.DEFERRED);
-            if ("duplicate".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.DUPLICATE);
-            if ("applied".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.APPLIED);
-            if ("published".equals(codeString))
-                return new Enumeration<ArtifactAssessmentWorkflowStatus>(
-                        this, ArtifactAssessmentWorkflowStatus.PUBLISHED);
-            throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
+            if (code == null) {
+                return null;
+            }
+            if (code.isEmpty()) {
+                return new Enumeration<>(this);
+            }
+            return new Enumeration<>(
+                    this, ArtifactAssessmentWorkflowStatus.fromCode(((PrimitiveType<?>) code).asStringValue()));
         }
 
         public String toCode(ArtifactAssessmentWorkflowStatus code) {
-            if (code == ArtifactAssessmentWorkflowStatus.SUBMITTED) return "submitted";
-            if (code == ArtifactAssessmentWorkflowStatus.TRIAGED) return "triaged";
-            if (code == ArtifactAssessmentWorkflowStatus.WAITINGFORINPUT) return "waiting-for-input";
-            if (code == ArtifactAssessmentWorkflowStatus.RESOLVEDNOCHANGE) return "resolved-no-change";
-            if (code == ArtifactAssessmentWorkflowStatus.RESOLVEDCHANGEREQUIRED) return "resolved-change-required";
-            if (code == ArtifactAssessmentWorkflowStatus.DEFERRED) return "deferred";
-            if (code == ArtifactAssessmentWorkflowStatus.DUPLICATE) return "duplicate";
-            if (code == ArtifactAssessmentWorkflowStatus.APPLIED) return "applied";
-            if (code == ArtifactAssessmentWorkflowStatus.PUBLISHED) return "published";
-            return "?";
+            return code.toCode();
         }
 
         public String toSystem(ArtifactAssessmentWorkflowStatus code) {
@@ -842,14 +695,28 @@ public class ArtifactAssessment extends Basic {
         NULL;
 
         public static ArtifactAssessmentDisposition fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("unresolved".equals(codeString)) return UNRESOLVED;
-            if ("not-persuasive".equals(codeString)) return NOTPERSUASIVE;
-            if ("persuasive".equals(codeString)) return PERSUASIVE;
-            if ("persuasive-with-modification".equals(codeString)) return PERSUASIVEWITHMODIFICATION;
-            if ("not-persuasive-with-modification".equals(codeString)) return NOTPERSUASIVEWITHMODIFICATION;
-            if (Configuration.isAcceptInvalidEnums()) return null;
-            else throw new FHIRException("Unknown ArtifactAssessmentDisposition code '" + codeString + "'");
+            if (StringUtils.isBlank(codeString)) {
+                return null;
+            }
+            switch (codeString) {
+                case "unresolved":
+                    return UNRESOLVED;
+                case "not-persuasive":
+                    return NOTPERSUASIVE;
+                case "persuasive":
+                    return PERSUASIVE;
+                case "persuasive-with-modification":
+                    return PERSUASIVEWITHMODIFICATION;
+                case "not-persuasive-with-modification":
+                    return NOTPERSUASIVEWITHMODIFICATION;
+
+                default:
+                    if (Configuration.isAcceptInvalidEnums()) {
+                        return null;
+                    } else {
+                        throw new FHIRException("Unknown ArtifactAssessmentDisposition code '" + codeString + "'");
+                    }
+            }
         }
 
         public String toCode() {
@@ -870,19 +737,10 @@ public class ArtifactAssessment extends Basic {
         }
 
         public String getSystem() {
-            switch (this) {
-                case UNRESOLVED:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                case NOTPERSUASIVE:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                case PERSUASIVE:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                case PERSUASIVEWITHMODIFICATION:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                case NOTPERSUASIVEWITHMODIFICATION:
-                    return "http://hl7.org/fhir/artifactassessment-disposition";
-                default:
-                    return "?";
+            if (this.equals(NULL)) {
+                return "?";
+            } else {
+                return "http://hl7.org/fhir/artifactassessment-disposition";
             }
         }
 
@@ -923,47 +781,22 @@ public class ArtifactAssessment extends Basic {
 
     public static class ArtifactAssessmentDispositionEnumFactory implements EnumFactory<ArtifactAssessmentDisposition> {
         public ArtifactAssessmentDisposition fromCode(String codeString) throws IllegalArgumentException {
-            if (codeString == null || "".equals(codeString))
-                if (codeString == null || "".equals(codeString)) return null;
-            if ("unresolved".equals(codeString)) return ArtifactAssessmentDisposition.UNRESOLVED;
-            if ("not-persuasive".equals(codeString)) return ArtifactAssessmentDisposition.NOTPERSUASIVE;
-            if ("persuasive".equals(codeString)) return ArtifactAssessmentDisposition.PERSUASIVE;
-            if ("persuasive-with-modification".equals(codeString))
-                return ArtifactAssessmentDisposition.PERSUASIVEWITHMODIFICATION;
-            if ("not-persuasive-with-modification".equals(codeString))
-                return ArtifactAssessmentDisposition.NOTPERSUASIVEWITHMODIFICATION;
-            throw new IllegalArgumentException("Unknown ArtifactAssessmentDisposition code '" + codeString + "'");
+            return ArtifactAssessmentDisposition.fromCode(codeString);
         }
 
         public Enumeration<ArtifactAssessmentDisposition> fromType(Base code) throws FHIRException {
-            if (code == null) return null;
-            if (code.isEmpty()) return new Enumeration<ArtifactAssessmentDisposition>(this);
-            String codeString = ((PrimitiveType<?>) code).asStringValue();
-            if (codeString == null || "".equals(codeString)) return null;
-            if ("unresolved".equals(codeString))
-                return new Enumeration<ArtifactAssessmentDisposition>(this, ArtifactAssessmentDisposition.UNRESOLVED);
-            if ("not-persuasive".equals(codeString))
-                return new Enumeration<ArtifactAssessmentDisposition>(
-                        this, ArtifactAssessmentDisposition.NOTPERSUASIVE);
-            if ("persuasive".equals(codeString))
-                return new Enumeration<ArtifactAssessmentDisposition>(this, ArtifactAssessmentDisposition.PERSUASIVE);
-            if ("persuasive-with-modification".equals(codeString))
-                return new Enumeration<ArtifactAssessmentDisposition>(
-                        this, ArtifactAssessmentDisposition.PERSUASIVEWITHMODIFICATION);
-            if ("not-persuasive-with-modification".equals(codeString))
-                return new Enumeration<ArtifactAssessmentDisposition>(
-                        this, ArtifactAssessmentDisposition.NOTPERSUASIVEWITHMODIFICATION);
-            throw new FHIRException("Unknown ArtifactAssessmentDisposition code '" + codeString + "'");
+            if (code == null) {
+                return null;
+            }
+            if (code.isEmpty()) {
+                return new Enumeration<>(this);
+            }
+            return new Enumeration<>(
+                    this, ArtifactAssessmentDisposition.fromCode(((PrimitiveType<?>) code).asStringValue()));
         }
 
         public String toCode(ArtifactAssessmentDisposition code) {
-            if (code == ArtifactAssessmentDisposition.UNRESOLVED) return "unresolved";
-            if (code == ArtifactAssessmentDisposition.NOTPERSUASIVE) return "not-persuasive";
-            if (code == ArtifactAssessmentDisposition.PERSUASIVE) return "persuasive";
-            if (code == ArtifactAssessmentDisposition.PERSUASIVEWITHMODIFICATION) return "persuasive-with-modification";
-            if (code == ArtifactAssessmentDisposition.NOTPERSUASIVEWITHMODIFICATION)
-                return "not-persuasive-with-modification";
-            return "?";
+            return code.toCode();
         }
 
         public String toSystem(ArtifactAssessmentDisposition code) {
@@ -1161,65 +994,78 @@ public class ArtifactAssessment extends Basic {
             String artifactAssessmentRelatedArtifact,
             String derivedFromRelatedArtifactUrl,
             String artifactAssessmentAuthor) {
-        boolean infoTypeCorrect = false;
-        boolean summaryCorrect = false;
-        boolean citationRelatedArtifactCorrect = false;
-        boolean derivedFromRelatedArtifactCorrect = false;
-        boolean authorCorrect = false;
-        boolean artifactCorrect = false;
-        int contentIndex = findIndex(CONTENT, null, this.getExtension());
+        var contentCorrect = false;
+        var artifactCorrect = false;
+        var contentIndex = findIndex(CONTENT, null, this.getExtension());
         if (contentIndex != -1) {
-            var contentExt = this.getExtension().get(contentIndex);
-            int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
-            if (infoTypeIndex != -1) {
-                var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
-                infoTypeCorrect = ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
-            }
-            int summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
-            if (summaryIndex != -1) {
-                var summaryExt = contentExt.getExtension().get(summaryIndex);
-                summaryCorrect = ((StringType) summaryExt.getValue()).getValue().equals(artifactAssessmentSummary);
-            }
-            var relatedArtifactList = contentExt.getExtension().stream()
-                    .filter(e -> e.getUrl().equals(ArtifactAssessmentContentExtension.RELATEDARTIFACT))
-                    .collect(Collectors.toList());
-            if (relatedArtifactList.size() > 0) {
-                var maybeCitation = relatedArtifactList.stream()
-                        .filter(ext ->
-                                ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
-                        .findAny();
-                var maybeDerivedFrom = relatedArtifactList.stream()
-                        .filter(ext ->
-                                ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
-                        .findAny();
-                if (maybeCitation.isPresent()) {
-                    var citation = maybeCitation.get();
-                    citationRelatedArtifactCorrect = ((RelatedArtifact) citation.getValue())
-                            .getResource()
-                            .equals(artifactAssessmentRelatedArtifact);
-                }
-                if (maybeDerivedFrom.isPresent()) {
-                    var derivedFrom = maybeDerivedFrom.get();
-                    derivedFromRelatedArtifactCorrect = ((RelatedArtifact) derivedFrom.getValue())
-                            .getResource()
-                            .equals(derivedFromRelatedArtifactUrl);
-                }
-            }
-            int authorIndex = findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
-            if (authorIndex != -1) {
-                var authorExt = contentExt.getExtension().get(authorIndex);
-                authorCorrect =
-                        ((Reference) authorExt.getValue()).getReference().equals(artifactAssessmentAuthor);
-            }
+            contentCorrect = checkContent(
+                    contentIndex,
+                    artifactAssessmentType,
+                    artifactAssessmentSummary,
+                    artifactAssessmentRelatedArtifact,
+                    derivedFromRelatedArtifactUrl,
+                    artifactAssessmentAuthor);
         }
-        int artifactIndex = findIndex(ARTIFACT, null, this.getExtension());
+        var artifactIndex = findIndex(ARTIFACT, null, this.getExtension());
         if (artifactIndex != -1) {
             var artifactExt = this.getExtension().get(artifactIndex);
             artifactCorrect =
                     ((Reference) artifactExt.getValue()).getReference().equals(artifactAssessmentTargetReference);
         }
-        return artifactCorrect
-                && infoTypeCorrect
+        return contentCorrect && artifactCorrect;
+    }
+
+    private boolean checkContent(
+            int contentIndex,
+            String artifactAssessmentType,
+            String artifactAssessmentSummary,
+            String artifactAssessmentRelatedArtifact,
+            String derivedFromRelatedArtifactUrl,
+            String artifactAssessmentAuthor) {
+        var infoTypeCorrect = false;
+        var summaryCorrect = false;
+        var citationRelatedArtifactCorrect = false;
+        var derivedFromRelatedArtifactCorrect = false;
+        var authorCorrect = false;
+        var contentExt = this.getExtension().get(contentIndex);
+        int infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
+        if (infoTypeIndex != -1) {
+            var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
+            infoTypeCorrect = ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
+        }
+        var summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
+        if (summaryIndex != -1) {
+            var summaryExt = contentExt.getExtension().get(summaryIndex);
+            summaryCorrect = ((StringType) summaryExt.getValue()).getValue().equals(artifactAssessmentSummary);
+        }
+        var relatedArtifactList = contentExt.getExtension().stream()
+                .filter(e -> e.getUrl().equals(ArtifactAssessmentContentExtension.RELATEDARTIFACT))
+                .collect(Collectors.toList());
+        if (!relatedArtifactList.isEmpty()) {
+            var maybeCitation = relatedArtifactList.stream()
+                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
+                    .findAny();
+            var maybeDerivedFrom = relatedArtifactList.stream()
+                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
+                    .findAny();
+            if (maybeCitation.isPresent()) {
+                var citation = maybeCitation.get();
+                citationRelatedArtifactCorrect =
+                        ((RelatedArtifact) citation.getValue()).getResource().equals(artifactAssessmentRelatedArtifact);
+            }
+            if (maybeDerivedFrom.isPresent()) {
+                var derivedFrom = maybeDerivedFrom.get();
+                derivedFromRelatedArtifactCorrect =
+                        ((RelatedArtifact) derivedFrom.getValue()).getResource().equals(derivedFromRelatedArtifactUrl);
+            }
+        }
+        var authorIndex = findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
+        if (authorIndex != -1) {
+            var authorExt = contentExt.getExtension().get(authorIndex);
+            authorCorrect = ((Reference) authorExt.getValue()).getReference().equals(artifactAssessmentAuthor);
+        }
+
+        return infoTypeCorrect
                 && summaryCorrect
                 && citationRelatedArtifactCorrect
                 && derivedFromRelatedArtifactCorrect
@@ -1227,13 +1073,13 @@ public class ArtifactAssessment extends Basic {
     }
 
     public boolean isValidArtifactComment() {
-        boolean infoTypeExists = false;
-        boolean summaryExists = false;
-        boolean relatedArtifactExists = false;
-        boolean authorExists = false;
-        boolean dateExists = findIndex(DATE, null, this.getExtension()) != -1;
-        boolean artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1;
-        int contentIndex = findIndex(CONTENT, null, this.getExtension());
+        var infoTypeExists = false;
+        var summaryExists = false;
+        var relatedArtifactExists = false;
+        var authorExists = false;
+        var dateExists = findIndex(DATE, null, this.getExtension()) != -1;
+        var artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1;
+        var contentIndex = findIndex(CONTENT, null, this.getExtension());
         if (contentIndex != -1) {
             var content = this.getExtension().get(contentIndex);
             infoTypeExists = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, content.getExtension()) != -1;
@@ -1250,7 +1096,7 @@ public class ArtifactAssessment extends Basic {
     List<ArtifactAssessmentContentExtension> getContent() {
         return this.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(CONTENT))
-                .map(ext -> (ArtifactAssessmentContentExtension) ext)
+                .map(ArtifactAssessmentContentExtension.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -1569,6 +1415,7 @@ public class ArtifactAssessment extends Basic {
             }
         }
 
+        @SuppressWarnings("squid:S2387")
         @DatatypeDef(
                 name = "ArtifactAssessmentContentTypeExtension",
                 isSpecialization = true,
@@ -1582,6 +1429,7 @@ public class ArtifactAssessment extends Basic {
             }
         }
 
+        @SuppressWarnings("squid:S2387")
         @DatatypeDef(
                 name = "ArtifactAssessmentContentClassifierExtension",
                 isSpecialization = true,

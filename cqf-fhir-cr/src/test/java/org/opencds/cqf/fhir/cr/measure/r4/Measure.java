@@ -57,8 +57,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedPopulation;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -113,7 +113,8 @@ public class Measure {
     public static class Given {
         private Repository repository;
         private MeasureEvaluationOptions evaluationOptions;
-        private MeasurePeriodValidator measurePeriodValidator;
+        private final MeasurePeriodValidator measurePeriodValidator;
+        private final R4MeasureServiceUtils measureServiceUtils;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -129,6 +130,8 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
+
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
         }
 
         public Given repository(Repository repository) {
@@ -150,7 +153,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
         }
 
         public When when() {

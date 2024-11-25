@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class VersionUtilities {
@@ -165,6 +166,28 @@ public class VersionUtilities {
                 return new org.hl7.fhir.r4.model.CodeType(code);
             case R5:
                 return new org.hl7.fhir.r5.model.CodeType(code);
+            default:
+                throw new IllegalArgumentException(UNSUPPORTED);
+        }
+    }
+
+    /**
+     * Returns a Reference for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a Reference for
+     * @param value the string value of the Reference
+     * @return the new Reference
+     */
+    public static IBaseReference referenceTypeForVersion(FhirVersionEnum fhirVersion, String value) {
+        switch (fhirVersion) {
+            case DSTU2:
+                return new org.hl7.fhir.dstu2.model.Reference().setReference(value);
+            case DSTU3:
+                return new org.hl7.fhir.dstu3.model.Reference().setReference(value);
+            case R4:
+                return new org.hl7.fhir.r4.model.Reference().setReference(value);
+            case R5:
+                return new org.hl7.fhir.r5.model.Reference().setReference(value);
             default:
                 throw new IllegalArgumentException(UNSUPPORTED);
         }

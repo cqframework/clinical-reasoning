@@ -40,7 +40,8 @@ public class MeasureMultipleSdeTest {
                 "population,Patient/numer-EXM125",
             },
             nullValues = {"null"})
-    void evaluateSucceedsMultipleSdesReportTypeSubjectAndSubjectNull(@Nullable String reportType, @Nullable String subject) {
+    void evaluateSucceedsMultipleSdesReportTypeSubjectAndSubjectNull(
+            @Nullable String reportType, @Nullable String subject) {
         var when = GIVEN_MULTIPLE_SDE_MEASURE_REPO
                 .when()
                 .reportType(reportType)

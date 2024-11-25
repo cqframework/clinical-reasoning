@@ -6,6 +6,7 @@ constants used on Measure resources
 public class MeasureConstants {
     private MeasureConstants() {}
 
+    public static final String CQFM_SCORING_SYSTEM_URL = "http://terminology.hl7.org/ValueSet/measure-scoring";
     public static final String CQFM_SCORING_EXT_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring";
     // this is used on Measure resources to indicate to $care-gaps and $care-list that the measure is compatible for the
@@ -39,6 +40,7 @@ public class MeasureConstants {
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.operationOutcome.reference";
     public static final String MEASUREMENT_PERIOD_PARAMETER_NAME = "Measurement Period";
     public static final String FHIR_MODEL_URI = "http://hl7.org/fhir";
+    public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
     public static final String EXT_TOTAL_DENOMINATOR_URL =

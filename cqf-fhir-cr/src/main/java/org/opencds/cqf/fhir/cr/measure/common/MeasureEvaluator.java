@@ -452,7 +452,7 @@ public class MeasureEvaluator {
                         evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
             }
             // Apply Exclusions and Exceptions
-            if (measureDef.isBooleanBasis()) {
+            if (groupDef.isBooleanBasis()) {
                 // Remove Subject and Resource Exclusions
                 if (denominatorExclusion != null) {
                     denominator.getSubjects().removeAll(denominatorExclusion.getSubjects());
@@ -528,7 +528,7 @@ public class MeasureEvaluator {
                         subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             }
             // Apply Exclusions to Population
-            if (measureDef.isBooleanBasis()) {
+            if (groupDef.isBooleanBasis()) {
                 if (measurePopulationExclusion != null) {
                     measurePopulation.getSubjects().removeAll(measurePopulationExclusion.getSubjects());
                     measurePopulation.getResources().removeAll(measurePopulationExclusion.getResources());
@@ -545,7 +545,7 @@ public class MeasureEvaluator {
                             resource,
                             measureObservation.expression(),
                             measureObservation.getEvaluatedResources(),
-                            measureDef.isBooleanBasis());
+                            groupDef.isBooleanBasis());
                     measureObservation.addResource(observationResult);
                 }
             }

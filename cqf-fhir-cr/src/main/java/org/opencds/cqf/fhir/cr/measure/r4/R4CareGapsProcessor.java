@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
@@ -187,10 +188,14 @@ public class R4CareGapsProcessor {
     }
 
     protected void checkMeasureBasis(Measure measure) {
-        R4MeasureBasisDef measureDef = new R4MeasureBasisDef();
-        if (!measureDef.isBooleanBasis(measure)) {
-            throw new IllegalArgumentException(
-                    String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart()));
+        var msg = String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart());
+        R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
+        var measureDef = measureDefBuilder.build(measure);
+
+        for (GroupDef groupDef : measureDef.groups()) {
+            if (!groupDef.isBooleanBasis()) {
+                throw new IllegalArgumentException(msg);
+            }
         }
     }
 

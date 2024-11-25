@@ -75,24 +75,28 @@
   "guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.",
   "group": [ {
     "population": [ {
+      "id": "initial-population",
       "code": {
         "coding": [ {
           "code": "initial-population"
         } ]
       }
     }, {
+      "id": "numerator",
       "code": {
         "coding": [ {
           "code": "numerator"
         } ]
       }
     }, {
+      "id": "denominator",
       "code": {
         "coding": [ {
           "code": "denominator"
         } ]
       }
     }, {
+      "id": "denominator-exclusion",
       "code": {
         "coding": [ {
           "code": "denominator-exclusion"

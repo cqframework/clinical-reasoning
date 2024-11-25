@@ -1,21 +1,23 @@
 package org.opencds.cqf.fhir.cql.engine.parameters;
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
@@ -25,6 +27,8 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class CqlFhirParametersConverter {
 
@@ -36,6 +40,9 @@ public class CqlFhirParametersConverter {
     // private IFhirPath fhirPath;
     private ModelResolver modelResolver;
 
+    /*
+     * Converts both CQL parameters and CQL Evaluation Results into Fhir Parameters Resources
+     */
     public CqlFhirParametersConverter(
             FhirContext fhirContext, IAdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         this.fhirContext = requireNonNull(fhirContext);
@@ -47,6 +54,22 @@ public class CqlFhirParametersConverter {
         // this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
+    // This is basically a copy and paste from R4FhirTypeConverter, but it's not exposed.
+    static final String EMPTY_LIST_EXT_URL = "http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList";
+    static final String DATA_ABSENT_REASON_EXT_URL = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+    static final String DATA_ABSENT_REASON_UNKNOWN_CODE = "unknown";
+    private static Iterable<?> asIterable(Object value) {
+        if (value instanceof Iterable) {
+            return (Iterable<?>) value;
+        } else {
+            return null;
+        }
+    }
+    private static BooleanType emptyBooleanWithExtension(String url, Type value) {
+        var result = new BooleanType((String) null);
+        result.addExtension().setUrl(url).setValue(value);
+        return result;
+    }
     public IBaseParameters toFhirParameters(EvaluationResult evaluationResult) {
         IBaseParameters params = null;
         try {
@@ -67,11 +90,20 @@ public class CqlFhirParametersConverter {
             Object value = entry.getValue().value();
 
             if (value == null) {
-                this.addPart(pa, name);
+                // Null value, add a single empty value with an extension indicating the reason
+                var dataAbsentValue = emptyBooleanWithExtension(
+                        DATA_ABSENT_REASON_EXT_URL, new CodeType(DATA_ABSENT_REASON_UNKNOWN_CODE));
+                addPart(pa, name, dataAbsentValue);
                 continue;
             }
 
             if (value instanceof Iterable) {
+                var iterable = asIterable(value);
+                if (!iterable.iterator().hasNext()) {
+                    // Empty list
+                    var emptyListValue = emptyBooleanWithExtension(EMPTY_LIST_EXT_URL, new BooleanType(true));
+                    addPart(pa, name, emptyListValue);
+                }
                 Iterable<?> values = (Iterable<?>) value;
                 for (Object o : values) {
                     this.addPart(pa, name, o);

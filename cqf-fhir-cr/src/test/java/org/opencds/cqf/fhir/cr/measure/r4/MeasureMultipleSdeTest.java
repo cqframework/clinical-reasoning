@@ -22,21 +22,25 @@ public class MeasureMultipleSdeTest {
     @ParameterizedTest
     @CsvSource(
             value = {
+                "null,null",
                 "subject,null",
                 "subject-list,null",
                 "population,null",
+                "null,Patient/numer-EXM125",
                 "subject,Patient/numer-EXM125",
                 "subject-list,Patient/numer-EXM125",
                 "population,Patient/numer-EXM125",
+                "null,Patient/denom-EXM125",
                 "subject,Patient/denom-EXM125",
                 "subject-list,Patient/denom-EXM125",
                 "population,Patient/denom-EXM125",
+                "null,Patient/numer-EXM125",
                 "subject,Patient/numer-EXM125",
                 "subject-list,Patient/numer-EXM125",
                 "population,Patient/numer-EXM125",
             },
             nullValues = {"null"})
-    void evaluateSucceedsMultipleSdesReportTypeSubjectAndSubjectNull(String reportType, @Nullable String subject) {
+    void evaluateSucceedsMultipleSdesReportTypeSubjectAndSubjectNull(@Nullable String reportType, @Nullable String subject) {
         var when = GIVEN_MULTIPLE_SDE_MEASURE_REPO
                 .when()
                 .reportType(reportType)

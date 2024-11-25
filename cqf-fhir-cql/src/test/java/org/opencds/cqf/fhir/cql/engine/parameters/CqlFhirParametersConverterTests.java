@@ -1,10 +1,16 @@
 package org.opencds.cqf.fhir.cql.engine.parameters;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -15,10 +21,6 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -28,9 +30,6 @@ import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 class CqlFhirParametersConverterTests {
 
@@ -84,7 +83,8 @@ class CqlFhirParametersConverterTests {
         Parameters expected = new Parameters();
         expected.addParameter().setName("Patient").setResource(new Patient());
         BooleanType nullBooleanValue = new BooleanType((String) null);
-        nullBooleanValue.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
+        nullBooleanValue.addExtension(
+                "http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
         expected.addParameter().setName("Null").setValue(nullBooleanValue);
 
         EvaluationResult testData = new EvaluationResult();

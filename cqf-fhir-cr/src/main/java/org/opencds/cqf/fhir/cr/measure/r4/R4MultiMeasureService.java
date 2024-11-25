@@ -56,7 +56,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
-        r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider);
+        r4Processor = new R4MeasureProcessor(
+                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -84,7 +85,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // if needing to use proxy repository, override constructors
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider);
+            r4Processor = new R4MeasureProcessor(
+                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
@@ -92,8 +94,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
-        var evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(subject == null || subject.isEmpty() ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT);
+        var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subject);
 
         // get subjects
         var subjects = getSubjects(subjectProvider, subject);

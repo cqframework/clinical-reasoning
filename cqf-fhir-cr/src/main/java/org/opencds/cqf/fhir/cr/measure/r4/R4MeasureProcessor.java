@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -41,13 +42,18 @@ public class R4MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
+    private final R4MeasureServiceUtils r4MeasureServiceUtils;
 
     public R4MeasureProcessor(
-            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            SubjectProvider subjectProvider,
+            R4MeasureServiceUtils r4MeasureServiceUtils) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
     }
 
     public MeasureReport evaluateMeasure(
@@ -59,16 +65,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters) {
 
-        var evalType = MeasureEvalType.fromCode(
-                        // validate in R4 accepted values
-                        R4MeasureEvalType.fromCode(reportType)
-                                .orElse(
-                                        // map null reportType parameter to evalType if no subject parameter is provided
-                                        subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                                                ? R4MeasureEvalType.POPULATION
-                                                : R4MeasureEvalType.SUBJECT)
-                                .toCode())
-                .orElse(MeasureEvalType.SUBJECT);
+        var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subjectIds);
 
         var actualRepo = this.repository;
         if (additionalData != null) {

@@ -148,18 +148,38 @@ class R4MeasureServiceUtilsTest {
 
     private static Stream<Arguments> getMeasureEvalTypeErrorsParams() {
         return Stream.of(
-                Arguments.of(MeasureEvalType.PATIENT.toCode(), null, new Exception("")),
-                Arguments.of(MeasureEvalType.PATIENTLIST.toCode(), null, new Exception("")),
-                Arguments.of(MeasureEvalType.PATIENT.toCode(), Collections.emptyList(), new Exception("")),
-                Arguments.of(MeasureEvalType.PATIENTLIST.toCode(), Collections.emptyList(), new Exception("")),
-                Arguments.of(MeasureEvalType.PATIENT.toCode(), Collections.singletonList(null), new Exception("")),
-                Arguments.of(MeasureEvalType.PATIENTLIST.toCode(), Collections.singletonList(null), new Exception("")),
                 Arguments.of(
-                        MeasureEvalType.PATIENT.toCode(), Collections.singletonList(PATIENT_PAT_1), new Exception("")),
+                        MeasureEvalType.PATIENT.toCode(),
+                        null,
+                        new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENTLIST.toCode(),
+                        null,
+                        new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENT.toCode(),
+                        Collections.emptyList(),
+                        new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENTLIST.toCode(),
+                        Collections.emptyList(),
+                        new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENT.toCode(),
+                        Collections.singletonList(null),
+                        new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENTLIST.toCode(),
+                        Collections.singletonList(null),
+                        new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
+                Arguments.of(
+                        MeasureEvalType.PATIENT.toCode(),
+                        Collections.singletonList(PATIENT_PAT_1),
+                        new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
                 Arguments.of(
                         MeasureEvalType.PATIENTLIST.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
-                        new Exception("")));
+                        new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")));
     }
 
     @ParameterizedTest

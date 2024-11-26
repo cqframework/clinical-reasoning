@@ -141,7 +141,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Subtracting '2' from groupDef to balance with Measure defined Groups
         if (measureGroup.getPopulation().size() != (groupDef.populations().size() - 2)) {
             // This is not a user error:
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
 

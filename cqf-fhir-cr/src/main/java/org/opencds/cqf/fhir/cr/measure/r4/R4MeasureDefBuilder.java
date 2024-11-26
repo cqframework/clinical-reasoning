@@ -148,7 +148,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     conceptToConceptDef(group.getCode()),
                     stratifiers,
                     populations,
-                    getScoringDef(measureScoring, groupScoring),
+                    getScoringDef(measure, measureScoring, groupScoring),
                     hasGroupImpNotation,
                     getImprovementNotation(measureImpNotation, groupImpNotation),
                     getPopulationBasisDef(measureBasis, groupBasis));
@@ -309,9 +309,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return null;
     }
 
-    private MeasureScoring getScoringDef(MeasureScoring measureScoring, MeasureScoring groupScoring) {
+    private MeasureScoring getScoringDef(Measure measure, MeasureScoring measureScoring, MeasureScoring groupScoring) {
         if (groupScoring == null && measureScoring == null) {
-            throw new InvalidRequestException("MeasureScoring must be specified on Group or Measure");
+            throw new InvalidRequestException(
+                    "MeasureScoring must be specified on Group or Measure for Measure: " + measure.getUrl());
         }
         if (groupScoring != null) {
             return groupScoring;

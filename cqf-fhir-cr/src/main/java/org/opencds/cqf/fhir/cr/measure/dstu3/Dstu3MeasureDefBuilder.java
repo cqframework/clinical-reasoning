@@ -9,7 +9,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -194,16 +193,20 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return null;
     }
 
-    private boolean isBooleanBasis(CodeDef populationBasis) {
-        return populationBasis.code().equals("boolean");
-    }
-
     private CodeDef getPopulationBasisDef(CodeDef measureBasis) {
         // default basis, if not defined
-        return Objects.requireNonNullElseGet(measureBasis, () -> new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean"));
+        if (measureBasis != null) {
+            return measureBasis;
+        } else {
+            return new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean");
+        }
     }
 
     private CodeDef getImprovementNotation(CodeDef measureImpNotation) {
-        return Objects.requireNonNullElse(measureImpNotation, new CodeDef(null, IMPROVEMENT_NOTATION_SYSTEM_INCREASE));
+        if (measureImpNotation != null) {
+            return measureImpNotation;
+        } else {
+            return new CodeDef(null, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
+        }
     }
 }

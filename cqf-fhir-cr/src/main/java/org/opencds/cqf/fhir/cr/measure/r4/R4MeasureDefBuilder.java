@@ -15,7 +15,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SD
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -308,7 +307,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (groupScoring == null && measureScoring == null) {
             throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
         }
-        return Objects.requireNonNullElse(groupScoring, measureScoring);
+        if (groupScoring != null) {
+            return groupScoring;
+        } else {
+            return measureScoring;
+        }
     }
 
     private CodeDef getPopulationBasisDef(CodeDef measureBasis, CodeDef groupBasis) {
@@ -316,7 +319,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             // default basis, if not defined
             return new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean");
         }
-        return Objects.requireNonNullElse(groupBasis, measureBasis);
+        return defaultCodeDef(groupBasis, measureBasis);
     }
 
     private CodeDef getImprovementNotation(CodeDef measureImpNotation, CodeDef groupImpNotation) {
@@ -324,6 +327,14 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             // default Improvement Notation, if not defined
             return new CodeDef(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
         }
-        return Objects.requireNonNullElse(groupImpNotation, measureImpNotation);
+        return defaultCodeDef(groupImpNotation, measureImpNotation);
+    }
+
+    private CodeDef defaultCodeDef(CodeDef code, CodeDef codeDefault) {
+        if (code != null) {
+            return code;
+        } else {
+            return codeDefault;
+        }
     }
 }

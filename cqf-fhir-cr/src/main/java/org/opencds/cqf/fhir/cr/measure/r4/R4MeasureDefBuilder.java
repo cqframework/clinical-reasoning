@@ -272,13 +272,14 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
         if (ext != null) {
             var value = ext.getValue();
-            assert value instanceof CodeableConcept;
-            CodeableConcept coding = (CodeableConcept) value;
-            var codeDef = new CodeDef(
-                    coding.getCodingFirstRep().getSystem(),
-                    coding.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(codeDef);
-            return codeDef;
+            if (value instanceof CodeableConcept) {
+                CodeableConcept coding = (CodeableConcept) value;
+                var codeDef = new CodeDef(
+                        coding.getCodingFirstRep().getSystem(),
+                        coding.getCodingFirstRep().getCode());
+                validateImprovementNotationCode(codeDef);
+                return codeDef;
+            }
         }
         return null;
     }

@@ -90,7 +90,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
-        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
+        // LUKETODO:  replace this with a constructor dependency to indicate we have the searchparameter or nothing
+//        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
         List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 

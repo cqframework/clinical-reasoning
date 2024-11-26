@@ -60,7 +60,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
+        // LUKETODO:  replace this with a constructor dependency to indicate we have the searchparameter or nothing
+//        r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
         MeasureReport measureReport = null;
 

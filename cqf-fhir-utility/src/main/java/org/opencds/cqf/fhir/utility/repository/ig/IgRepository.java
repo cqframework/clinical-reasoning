@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -88,6 +89,19 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * <li>Utilizes caching for efficient resource access.</li>
  * </ul>
  */
+// LUKETODO:  JP:
+    /*
+    for SearchParameters:  in CR… create InMemoryRepository. create SearchParameter:  pass to Operation implementation and it should just work
+IGRepository doesn’t have that functionality
+try to add functionality to IGRepository
+look at InMemoryRepository
+take code from InMemoryRepo to IGRepository
+first seed search param and then run operaion
+so hapi-fhir. for production seeding
+probably need a check… just not an update
+test at the very first “partition step” to check to see if the SearchParameter is there
+and override function to skip that evaluate check
+     */
 public class IgRepository implements Repository {
     private final FhirContext fhirContext;
     private final Path root;
@@ -564,6 +578,11 @@ public class IgRepository implements Repository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
+        // LUKETODO:  test this
+        if (resource.fhirType().equals("SearchParameter")) {
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
+        }
+
         var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
         writeResource(resource, path);
 
@@ -652,6 +671,11 @@ public class IgRepository implements Repository {
             }
 
             actual = preferred;
+        }
+
+        // LUKETODO:  test this
+        if (resource.fhirType().equals("SearchParameter")) {
+            resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
         }
 
         writeResource(resource, actual);

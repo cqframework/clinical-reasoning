@@ -57,6 +57,10 @@ public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final Repository repository;
 
+    // LUKETODO: pass in some sort of state indicating that the Extension SearchParameter has been laoded
+    // 1. hapi-fhir/JPA server starter
+    // 2. cdr
+
     public R4MeasureServiceUtils(Repository repository) {
         this.repository = repository;
     }
@@ -113,21 +117,6 @@ public class R4MeasureServiceUtils {
         return String.format("%s%s/%s", serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
     }
 
-    public void ensureSupplementalDataElementSearchParameter() {
-        // create a transaction bundle
-        ca.uhn.fhir.util.BundleBuilder builder = new ca.uhn.fhir.util.BundleBuilder(repository.fhirContext());
-
-        // set the request to be condition on code == supplemental data
-        builder.addTransactionCreateEntry(R4MeasureServiceUtils.SUPPLEMENTAL_DATA_SEARCHPARAMETER)
-                .conditional("code=supplemental-data");
-        try {
-            repository.transaction(builder.getBundle());
-        } catch (NotImplementedOperationException e) {
-            log.warn(
-                    "Error creating supplemental data search parameter. This may be due to the server not supporting transactions.",
-                    e);
-        }
-    }
 
     public MeasureReport addSubjectReference(MeasureReport measureReport, String practitioner, String subjectId) {
         if ((StringUtils.isNotBlank(practitioner) || StringUtils.isNotBlank(subjectId))

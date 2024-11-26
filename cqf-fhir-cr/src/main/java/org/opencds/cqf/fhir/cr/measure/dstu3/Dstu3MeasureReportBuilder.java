@@ -286,7 +286,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if (measureDef.groups().get(0).isBooleanBasis()) {
+        if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
@@ -523,40 +523,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         return report;
     }
-    // /**
-    // * Retrieve the coding from an extension that that looks like the following...
-    // *
-    // * { "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-    // * "extension": [ { "url": "ombCategory", "valueCoding": { "system":
-    // * "urn:oid:2.16.840.1.113883.6.238", "code": "2054-5", "display": "Black or
-    // * African American" } } ] }
-    // */
-
-    protected Coding getExtensionCoding(DomainResource patient, String coreCategory, String sdeCode) {
-        Coding valueCoding = new Coding();
-
-        patient.getExtension().forEach((ptExt) -> {
-            if (ptExt.getUrl().contains(coreCategory)) {
-                Coding extCoding = (Coding) ptExt.getExtension().get(0).getValue();
-                String extCode = extCoding.getCode();
-                if (extCode.equalsIgnoreCase(sdeCode)) {
-                    valueCoding.setSystem(extCoding.getSystem());
-                    valueCoding.setCode(extCoding.getCode());
-                    valueCoding.setDisplay(extCoding.getDisplay());
-                }
-            }
-        });
-
-        return valueCoding;
-    }
-
-    // protected Extension createCodingExtension(String url, String codeSystem,
-    // String code) {
-    // Extension ext = new Extension().setUrl(url);
-    // Coding coding = new Coding().setSystem(codeSystem).setCode(code);
-    // ext.setValue(coding);
-    // return ext;
-    // }
 
     protected Extension createStringExtension(String url, String value) {
         Extension ext = new Extension().setUrl(url);

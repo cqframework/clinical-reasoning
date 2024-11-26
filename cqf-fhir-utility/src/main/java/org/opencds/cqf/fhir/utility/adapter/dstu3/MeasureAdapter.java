@@ -22,6 +22,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
     public MeasureAdapter(IDomainResource measure) {
         super(measure);
         if (!(measure instanceof Measure)) {
+            // This is NOT due to a bad request/user error.  It's a system error.
             throw new IllegalArgumentException("resource passed as measure argument is not a Measure resource");
         }
     }

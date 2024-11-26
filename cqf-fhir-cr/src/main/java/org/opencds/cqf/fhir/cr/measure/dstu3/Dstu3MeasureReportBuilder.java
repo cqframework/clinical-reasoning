@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,7 +95,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        this.measureReportScorer.score(measureDef, this.report);
+        this.measureReportScorer.score(measure.getUrl(), measureDef, this.report);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -110,6 +111,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected void buildGroups(Measure measure, MeasureDef measureDef) {
         if (measure.getGroup().size() != measureDef.groups().size()) {
+            // This is not a user error:
             throw new IllegalArgumentException(
                     "The Measure has a different number of groups defined than the MeasureDef");
         }
@@ -138,7 +140,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // TOTAL-DENOMINATOR), and will not be added to group populations.
         // Subtracting '2' from groupDef to balance with Measure defined Groups
         if (measureGroup.getPopulation().size() != (groupDef.populations().size() - 2)) {
-            throw new IllegalArgumentException(
+            // This is not a user error:
+            throw new InvalidRequestException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
 
@@ -485,7 +488,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             Date dEnd = (Date) measurementPeriod.getEnd();
             return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
-            throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
+            throw new InvalidRequestException(
+                    "Measurement period should be an interval of CQL DateTime or Date: " + measurementPeriod);
         }
     }
 
@@ -721,7 +725,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             }
 
             if (key == null) {
-                throw new IllegalArgumentException(String.format("found a null key for the wrapped value: %s", value));
+                throw new InvalidRequestException(String.format("found a null key for the wrapped value: %s", value));
             }
 
             return key;

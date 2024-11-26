@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -103,7 +104,7 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType) {
 
         if (!measure.hasLibrary()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
 

@@ -4,12 +4,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
 import static org.opencds.cqf.fhir.utility.Resources.newResource;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -17,6 +19,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
@@ -79,7 +82,7 @@ public class R4CareGapsProcessor {
         checkConfigurationReferences();
 
         // validate required parameter values
-        checkValidStatusCode(r4CareGapsParams.getStatus());
+        checkValidStatusCode(measure, r4CareGapsParams.getStatus());
         List<Measure> measures = resolveMeasure(r4CareGapsParams.getMeasure());
         measureCompatibilityCheck(measures);
 
@@ -164,7 +167,7 @@ public class R4CareGapsProcessor {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
     }
 
-    protected void checkValidStatusCode(List<String> statuses) {
+    protected void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -172,8 +175,9 @@ public class R4CareGapsProcessor {
                     && !CareGapsStatusCode.OPEN_GAP.toString().equals(status)
                     && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)
                     && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
-                throw new IllegalArgumentException(
-                        String.format("CareGap status parameter: %s, is not an accepted value", status));
+                throw new InvalidRequestException(String.format(
+                        "CareGap status parameter: %s, is not an accepted value for Measure: %s",
+                        status, printEithers(measure)));
             }
         }
     }
@@ -190,7 +194,7 @@ public class R4CareGapsProcessor {
     protected void checkMeasureBasis(Measure measure) {
         R4MeasureBasisDef measureDef = new R4MeasureBasisDef();
         if (!measureDef.isBooleanBasis(measure)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart()));
         }
     }
@@ -206,8 +210,9 @@ public class R4CareGapsProcessor {
             for (MeasureGroupComponent group : measure.getGroup()) {
                 if (measure.getGroup().size() > 1
                         && (group.getId() == null || group.getId().isEmpty())) {
-                    throw new IllegalArgumentException(
-                            "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated.");
+                    throw new InvalidRequestException(
+                            "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated for Measure: "
+                                    + measure.getUrl());
                 }
             }
         }
@@ -218,9 +223,9 @@ public class R4CareGapsProcessor {
         for (MeasureScoring measureScoringType : scoringTypes) {
             if (!MeasureScoring.PROPORTION.equals(measureScoringType)
                     && !MeasureScoring.RATIO.equals(measureScoringType)) {
-                throw new IllegalArgumentException(String.format(
-                        "MeasureScoring type: %s, is not an accepted Type for care-gaps service",
-                        measureScoringType.getDisplay()));
+                throw new InvalidRequestException(String.format(
+                        "MeasureScoring type: %s, is not an accepted Type for care-gaps service for Measure: %s",
+                        measureScoringType.getDisplay(), measure.getUrl()));
             }
         }
     }
@@ -232,5 +237,11 @@ public class R4CareGapsProcessor {
         addConfiguredResource(
                 careGapsProperties.getCareGapsCompositionSectionAuthor(),
                 CareGapsConstants.CARE_GAPS_SECTION_AUTHOR_KEY);
+    }
+
+    private static List<String> printEithers(List<Either3<IdType, String, CanonicalType>> either) {
+        return either.stream()
+                .map(x -> x.fold(IdType::getIdPart, Function.identity(), PrimitiveType::asStringValue))
+                .collect(Collectors.toList());
     }
 }

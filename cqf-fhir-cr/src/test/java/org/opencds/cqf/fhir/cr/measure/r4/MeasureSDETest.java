@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Period;
@@ -154,8 +155,11 @@ public class MeasureSDETest {
                     .then()
                     .report();
             fail("should throw error");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("SupplementalDataComponent usage is missing code: supplemental-data"));
+        } catch (InvalidRequestException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "SupplementalDataComponent usage is missing code: supplemental-data for Measure: http://example.com/Measure/CohortBooleanSDEMissingUsage"));
         }
     }
 }

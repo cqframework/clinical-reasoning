@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -89,7 +90,7 @@ public class MeasureEvaluator {
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
         // measurementPeriod is not required, because it's often defaulted in CQL
-        this.setMeasurementPeriod(measurementPeriod);
+        setMeasurementPeriod(measureDef, measurementPeriod);
 
         final ZonedDateTime zonedDateTime = getZonedTimeZoneForEval(measurementPeriod);
 
@@ -110,8 +111,9 @@ public class MeasureEvaluator {
                         measureDef, MeasureReportType.SUMMARY, subjectIds, versionedIdentifier, zonedDateTime);
             default:
                 // never hit because this value is set upstream
-                throw new IllegalArgumentException(
-                        String.format("Unsupported Measure Evaluation type: %s", measureEvalType.getDisplay()));
+                throw new InvalidRequestException(String.format(
+                        "Unsupported Measure Evaluation type: %s for MeasureDef: %s",
+                        measureEvalType.getDisplay(), measureDef.url()));
         }
     }
 
@@ -145,7 +147,7 @@ public class MeasureEvaluator {
         return null;
     }
 
-    protected void setMeasurementPeriod(Interval measurementPeriod) {
+    protected void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef();
         if (pd == null) {
             logger.warn(
@@ -183,7 +185,7 @@ public class MeasureEvaluator {
 
         NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measurementPeriod, targetType);
+        Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
 
         this.context.getState().setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
     }
@@ -225,7 +227,7 @@ public class MeasureEvaluator {
         return newDateTime;
     }
 
-    protected Interval convertInterval(Interval interval, String targetType) {
+    protected Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
         String sourceType =
                 sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
@@ -243,9 +245,9 @@ public class MeasureEvaluator {
                     interval.getHighClosed());
         }
 
-        throw new IllegalArgumentException(String.format(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible.",
-                sourceType, targetType));
+        throw new InvalidRequestException(String.format(
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s.",
+                sourceType, targetType, measureDef.url()));
     }
 
     protected Date truncateDateTime(DateTime dateTime) {
@@ -258,7 +260,7 @@ public class MeasureEvaluator {
             String[] subjectIdParts = subjectId.split("/");
             return Pair.of(subjectIdParts[0], subjectIdParts[1]);
         } else {
-            throw new IllegalArgumentException(String.format(
+            throw new InvalidRequestException(String.format(
                     "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)",
                     subjectId));
         }
@@ -361,7 +363,7 @@ public class MeasureEvaluator {
                 criteriaExpression, this.context.getState().getCurrentLibrary());
 
         if (!(ed instanceof FunctionDef)) {
-            throw new IllegalArgumentException(String.format(
+            throw new InvalidRequestException(String.format(
                     "Measure observation %s does not reference a function definition", criteriaExpression));
         }
 
@@ -629,7 +631,8 @@ public class MeasureEvaluator {
                 }
 
                 if (resultIter.hasNext()) {
-                    throw new IllegalArgumentException("stratifiers may not return multiple values");
+                    throw new InvalidRequestException(
+                            "stratifiers may not return multiple values for subjectId: " + subjectId);
                 }
             }
 

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
@@ -15,10 +16,12 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(MeasureDef measureDef, MeasureReport measureReport) {
+    public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
         if (measureDef == null) {
-            throw new IllegalArgumentException("MeasureDef is required in order to score a Measure.");
+            // This isn't due to user error
+            throw new IllegalArgumentException(
+                    "MeasureDef is required in order to score a Measure for Measure: " + measureUrl);
         }
         // No groups, nothing to score
         if (measureReport.getGroup().isEmpty()) {
@@ -29,8 +32,9 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
 
         // validate scoring
         if (measureScoring == null) {
-            throw new IllegalArgumentException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+            throw new InvalidRequestException(String.format(
+                    "Measure: %s does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.",
+                    measureUrl));
         }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {

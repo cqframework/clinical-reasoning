@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
@@ -333,11 +334,11 @@ public class MeasureImprovementNotationTest {
                     .hasScore("0.6666666666666667") // inverse score of increase
                     .up()
                     .report();
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "ImprovementNotation Coding has invalid System: http://terminology.hl7.org/CodeSystem/measure-improvement-notation, code: neutral, combination for Measure."));
+                                    "ImprovementNotation Coding has invalid System: http://terminology.hl7.org/CodeSystem/measure-improvement-notation, code: neutral, combination for Measure: http://example.com/Measure/ProportionBooleanImprovementNotationMeasureInvalid"));
         }
     }
     // ProportionBooleanMultiGroupImprovementNotation

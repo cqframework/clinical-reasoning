@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +57,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // This might not be the best behavior, but we want to ensure that the behavior is the same
         // between versions
         if (!measure.getGroup().isEmpty() && groupMeasureScoringCode == null) {
-            throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
+            throw new InvalidRequestException(
+                    String.format("MeasureScoring must be specified on Measure: %s", measure.getUrl()));
         }
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
@@ -176,7 +178,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         boolean hasValidCode = IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(improvementNotationValue)
                 || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(improvementNotationValue);
         if (!hasValidCode) {
-            throw new IllegalArgumentException(String.format(
+            throw new InvalidRequestException(String.format(
                     "ImprovementNotation Coding has invalid code: %s, combination for Measure.",
                     improvementNotationValue));
         }

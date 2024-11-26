@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
@@ -37,10 +38,11 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(MeasureDef measureDef, MeasureReport measureReport) {
+    public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
         if (measureDef == null) {
-            throw new IllegalArgumentException("MeasureDef is required in order to score a Measure.");
+            throw new InvalidRequestException(
+                    "MeasureDef is required in order to score a Measure for Measure: " + measureUrl);
         }
         // No groups to score, nothing to do.
         if (measureReport.getGroup().isEmpty()) {
@@ -66,18 +68,20 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
-    protected MeasureScoring checkMissingScoringType(MeasureScoring measureScoring) {
+    protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {
         if (measureScoring == null) {
-            throw new IllegalArgumentException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+            throw new InvalidRequestException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for MeasureDef: "
+                            + measureDef.url());
         }
         return measureScoring;
     }
 
-    protected void groupHasValidId(String id) {
+    protected void groupHasValidId(MeasureDef measureDef, String id) {
         if (id == null || id.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately.");
+            throw new InvalidRequestException(
+                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: "
+                            + measureDef.url());
         }
     }
 
@@ -91,8 +95,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             for (GroupDef groupDef : measureDef.groups()) {
                 var groupDefMeasureScoring = groupDef.measureScoring();
                 // groups must have id populated
-                groupHasValidId(mrgc.getId());
-                groupHasValidId(groupDef.id());
+                groupHasValidId(measureDef, mrgc.getId());
+                groupHasValidId(measureDef, groupDef.id());
                 // Match by group id if available
                 // Note: Match by group's population id, was removed per cqf-measures conformance change FHIR-45423
                 // multi-rate measures must have a group.id defined to be conformant
@@ -101,7 +105,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 }
             }
         }
-        return checkMissingScoringType(groupScoringType);
+        return checkMissingScoringType(measureDef, groupScoringType);
     }
 
     protected void scoreGroup(

@@ -23,4 +23,9 @@ public class Dstu3MeasureEvaluation extends BaseMeasureEvaluation<Measure, Measu
                 libraryEngine,
                 versionIdentifier);
     }
+
+    @Override
+    protected String getMeasureUrl() {
+        return measure.getUrl();
+    }
 }

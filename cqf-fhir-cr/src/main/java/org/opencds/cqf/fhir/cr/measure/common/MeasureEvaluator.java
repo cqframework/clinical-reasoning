@@ -318,7 +318,7 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+            evaluateGroup(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
         }
     }
 
@@ -405,7 +405,6 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateProportion(
-            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
@@ -503,11 +502,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(
-            MeasureDef measureDef,
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
@@ -564,7 +559,6 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
@@ -577,11 +571,10 @@ public class MeasureEvaluator {
         switch (scoring) {
             case PROPORTION:
             case RATIO:
-                evaluateProportion(
-                        measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+                evaluateProportion(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(measureDef, groupDef, subjectType, subjectId, evaluationResult);
+                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult);
                 break;
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);

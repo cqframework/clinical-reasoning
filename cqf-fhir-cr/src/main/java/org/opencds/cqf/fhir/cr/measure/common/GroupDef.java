@@ -36,10 +36,6 @@ public class GroupDef {
         this.isGroupImpNotation = isGroupImprovementNotation;
         this.improvementNotation = improvementNotation;
         this.populationBasis = populationBasis;
-        // this.isGroupPopulationBasis = isGroupPopulationBasis;
-        // this.isGroupScoring = isGroupScoring;
-        // this.isIncreaseImpNotation = isIncreaseImprovementNotation;
-        // this.isBooleanBasis = isBooleanBasis;
     }
 
     public String id() {

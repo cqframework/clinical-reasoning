@@ -21,11 +21,10 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
+/**
+ * Test MeasureDefBuilder on different scenarios around group level Measure settings and if they are properly being set
+ */
 public class MeasureDefBuilderTest {
-    // resource basis
-    // boolean basis
-    // group defined basis --> error
-    // no basis
     private final CodeableConcept increase = new CodeableConcept(new Coding(
             MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
             IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
@@ -268,7 +267,7 @@ public class MeasureDefBuilderTest {
     @Test
     void basisInvalidGroup() {
         try {
-            var def = measureDefBuilder("fish", "cohort", decrease, "fish", "cohort", increase, null, null, null);
+            measureDefBuilder("fish", "cohort", decrease, "fish", "cohort", increase, null, null, null);
             fail("invalid code, should fail");
         } catch (FHIRException e) {
             assertTrue(e.getMessage().contains("Unknown FHIRAllTypes code 'fish'"));
@@ -278,7 +277,7 @@ public class MeasureDefBuilderTest {
     @Test
     void BasisMeasureInvalid() {
         try {
-            var def = measureDefBuilder(null, null, null, null, null, null, "whale", "ratio", decrease);
+            measureDefBuilder(null, null, null, null, null, null, "whale", "ratio", decrease);
             fail("invalid code, should fail");
         } catch (FHIRException e) {
             assertTrue(e.getMessage().contains("Unknown FHIRAllTypes code 'whale'"));
@@ -342,7 +341,7 @@ public class MeasureDefBuilderTest {
     @Test
     void noScoring() {
         try {
-            var def = measureDefBuilder(null, null, null, null, null, null, "boolean", null, null);
+            measureDefBuilder(null, null, null, null, null, null, "boolean", null, null);
             fail("measureScoring needs to be defined");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("MeasureScoring must be specified on Group or Measure"));
@@ -352,7 +351,7 @@ public class MeasureDefBuilderTest {
     @Test
     void invalidMeasureScoring() {
         try {
-            var def = measureDefBuilder(null, null, null, null, null, null, "boolean", "attestation", null);
+            measureDefBuilder(null, null, null, null, null, null, "boolean", "attestation", null);
             fail("measureScoring needs to be defined");
         } catch (IllegalArgumentException e) {
             assertTrue(
@@ -363,7 +362,7 @@ public class MeasureDefBuilderTest {
     @Test
     void invalidGroupScoring() {
         try {
-            var def = measureDefBuilder(null, "attestation", null, null, "attestation", null, "boolean", null, null);
+            measureDefBuilder(null, "attestation", null, null, "attestation", null, "boolean", null, null);
             fail("measureScoring needs to be defined");
         } catch (IllegalArgumentException e) {
             assertTrue(
@@ -446,7 +445,7 @@ public class MeasureDefBuilderTest {
     @Test
     void invalidImprovementNotation() {
         try {
-            var def = measureDefBuilder(null, "ratio", invalid, null, "proportion", invalid, "boolean", null, null);
+            measureDefBuilder(null, "ratio", invalid, null, "proportion", invalid, "boolean", null, null);
             fail("invalid improvement Notation value");
         } catch (IllegalArgumentException e) {
             assertTrue(

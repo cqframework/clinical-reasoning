@@ -309,9 +309,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
         if (groupScoring != null) {
             return groupScoring;
-        } else {
-            return measureScoring;
         }
+        return measureScoring;
     }
 
     private CodeDef getPopulationBasisDef(CodeDef measureBasis, CodeDef groupBasis) {
@@ -333,8 +332,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private CodeDef defaultCodeDef(CodeDef code, CodeDef codeDefault) {
         if (code != null) {
             return code;
-        } else {
-            return codeDefault;
         }
+        return codeDefault;
     }
 }

@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -51,7 +52,7 @@ public class MeasureDefBuilderTest {
             CodeableConcept measureImpNotation) {
 
         R4MeasureDefBuilder defBuilder = new R4MeasureDefBuilder();
-        org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)
+        Measure measure = (org.hl7.fhir.r4.model.Measure)
                 parser.parseResource(MeasureDefBuilderTest.class.getResourceAsStream("TemplateMeasure.json"));
 
         var group1 = measure.getGroup().stream()

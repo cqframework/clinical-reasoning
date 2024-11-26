@@ -1,35 +1,27 @@
 {
-  "id": "MinimalProportionResourceBasisSingleGroupWithBadDOC",
+  "id": "RatioGroupBooleanAllPopulations",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/MinimalProportionResourceBasisSingleGroupWithBadDOC",
+  "url": "http://example.com/Measure/RatioGroupBooleanAllPopulations",
   "library": [
-    "http://example.com/Library/MinimalProportionResourceBasisSingleGroup"
+    "http://example.com/Library/LibrarySimple"
   ],
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-    "valueCode": "Encounter"
-  },
-    {
-      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-compatible",
-      "valueBoolean": "true"
-    }
-    ],
   "scoring": {
     "coding": [
       {
         "system": "http://hl7.org/fhir/measure-scoring",
-        "code": "proportion"
+        "code": "ratio"
       }
     ]
   },
   "group": [
     {
-      "extension": [ {
-        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression",
-        "valueExpression": {
-          "language": "text/cql-identifier"
+      "id": "group-1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "boolean"
         }
-      } ],
+      ],
       "population": [
         {
           "id": "initial-population",
@@ -44,7 +36,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population"
+            "expression": "Initial Population Boolean"
           }
         },
         {
@@ -60,7 +52,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator"
+            "expression": "Denominator Boolean"
           }
         },
         {
@@ -76,23 +68,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator Exclusion"
-          }
-        },
-        {
-          "id": "denominator-exception",
-          "code": {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
-                "code": "denominator-exception",
-                "display": "Denominator-Exception"
-              }
-            ]
-          },
-          "criteria": {
-            "language": "text/cql-identifier",
-            "expression": "Denominator Exception"
+            "expression": "Denominator Exclusion Boolean"
           }
         },
         {
@@ -102,13 +78,13 @@
               {
                 "system": "http://terminology.hl7.org/CodeSystem/measure-population",
                 "code": "numerator-exclusion",
-                "display": "Numerator-Exclusion"
+                "display": "Numerator Exclusion"
               }
             ]
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator Exclusion"
+            "expression": "Numerator Exclusion Boolean"
           }
         },
         {
@@ -124,10 +100,9 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator"
+            "expression": "Numerator Boolean"
           }
         }
       ]
-    }
-  ]
+    }]
 }

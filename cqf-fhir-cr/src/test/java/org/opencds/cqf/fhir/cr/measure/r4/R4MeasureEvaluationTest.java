@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import jakarta.annotation.Nullable;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
@@ -47,6 +49,9 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -99,7 +104,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = cohort_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
     }
 
@@ -127,7 +133,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = cohort_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
     }
 
@@ -158,7 +165,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
     }
 
@@ -188,7 +196,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
     }
 
@@ -218,12 +227,18 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = continuous_variable_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
     }
 
-    @Test
-    void stratifiedMeasureEvaluation() throws Exception {
+    // Prove we no longer error out for a SUBJECT report with multiple SDEs
+    @ParameterizedTest
+    @NullSource
+    @EnumSource(
+            value = MeasureEvalType.class,
+            names = {"SUBJECT", "SUBJECTLIST", "POPULATION"})
+    void stratifiedMeasureEvaluation(@Nullable MeasureEvalType measureEvalTypeOverride) {
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
         when(retrieveProvider.retrieve(
                         isNull(),
@@ -275,8 +290,12 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = stratified_measure();
 
-        MeasureReport report =
-                runTest(cql, Arrays.asList(jane_doe().getId(), john_doe().getId()), measure, retrieveProvider);
+        MeasureReport report = runTest(
+                cql,
+                Arrays.asList(jane_doe().getId(), john_doe().getId()),
+                measure,
+                retrieveProvider,
+                measureEvalTypeOverride);
         checkStratification(report);
     }
 
@@ -305,15 +324,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        MeasureReport report = runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider);
+        MeasureReport report =
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(patient, report);
-        validateReport(report);
-    }
-
-    private void validateReport(MeasureReport report) {
-        // var validator = new ResourceValidator(FhirVersionEnum.R4, null);
-        // var result = validator.validate(report);
-        // assertEquals(report, result);
     }
 
     private void checkStratification(MeasureReport report) {
@@ -351,7 +364,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private MeasureReport runTest(
-            String cql, List<String> subjectIds, Measure measure, RetrieveProvider retrieveProvider) throws Exception {
+            String cql,
+            List<String> subjectIds,
+            Measure measure,
+            RetrieveProvider retrieveProvider,
+            @Nullable MeasureEvalType measureEvalTypeOverride) {
         Interval measurementPeriod = measurementPeriod("2000-01-01", "2001-01-01");
 
         Library primaryLibrary = library(cql);
@@ -376,7 +393,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure, libraryEngine, id);
         MeasureReport report = evaluation.evaluate(
-                subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION,
+                getMeasureEvalType(subjectIds, measureEvalTypeOverride),
                 subjectIds,
                 measurementPeriod,
                 libraryEngine,
@@ -388,6 +405,12 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         report = (MeasureReport) parser.parseResource(parser.encodeResourceToString(report));
 
         return report;
+    }
+
+    @Nonnull
+    private MeasureEvalType getMeasureEvalType(List<String> subjectIds, MeasureEvalType measureEvalTypeOverride) {
+        return Optional.ofNullable(measureEvalTypeOverride)
+                .orElse(subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION);
     }
 
     private void checkEvidence(Patient patient, MeasureReport report) {

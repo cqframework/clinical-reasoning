@@ -11,24 +11,13 @@ public class MeasureDef {
     private Interval defaultMeasurementPeriod;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
-    private final boolean isBooleanBasis;
-    private final boolean useMeasureImpNotation;
 
-    public MeasureDef(
-            String id,
-            String url,
-            String version,
-            List<GroupDef> groups,
-            List<SdeDef> sdes,
-            boolean isBooleanBasis,
-            boolean useMeasureImprovementNotation) {
+    public MeasureDef(String id, String url, String version, List<GroupDef> groups, List<SdeDef> sdes) {
         this.id = id;
         this.url = url;
         this.version = version;
         this.groups = groups;
         this.sdes = sdes;
-        this.isBooleanBasis = isBooleanBasis;
-        this.useMeasureImpNotation = useMeasureImprovementNotation;
     }
 
     public String id() {
@@ -53,13 +42,5 @@ public class MeasureDef {
 
     public List<GroupDef> groups() {
         return this.groups;
-    }
-
-    public boolean isBooleanBasis() {
-        return this.isBooleanBasis;
-    }
-
-    public boolean useMeasureImpNotation() {
-        return this.useMeasureImpNotation;
     }
 }

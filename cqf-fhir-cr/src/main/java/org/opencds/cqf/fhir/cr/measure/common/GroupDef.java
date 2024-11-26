@@ -12,9 +12,9 @@ public class GroupDef {
     private final List<StratifierDef> stratifiers;
     private final List<PopulationDef> populations;
     private final MeasureScoring measureScoring;
-    private final boolean useGroupDefImprovementNotation;
-    private final boolean isIncreaseImprovementNotation;
-
+    private final boolean isGroupImpNotation;
+    private final CodeDef populationBasis;
+    private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
     public GroupDef(
@@ -23,16 +23,19 @@ public class GroupDef {
             List<StratifierDef> stratifiers,
             List<PopulationDef> populations,
             MeasureScoring measureScoring,
-            boolean isIncreaseImprovementNotation,
-            boolean useGroupDefImprovementNotation) {
+            boolean isGroupImprovementNotation,
+            CodeDef improvementNotation,
+            CodeDef populationBasis) {
+        //
         this.id = id;
         this.code = code;
         this.stratifiers = stratifiers;
         this.populations = populations;
         this.populationIndex = index(populations);
         this.measureScoring = measureScoring;
-        this.isIncreaseImprovementNotation = isIncreaseImprovementNotation;
-        this.useGroupDefImprovementNotation = useGroupDefImprovementNotation;
+        this.isGroupImpNotation = isGroupImprovementNotation;
+        this.improvementNotation = improvementNotation;
+        this.populationBasis = populationBasis;
     }
 
     public String id() {
@@ -77,10 +80,27 @@ public class GroupDef {
     }
 
     public boolean isIncreaseImprovementNotation() {
-        return this.isIncreaseImprovementNotation;
+        if (getImprovementNotation() != null) {
+            return getImprovementNotation().code().equals("increase");
+        } else {
+            // default response if null
+            return true;
+        }
     }
 
-    public boolean useGroupDefImprovementNotation() {
-        return this.useGroupDefImprovementNotation;
+    public boolean isGroupImprovementNotation() {
+        return this.isGroupImpNotation;
+    }
+
+    public boolean isBooleanBasis() {
+        return getPopulationBasis().code().equals("boolean");
+    }
+
+    public CodeDef getPopulationBasis() {
+        return this.populationBasis;
+    }
+
+    public CodeDef getImprovementNotation() {
+        return this.improvementNotation;
     }
 }

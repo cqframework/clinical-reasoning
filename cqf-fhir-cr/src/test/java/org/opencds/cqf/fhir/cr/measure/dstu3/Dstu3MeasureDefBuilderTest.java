@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 class Dstu3MeasureDefBuilderTest {
 
@@ -21,6 +23,8 @@ class Dstu3MeasureDefBuilderTest {
             new Extension().setUrl(POPULATION_BASIS_URL).setValue(new StringType("boolean"));
     private static final Extension RESOURCE_BASIS_EXT =
             new Extension().setUrl(POPULATION_BASIS_URL).setValue(new StringType("encounter"));
+    private static final String INCREASE = "increase";
+    private static final String DECREASE = "decrease";
 
     @Test
     void defBuilderThrowsWhenMeasureIdMissing() {
@@ -50,7 +54,7 @@ class Dstu3MeasureDefBuilderTest {
         measure.setExtension(Collections.singletonList(RESOURCE_BASIS_EXT));
 
         var def = BUILDER.build(measure);
-        assertFalse(def.isBooleanBasis());
+        assertFalse(def.groups().get(0).isBooleanBasis());
     }
 
     @Test
@@ -64,7 +68,7 @@ class Dstu3MeasureDefBuilderTest {
         measure.setExtension(Collections.singletonList(BOOLEAN_BASIS_EXT));
 
         var def = BUILDER.build(measure);
-        assertTrue(def.isBooleanBasis());
+        assertTrue(def.groups().get(0).isBooleanBasis());
     }
 
     @Test
@@ -77,6 +81,68 @@ class Dstu3MeasureDefBuilderTest {
         grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
         // no extension set to define basis of Measure
         var def = BUILDER.build(measure);
-        assertTrue(def.isBooleanBasis());
+        assertTrue(def.groups().get(0).isBooleanBasis());
+    }
+
+    @Test
+    void defBuilderImpNotationIncrease() {
+        var measure = new Measure();
+        measure.setId("123");
+        measure.setImprovementNotation(INCREASE);
+        measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        // no extension set to define basis of Measure
+        var def = BUILDER.build(measure);
+        assertFalse(def.groups().get(0).isGroupImprovementNotation());
+        assertEquals(INCREASE, def.groups().get(0).getImprovementNotation().code());
+        assertTrue(def.groups().get(0).isIncreaseImprovementNotation());
+    }
+
+    @Test
+    void defBuilderImpNotationDecrease() {
+        var measure = new Measure();
+        measure.setId("123");
+        measure.setImprovementNotation(DECREASE);
+        measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        // no extension set to define basis of Measure
+        var def = BUILDER.build(measure);
+        assertFalse(def.groups().get(0).isGroupImprovementNotation());
+        assertEquals(DECREASE, def.groups().get(0).getImprovementNotation().code());
+        assertFalse(def.groups().get(0).isIncreaseImprovementNotation());
+    }
+
+    @Test
+    void defBuilderImpNotationEmpty() {
+        var measure = new Measure();
+        measure.setId("123");
+        measure.setImprovementNotation(INCREASE);
+        measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        // no extension set to define basis of Measure
+        var def = BUILDER.build(measure);
+        assertFalse(def.groups().get(0).isGroupImprovementNotation());
+        assertEquals(INCREASE, def.groups().get(0).getImprovementNotation().code());
+        assertTrue(def.groups().get(0).isIncreaseImprovementNotation());
+    }
+
+    @Test
+    void defBuilderMeasureScoring() {
+        var measure = new Measure();
+        measure.setId("123");
+        measure.setImprovementNotation(INCREASE);
+        measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
+        var grp = measure.addGroup().addPopulation();
+        grp.setId("pop-id");
+        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
+        // no extension set to define basis of Measure
+        var def = BUILDER.build(measure);
+        assertEquals(MeasureScoring.PROPORTION, def.groups().get(0).measureScoring());
     }
 }

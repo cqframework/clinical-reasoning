@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CollectData {
@@ -65,6 +66,7 @@ public class CollectData {
     public static class Given {
         private Repository repository;
         private final MeasureEvaluationOptions evaluationOptions;
+        private final R4MeasureServiceUtils measureServiceUtils;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -78,6 +80,8 @@ public class CollectData {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
         }
 
         public Given repository(Repository repository) {
@@ -93,7 +97,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions);
+            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils);
         }
 
         public When when() {

@@ -12,8 +12,8 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
-import jakarta.annotation.Nullable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,11 +70,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
             // group Measure Scoring
-            var groupScoring = getGroupMeasureScoring(group);
+            var groupScoring = getGroupMeasureScoring(measure, group);
             // populationBasis
             var groupBasis = getGroupPopulationBasis(group);
             // improvement Notation
-            var groupImpNotation = getGroupImpNotation(group);
+            var groupImpNotation = getGroupImpNotation(measure, group);
             var hasGroupImpNotation = groupImpNotation != null;
 
             // Populations
@@ -212,7 +212,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private MeasureScoring getMeasureScoring(@Nullable String scoringCode) {
+    private MeasureScoring getMeasureScoring(Measure measure, @Nullable String scoringCode) {
         if (scoringCode != null) {
             var code = MeasureScoring.fromCode(scoringCode);
             if (code == null) {
@@ -228,10 +228,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private MeasureScoring getMeasureScoring(Measure measure) {
         var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
-        return getMeasureScoring(scoringCode);
+        return getMeasureScoring(measure, scoringCode);
     }
 
-    private void validateImprovementNotationCode(CodeDef improvementNotation) {
+    private void validateImprovementNotationCode(Measure measure, CodeDef improvementNotation) {
         var code = improvementNotation.code();
         var system = improvementNotation.system();
         boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
@@ -267,13 +267,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(codeDef);
+            validateImprovementNotationCode(measure, codeDef);
             return codeDef;
         }
         return null;
     }
 
-    public CodeDef getGroupImpNotation(MeasureGroupComponent group) {
+    public CodeDef getGroupImpNotation(Measure measure, MeasureGroupComponent group) {
         var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
         if (ext != null) {
             var value = ext.getValue();
@@ -282,20 +282,20 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 var codeDef = new CodeDef(
                         coding.getCodingFirstRep().getSystem(),
                         coding.getCodingFirstRep().getCode());
-                validateImprovementNotationCode(codeDef);
+                validateImprovementNotationCode(measure, codeDef);
                 return codeDef;
             }
         }
         return null;
     }
 
-    public MeasureScoring getGroupMeasureScoring(MeasureGroupComponent group) {
+    public MeasureScoring getGroupMeasureScoring(Measure measure, MeasureGroupComponent group) {
         var ext = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
         if (ext != null) {
             var extVal = ext.getValue();
             assert extVal instanceof CodeableConcept;
             CodeableConcept coding = (CodeableConcept) extVal;
-            return getMeasureScoring(coding.getCodingFirstRep().getCode());
+            return getMeasureScoring(measure, coding.getCodingFirstRep().getCode());
         }
         return null;
     }
@@ -311,7 +311,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private MeasureScoring getScoringDef(MeasureScoring measureScoring, MeasureScoring groupScoring) {
         if (groupScoring == null && measureScoring == null) {
-            throw new IllegalArgumentException("MeasureScoring must be specified on Group or Measure");
+            throw new InvalidRequestException("MeasureScoring must be specified on Group or Measure");
         }
         if (groupScoring != null) {
             return groupScoring;

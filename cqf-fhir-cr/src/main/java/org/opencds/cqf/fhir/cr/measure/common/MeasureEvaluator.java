@@ -320,7 +320,7 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+            evaluateGroup(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
         }
     }
 
@@ -407,7 +407,6 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateProportion(
-            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
@@ -454,7 +453,7 @@ public class MeasureEvaluator {
                         evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
             }
             // Apply Exclusions and Exceptions
-            if (measureDef.isBooleanBasis()) {
+            if (groupDef.isBooleanBasis()) {
                 // Remove Subject and Resource Exclusions
                 if (denominatorExclusion != null) {
                     denominator.getSubjects().removeAll(denominatorExclusion.getSubjects());
@@ -505,11 +504,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(
-            MeasureDef measureDef,
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
@@ -530,7 +525,7 @@ public class MeasureEvaluator {
                         subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             }
             // Apply Exclusions to Population
-            if (measureDef.isBooleanBasis()) {
+            if (groupDef.isBooleanBasis()) {
                 if (measurePopulationExclusion != null) {
                     measurePopulation.getSubjects().removeAll(measurePopulationExclusion.getSubjects());
                     measurePopulation.getResources().removeAll(measurePopulationExclusion.getResources());
@@ -547,7 +542,7 @@ public class MeasureEvaluator {
                             resource,
                             measureObservation.expression(),
                             measureObservation.getEvaluatedResources(),
-                            measureDef.isBooleanBasis());
+                            groupDef.isBooleanBasis());
                     measureObservation.addResource(observationResult);
                 }
             }
@@ -566,7 +561,6 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
-            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
@@ -579,11 +573,10 @@ public class MeasureEvaluator {
         switch (scoring) {
             case PROPORTION:
             case RATIO:
-                evaluateProportion(
-                        measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+                evaluateProportion(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(measureDef, groupDef, subjectType, subjectId, evaluationResult);
+                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult);
                 break;
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);

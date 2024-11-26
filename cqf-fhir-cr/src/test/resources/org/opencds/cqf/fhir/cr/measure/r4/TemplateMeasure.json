@@ -1,0 +1,30 @@
+{
+  "resourceType": "Measure",
+  "id": "TemplateMeasure",
+  "group": [ {
+    "id": "group-1",
+    "population": [ {
+      "id": "initial-population-1",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      }
+    } ]
+  },
+    {
+      "id": "group-2",
+      "population": [ {
+        "id": "initial-population-2",
+        "code": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+            "code": "initial-population",
+            "display": "Initial Population"
+          } ]
+        }
+      } ]
+    }]
+}

@@ -301,7 +301,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportGroup.setId(measureGroup.getId());
         // Measure Level Extension
         addMeasureDescription(reportGroup, measureGroup);
-        addExtensionImprovementNotation(reportGroup, bc.measureDef, groupDef);
+        addExtensionImprovementNotation(reportGroup, groupDef);
 
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             var measurePop = measureGroup.getPopulation().get(i);
@@ -318,7 +318,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
             }
             var reportPop = reportGroup.addPopulation();
-            buildPopulation(bc, measurePop, reportPop, defPop);
+            buildPopulation(bc, measurePop, reportPop, defPop, groupDef);
         }
 
         // add extension to group for totalDenominator and totalNumerator
@@ -345,32 +345,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
             }
 
-            if (bc.measureDef.isBooleanBasis()) {
-                reportGroup
-                        .addExtension()
-                        .setUrl(EXT_TOTAL_DENOMINATOR_URL)
-                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
-                                .getSubjects()
-                                .size())));
-                reportGroup
-                        .addExtension()
-                        .setUrl(EXT_TOTAL_NUMERATOR_URL)
-                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
-                                .getSubjects()
-                                .size())));
+            if (groupDef.isBooleanBasis()) {
+                addExtension(
+                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), true);
+                addExtension(reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), true);
+
             } else {
-                reportGroup
-                        .addExtension()
-                        .setUrl(EXT_TOTAL_DENOMINATOR_URL)
-                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALDENOMINATOR)
-                                .getResources()
-                                .size())));
-                reportGroup
-                        .addExtension()
-                        .setUrl(EXT_TOTAL_NUMERATOR_URL)
-                        .setValue(new StringType(Integer.toString(getReportPopulation(groupDef, TOTALNUMERATOR)
-                                .getResources()
-                                .size())));
+                addExtension(
+                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), false);
+                addExtension(
+                        reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), false);
             }
         }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
@@ -379,6 +363,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var defStrat = groupDef.stratifiers().get(i);
             buildStratifier(bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
         }
+    }
+
+    protected void addExtension(
+            MeasureReportGroupComponent group, String extUrl, PopulationDef populationDef, boolean useSubjects) {
+        int count;
+        if (useSubjects) {
+            count = populationDef.getSubjects().size();
+        } else {
+            count = populationDef.getResources().size();
+        }
+
+        group.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
 
     /**
@@ -418,10 +414,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
-        validateStratifierBasisType(subjectValues, bc.measureDef.isBooleanBasis());
+        validateStratifierBasisType(subjectValues, groupDef.isBooleanBasis());
 
         // Stratifiers should be of the same basis as population
-        if (bc.measureDef.isBooleanBasis()) {
+        if (groupDef.isBooleanBasis()) {
             // ValueWrapper is used because most of the types we're dealing with don't implement hashCode or equals
             Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                     .collect(Collectors.groupingBy(
@@ -460,10 +456,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void addExtensionImprovementNotation(
-            MeasureReportGroupComponent reportGroup, MeasureDef measureDef, GroupDef groupDef) {
+    protected void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         // if already set on Measure, don't set on groups too
-        if (!measureDef.useMeasureImpNotation()) {
+        if (groupDef.isGroupImprovementNotation()) {
             if (groupDef.isIncreaseImprovementNotation()) {
                 reportGroup.addExtension(
                         MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
@@ -502,15 +497,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add totalDenominator and totalNumerator extensions
-        buildStratumExtPopulation(
-                groupDef,
-                TOTALDENOMINATOR,
-                subjectIds,
-                stratum,
-                EXT_TOTAL_DENOMINATOR_URL,
-                bc.measureDef.isBooleanBasis());
-        buildStratumExtPopulation(
-                groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL, bc.measureDef.isBooleanBasis());
+        buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
+        buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
     }
 
     protected void buildStratumExtPopulation(
@@ -518,12 +506,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasurePopulationType measurePopulationType,
             List<String> subjectIds,
             StratifierGroupComponent stratum,
-            String extUrl,
-            boolean isBooleanBasis) {
+            String extUrl) {
         Set<String> subjectPop;
         var reportPopulation = getReportPopulation(groupDef, measurePopulationType);
         assert reportPopulation != null;
-        if (isBooleanBasis) {
+        if (groupDef.isBooleanBasis()) {
             subjectPop = reportPopulation.getSubjects().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toSet());
@@ -585,12 +572,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             BuilderContext bc,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
-            PopulationDef populationDef) {
+            PopulationDef populationDef,
+            GroupDef groupDef) {
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
-        if (bc.measureDef.isBooleanBasis()) {
+        if (groupDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getSubjects().size());
         } else {
             reportPopulation.setCount(populationDef.getResources().size());
@@ -607,7 +595,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // This is a temporary list carried forward to stratifiers
         // subjectResult set defined by basis of Measure
         Set<String> populationSet;
-        if (bc.measureDef.isBooleanBasis()) {
+        if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toSet());
@@ -786,7 +774,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         report.setMeasure(getMeasure(measure));
         report.setDate(new java.util.Date());
         report.setImplicitRules(measure.getImplicitRules());
-        if (measureDef.useMeasureImpNotation()) {
+        if (measureDef.groups().isEmpty() || !measureDef.groups().get(0).isGroupImprovementNotation()) {
             // if true, all group components have the same improvement Notation
             report.setImprovementNotation(measure.getImprovementNotation());
         }

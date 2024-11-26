@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -208,7 +209,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private MeasureScoring getMeasureScoring(String scoringCode) {
+    private MeasureScoring getMeasureScoring(@Nullable String scoringCode) {
         if (scoringCode != null) {
             var code = MeasureScoring.fromCode(scoringCode);
             if (code == null) {
@@ -314,7 +315,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return measureScoring;
     }
 
-    private CodeDef getPopulationBasisDef(CodeDef measureBasis, CodeDef groupBasis) {
+    private CodeDef getPopulationBasisDef(@Nullable CodeDef measureBasis, @Nullable CodeDef groupBasis) {
         if (measureBasis == null && groupBasis == null) {
             // default basis, if not defined
             return new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean");
@@ -322,7 +323,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return defaultCodeDef(groupBasis, measureBasis);
     }
 
-    private CodeDef getImprovementNotation(CodeDef measureImpNotation, CodeDef groupImpNotation) {
+    private CodeDef getImprovementNotation(@Nullable CodeDef measureImpNotation, @Nullable CodeDef groupImpNotation) {
         if (measureImpNotation == null && groupImpNotation == null) {
             // default Improvement Notation, if not defined
             return new CodeDef(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
@@ -330,7 +331,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return defaultCodeDef(groupImpNotation, measureImpNotation);
     }
 
-    private CodeDef defaultCodeDef(CodeDef code, CodeDef codeDefault) {
+    private CodeDef defaultCodeDef(@Nullable CodeDef code, @Nullable CodeDef codeDefault) {
         if (code != null) {
             return code;
         }

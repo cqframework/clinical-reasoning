@@ -52,8 +52,8 @@ class MeasureScorerTest {
         }
     }
 
-    // LUKETODO:  these counts are off each other:
-    // LUKETODO:  is this just because of bad test data, or are the counts really different?
+    // LUKETODO: 602  these counts are off each other:
+    // LUKETODO: 602  is this just because of bad test data, or are the counts really different?
     /*
     populationNumeratorCount = 1
     populationDenominatorCount = 1
@@ -69,7 +69,7 @@ class MeasureScorerTest {
     extDenominatorCount= 2
 
          */
-    // LUKETODO:  fix counts in JSONs
+    // LUKETODO:  602 fix counts in JSONs
     @Test
     void scorePopulationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
@@ -118,7 +118,7 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "DataCompleteness").getMeasureScore().getValue());
     }
 
-    // LUKETODO:  fix counts in JSONs
+    // LUKETODO:  602 fix counts in JSONs
     @Test
     void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
@@ -131,7 +131,7 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "PerformanceRate").getMeasureScore().getValue());
     }
 
-    // LUKETODO:  these counts are in sync:
+    // LUKETODO:  602 these counts are in sync:
     /*
     populationNumeratorCount = 5
     populationDenominatorCount = 10

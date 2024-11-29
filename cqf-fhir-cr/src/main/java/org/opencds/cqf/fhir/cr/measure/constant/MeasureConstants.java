@@ -43,11 +43,11 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
-    // LUKETODO:  get rid of this:
+    // LUKETODO: 602  get rid of this:
     @Deprecated
     public static final String EXT_TOTAL_DENOMINATOR_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership";
-    // LUKETODO:  get rid of this:
+    // LUKETODO: 602 get rid of this:
     @Deprecated
     public static final String EXT_TOTAL_NUMERATOR_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership";

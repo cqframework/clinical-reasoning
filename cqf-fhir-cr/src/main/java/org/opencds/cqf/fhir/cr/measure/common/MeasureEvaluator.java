@@ -598,7 +598,7 @@ public class MeasureEvaluator {
         final List<Map<String, CriteriaResult>> criteriaResults =
                 stratifiers.stream().map(StratifierDef::getResults).collect(Collectors.toList());
 
-        // LUKETODO:  LEFT side of the comparison is the groupDefPopulationBasis
+        // LUKETODO:  600 LEFT side of the comparison is the groupDefPopulationBasis
         logger.info("expressionResults: {}, groupDefPopulationBasis: {}", expressionResults, groupDefPopulationBasis);
 
         for (Map<String, CriteriaResult> criteriaResult : criteriaResults) {

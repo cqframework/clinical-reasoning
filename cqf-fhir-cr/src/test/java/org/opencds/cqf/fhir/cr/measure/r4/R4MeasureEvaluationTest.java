@@ -255,7 +255,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: cleanup:
+    // LUKETODO: 600 cleanup:
     @Language("JSON")
     final String json =
             """
@@ -385,7 +385,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_ENCOUNTER, POPULATION_BASIS_ENCOUNTER));
     }
 
-    // LUKETODO:  can I just shove "SDE Race" into the Numerator expression and call it a day?
+    // LUKETODO:  600  can I just shove "SDE Race" into the Numerator expression and call it a day?
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisErrorPathParams")
     void stratifiedMeasureEvaluationByPopulationErrorPathBasis(

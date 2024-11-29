@@ -10,12 +10,15 @@ import org.opencds.cqf.fhir.api.Repository;
 
 public class R4SubmitDataService {
 
-    // LUKETODO:  test this
+    // LUKETODO:  601 test this
     private final Repository repository;
 
     public R4SubmitDataService(Repository repository) {
         this.repository = repository;
     }
+
+    // LUKETODO:  601 what's the point of the id in the GET String?  Is this a measure ID?  If so, what to do with it?
+    // URL: [base]/Measure/[id]/$submit-data
 
     /**
      * Save measure report and resources to the local repository
@@ -26,10 +29,14 @@ public class R4SubmitDataService {
      * @return Bundle transaction result
      */
     public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
+        // LUKETODO: 601
         /*
          * TODO - resource validation using $data-requirements operation (params are the provided id and
          * the measurement period from the MeasureReport)
-         *
+         */
+
+        // LUKETODO: 601
+        /*
          * TODO - profile validation ... not sure how that would work ... (get StructureDefinition from
          * URL or must it be stored in Ruler?)
          */

@@ -1,17 +1,26 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOR;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
@@ -36,6 +45,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
+
     @Override
     public void score(MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
@@ -48,10 +59,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
+
             scoreGroup(
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
                     getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation());
+
+            final GroupDef groupDef = getGroupDef(measureDef, mrgc);
+
+            final PopulationDef numeratorPopulationDef = groupDef.getSingle(NUMERATOR);
+            final PopulationDef denominatorPopulationDef = groupDef.getSingle(DENOMINATOR);
+
+            logger.info("numeratorPopulationDef: {}, denominatorPopulationDef: {} ", numeratorPopulationDef, denominatorPopulationDef);
         }
     }
 
@@ -109,9 +128,61 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
+                // LUKETODO:  should this be from the MeasureReportGroupComponent  or the GroupDef?
+                /*
+                    MeasureScorer should now look for Numerator/Denominator values to make the calculation instead of the extension values.
+                    Any code that sets or maintains these populations can be removed
+                    Testing classes that have assertions for these values should be deprecated
+                 */
+                final List<MeasureReportGroupPopulationComponent> populations = mrgc.getPopulation();
+
+                // LUKETODO:  I think we need to do the depopulations.stream()
+                final List<MeasureReportGroupPopulationComponent> numerators = populations.stream()
+                    .filter(population -> "numerator".equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                    .toList();
+
+                final List<MeasureReportGroupPopulationComponent> denominators = populations.stream()
+                    .filter(population -> "numerator".equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                    .toList();
+
+                final Integer populationNumeratorCount = populations.stream()
+                    .filter(population -> "numerator".equals(population.getCode().getCodingFirstRep().getCode()))
+                    .map(MeasureReportGroupPopulationComponent::getCount)
+                    .findAny()
+                    .orElse(0);
+
+                final Integer populationDenominatorCount = populations.stream()
+                    .filter(population -> "denominator".equals(population.getCode().getCodingFirstRep().getCode()))
+                    .map(MeasureReportGroupPopulationComponent::getCount)
+                    .findAny()
+                    .orElse(0);
+                logger.info("populationNumeratorCount: {}, populationDenominatorCount: {}", populationNumeratorCount, populationDenominatorCount);
+                System.out.println("populationNumeratorCount = " + populationNumeratorCount );
+                System.out.println("populationDenominatorCount = " + populationDenominatorCount);
+
+                final Integer extNumeratorCount = getGroupExtensionCount(mrgc,
+                    EXT_TOTAL_NUMERATOR_URL);
+                final Integer extDenominatorCount = getGroupExtensionCount(mrgc,
+                    EXT_TOTAL_DENOMINATOR_URL);
+
+                logger.info("extNumeratorCount: {}, extDenominatorCount: {}", extNumeratorCount, extDenominatorCount);
+                System.out.println("extNumeratorCount= " + populationNumeratorCount);
+                System.out.println("extDenominatorCount= " + extDenominatorCount);
+
+
+                if (!Objects.equals(extNumeratorCount, populationNumeratorCount)) {
+                    throw new IllegalStateException("numerator counts don't match: ext:" + extNumeratorCount + " != population:" + populationNumeratorCount);
+                }
+
+                if (!Objects.equals(extDenominatorCount, populationDenominatorCount)) {
+                    throw new IllegalStateException("denominator counts don't match: ext:" + extDenominatorCount + " != population:" + populationDenominatorCount);
+                }
+
                 Double score = this.calcProportionScore(
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
+                    extNumeratorCount,
+                    extDenominatorCount);
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));
@@ -133,6 +204,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
+                // LUKETODO:
                 Double score = this.calcProportionScore(
                         getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL),
                         getStratumPopulationCount(stratum, EXT_TOTAL_DENOMINATOR_URL));

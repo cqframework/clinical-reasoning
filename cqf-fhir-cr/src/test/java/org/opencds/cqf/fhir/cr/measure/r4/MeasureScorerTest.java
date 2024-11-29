@@ -18,14 +18,14 @@ import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
 class MeasureScorerTest {
 
-    List<Measure> myMeasures = getMyMeasures();
-    List<MeasureReport> myMeasureReports = getMyMeasureReports();
+    List<Measure> measures = getMeasures();
+    List<MeasureReport> measureReports = getMeasureReports();
 
     @Test
     void scoreOnlyPopulationIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
@@ -52,11 +52,29 @@ class MeasureScorerTest {
         }
     }
 
+    // LUKETODO:  these counts are off each other:
+    // LUKETODO:  is this just because of bad test data, or are the counts really different?
+    /*
+populationNumeratorCount = 1
+populationDenominatorCount = 1
+extNumeratorCount= 1
+extDenominatorCount= 1
+populationNumeratorCount = 1
+populationDenominatorCount = 2
+extNumeratorCount= 1
+extDenominatorCount= 1
+populationNumeratorCount = 1
+populationDenominatorCount = 2
+extNumeratorCount= 1
+extDenominatorCount= 2
+
+     */
+    // LUKETODO:  fix counts in JSONs
     @Test
     void scorePopulationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -76,7 +94,7 @@ class MeasureScorerTest {
     void scoreErrorNoIds() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
             scorer.score(measureScoringDef, measureReport);
@@ -92,7 +110,7 @@ class MeasureScorerTest {
     void scoreZeroDenominator() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -100,11 +118,12 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "DataCompleteness").getMeasureScore().getValue());
     }
 
+    // LUKETODO:  fix counts in JSONs
     @Test
     void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -112,12 +131,19 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "PerformanceRate").getMeasureScore().getValue());
     }
 
+    // LUKETODO:  these counts are in sync:
+    /*
+    populationNumeratorCount = 5
+    populationDenominatorCount = 10
+    extNumeratorCount= 5
+    extDenominatorCount= 10
+     */
     @Test
     void scoreGroupIdMultiStratum() {
         var measureUrl =
                 "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -169,7 +195,7 @@ class MeasureScorerTest {
                 .get();
     }
 
-    public List<Measure> getMyMeasures() {
+    public List<Measure> getMeasures() {
         // Measures
         FhirResourceLoader measures = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/Measures/"), false);
@@ -181,7 +207,7 @@ class MeasureScorerTest {
         return measureList;
     }
 
-    public List<MeasureReport> getMyMeasureReports() {
+    public List<MeasureReport> getMeasureReports() {
         FhirResourceLoader measureReports = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/MeasureReports/"), false);
         List<MeasureReport> measureReportList = new ArrayList<>();
@@ -193,7 +219,7 @@ class MeasureScorerTest {
     }
 
     public MeasureDef getMeasureScoringDef(String measureUrl) {
-        var measureRes = myMeasures.stream()
+        var measureRes = measures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
                 .orElse(null);
@@ -201,8 +227,8 @@ class MeasureScorerTest {
         return measureDefBuilder.build(measureRes);
     }
 
-    public MeasureReport getMyMeasureReport(String measureUrl) {
-        return myMeasureReports.stream()
+    public MeasureReport getMeasureReport(String measureUrl) {
+        return measureReports.stream()
                 .filter(measureReport -> measureUrl.equals(measureReport.getMeasure()))
                 .findAny()
                 .orElse(null);

@@ -55,20 +55,20 @@ class MeasureScorerTest {
     // LUKETODO:  these counts are off each other:
     // LUKETODO:  is this just because of bad test data, or are the counts really different?
     /*
-populationNumeratorCount = 1
-populationDenominatorCount = 1
-extNumeratorCount= 1
-extDenominatorCount= 1
-populationNumeratorCount = 1
-populationDenominatorCount = 2
-extNumeratorCount= 1
-extDenominatorCount= 1
-populationNumeratorCount = 1
-populationDenominatorCount = 2
-extNumeratorCount= 1
-extDenominatorCount= 2
+    populationNumeratorCount = 1
+    populationDenominatorCount = 1
+    extNumeratorCount= 1
+    extDenominatorCount= 1
+    populationNumeratorCount = 1
+    populationDenominatorCount = 2
+    extNumeratorCount= 1
+    extDenominatorCount= 1
+    populationNumeratorCount = 1
+    populationDenominatorCount = 2
+    extNumeratorCount= 1
+    extDenominatorCount= 2
 
-     */
+         */
     // LUKETODO:  fix counts in JSONs
     @Test
     void scorePopulationIdMultiRate() {

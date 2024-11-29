@@ -595,12 +595,11 @@ public class MeasureEvaluator {
         final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
         final CodeDef groupDefPopulationBasis = groupDef.getPopulationBasis();
         final List<StratifierDef> stratifiers = groupDef.stratifiers();
-        final List<Map<String, CriteriaResult>> criteriaResults = stratifiers.stream()
-            .map(StratifierDef::getResults).toList();
+        final List<Map<String, CriteriaResult>> criteriaResults =
+                stratifiers.stream().map(StratifierDef::getResults).collect(Collectors.toList());
 
         // LUKETODO:  LEFT side of the comparison is the groupDefPopulationBasis
-        logger.info("expressionResults: {}, groupDefPopulationBasis: {}", expressionResults,
-            groupDefPopulationBasis);
+        logger.info("expressionResults: {}, groupDefPopulationBasis: {}", expressionResults, groupDefPopulationBasis);
 
         for (Map<String, CriteriaResult> criteriaResult : criteriaResults) {
             logger.info("criteriaResult: {}", criteriaResult);

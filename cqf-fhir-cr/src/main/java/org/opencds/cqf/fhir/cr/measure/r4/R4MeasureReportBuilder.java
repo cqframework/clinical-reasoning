@@ -359,7 +359,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .filter(x -> x.rawValue() instanceof Resource)
                     .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
-                // LUKETODO:  602 this is the stratifier case
                 throw new IllegalArgumentException(
                         "stratifier expression criteria results must match the same type as population.");
             }

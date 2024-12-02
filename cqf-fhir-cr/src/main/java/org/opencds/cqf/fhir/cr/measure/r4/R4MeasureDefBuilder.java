@@ -87,21 +87,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         populationType,
                         pop.getCriteria().getExpression()));
             }
-            // total Denominator/Numerator Def Builder
-            // validate population is not in Def
-            //            // LUKETODO:
-            //            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
-            //                // add to definition
-            //                populations.add(new PopulationDef(
-            //                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR,
-            // null));
-            //            }
-            //            // LUKETODO:
-            //            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
-            //                // add to definition
-            //                populations.add(new PopulationDef(
-            //                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
-            //            }
+
             if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
                     && checkPopulationForCode(populations, DATEOFCOMPLIANCE) == null) {
                 // add to definition

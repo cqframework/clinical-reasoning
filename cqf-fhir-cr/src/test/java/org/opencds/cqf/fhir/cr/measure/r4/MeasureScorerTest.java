@@ -100,7 +100,6 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "DataCompleteness").getMeasureScore().getValue());
     }
 
-    // LUKETODO:  602 fix counts in JSONs
     @Test
     void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
@@ -113,13 +112,6 @@ class MeasureScorerTest {
         assertNull(group(measureReport, "PerformanceRate").getMeasureScore().getValue());
     }
 
-    // LUKETODO:  602 these counts are in sync:
-    /*
-    populationNumeratorCount = 5
-    populationDenominatorCount = 10
-    extNumeratorCount= 5
-    extDenominatorCount= 10
-     */
     @Test
     void scoreGroupIdMultiStratum() {
         var measureUrl =

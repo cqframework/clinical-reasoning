@@ -3,15 +3,21 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
@@ -36,6 +42,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
+
     @Override
     public void score(MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
@@ -48,6 +56,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
+
             scoreGroup(
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
@@ -106,12 +115,70 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected void scoreGroup(
             MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
+        // LUKETODO: 602  should this be from the MeasureReportGroupComponent  or the GroupDef?
+                /*
+                   MeasureScorer should now look for Numerator/Denominator values to make the calculation instead of the extension values.
+                   Any code that sets or maintains these populations can be removed
+                   Testing classes that have assertions for these values should be deprecated
+                */
+        final List<MeasureReportGroupPopulationComponent> populations = mrgc.getPopulation();
+
+        // LUKETODO:  602 I think we need to do the populations.stream()
+        final List<MeasureReportGroupPopulationComponent> numerators = populations.stream()
+            .filter(population -> "numerator"
+                .equals(population.getCode().getCodingFirstRep().getCode()))
+            .collect(Collectors.toList());
+
+        final List<MeasureReportGroupPopulationComponent> denominators = populations.stream()
+            .filter(population -> "numerator"
+                .equals(population.getCode().getCodingFirstRep().getCode()))
+            .collect(Collectors.toList());
+
+        final Integer populationNumeratorCount = populations.stream()
+            .filter(population -> "numerator"
+                .equals(population.getCode().getCodingFirstRep().getCode()))
+            .map(MeasureReportGroupPopulationComponent::getCount)
+            .findAny()
+            .orElse(0);
+
+        final Integer populationDenominatorCount = populations.stream()
+            .filter(population -> "denominator"
+                .equals(population.getCode().getCodingFirstRep().getCode()))
+            .map(MeasureReportGroupPopulationComponent::getCount)
+            .findAny()
+            .orElse(0);
+        logger.info(
+            "populationNumeratorCount: {}, populationDenominatorCount: {}",
+            populationNumeratorCount,
+            populationDenominatorCount);
+        System.out.println("populationNumeratorCount = " + populationNumeratorCount);
+        System.out.println("populationDenominatorCount = " + populationDenominatorCount);
+
+        final Integer extNumeratorCount = getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL);
+        final Integer extDenominatorCount = getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL);
+
+        logger.info("extNumeratorCount: {}, extDenominatorCount: {}", extNumeratorCount, extDenominatorCount);
+        System.out.println("extNumeratorCount= " + populationNumeratorCount);
+        System.out.println("extDenominatorCount= " + extDenominatorCount);
+
+        // LUKETODO:  602
+        //                if (!Objects.equals(extNumeratorCount, populationNumeratorCount)) {
+        //                    throw new IllegalStateException("numerator counts don't match: ext:" +
+        // extNumeratorCount + " != population:" + populationNumeratorCount);
+        //                }
+        //
+        //                if (!Objects.equals(extDenominatorCount, populationDenominatorCount)) {
+        //                    throw new IllegalStateException("denominator counts don't match: ext:" +
+        // extDenominatorCount + " != population:" + populationDenominatorCount);
+        //                }
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
+
+                // LUKETODO: 602:  do we need a fix for the PRODUCTION WRITE????
+                // LUKETODO: 602:  this is the actual fix for the READ
+//                Double score = this.calcProportionScore(extNumeratorCount, extDenominatorCount);
+                Double score = this.calcProportionScore(populationNumeratorCount, populationDenominatorCount);
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));
@@ -124,6 +191,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
         }
 
+        // LUKETODO: 602:  pass down populationNumerator and denominator to scoreStratifier() ???
         for (MeasureReportGroupStratifierComponent stratifierComponent : mrgc.getStratifier()) {
             scoreStratifier(measureScoring, stratifierComponent);
         }
@@ -133,6 +201,29 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
+                // LUKETODO: 602:  use this instead of the MeasureGroup Population????????
+                final List<StratifierGroupPopulationComponent> populations = stratum.getPopulation();
+
+                final Integer stratumPopulationNumeratorCount = populations.stream()
+                    .filter(population -> "numerator"
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                    .map(StratifierGroupPopulationComponent::getCount)
+                    .findAny()
+                    .orElse(0);
+
+                final Integer stratumPopulationDenominatorCount = populations.stream()
+                    .filter(population -> "denominator"
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                    .map(StratifierGroupPopulationComponent::getCount)
+                    .findAny()
+                    .orElse(0);
+                logger.info(
+                    "stratumPopulationNumeratorCount: {}, stratumPopulationDenominatorCount: {}",
+                    stratumPopulationNumeratorCount,
+                    stratumPopulationDenominatorCount);
+                System.out.println("stratumPopulationNumeratorCount = " + stratumPopulationNumeratorCount);
+                System.out.println("stratumPopulationDenominatorCount = " + stratumPopulationDenominatorCount);
+
                 Double score = this.calcProportionScore(
                         getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL),
                         getStratumPopulationCount(stratum, EXT_TOTAL_DENOMINATOR_URL));

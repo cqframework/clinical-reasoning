@@ -4,7 +4,9 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 
@@ -19,16 +21,24 @@ public class R4SubmitDataService {
     /**
      * Save measure report and resources to the local repository
      *
-     * @param id
-     * @param report
-     * @param resources
+     * @param measureId ???
+     * @param report The measure report being submitted
+     * @param resources The individual resources that make up the data-of-interest being submitted
      * @return Bundle transaction result
      */
-    public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
+    public Bundle submitData(IdType measureId, MeasureReport report, List<IBaseResource> resources) {
         /*
-         * TODO - resource validation using $data-requirements operation (params are the provided id and
+         * TODO - resource validation using $data-requirements operation (params are the provided measureId and
          * the measurement period from the MeasureReport)
-         *
+         */
+
+        var measureFromDb = repository.read(Measure.class, measureId);
+        var measureReportPeriod = report.getPeriod();
+
+        validateResource(measureFromDb, measureReportPeriod);
+
+        // LUKETODO: 601
+        /*
          * TODO - profile validation ... not sure how that would work ... (get StructureDefinition from
          * URL or must it be stored in Ruler?)
          */
@@ -39,6 +49,7 @@ public class R4SubmitDataService {
         if (resources != null) {
             for (IBaseResource res : resources) {
                 // Unpack nested Bundles
+                // TODO: LD: replace with pattern variable once animal sniffer allows it
                 if (res instanceof Bundle) {
                     Bundle nestedBundle = (Bundle) res;
                     for (Bundle.BundleEntryComponent entry : nestedBundle.getEntry()) {
@@ -50,6 +61,11 @@ public class R4SubmitDataService {
             }
         }
         return repository.transaction(transactionBundle);
+    }
+
+    private void validateResource(Measure measureFromDb, Period measureReportPeriod) {
+        // LUKETODO: 601 ???
+        // LUKETODO: 601 unit tests for any cases that fail validation
     }
 
     private Bundle.BundleEntryComponent createEntry(IBaseResource resource) {

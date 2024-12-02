@@ -1,13 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -344,22 +340,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     }
                 }
             }
-
-            if (groupDef.isBooleanBasis()) {
-                // LUKETODO: 602 why doesn't this consider exclusions?
-                // LUKETODO: 602 do we add this WITH or WITHOUT exclusions? my guess is WITHOUT
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), true);
-                addExtension(reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), true);
-
-            } else {
-                // LUKETODO: 602 why doesn't this consider exclusions?
-                // LUKETODO: 602 do we add this WITH or WITHOUT exclusions? my guess is WITHOUT
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), false);
-                addExtension(
-                        reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), false);
-            }
         }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             var groupStrat = measureGroup.getStratifier().get(i);
@@ -368,26 +348,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             buildStratifier(bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
         }
     }
-
-    protected void addExtension(
-            MeasureReportGroupComponent group, String extUrl, PopulationDef populationDef, boolean useSubjects) {
-        int count;
-        if (useSubjects) {
-            // LUKETODO:  in the test case, this will be 6, same as the population "denominator"
-            // LUKETODO:  in the test case, this will be 3, same as the population "numerator"
-            count = populationDef.getSubjects().size();
-            System.out.println(String.format("useSubjects YES: populationDef: %s, count: %s", extUrl, count));
-        } else {
-            // LUKETODO:  in the test case, this will be 2, same as the population "denominator"
-            // LUKETODO:  in the test case, this will be 1, same as the population "numerator"
-            count = populationDef.getResources().size();
-            System.out.println(String.format("useSubjects NO: populationDef: %s count: %s", extUrl, count));
-        }
-
-        group.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
-    }
-
-    // LUKETODO: 602 is there such a thing as validation for group population basis?
 
     /**
      *
@@ -508,39 +468,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratumPopulation, subjectIds, mgpc);
         }
-
-        // add totalDenominator and totalNumerator extensions
-        // LUKETODO: 602
-        buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
-        buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
-    }
-
-    protected void buildStratumExtPopulation(
-            GroupDef groupDef,
-            MeasurePopulationType measurePopulationType,
-            List<String> subjectIds,
-            StratifierGroupComponent stratum,
-            String extUrl) {
-        Set<String> subjectPop;
-        var reportPopulation = getReportPopulation(groupDef, measurePopulationType);
-        assert reportPopulation != null;
-        if (groupDef.isBooleanBasis()) {
-            subjectPop = reportPopulation.getSubjects().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                    .collect(Collectors.toSet());
-        } else {
-            subjectPop = reportPopulation.getResources().stream()
-                    .filter(Resource.class::isInstance)
-                    .map(Resource.class::cast)
-                    .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
-                    .collect(Collectors.toSet());
-        }
-        int count;
-
-        Set<String> intersection = new HashSet<>(subjectIds);
-        intersection.retainAll(subjectPop);
-        count = intersection.size();
-        stratum.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
 
     protected void buildStratumPopulation(

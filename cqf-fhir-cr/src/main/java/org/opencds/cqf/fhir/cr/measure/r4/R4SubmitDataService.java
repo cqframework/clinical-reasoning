@@ -8,6 +8,9 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 
+/**
+ * See: <a href='https://www.hl7.org/fhir/R4/measure-operation-submit-data.html'>https://www.hl7.org/fhir/R4/measure-operation-submit-data.html</a>
+ */
 public class R4SubmitDataService {
 
     private final Repository repository;
@@ -16,18 +19,22 @@ public class R4SubmitDataService {
         this.repository = repository;
     }
 
+    // TODO: LD: Add description for measureId parameter once it's clear what this is:
     /**
      * Save measure report and resources to the local repository
      *
-     * @param id
-     * @param report
-     * @param resources
+     * @param measureId
+     * @param report The measure report being submitted
+     * @param resources The individual resources that make up the data-of-interest being submitted
      * @return Bundle transaction result
      */
-    public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
+    public Bundle submitData(IdType measureId, MeasureReport report, List<IBaseResource> resources) {
         /*
          * TODO - resource validation using $data-requirements operation (params are the provided id and
          * the measurement period from the MeasureReport)
+         */
+
+        /*
          *
          * TODO - profile validation ... not sure how that would work ... (get StructureDefinition from
          * URL or must it be stored in Ruler?)

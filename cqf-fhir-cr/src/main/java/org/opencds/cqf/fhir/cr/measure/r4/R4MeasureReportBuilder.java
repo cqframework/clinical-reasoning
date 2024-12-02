@@ -346,11 +346,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             if (groupDef.isBooleanBasis()) {
+                // LUKETODO: 602 why doesn't this consider exclusions?
+                // LUKETODO: 602 do we add this WITH or WITHOUT exclusions? my guess is WITHOUT
                 addExtension(
                         reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), true);
                 addExtension(reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), true);
 
             } else {
+                // LUKETODO: 602 why doesn't this consider exclusions?
+                // LUKETODO: 602 do we add this WITH or WITHOUT exclusions? my guess is WITHOUT
                 addExtension(
                         reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), false);
                 addExtension(
@@ -369,13 +373,21 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent group, String extUrl, PopulationDef populationDef, boolean useSubjects) {
         int count;
         if (useSubjects) {
+            // LUKETODO:  in the test case, this will be 6, same as the population "denominator"
+            // LUKETODO:  in the test case, this will be 3, same as the population "numerator"
             count = populationDef.getSubjects().size();
+            System.out.println(String.format("useSubjects YES: populationDef: %s, count: %s", extUrl, count));
         } else {
+            // LUKETODO:  in the test case, this will be 2, same as the population "denominator"
+            // LUKETODO:  in the test case, this will be 1, same as the population "numerator"
             count = populationDef.getResources().size();
+            System.out.println(String.format("useSubjects NO: populationDef: %s count: %s", extUrl, count));
         }
 
         group.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
+
+    // LUKETODO: 602 is there such a thing as validation for group population basis?
 
     /**
      *
@@ -390,6 +402,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .filter(x -> x.rawValue() instanceof Resource)
                     .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
+                // LUKETODO:  602 this is the stratifier case
                 throw new IllegalArgumentException(
                         "stratifier expression criteria results must match the same type as population.");
             }
@@ -497,6 +510,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // add totalDenominator and totalNumerator extensions
+        // LUKETODO: 602
         buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
         buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
     }

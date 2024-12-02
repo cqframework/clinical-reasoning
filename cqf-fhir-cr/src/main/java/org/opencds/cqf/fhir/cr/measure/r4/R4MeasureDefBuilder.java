@@ -91,11 +91,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             }
             // total Denominator/Numerator Def Builder
             // validate population is not in Def
+            // LUKETODO:
             if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
                 // add to definition
                 populations.add(new PopulationDef(
                         "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
             }
+            // LUKETODO:
             if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
                 // add to definition
                 populations.add(new PopulationDef(

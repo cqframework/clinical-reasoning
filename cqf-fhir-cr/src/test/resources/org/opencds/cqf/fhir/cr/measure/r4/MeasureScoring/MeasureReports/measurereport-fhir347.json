@@ -310,7 +310,7 @@
       "extension":[
         {
           "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-          "valueString":"1"
+          "valueString":"2"
         },
         {
           "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",

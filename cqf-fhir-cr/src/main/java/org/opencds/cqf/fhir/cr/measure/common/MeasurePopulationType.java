@@ -49,11 +49,15 @@ public enum MeasurePopulationType {
             "Measure Observation",
             "Defines the individual observation to be performed for each patient or event in the measure population. Measure observations for each case in the population are aggregated to determine the overall measure score for the population"),
 
+    // LUKETODO:
+    @Deprecated
     TOTALDENOMINATOR(
             "total-denominator",
             "Total Denominator",
             "The calculated denominator value used to calculate the measure score from Denominator, Denominator-Exclusion, Denominator-Exception and Numerator values"),
 
+    // LUKETODO:
+    @Deprecated
     TOTALNUMERATOR(
             "total-numerator",
             "Total Numerator",

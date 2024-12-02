@@ -385,18 +385,24 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_ENCOUNTER, POPULATION_BASIS_ENCOUNTER));
     }
 
+    // LUKETODO:  600  how do I set up this test to prove that GroupDef criteria expressions are properly validated?
     // LUKETODO:  600  can I just shove "SDE Race" into the Numerator expression and call it a day?
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisErrorPathParams")
     void stratifiedMeasureEvaluationByPopulationErrorPathBasis(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
-        final String cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                + "define Denominator: 'John' in Patient.name.given\n"
-                + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
+        final String cql = cql_with_dateTime() + sde_race() +
+            """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            define Gender: Patient.gender
+            """;
 
+        // LUKETODO:  cleanup
         System.out.println("cql = \n" + cql);
 
+        // LUKETODO:  cleanup
         var x =
                 """
         library Test version '1.0.0'
@@ -425,7 +431,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         try {
             runTest(
                     cql,
-                    Arrays.asList(jane_doe().getId(), john_doe().getId()),
+                    List.of(jane_doe().getId(), john_doe().getId()),
                     stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
                     setupMockRetrieverProvider(),
                     null);
@@ -588,7 +594,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Measure measure = measure("proportion", populationBasisTypeForMeasure, populationBasisTypeForGroup);
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
+//        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
+        addPopulation(measure, MeasurePopulationType.NUMERATOR, "SDE Race");
         addSDEComponent(measure);
 
         return measure;

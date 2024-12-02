@@ -4,36 +4,38 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class R4SubmitDataService {
 
-    // LUKETODO:  601 test this
     private final Repository repository;
 
     public R4SubmitDataService(Repository repository) {
         this.repository = repository;
     }
 
-    // LUKETODO:  601 what's the point of the id in the GET String?  Is this a measure ID?  If so, what to do with it?
-    // URL: [base]/Measure/[id]/$submit-data
-
     /**
      * Save measure report and resources to the local repository
      *
-     * @param id
-     * @param report
-     * @param resources
+     * @param measureId ???
+     * @param report The measure report being submitted
+     * @param resources The individual resources that make up the data-of-interest being submitted
      * @return Bundle transaction result
      */
-    public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
-        // LUKETODO: 601
+    public Bundle submitData(IdType measureId, MeasureReport report, List<IBaseResource> resources) {
         /*
-         * TODO - resource validation using $data-requirements operation (params are the provided id and
+         * TODO - resource validation using $data-requirements operation (params are the provided measureId and
          * the measurement period from the MeasureReport)
          */
+
+        var measureFromDb = repository.read(Measure.class, measureId);
+        var measureReportPeriod = report.getPeriod();
+
+        validateResource(measureFromDb, measureReportPeriod);
 
         // LUKETODO: 601
         /*
@@ -47,6 +49,7 @@ public class R4SubmitDataService {
         if (resources != null) {
             for (IBaseResource res : resources) {
                 // Unpack nested Bundles
+                // TODO: LD: replace with pattern variable once animal sniffer allows it
                 if (res instanceof Bundle) {
                     Bundle nestedBundle = (Bundle) res;
                     for (Bundle.BundleEntryComponent entry : nestedBundle.getEntry()) {
@@ -58,6 +61,11 @@ public class R4SubmitDataService {
             }
         }
         return repository.transaction(transactionBundle);
+    }
+
+    private void validateResource(Measure measureFromDb, Period measureReportPeriod) {
+        // LUKETODO: 601 ???
+        // LUKETODO: 601 unit tests for any cases that fail validation
     }
 
     private Bundle.BundleEntryComponent createEntry(IBaseResource resource) {

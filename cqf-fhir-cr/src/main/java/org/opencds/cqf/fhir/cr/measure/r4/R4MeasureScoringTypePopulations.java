@@ -15,9 +15,12 @@ public class R4MeasureScoringTypePopulations {
         DENOMINATOREXCEPTION(MeasurePopulationType.DENOMINATOREXCEPTION),
         NUMERATOREXCLUSION(MeasurePopulationType.NUMERATOREXCLUSION),
         NUMERATOR(MeasurePopulationType.NUMERATOR),
-        DATEOFCOMPLIANCE(MeasurePopulationType.DATEOFCOMPLIANCE),
-        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
-        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR);
+        DATEOFCOMPLIANCE(MeasurePopulationType.DATEOFCOMPLIANCE)
+    // LUKETODO:
+    //        ,
+    //        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
+    //        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR)
+    ;
 
         private final MeasurePopulationType measurePopulationType;
 
@@ -82,9 +85,11 @@ public class R4MeasureScoringTypePopulations {
         DENOMINATOREXCLUSION(MeasurePopulationType.DENOMINATOREXCLUSION),
         NUMERATOREXCLUSION(MeasurePopulationType.NUMERATOREXCLUSION),
         NUMERATOR(MeasurePopulationType.NUMERATOR),
-        DATEOFCOMPLIANCE(MeasurePopulationType.DATEOFCOMPLIANCE),
-        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
-        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR);
+        DATEOFCOMPLIANCE(MeasurePopulationType.DATEOFCOMPLIANCE)
+    //        ,
+    //        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
+    //        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR)
+    ;
         private final MeasurePopulationType measurePopulationType;
 
         RATIO_ALLOWED(MeasurePopulationType measurePopulationType) {
@@ -145,8 +150,8 @@ public class R4MeasureScoringTypePopulations {
         INITIALPOPULATION(MeasurePopulationType.INITIALPOPULATION),
         MEASUREPOPULATION(MeasurePopulationType.MEASUREPOPULATION),
         MEASUREPOPULATIONEXCLUSION(MeasurePopulationType.MEASUREPOPULATIONEXCLUSION),
-        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
-        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR),
+        //        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
+        //        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR),
         MEASUREOBSERVATION(MeasurePopulationType.MEASUREOBSERVATION);
         private final MeasurePopulationType measurePopulationType;
 
@@ -210,9 +215,12 @@ public class R4MeasureScoringTypePopulations {
     }
 
     public enum COHORT_ALLOWED {
-        INITIALPOPULATION(MeasurePopulationType.INITIALPOPULATION),
-        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
-        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR);
+        INITIALPOPULATION(MeasurePopulationType.INITIALPOPULATION)
+    // LUKETODO:
+    //        ,
+    //        TOTALDENOMINATOR(MeasurePopulationType.TOTALDENOMINATOR),
+    //        TOTALNUMERATOR(MeasurePopulationType.TOTALNUMERATOR)
+    ;
         private final MeasurePopulationType measurePopulationType;
 
         COHORT_ALLOWED(MeasurePopulationType measurePopulationType) {

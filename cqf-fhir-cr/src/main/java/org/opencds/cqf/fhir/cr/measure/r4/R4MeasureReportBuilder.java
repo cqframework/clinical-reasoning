@@ -270,17 +270,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
 
-        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
-        // TOTAL-DENOMINATOR), and will not be added to group populations.
-        // Subtracting '2' from groupDef to balance with Measure defined Groups
-        var groupDefSizeDiff = 2;
+        var groupDefSizeDiff = 0;
         if (groupDef.populations().stream()
                         .filter(x -> x.type().equals(MeasurePopulationType.DATEOFCOMPLIANCE))
                         .findFirst()
                         .orElse(null)
                 != null) {
             // dateOfNonCompliance is another population not calculated
-            groupDefSizeDiff = 3;
+            groupDefSizeDiff = 1;
         }
 
         if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {

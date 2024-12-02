@@ -19,6 +19,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -303,6 +305,8 @@ public class MeasureEvaluator {
             EvaluationResult result =
                     libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
 
+            someEvaluationValidationStuff(measureDef, result);
+
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
         }
 
@@ -579,6 +583,29 @@ public class MeasureEvaluator {
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
+        }
+    }
+
+    private void someEvaluationValidationStuff(MeasureDef measureDef, EvaluationResult evaluationResult) {
+        measureDef.groups().forEach(groupDef -> someEvaluationValidationStuff(groupDef, evaluationResult));
+    }
+
+    private void someEvaluationValidationStuff(GroupDef groupDef, EvaluationResult evaluationResult) {
+        final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
+        final CodeDef groupDefPopulationBasis = groupDef.getPopulationBasis();
+        final List<StratifierDef> stratifiers = groupDef.stratifiers();
+        final List<Map<String, CriteriaResult>> criteriaResults =
+                stratifiers.stream().map(StratifierDef::getResults).collect(Collectors.toList());
+
+        // LUKETODO:  600 LEFT side of the comparison is the groupDefPopulationBasis
+        logger.info("expressionResults: {}, groupDefPopulationBasis: {}", expressionResults, groupDefPopulationBasis);
+
+        for (Map<String, CriteriaResult> criteriaResult : criteriaResults) {
+            logger.info("criteriaResult: {}", criteriaResult);
+
+            for (Entry<String, CriteriaResult> criteriaResultEntry : criteriaResult.entrySet()) {
+                logger.info("criteriaResultEntry: {}", criteriaResultEntry);
+            }
         }
     }
 

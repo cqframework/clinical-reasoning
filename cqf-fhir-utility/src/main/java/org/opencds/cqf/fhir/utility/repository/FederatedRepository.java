@@ -114,7 +114,7 @@ public class FederatedRepository implements Repository {
                 () -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
 
         futureList.stream()
-                .map(c -> (List<T>) c.join())
+                .map(c -> c.join())
                 .flatMap(b -> b.stream())
                 .forEach(builder::addCollectionEntry);
         builder.setType("searchset");

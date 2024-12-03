@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
@@ -77,18 +75,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 populations.add(new PopulationDef(
                         pop.getId(), conceptToConceptDef(pop.getCode()), populationType, pop.getCriteria()));
-            }
-            // total Denominator/Numerator Def Builder
-            // validate population is not in Def
-            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
-            }
-            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
             }
 
             // Stratifiers

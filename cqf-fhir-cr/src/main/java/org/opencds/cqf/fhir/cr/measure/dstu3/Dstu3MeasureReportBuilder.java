@@ -136,10 +136,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
-        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
-        // TOTAL-DENOMINATOR), and will not be added to group populations.
-        // Subtracting '2' from groupDef to balance with Measure defined Groups
-        if (measureGroup.getPopulation().size() != (groupDef.populations().size() - 2)) {
+        if (measureGroup.getPopulation().size() != (groupDef.populations().size())) {
             // This is not a user error:
             throw new IllegalArgumentException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");

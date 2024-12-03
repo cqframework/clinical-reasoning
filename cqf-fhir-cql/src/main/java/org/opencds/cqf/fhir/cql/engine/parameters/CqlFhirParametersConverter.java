@@ -11,14 +11,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
@@ -66,9 +65,34 @@ public class CqlFhirParametersConverter {
         }
     }
 
-    private static BooleanType emptyBooleanWithExtension(String url, Type value) {
-        var result = new BooleanType((String) null);
-        result.addExtension().setUrl(url).setValue(value);
+    private static IBaseBooleanDatatype booleanType(FhirContext context, Boolean value) {
+        try {
+            return (IBaseBooleanDatatype) context.getElementDefinition("Boolean")
+                    .getImplementingClass()
+                    .getDeclaredConstructor(Boolean.class)
+                    .newInstance(value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static IBaseDatatype codeType(FhirContext context, String value) {
+        try {
+            return (IBaseDatatype) context.getElementDefinition("Code")
+                    .getImplementingClass()
+                    .getDeclaredConstructor(String.class)
+                    .newInstance(value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static IBaseBooleanDatatype emptyBooleanWithExtension(
+            FhirContext context, String url, IBaseDatatype value) {
+        var result = booleanType(context, null);
+        var ext = ((IBaseHasExtensions) result).addExtension();
+        ext.setUrl(url);
+        ext.setValue(value);
         return result;
     }
 
@@ -94,7 +118,9 @@ public class CqlFhirParametersConverter {
             if (value == null) {
                 // Null value, add a single empty value with an extension indicating the reason
                 var dataAbsentValue = emptyBooleanWithExtension(
-                        DATA_ABSENT_REASON_EXT_URL, new CodeType(DATA_ABSENT_REASON_UNKNOWN_CODE));
+                        fhirContext,
+                        DATA_ABSENT_REASON_EXT_URL,
+                        codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
                 addPart(pa, name, dataAbsentValue);
                 continue;
             }
@@ -103,7 +129,8 @@ public class CqlFhirParametersConverter {
                 var iterable = asIterable(value);
                 if (!iterable.iterator().hasNext()) {
                     // Empty list
-                    var emptyListValue = emptyBooleanWithExtension(EMPTY_LIST_EXT_URL, new BooleanType(true));
+                    var emptyListValue =
+                            emptyBooleanWithExtension(fhirContext, EMPTY_LIST_EXT_URL, booleanType(fhirContext, true));
                     addPart(pa, name, emptyListValue);
                 }
                 Iterable<?> values = (Iterable<?>) value;

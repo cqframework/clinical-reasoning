@@ -137,7 +137,7 @@ public class ProcessItemWithContext extends ProcessItem {
             if (extension != null) {
                 // pass the context resource(s) as a parameter to the evaluation
                 request.addContextParameter("%" + contextName, context);
-                populateAnswer(request, responseItem, getInitialValue(request, item));
+                populateAnswer(request, responseItem, getInitialValue(request, item, responseItem));
             }
         }
         return responseItem;

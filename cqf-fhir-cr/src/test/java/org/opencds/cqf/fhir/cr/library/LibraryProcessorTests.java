@@ -127,7 +127,7 @@ class LibraryProcessorTests {
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .subjectId("OPA-Patient1")
                 .thenEvaluate()
-                .hasResults(47);
+                .hasResults(48);
     }
 
     @Test
@@ -137,7 +137,7 @@ class LibraryProcessorTests {
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .subjectId("OPA-Patient1")
                 .thenEvaluate()
-                .hasResults(50);
+                .hasResults(51);
     }
 
     @Test
@@ -147,7 +147,7 @@ class LibraryProcessorTests {
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .subjectId("OPA-Patient1")
                 .thenEvaluate()
-                .hasResults(48);
+                .hasResults(49);
     }
 
     @Test

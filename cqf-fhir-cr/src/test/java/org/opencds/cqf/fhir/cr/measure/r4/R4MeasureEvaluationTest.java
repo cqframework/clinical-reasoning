@@ -16,6 +16,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -436,12 +437,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                     setupMockRetrieverProvider(),
                     null);
             fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException exception) {
+        } catch (InvalidRequestException exception) {
             assertThat(
                     exception.getMessage(),
-                    equalTo("stratifier expression criteria results must match the same type as population."));
+                    equalTo("stratifier expression criteria results must match the same type as population for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
+
+    // LUKETODO:  there is no test that covers non-boolean/non-Encounter population Basises
 
     @Test
     void evaluatePopulationCriteriaNullResult() {

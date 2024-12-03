@@ -15,6 +15,7 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -308,6 +309,25 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private CodeDef getPopulationBasisDef(@Nullable CodeDef measureBasis, @Nullable CodeDef groupBasis) {
+        // LUKETODO:  clean this up
+
+        final String measureBasisCode = Optional.ofNullable(measureBasis).map(CodeDef::code)
+            .orElse(null);
+        final String groupBasisCode = Optional.ofNullable(groupBasis).map(CodeDef::code)
+            .orElse(null);
+
+        if (measureBasisCode != null && ! "boolean".equals(measureBasisCode) && ! "Encounter".equals(measureBasisCode)) {
+            throw new IllegalArgumentException("MEASURE BASIS!!! " + measureBasis);
+        }
+
+        if (groupBasisCode != null && ! "boolean".equals(groupBasisCode) && ! "Encounter".equals(groupBasisCode)) {
+            throw new IllegalArgumentException("GROUP BASIS!!! " + groupBasisCode);
+        }
+
+        System.out.printf("600: measureBasis: %s, groupBasis: %s\n",
+            measureBasisCode,
+            groupBasisCode
+        );
         if (measureBasis == null && groupBasis == null) {
             // default basis, if not defined
             return new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean");
@@ -323,6 +343,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return defaultCodeDef(groupImpNotation, measureImpNotation);
     }
 
+    // LUKETODO: requirement is first group basis and if null, group basis
     private CodeDef defaultCodeDef(@Nullable CodeDef code, @Nullable CodeDef codeDefault) {
         if (code != null) {
             return code;

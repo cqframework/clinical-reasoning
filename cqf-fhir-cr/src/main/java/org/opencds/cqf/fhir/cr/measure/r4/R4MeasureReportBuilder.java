@@ -69,10 +69,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    protected MeasureReportScorer<MeasureReport> measureReportScorer;
+    private final MeasureReportScorer<MeasureReport> measureReportScorer;
+    private final R4PopulationBasisValidator populationBasisValidator;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
+        this.populationBasisValidator = new R4PopulationBasisValidator();
     }
 
     private static class BuilderContext {
@@ -350,6 +352,22 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    // LUKETODO:  javadoc
+    protected void validateGroupBasisType(Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
+
+        // LUKETODO:  validate boolean basis doesn't match CriteriaResults
+
+        if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
+            var list = subjectValues.values().stream()
+                .filter(x -> x.rawValue() instanceof Resource)
+                .collect(Collectors.toList());
+            if (list.size() != subjectValues.values().size()) {
+                throw new IllegalArgumentException(
+                    "stratifier expression criteria results must match the same type as population.");
+            }
+        }
+    }
+
     /**
      *
      * Resource result --> Patient Key, Resource result --> can intersect on patient for Boolean basis, can't for Resource
@@ -359,6 +377,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected void validateStratifierBasisType(
             Measure measure, Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
 
+        // LUKETODO:  validate boolean basis doesn't match CriteriaResults
+
+
         if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
             var list = subjectValues.values().stream()
                     .filter(x -> x.rawValue() instanceof Resource)
@@ -367,6 +388,42 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 throw new InvalidRequestException(
                         "stratifier expression criteria results must match the same type as population for Measure: "
                                 + measure.getUrl());
+            }
+        }
+    }
+
+    protected void validateStratifierBasisType2(Map<String, CriteriaResult> subjectValues, CodeDef groupBasis) {
+
+        // LUKETODO:  validate boolean basis doesn't match CriteriaResults
+
+
+        if (!subjectValues.entrySet().isEmpty() && !groupBasis.code().equals("boolean")) {
+            var list = subjectValues.values().stream()
+                .filter(x -> x.rawValue() instanceof Resource)
+                .collect(Collectors.toList());
+            if (list.size() != subjectValues.values().size()) {
+                throw new IllegalArgumentException(
+                    "stratifier expression criteria results must match the same type as population.");
+            }
+        }
+    }
+
+
+    private void validateStratifierBasisType3(Measure measure, Map<String, CriteriaResult> subjectValues, GroupDef groupDef) {
+        var isBooleanBasisDirect = groupDef.isBooleanBasis();
+        var isBooleanBasisindirect = groupDef.getPopulationBasis().code().equals("boolean");
+        var isBooleanBasisToUse = isBooleanBasisindirect;
+
+        System.out.printf("boolean basis direct: %s, boolean basis indirect: %s\n", isBooleanBasisDirect, isBooleanBasisindirect);
+
+        if (!subjectValues.entrySet().isEmpty() && !isBooleanBasisToUse) {
+            var list = subjectValues.values().stream()
+                .filter(x -> x.rawValue() instanceof Resource)
+                .collect(Collectors.toList());
+            if (list.size() != subjectValues.values().size()) {
+                throw new InvalidRequestException(
+                    "stratifier expression criteria results must match the same type as population for Measure: "
+                        + measure.getUrl());
             }
         }
     }
@@ -389,7 +446,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
-        validateStratifierBasisType(bc.measure, subjectValues, groupDef.isBooleanBasis());
+        System.out.printf("measureBasis: %s,  groupBasis: %s CriteriaResult resources: %s\n", bc.measureDef, groupDef.getPopulationBasis().code(), subjectValues.values().stream().map(CriteriaResult::getClass).toList());
+
+//        validateStratifierBasisType(bc.measure, subjectValues, groupDef.isBooleanBasis());
+//        validateStratifierBasisType2(subjectValues, groupDef.getPopulationBasis());
+        populationBasisValidator.validateStratifierBasisType(bc.measure, subjectValues, groupDef);
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {

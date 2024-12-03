@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,26 +30,30 @@ class MeasureScorerTest {
 
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-            scorer.score(measureScoringDef, measureReport);
+            scorer.score(measureUrl, measureScoringDef, measureReport);
             fail("this should throw error");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid"));
         }
     }
 
     @Test
     void scorerThrowsIfNoScoringSupplied() {
+        var measureUrl = "http://some.measure.with.no.scoring";
         var mr = new MeasureReport();
         mr.addGroup();
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
 
         try {
-            scorer.score(null, mr);
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("MeasureDef is required in order to score a Measure."));
+            scorer.score(measureUrl, null, mr);
+        } catch (InvalidRequestException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "MeasureDef is required in order to score a Measure for Measure: http://some.measure.with.no.scoring"));
         }
     }
 
@@ -59,7 +64,7 @@ class MeasureScorerTest {
         var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
 
         assertEquals(
                 "1.0",
@@ -79,12 +84,12 @@ class MeasureScorerTest {
         var measureReport = getMeasureReport(measureUrl);
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-            scorer.score(measureScoringDef, measureReport);
-        } catch (IllegalArgumentException e) {
+            scorer.score(measureUrl, measureScoringDef, measureReport);
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error"));
         }
     }
 
@@ -95,7 +100,7 @@ class MeasureScorerTest {
         var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         // when denominator =0, no score should be added to report
         assertNull(group(measureReport, "DataCompleteness").getMeasureScore().getValue());
     }
@@ -107,7 +112,7 @@ class MeasureScorerTest {
         var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         // if no extension elements are generated for totalDen or totalNum, no measureScore should be added
         assertNull(group(measureReport, "PerformanceRate").getMeasureScore().getValue());
     }
@@ -120,7 +125,7 @@ class MeasureScorerTest {
         var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         assertEquals(
                 "0.5",
                 group(measureReport, "group-1").getMeasureScore().getValue().toString());

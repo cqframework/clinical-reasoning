@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.time.LocalDate;
 import java.time.Month;
@@ -322,9 +323,11 @@ class R4CareGapsTest {
                     .getCareGapsReport()
                     .then();
             fail("this should fail with no resource found");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             Assertions.assertTrue(
-                    e.getMessage().contains("CareGap status parameter: closed-ga, is not an accepted value"));
+                    e.getMessage()
+                            .contains(
+                                    "CareGap status parameter: closed-ga, is not an accepted value for Measure: [BreastCancerScreeningFHIR]"));
         }
     }
 
@@ -530,7 +533,7 @@ class R4CareGapsTest {
                     .hasBundleCount(1);
 
             fail("method should error");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             Assertions.assertTrue(e.getMessage()
                     .contains("MeasureScoring type: Cohort, is not an accepted Type for care-gaps service"));
         }
@@ -555,7 +558,7 @@ class R4CareGapsTest {
                     .hasBundleCount(1);
 
             fail("method should error");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             Assertions.assertTrue(e.getMessage()
                     .contains(
                             "MeasureScoring type: Continuous Variable, is not an accepted Type for care-gaps service"));
@@ -581,7 +584,7 @@ class R4CareGapsTest {
                     .then()
                     .hasBundleCount(1);
             fail("resource based measures should fail");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             Assertions.assertTrue(
                     e.getMessage()
                             .contains(
@@ -645,9 +648,11 @@ class R4CareGapsTest {
                     .firstParameter()
                     .detectedIssueCount(2); // 1 Detected issue per groupId
             fail("this should fail without a groupId");
-        } catch (IllegalArgumentException e) {
-            Assertions.assertTrue(e.getMessage()
-                    .contains("Multi-rate Measure resources require unique 'id' for GroupComponents to be populated."));
+        } catch (InvalidRequestException e) {
+            Assertions.assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated for Measure: http://example.com/Measure/MinimalProportionBooleanBasisMultiGroupNoGroupId"));
         }
     }
 
@@ -756,7 +761,7 @@ class R4CareGapsTest {
                     .detectedIssue()
                     .hasGroupIdReportExtension("group-2");
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("no measure resolving parameter was specified"));
         }
     }

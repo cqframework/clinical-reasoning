@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -344,7 +345,7 @@ public class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, null, null, null, null, null, "boolean", null, null);
             fail("measureScoring needs to be defined");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("MeasureScoring must be specified on Group or Measure"));
         }
     }
@@ -354,9 +355,11 @@ public class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, null, null, null, null, null, "boolean", "attestation", null);
             fail("measureScoring needs to be defined");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
-                    e.getMessage().contains("Measure Scoring code: attestation, is not a valid Measure Scoring Type."));
+                    e.getMessage()
+                            .contains(
+                                    "Measure Scoring code: attestation, is not a valid Measure Scoring Type for measure: null."));
         }
     }
 
@@ -365,9 +368,11 @@ public class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, "attestation", null, null, "attestation", null, "boolean", null, null);
             fail("measureScoring needs to be defined");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
-                    e.getMessage().contains("Measure Scoring code: attestation, is not a valid Measure Scoring Type."));
+                    e.getMessage()
+                            .contains(
+                                    "Measure Scoring code: attestation, is not a valid Measure Scoring Type for measure: null."));
         }
     }
 
@@ -448,11 +453,11 @@ public class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, "ratio", invalid, null, "proportion", invalid, "boolean", null, null);
             fail("invalid improvement Notation value");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "ImprovementNotation Coding has invalid System: http://terminology.hl7.org/CodeSystem/measure-improvement-notation, code: fake, combination for Measure."));
+                                    "ImprovementNotation Coding has invalid System: http://terminology.hl7.org/CodeSystem/measure-improvement-notation, code: fake, combination for Measure: null"));
         }
     }
 }

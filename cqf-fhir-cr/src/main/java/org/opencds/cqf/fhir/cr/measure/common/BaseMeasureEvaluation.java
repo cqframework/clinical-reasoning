@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -99,8 +100,10 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             case POPULATION:
                 return MeasureReportType.SUMMARY;
             default:
-                throw new IllegalArgumentException(
-                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+                throw new InvalidRequestException(String.format(
+                        "Unsupported MeasureEvalType: %s for Measure: %s", measureEvalType.toCode(), getMeasureUrl()));
         }
     }
+
+    protected abstract String getMeasureUrl();
 }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
@@ -256,8 +257,9 @@ class MeasureProcessorEvaluateTest {
                 .reportType("population")
                 .evaluate();
 
-        String errorMsg = "MeasureScoring must be specified on Group or Measure";
-        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        String errorMsg =
+                "MeasureScoring must be specified on Group or Measure for Measure: https://madie.cms.gov/Measure/DischargedonAntithromboticTherapyFHIR";
+        var e = assertThrows(InvalidRequestException.class, when::then);
         assertEquals(errorMsg, e.getMessage());
     }
 }

@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -173,17 +174,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         private void validateReference(String reference) {
             // Can't be null
             if (reference == null) {
-                throw new NullPointerException();
+                throw new NullPointerException("validated reference is null");
             }
 
             // If it's a contained reference, must be just the Guid and nothing else
             if (reference.startsWith("#") && reference.contains("/")) {
-                throw new IllegalArgumentException();
+                throw new InvalidRequestException("Invalid contained reference: " + reference);
             }
 
             // If it's a full reference, it must be type/id and that's it
             if (!reference.startsWith("#") && reference.split("/").length != 2) {
-                throw new IllegalArgumentException();
+                throw new InvalidRequestException("Invalid full reference: " + reference);
             }
         }
     }
@@ -213,7 +214,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.report().addContained(r);
         }
 
-        this.measureReportScorer.score(measureDef, bc.report());
+        this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
 
         return bc.report();
     }
@@ -242,8 +243,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var report = bc.report();
 
         if (measure.getGroup().size() != measureDef.groups().size()) {
-            throw new IllegalArgumentException(
-                    "The Measure has a different number of groups defined than the MeasureDef");
+            throw new InvalidRequestException(
+                    "The Measure has a different number of groups defined than the MeasureDef for Measure: "
+                            + measure.getUrl());
         }
 
         // ASSUMPTION: The groups are in the same order in both the Measure and the
@@ -281,13 +283,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of populations defined than the GroupDef");
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
         }
 
         if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
         }
 
         reportGroup.setCode(measureGroup.getCode());
@@ -352,15 +356,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      * boolean result --> Patient Key, Boolean result --> can intersect on Patient
      * code result --> Patient Key, Code result --> can intersect on Patient
      */
-    protected void validateStratifierBasisType(Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
+    protected void validateStratifierBasisType(
+            Measure measure, Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
 
         if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
             var list = subjectValues.values().stream()
                     .filter(x -> x.rawValue() instanceof Resource)
                     .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
-                throw new IllegalArgumentException(
-                        "stratifier expression criteria results must match the same type as population.");
+                throw new InvalidRequestException(
+                        "stratifier expression criteria results must match the same type as population for Measure: "
+                                + measure.getUrl());
             }
         }
     }
@@ -383,7 +389,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
-        validateStratifierBasisType(subjectValues, groupDef.isBooleanBasis());
+        validateStratifierBasisType(bc.measure, subjectValues, groupDef.isBooleanBasis());
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {
@@ -897,7 +903,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             if (key == null) {
-                throw new IllegalArgumentException(String.format("found a null key for the wrapped value: %s", value));
+                throw new InvalidRequestException(String.format("found a null key for the wrapped value: %s", value));
             }
 
             return key;

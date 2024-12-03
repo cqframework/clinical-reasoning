@@ -463,6 +463,7 @@ public class IgRepository implements Repository {
 
         try (var paths = Files.walk(path)) {
             paths.filter(resourceFileFilter)
+                    .sorted()
                     .map(this::cachedReadResource)
                     .filter(Optional::isPresent)
                     .map(Optional::get)

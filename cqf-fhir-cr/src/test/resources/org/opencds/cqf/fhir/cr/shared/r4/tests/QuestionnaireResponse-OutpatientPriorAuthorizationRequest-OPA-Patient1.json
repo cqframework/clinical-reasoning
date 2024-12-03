@@ -74,12 +74,6 @@
                     "language": "text/cql.identifier",
                     "expression": "FacilityName"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "1.1",
@@ -94,12 +88,6 @@
                   "valueExpression": {
                     "language": "text/cql.identifier",
                     "expression": "FacilityNPI"
-                  }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                   }
                 }
               ],
@@ -163,12 +151,6 @@
                     "language": "text/cql.identifier",
                     "expression": "BeneficiaryFirstName"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "2.1",
@@ -184,12 +166,6 @@
                     "language": "text/cql.identifier",
                     "expression": "BeneficiaryLastName"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "2.2",
@@ -204,12 +180,6 @@
                   "valueExpression": {
                     "language": "text/cql.identifier",
                     "expression": "BeneficiaryDOB"
-                  }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                   }
                 }
               ],
@@ -240,12 +210,6 @@
                   "valueExpression": {
                     "language": "text/cql.identifier",
                     "expression": "BeneficiaryGender"
-                  }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                   }
                 }
               ],
@@ -306,12 +270,6 @@
                     "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianFirstName"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "3.1",
@@ -327,12 +285,6 @@
                     "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianLastName"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "3.2",
@@ -347,12 +299,6 @@
                   "valueExpression": {
                     "language": "text/cql.identifier",
                     "expression": "OperatingPhysicianNPI"
-                  }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                   }
                 }
               ],
@@ -380,12 +326,6 @@
                       "valueExpression": {
                         "language": "text/cql.identifier",
                         "expression": "OperatingPhysicianAddress1"
-                      }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                       }
                     }
                   ],
@@ -417,12 +357,6 @@
                         "language": "text/cql.identifier",
                         "expression": "OperatingPhysicianAddressCity"
                       }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                      }
                     }
                   ],
                   "linkId": "3.5.3",
@@ -438,12 +372,6 @@
                         "language": "text/cql.identifier",
                         "expression": "OperatingPhysicianAddressState"
                       }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                      }
                     }
                   ],
                   "linkId": "3.5.4",
@@ -458,12 +386,6 @@
                       "valueExpression": {
                         "language": "text/cql.identifier",
                         "expression": "OperatingPhysicianAddressZip"
-                      }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                       }
                     }
                   ],
@@ -495,12 +417,6 @@
                     "language": "text/cql.identifier",
                     "expression": "AttendingPhysicianSame"
                   }
-                },
-                {
-                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                  "valueReference": {
-                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                  }
                 }
               ],
               "linkId": "4.1",
@@ -528,12 +444,6 @@
                         "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianFirstName"
                       }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                      }
                     }
                   ],
                   "linkId": "4.2.1",
@@ -549,12 +459,6 @@
                         "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianLastName"
                       }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                      }
                     }
                   ],
                   "linkId": "4.2.2",
@@ -569,12 +473,6 @@
                       "valueExpression": {
                         "language": "text/cql.identifier",
                         "expression": "AttendingPhysicianNPI"
-                      }
-                    },
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                      "valueReference": {
-                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                       }
                     }
                   ],
@@ -602,12 +500,6 @@
                           "valueExpression": {
                             "language": "text/cql.identifier",
                             "expression": "AttendingPhysicianAddress1"
-                          }
-                        },
-                        {
-                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                          "valueReference": {
-                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                           }
                         }
                       ],
@@ -639,12 +531,6 @@
                             "language": "text/cql.identifier",
                             "expression": "AttendingPhysicianAddressCity"
                           }
-                        },
-                        {
-                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                          "valueReference": {
-                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                          }
                         }
                       ],
                       "linkId": "4.2.5.3",
@@ -660,12 +546,6 @@
                             "language": "text/cql.identifier",
                             "expression": "AttendingPhysicianAddressState"
                           }
-                        },
-                        {
-                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                          "valueReference": {
-                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
-                          }
                         }
                       ],
                       "linkId": "4.2.5.4",
@@ -680,12 +560,6 @@
                           "valueExpression": {
                             "language": "text/cql.identifier",
                             "expression": "AttendingPhysicianAddressZip"
-                          }
-                        },
-                        {
-                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
-                          "valueReference": {
-                            "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
                           }
                         }
                       ],
@@ -722,6 +596,14 @@
       "text": "Facility Information",
       "item": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "1.1",
           "text": "Name",
           "answer": [
@@ -731,6 +613,14 @@
           ]
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "1.2",
           "text": "NPI",
           "answer": [
@@ -754,6 +644,14 @@
       "text": "Beneficiary Information",
       "item": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "2.1",
           "text": "First Name",
           "answer": [
@@ -763,6 +661,14 @@
           ]
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "2.2",
           "text": "Last Name",
           "answer": [
@@ -772,6 +678,14 @@
           ]
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "2.3",
           "text": "Date of Birth",
           "answer": [
@@ -785,6 +699,14 @@
           "text": "Medicare ID"
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "2.5",
           "text": "Gender",
           "answer": [
@@ -800,6 +722,14 @@
       "text": "Operating Physician Information",
       "item": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "3.1",
           "text": "First Name",
           "answer": [
@@ -809,6 +739,14 @@
           ]
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "3.2",
           "text": "Last Name",
           "answer": [
@@ -818,6 +756,14 @@
           ]
         },
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "3.3",
           "text": "NPI",
           "answer": [
@@ -835,6 +781,14 @@
           "text": "Address",
           "item": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "3.5.1",
               "text": "Address1",
               "answer": [
@@ -844,10 +798,38 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "3.5.2",
-              "text": "Address2"
+              "text": "Address2",
+              "answer": [
+                {
+                  "_valueBoolean": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                        "valueCode": "unknown"
+                      }
+                    ]
+                  }
+                }
+              ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "3.5.3",
               "text": "City",
               "answer": [
@@ -857,6 +839,14 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "3.5.4",
               "text": "State",
               "answer": [
@@ -866,6 +856,14 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "3.5.5",
               "text": "Zip",
               "answer": [
@@ -883,6 +881,14 @@
       "text": "Attending Physician Information",
       "item": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+              "valueReference": {
+                "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+              }
+            }
+          ],
           "linkId": "4.1",
           "text": "Same as Operating Physician?",
           "answer": [
@@ -896,6 +902,14 @@
           "text": "Attending Physician",
           "item": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "4.2.1",
               "text": "First Name",
               "answer": [
@@ -905,6 +919,14 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "4.2.2",
               "text": "Last Name",
               "answer": [
@@ -914,6 +936,14 @@
               ]
             },
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                  "valueReference": {
+                    "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                  }
+                }
+              ],
               "linkId": "4.2.3",
               "text": "NPI",
               "answer": [
@@ -931,6 +961,14 @@
               "text": "Address",
               "item": [
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.5.1",
                   "text": "Address1",
                   "answer": [
@@ -940,10 +978,38 @@
                   ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.5.2",
-                  "text": "Address2"
+                  "text": "Address2",
+                  "answer": [
+                    {
+                      "_valueBoolean": {
+                        "extension": [
+                          {
+                            "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                            "valueCode": "unknown"
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.5.3",
                   "text": "City",
                   "answer": [
@@ -953,6 +1019,14 @@
                   ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.5.4",
                   "text": "State",
                   "answer": [
@@ -962,6 +1036,14 @@
                   ]
                 },
                 {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaireresponse-author",
+                      "valueReference": {
+                        "reference": "http://cqframework.org/fhir/Device/clinical-quality-language"
+                      }
+                    }
+                  ],
                   "linkId": "4.2.5.5",
                   "text": "Zip",
                   "answer": [

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,8 +56,7 @@ class IgRepositoryBadDataTest {
     void searchThrowsBecauseOfInvalidContent() {
         var e = assertThrows(
                 ResourceNotFoundException.class, () -> repository.search(Bundle.class, Patient.class, Searches.ALL));
-        System.out.println(e.getMessage());
-        System.err.println(e.getMessage());
+        assertEquals("haha", e.getMessage());
         assertTrue(e.getMessage().contains("Found empty or invalid content"));
     }
 

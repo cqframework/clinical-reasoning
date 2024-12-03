@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 class Dstu3MeasureProcessorTest {
@@ -39,8 +40,9 @@ class Dstu3MeasureProcessorTest {
                 .reportType("subject")
                 .evaluate();
 
-        String errorMsg = "MeasureScoring must be specified on Measure";
-        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        String errorMsg =
+                "MeasureScoring must be specified on Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM105-FHIR3-8.0.000";
+        var e = assertThrows(InvalidRequestException.class, when::then);
         assertEquals(errorMsg, e.getMessage());
     }
 }

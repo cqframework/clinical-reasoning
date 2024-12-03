@@ -1,11 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -86,7 +89,13 @@ public class R4CareGapsService {
                 .map(Eithers::<IdType, String, CanonicalType>forRight3)
                 .forEach(eitherList::add));
         if (eitherList.isEmpty()) {
-            throw new IllegalArgumentException("no measure resolving parameter was specified");
+            final List<String> measureIdsAsStrings = Optional.ofNullable(measureId)
+                    .map(nonNullMeasureId ->
+                            nonNullMeasureId.stream().map(IdType::getIdPart).collect(Collectors.toList()))
+                    .orElse(Collections.emptyList());
+
+            throw new InvalidRequestException(
+                    "no measure resolving parameter was specified for Measure: " + measureIdsAsStrings);
         }
         return eitherList;
     }

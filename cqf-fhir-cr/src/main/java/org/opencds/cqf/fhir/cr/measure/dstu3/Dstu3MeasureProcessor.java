@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,7 @@ public class Dstu3MeasureProcessor {
             Parameters parameters) {
 
         if (!measure.hasLibrary()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
 
@@ -148,7 +149,7 @@ public class Dstu3MeasureProcessor {
             case POPULATION:
                 return MeasureReportType.SUMMARY;
             default:
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
         }
     }

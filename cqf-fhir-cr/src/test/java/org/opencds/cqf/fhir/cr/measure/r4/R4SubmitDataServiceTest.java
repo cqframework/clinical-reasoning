@@ -22,7 +22,6 @@ class R4SubmitDataServiceTest {
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
 
     private static final String OBSERVATION_VALUE = "ABC";
-    private static final String MEASURE_ID_COMPONENT = "A123";
     private static final String MEASURE_FULL_ID = "Measure/A123";
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
@@ -41,8 +40,7 @@ class R4SubmitDataServiceTest {
         var observation = newResource(Observation.class).setValue(new StringType(OBSERVATION_VALUE));
 
         // submit-data operation
-        var result = testSubject.submitData(
-                new IdType(ResourceType.Measure.toString(), MEASURE_ID_COMPONENT), measureReport, List.of(observation));
+        var result = testSubject.submitData(measureReport, List.of(observation));
 
         assertNotNull(result);
 
@@ -83,10 +81,7 @@ class R4SubmitDataServiceTest {
                 .addEvaluatedResource(new Reference(procedure.getId()));
 
         // submit-data operation
-        var result = testSubject.submitData(
-                new IdType(ResourceType.Measure.toString(), MEASURE_ID_COMPONENT),
-                measureReport,
-                List.of(patient, encounter, procedure));
+        var result = testSubject.submitData(measureReport, List.of(patient, encounter, procedure));
 
         assertNotNull(result);
 

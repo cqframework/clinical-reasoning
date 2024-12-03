@@ -55,6 +55,8 @@ class IgRepositoryBadDataTest {
     void searchThrowsBecauseOfInvalidContent() {
         var e = assertThrows(
                 ResourceNotFoundException.class, () -> repository.search(Bundle.class, Patient.class, Searches.ALL));
+        System.out.println(e.getMessage());
+        System.err.println(e.getMessage());
         assertTrue(e.getMessage().contains("Found empty or invalid content"));
     }
 

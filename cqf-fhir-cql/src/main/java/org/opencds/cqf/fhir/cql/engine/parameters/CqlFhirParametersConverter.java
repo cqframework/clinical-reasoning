@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql.engine.parameters;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,7 +73,7 @@ public class CqlFhirParametersConverter {
                     .getDeclaredConstructor(Boolean.class)
                     .newInstance(value);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new InternalErrorException("error creating BooleanType", e);
         }
     }
 
@@ -83,7 +84,7 @@ public class CqlFhirParametersConverter {
                     .getDeclaredConstructor(String.class)
                     .newInstance(value);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new InternalErrorException("error creating CodeType", e);
         }
     }
 

@@ -10,9 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -28,8 +25,7 @@ public class FederatedRepository implements Repository {
 
     public FederatedRepository(Repository local, Repository... repositories) {
         this.local = local;
-        repositoryList = new ArrayList<>();
-        repositoryList.addAll(Arrays.asList(repositories));
+        repositoryList = Arrays.asList(repositories);
     }
 
     @Override
@@ -103,7 +99,6 @@ public class FederatedRepository implements Repository {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
@@ -118,23 +113,11 @@ public class FederatedRepository implements Repository {
         this.repositoryList.forEach(r -> futureList.add(CompletableFuture.supplyAsync(
                 () -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
 
-        var futureArray = futureList.toArray(new CompletableFuture<?>[futureList.size()]);
-
-        var resultsFuture = CompletableFuture.allOf(futureArray);
-
-        try {
-            resultsFuture.get();
-            List<IBaseResource> resources = Stream.of(futureArray)
-                    .map(CompletableFuture<?>::join)
-                    .map(b -> (List<IBaseResource>) b)
-                    // .map((IBaseBundle b) -> BundleUtil.toListOfResources(fhirContext(), b))
-                    .flatMap(b -> b.stream())
-                    .collect(Collectors.toList());
-            resources.forEach(builder::addCollectionEntry);
-            builder.setType("searchset");
-        } catch (InterruptedException | ExecutionException e) {
-            // intentionally emp
-        }
+        futureList.stream()
+                .map(c -> (List<T>) c.join())
+                .flatMap(b -> b.stream())
+                .forEach(builder::addCollectionEntry);
+        builder.setType("searchset");
 
         return builder.getBundleTyped();
     }

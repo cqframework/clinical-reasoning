@@ -113,10 +113,7 @@ public class FederatedRepository implements Repository {
         this.repositoryList.forEach(r -> futureList.add(CompletableFuture.supplyAsync(
                 () -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
 
-        futureList.stream()
-                .map(c -> c.join())
-                .flatMap(b -> b.stream())
-                .forEach(builder::addCollectionEntry);
+        futureList.stream().map(c -> c.join()).flatMap(b -> b.stream()).forEach(builder::addCollectionEntry);
         builder.setType("searchset");
 
         return builder.getBundleTyped();

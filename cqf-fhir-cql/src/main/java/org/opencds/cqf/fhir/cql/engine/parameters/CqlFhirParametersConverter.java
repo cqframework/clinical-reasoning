@@ -58,14 +58,6 @@ public class CqlFhirParametersConverter {
     static final String DATA_ABSENT_REASON_EXT_URL = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
     static final String DATA_ABSENT_REASON_UNKNOWN_CODE = "unknown";
 
-    private static Iterable<?> asIterable(Object value) {
-        if (value instanceof Iterable) {
-            return (Iterable<?>) value;
-        } else {
-            return null;
-        }
-    }
-
     private static IBaseBooleanDatatype booleanType(FhirContext context, Boolean value) {
         try {
             return (IBaseBooleanDatatype) context.getElementDefinition("Boolean")
@@ -127,7 +119,7 @@ public class CqlFhirParametersConverter {
             }
 
             if (value instanceof Iterable) {
-                var iterable = asIterable(value);
+                var iterable = (Iterable<?>) value;
                 if (!iterable.iterator().hasNext()) {
                     // Empty list
                     var emptyListValue =

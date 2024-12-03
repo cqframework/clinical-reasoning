@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
-
+import java.util.List;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -35,6 +35,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  * "Total Denominator" and "Total Numerator" are not explicit in the Measure, MeasureReport, or the CQL. Those values are calculated internally in the engine and are implicitly used in the score.
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
+
+    private static final String NUMERATOR = "numerator";
+    private static final String DENOMINATOR = "denominator";
 
     @Override
     public void score(MeasureDef measureDef, MeasureReport measureReport) {
@@ -106,12 +109,13 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected void scoreGroup(
             MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
+
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
+                var score = calcProportionScore(
+                        getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
+                        getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR));
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));
@@ -133,9 +137,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(
-                        getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL),
-                        getStratumPopulationCount(stratum, EXT_TOTAL_DENOMINATOR_URL));
+                var score = calcProportionScore(
+                        getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                        getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
                 if (score != null) {
                     stratum.setMeasureScore(new Quantity(score));
                 }
@@ -145,28 +149,30 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    protected Integer getGroupExtensionCount(MeasureReportGroupComponent mrgc, String extUrl) {
-        var ext = mrgc.getExtension().stream()
-                .filter(x -> x.getUrl().equals(extUrl))
-                .findFirst();
-        return ext.map(extension -> Integer.valueOf(extension.getValue().toString()))
-                .orElse(null);
-    }
-
-    protected Integer getStratumPopulationCount(StratifierGroupComponent sgc, String extUrl) {
-        var pop = sgc.getExtension();
-        var ext =
-                pop.stream().filter(x -> x.getUrl().equals(extUrl)).findFirst().orElse(null);
-        if (ext != null) {
-            return Integer.valueOf(ext.getValue().toString());
-        }
-        return null;
-    }
-
     protected void scoreStratifier(
             MeasureScoring measureScoring, MeasureReportGroupStratifierComponent stratifierComponent) {
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
             scoreStratum(measureScoring, sgc);
         }
+    }
+
+    private int getCountFromGroupPopulation(
+            List<MeasureReportGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(MeasureReportGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
+    }
+
+    private int getCountFromStratifierPopulation(
+            List<StratifierGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(StratifierGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
     }
 }

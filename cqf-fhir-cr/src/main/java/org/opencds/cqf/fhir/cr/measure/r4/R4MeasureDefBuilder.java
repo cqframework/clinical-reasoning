@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
@@ -89,18 +87,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         populationType,
                         pop.getCriteria().getExpression()));
             }
-            // total Denominator/Numerator Def Builder
-            // validate population is not in Def
-            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
-            }
-            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
-            }
+
             if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
                     && checkPopulationForCode(populations, DATEOFCOMPLIANCE) == null) {
                 // add to definition

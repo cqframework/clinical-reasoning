@@ -10,8 +10,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -434,8 +432,6 @@ public class MeasureEvaluator {
             // Evaluate Population Expressions
             denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
             numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
-            var totalDenominator = groupDef.getSingle(TOTALDENOMINATOR);
-            var totalNumerator = groupDef.getSingle(TOTALNUMERATOR);
 
             // Evaluate Exclusions and Exception Populations
             if (denominatorExclusion != null) {
@@ -471,8 +467,6 @@ public class MeasureEvaluator {
                     denominator.getSubjects().removeAll(denominatorException.getSubjects());
                     denominator.getResources().removeAll(denominatorException.getResources());
                 }
-                totalDenominator.getSubjects().addAll(denominator.getSubjects());
-                totalNumerator.getSubjects().addAll(numerator.getSubjects());
             } else {
                 // Remove Only Resource Exclusions
                 // * Multiple resources can be from one subject and represented in multiple populations
@@ -490,9 +484,6 @@ public class MeasureEvaluator {
                     // Remove Resources in Denominator that are not in Numerator
                     denominator.getResources().removeAll(denominatorException.getResources());
                 }
-                // TODO: Evaluate validity of TotalDenominator & TotalDenominator
-                totalDenominator.getResources().addAll(denominator.getResources());
-                totalNumerator.getResources().addAll(numerator.getResources());
             }
             if (reportType.equals(MeasureReportType.INDIVIDUAL) && populationSize == 1 && dateOfCompliance != null) {
                 var doc = evaluateDateOfCompliance(dateOfCompliance);

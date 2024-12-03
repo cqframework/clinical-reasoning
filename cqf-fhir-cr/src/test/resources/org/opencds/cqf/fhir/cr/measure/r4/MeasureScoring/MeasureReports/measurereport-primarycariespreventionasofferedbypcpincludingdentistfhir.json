@@ -26,16 +26,6 @@
   "group":[
     {
       "id":"group-1",
-      "extension":[
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-          "valueString":"10"
-        },
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-          "valueString":"5"
-        }
-      ],
       "population":[
         {
           "id":"12FA9D2D-42F4-4D78-B121-8A5CF304DAF8",
@@ -100,16 +90,6 @@
           ],
           "stratum":[
             {
-              "extension":[
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-                  "valueString":"10"
-                },
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-                  "valueString":"5"
-                }
-              ],
               "value":{
                 "text":"true"
               },
@@ -179,16 +159,6 @@
           ],
           "stratum":[
             {
-              "extension":[
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-                  "valueString":"5"
-                },
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-                  "valueString":"3"
-                }
-              ],
               "value":{
                 "text":"false"
               },
@@ -258,16 +228,6 @@
           ],
           "stratum":[
             {
-              "extension":[
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-                  "valueString":"3"
-                },
-                {
-                  "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-                  "valueString":"1"
-                }
-              ],
               "value":{
                 "text":"false"
               },

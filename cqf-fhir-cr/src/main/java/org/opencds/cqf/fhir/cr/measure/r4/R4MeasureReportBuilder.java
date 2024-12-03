@@ -1,13 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -274,17 +270,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
 
-        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
-        // TOTAL-DENOMINATOR), and will not be added to group populations.
-        // Subtracting '2' from groupDef to balance with Measure defined Groups
-        var groupDefSizeDiff = 2;
+        var groupDefSizeDiff = 0;
         if (groupDef.populations().stream()
                         .filter(x -> x.type().equals(MeasurePopulationType.DATEOFCOMPLIANCE))
                         .findFirst()
                         .orElse(null)
                 != null) {
             // dateOfNonCompliance is another population not calculated
-            groupDefSizeDiff = 3;
+            groupDefSizeDiff = 1;
         }
 
         if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
@@ -344,18 +337,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     }
                 }
             }
-
-            if (groupDef.isBooleanBasis()) {
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), true);
-                addExtension(reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), true);
-
-            } else {
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), false);
-                addExtension(
-                        reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), false);
-            }
         }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             var groupStrat = measureGroup.getStratifier().get(i);
@@ -363,18 +344,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var defStrat = groupDef.stratifiers().get(i);
             buildStratifier(bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
         }
-    }
-
-    protected void addExtension(
-            MeasureReportGroupComponent group, String extUrl, PopulationDef populationDef, boolean useSubjects) {
-        int count;
-        if (useSubjects) {
-            count = populationDef.getSubjects().size();
-        } else {
-            count = populationDef.getResources().size();
-        }
-
-        group.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
 
     /**
@@ -495,38 +464,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratumPopulation, subjectIds, mgpc);
         }
-
-        // add totalDenominator and totalNumerator extensions
-        buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
-        buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
-    }
-
-    protected void buildStratumExtPopulation(
-            GroupDef groupDef,
-            MeasurePopulationType measurePopulationType,
-            List<String> subjectIds,
-            StratifierGroupComponent stratum,
-            String extUrl) {
-        Set<String> subjectPop;
-        var reportPopulation = getReportPopulation(groupDef, measurePopulationType);
-        assert reportPopulation != null;
-        if (groupDef.isBooleanBasis()) {
-            subjectPop = reportPopulation.getSubjects().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                    .collect(Collectors.toSet());
-        } else {
-            subjectPop = reportPopulation.getResources().stream()
-                    .filter(Resource.class::isInstance)
-                    .map(Resource.class::cast)
-                    .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
-                    .collect(Collectors.toSet());
-        }
-        int count;
-
-        Set<String> intersection = new HashSet<>(subjectIds);
-        intersection.retainAll(subjectPop);
-        count = intersection.size();
-        stratum.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
 
     protected void buildStratumPopulation(

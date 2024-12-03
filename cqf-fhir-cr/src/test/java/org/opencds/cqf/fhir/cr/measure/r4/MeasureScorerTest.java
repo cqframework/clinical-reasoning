@@ -18,14 +18,14 @@ import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
 class MeasureScorerTest {
 
-    List<Measure> myMeasures = getMyMeasures();
-    List<MeasureReport> myMeasureReports = getMyMeasureReports();
+    List<Measure> measures = getMeasures();
+    List<MeasureReport> measureReports = getMeasureReports();
 
     @Test
     void scoreOnlyPopulationIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
@@ -56,7 +56,7 @@ class MeasureScorerTest {
     void scorePopulationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -65,7 +65,7 @@ class MeasureScorerTest {
                 "1.0",
                 group(measureReport, "group-1").getMeasureScore().getValue().toString());
         assertEquals(
-                "1.0",
+                "0.5",
                 group(measureReport, "group-2").getMeasureScore().getValue().toString());
         assertEquals(
                 "0.5",
@@ -76,7 +76,7 @@ class MeasureScorerTest {
     void scoreErrorNoIds() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
             scorer.score(measureScoringDef, measureReport);
@@ -92,7 +92,7 @@ class MeasureScorerTest {
     void scoreZeroDenominator() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -104,7 +104,7 @@ class MeasureScorerTest {
     void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -117,7 +117,7 @@ class MeasureScorerTest {
         var measureUrl =
                 "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
         scorer.score(measureScoringDef, measureReport);
@@ -169,7 +169,7 @@ class MeasureScorerTest {
                 .get();
     }
 
-    public List<Measure> getMyMeasures() {
+    public List<Measure> getMeasures() {
         // Measures
         FhirResourceLoader measures = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/Measures/"), false);
@@ -181,7 +181,7 @@ class MeasureScorerTest {
         return measureList;
     }
 
-    public List<MeasureReport> getMyMeasureReports() {
+    public List<MeasureReport> getMeasureReports() {
         FhirResourceLoader measureReports = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/MeasureReports/"), false);
         List<MeasureReport> measureReportList = new ArrayList<>();
@@ -193,7 +193,7 @@ class MeasureScorerTest {
     }
 
     public MeasureDef getMeasureScoringDef(String measureUrl) {
-        var measureRes = myMeasures.stream()
+        var measureRes = measures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
                 .orElse(null);
@@ -201,8 +201,8 @@ class MeasureScorerTest {
         return measureDefBuilder.build(measureRes);
     }
 
-    public MeasureReport getMyMeasureReport(String measureUrl) {
-        return myMeasureReports.stream()
+    public MeasureReport getMeasureReport(String measureUrl) {
+        return measureReports.stream()
                 .filter(measureReport -> measureUrl.equals(measureReport.getMeasure()))
                 .findAny()
                 .orElse(null);

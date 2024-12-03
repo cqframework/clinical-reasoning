@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Period;
@@ -55,9 +56,11 @@ public class MeasureScoringTypeCompositeTest {
                     .up()
                     .report();
             fail("This is not a covered scoring Type and should fail");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
-                    e.getMessage().contains("Measure Scoring code: composite, is not a valid Measure Scoring Type."));
+                    e.getMessage()
+                            .contains(
+                                    "Measure Scoring code: composite, is not a valid Measure Scoring Type for measure: http://example.com/Measure/CompositeBooleanAllPopulations."));
         }
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -254,9 +255,11 @@ class MeasureStratifierTest {
                     .then()
                     .report();
             fail("Since this is Resource based, it can't intersect with subject based expression");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage()
-                    .contains("stratifier expression criteria results must match the same type as population"));
+        } catch (InvalidRequestException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "stratifier expression criteria results must match the same type as population for Measure: http://example.com/Measure/RatioResourceStratDifferentType"));
         }
     }
 

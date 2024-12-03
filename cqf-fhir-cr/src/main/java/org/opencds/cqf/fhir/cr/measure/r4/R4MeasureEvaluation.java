@@ -23,4 +23,9 @@ public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureR
                 libraryEngine,
                 versionIdentifier);
     }
+
+    @Override
+    protected String getMeasureUrl() {
+        return measure.getUrl();
+    }
 }

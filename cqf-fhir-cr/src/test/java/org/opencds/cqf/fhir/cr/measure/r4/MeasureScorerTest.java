@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,37 +19,41 @@ import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
 class MeasureScorerTest {
 
-    List<Measure> myMeasures = getMyMeasures();
-    List<MeasureReport> myMeasureReports = getMyMeasureReports();
+    List<Measure> measures = getMeasures();
+    List<MeasureReport> measureReports = getMeasureReports();
 
     @Test
     void scoreOnlyPopulationIdMultiRateMeasure() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-            scorer.score(measureScoringDef, measureReport);
+            scorer.score(measureUrl, measureScoringDef, measureReport);
             fail("this should throw error");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid"));
         }
     }
 
     @Test
     void scorerThrowsIfNoScoringSupplied() {
+        var measureUrl = "http://some.measure.with.no.scoring";
         var mr = new MeasureReport();
         mr.addGroup();
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
 
         try {
-            scorer.score(null, mr);
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("MeasureDef is required in order to score a Measure."));
+            scorer.score(measureUrl, null, mr);
+        } catch (InvalidRequestException e) {
+            assertTrue(
+                    e.getMessage()
+                            .contains(
+                                    "MeasureDef is required in order to score a Measure for Measure: http://some.measure.with.no.scoring"));
         }
     }
 
@@ -56,16 +61,16 @@ class MeasureScorerTest {
     void scorePopulationIdMultiRate() {
         var measureUrl = "http://ecqi.healthit.gov/ecqms/Measure/FHIR347";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
 
         assertEquals(
                 "1.0",
                 group(measureReport, "group-1").getMeasureScore().getValue().toString());
         assertEquals(
-                "1.0",
+                "0.5",
                 group(measureReport, "group-2").getMeasureScore().getValue().toString());
         assertEquals(
                 "0.5",
@@ -76,15 +81,15 @@ class MeasureScorerTest {
     void scoreErrorNoIds() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
         try {
             R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-            scorer.score(measureScoringDef, measureReport);
-        } catch (IllegalArgumentException e) {
+            scorer.score(measureUrl, measureScoringDef, measureReport);
+        } catch (InvalidRequestException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately"));
+                                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid-error"));
         }
     }
 
@@ -92,10 +97,10 @@ class MeasureScorerTest {
     void scoreZeroDenominator() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-zeroden";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         // when denominator =0, no score should be added to report
         assertNull(group(measureReport, "DataCompleteness").getMeasureScore().getValue());
     }
@@ -104,10 +109,10 @@ class MeasureScorerTest {
     void scoreNoExtension() {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-noext";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         // if no extension elements are generated for totalDen or totalNum, no measureScore should be added
         assertNull(group(measureReport, "PerformanceRate").getMeasureScore().getValue());
     }
@@ -117,10 +122,10 @@ class MeasureScorerTest {
         var measureUrl =
                 "http://ecqi.healthit.gov/ecqms/Measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
-        var measureReport = getMyMeasureReport(measureUrl);
+        var measureReport = getMeasureReport(measureUrl);
 
         R4MeasureReportScorer scorer = new R4MeasureReportScorer();
-        scorer.score(measureScoringDef, measureReport);
+        scorer.score(measureUrl, measureScoringDef, measureReport);
         assertEquals(
                 "0.5",
                 group(measureReport, "group-1").getMeasureScore().getValue().toString());
@@ -169,7 +174,7 @@ class MeasureScorerTest {
                 .get();
     }
 
-    public List<Measure> getMyMeasures() {
+    public List<Measure> getMeasures() {
         // Measures
         FhirResourceLoader measures = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/Measures/"), false);
@@ -181,7 +186,7 @@ class MeasureScorerTest {
         return measureList;
     }
 
-    public List<MeasureReport> getMyMeasureReports() {
+    public List<MeasureReport> getMeasureReports() {
         FhirResourceLoader measureReports = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/MeasureReports/"), false);
         List<MeasureReport> measureReportList = new ArrayList<>();
@@ -193,7 +198,7 @@ class MeasureScorerTest {
     }
 
     public MeasureDef getMeasureScoringDef(String measureUrl) {
-        var measureRes = myMeasures.stream()
+        var measureRes = measures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
                 .orElse(null);
@@ -201,8 +206,8 @@ class MeasureScorerTest {
         return measureDefBuilder.build(measureRes);
     }
 
-    public MeasureReport getMyMeasureReport(String measureUrl) {
-        return myMeasureReports.stream()
+    public MeasureReport getMeasureReport(String measureUrl) {
+        return measureReports.stream()
                 .filter(measureReport -> measureUrl.equals(measureReport.getMeasure()))
                 .findAny()
                 .orElse(null);

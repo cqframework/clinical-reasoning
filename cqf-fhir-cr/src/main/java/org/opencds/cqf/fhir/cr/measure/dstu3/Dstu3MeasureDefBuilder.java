@@ -1,11 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +61,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // This might not be the best behavior, but we want to ensure that the behavior is the same
         // between versions
         if (measureScoring == null && measure.hasGroup()) {
-            throw new IllegalArgumentException("MeasureScoring must be specified on Measure");
+            throw new InvalidRequestException(
+                    String.format("MeasureScoring must be specified on Measure: %s", measure.getUrl()));
         }
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
@@ -75,18 +75,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
                 populations.add(new PopulationDef(
                         pop.getId(), conceptToConceptDef(pop.getCode()), populationType, pop.getCriteria()));
-            }
-            // total Denominator/Numerator Def Builder
-            // validate population is not in Def
-            if (checkPopulationForCode(populations, TOTALDENOMINATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalDenominator", totalConceptDefCreator(TOTALDENOMINATOR), TOTALDENOMINATOR, null));
-            }
-            if (checkPopulationForCode(populations, TOTALNUMERATOR) == null) {
-                // add to definition
-                populations.add(new PopulationDef(
-                        "totalNumerator", totalConceptDefCreator(TOTALNUMERATOR), TOTALNUMERATOR, null));
             }
 
             // Stratifiers
@@ -160,14 +148,15 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private void validateImprovementNotationCode(CodeDef improvementNotation) {
+    private void validateImprovementNotationCode(Measure measure, CodeDef improvementNotation) {
         if (improvementNotation != null) {
             var code = improvementNotation.code();
             boolean hasValidCode = IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code)
                     || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
             if (!hasValidCode) {
                 throw new IllegalArgumentException(String.format(
-                        "ImprovementNotation Coding has invalid code: %s, combination for Measure.", code));
+                        "ImprovementNotation Coding has invalid code: %s, combination for Measure: %s",
+                        code, measure.getUrl()));
             }
         }
     }
@@ -186,7 +175,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     public CodeDef getMeasureImprovementNotation(Measure measure) {
         if (measure.hasImprovementNotation()) {
             var impNot = new CodeDef(null, measure.getImprovementNotation());
-            validateImprovementNotationCode(impNot);
+            validateImprovementNotationCode(measure, impNot);
             // Dstu3 only has a string defined for improvementNotation
             return impNot;
         }

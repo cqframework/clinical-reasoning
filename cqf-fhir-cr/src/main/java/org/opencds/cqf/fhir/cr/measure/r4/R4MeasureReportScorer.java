@@ -1,12 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
-
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.List;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -36,11 +37,15 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
+    private static final String NUMERATOR = "numerator";
+    private static final String DENOMINATOR = "denominator";
+
     @Override
-    public void score(MeasureDef measureDef, MeasureReport measureReport) {
+    public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
         if (measureDef == null) {
-            throw new IllegalArgumentException("MeasureDef is required in order to score a Measure.");
+            throw new InvalidRequestException(
+                    "MeasureDef is required in order to score a Measure for Measure: " + measureUrl);
         }
         // No groups to score, nothing to do.
         if (measureReport.getGroup().isEmpty()) {
@@ -66,18 +71,20 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
-    protected MeasureScoring checkMissingScoringType(MeasureScoring measureScoring) {
+    protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {
         if (measureScoring == null) {
-            throw new IllegalArgumentException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.");
+            throw new InvalidRequestException(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for MeasureDef: "
+                            + measureDef.url());
         }
         return measureScoring;
     }
 
-    protected void groupHasValidId(String id) {
+    protected void groupHasValidId(MeasureDef measureDef, String id) {
         if (id == null || id.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately.");
+            throw new InvalidRequestException(
+                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: "
+                            + measureDef.url());
         }
     }
 
@@ -91,8 +98,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             for (GroupDef groupDef : measureDef.groups()) {
                 var groupDefMeasureScoring = groupDef.measureScoring();
                 // groups must have id populated
-                groupHasValidId(mrgc.getId());
-                groupHasValidId(groupDef.id());
+                groupHasValidId(measureDef, mrgc.getId());
+                groupHasValidId(measureDef, groupDef.id());
                 // Match by group id if available
                 // Note: Match by group's population id, was removed per cqf-measures conformance change FHIR-45423
                 // multi-rate measures must have a group.id defined to be conformant
@@ -101,17 +108,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 }
             }
         }
-        return checkMissingScoringType(groupScoringType);
+        return checkMissingScoringType(measureDef, groupScoringType);
     }
 
     protected void scoreGroup(
             MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
+
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_NUMERATOR_URL),
-                        getGroupExtensionCount(mrgc, EXT_TOTAL_DENOMINATOR_URL));
+                var score = calcProportionScore(
+                        getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
+                        getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR));
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));
@@ -133,9 +141,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
-                Double score = this.calcProportionScore(
-                        getStratumPopulationCount(stratum, EXT_TOTAL_NUMERATOR_URL),
-                        getStratumPopulationCount(stratum, EXT_TOTAL_DENOMINATOR_URL));
+                var score = calcProportionScore(
+                        getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                        getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
                 if (score != null) {
                     stratum.setMeasureScore(new Quantity(score));
                 }
@@ -145,28 +153,30 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    protected Integer getGroupExtensionCount(MeasureReportGroupComponent mrgc, String extUrl) {
-        var ext = mrgc.getExtension().stream()
-                .filter(x -> x.getUrl().equals(extUrl))
-                .findFirst();
-        return ext.map(extension -> Integer.valueOf(extension.getValue().toString()))
-                .orElse(null);
-    }
-
-    protected Integer getStratumPopulationCount(StratifierGroupComponent sgc, String extUrl) {
-        var pop = sgc.getExtension();
-        var ext =
-                pop.stream().filter(x -> x.getUrl().equals(extUrl)).findFirst().orElse(null);
-        if (ext != null) {
-            return Integer.valueOf(ext.getValue().toString());
-        }
-        return null;
-    }
-
     protected void scoreStratifier(
             MeasureScoring measureScoring, MeasureReportGroupStratifierComponent stratifierComponent) {
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
             scoreStratum(measureScoring, sgc);
         }
+    }
+
+    private int getCountFromGroupPopulation(
+            List<MeasureReportGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(MeasureReportGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
+    }
+
+    private int getCountFromStratifierPopulation(
+            List<StratifierGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(StratifierGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
     }
 }

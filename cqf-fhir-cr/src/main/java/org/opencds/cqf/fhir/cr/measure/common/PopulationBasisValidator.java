@@ -1,13 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 // LUKETODO:  javadoc
 public interface PopulationBasisValidator {
 
-    // LUKETODO:  javadoc
-    void validateGroupPopulationBasisType(String url, GroupDef groupDef, ExpressionResult expressionResult);
+    void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult);
 
-    // LUKETODO:  javadoc
-    void validateStratifierPopulationBasisType(String url, GroupDef groupDef, ExpressionResult expressionResult);
+    void validateStratifiers(MeasureDef measureDef, GroupDef theGroupDef, EvaluationResult theEvaluationResult);
 }

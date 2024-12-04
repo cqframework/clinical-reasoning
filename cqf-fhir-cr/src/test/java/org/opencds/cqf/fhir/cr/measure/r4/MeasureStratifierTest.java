@@ -190,8 +190,8 @@ class MeasureStratifierTest {
      * This is validating that even though the Measure is Boolean basis, a stratifier expression that produces results of a different basis IS possible if the expression can be evaluated in the correct context.
      * If this expression produced both 'boolean' AND 'resource' results then it should not be allowed.
      */
-    // LUKETODO:  stratifier expression criteria results must match the same type: [Encounter] as population basis:
-    // [boolean] for Measure: STRATIFIER
+    // LUKETODO: "resource strat not finished" stratifier expression criteria results must match the same type:
+    // [Encounter] as population basis:
     @Test
     void cohortBooleanDifferentTypeStrat() {
         given.when()
@@ -269,8 +269,6 @@ class MeasureStratifierTest {
                     e.getMessage()
                             .contains(
                                     "stratifier expression criteria results must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: STRATIFIER"));
-            //                                    "stratifier expression criteria results must match the same type as
-            // population for Measure: http://example.com/Measure/RatioResourceStratDifferentType"));
         }
     }
 

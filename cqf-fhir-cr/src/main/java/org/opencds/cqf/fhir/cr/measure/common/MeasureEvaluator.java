@@ -328,13 +328,12 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
         }
     }
 
     @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluatePopulationCriteria(
-            GroupDef groupDef,
             String subjectType,
             ExpressionResult expressionResult,
             EvaluationResult evaluationResult,
@@ -347,8 +346,6 @@ public class MeasureEvaluator {
         if (expressionResult == null || expressionResult.value() == null) {
             return Collections.emptyList();
         }
-
-        populationBasisValidator.validateGroupPopulationBasisType("POPULATION", groupDef, expressionResult);
 
         if (expressionResult.value() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.value()))) {
@@ -399,20 +396,14 @@ public class MeasureEvaluator {
     }
 
     protected PopulationDef evaluatePopulationMembership(
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            PopulationDef inclusionDef,
-            EvaluationResult evaluationResult) {
-        // LUKETODO:  this is where we extract the group population criteria result?
-        System.out.printf("expression: [%s]\n", inclusionDef.expression());
+            String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
         // find matching expression
         var matchingResult = evaluationResult.forExpression(inclusionDef.expression());
 
         // Add Resources from SubjectId
         int i = 0;
         for (Object resource : evaluatePopulationCriteria(
-                groupDef, subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
+                subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
             inclusionDef.addResource(resource);
             i++;
         }
@@ -447,26 +438,25 @@ public class MeasureEvaluator {
         // add resources
         // add subject
 
-        initialPopulation =
-                evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
+        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
 
         if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
-            denominator = evaluatePopulationMembership(groupDef, subjectType, subjectId, denominator, evaluationResult);
-            numerator = evaluatePopulationMembership(groupDef, subjectType, subjectId, numerator, evaluationResult);
+            denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
+            numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
 
             // Evaluate Exclusions and Exception Populations
             if (denominatorExclusion != null) {
-                denominatorExclusion = evaluatePopulationMembership(
-                        groupDef, subjectType, subjectId, denominatorExclusion, evaluationResult);
+                denominatorExclusion =
+                        evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion, evaluationResult);
             }
             if (denominatorException != null) {
-                denominatorException = evaluatePopulationMembership(
-                        groupDef, subjectType, subjectId, denominatorException, evaluationResult);
+                denominatorException =
+                        evaluatePopulationMembership(subjectType, subjectId, denominatorException, evaluationResult);
             }
             if (numeratorExclusion != null) {
-                numeratorExclusion = evaluatePopulationMembership(
-                        groupDef, subjectType, subjectId, numeratorExclusion, evaluationResult);
+                numeratorExclusion =
+                        evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
             }
             // Apply Exclusions and Exceptions
             if (groupDef.isBooleanBasis()) {
@@ -525,20 +515,15 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
                 MeasureScoring.CONTINUOUSVARIABLE);
 
-        initialPopulation =
-                evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
+        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
             measurePopulation =
-                    evaluatePopulationMembership(groupDef, subjectType, subjectId, measurePopulation, evaluationResult);
+                    evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
 
             if (measurePopulationExclusion != null) {
                 measurePopulationExclusion = evaluatePopulationMembership(
-                        groupDef,
-                        subjectType,
-                        subjectId,
-                        groupDef.getSingle(MEASUREPOPULATIONEXCLUSION),
-                        evaluationResult);
+                        subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             }
             // Apply Exclusions to Population
             if (groupDef.isBooleanBasis()) {
@@ -573,16 +558,21 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
                 MeasureScoring.COHORT);
         // Evaluate Population
-        evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
+        evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
     }
 
     protected void evaluateGroup(
+            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
+
+        populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
+        populationBasisValidator.validateStratifiers(measureDef, groupDef, evaluationResult);
+
         evaluateStratifiers(groupDef, subjectId, groupDef.stratifiers(), evaluationResult);
 
         var scoring = groupDef.measureScoring();
@@ -636,8 +626,6 @@ public class MeasureEvaluator {
             var expressionResult = evaluationResult.forExpression(sd.expression());
             Object result = expressionResult.value();
 
-            populationBasisValidator.validateStratifierPopulationBasisType("STRATIFIER", groupDef, expressionResult);
-
             if (result instanceof Iterable) {
                 var resultIter = ((Iterable<?>) result).iterator();
                 if (!resultIter.hasNext()) {
@@ -658,26 +646,5 @@ public class MeasureEvaluator {
 
             clearEvaluatedResources();
         }
-    }
-
-    private void printDetails(GroupDef groupDef, Object result) {
-        final String resultClass;
-        if (result != null) {
-            if (result instanceof List<?> list) {
-                if (!list.isEmpty()) {
-                    resultClass = "List: " + list.get(0).getClass();
-                } else {
-                    resultClass = "List: " + null;
-                }
-            } else {
-                resultClass = "Single: " + result.getClass();
-            }
-        } else {
-            resultClass = "Single: " + null;
-        }
-
-        System.out.printf(
-                "evaluateStratifiers(): populationBasis: [%s], result class: %s\n",
-                groupDef.getPopulationBasis().code(), resultClass);
     }
 }

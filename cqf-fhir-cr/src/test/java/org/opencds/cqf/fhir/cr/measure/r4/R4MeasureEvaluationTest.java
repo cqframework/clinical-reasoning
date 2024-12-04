@@ -180,6 +180,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
+        System.out.println(cql);
+        printResource(measure);
+
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(report);
@@ -323,7 +326,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             }
         """;
 
-    // LUKETODO: stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as
+    // LUKETODO: Gender: stratifier expression criteria results must match the same type:
+    // [org.hl7.fhir.r4.model.Enumeration] as
     // population basis: [boolean] for Measure: STRATIFIER
     // Prove we no longer error out for a SUBJECT report with multiple SDEs
     @ParameterizedTest
@@ -337,6 +341,10 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
+
+        System.out.println(cql);
+
+        printResource(stratified_measure());
 
         final MeasureReport report = runTest(
                 cql,
@@ -354,7 +362,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_ENCOUNTER));
     }
 
-    // LUKETODO: stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as
+    // LUKETODO: Gender: stratifier expression criteria results must match the same type:
+    // [org.hl7.fhir.r4.model.Enumeration] as
     // population basis: [boolean] for Measure: STRATIFIER
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisHappyPathParams")
@@ -409,7 +418,9 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             assertThat(
                     exception.getMessage(),
                     equalTo(
-                            "stratifier expression criteria results must match the same type as population for Measure: http://test.com/fhir/Measure/Test"));
+                            //                            "stratifier expression criteria results must match the same
+                            // type as population for Measure: http://test.com/fhir/Measure/Test"));
+                            "stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as population basis: [Encounter] for Measure: STRATIFIER"));
         }
     }
 

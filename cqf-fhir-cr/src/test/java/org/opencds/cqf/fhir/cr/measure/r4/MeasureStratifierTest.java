@@ -37,6 +37,8 @@ class MeasureStratifierTest {
         period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
         testDataGenerator.makePatient(null, null, period);
     }
+
+    // LUKETODO: figure out why this is failing
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -131,6 +133,9 @@ class MeasureStratifierTest {
         var notUnfinished = new CodeableConcept().setText("false");
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
+
+        // LUKETODO: can we combine Boolean and Code stratifier criteria evaluation results
+        // in the same group????
 
         given.when()
                 .measureId("CohortBooleanStratMulti")

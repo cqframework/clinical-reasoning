@@ -44,6 +44,7 @@ class SimpleMeasureProcessorTest {
                 .hasCount(1);
     }
 
+    // LUKETODO: POPULATION: populationBasis: [boolean], result class: List: Encounter
     @Test
     void exm108_fullSubjectId() {
         given.when()

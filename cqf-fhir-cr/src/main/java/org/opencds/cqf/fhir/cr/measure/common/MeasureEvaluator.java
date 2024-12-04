@@ -18,8 +18,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +40,7 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
+import org.opencds.cqf.fhir.cr.measure.r4.R4PopulationBasisValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +87,8 @@ public class MeasureEvaluator {
             VersionedIdentifier versionedIdentifier) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
+
+        System.out.println("-----------------------------");
 
         // measurementPeriod is not required, because it's often defaulted in CQL
         setMeasurementPeriod(measureDef, measurementPeriod);
@@ -305,9 +306,9 @@ public class MeasureEvaluator {
             EvaluationResult result =
                     libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
 
-            someEvaluationValidationStuff(measureDef, result);
-
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
+            // LUKETODO:
+            System.out.println("***********************");
         }
 
         return measureDef;
@@ -328,6 +329,7 @@ public class MeasureEvaluator {
 
     @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluatePopulationCriteria(
+            GroupDef groupDef,
             String subjectType,
             ExpressionResult expressionResult,
             EvaluationResult evaluationResult,
@@ -340,6 +342,8 @@ public class MeasureEvaluator {
         if (expressionResult == null || expressionResult.value() == null) {
             return Collections.emptyList();
         }
+
+        new R4PopulationBasisValidator().validateGroupPopulationBasisType("POPULATION", groupDef, expressionResult);
 
         if (expressionResult.value() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.value()))) {
@@ -390,14 +394,20 @@ public class MeasureEvaluator {
     }
 
     protected PopulationDef evaluatePopulationMembership(
-            String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            PopulationDef inclusionDef,
+            EvaluationResult evaluationResult) {
+        // LUKETODO:  this is where we extract the group population criteria result?
+        System.out.printf("expression: [%s]\n", inclusionDef.expression());
         // find matching expression
         var matchingResult = evaluationResult.forExpression(inclusionDef.expression());
 
         // Add Resources from SubjectId
         int i = 0;
         for (Object resource : evaluatePopulationCriteria(
-                subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
+                groupDef, subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
             inclusionDef.addResource(resource);
             i++;
         }
@@ -432,25 +442,26 @@ public class MeasureEvaluator {
         // add resources
         // add subject
 
-        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+        initialPopulation =
+                evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
 
         if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
-            denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
-            numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
+            denominator = evaluatePopulationMembership(groupDef, subjectType, subjectId, denominator, evaluationResult);
+            numerator = evaluatePopulationMembership(groupDef, subjectType, subjectId, numerator, evaluationResult);
 
             // Evaluate Exclusions and Exception Populations
             if (denominatorExclusion != null) {
-                denominatorExclusion =
-                        evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion, evaluationResult);
+                denominatorExclusion = evaluatePopulationMembership(
+                        groupDef, subjectType, subjectId, denominatorExclusion, evaluationResult);
             }
             if (denominatorException != null) {
-                denominatorException =
-                        evaluatePopulationMembership(subjectType, subjectId, denominatorException, evaluationResult);
+                denominatorException = evaluatePopulationMembership(
+                        groupDef, subjectType, subjectId, denominatorException, evaluationResult);
             }
             if (numeratorExclusion != null) {
-                numeratorExclusion =
-                        evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
+                numeratorExclusion = evaluatePopulationMembership(
+                        groupDef, subjectType, subjectId, numeratorExclusion, evaluationResult);
             }
             // Apply Exclusions and Exceptions
             if (groupDef.isBooleanBasis()) {
@@ -509,15 +520,20 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
                 MeasureScoring.CONTINUOUSVARIABLE);
 
-        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+        initialPopulation =
+                evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
             measurePopulation =
-                    evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
+                    evaluatePopulationMembership(groupDef, subjectType, subjectId, measurePopulation, evaluationResult);
 
             if (measurePopulationExclusion != null) {
                 measurePopulationExclusion = evaluatePopulationMembership(
-                        subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
+                        groupDef,
+                        subjectType,
+                        subjectId,
+                        groupDef.getSingle(MEASUREPOPULATIONEXCLUSION),
+                        evaluationResult);
             }
             // Apply Exclusions to Population
             if (groupDef.isBooleanBasis()) {
@@ -552,7 +568,7 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
                 MeasureScoring.COHORT);
         // Evaluate Population
-        evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+        evaluatePopulationMembership(groupDef, subjectType, subjectId, initialPopulation, evaluationResult);
     }
 
     protected void evaluateGroup(
@@ -562,9 +578,10 @@ public class MeasureEvaluator {
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
-        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
+        evaluateStratifiers(groupDef, subjectId, groupDef.stratifiers(), evaluationResult);
 
         var scoring = groupDef.measureScoring();
+        System.out.println("scoring: " + scoring);
         switch (scoring) {
             case PROPORTION:
             case RATIO:
@@ -576,29 +593,6 @@ public class MeasureEvaluator {
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
-        }
-    }
-
-    private void someEvaluationValidationStuff(MeasureDef measureDef, EvaluationResult evaluationResult) {
-        measureDef.groups().forEach(groupDef -> someEvaluationValidationStuff(groupDef, evaluationResult));
-    }
-
-    private void someEvaluationValidationStuff(GroupDef groupDef, EvaluationResult evaluationResult) {
-        final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
-        final CodeDef groupDefPopulationBasis = groupDef.getPopulationBasis();
-        final List<StratifierDef> stratifiers = groupDef.stratifiers();
-        final List<Map<String, CriteriaResult>> criteriaResults =
-                stratifiers.stream().map(StratifierDef::getResults).collect(Collectors.toList());
-
-        // LUKETODO:  600 LEFT side of the comparison is the groupDefPopulationBasis
-        logger.info("expressionResults: {}, groupDefPopulationBasis: {}", expressionResults, groupDefPopulationBasis);
-
-        for (Map<String, CriteriaResult> criteriaResult : criteriaResults) {
-            logger.info("criteriaResult: {}", criteriaResult);
-
-            for (Entry<String, CriteriaResult> criteriaResultEntry : criteriaResult.entrySet()) {
-                logger.info("criteriaResultEntry: {}", criteriaResultEntry);
-            }
         }
     }
 
@@ -624,15 +618,27 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectId,
+            List<StratifierDef> stratifierDefs,
+            EvaluationResult evaluationResult) {
         for (StratifierDef sd : stratifierDefs) {
             if (!sd.components().isEmpty()) {
                 throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
             }
 
+            // LUKETODO: do we validate stratifiers here instead?
+            // LUKETODO: we have the same problem as elsewhere:  the Boolean basis doesn't match the groups
             // TODO: Handle list values as components?
             var expressionResult = evaluationResult.forExpression(sd.expression());
             Object result = expressionResult.value();
+
+            new R4PopulationBasisValidator()
+                    .validateStratifierPopulationBasisType("STRATIFIER", groupDef, expressionResult);
+            //            System.out.printf("evaluateStratifiers(): populationBasis: [%s], result class: %s\n",
+            // groupDef.getPopulationBasis().code(),
+            // Optional.ofNullable(result).map(Object::getClass).map(Class::getSimpleName).orElse(null));
+
             if (result instanceof Iterable) {
                 var resultIter = ((Iterable<?>) result).iterator();
                 if (!resultIter.hasNext()) {
@@ -653,5 +659,26 @@ public class MeasureEvaluator {
 
             clearEvaluatedResources();
         }
+    }
+
+    private void printDetails(GroupDef groupDef, Object result) {
+        final String resultClass;
+        if (result != null) {
+            if (result instanceof List<?> list) {
+                if (!list.isEmpty()) {
+                    resultClass = "List: " + list.get(0).getClass();
+                } else {
+                    resultClass = "List: " + null;
+                }
+            } else {
+                resultClass = "Single: " + result.getClass();
+            }
+        } else {
+            resultClass = "Single: " + null;
+        }
+
+        System.out.printf(
+                "evaluateStratifiers(): populationBasis: [%s], result class: %s\n",
+                groupDef.getPopulationBasis().code(), resultClass);
     }
 }

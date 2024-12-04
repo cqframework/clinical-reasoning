@@ -81,6 +81,7 @@ class MeasureProcessorEvaluateTest {
                 measurementPeriod.getEnd().toInstant(), actualPeriod.getEnd().toInstant());
     }
 
+    // LUKETODO:  POPULATION: populationBasis: [boolean], result class: List: Encounter
     @Test
     void measure_eval_with_additional_data() {
         Bundle additionalData = (Bundle) FhirContext.forR4Cached()
@@ -187,6 +188,7 @@ class MeasureProcessorEvaluateTest {
         when.then().report();
     }
 
+    // LUKETODO:  POPULATION: populationBasis: [boolean], result class: List: Encounter
     @Test
     void additional_data_with_custom_options() {
         var evaluationOptions = MeasureEvaluationOptions.defaultOptions();

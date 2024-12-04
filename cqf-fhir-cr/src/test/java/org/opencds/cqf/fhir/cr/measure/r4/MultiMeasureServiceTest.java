@@ -332,6 +332,8 @@ class MultiMeasureServiceTest {
                 .hasReportType("Individual");
     }
 
+    // LUKETODO:  add tests here for population basis mismatches
+
     @Test
     void MultiMeasure_EightMeasures_SubjectEvalType_GroupPatients() {
         var when = GIVEN_REPO

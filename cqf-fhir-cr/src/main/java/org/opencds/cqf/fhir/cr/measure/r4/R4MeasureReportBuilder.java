@@ -359,11 +359,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
             var list = subjectValues.values().stream()
-                .filter(x -> x.rawValue() instanceof Resource)
-                .collect(Collectors.toList());
+                    .filter(x -> x.rawValue() instanceof Resource)
+                    .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
                 throw new IllegalArgumentException(
-                    "stratifier expression criteria results must match the same type as population.");
+                        "stratifier expression criteria results must match the same type as population.");
             }
         }
     }
@@ -378,7 +378,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Measure measure, Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
 
         // LUKETODO:  validate boolean basis doesn't match CriteriaResults
-
 
         if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
             var list = subjectValues.values().stream()
@@ -396,34 +395,34 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // LUKETODO:  validate boolean basis doesn't match CriteriaResults
 
-
         if (!subjectValues.entrySet().isEmpty() && !groupBasis.code().equals("boolean")) {
             var list = subjectValues.values().stream()
-                .filter(x -> x.rawValue() instanceof Resource)
-                .collect(Collectors.toList());
+                    .filter(x -> x.rawValue() instanceof Resource)
+                    .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
                 throw new IllegalArgumentException(
-                    "stratifier expression criteria results must match the same type as population.");
+                        "stratifier expression criteria results must match the same type as population.");
             }
         }
     }
 
-
-    private void validateStratifierBasisType3(Measure measure, Map<String, CriteriaResult> subjectValues, GroupDef groupDef) {
+    private void validateStratifierBasisType3(
+            Measure measure, Map<String, CriteriaResult> subjectValues, GroupDef groupDef) {
         var isBooleanBasisDirect = groupDef.isBooleanBasis();
         var isBooleanBasisindirect = groupDef.getPopulationBasis().code().equals("boolean");
         var isBooleanBasisToUse = isBooleanBasisindirect;
 
-        System.out.printf("boolean basis direct: %s, boolean basis indirect: %s\n", isBooleanBasisDirect, isBooleanBasisindirect);
+        System.out.printf(
+                "boolean basis direct: %s, boolean basis indirect: %s\n", isBooleanBasisDirect, isBooleanBasisindirect);
 
         if (!subjectValues.entrySet().isEmpty() && !isBooleanBasisToUse) {
             var list = subjectValues.values().stream()
-                .filter(x -> x.rawValue() instanceof Resource)
-                .collect(Collectors.toList());
+                    .filter(x -> x.rawValue() instanceof Resource)
+                    .collect(Collectors.toList());
             if (list.size() != subjectValues.values().size()) {
                 throw new InvalidRequestException(
-                    "stratifier expression criteria results must match the same type as population for Measure: "
-                        + measure.getUrl());
+                        "stratifier expression criteria results must match the same type as population for Measure: "
+                                + measure.getUrl());
             }
         }
     }
@@ -446,11 +445,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
-        System.out.printf("measureBasis: %s,  groupBasis: %s CriteriaResult resources: %s\n", bc.measureDef, groupDef.getPopulationBasis().code(), subjectValues.values().stream().map(CriteriaResult::getClass).toList());
-
-//        validateStratifierBasisType(bc.measure, subjectValues, groupDef.isBooleanBasis());
-//        validateStratifierBasisType2(subjectValues, groupDef.getPopulationBasis());
-        populationBasisValidator.validateStratifierBasisType(bc.measure, subjectValues, groupDef);
+        // LUKETODO:
+        populationBasisValidator.validateStratifierPopulationBasisType(bc.measure, subjectValues, groupDef);
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {

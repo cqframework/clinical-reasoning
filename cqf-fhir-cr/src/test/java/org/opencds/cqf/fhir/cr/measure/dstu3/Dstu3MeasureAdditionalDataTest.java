@@ -9,6 +9,7 @@ class Dstu3MeasureAdditionalDataTest {
 
     protected static Given given = Measure.given().repositoryFor("EXM105FHIR3MeasurePartBundle");
 
+    // LUKETODO: POPULATION: populationBasis: [Encounter], result class: List: Encounter
     @Test
     void measureAdditionalData() {
 

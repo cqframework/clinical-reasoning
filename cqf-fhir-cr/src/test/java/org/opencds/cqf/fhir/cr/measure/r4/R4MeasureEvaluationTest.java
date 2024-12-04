@@ -179,8 +179,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n";
 
-        System.out.println("cql = \n" + cql);
-
         Measure measure = proportion_measure();
 
         MeasureReport report =
@@ -188,6 +186,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
+    // LUKETODO: POPULATION: populationBasis: [boolean], result class: List: Coding
     @Test
     void proportionMeasureEvaluationWithDate() {
         Patient patient = john_doe();
@@ -211,8 +210,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         String cql = cql_with_date() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: AgeInYearsAt(start of \"Measurement Period\") > 18\n";
-
-        System.out.println("cql = \n" + cql);
 
         Measure measure = proportion_measure();
 
@@ -360,6 +357,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_ENCOUNTER));
     }
 
+    // LUKETODO:  POPULATION: populationBasis: [boolean], result class: List: Coding
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisHappyPathParams")
     void stratifiedMeasureEvaluationByPopulationHappyPathBasis(
@@ -390,10 +388,12 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     // LUKETODO:  600  can I just shove "SDE Race" into the Numerator expression and call it a day?
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisErrorPathParams")
+
+    // LUKETODO: POPULATION: populationBasis: [Encounter], result class: Single: Boolean
     void stratifiedMeasureEvaluationByPopulationErrorPathBasis(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
-        final String cql = cql_with_dateTime() + sde_race() +
-            """
+        final String cql = cql_with_dateTime() + sde_race()
+                + """
             define InitialPopulation: 'Doe' in Patient.name.family
             define Denominator: 'John' in Patient.name.given
             define Numerator: Patient.birthDate > @1970-01-01
@@ -440,7 +440,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         } catch (InvalidRequestException exception) {
             assertThat(
                     exception.getMessage(),
-                    equalTo("stratifier expression criteria results must match the same type as population for Measure: http://test.com/fhir/Measure/Test"));
+                    equalTo(
+                            "stratifier expression criteria results must match the same type as population for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
 
@@ -597,7 +598,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Measure measure = measure("proportion", populationBasisTypeForMeasure, populationBasisTypeForGroup);
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-//        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
+        //        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
         addPopulation(measure, MeasurePopulationType.NUMERATOR, "SDE Race");
         addSDEComponent(measure);
 

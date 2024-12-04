@@ -594,7 +594,11 @@
     "valueReference": {
       "reference": "#effective-data-requirements"
     }
-  } ],
+  }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
   "url": "http://test-case.com/fhir/measures/Measure/GlycemicControlHypoglycemicInitialPopulation",
   "identifier": [ {
     "system": "https://test-case.org",

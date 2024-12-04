@@ -116,8 +116,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
-        System.out.println("cql = \n" + cql);
-
         Measure measure = cohort_measure();
 
         MeasureReport report =
@@ -147,8 +145,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
-        System.out.println("cql = \n" + cql);
-
         Measure measure = cohort_measure();
 
         MeasureReport report =
@@ -156,8 +152,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: roup expression criteria results must match the same type: [[org.hl7.fhir.r4.model.Coding]] as
-    // population basis: [boolean] for Measure: POPULATION
+    // LUKETODO: GROUP!!!! SDE RACE
     @Test
     void proportionMeasureEvaluation() {
         Patient patient = john_doe();
@@ -190,8 +185,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: group expression criteria results must match the same type: [[org.hl7.fhir.r4.model.Coding]] as
-    // population basis: [boolean] for Measure: POPULATION
+    // LUKETODO: GROUP!!!! SDE RACE
     @Test
     void proportionMeasureEvaluationWithDate() {
         Patient patient = john_doe();
@@ -246,8 +240,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         String cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define MeasurePopulation: Patient.birthDate > @1970-01-01\n";
-
-        System.out.println("cql = \n" + cql);
 
         Measure measure = continuous_variable_measure();
 
@@ -346,8 +338,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
-        System.out.println("cql = \n" + cql);
-
         final MeasureReport report = runTest(
                 cql,
                 Arrays.asList(jane_doe().getId(), john_doe().getId()),
@@ -405,35 +395,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             define Numerator: Patient.birthDate > @1970-01-01
             define Gender: Patient.gender
             """;
-
-        // LUKETODO:  cleanup
-        System.out.println("cql = \n" + cql);
-
-        // LUKETODO:  cleanup
-        var x =
-                """
-        library Test version '1.0.0'
-
-        using FHIR version '4.0.1'
-        include FHIRHelpers version '4.0.1'
-
-        parameter "Measurement Period" Interval<DateTime> default Interval[@2019-01-01T00:00:00.0, @2020-01-01T00:00:00.0)
-
-        context Patient
-        define "SDE Race":
-          (flatten (
-            Patient.extension Extension
-              where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'
-                return Extension.extension
-          )) E
-            where E.url = 'ombCategory'
-              or E.url = 'detailed'
-            return E.value as Coding
-
-        define InitialPopulation: 'Doe' in Patient.name.family
-        define Denominator: 'John' in Patient.name.given
-        define Numerator: Patient.birthDate > @1970-01-01
-        """;
 
         try {
             runTest(

@@ -248,6 +248,7 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population.
      * Given that Population results are "Encounter" resources, intersection of results with Patient.gender is not possible. All results would be empty
@@ -267,7 +268,9 @@ class MeasureStratifierTest {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "stratifier expression criteria results must match the same type as population for Measure: http://example.com/Measure/RatioResourceStratDifferentType"));
+                                    "stratifier expression criteria results must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: STRATIFIER"));
+            //                                    "stratifier expression criteria results must match the same type as
+            // population for Measure: http://example.com/Measure/RatioResourceStratDifferentType"));
         }
     }
 

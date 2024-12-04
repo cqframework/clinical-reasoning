@@ -324,6 +324,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             throw new IllegalArgumentException("GROUP BASIS!!! " + groupBasisCode);
         }
 
+        // LUKETODO:
         System.out.printf("600: measureBasis: %s, groupBasis: %s\n", measureBasisCode, groupBasisCode);
         if (measureBasis == null && groupBasis == null) {
             // default basis, if not defined

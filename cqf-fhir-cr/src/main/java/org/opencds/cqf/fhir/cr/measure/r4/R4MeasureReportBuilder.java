@@ -70,11 +70,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
     private final MeasureReportScorer<MeasureReport> measureReportScorer;
-    private final R4PopulationBasisValidator populationBasisValidator;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
-        this.populationBasisValidator = new R4PopulationBasisValidator();
     }
 
     private static class BuilderContext {
@@ -444,9 +442,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-
-        // LUKETODO:
-        populationBasisValidator.validateStratifierPopulationBasisType(bc.measure, subjectValues, groupDef);
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {

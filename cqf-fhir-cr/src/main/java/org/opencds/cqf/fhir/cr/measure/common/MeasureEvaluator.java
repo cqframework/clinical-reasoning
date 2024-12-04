@@ -40,7 +40,6 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
-import org.opencds.cqf.fhir.cr.measure.r4.R4PopulationBasisValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,13 +69,19 @@ public class MeasureEvaluator {
     protected CqlEngine context;
     protected String measurementPeriodParameterName;
 
-    protected LibraryEngine libraryEngine;
+    private final LibraryEngine libraryEngine;
+    private final PopulationBasisValidator populationBasisValidator;
 
-    public MeasureEvaluator(CqlEngine context, String measurementPeriodParameterName, LibraryEngine libraryEngine) {
+    public MeasureEvaluator(
+            CqlEngine context,
+            String measurementPeriodParameterName,
+            LibraryEngine libraryEngine,
+            PopulationBasisValidator populationBasisValidator) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
         this.libraryEngine = libraryEngine;
         this.measurementPeriodParameterName = Objects.requireNonNull(
                 measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     public MeasureDef evaluate(
@@ -343,7 +348,7 @@ public class MeasureEvaluator {
             return Collections.emptyList();
         }
 
-        new R4PopulationBasisValidator().validateGroupPopulationBasisType("POPULATION", groupDef, expressionResult);
+        populationBasisValidator.validateGroupPopulationBasisType("POPULATION", groupDef, expressionResult);
 
         if (expressionResult.value() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.value()))) {
@@ -627,17 +632,11 @@ public class MeasureEvaluator {
                 throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
             }
 
-            // LUKETODO: do we validate stratifiers here instead?
-            // LUKETODO: we have the same problem as elsewhere:  the Boolean basis doesn't match the groups
             // TODO: Handle list values as components?
             var expressionResult = evaluationResult.forExpression(sd.expression());
             Object result = expressionResult.value();
 
-            new R4PopulationBasisValidator()
-                    .validateStratifierPopulationBasisType("STRATIFIER", groupDef, expressionResult);
-            //            System.out.printf("evaluateStratifiers(): populationBasis: [%s], result class: %s\n",
-            // groupDef.getPopulationBasis().code(),
-            // Optional.ofNullable(result).map(Object::getClass).map(Class::getSimpleName).orElse(null));
+            populationBasisValidator.validateStratifierPopulationBasisType("STRATIFIER", groupDef, expressionResult);
 
             if (result instanceof Iterable) {
                 var resultIter = ((Iterable<?>) result).iterator();

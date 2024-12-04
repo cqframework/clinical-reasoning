@@ -7,6 +7,8 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+// LUKETODO: group expression criteria results must match the same type: [[org.hl7.fhir.r4.model.Encounter]] as
+// population basis: [boolean] for Measure: POPULATION
 class SimpleMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("EXM108");

@@ -43,12 +43,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private R4MeasureProcessor r4Processor;
 
     private R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final R4PopulationBasisValidator populationBasisValidator;
 
     public R4MultiMeasureService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4PopulationBasisValidator populationBasisValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
@@ -57,9 +59,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                repository,
+                this.measureEvaluationOptions,
+                subjectProvider,
+                r4MeasureServiceUtils,
+                populationBasisValidator);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     @Override
@@ -86,7 +94,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
             r4Processor = new R4MeasureProcessor(
-                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                    repository,
+                    this.measureEvaluationOptions,
+                    subjectProvider,
+                    r4MeasureServiceUtils,
+                    populationBasisValidator);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }

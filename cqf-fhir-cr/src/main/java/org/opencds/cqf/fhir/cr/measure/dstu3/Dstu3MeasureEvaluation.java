@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 
 /**
  * Implementation of MeasureEvaluation on top of HAPI FHIR DSTU3 structures.
@@ -14,14 +15,19 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 public class Dstu3MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
     public Dstu3MeasureEvaluation(
-            CqlEngine context, Measure measure, LibraryEngine libraryEngine, VersionedIdentifier versionIdentifier) {
+            CqlEngine context,
+            Measure measure,
+            LibraryEngine libraryEngine,
+            VersionedIdentifier versionIdentifier,
+            PopulationBasisValidator populationBasisValidator) {
         super(
                 context,
                 measure,
                 new Dstu3MeasureDefBuilder(),
                 new Dstu3MeasureReportBuilder(),
                 libraryEngine,
-                versionIdentifier);
+                versionIdentifier,
+                populationBasisValidator);
     }
 
     @Override

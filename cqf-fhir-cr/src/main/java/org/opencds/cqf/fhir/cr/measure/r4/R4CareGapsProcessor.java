@@ -52,7 +52,8 @@ public class R4CareGapsProcessor {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4PopulationBasisValidator populationBasisValidator) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 
@@ -63,7 +64,8 @@ public class R4CareGapsProcessor {
                 measureEvaluationOptions,
                 serverBase,
                 configuredResources,
-                measurePeriodValidator);
+                measurePeriodValidator,
+                populationBasisValidator);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 

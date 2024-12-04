@@ -26,15 +26,18 @@ public class R4CollectDataService {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
+    private final R4PopulationBasisValidator populationBasisValidator;
 
     public R4CollectDataService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtils measureServiceUtils) {
+            R4MeasureServiceUtils measureServiceUtils,
+            R4PopulationBasisValidator thePopulationBasisValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
+        populationBasisValidator = thePopulationBasisValidator;
     }
 
     /**
@@ -66,7 +69,11 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
+                this.repository,
+                this.measureEvaluationOptions,
+                this.subjectProvider,
+                this.measureServiceUtils,
+                populationBasisValidator);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);

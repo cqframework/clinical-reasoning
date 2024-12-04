@@ -90,7 +90,11 @@ public class Measure {
         }
 
         private Dstu3MeasureProcessor buildProcessor() {
-            return new Dstu3MeasureProcessor(repository, evaluationOptions, new Dstu3RepositorySubjectProvider());
+            return new Dstu3MeasureProcessor(
+                    repository,
+                    evaluationOptions,
+                    new Dstu3RepositorySubjectProvider(),
+                    new Dstu3PopulationBasisValidator());
         }
 
         public When when() {

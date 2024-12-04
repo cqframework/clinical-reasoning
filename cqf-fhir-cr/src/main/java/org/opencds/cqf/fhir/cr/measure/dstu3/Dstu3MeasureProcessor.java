@@ -35,17 +35,29 @@ public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
+    private final Dstu3PopulationBasisValidator dstu3PopulationBasisValidator;
 
-    public Dstu3MeasureProcessor(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
-        this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
+    public Dstu3MeasureProcessor(
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            Dstu3PopulationBasisValidator theDstu3PopulationBasisValidator) {
+        this(
+                repository,
+                measureEvaluationOptions,
+                new Dstu3RepositorySubjectProvider(),
+                theDstu3PopulationBasisValidator);
     }
 
     public Dstu3MeasureProcessor(
-            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            SubjectProvider subjectProvider,
+            Dstu3PopulationBasisValidator theDstu3PopulationBasisValidator) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
+        dstu3PopulationBasisValidator = theDstu3PopulationBasisValidator;
     }
 
     public MeasureReport evaluateMeasure(
@@ -134,7 +146,8 @@ public class Dstu3MeasureProcessor {
 
         var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
+        Dstu3MeasureEvaluation measureEvaluator =
+                new Dstu3MeasureEvaluation(context, measure, libraryEngine, id, dstu3PopulationBasisValidator);
         return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);
     }
 

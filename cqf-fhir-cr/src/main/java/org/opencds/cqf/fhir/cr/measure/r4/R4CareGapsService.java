@@ -30,10 +30,16 @@ public class R4CareGapsService {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodEvalutator) {
+            MeasurePeriodValidator measurePeriodEvalutator,
+            R4PopulationBasisValidator populationBasisValidator) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
-                careGapsProperties, repository, measureEvaluationOptions, serverBase, measurePeriodEvalutator);
+                careGapsProperties,
+                repository,
+                measureEvaluationOptions,
+                serverBase,
+                measurePeriodEvalutator,
+                populationBasisValidator);
     }
 
     /**

@@ -190,6 +190,8 @@ class MeasureStratifierTest {
      * This is validating that even though the Measure is Boolean basis, a stratifier expression that produces results of a different basis IS possible if the expression can be evaluated in the correct context.
      * If this expression produced both 'boolean' AND 'resource' results then it should not be allowed.
      */
+    // LUKETODO:  stratifier expression criteria results must match the same type: [Encounter] as population basis:
+    // [boolean] for Measure: STRATIFIER
     @Test
     void cohortBooleanDifferentTypeStrat() {
         given.when()
@@ -261,6 +263,7 @@ class MeasureStratifierTest {
                     .report();
             fail("Since this is Resource based, it can't intersect with subject based expression");
         } catch (InvalidRequestException e) {
+            // LUKETODO:  fix Exception message assertion
             assertTrue(
                     e.getMessage()
                             .contains(

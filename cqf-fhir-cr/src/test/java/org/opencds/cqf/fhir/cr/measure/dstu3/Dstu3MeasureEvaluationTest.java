@@ -60,6 +60,7 @@ import org.opencds.cqf.fhir.cr.measure.BaseMeasureEvaluationTest;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -73,6 +74,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             FhirContext.forDstu3Cached(),
             Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/dstu3/EXM105FHIR3Measure/"));
     private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+    private PopulationBasisValidator populationBasisValidator = new Dstu3PopulationBasisValidator();
 
     @Test
     void cohortMeasureEvaluation() throws Exception {
@@ -244,7 +246,8 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         var lib = engine.getEnvironment().getLibraryManager().resolveLibrary(id);
         engine.getState().init(lib.getLibrary());
         var libraryEngine = new LibraryEngine(repository, this.evaluationOptions.getEvaluationSettings());
-        Dstu3MeasureEvaluation evaluation = new Dstu3MeasureEvaluation(engine, measure, libraryEngine, id);
+        Dstu3MeasureEvaluation evaluation =
+                new Dstu3MeasureEvaluation(engine, measure, libraryEngine, id, populationBasisValidator);
         MeasureReport report = evaluation.evaluate(
                 subjectIds.size() == 1 ? MeasureEvalType.PATIENT : MeasureEvalType.POPULATION,
                 subjectIds,

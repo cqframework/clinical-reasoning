@@ -92,6 +92,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/r4/FHIR347/"));
     private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
+    private final R4PopulationBasisValidator populationBasisValidator = new R4PopulationBasisValidator();
+
     @Test
     void cohortMeasureEvaluation() {
         Patient patient = john_doe();
@@ -154,6 +156,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
+    // LUKETODO: roup expression criteria results must match the same type: [[org.hl7.fhir.r4.model.Coding]] as
+    // population basis: [boolean] for Measure: POPULATION
     @Test
     void proportionMeasureEvaluation() {
         Patient patient = john_doe();
@@ -186,7 +190,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: POPULATION: populationBasis: [boolean], result class: List: Coding
+    // LUKETODO: group expression criteria results must match the same type: [[org.hl7.fhir.r4.model.Coding]] as
+    // population basis: [boolean] for Measure: POPULATION
     @Test
     void proportionMeasureEvaluationWithDate() {
         Patient patient = john_doe();
@@ -326,6 +331,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             }
         """;
 
+    // LUKETODO: stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as
+    // population basis: [boolean] for Measure: STRATIFIER
     // Prove we no longer error out for a SUBJECT report with multiple SDEs
     @ParameterizedTest
     @NullSource
@@ -357,19 +364,18 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_ENCOUNTER));
     }
 
-    // LUKETODO:  POPULATION: populationBasis: [boolean], result class: List: Coding
+    // LUKETODO: stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as
+    // population basis: [boolean] for Measure: STRATIFIER
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisHappyPathParams")
     void stratifiedMeasureEvaluationByPopulationHappyPathBasis(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
-        final String cql = cql_with_dateTime() + sde_race()
+        var cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
-        System.out.println("cql = \n" + cql);
-
-        final MeasureReport report = runTest(
+        var report = runTest(
                 cql,
                 Arrays.asList(jane_doe().getId(), john_doe().getId()),
                 stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
@@ -438,6 +444,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                     null);
             fail("expected IllegalArgumentException");
         } catch (InvalidRequestException exception) {
+            // LUKETODO: fix exception message assertion
             assertThat(
                     exception.getMessage(),
                     equalTo(
@@ -539,7 +546,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         var libraryEngine = new LibraryEngine(repository, evaluationOptions.getEvaluationSettings());
 
-        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure, libraryEngine, id);
+        R4MeasureEvaluation evaluation =
+                new R4MeasureEvaluation(engine, measure, libraryEngine, id, populationBasisValidator);
         MeasureReport report = evaluation.evaluate(
                 getMeasureEvalType(subjectIds, measureEvalTypeOverride),
                 subjectIds,

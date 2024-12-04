@@ -44,17 +44,20 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final R4PopulationBasisValidator r4PopulationBasisValidator;
 
     public R4MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils r4MeasureServiceUtils) {
+            R4MeasureServiceUtils r4MeasureServiceUtils,
+            R4PopulationBasisValidator r4PopulationBasisValidator) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.r4PopulationBasisValidator = r4PopulationBasisValidator;
     }
 
     public MeasureReport evaluateMeasure(
@@ -164,7 +167,8 @@ public class R4MeasureProcessor {
         }
         // Library Evaluate
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        R4MeasureEvaluation measureEvaluator = new R4MeasureEvaluation(context, measure, libraryEngine, id);
+        R4MeasureEvaluation measureEvaluator =
+                new R4MeasureEvaluation(context, measure, libraryEngine, id, r4PopulationBasisValidator);
         return measureEvaluator.evaluate(evalType, subjectIds, measurementPeriod, libraryEngine, id);
     }
 

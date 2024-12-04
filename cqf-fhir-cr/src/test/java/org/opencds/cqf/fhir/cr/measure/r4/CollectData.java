@@ -67,6 +67,7 @@ public class CollectData {
         private Repository repository;
         private final MeasureEvaluationOptions evaluationOptions;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private final R4PopulationBasisValidator populationBasisValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -82,6 +83,7 @@ public class CollectData {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+            this.populationBasisValidator = new R4PopulationBasisValidator();
         }
 
         public Given repository(Repository repository) {
@@ -97,7 +99,8 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils);
+            return new R4CollectDataService(
+                    repository, evaluationOptions, measureServiceUtils, populationBasisValidator);
         }
 
         public When when() {

@@ -30,10 +30,15 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final Dstu3PopulationBasisValidator populationBasisValidator;
 
-    public Dstu3MeasureService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public Dstu3MeasureService(
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            Dstu3PopulationBasisValidator populationBasisValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
@@ -109,7 +114,8 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
         ensureSupplementalDataElementSearchParameter();
 
-        var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
+        var dstu3MeasureProcessor =
+                new Dstu3MeasureProcessor(repository, measureEvaluationOptions, populationBasisValidator);
 
         MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
                 id, periodStart, periodEnd, reportType, Collections.singletonList(subject), additionalData, parameters);

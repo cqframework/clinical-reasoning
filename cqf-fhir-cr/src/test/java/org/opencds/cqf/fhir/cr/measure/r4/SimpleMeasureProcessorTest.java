@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
@@ -221,6 +222,7 @@ class SimpleMeasureProcessorTest {
                         .up()
                         .population("denominator")
                         .hasCount(1);
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -237,12 +239,12 @@ class SimpleMeasureProcessorTest {
                         .reportType("subject")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
         }
 
-        // LUKETODO: POPULATION: populationBasis: [boolean], result class: List: Encounter
         @Test
         void exm108_fullSubjectId_1() {
             try {
@@ -254,6 +256,7 @@ class SimpleMeasureProcessorTest {
                         .reportType("subject")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -270,6 +273,7 @@ class SimpleMeasureProcessorTest {
                         .reportType("subject")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -285,6 +289,7 @@ class SimpleMeasureProcessorTest {
                         .reportType("population")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -299,6 +304,7 @@ class SimpleMeasureProcessorTest {
                         .periodEnd("2019-12-31")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -314,6 +320,7 @@ class SimpleMeasureProcessorTest {
                         .subject("Patient/numer-EXM108")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }
@@ -330,6 +337,7 @@ class SimpleMeasureProcessorTest {
                         .reportType("subject")
                         .evaluate()
                         .then();
+                fail("Expected InvalidRequestException");
             } catch (InvalidRequestException exception) {
                 assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
             }

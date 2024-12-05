@@ -693,7 +693,7 @@ class R4CareGapsTest {
             fail("this should fail with a date of compliance expression");
         } catch (InvalidRequestException exception) {
             assertEquals(
-                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must match the same type: [org.opencds.cqf.cql.engine.runtime.Interval] as population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
                     exception.getMessage());
         }
     }
@@ -732,7 +732,7 @@ class R4CareGapsTest {
             fail("this should fail with a date of compliance expression");
         } catch (InvalidRequestException exception) {
             assertEquals(
-                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must match the same type: [org.opencds.cqf.cql.engine.runtime.Interval] as population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
                     exception.getMessage());
         }
     }

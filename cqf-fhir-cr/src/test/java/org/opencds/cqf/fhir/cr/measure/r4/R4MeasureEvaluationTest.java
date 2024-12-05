@@ -218,7 +218,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             assertThat(
                     exception.getMessage(),
                     equalTo(
-                            "group expression criteria results for expression: [SDE Race] and scoring: [PROPORTION] must match the same type: [org.hl7.fhir.r4.model.Coding] as population basis: [boolean] for Measure: http://test.com/fhir/Measure/Test"));
+                            "group expression criteria results for expression: [SDE Race] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
 
@@ -364,7 +364,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             assertThat(
                     exception.getMessage(),
                     equalTo(
-                            "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must match the same type: [java.lang.Boolean] as population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
+                            "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
 

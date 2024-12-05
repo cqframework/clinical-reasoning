@@ -68,12 +68,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
             if (resultMatchingClassCount != resultClasses.size()) {
                 throw new InvalidRequestException(String.format(
-                        "group expression criteria results for expression: [%s] and scoring: [%s] must match the same type: %s as population basis: [%s] for Measure: %s",
-                        populationExpression,
-                        scoring,
-                        distinctClassSimpleNames(resultClasses),
-                        groupPopulationBasisCode,
-                        url));
+                        "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: %s",
+                        populationExpression, scoring, groupPopulationBasisCode, url));
             }
         }
     }
@@ -104,8 +100,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
             if (resultMatchingClassCount != resultClasses.size()) {
                 throw new InvalidRequestException(String.format(
-                        "stratifier expression criteria results for expression: [%s] must fall within accepted types %s for boolean population basis: [%s] for Measure: %s",
-                        stratifierExpression, distinctClassSimpleNames(resultClasses), groupPopulationBasisCode, url));
+                        "stratifier expression criteria results for expression: [%s] must fall within accepted types for boolean population basis: [%s] for Measure: %s",
+                        stratifierExpression, groupPopulationBasisCode, url));
             }
 
             return;
@@ -121,8 +117,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
             if (resultMatchingClassCount != resultClasses.size()) {
                 throw new InvalidRequestException(String.format(
-                        "stratifier expression criteria results for expression: [%s] must match the same type: %s as population basis: [%s] for Measure: %s",
-                        stratifierExpression, distinctClassSimpleNames(resultClasses), groupPopulationBasisCode, url));
+                        "stratifier expression criteria results for expression: [%s] must fall within accepted types for population basis: [%s] for Measure: %s",
+                        stratifierExpression, groupPopulationBasisCode, url));
             }
         }
     }
@@ -163,12 +159,5 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var list = (List<?>) result;
 
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
-    }
-
-    private Set<String> distinctClassSimpleNames(List<Class<?>> resultClasses) {
-        return resultClasses.stream()
-                //                .map(Class::getSimpleName)
-                .map(Class::getName)
-                .collect(Collectors.toSet());
     }
 }

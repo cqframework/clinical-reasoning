@@ -188,7 +188,7 @@ class MeasureStratifierTest {
             given.when().measureId("CohortBooleanStratDifferentType").evaluate().then();
         } catch (InvalidRequestException exception) {
             assertEquals(
-                    "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types [org.hl7.fhir.r4.model.Encounter] for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
+                    "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
                     exception.getMessage());
         }
     }
@@ -253,7 +253,7 @@ class MeasureStratifierTest {
             fail("Since this is Resource based, it can't intersect with subject based expression");
         } catch (InvalidRequestException exception) {
             assertEquals(
-                    "stratifier expression criteria results for expression: [Gender Stratification] must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
+                    "stratifier expression criteria results for expression: [Gender Stratification] must fall within accepted types for population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
                     exception.getMessage());
         }
     }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql.engine.parameters;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,8 +12,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -36,6 +39,9 @@ public class CqlFhirParametersConverter {
     // private IFhirPath fhirPath;
     private ModelResolver modelResolver;
 
+    /*
+     * Converts both CQL parameters and CQL Evaluation Results into Fhir Parameters Resources
+     */
     public CqlFhirParametersConverter(
             FhirContext fhirContext, IAdapterFactory adapterFactory, FhirTypeConverter fhirTypeConverter) {
         this.fhirContext = requireNonNull(fhirContext);
@@ -45,6 +51,42 @@ public class CqlFhirParametersConverter {
                 this.fhirContext.getVersion().getVersion());
 
         // this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+    }
+
+    // This is basically a copy and paste from R4FhirTypeConverter, but it's not exposed.
+    static final String EMPTY_LIST_EXT_URL = "http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList";
+    static final String DATA_ABSENT_REASON_EXT_URL = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+    static final String DATA_ABSENT_REASON_UNKNOWN_CODE = "unknown";
+
+    private static IBaseBooleanDatatype booleanType(FhirContext context, Boolean value) {
+        try {
+            return (IBaseBooleanDatatype) context.getElementDefinition("Boolean")
+                    .getImplementingClass()
+                    .getDeclaredConstructor(Boolean.class)
+                    .newInstance(value);
+        } catch (Exception e) {
+            throw new InternalErrorException("error creating BooleanType", e);
+        }
+    }
+
+    private static IBaseDatatype codeType(FhirContext context, String value) {
+        try {
+            return (IBaseDatatype) context.getElementDefinition("Code")
+                    .getImplementingClass()
+                    .getDeclaredConstructor(String.class)
+                    .newInstance(value);
+        } catch (Exception e) {
+            throw new InternalErrorException("error creating CodeType", e);
+        }
+    }
+
+    private static IBaseBooleanDatatype emptyBooleanWithExtension(
+            FhirContext context, String url, IBaseDatatype value) {
+        var result = booleanType(context, null);
+        var ext = ((IBaseHasExtensions) result).addExtension();
+        ext.setUrl(url);
+        ext.setValue(value);
+        return result;
     }
 
     public IBaseParameters toFhirParameters(EvaluationResult evaluationResult) {
@@ -67,11 +109,23 @@ public class CqlFhirParametersConverter {
             Object value = entry.getValue().value();
 
             if (value == null) {
-                this.addPart(pa, name);
+                // Null value, add a single empty value with an extension indicating the reason
+                var dataAbsentValue = emptyBooleanWithExtension(
+                        fhirContext,
+                        DATA_ABSENT_REASON_EXT_URL,
+                        codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
+                addPart(pa, name, dataAbsentValue);
                 continue;
             }
 
             if (value instanceof Iterable) {
+                var iterable = (Iterable<?>) value;
+                if (!iterable.iterator().hasNext()) {
+                    // Empty list
+                    var emptyListValue =
+                            emptyBooleanWithExtension(fhirContext, EMPTY_LIST_EXT_URL, booleanType(fhirContext, true));
+                    addPart(pa, name, emptyListValue);
+                }
                 Iterable<?> values = (Iterable<?>) value;
                 for (Object o : values) {
                     this.addPart(pa, name, o);

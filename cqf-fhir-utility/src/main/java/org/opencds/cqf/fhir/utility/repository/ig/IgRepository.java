@@ -24,12 +24,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -445,11 +445,11 @@ public class IgRepository implements Repository {
      */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(Class<T> resourceClass) {
         var path = this.directoryForResource(resourceClass);
-        var resources = new HashMap<IIdType, T>();
         if (!path.toFile().exists()) {
-            return resources;
+            return Collections.emptyMap();
         }
 
+        var resources = new HashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter;
         switch (this.conventions.filenameMode()) {
             case ID_ONLY:
@@ -462,20 +462,20 @@ public class IgRepository implements Repository {
         }
 
         try (var paths = Files.walk(path)) {
-            var recursiveResources = paths.filter(resourceFileFilter)
+            paths.filter(resourceFileFilter)
+                    .sorted()
                     .map(this::cachedReadResource)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .collect(Collectors.toList());
+                    .forEach(r -> {
+                        if (!r.fhirType().equals(resourceClass.getSimpleName())) {
+                            return;
+                        }
 
-            for (var resource : recursiveResources) {
-                if (!resource.fhirType().equals(resourceClass.getSimpleName())) {
-                    continue;
-                }
+                        T validatedResource = validateResource(resourceClass, r, r.getIdElement());
+                        resources.put(r.getIdElement().toUnqualifiedVersionless(), validatedResource);
+                    });
 
-                T validatedResource = validateResource(resourceClass, resource, resource.getIdElement());
-                resources.put(resource.getIdElement().toUnqualifiedVersionless(), validatedResource);
-            }
         } catch (IOException e) {
             throw new UnclassifiedServerFailureException(
                     500, String.format("Unable to read resources from path: %s", path));

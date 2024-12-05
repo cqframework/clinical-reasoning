@@ -1,7 +1,7 @@
 {
-  "id": "MinimalProportionBooleanBasisSingleGroupWithDOC",
+  "id": "MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC",
+  "url": "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
   "library": [
     "http://example.com/Library/MinimalProportionBooleanBasisSingleGroup"
   ],

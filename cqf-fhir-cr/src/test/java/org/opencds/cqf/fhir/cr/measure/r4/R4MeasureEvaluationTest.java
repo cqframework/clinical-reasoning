@@ -152,9 +152,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: GROUP!!!! SDE RACE
     @Test
-    void proportionMeasureEvaluation() {
+    void proportionMeasureEvaluation_NO_SDE_RACE() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -188,7 +187,41 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         checkEvidence(report);
     }
 
-    // LUKETODO: GROUP!!!! SDE RACE
+    @Test
+    void proportionMeasureEvaluation_YES_SDE_RACE() {
+        Patient patient = john_doe();
+
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(
+            eq("Patient"),
+            anyString(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()))
+            .thenReturn(List.of(patient));
+
+        String cql = cql_with_dateTime() + sde_race()
+            + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+            + "define Denominator: 'John' in Patient.name.given\n"
+            + "define Numerator: Patient.birthDate > @1970-01-01\n";
+
+        Measure measure = proportion_measure();
+
+        System.out.println(cql);
+        printResource(measure);
+
+        MeasureReport report =
+            runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
+        checkEvidence(report);
+    }
+
     @Test
     void proportionMeasureEvaluationWithDate() {
         Patient patient = john_doe();
@@ -374,6 +407,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
+        printResource(stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup));
+
         var report = runTest(
                 cql,
                 Arrays.asList(jane_doe().getId(), john_doe().getId()),
@@ -414,17 +449,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                     null);
             fail("expected IllegalArgumentException");
         } catch (InvalidRequestException exception) {
-            // LUKETODO: fix exception message assertion
             assertThat(
                     exception.getMessage(),
                     equalTo(
-                            //                            "stratifier expression criteria results must match the same
-                            // type as population for Measure: http://test.com/fhir/Measure/Test"));
-                            "stratifier expression criteria results must match the same type: [org.hl7.fhir.r4.model.Enumeration] as population basis: [Encounter] for Measure: STRATIFIER"));
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must match the same type: [java.lang.Boolean] as population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
 
-    // LUKETODO:  there is no test that covers non-boolean/non-Encounter population Basises
+    // LUKETODO:  failing test with SDE RACE numerator expression
 
     @Test
     void evaluatePopulationCriteriaNullResult() {
@@ -578,8 +610,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         Measure measure = measure("proportion", populationBasisTypeForMeasure, populationBasisTypeForGroup);
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-        //        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
-        addPopulation(measure, MeasurePopulationType.NUMERATOR, "SDE Race");
+        // LUKETODO:  conditional logic here:
+        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
         addSDEComponent(measure);
 
         return measure;

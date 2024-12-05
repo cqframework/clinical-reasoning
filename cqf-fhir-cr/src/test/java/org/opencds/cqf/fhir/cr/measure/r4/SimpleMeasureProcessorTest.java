@@ -201,7 +201,7 @@ class SimpleMeasureProcessorTest {
 
         private static final String MEASURE_ID = "measure-EXM108-8.3.000-basis-boolean";
         private static final String EXCEPTION_MESSAGE =
-                "group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must match the same type: [[org.hl7.fhir.r4.model.Encounter]] as population basis: [boolean] for Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean";
+                "group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must match the same type: [org.hl7.fhir.r4.model.Encounter] as population basis: [boolean] for Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean";
 
         @Test
         void exm108_partialSubjectId_1() {

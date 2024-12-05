@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -190,20 +191,22 @@ class MeasureStratifierTest {
      * This is validating that even though the Measure is Boolean basis, a stratifier expression that produces results of a different basis IS possible if the expression can be evaluated in the correct context.
      * If this expression produced both 'boolean' AND 'resource' results then it should not be allowed.
      */
-    // LUKETODO: "resource strat not finished" stratifier expression criteria results must match the same type:
+    // LUKETODO: throw on this and assert
+    // LUKETODO: change comment:  Resource-based stratifiers are not in the list of acceptable expressions
+//    https://hl7.org/fhir/R5/measurereport-definitions.html#MeasureReport.group.stratifier.stratum.value_x_
     // [Encounter] as population basis:
     @Test
     void cohortBooleanDifferentTypeStrat() {
-        given.when()
+        try {
+            given.when()
                 .measureId("CohortBooleanStratDifferentType")
                 .evaluate()
-                .then()
-                .firstGroup()
-                .firstStratifier()
-                .stratumCount(9) // one for each encounter
-                .up()
-                .up()
-                .report();
+                .then();
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types [org.hl7.fhir.r4.model.Encounter] for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
+                exception.getMessage());
+        }
     }
     /**
      * Boolean Basis Measure with Stratifier defined as a component.
@@ -263,12 +266,11 @@ class MeasureStratifierTest {
                     .then()
                     .report();
             fail("Since this is Resource based, it can't intersect with subject based expression");
-        } catch (InvalidRequestException e) {
+        } catch (InvalidRequestException exception) {
             // LUKETODO:  fix Exception message assertion
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "stratifier expression criteria results must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: STRATIFIER"));
+            assertEquals(
+                "stratifier expression criteria results for expression: [Gender Stratification] must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
+                exception.getMessage());
         }
     }
 

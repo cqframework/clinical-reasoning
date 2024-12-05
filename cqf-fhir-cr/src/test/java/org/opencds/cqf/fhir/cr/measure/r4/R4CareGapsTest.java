@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -658,47 +659,83 @@ class R4CareGapsTest {
 
     // 'prospective gap' test relies on date of report to decide if 'prospective' or 'open' gap. This will fail EOY
     // 2025.
+    // LUKETODO:  expression: [date of compliance], populationBasis: [boolean], result class: Single: org.opencds.cqf.cql.engine.runtime.Interval
     @Test
-    void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode() {
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode_NO_date_of_compliance() {
         GIVEN_REPO
                 .when()
                 .subject("Patient/male-2022")
                 .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC")
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-NO-date-of-compliance")
                 .notDocument(false)
                 .status("prospective-gap")
                 .getCareGapsReport()
                 .then()
-                .hasBundleCount(1)
-                .firstParameter()
-                .detectedIssueCount(1)
-                .detectedIssue()
-                .hasCareGapStatus("prospective-gap");
+                .hasBundleCount(0);
+    }
+
+    // 'prospective gap' test relies on date of report to decide if 'prospective' or 'open' gap. This will fail EOY
+    // 2025.
+    @Test
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode_YES_date_of_compliance() {
+        try {
+            GIVEN_REPO
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay()
+                    .atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay()
+                    .atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
+                .notDocument(false)
+                .status("prospective-gap")
+                .getCareGapsReport()
+                .then();
+            fail("this should fail with a date of compliance expression");
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must match the same type: [org.opencds.cqf.cql.engine.runtime.Interval] as population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+                exception.getMessage());
+        }
     }
 
     @Test
-    void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode() {
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode_NO_date_of_compliance() {
         GIVEN_REPO
                 .when()
                 .subject("Patient/male-2022")
                 .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
                 .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
-                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC")
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-NO-date-of-compliance")
                 .notDocument(true)
                 .status("prospective-gap")
                 .getCareGapsReport()
                 .then()
-                .hasBundleCount(1)
-                .firstParameter()
-                .bundleEntryCount(1) // non-document mode should leave only 1 Detected Issue per MeasureReport.group
-                .detectedIssueCount(1) // this confirms only entry is a DetectedIssue
-                .detectedIssue()
-                .hasCareGapStatus("prospective-gap")
-                .hasContainedEvidenceReference()
-                .hasContainedMeasureReport()
-                .hasIdentifiedPeriod()
-                .hasImplicatedMeasureReference();
+                .hasBundleCount(0);
+    }
+
+    @Test
+    void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode_YES_date_of_compliance() {
+        try {
+            GIVEN_REPO
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay()
+                    .atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay()
+                    .atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
+                .notDocument(true)
+                .status("prospective-gap")
+                .getCareGapsReport()
+                .then();
+            fail("this should fail with a date of compliance expression");
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must match the same type: [org.opencds.cqf.cql.engine.runtime.Interval] as population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+                exception.getMessage());
+        }
     }
 
     @Test

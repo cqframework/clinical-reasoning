@@ -10,7 +10,7 @@ class DiabetesMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
 
-    // LUKETODO: SDE Ethnicity: stratifier expression criteria results must match the same type:
+    // LUKETODO:stratifier expression criteria results for expression: [SDE Ethnicity] must fall within accepted types [org.hl7.fhir.r4.model.Coding] for boolean population basis: [boolean]
     // [org.hl7.fhir.r4.model.Coding] as
     // population basis: [boolean] for Measure: STRATIFIER
     @Test
@@ -31,9 +31,6 @@ class DiabetesMeasureProcessorTest {
                 .hasCount(1);
     }
 
-    // LUKETODO:  SDE Ethnicity: stratifier expression criteria results must match the same type:
-    // [org.hl7.fhir.r4.model.Coding] as :
-    // population basis: [boolean] for Measure: STRATIFIER
     @Test
     void a1c_population() throws IOException {
         given.when()

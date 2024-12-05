@@ -11,28 +11,33 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Range;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResourceType;
+
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // LUKETODO: javadoc
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
+    private static final Logger logger = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
+
     private static final String BOOLEAN_BASIS = "boolean";
 
-    // LUKETODO:  we're failing because "Code" doesn't match "CodeableConcept" so investigate
-    // LUKETODO:  we also get a FHIR Enumeration here (ex: female)
+    /**
+     * For any given stratifier expression, we don't know if it was evaluated in the patient context or it's a valid
+     * expression, so we'll apply this heuristic for now
+     */
     private static final Set<Class<?>> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES = Set.of(
             CodeableConcept.class,
             Quantity.class,
             Range.class,
             Reference.class,
+            Coding.class,
+            Enumeration.class,
             Boolean.class,
             // CQL type returned by some stratifier expression that don't map neatly to FHIR types
             Code.class);
@@ -51,7 +56,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         });
     }
 
-    // LUKETODO:  pass actual measure later?
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
         printDetails(url, groupDef, populationDef, evaluationResult);
@@ -59,19 +63,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var scoring = groupDef.measureScoring();
 
         // Depending on the scoring type, we'll only evaluate some of the expressions, so we don't evaluate all of them?
-        var expressionsToEvaluate =
-                switch (scoring) {
-                    case PROPORTION, RATIO -> Set.of(
-                            INITIALPOPULATION,
-                            MEASUREPOPULATION,
-                            MEASUREOBSERVATION,
-                            MEASUREPOPULATIONEXCLUSION,
-                            NUMERATOR,
-                            DENOMINATOR);
-                    case CONTINUOUSVARIABLE -> Set.of(INITIALPOPULATION);
-                    case COHORT -> Set.of(
-                            INITIALPOPULATION, MEASUREPOPULATION, MEASUREOBSERVATION, MEASUREPOPULATIONEXCLUSION);
-                };
+        var expressionsToEvaluate = extractExpressionsToEvaluateForScoring(scoring);
 
         var populationExpression = populationDef.expression();
 
@@ -83,7 +75,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             System.out.printf(
                     "POPULATION EXPRESSION: [%s] WILL NOT BE EVALUATED: for scoring [%s]\n",
                     populationExpression, scoring);
-            return;
+//            return;
         }
 
         System.out.printf(
@@ -108,7 +100,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
             if (resultMatchingClassCount != resultClasses.size()) {
                 throw new InvalidRequestException(String.format(
-                        "group expression criteria results for expression: [%s] and scoring: [%s] must match the same type: [%s] as population basis: [%s] for Measure: %s",
+                        "group expression criteria results for expression: [%s] and scoring: [%s] must match the same type: %s as population basis: [%s] for Measure: %s",
                         populationExpression,
                         scoring,
                         distinctClassSimpleNames(resultClasses),
@@ -169,6 +161,23 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         // LUKETODO:  what if it's empty?
     }
 
+    // LUKETODO:  get rid of this:
+    private Set<MeasurePopulationType> extractExpressionsToEvaluateForScoring(MeasureScoring measureScoring) {
+
+        return switch (measureScoring) {
+            case PROPORTION, RATIO -> Set.of(
+                    INITIALPOPULATION,
+                    MEASUREPOPULATION,
+                    MEASUREOBSERVATION,
+                    MEASUREPOPULATIONEXCLUSION,
+                    NUMERATOR,
+                    DENOMINATOR);
+            case CONTINUOUSVARIABLE -> Set.of(INITIALPOPULATION);
+            case COHORT -> Set.of(
+                    INITIALPOPULATION, MEASUREPOPULATION, MEASUREOBSERVATION, MEASUREPOPULATIONEXCLUSION);
+        };
+    }
+
     private Optional<? extends Class<?>> extractResourceType(String groupPopulationBasisCode) {
         if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
             return Optional.of(Boolean.class);
@@ -205,6 +214,13 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var list = (List<?>) result;
 
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
+    }
+    @Nonnull
+    private Set<String> distinctClassSimpleNames(List<Class<?>> theResultClasses) {
+        return theResultClasses.stream()
+                //                .map(Class::getSimpleName)
+                .map(Class::getName)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     // LUKETODO:  get rid of this at the last minute:
@@ -261,13 +277,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         System.out.printf(
                 "STRATIFIER: %s: expression: [%s], populationBasis: [%s], result class: %s\n",
                 url, stratifierDef.expression(), groupDef.getPopulationBasis().code(), resultClass);
-    }
-
-    @Nonnull
-    private Set<String> distinctClassSimpleNames(List<Class<?>> theResultClasses) {
-        return theResultClasses.stream()
-                //                .map(Class::getSimpleName)
-                .map(Class::getName)
-                .collect(Collectors.toUnmodifiableSet());
+        logger.debug(
+                "STRATIFIER: {}: expression: [{}], populationBasis: [{}], result class: {}\n",
+                url, stratifierDef.expression(), groupDef.getPopulationBasis().code(), resultClass);
     }
 }

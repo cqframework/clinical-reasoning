@@ -9,5 +9,5 @@ public interface PopulationBasisValidator {
 
     void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult);
 
-    void validateStratifiers(MeasureDef measureDef, GroupDef theGroupDef, EvaluationResult theEvaluationResult);
+    void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult);
 }

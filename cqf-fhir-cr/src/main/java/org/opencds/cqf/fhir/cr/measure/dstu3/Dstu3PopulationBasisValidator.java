@@ -18,7 +18,7 @@ public class Dstu3PopulationBasisValidator implements PopulationBasisValidator {
     }
 
     @Override
-    public void validateStratifiers(MeasureDef measureDef, GroupDef theGroupDef, EvaluationResult theEvaluationResult) {
+    public void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
         // TODO: LD: Implement this if there's ever a requirement to validate DSTU3 Population Basis
     }
 }

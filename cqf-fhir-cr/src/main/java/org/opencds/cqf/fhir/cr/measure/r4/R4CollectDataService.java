@@ -32,12 +32,12 @@ public class R4CollectDataService {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtils measureServiceUtils,
-            R4PopulationBasisValidator thePopulationBasisValidator) {
+            R4PopulationBasisValidator populationBasisValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
-        populationBasisValidator = thePopulationBasisValidator;
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     /**

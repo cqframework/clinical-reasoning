@@ -4,7 +4,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.R4PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -16,8 +18,8 @@ public class MeasureConfiguration {
 
     @Bean
     Dstu3MeasureProcessor dstu3MeasureProcessor(
-            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider) {
-        return new Dstu3MeasureProcessor(repository, measureEvaluationOptions, subjectProvider);
+            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider, Dstu3PopulationBasisValidator populationBasisValidator) {
+        return new Dstu3MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, populationBasisValidator);
     }
 
     @Bean
@@ -25,7 +27,8 @@ public class MeasureConfiguration {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils measureServiceUtils) {
-        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils);
+            R4MeasureServiceUtils measureServiceUtils,
+            R4PopulationBasisValidator populationBasisValidator) {
+        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, populationBasisValidator);
     }
 }

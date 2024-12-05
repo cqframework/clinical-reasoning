@@ -40,24 +40,24 @@ public class Dstu3MeasureProcessor {
     public Dstu3MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            Dstu3PopulationBasisValidator theDstu3PopulationBasisValidator) {
+            Dstu3PopulationBasisValidator dstu3PopulationBasisValidator) {
         this(
                 repository,
                 measureEvaluationOptions,
                 new Dstu3RepositorySubjectProvider(),
-                theDstu3PopulationBasisValidator);
+            dstu3PopulationBasisValidator);
     }
 
     public Dstu3MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            Dstu3PopulationBasisValidator theDstu3PopulationBasisValidator) {
+            Dstu3PopulationBasisValidator dstu3PopulationBasisValidator) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
-        dstu3PopulationBasisValidator = theDstu3PopulationBasisValidator;
+        this.dstu3PopulationBasisValidator = dstu3PopulationBasisValidator;
     }
 
     public MeasureReport evaluateMeasure(

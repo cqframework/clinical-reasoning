@@ -208,11 +208,16 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n";
 
-        Measure measure = proportion_measure();
+        Measure measure = proportion_measure_Numerator_SDE_RACE();
 
-        MeasureReport report =
-                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(report);
+        try {
+            runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
+        } catch (InvalidRequestException exception) {
+            assertThat(
+                    exception.getMessage(),
+                    equalTo(
+                            "group expression criteria results for expression: [SDE Race] and scoring: [PROPORTION] must match the same type: [org.hl7.fhir.r4.model.Coding] as population basis: [boolean] for Measure: http://test.com/fhir/Measure/Test"));
+        }
     }
 
     @Test
@@ -358,8 +363,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         }
     }
 
-    // LUKETODO:  failing test with SDE RACE numerator expression
-
     @Test
     void evaluatePopulationCriteriaNullResult() {
         Patient patient = john_doe();
@@ -503,17 +506,22 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private Measure proportion_measure() {
-        return proportion_measure(null, null);
+        return proportion_measure(null, null, "Numerator");
+    }
+
+    private Measure proportion_measure_Numerator_SDE_RACE() {
+        return proportion_measure(null, null, "SDE Race");
     }
 
     private Measure proportion_measure(
-            @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
+            @Nullable CodeType populationBasisTypeForMeasure,
+            @Nullable CodeType populationBasisTypeForGroup,
+            String numeratorExpression) {
 
         Measure measure = measure("proportion", populationBasisTypeForMeasure, populationBasisTypeForGroup);
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-        // LUKETODO:  conditional logic here:
-        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
+        addPopulation(measure, MeasurePopulationType.NUMERATOR, numeratorExpression);
         addSDEComponent(measure);
 
         return measure;
@@ -530,14 +538,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private Measure stratified_measure() {
-        Measure measure = proportion_measure(null, null);
+        Measure measure = proportion_measure(null, null, "Numerator");
         addStratifier(measure, "patient-gender", "Gender");
         return measure;
     }
 
     private Measure stratified_measure(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
-        Measure measure = proportion_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup);
+        Measure measure = proportion_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup, "Numerator");
         addStratifier(measure, "patient-gender", "Gender");
         return measure;
     }

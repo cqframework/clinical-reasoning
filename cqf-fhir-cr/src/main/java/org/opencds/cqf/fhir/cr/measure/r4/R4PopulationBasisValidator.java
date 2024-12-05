@@ -1,22 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.*;
-import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
  */
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
-
-    private static final Logger logger = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
 
     private static final String BOOLEAN_BASIS = "boolean";
 
@@ -24,7 +21,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
      * For any given stratifier expression, we don't know if it was evaluated in the patient context or it's a valid
      * expression, so we'll apply this heuristic for now
      */
-    private static final Set<Class<?>> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES = Set.of(
+    private static final Set<Class<?>> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES = new HashSet<>(Arrays.asList(
             CodeableConcept.class,
             Quantity.class,
             Range.class,
@@ -33,7 +30,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             Enumeration.class,
             Boolean.class,
             // CQL type returned by some stratifier expression that don't map neatly to FHIR types
-            Code.class);
+            Code.class));
 
     @Override
     public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
@@ -92,6 +89,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var stratifierExpression = stratifierDef.expression();
 
         var expressionResult = evaluationResult.forExpression(stratifierExpression);
+
+        if (expressionResult == null || expressionResult.value() == null) {
+            return;
+        }
 
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
@@ -165,10 +166,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
     }
 
-    private Set<String> distinctClassSimpleNames(List<Class<?>> theResultClasses) {
-        return theResultClasses.stream()
+    private Set<String> distinctClassSimpleNames(List<Class<?>> resultClasses) {
+        return resultClasses.stream()
                 //                .map(Class::getSimpleName)
                 .map(Class::getName)
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.toSet());
     }
 }

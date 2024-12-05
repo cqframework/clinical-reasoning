@@ -38,8 +38,6 @@ class MeasureStratifierTest {
         period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
         testDataGenerator.makePatient(null, null, period);
     }
-
-    // LUKETODO: figure out why this is failing
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -135,9 +133,6 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        // LUKETODO: can we combine Boolean and Code stratifier criteria evaluation results
-        // in the same group????
-
         given.when()
                 .measureId("CohortBooleanStratMulti")
                 .evaluate()
@@ -184,30 +179,20 @@ class MeasureStratifierTest {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
         }
     }
-    /**
-     * Boolean Basis Measure with Stratifier defined that produces resource based results.
-     * 9 Encounters are returned as a result of this stratifier expression. One stratum per unique 'Encounter' found.
-     * Example: Encounter/patient-1-encounter-1 as a stratum value returned.
-     * This is validating that even though the Measure is Boolean basis, a stratifier expression that produces results of a different basis IS possible if the expression can be evaluated in the correct context.
-     * If this expression produced both 'boolean' AND 'resource' results then it should not be allowed.
-     */
-    // LUKETODO: throw on this and assert
-    // LUKETODO: change comment:  Resource-based stratifiers are not in the list of acceptable expressions
-//    https://hl7.org/fhir/R5/measurereport-definitions.html#MeasureReport.group.stratifier.stratum.value_x_
-    // [Encounter] as population basis:
+
+    // Previously, we didn't expect this to fail but with the new validation logic we decided that
+    // it now ought to.
     @Test
     void cohortBooleanDifferentTypeStrat() {
         try {
-            given.when()
-                .measureId("CohortBooleanStratDifferentType")
-                .evaluate()
-                .then();
+            given.when().measureId("CohortBooleanStratDifferentType").evaluate().then();
         } catch (InvalidRequestException exception) {
             assertEquals(
-                "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types [org.hl7.fhir.r4.model.Encounter] for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
-                exception.getMessage());
+                    "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types [org.hl7.fhir.r4.model.Encounter] for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
+                    exception.getMessage());
         }
     }
+
     /**
      * Boolean Basis Measure with Stratifier defined as a component.
      * MultiComponent stratifiers blend results of multiple criteria (Gender of Patient and Payer, instead of just one or the other)
@@ -267,10 +252,9 @@ class MeasureStratifierTest {
                     .report();
             fail("Since this is Resource based, it can't intersect with subject based expression");
         } catch (InvalidRequestException exception) {
-            // LUKETODO:  fix Exception message assertion
             assertEquals(
-                "stratifier expression criteria results for expression: [Gender Stratification] must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
-                exception.getMessage());
+                    "stratifier expression criteria results for expression: [Gender Stratification] must match the same type: [org.opencds.cqf.cql.engine.runtime.Code] as population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
+                    exception.getMessage());
         }
     }
 

@@ -93,8 +93,6 @@ public class MeasureEvaluator {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
 
-        System.out.println("-----------------------------");
-
         // measurementPeriod is not required, because it's often defaulted in CQL
         setMeasurementPeriod(measureDef, measurementPeriod);
 
@@ -312,8 +310,6 @@ public class MeasureEvaluator {
                     libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
 
             evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
-            // LUKETODO:
-            System.out.println("***********************");
         }
 
         return measureDef;
@@ -576,7 +572,6 @@ public class MeasureEvaluator {
         evaluateStratifiers(groupDef, subjectId, groupDef.stratifiers(), evaluationResult);
 
         var scoring = groupDef.measureScoring();
-        System.out.println("scoring: " + scoring);
         switch (scoring) {
             case PROPORTION:
             case RATIO:

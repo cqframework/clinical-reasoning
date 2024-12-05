@@ -54,7 +54,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -179,9 +178,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = proportion_measure();
 
-        System.out.println(cql);
-        printResource(measure);
-
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(report);
@@ -193,32 +189,29 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
         when(retrieveProvider.retrieve(
-            eq("Patient"),
-            anyString(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-            .thenReturn(List.of(patient));
+                        eq("Patient"),
+                        anyString(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race()
-            + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-            + "define Denominator: 'John' in Patient.name.given\n"
-            + "define Numerator: Patient.birthDate > @1970-01-01\n";
+                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
+                + "define Denominator: 'John' in Patient.name.given\n"
+                + "define Numerator: Patient.birthDate > @1970-01-01\n";
 
         Measure measure = proportion_measure();
 
-        System.out.println(cql);
-        printResource(measure);
-
         MeasureReport report =
-            runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
+                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(report);
     }
 
@@ -279,89 +272,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         Measure measure = continuous_variable_measure();
 
-        printResource(measure);
-
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
         checkEvidence(report);
     }
 
-    // LUKETODO: 600 cleanup:
-    @Language("JSON")
-    final String json =
-            """
-            {
-              "resourceType": "Measure",
-              "id": "proportion",
-              "url": "http://test.com/fhir/Measure/Test",
-              "version": "1.0.0",
-              "name": "Test",
-              "scoring": {
-                "coding": [ {
-                  "code": "proportion"
-                } ]
-              },
-              "group": [ {
-                "population": [ {
-                  "id": "initial-population",
-                  "code": {
-                    "coding": [ {
-                      "code": "initial-population"
-                    } ]
-                  },
-                  "criteria": {
-                    "expression": "InitialPopulation"
-                  }
-                }, {
-                  "id": "denominator",
-                  "code": {
-                    "coding": [ {
-                      "code": "denominator"
-                    } ]
-                  },
-                  "criteria": {
-                    "expression": "Denominator"
-                  }
-                }, {
-                  "id": "numerator",
-                  "code": {
-                    "coding": [ {
-                      "code": "numerator"
-                    } ]
-                  },
-                  "criteria": {
-                    "expression": "Numerator"
-                  }
-                } ],
-                "stratifier": [ {
-                  "id": "patient-gender",
-                  "criteria": {
-                    "expression": "Gender"
-                  }
-                } ]
-              } ],
-              "supplementalData": [ {
-                "id": "sde-race",
-                "code": {
-                  "text": "sde-race"
-                },
-                "usage": [ {
-                  "coding": [ {
-                    "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
-                    "code": "supplemental-data"
-                  } ]
-                } ],
-                "criteria": {
-                  "language": "text/cql",
-                  "expression": "SDE Race"
-                }
-              } ]
-            }
-        """;
-
-    // LUKETODO: Gender: stratifier expression criteria results must match the same type:
-    // [org.hl7.fhir.r4.model.Enumeration] as
-    // population basis: [boolean] for Measure: STRATIFIER
     // Prove we no longer error out for a SUBJECT report with multiple SDEs
     @ParameterizedTest
     @NullSource
@@ -370,16 +285,12 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             names = {"SUBJECT", "SUBJECTLIST", "POPULATION"})
     void stratifiedMeasureEvaluation(@Nullable MeasureEvalType measureEvalTypeOverride) {
 
-        final String cql = cql_with_dateTime() + sde_race()
+        var cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
-        System.out.println(cql);
-
-        printResource(stratified_measure());
-
-        final MeasureReport report = runTest(
+        var report = runTest(
                 cql,
                 Arrays.asList(jane_doe().getId(), john_doe().getId()),
                 stratified_measure(),
@@ -395,9 +306,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_ENCOUNTER));
     }
 
-    // LUKETODO: Gender: stratifier expression criteria results must match the same type:
-    // [org.hl7.fhir.r4.model.Enumeration] as
-    // population basis: [boolean] for Measure: STRATIFIER
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisHappyPathParams")
     void stratifiedMeasureEvaluationByPopulationHappyPathBasis(
@@ -406,8 +314,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
-
-        printResource(stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup));
 
         var report = runTest(
                 cql,
@@ -424,12 +330,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 Arguments.of(POPULATION_BASIS_ENCOUNTER, POPULATION_BASIS_ENCOUNTER));
     }
 
-    // LUKETODO:  600  how do I set up this test to prove that GroupDef criteria expressions are properly validated?
-    // LUKETODO:  600  can I just shove "SDE Race" into the Numerator expression and call it a day?
     @ParameterizedTest
     @MethodSource("stratifiedMeasureEvaluationByPopulationBasisErrorPathParams")
-
-    // LUKETODO: POPULATION: populationBasis: [Encounter], result class: Single: Boolean
     void stratifiedMeasureEvaluationByPopulationErrorPathBasis(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
         final String cql = cql_with_dateTime() + sde_race()
@@ -452,7 +354,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             assertThat(
                     exception.getMessage(),
                     equalTo(
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must match the same type: [java.lang.Boolean] as population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
+                            "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must match the same type: [java.lang.Boolean] as population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
         }
     }
 
@@ -623,8 +525,6 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.MEASUREPOPULATION, "MeasurePopulation");
         addSDEComponent(measure);
-
-        printResource(measure);
 
         return measure;
     }
@@ -797,12 +697,5 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any()))
                 .thenReturn(List.of(jane_doe()));
         return retrieveProvider;
-    }
-
-    private void printResource(Resource resource) {
-        final String json =
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
-
-        System.out.println("json = \n" + json);
     }
 }

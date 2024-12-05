@@ -5,6 +5,11 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 
+/**
+ * Validates group populations and stratifiers against population basis-es for DSTU3.
+ * <p/>
+ * Currently no-ops.
+ */
 public class Dstu3PopulationBasisValidator implements PopulationBasisValidator {
 
     @Override

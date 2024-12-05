@@ -1,26 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.*;
-
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO: javadoc
+/**
+ * Validates group populations and stratifiers against population basis-es for R4 only.
+ */
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
@@ -58,29 +51,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
-        printDetails(url, groupDef, populationDef, evaluationResult);
 
         var scoring = groupDef.measureScoring();
-
-        // Depending on the scoring type, we'll only evaluate some of the expressions, so we don't evaluate all of them?
-        var expressionsToEvaluate = extractExpressionsToEvaluateForScoring(scoring);
-
         var populationExpression = populationDef.expression();
-
-        var expressionCodesWhitelist = expressionsToEvaluate.stream()
-                .map(MeasurePopulationType::getDisplay)
-                .toList();
-
-        if (!expressionCodesWhitelist.contains(populationExpression)) {
-            System.out.printf(
-                    "POPULATION EXPRESSION: [%s] WILL NOT BE EVALUATED: for scoring [%s]\n",
-                    populationExpression, scoring);
-//            return;
-        }
-
-        System.out.printf(
-                "POPULATION EXPRESSION: [%s] WILL BE EVALUATED: for scoring [%s]\n", populationExpression, scoring);
-
         var expressionResult = evaluationResult.forExpression(populationDef.expression());
 
         if (expressionResult == null || expressionResult.value() == null) {
@@ -89,7 +62,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
-
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
 
         if (optResourceClass.isPresent()) {
@@ -108,14 +80,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                         url));
             }
         }
-
-        // LUKETODO:  what if it's empty?
     }
 
     private void validateStratifierPopulationBasisType(
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
-
-        printDetails(url, groupDef, stratifierDef, evaluationResult);
 
         if (!stratifierDef.components().isEmpty()) {
             throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
@@ -157,25 +125,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                         stratifierExpression, distinctClassSimpleNames(resultClasses), groupPopulationBasisCode, url));
             }
         }
-
-        // LUKETODO:  what if it's empty?
-    }
-
-    // LUKETODO:  get rid of this:
-    private Set<MeasurePopulationType> extractExpressionsToEvaluateForScoring(MeasureScoring measureScoring) {
-
-        return switch (measureScoring) {
-            case PROPORTION, RATIO -> Set.of(
-                    INITIALPOPULATION,
-                    MEASUREPOPULATION,
-                    MEASUREOBSERVATION,
-                    MEASUREPOPULATIONEXCLUSION,
-                    NUMERATOR,
-                    DENOMINATOR);
-            case CONTINUOUSVARIABLE -> Set.of(INITIALPOPULATION);
-            case COHORT -> Set.of(
-                    INITIALPOPULATION, MEASUREPOPULATION, MEASUREOBSERVATION, MEASUREPOPULATIONEXCLUSION);
-        };
     }
 
     private Optional<? extends Class<?>> extractResourceType(String groupPopulationBasisCode) {
@@ -215,70 +164,11 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
     }
-    @Nonnull
+
     private Set<String> distinctClassSimpleNames(List<Class<?>> theResultClasses) {
         return theResultClasses.stream()
                 //                .map(Class::getSimpleName)
                 .map(Class::getName)
                 .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // LUKETODO:  get rid of this at the last minute:
-    private void printDetails(
-            String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
-        var result = Optional.ofNullable(evaluationResult.forExpression(populationDef.expression()))
-                .map(ExpressionResult::value)
-                .orElse(null);
-        final String resultClass;
-        if (result != null) {
-            if (result instanceof List<?> list) {
-                if (!list.isEmpty()) {
-                    //                    resultClass = "List: " + list.get(0).getClass().getSimpleName();
-                    resultClass = "List: " + list.get(0).getClass().getName();
-                } else {
-                    resultClass = "List: " + null;
-                }
-            } else {
-                //                resultClass = "Single: " + result.getClass().getSimpleName();
-                resultClass = "Single: " + result.getClass().getName();
-            }
-        } else {
-            resultClass = "Single: " + null;
-        }
-
-        System.out.printf(
-                "POPULATION: %s: expression: [%s], populationBasis: [%s], result class: %s\n",
-                url, populationDef.expression(), groupDef.getPopulationBasis().code(), resultClass);
-    }
-
-    // LUKETODO:  get rid of this at the last minute:
-    private void printDetails(
-            String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
-        var result = Optional.ofNullable(evaluationResult.forExpression(stratifierDef.expression()))
-                .map(ExpressionResult::value)
-                .orElse(null);
-        final String resultClass;
-        if (result != null) {
-            if (result instanceof List<?> list) {
-                if (!list.isEmpty()) {
-                    //                    resultClass = "List: " + list.get(0).getClass().getSimpleName();
-                    resultClass = "List: " + list.get(0).getClass().getName();
-                } else {
-                    resultClass = "List: " + null;
-                }
-            } else {
-                //                resultClass = "Single: " + result.getClass().getSimpleName();
-                resultClass = "Single: " + result.getClass().getName();
-            }
-        } else {
-            resultClass = "Single: " + null;
-        }
-
-        System.out.printf(
-                "STRATIFIER: %s: expression: [%s], populationBasis: [%s], result class: %s\n",
-                url, stratifierDef.expression(), groupDef.getPopulationBasis().code(), resultClass);
-        logger.debug(
-                "STRATIFIER: {}: expression: [{}], populationBasis: [{}], result class: {}\n",
-                url, stratifierDef.expression(), groupDef.getPopulationBasis().code(), resultClass);
     }
 }

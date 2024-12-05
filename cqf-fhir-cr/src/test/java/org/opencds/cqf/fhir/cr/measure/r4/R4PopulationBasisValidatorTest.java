@@ -17,23 +17,17 @@ class R4PopulationBasisValidatorTest {
 
     private static Stream<Arguments> validateGroupBasisTypeParams() {
         return Stream.of(
-            Arguments.of(
-                new GroupDef(null, null, null, null, null, false, null, null),
-                new EvaluationResult())
-        );
+                Arguments.of(new GroupDef(null, null, null, null, null, false, null, null), new EvaluationResult()));
     }
 
     @ParameterizedTest
     @MethodSource("validateGroupBasisTypeParams")
     void validateGroupBasisType(GroupDef groupDef, EvaluationResult evaluationResult) {
         testSubject.validateGroupPopulations(MEASURE_DEF, groupDef, evaluationResult);
-
     }
 
     private static Stream<Arguments> validateStratifierBasisTypeParams() {
-        return Stream.of(
-            Arguments.of()
-        );
+        return Stream.of(Arguments.of());
     }
 
     @ParameterizedTest

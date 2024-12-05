@@ -18,8 +18,12 @@ public class MeasureConfiguration {
 
     @Bean
     Dstu3MeasureProcessor dstu3MeasureProcessor(
-            Repository repository, MeasureEvaluationOptions measureEvaluationOptions, SubjectProvider subjectProvider, Dstu3PopulationBasisValidator populationBasisValidator) {
-        return new Dstu3MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, populationBasisValidator);
+            Repository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            SubjectProvider subjectProvider,
+            Dstu3PopulationBasisValidator populationBasisValidator) {
+        return new Dstu3MeasureProcessor(
+                repository, measureEvaluationOptions, subjectProvider, populationBasisValidator);
     }
 
     @Bean
@@ -29,6 +33,7 @@ public class MeasureConfiguration {
             SubjectProvider subjectProvider,
             R4MeasureServiceUtils measureServiceUtils,
             R4PopulationBasisValidator populationBasisValidator) {
-        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, populationBasisValidator);
+        return new R4MeasureProcessor(
+                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, populationBasisValidator);
     }
 }

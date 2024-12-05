@@ -111,7 +111,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
@@ -140,7 +140,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
@@ -204,9 +204,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                + "define Denominator: 'John' in Patient.name.given\n"
-                + "define Numerator: Patient.birthDate > @1970-01-01\n";
+                + """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            """;
 
         Measure measure = proportion_measure_Numerator_SDE_RACE();
 
@@ -316,9 +318,12 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     void stratifiedMeasureEvaluationByPopulationHappyPathBasis(
             @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
         var cql = cql_with_dateTime() + sde_race()
-                + "define InitialPopulation: 'Doe' in Patient.name.family\n"
-                + "define Denominator: 'John' in Patient.name.given\n"
-                + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
+                + """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            define Gender: Patient.gender
+            """;
 
         var report = runTest(
                 cql,

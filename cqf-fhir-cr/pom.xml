@@ -76,16 +76,6 @@
         <artifactId>slf4j-test</artifactId>
         <scope>test</scope>
     </dependency>
-    <!--
-    Needed to support @Language annotation for JDK 17 multi-line strings and syntax highlighting.
-    This supports SQL, JSON, etc, but unfortunately, not CQL (yet).
-    -->
-    <dependency>
-        <groupId>org.jetbrains</groupId>
-        <artifactId>annotations</artifactId>
-        <version>23.0.0</version>
-        <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>

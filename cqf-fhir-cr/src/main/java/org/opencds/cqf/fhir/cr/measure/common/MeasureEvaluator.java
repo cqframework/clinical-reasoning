@@ -620,7 +620,6 @@ public class MeasureEvaluator {
             // TODO: Handle list values as components?
             var expressionResult = evaluationResult.forExpression(sd.expression());
             Object result = expressionResult.value();
-
             if (result instanceof Iterable) {
                 var resultIter = ((Iterable<?>) result).iterator();
                 if (!resultIter.hasNext()) {

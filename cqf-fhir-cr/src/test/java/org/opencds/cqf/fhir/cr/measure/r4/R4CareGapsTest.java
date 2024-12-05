@@ -674,8 +674,6 @@ class R4CareGapsTest {
                 .hasBundleCount(0);
     }
 
-    // 'prospective gap' test relies on date of report to decide if 'prospective' or 'open' gap. This will fail EOY
-    // 2025.
     @Test
     void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode_YES_date_of_compliance() {
         try {

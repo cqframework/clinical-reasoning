@@ -41,11 +41,7 @@ public class Dstu3MeasureProcessor {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             Dstu3PopulationBasisValidator dstu3PopulationBasisValidator) {
-        this(
-                repository,
-                measureEvaluationOptions,
-                new Dstu3RepositorySubjectProvider(),
-            dstu3PopulationBasisValidator);
+        this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider(), dstu3PopulationBasisValidator);
     }
 
     public Dstu3MeasureProcessor(

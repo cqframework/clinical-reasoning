@@ -1,14 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.r4.model.Enumeration;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.

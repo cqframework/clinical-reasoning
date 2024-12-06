@@ -460,8 +460,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         var libraryEngine = new LibraryEngine(repository, evaluationOptions.getEvaluationSettings());
 
-        R4MeasureEvaluation evaluation =
-                new R4MeasureEvaluation(engine, measure, libraryEngine, id, populationBasisValidator);
+        R4MeasureEvaluation evaluation = new R4MeasureEvaluation(engine, measure, libraryEngine, id);
         MeasureReport report = evaluation.evaluate(
                 getMeasureEvalType(subjectIds, measureEvalTypeOverride),
                 subjectIds,

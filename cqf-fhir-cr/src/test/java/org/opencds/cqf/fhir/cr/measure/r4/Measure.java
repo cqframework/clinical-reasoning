@@ -115,7 +115,6 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
-        private final R4PopulationBasisValidator populationBasisValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -133,8 +132,6 @@ public class Measure {
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
-
-            this.populationBasisValidator = new R4PopulationBasisValidator();
         }
 
         public Given repository(Repository repository) {
@@ -156,12 +153,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(
-                    repository,
-                    evaluationOptions,
-                    measurePeriodValidator,
-                    measureServiceUtils,
-                    populationBasisValidator);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
         }
 
         public When when() {

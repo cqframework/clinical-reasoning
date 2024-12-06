@@ -24,20 +24,17 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
-    private final R4PopulationBasisValidator populationBasisValidator;
 
     public R4MeasureService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            R4MeasureServiceUtils measureServiceUtils,
-            R4PopulationBasisValidator populationBasisValidator) {
+            R4MeasureServiceUtils measureServiceUtils) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
-        this.populationBasisValidator = populationBasisValidator;
     }
 
     @Override
@@ -60,11 +57,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(
-                repo,
-                this.measureEvaluationOptions,
-                this.subjectProvider,
-                this.measureServiceUtils,
-                populationBasisValidator);
+                repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();

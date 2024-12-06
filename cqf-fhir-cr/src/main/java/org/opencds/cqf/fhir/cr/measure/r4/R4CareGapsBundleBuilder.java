@@ -81,16 +81,15 @@ public class R4CareGapsBundleBuilder {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
-            MeasurePeriodValidator measurePeriodValidator,
-            R4PopulationBasisValidator populationBasisValidator) {
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService = new R4MultiMeasureService(
-                repository, measureEvaluationOptions, serverBase, measurePeriodValidator, populationBasisValidator);
+        r4MultiMeasureService =
+                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(

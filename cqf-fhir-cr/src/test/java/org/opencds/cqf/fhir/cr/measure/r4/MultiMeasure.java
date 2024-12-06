@@ -92,7 +92,6 @@ public class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
-        private R4PopulationBasisValidator populationBasisValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -110,8 +109,6 @@ public class MultiMeasure {
             this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-
-            this.populationBasisValidator = new R4PopulationBasisValidator();
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -137,8 +134,7 @@ public class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(
-                    repository, evaluationOptions, serverBase, measurePeriodValidator, populationBasisValidator);
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public MultiMeasure.When when() {

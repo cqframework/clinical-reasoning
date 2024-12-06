@@ -90,7 +90,6 @@ public class CareGaps {
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
         private final MeasurePeriodValidator measurePeriodEvaluator;
-        private final R4PopulationBasisValidator populationBasisValidator;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -111,7 +110,6 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
-            this.populationBasisValidator = new R4PopulationBasisValidator();
         }
 
         public CareGaps.Given repository(Repository repository) {
@@ -138,12 +136,7 @@ public class CareGaps {
 
         private R4CareGapsService buildCareGapsService() {
             return new R4CareGapsService(
-                    careGapsProperties,
-                    repository,
-                    evaluationOptions,
-                    serverBase,
-                    measurePeriodEvaluator,
-                    populationBasisValidator);
+                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
         }
 
         public When when() {

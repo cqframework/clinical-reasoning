@@ -14,11 +14,7 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureEvaluation;
 public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureReport, DomainResource> {
 
     public R4MeasureEvaluation(
-            CqlEngine context,
-            Measure measure,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier,
-            R4PopulationBasisValidator populationBasisValidator) {
+            CqlEngine context, Measure measure, LibraryEngine libraryEngine, VersionedIdentifier versionIdentifier) {
         super(
                 context,
                 measure,
@@ -26,7 +22,7 @@ public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureR
                 new R4MeasureReportBuilder(),
                 libraryEngine,
                 versionIdentifier,
-                populationBasisValidator);
+                new R4PopulationBasisValidator());
     }
 
     @Override

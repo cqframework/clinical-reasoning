@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
@@ -42,6 +43,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
     private static final String TERMINOLOGY_TYPE = "terminology";
+    private IValueSetExpansionCache cache;
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
@@ -163,7 +165,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // what is dependency, where did it originate? potentially the package?
     }
 
-    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IBaseResource> terminologyEndpoint) {
+    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IBaseResource> terminologyEndpoint, IParametersAdapter cachedExpansions) {
         var expansionParams = newParameters(fhirContext());
         var rootSpecificationLibrary = getRootSpecificationLibrary(packagedBundle);
         if (rootSpecificationLibrary != null) {
@@ -178,21 +180,42 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             }
         }
         var params = (IParametersAdapter) createAdapterForResource(expansionParams);
+        var expansionHash = cache.getExpansionParametersHash(expansionParams);
         var expandedList = new ArrayList<String>();
-
-        var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
-                .filter(r -> r.fhirType().equals("ValueSet"))
-                .map(v -> (IValueSetAdapter) createAdapterForResource(v))
-                .collect(Collectors.toList());
-
-        valueSets.stream()
-                .forEach(valueSet -> expandHelper.expandValueSet(
+        var valueSets = new ArrayList<IValueSetAdapter>();
+        for (final var resource: BundleHelper.getEntryResources(packagedBundle)) {
+            final var vset = (IValueSetAdapter)createAdapterForResource(resource);
+            var expanded = false;
+            if (cachedExpansions.getParameter(vset.getCanonical()) != null) {
+                final var expansionBundle = (IBaseBundle)cachedExpansions.getParameter(vset.getCanonical());//.getResource();
+                for (final var e: BundleHelper.getEntryResources(expansionBundle)) {
+                    final var expandedVset = (IValueSetAdapter)createAdapterForResource(e);
+                    if (expandedVset.hasExtension("expansionParameterHash") && ((IPrimitiveType)expandedVset.getExtension("expansionParameterHash").getValue()).getValue().equals(expansionHash)) {
+                        vset.setExpansion(expandedVset.getExpansion());
+                        expandedList.add(vset.getCanonical());
+                        expanded = true;
+                        break;
+                    }
+                }
+            }
+            if (vset.getExpansion() == null) {
+                valueSets.add(vset);
+            }
+        }
+        if (!valueSets.isEmpty()) {
+            valueSets.stream()
+                .forEach(valueSet -> {
+                    expandHelper.expandValueSet(
                         valueSet,
                         params,
                         terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
                         valueSets,
                         expandedList,
-                        new Date()));
+                        new Date());
+                    // this should really be a transaction
+                    cache.updateExpansionsForCanonical(cache.addExpansionToBundle(expansionHash, valueSet));
+                    });
+        }
     }
 
     protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {

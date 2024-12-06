@@ -69,13 +69,19 @@ public class MeasureEvaluator {
     protected CqlEngine context;
     protected String measurementPeriodParameterName;
 
-    protected LibraryEngine libraryEngine;
+    private final LibraryEngine libraryEngine;
+    private final PopulationBasisValidator populationBasisValidator;
 
-    public MeasureEvaluator(CqlEngine context, String measurementPeriodParameterName, LibraryEngine libraryEngine) {
+    public MeasureEvaluator(
+            CqlEngine context,
+            String measurementPeriodParameterName,
+            LibraryEngine libraryEngine,
+            PopulationBasisValidator populationBasisValidator) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
         this.libraryEngine = libraryEngine;
         this.measurementPeriodParameterName = Objects.requireNonNull(
                 measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     public MeasureDef evaluate(
@@ -318,7 +324,7 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
         }
     }
 
@@ -552,13 +558,18 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateGroup(
+            MeasureDef measureDef,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult) {
-        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
+
+        populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
+        populationBasisValidator.validateStratifiers(measureDef, groupDef, evaluationResult);
+
+        evaluateStratifiers(groupDef, subjectId, groupDef.stratifiers(), evaluationResult);
 
         var scoring = groupDef.measureScoring();
         switch (scoring) {
@@ -597,7 +608,10 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectId,
+            List<StratifierDef> stratifierDefs,
+            EvaluationResult evaluationResult) {
         for (StratifierDef sd : stratifierDefs) {
             if (!sd.components().isEmpty()) {
                 throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");

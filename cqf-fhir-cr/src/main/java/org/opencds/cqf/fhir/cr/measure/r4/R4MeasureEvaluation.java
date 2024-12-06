@@ -21,7 +21,8 @@ public class R4MeasureEvaluation extends BaseMeasureEvaluation<Measure, MeasureR
                 new R4MeasureDefBuilder(),
                 new R4MeasureReportBuilder(),
                 libraryEngine,
-                versionIdentifier);
+                versionIdentifier,
+                new R4PopulationBasisValidator());
     }
 
     @Override

@@ -69,7 +69,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    protected MeasureReportScorer<MeasureReport> measureReportScorer;
+    private final MeasureReportScorer<MeasureReport> measureReportScorer;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
@@ -350,27 +350,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    /**
-     *
-     * Resource result --> Patient Key, Resource result --> can intersect on patient for Boolean basis, can't for Resource
-     * boolean result --> Patient Key, Boolean result --> can intersect on Patient
-     * code result --> Patient Key, Code result --> can intersect on Patient
-     */
-    protected void validateStratifierBasisType(
-            Measure measure, Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
-
-        if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
-            var list = subjectValues.values().stream()
-                    .filter(x -> x.rawValue() instanceof Resource)
-                    .collect(Collectors.toList());
-            if (list.size() != subjectValues.values().size()) {
-                throw new InvalidRequestException(
-                        "stratifier expression criteria results must match the same type as population for Measure: "
-                                + measure.getUrl());
-            }
-        }
-    }
-
     protected void buildStratifier(
             BuilderContext bc,
             MeasureGroupStratifierComponent measureStratifier,
@@ -388,8 +367,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-
-        validateStratifierBasisType(bc.measure, subjectValues, groupDef.isBooleanBasis());
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {

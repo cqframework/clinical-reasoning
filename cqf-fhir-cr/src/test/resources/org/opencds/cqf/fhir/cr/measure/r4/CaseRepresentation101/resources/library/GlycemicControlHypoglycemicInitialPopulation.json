@@ -4,6 +4,10 @@
   "meta": {
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
   },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "Encounter"
+  } ],
   "url": "http://test-case.com/fhir/measures/Library/GlycemicControlHypoglycemicInitialPopulation",
   "version": "0.0.004",
   "name": "GlycemicControlHypoglycemicInitialPopulation",

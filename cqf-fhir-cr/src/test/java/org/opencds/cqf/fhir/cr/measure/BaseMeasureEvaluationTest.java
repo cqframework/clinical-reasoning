@@ -55,10 +55,17 @@ public abstract class BaseMeasureEvaluationTest {
     public abstract String getFhirVersion();
 
     protected String sde_race() {
-        return "define \"SDE Race\":\n" + "  (flatten (\n" + "    Patient.extension Extension\n"
-                + "      where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'\n"
-                + "        return Extension.extension\n" + "  )) E\n" + "    where E.url = 'ombCategory'\n"
-                + "      or E.url = 'detailed'\n" + "    return E.value as Coding\n\n";
+        return """
+            define "SDE Race":
+              (flatten (
+                  Patient.extension Extension
+                    where Extension.url = 'http://hl7.org/fhir/us/core/StructureDefinition/us-core-race'
+                      return Extension.extension
+             )) E
+               where E.url = 'ombCategory'
+                  or E.url = 'detailed'
+               return E.value as Coding
+            """;
     }
 
     protected static String formatMsg(List<CqlCompilerException> translationErrs) {

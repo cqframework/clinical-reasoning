@@ -18,6 +18,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
     protected LibraryEngine libraryEngine;
     protected String measurementPeriodParameterName;
     protected VersionedIdentifier versionIdentifier;
+    protected PopulationBasisValidator populationBasisValidator;
 
     protected BaseMeasureEvaluation(
             CqlEngine context,
@@ -25,7 +26,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             MeasureDefBuilder<MeasureT> measureDefBuilder,
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier) {
+            VersionedIdentifier versionIdentifier,
+            PopulationBasisValidator populationBasisValidator) {
         this(
                 context,
                 measure,
@@ -33,7 +35,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
                 measureReportBuilder,
                 MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
                 libraryEngine,
-                versionIdentifier);
+                versionIdentifier,
+                populationBasisValidator);
     }
 
     protected BaseMeasureEvaluation(
@@ -43,7 +46,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
             MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> measureReportBuilder,
             String measurementPeriodParameterName,
             LibraryEngine libraryEngine,
-            VersionedIdentifier versionIdentifier) {
+            VersionedIdentifier versionIdentifier,
+            PopulationBasisValidator populationBasisValidator) {
         this.context = Objects.requireNonNull(context, "context is a required argument");
         this.measure = Objects.requireNonNull(measure, "measure is a required argument");
         this.measureDefBuilder = Objects.requireNonNull(measureDefBuilder, "measureDefBuilder is a required argument");
@@ -53,6 +57,7 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
                 measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
         this.libraryEngine = libraryEngine;
         this.versionIdentifier = versionIdentifier;
+        this.populationBasisValidator = populationBasisValidator;
     }
 
     public MeasureReportT evaluate(
@@ -73,8 +78,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         Objects.requireNonNull(measureEvalType, "measureEvalType is a required parameter");
 
         MeasureDef measureDef = this.measureDefBuilder.build(measure);
-        MeasureEvaluator measureEvaluation =
-                new MeasureEvaluator(context, this.measurementPeriodParameterName, libraryEngine);
+        MeasureEvaluator measureEvaluation = new MeasureEvaluator(
+                context, this.measurementPeriodParameterName, libraryEngine, populationBasisValidator);
         measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
 
         Interval measurementPeriodInterval;

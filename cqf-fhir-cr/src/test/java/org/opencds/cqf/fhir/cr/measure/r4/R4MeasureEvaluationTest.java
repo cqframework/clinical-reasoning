@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,6 +16,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -24,12 +28,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -50,7 +56,9 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
@@ -71,6 +79,9 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
+    private static final CodeType POPULATION_BASIS_BOOLEAN = new CodeType("boolean");
+    private static final CodeType POPULATION_BASIS_ENCOUNTER = new CodeType("Encounter");
+
     public String getFhirVersion() {
         return "4.0.1";
     }
@@ -80,8 +91,10 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/r4/FHIR347/"));
     private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
+    private final R4PopulationBasisValidator populationBasisValidator = new R4PopulationBasisValidator();
+
     @Test
-    void cohortMeasureEvaluation() throws Exception {
+    void cohortMeasureEvaluation() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -98,7 +111,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
@@ -106,11 +119,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     @Test
-    void sdeInMeasureEvaluation() throws Exception {
+    void sdeInMeasureEvaluation() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -127,7 +140,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
 
@@ -135,11 +148,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     @Test
-    void proportionMeasureEvaluation() throws Exception {
+    void proportionMeasureEvaluation_NO_SDE_RACE() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -156,7 +169,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
@@ -167,11 +180,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     @Test
-    void proportionMeasureEvaluationWithDate() throws Exception {
+    void proportionMeasureEvaluation_YES_SDE_RACE() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -188,7 +201,46 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
+
+        String cql = cql_with_dateTime() + sde_race()
+                + """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            """;
+
+        Measure measure = proportion_measure_Numerator_SDE_RACE();
+
+        try {
+            runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
+        } catch (InvalidRequestException exception) {
+            assertThat(
+                    exception.getMessage(),
+                    equalTo(
+                            "group expression criteria results for expression: [SDE Race] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://test.com/fhir/Measure/Test"));
+        }
+    }
+
+    @Test
+    void proportionMeasureEvaluationWithDate() {
+        Patient patient = john_doe();
+
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(
+                        eq("Patient"),
+                        anyString(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_date() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
@@ -198,11 +250,11 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     @Test
-    void continuousVariableMeasureEvaluation() throws Exception {
+    void continuousVariableMeasureEvaluation() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -219,7 +271,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
@@ -229,7 +281,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     // Prove we no longer error out for a SUBJECT report with multiple SDEs
@@ -239,68 +291,85 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             value = MeasureEvalType.class,
             names = {"SUBJECT", "SUBJECTLIST", "POPULATION"})
     void stratifiedMeasureEvaluation(@Nullable MeasureEvalType measureEvalTypeOverride) {
-        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(
-                        isNull(),
-                        isNull(),
-                        isNull(),
-                        eq("Patient"),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any()))
-                .thenReturn(Arrays.asList(jane_doe(), john_doe()));
-        when(retrieveProvider.retrieve(
-                        eq("Patient"),
-                        eq("id"),
-                        eq("john-doe"),
-                        eq("Patient"),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any()))
-                .thenReturn(Arrays.asList(john_doe()));
-        when(retrieveProvider.retrieve(
-                        eq("Patient"),
-                        eq("id"),
-                        eq("jane-doe"),
-                        eq("Patient"),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any()))
-                .thenReturn(Arrays.asList(jane_doe()));
 
-        String cql = cql_with_dateTime() + sde_race()
+        var cql = cql_with_dateTime() + sde_race()
                 + "define InitialPopulation: 'Doe' in Patient.name.family\n"
                 + "define Denominator: 'John' in Patient.name.given\n"
                 + "define Numerator: Patient.birthDate > @1970-01-01\n" + "define Gender: Patient.gender\n";
 
-        Measure measure = stratified_measure();
-
-        MeasureReport report = runTest(
+        var report = runTest(
                 cql,
                 Arrays.asList(jane_doe().getId(), john_doe().getId()),
-                measure,
-                retrieveProvider,
+                stratified_measure(),
+                setupMockRetrieverProvider(),
                 measureEvalTypeOverride);
         checkStratification(report);
     }
 
+    private static Stream<Arguments> stratifiedMeasureEvaluationByPopulationBasisHappyPathParams() {
+        return Stream.of(
+                Arguments.of(null, null),
+                Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_BOOLEAN),
+                Arguments.of(POPULATION_BASIS_BOOLEAN, POPULATION_BASIS_ENCOUNTER));
+    }
+
+    @ParameterizedTest
+    @MethodSource("stratifiedMeasureEvaluationByPopulationBasisHappyPathParams")
+    void stratifiedMeasureEvaluationByPopulationHappyPathBasis(
+            @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
+        var cql = cql_with_dateTime() + sde_race()
+                + """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            define Gender: Patient.gender
+            """;
+
+        var report = runTest(
+                cql,
+                Arrays.asList(jane_doe().getId(), john_doe().getId()),
+                stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
+                setupMockRetrieverProvider(),
+                null);
+        checkStratification(report);
+    }
+
+    private static Stream<Arguments> stratifiedMeasureEvaluationByPopulationBasisErrorPathParams() {
+        return Stream.of(
+                Arguments.of(POPULATION_BASIS_ENCOUNTER, POPULATION_BASIS_BOOLEAN),
+                Arguments.of(POPULATION_BASIS_ENCOUNTER, POPULATION_BASIS_ENCOUNTER));
+    }
+
+    @ParameterizedTest
+    @MethodSource("stratifiedMeasureEvaluationByPopulationBasisErrorPathParams")
+    void stratifiedMeasureEvaluationByPopulationErrorPathBasis(
+            @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
+        final String cql = cql_with_dateTime() + sde_race()
+                + """
+            define InitialPopulation: 'Doe' in Patient.name.family
+            define Denominator: 'John' in Patient.name.given
+            define Numerator: Patient.birthDate > @1970-01-01
+            define Gender: Patient.gender
+            """;
+
+        try {
+            runTest(
+                    cql,
+                    List.of(jane_doe().getId(), john_doe().getId()),
+                    stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
+                    setupMockRetrieverProvider(),
+                    null);
+            fail("expected IllegalArgumentException");
+        } catch (InvalidRequestException exception) {
+            assertThat(
+                    exception.getMessage(),
+                    equalTo(
+                            "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
+        }
+    }
+
     @Test
-    void evaluatePopulationCriteriaNullResult() throws Exception {
+    void evaluatePopulationCriteriaNullResult() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
@@ -317,7 +386,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         any(),
                         any(),
                         any()))
-                .thenReturn(Arrays.asList(patient));
+                .thenReturn(List.of(patient));
 
         String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: null\n"
                 + "define Denominator: null\n" + "define Numerator: null\n";
@@ -326,7 +395,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
         MeasureReport report =
                 runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(patient, report);
+        checkEvidence(report);
     }
 
     private void checkStratification(MeasureReport report) {
@@ -337,14 +406,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         StratifierGroupComponent sgc = mrgsc.getStratum().stream()
                 .filter(x -> x.hasValue() && x.getValue().getText().equals("male"))
                 .findFirst()
-                .get();
+                .orElseThrow();
         StratifierGroupPopulationComponent sgpc = sgc.getPopulation().stream()
                 .filter(x -> x.getCode()
                         .getCodingFirstRep()
                         .getCode()
                         .equals(MeasurePopulationType.INITIALPOPULATION.toCode()))
                 .findFirst()
-                .get();
+                .orElseThrow();
 
         assertEquals(1, sgpc.getCount());
 
@@ -413,7 +482,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .orElse(subjectIds.size() == 1 ? MeasureEvalType.SUBJECT : MeasureEvalType.POPULATION);
     }
 
-    private void checkEvidence(Patient patient, MeasureReport report) {
+    private void checkEvidence(MeasureReport report) {
         Map<String, Resource> contained = report.getContained().stream()
                 .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
 
@@ -441,11 +510,22 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private Measure proportion_measure() {
+        return proportion_measure(null, null, "Numerator");
+    }
 
-        Measure measure = measure("proportion");
+    private Measure proportion_measure_Numerator_SDE_RACE() {
+        return proportion_measure(null, null, "SDE Race");
+    }
+
+    private Measure proportion_measure(
+            @Nullable CodeType populationBasisTypeForMeasure,
+            @Nullable CodeType populationBasisTypeForGroup,
+            String numeratorExpression) {
+
+        Measure measure = measure("proportion", populationBasisTypeForMeasure, populationBasisTypeForGroup);
         addPopulation(measure, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation");
         addPopulation(measure, MeasurePopulationType.DENOMINATOR, "Denominator");
-        addPopulation(measure, MeasurePopulationType.NUMERATOR, "Numerator");
+        addPopulation(measure, MeasurePopulationType.NUMERATOR, numeratorExpression);
         addSDEComponent(measure);
 
         return measure;
@@ -462,7 +542,14 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private Measure stratified_measure() {
-        Measure measure = proportion_measure();
+        Measure measure = proportion_measure(null, null, "Numerator");
+        addStratifier(measure, "patient-gender", "Gender");
+        return measure;
+    }
+
+    private Measure stratified_measure(
+            @Nullable CodeType populationBasisTypeForMeasure, @Nullable CodeType populationBasisTypeForGroup) {
+        Measure measure = proportion_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup, "Numerator");
         addStratifier(measure, "patient-gender", "Gender");
         return measure;
     }
@@ -492,12 +579,28 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     }
 
     private Measure measure(String scoring) {
+        return measure(scoring, null, null);
+    }
+
+    private Measure measure(
+            String scoring,
+            @Nullable CodeType populationBasisTypeForMeasure,
+            @Nullable CodeType populationBasisTypeForGroup) {
         Measure measure = new Measure();
         measure.setId(scoring);
         measure.setName("Test");
         measure.setVersion("1.0.0");
         measure.setUrl("http://test.com/fhir/Measure/Test");
         measure.getScoring().getCodingFirstRep().setCode(scoring);
+        Optional.ofNullable(populationBasisTypeForMeasure)
+                .ifPresent(nonNullPopulationBasisType -> measure.addExtension(new Extension()
+                        .setUrl(MeasureConstants.POPULATION_BASIS_URL)
+                        .setValue(populationBasisTypeForMeasure)));
+        Optional.ofNullable(populationBasisTypeForGroup)
+                .ifPresent(nonNullPopulationBasisType -> measure.getGroupFirstRep()
+                        .addExtension(new Extension()
+                                .setUrl(MeasureConstants.POPULATION_BASIS_URL)
+                                .setValue(populationBasisTypeForMeasure)));
         return measure;
     }
 
@@ -515,8 +618,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     private Patient john_doe() {
         Patient patient = new Patient();
         patient.setId(new IdType("Patient", "john-doe"));
-        patient.setName(
-                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("John")))));
+        patient.setName(List.of(new HumanName().setFamily("Doe").setGiven(List.of(new StringType("John")))));
         patient.setBirthDate(new Date());
         patient.setGender(AdministrativeGender.MALE);
 
@@ -544,8 +646,7 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
     private Patient jane_doe() {
         Patient patient = new Patient();
         patient.setId(new IdType("Patient", "jane-doe"));
-        patient.setName(
-                Arrays.asList(new HumanName().setFamily("Doe").setGiven(Arrays.asList(new StringType("Jane")))));
+        patient.setName(List.of(new HumanName().setFamily("Doe").setGiven(List.of(new StringType("Jane")))));
         patient.setBirthDate(new Date());
         patient.setGender(AdministrativeGender.FEMALE);
 
@@ -560,5 +661,53 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                         .setDisplay(BLACK_OR_AFRICAN_AMERICAN));
         patient.getExtension().add(usCoreRace);
         return patient;
+    }
+
+    @Nonnull
+    private RetrieveProvider setupMockRetrieverProvider() {
+        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
+        when(retrieveProvider.retrieve(
+                        isNull(),
+                        isNull(),
+                        isNull(),
+                        eq("Patient"),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenReturn(Arrays.asList(jane_doe(), john_doe()));
+        when(retrieveProvider.retrieve(
+                        eq("Patient"),
+                        eq("id"),
+                        eq("john-doe"),
+                        eq("Patient"),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenReturn(List.of(john_doe()));
+        when(retrieveProvider.retrieve(
+                        eq("Patient"),
+                        eq("id"),
+                        eq("jane-doe"),
+                        eq("Patient"),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
+                .thenReturn(List.of(jane_doe()));
+        return retrieveProvider;
     }
 }

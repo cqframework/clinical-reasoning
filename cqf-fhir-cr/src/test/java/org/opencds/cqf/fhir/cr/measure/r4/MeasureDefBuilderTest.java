@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -538,15 +539,20 @@ public class MeasureDefBuilderTest {
                         buildOutputStratifiers(),
                         buildOutputStratifiers()),
                 Arguments.of(
+                        buildInputStratifiers(1),
+                        buildInputStratifiers(2),
+                        buildOutputStratifiers(1),
+                        buildOutputStratifiers(2)),
+                Arguments.of(
                         buildInputStratifiers("InitialPopulation"),
                         buildInputStratifiers("Denominator"),
                         buildOutputStratifiers("InitialPopulation"),
                         buildOutputStratifiers("Denominator")),
                 Arguments.of(
-                        buildInputStratifiers("InitialPopulation", "Denominator", "Numerator"),
-                        buildInputStratifiers("MeasurePopulation", "MeasurePopulationExclusion"),
-                        buildOutputStratifiers("InitialPopulation", "Denominator", "Numerator"),
-                        buildOutputStratifiers("MeasurePopulation", "MeasurePopulationExclusion")));
+                        buildInputStratifiers(3, "InitialPopulation", "Denominator", "Numerator"),
+                        buildInputStratifiers(4, "MeasurePopulation", "MeasurePopulationExclusion"),
+                        buildOutputStratifiers(3, "InitialPopulation", "Denominator", "Numerator"),
+                        buildOutputStratifiers(4, "MeasurePopulation", "MeasurePopulationExclusion")));
     }
 
     @ParameterizedTest
@@ -586,18 +592,29 @@ public class MeasureDefBuilderTest {
     }
 
     private static List<MeasureGroupStratifierComponent> buildInputStratifiers(String... expressions) {
+        return buildInputStratifiers(0, expressions);
+    }
+
+    private static List<MeasureGroupStratifierComponent> buildInputStratifiers(
+            int componentCount, String... expressions) {
         return Arrays.stream(expressions)
-                .map(MeasureDefBuilderTest::buildInputStratifier)
+                .map(expression -> buildInputStratifier(componentCount, expression))
                 .toList();
     }
 
-    private static MeasureGroupStratifierComponent buildInputStratifier(String expression) {
-        return (MeasureGroupStratifierComponent) new MeasureGroupStratifierComponent()
-                .setCode(new CodeableConcept().setText("123"))
-                .setCriteria(new Expression().setExpression(expression))
-                .addComponent(buildInputStratifierComponent("one"))
-                .addComponent(buildInputStratifierComponent("two"))
-                .setId("id");
+    private static MeasureGroupStratifierComponent buildInputStratifier(int componentCount, String expression) {
+        final MeasureGroupStratifierComponent component =
+                (MeasureGroupStratifierComponent) new MeasureGroupStratifierComponent()
+                        .setCode(new CodeableConcept()
+                                .addCoding(new Coding().setSystem("system").setCode("code"))
+                                .setText(expression))
+                        .setCriteria(new Expression().setExpression(expression))
+                        .setId(expression);
+
+        IntStream.range(0, componentCount)
+                .forEach(num -> component.addComponent(buildInputStratifierComponent(expression + num)));
+
+        return component;
     }
 
     @Nonnull
@@ -608,17 +625,23 @@ public class MeasureDefBuilderTest {
     }
 
     private static List<StratifierDef> buildOutputStratifiers(String... expressions) {
+        return buildOutputStratifiers(0, expressions);
+    }
+
+    private static List<StratifierDef> buildOutputStratifiers(int componentCount, String... expressions) {
         return Arrays.stream(expressions)
-                .map(MeasureDefBuilderTest::buildOutputStratifierDef)
+                .map(expression -> buildOutputStratifierDef(componentCount, expression))
                 .toList();
     }
 
-    private static StratifierDef buildOutputStratifierDef(String expression) {
+    private static StratifierDef buildOutputStratifierDef(int componentCount, String expression) {
         return new StratifierDef(
-                "id",
-                new ConceptDef(List.of(), "123"),
                 expression,
-                List.of(buildOutputStratifierComponentDef("one"), buildOutputStratifierComponentDef("two")));
+                new ConceptDef(List.of(new CodeDef("system", "code")), expression),
+                expression,
+                IntStream.range(0, componentCount)
+                        .mapToObj(num -> buildOutputStratifierComponentDef(expression + num))
+                        .toList());
     }
 
     private static StratifierComponentDef buildOutputStratifierComponentDef(String text) {

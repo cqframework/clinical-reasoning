@@ -230,21 +230,23 @@ public class ProcessDefinitionItem {
             IBaseBackboneElement childItem,
             String path) {
         var answers = request.resolvePathList(childItem, "answer", IBaseBackboneElement.class);
-        var answerValue = answers.isEmpty() ? null : request.resolvePath(answers.get(0), "value");
-        if (answerValue != null) {
-            // Check if answer type matches path types available and transform if necessary
-            var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
-            if (pathDefinition instanceof RuntimeChildChoiceDefinition) {
-                var choices = ((RuntimeChildChoiceDefinition) pathDefinition).getChoices();
-                if (!choices.contains(answerValue.getClass())) {
+        var pathDefinition = (BaseRuntimeDeclaredChildDefinition) resourceDefinition.getChildByName(path);
+        List<Class<? extends IBase>> choices = pathDefinition instanceof RuntimeChildChoiceDefinition
+                ? ((RuntimeChildChoiceDefinition) pathDefinition).getChoices()
+                : new ArrayList<>();
+        answers.stream().forEach(answer -> {
+            var answerValue = request.resolvePath(answer, "value");
+            if (answerValue != null) {
+                // Check if answer type matches path types available and transform if necessary
+                if ((pathDefinition instanceof RuntimeChildChoiceDefinition
+                                && !choices.contains(answerValue.getClass()))
+                        || (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
+                                && !pathDefinition.getField().getType().equals(answerValue.getClass()))) {
                     answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
                 }
-            } else if (pathDefinition instanceof RuntimeChildCompositeDatatypeDefinition
-                    && !pathDefinition.getField().getType().equals(answerValue.getClass())) {
-                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                request.getModelResolver().setValue(resource, path, answerValue);
             }
-            request.getModelResolver().setValue(resource, path, answerValue);
-        }
+        });
     }
 
     private String getDefinition(

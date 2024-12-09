@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +57,7 @@ public enum MeasureEvalType {
     public static Optional<MeasureEvalType> fromCode(String code) {
         MeasureEvalType evalType = lookup.get(code);
         if (code != null && evalType == null) {
-            throw new UnsupportedOperationException(
+            throw new InvalidRequestException(
                     String.format("ReportType: %s, is not an accepted EvalType value.", code));
         }
         return Optional.ofNullable(evalType);

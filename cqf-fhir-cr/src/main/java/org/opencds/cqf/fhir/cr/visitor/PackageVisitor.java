@@ -184,15 +184,33 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .filter(r -> r.fhirType().equals("ValueSet"))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
-
+        var expansionCache = this.getExpansionCache();
+        if (expansionCache.isPresent()) {
+            var expansionParamsHash = expansionCache.get().getExpansionParametersHash(rootSpecificationLibrary);
+            valueSets.forEach(v -> {
+                var cachedExpansion = expansionCache.get().getExpansionForCanonical(v.getCanonical(), expansionParamsHash.orElse(null));
+                if (cachedExpansion != null) {
+                    v.setExpansion(cachedExpansion.getExpansion());
+                    expandedList.add(v.getUrl());
+                }
+            });
+        }
         valueSets.stream()
-                .forEach(valueSet -> expandHelper.expandValueSet(
+                .forEach(valueSet -> {
+                    if (!expandedList.contains(valueSet.getUrl())) {
+                        expandHelper.expandValueSet(
                         valueSet,
                         params,
                         terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
                         valueSets,
                         expandedList,
-                        new Date()));
+                        new Date());
+                        if (expansionCache.isPresent()) {
+                            var expansionParamsHash = expansionCache.get().getExpansionParametersHash(rootSpecificationLibrary);
+                            expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
+                        }
+                    }
+                });
     }
 
     protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {

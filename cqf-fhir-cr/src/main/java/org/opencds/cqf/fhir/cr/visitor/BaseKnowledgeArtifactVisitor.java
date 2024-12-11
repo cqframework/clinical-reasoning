@@ -34,9 +34,16 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     protected final Repository repository;
+    protected final IValueSetExpansionCache valueSetExpansionCache;
 
     protected BaseKnowledgeArtifactVisitor(Repository repository) {
         this.repository = repository;
+        valueSetExpansionCache = null;
+    }
+
+    protected BaseKnowledgeArtifactVisitor(Repository repository, IValueSetExpansionCache valueSetExpansionCache) {
+        this.repository = repository;
+        this.valueSetExpansionCache = valueSetExpansionCache;
     }
 
     protected FhirContext fhirContext() {
@@ -45,6 +52,10 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
     protected FhirVersionEnum fhirVersion() {
         return fhirContext().getVersion().getVersion();
+    }
+
+    protected Optional<IValueSetExpansionCache> getExpansionCache() {
+        return Optional.ofNullable(valueSetExpansionCache);
     }
 
     protected List<IBaseBackboneElement> findArtifactCommentsToUpdate(

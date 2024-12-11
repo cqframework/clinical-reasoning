@@ -59,7 +59,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -91,7 +91,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -110,7 +110,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -133,7 +133,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -156,7 +156,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -180,7 +180,7 @@ class PackageVisitorTests {
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-package-capabilities.json"));
         repo.transaction(bundle);
         List<String> capabilities = Arrays.asList("computable", "publishable", "executable");
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -211,7 +211,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-active-no-versions.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -272,7 +272,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -308,7 +308,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -345,7 +345,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -364,7 +364,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);

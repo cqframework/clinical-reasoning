@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.npm.NpmProcessor;
@@ -39,7 +40,6 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.annotation.Nonnull;
 
 class EnginesTest {
 
@@ -74,14 +74,14 @@ class EnginesTest {
     @Test
     void duplicateSettingsNpmProcessor() {
         var settings = EvaluationSettings.getDefault()
-            .withModelCache(new HashMap<>())
-            .withValueSetCache(new HashMap<>())
-            .withNpmProcessor(mock(NpmProcessor.class))
-            .withLibraryCache(new HashMap<>())
-            .withLibrarySourceProviders(List.of(new StringLibrarySourceProvider(new ArrayList<>())))
-            .withTerminologySettings(new TerminologySettings())
-            .withCqlOptions(new CqlOptions().setUseEmbeddedLibraries(false))
-            .withRetrieveSettings(new RetrieveSettings());
+                .withModelCache(new HashMap<>())
+                .withValueSetCache(new HashMap<>())
+                .withNpmProcessor(mock(NpmProcessor.class))
+                .withLibraryCache(new HashMap<>())
+                .withLibrarySourceProviders(List.of(new StringLibrarySourceProvider(new ArrayList<>())))
+                .withTerminologySettings(new TerminologySettings())
+                .withCqlOptions(new CqlOptions().setUseEmbeddedLibraries(false))
+                .withRetrieveSettings(new RetrieveSettings());
 
         settings.getCqlOptions().setUseEmbeddedLibraries(false);
         settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(true);
@@ -282,7 +282,6 @@ class EnginesTest {
         assertDataProviders(engine);
     }
 
-
     @Test
     void additionalDataNull() {
         var settings = EvaluationSettings.getDefault();
@@ -313,13 +312,12 @@ class EnginesTest {
 
         assertNotNull(engine.getState());
 
-        var dataProviders= engine.getEnvironment().getDataProviders();
+        var dataProviders = engine.getEnvironment().getDataProviders();
 
         assertNotNull(dataProviders);
         assertEquals(2, dataProviders.size());
 
-        assertThat(dataProviders.keySet(),
-            containsInAnyOrder(Constants.FHIR_MODEL_URI, URN_HL_7_ORG_ELM_TYPES_R_1));
+        assertThat(dataProviders.keySet(), containsInAnyOrder(Constants.FHIR_MODEL_URI, URN_HL_7_ORG_ELM_TYPES_R_1));
 
         var dataProvider1 = dataProviders.get(Constants.FHIR_MODEL_URI);
         var dataProvider2 = dataProviders.get(URN_HL_7_ORG_ELM_TYPES_R_1);
@@ -333,7 +331,7 @@ class EnginesTest {
         assertThat(retrievedPatients, hasSize(1));
 
         var retrieveEncounters = retrieve(Encounter.class, federatedDataProvider);
-        assertThat(retrieveEncounters , hasSize(1));
+        assertThat(retrieveEncounters, hasSize(1));
     }
 
     @Test
@@ -342,13 +340,12 @@ class EnginesTest {
     }
 
     private static void assertDataProviders(CqlEngine engine) {
-        var dataProviders= engine.getEnvironment().getDataProviders();
+        var dataProviders = engine.getEnvironment().getDataProviders();
 
         assertNotNull(dataProviders);
         assertEquals(2, dataProviders.size());
 
-        assertThat(dataProviders.keySet(),
-            containsInAnyOrder(Constants.FHIR_MODEL_URI, URN_HL_7_ORG_ELM_TYPES_R_1));
+        assertThat(dataProviders.keySet(), containsInAnyOrder(Constants.FHIR_MODEL_URI, URN_HL_7_ORG_ELM_TYPES_R_1));
 
         var dataProvider1 = dataProviders.get(Constants.FHIR_MODEL_URI);
         var dataProvider2 = dataProviders.get(URN_HL_7_ORG_ELM_TYPES_R_1);
@@ -378,28 +375,16 @@ class EnginesTest {
 
     private static <T extends Resource> List<T> retrieve(Class<T> clazz, FederatedDataProvider provider) {
         return convert(
-            clazz,
-            provider.retrieve(
-                null,
-                null,
-                null,
-                clazz.getSimpleName(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null)
-            );
+                clazz,
+                provider.retrieve(
+                        null, null, null, clazz.getSimpleName(), null, null, null, null, null, null, null, null));
     }
 
     private static <T extends Resource> List<T> convert(Class<T> clazz, Iterable<Object> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false)
-            .filter(clazz::isInstance)
-            .map(clazz::cast)
-            .toList();
+                .filter(clazz::isInstance)
+                .map(clazz::cast)
+                .toList();
     }
 
     @Nonnull

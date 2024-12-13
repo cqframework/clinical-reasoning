@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -12,7 +13,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -190,6 +195,39 @@ class R4MeasureServiceUtilsTest {
                 assertThrows(Exception.class, () -> testSubject.getMeasureEvalType(reportType, subjectIds));
 
         assertThat(actualException.getMessage(), containsString(expectedException.getMessage()));
+    }
+
+    private static Stream<Arguments> productLineParams() {
+        return Stream.of(
+                Arguments.of("Medicare", buildExtensionForProductLine("Medicare")),
+                Arguments.of("Medicaid", buildExtensionForProductLine("Medicaid")),
+                Arguments.of(null, null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("productLineParams")
+    void productLine(@Nullable String productLine, @Nullable Extension expectedExtension) {
+        var measureReportWithProductLine = testSubject.addProductLineExtension(new MeasureReport(), productLine);
+
+        var actualExtension = measureReportWithProductLine.getExtensionByUrl(
+                MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+
+        if (expectedExtension == null) {
+            assertNull(actualExtension);
+            return;
+        }
+
+        assertThat(actualExtension.getUrl(), equalTo(expectedExtension.getUrl()));
+
+        assertThat(
+                actualExtension.getValue().primitiveValue(),
+                equalTo(expectedExtension.getValue().primitiveValue()));
+    }
+
+    private static Extension buildExtensionForProductLine(String productLine) {
+        return new Extension()
+                .setUrl(MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL)
+                .setValue(new StringType(productLine));
     }
 
     private static Either<Optional<Reference>, Exception> buildEitherLeft(@Nullable String theId) {

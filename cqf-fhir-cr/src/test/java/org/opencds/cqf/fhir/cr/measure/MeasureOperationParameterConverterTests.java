@@ -157,4 +157,30 @@ class MeasureOperationParameterConverterTests {
                 .count();
         assertEquals(0, actualCount);
     }
+
+    @Test
+    void nullMeasurementPeriodStart() {
+
+        Parameters parameters = new Parameters();
+
+        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01", null);
+
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period"))
+                .count();
+        assertEquals(0, actualCount);
+    }
+
+    @Test
+    void nullMeasurementPeriodEnd() {
+
+        Parameters parameters = new Parameters();
+
+        measureOperationParameterConverter.addMeasurementPeriod(parameters, null, "2020-01-01");
+
+        long actualCount = parameters.getParameter().stream()
+                .filter(x -> x.getName().equals("Measurement Period"))
+                .count();
+        assertEquals(0, actualCount);
+    }
 }

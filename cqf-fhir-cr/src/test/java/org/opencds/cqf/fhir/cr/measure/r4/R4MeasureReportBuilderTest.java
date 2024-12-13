@@ -2,28 +2,38 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.runtime.Date;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -31,7 +41,9 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 class R4MeasureReportBuilderTest {
 
     public static final String MEASURE_ID_1 = "measure1";
+    public static final String MEASURE_ID_2 = "measure1";
     public static final String MEASURE_URL_1 = "http://something.com/measure1";
+    public static final String MEASURE_URL_2 = "http://something.com/measure2|something";
 
     @Test
     void happyPathEmptySdes() {
@@ -39,7 +51,38 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, Set.of(buildInterval())),
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
+
+        assertNotNull(measureReport);
+    }
+
+    @Test
+    void happyPathEmptySdesAllResourcesAsNull() {
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+
+        var measureReport = r4MeasureReportBuilder.build(
+                buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
+                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, null),
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
+
+        assertNotNull(measureReport);
+    }
+
+    @Test
+    void happyPathEmptySdesAllNullResources() {
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+
+        var nulls = new ArrayList<>();
+        nulls.add(null);
+
+        var measureReport = r4MeasureReportBuilder.build(
+                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, nulls),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -100,54 +143,95 @@ class R4MeasureReportBuilderTest {
     }
 
     @Test
-    void errorInvalidReference() {
+    void invalidPopulationResource() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
-        r4MeasureReportBuilder.build(
-                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, Set.of(new Patient())),
-                MeasureReportType.INDIVIDUAL,
-                null,
-                List.of());
+        try {
+            r4MeasureReportBuilder.build(
+                    buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, Set.of(new Patient())),
+                    MeasureReportType.INDIVIDUAL,
+                    null,
+                    List.of());
+        } catch (AssertionError exception) {
+            assertNull(exception.getMessage());
+        }
     }
+
+    // LUKETODO: build group measure scoring:  line 282
+    // LUKETODO: build group measure scoring:  line 328
+
+    // LUKETODO: build group measure scoring:  line 328
+    // LUKETODO: create observation line 801
 
     @Nonnull
     private static MeasureDef buildMeasureDef(
-            String id, String url, int numGroups, int numSdes, Set<Resource> evaluatedResources) {
+            String id, String url, int numGroups, int numSdes, Collection<Object> evaluatedResources) {
         return new MeasureDef(
                 id,
                 url,
                 null,
                 IntStream.range(0, numGroups)
-                        .mapToObj(num -> buildGroupDef("group_" + num))
+                        .mapToObj(num -> buildGroupDef("group_" + num, evaluatedResources))
                         .toList(),
                 IntStream.range(0, numSdes)
                         .mapToObj(num -> buildSdes("sde_" + num, evaluatedResources))
                         .toList());
     }
 
-    private static SdeDef buildSdes(String id, Set<Resource> evaluatedResources) {
-        final SdeDef sdeDef = new SdeDef(id, new ConceptDef(List.of(), null), null);
+    private static SdeDef buildSdes(String id, @Nullable Collection<Object> evaluatedResources) {
+        final SdeDef sdeDef = new SdeDef(
+                id,
+                new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
+                null);
 
-        sdeDef.putResult(
-                "subject",
-                new Patient().setId(new IdType("Patient", "patient1")),
-                evaluatedResources.stream().collect(Collectors.toUnmodifiableSet()));
+        if (evaluatedResources != null) {
+            sdeDef.putResult(
+                    "subject",
+                    new Patient().setId(new IdType("Patient", "patient1")),
+                    evaluatedResources.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
+        }
 
         return sdeDef;
     }
 
     @Nonnull
-    private static GroupDef buildGroupDef(String id) {
+    private static GroupDef buildGroupDef(String id, Collection<Object> resources) {
         return new GroupDef(
                 id,
                 null,
                 List.of(buildStratifierDef()),
-                List.of(),
+                List.of(buildPopulationRef(resources)),
                 MeasureScoring.PROPORTION,
                 false,
                 null,
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+    }
+
+    private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+        final PopulationDef populationDef = new PopulationDef(
+                null,
+                new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
+                MeasurePopulationType.DATEOFCOMPLIANCE,
+                null);
+
+        if (resources != null) {
+            resources.forEach(populationDef::addResource);
+        }
+
+        return populationDef;
+    }
+
+    private Interval buildInterval() {
+        return new Interval(
+                toJavaUtilDate(LocalDate.of(1999, Month.DECEMBER, 31)),
+                true,
+                toJavaUtilDate(LocalDate.of(2000, Month.JANUARY, 1)),
+                false);
+    }
+
+    private static Date toJavaUtilDate(LocalDate localDate) {
+        return new Date(localDate);
     }
 
     @Nonnull

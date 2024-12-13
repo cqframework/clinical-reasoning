@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -22,7 +23,9 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -51,12 +54,16 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, Set.of(buildInterval())),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Set.of(buildInterval())),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
 
         assertNotNull(measureReport);
+
+        final List<Resource> contained = measureReport.getContained();
+
+        assertTrue(contained.isEmpty());
     }
 
     @Test
@@ -65,12 +72,16 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
-                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, null),
+                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true,null),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
 
         assertNotNull(measureReport);
+
+        final List<Resource> contained = measureReport.getContained();
+
+        assertTrue(contained.isEmpty());
     }
 
     @Test
@@ -82,12 +93,16 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, nulls),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
 
         assertNotNull(measureReport);
+
+        final List<Resource> contained = measureReport.getContained();
+
+        assertTrue(contained.isEmpty());
     }
 
     @Test
@@ -96,12 +111,48 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Set.of()),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
 
         assertNotNull(measureReport);
+
+        final List<Resource> contained = measureReport.getContained();
+
+        assertEquals(1, contained.size());
+
+        final List<Patient> patients = contained.stream()
+            .filter(Patient.class::isInstance)
+            .map(Patient.class::cast)
+            .toList();
+
+        assertEquals(1, patients.size());
+    }
+
+    @Test
+    void happyPathNonEmptySdesCreateObservations() {
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+
+        var measureReport = r4MeasureReportBuilder.build(
+            buildMeasure(MEASURE_ID_1, null, 2, 3),
+            buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
+            MeasureReportType.INDIVIDUAL,
+            null,
+            List.of());
+
+        assertNotNull(measureReport);
+
+        final List<Resource> contained = measureReport.getContained();
+
+        assertEquals(3, contained.size());
+
+        final List<Observation> observations = contained.stream()
+            .filter(Observation.class::isInstance)
+            .map(Observation.class::cast)
+            .toList();
+
+        assertEquals(3, observations.size());
     }
 
     @Test
@@ -111,7 +162,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(
                     buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, Set.of()),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of()),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -130,7 +181,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(
                     buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, Set.of()),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of()),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -148,8 +199,8 @@ class R4MeasureReportBuilderTest {
 
         try {
             r4MeasureReportBuilder.build(
-                    buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, Set.of(new Patient())),
+                    buildMeasure(null, MEASURE_URL_1, 2, 2),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(new Patient())),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -158,15 +209,9 @@ class R4MeasureReportBuilderTest {
         }
     }
 
-    // LUKETODO: build group measure scoring:  line 282
-    // LUKETODO: build group measure scoring:  line 328
-
-    // LUKETODO: build group measure scoring:  line 328
-    // LUKETODO: create observation line 801
-
     @Nonnull
     private static MeasureDef buildMeasureDef(
-            String id, String url, int numGroups, int numSdes, Collection<Object> evaluatedResources) {
+            String id, String url, int numGroups, int numSdes, boolean isKeyResource, Collection<Object> evaluatedResources) {
         return new MeasureDef(
                 id,
                 url,
@@ -175,11 +220,11 @@ class R4MeasureReportBuilderTest {
                         .mapToObj(num -> buildGroupDef("group_" + num, evaluatedResources))
                         .toList(),
                 IntStream.range(0, numSdes)
-                        .mapToObj(num -> buildSdes("sde_" + num, evaluatedResources))
+                        .mapToObj(num -> buildSdes("sde_" + num, isKeyResource, evaluatedResources))
                         .toList());
     }
 
-    private static SdeDef buildSdes(String id, @Nullable Collection<Object> evaluatedResources) {
+    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {
         final SdeDef sdeDef = new SdeDef(
                 id,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
@@ -188,7 +233,7 @@ class R4MeasureReportBuilderTest {
         if (evaluatedResources != null) {
             sdeDef.putResult(
                     "subject",
-                    new Patient().setId(new IdType("Patient", "patient1")),
+                    isKeyResource ? new Patient().setId(new IdType("Patient", "patient1")) : "nonResource",
                     evaluatedResources.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
         }
 
@@ -240,7 +285,9 @@ class R4MeasureReportBuilderTest {
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {
-        var measure = (Measure) new Measure().setUrl(url).setId(new IdType("Measure", id));
+        var measure = (Measure) new Measure()
+            .setUrl(url)
+            .setId(new IdType("Measure", id));
 
         IntStream.range(0, numGroups).forEach(num -> measure.addGroup(buildGroup("group_" + num)));
         IntStream.range(0, numSdes)

@@ -72,7 +72,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
-                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true,null),
+                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true, null),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -123,9 +123,9 @@ class R4MeasureReportBuilderTest {
         assertEquals(1, contained.size());
 
         final List<Patient> patients = contained.stream()
-            .filter(Patient.class::isInstance)
-            .map(Patient.class::cast)
-            .toList();
+                .filter(Patient.class::isInstance)
+                .map(Patient.class::cast)
+                .toList();
 
         assertEquals(1, patients.size());
     }
@@ -135,11 +135,11 @@ class R4MeasureReportBuilderTest {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
         var measureReport = r4MeasureReportBuilder.build(
-            buildMeasure(MEASURE_ID_1, null, 2, 3),
-            buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
-            MeasureReportType.INDIVIDUAL,
-            null,
-            List.of());
+                buildMeasure(MEASURE_ID_1, null, 2, 3),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
 
         assertNotNull(measureReport);
 
@@ -148,9 +148,9 @@ class R4MeasureReportBuilderTest {
         assertEquals(3, contained.size());
 
         final List<Observation> observations = contained.stream()
-            .filter(Observation.class::isInstance)
-            .map(Observation.class::cast)
-            .toList();
+                .filter(Observation.class::isInstance)
+                .map(Observation.class::cast)
+                .toList();
 
         assertEquals(3, observations.size());
     }
@@ -211,7 +211,12 @@ class R4MeasureReportBuilderTest {
 
     @Nonnull
     private static MeasureDef buildMeasureDef(
-            String id, String url, int numGroups, int numSdes, boolean isKeyResource, Collection<Object> evaluatedResources) {
+            String id,
+            String url,
+            int numGroups,
+            int numSdes,
+            boolean isKeyResource,
+            Collection<Object> evaluatedResources) {
         return new MeasureDef(
                 id,
                 url,
@@ -285,9 +290,7 @@ class R4MeasureReportBuilderTest {
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {
-        var measure = (Measure) new Measure()
-            .setUrl(url)
-            .setId(new IdType("Measure", id));
+        var measure = (Measure) new Measure().setUrl(url).setId(new IdType("Measure", id));
 
         IntStream.range(0, numGroups).forEach(num -> measure.addGroup(buildGroup("group_" + num)));
         IntStream.range(0, numSdes)

@@ -197,16 +197,13 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
         var expansionCache = this.getExpansionCache();
+        var expansionParamsHash = expansionCache.map(
+                e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
         if (expansionCache.isPresent()) {
             valueSets.forEach(v -> {
                 var cachedExpansion = expansionCache
                         .get()
-                        .getExpansionForCanonical(
-                                v.getCanonical(),
-                                expansionCache
-                                        .get()
-                                        .getExpansionParametersHash(rootSpecificationLibrary)
-                                        .orElse(null));
+                        .getExpansionForCanonical(v.getCanonical(), expansionParamsHash.orElse(null));
                 if (cachedExpansion != null) {
                     v.setExpansion(cachedExpansion.getExpansion());
                     expandedList.add(v.getUrl());
@@ -223,14 +220,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         expandedList,
                         new Date());
                 if (expansionCache.isPresent()) {
-                    expansionCache
-                            .get()
-                            .addToCache(
-                                    valueSet,
-                                    expansionCache
-                                            .get()
-                                            .getExpansionParametersHash(rootSpecificationLibrary)
-                                            .orElse(null));
+                    expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
                 }
             }
         });

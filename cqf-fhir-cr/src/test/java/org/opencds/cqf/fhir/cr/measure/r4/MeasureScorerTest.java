@@ -4,17 +4,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.test.FhirResourceLoader;
 
 class MeasureScorerTest {
@@ -158,23 +164,93 @@ class MeasureScorerTest {
                         .toString());
     }
 
-    MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
+    @Test
+    void missingScoringType() {
+        var scorer = new R4MeasureReportScorer();
+
+        var measureDef = mockMeasureDef(0);
+        var measureReport = mockMeasureReport(null);
+
+        try {
+            scorer.score("url", measureDef, measureReport);
+            fail("expected Exception");
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for MeasureDef: null",
+                    exception.getMessage());
+        }
+    }
+
+    @Test
+    void emptyGroupId() {
+        var scorer = new R4MeasureReportScorer();
+
+        var measureDef = mockMeasureDef(2);
+        var measureReport = mockMeasureReport("");
+
+        try {
+            scorer.score("url", measureDef, measureReport);
+            fail("expected Exception");
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: null",
+                    exception.getMessage());
+        }
+    }
+
+    private MeasureDef mockMeasureDef(int numGroups) {
+        final MeasureDef measureDef = mock(MeasureDef.class);
+        doReturn(mockGroupDefs(numGroups)).when(measureDef).groups();
+        return measureDef;
+    }
+
+    private List<GroupDef> mockGroupDefs(int numGroups) {
+        return IntStream.range(0, numGroups).mapToObj(num -> mockGroupDef()).toList();
+    }
+
+    private GroupDef mockGroupDef() {
+        final GroupDef groupDef = mock(GroupDef.class);
+
+        doReturn(mockMeasureScoring()).when(groupDef).measureScoring();
+
+        return groupDef;
+    }
+
+    private MeasureScoring mockMeasureScoring() {
+        return mock(MeasureScoring.class);
+    }
+
+    private MeasureReport mockMeasureReport(@Nullable String groupId) {
+        var measureReport = mock(MeasureReport.class);
+
+        doReturn(List.of(mockMeasureGroup(groupId))).when(measureReport).getGroup();
+
+        return measureReport;
+    }
+
+    private MeasureReportGroupComponent mockMeasureGroup(@Nullable String id) {
+        var group = mock(MeasureReportGroupComponent.class);
+        doReturn(id).when(group).getId();
+        return group;
+    }
+
+    private MeasureReportGroupComponent group(MeasureReport measureReport, String id) {
         return measureReport.getGroup().stream()
                 .filter(g -> g.getId().equals(id))
                 .findFirst()
                 .get();
     }
 
-    public MeasureReport.MeasureReportGroupStratifierComponent getStratumById(
+    private MeasureReport.MeasureReportGroupStratifierComponent getStratumById(
             MeasureReport measureReport, String groupId, String stratifierId) {
         var group = group(measureReport, groupId);
         return group.getStratifier().stream()
                 .filter(g -> g.getId().equals(stratifierId))
                 .findFirst()
-                .get();
+                .orElseThrow();
     }
 
-    public List<Measure> getMeasures() {
+    private List<Measure> getMeasures() {
         // Measures
         FhirResourceLoader measures = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/Measures/"), false);
@@ -186,7 +262,7 @@ class MeasureScorerTest {
         return measureList;
     }
 
-    public List<MeasureReport> getMeasureReports() {
+    private List<MeasureReport> getMeasureReports() {
         FhirResourceLoader measureReports = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/MeasureReports/"), false);
         List<MeasureReport> measureReportList = new ArrayList<>();
@@ -197,7 +273,7 @@ class MeasureScorerTest {
         return measureReportList;
     }
 
-    public MeasureDef getMeasureScoringDef(String measureUrl) {
+    private MeasureDef getMeasureScoringDef(String measureUrl) {
         var measureRes = measures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
@@ -206,7 +282,7 @@ class MeasureScorerTest {
         return measureDefBuilder.build(measureRes);
     }
 
-    public MeasureReport getMeasureReport(String measureUrl) {
+    private MeasureReport getMeasureReport(String measureUrl) {
         return measureReports.stream()
                 .filter(measureReport -> measureUrl.equals(measureReport.getMeasure()))
                 .findAny()

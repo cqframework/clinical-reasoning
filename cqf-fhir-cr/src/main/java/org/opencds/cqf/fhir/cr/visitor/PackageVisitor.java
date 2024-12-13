@@ -47,10 +47,22 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
+    public PackageVisitor(Repository repository) {
+        super(repository);
+        terminologyServerClient = new TerminologyServerClient(fhirContext());
+        expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
+    }
+
     public PackageVisitor(Repository repository, IValueSetExpansionCache cache) {
         super(repository, cache);
         terminologyServerClient = new TerminologyServerClient(fhirContext());
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
+    }
+
+    public void setupResourceTypes() {
+        // super(repository, cache);
         switch (fhirVersion()) {
             case DSTU3:
                 resourceTypes.put(
@@ -186,31 +198,42 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
         var expansionCache = this.getExpansionCache();
         if (expansionCache.isPresent()) {
-            var expansionParamsHash = expansionCache.get().getExpansionParametersHash(rootSpecificationLibrary);
             valueSets.forEach(v -> {
-                var cachedExpansion = expansionCache.get().getExpansionForCanonical(v.getCanonical(), expansionParamsHash.orElse(null));
+                var cachedExpansion = expansionCache
+                        .get()
+                        .getExpansionForCanonical(
+                                v.getCanonical(),
+                                expansionCache
+                                        .get()
+                                        .getExpansionParametersHash(rootSpecificationLibrary)
+                                        .orElse(null));
                 if (cachedExpansion != null) {
                     v.setExpansion(cachedExpansion.getExpansion());
                     expandedList.add(v.getUrl());
                 }
             });
         }
-        valueSets.stream()
-                .forEach(valueSet -> {
-                    if (!expandedList.contains(valueSet.getUrl())) {
-                        expandHelper.expandValueSet(
+        valueSets.stream().forEach(valueSet -> {
+            if (!expandedList.contains(valueSet.getUrl())) {
+                expandHelper.expandValueSet(
                         valueSet,
                         params,
                         terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
                         valueSets,
                         expandedList,
                         new Date());
-                        if (expansionCache.isPresent()) {
-                            var expansionParamsHash = expansionCache.get().getExpansionParametersHash(rootSpecificationLibrary);
-                            expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
-                        }
-                    }
-                });
+                if (expansionCache.isPresent()) {
+                    expansionCache
+                            .get()
+                            .addToCache(
+                                    valueSet,
+                                    expansionCache
+                                            .get()
+                                            .getExpansionParametersHash(rootSpecificationLibrary)
+                                            .orElse(null));
+                }
+            }
+        });
     }
 
     protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {

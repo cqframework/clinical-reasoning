@@ -62,7 +62,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     public void setupResourceTypes() {
-        // super(repository, cache);
         switch (fhirVersion()) {
             case DSTU3:
                 resourceTypes.put(

@@ -38,7 +38,6 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
     protected BaseKnowledgeArtifactVisitor(Repository repository) {
         this.repository = repository;
-        valueSetExpansionCache = null;
     }
 
     protected BaseKnowledgeArtifactVisitor(Repository repository, IValueSetExpansionCache valueSetExpansionCache) {

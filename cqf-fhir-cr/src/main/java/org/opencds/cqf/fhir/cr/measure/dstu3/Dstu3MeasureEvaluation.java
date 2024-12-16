@@ -21,6 +21,12 @@ public class Dstu3MeasureEvaluation extends BaseMeasureEvaluation<Measure, Measu
                 new Dstu3MeasureDefBuilder(),
                 new Dstu3MeasureReportBuilder(),
                 libraryEngine,
-                versionIdentifier);
+                versionIdentifier,
+                new Dstu3PopulationBasisValidator());
+    }
+
+    @Override
+    protected String getMeasureUrl() {
+        return measure.getUrl();
     }
 }

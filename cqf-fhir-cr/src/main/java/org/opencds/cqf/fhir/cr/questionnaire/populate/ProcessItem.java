@@ -29,7 +29,7 @@ public class ProcessItem {
 
     public IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item) {
         final var responseItem = createResponseItem(request.getFhirVersion(), item);
-        populateAnswer(request, responseItem, getInitialValue(request, item));
+        populateAnswer(request, responseItem, getInitialValue(request, item, responseItem));
         return responseItem;
     }
 
@@ -44,7 +44,8 @@ public class ProcessItem {
         request.getModelResolver().setValue(responseItem, "answer", answers);
     }
 
-    protected List<IBase> getInitialValue(PopulateRequest request, IBaseBackboneElement item) {
+    protected List<IBase> getInitialValue(
+            PopulateRequest request, IBaseBackboneElement item, IBaseBackboneElement responseItem) {
         List<IBase> results;
         var expression = expressionProcessor.getItemInitialExpression(request, item);
         if (expression != null) {
@@ -52,7 +53,7 @@ public class ProcessItem {
             try {
                 results = expressionProcessor.getExpressionResultForItem(request, expression, itemLinkId);
                 if (results != null && !results.isEmpty()) {
-                    addAuthorExtension(request, item);
+                    addAuthorExtension(request, responseItem);
                 }
             } catch (Exception e) {
                 var message = String.format(

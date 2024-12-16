@@ -3,11 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 
+/**
+ * See: <a href='https://www.hl7.org/fhir/R4/measure-operation-submit-data.html'>https://www.hl7.org/fhir/R4/measure-operation-submit-data.html</a>
+ */
 public class R4SubmitDataService {
 
     private final Repository repository;
@@ -19,15 +21,17 @@ public class R4SubmitDataService {
     /**
      * Save measure report and resources to the local repository
      *
-     * @param id
-     * @param report
-     * @param resources
+     * @param report The measure report being submitted
+     * @param resources The individual resources that make up the data-of-interest being submitted
      * @return Bundle transaction result
      */
-    public Bundle submitData(IdType id, MeasureReport report, List<IBaseResource> resources) {
+    public Bundle submitData(MeasureReport report, List<IBaseResource> resources) {
         /*
          * TODO - resource validation using $data-requirements operation (params are the provided id and
          * the measurement period from the MeasureReport)
+         */
+
+        /*
          *
          * TODO - profile validation ... not sure how that would work ... (get StructureDefinition from
          * URL or must it be stored in Ruler?)

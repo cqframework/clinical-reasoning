@@ -1,14 +1,14 @@
 {
   "resourceType": "Measure",
-  "id": "measure-EXM108-8.3.000",
+  "id": "measure-EXM108-8.3.000-basis-Encounter",
   "meta": {
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
   },
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-    "valueCode": "boolean"
+    "valueCode": "Encounter"
   } ],
-  "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108",
+  "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-Encounter",
   "identifier": [ {
     "use": "official",
     "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",

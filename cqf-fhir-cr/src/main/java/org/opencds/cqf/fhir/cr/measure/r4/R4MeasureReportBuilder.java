@@ -1,14 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALDENOMINATOR;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.TOTALNUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_DENOMINATOR_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_TOTAL_NUMERATOR_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,7 +69,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    protected MeasureReportScorer<MeasureReport> measureReportScorer;
+    private final MeasureReportScorer<MeasureReport> measureReportScorer;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();
@@ -177,17 +174,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         private void validateReference(String reference) {
             // Can't be null
             if (reference == null) {
-                throw new NullPointerException();
+                throw new NullPointerException("validated reference is null");
             }
 
             // If it's a contained reference, must be just the Guid and nothing else
             if (reference.startsWith("#") && reference.contains("/")) {
-                throw new IllegalArgumentException();
+                throw new InvalidRequestException("Invalid contained reference: " + reference);
             }
 
             // If it's a full reference, it must be type/id and that's it
             if (!reference.startsWith("#") && reference.split("/").length != 2) {
-                throw new IllegalArgumentException();
+                throw new InvalidRequestException("Invalid full reference: " + reference);
             }
         }
     }
@@ -217,7 +214,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.report().addContained(r);
         }
 
-        this.measureReportScorer.score(measureDef, bc.report());
+        this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
 
         return bc.report();
     }
@@ -246,8 +243,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var report = bc.report();
 
         if (measure.getGroup().size() != measureDef.groups().size()) {
-            throw new IllegalArgumentException(
-                    "The Measure has a different number of groups defined than the MeasureDef");
+            throw new InvalidRequestException(
+                    "The Measure has a different number of groups defined than the MeasureDef for Measure: "
+                            + measure.getUrl());
         }
 
         // ASSUMPTION: The groups are in the same order in both the Measure and the
@@ -274,27 +272,26 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
 
-        // groupDef contains populations/stratifier components not defined in measureGroup (TOTAL-NUMERATOR &
-        // TOTAL-DENOMINATOR), and will not be added to group populations.
-        // Subtracting '2' from groupDef to balance with Measure defined Groups
-        var groupDefSizeDiff = 2;
+        var groupDefSizeDiff = 0;
         if (groupDef.populations().stream()
                         .filter(x -> x.type().equals(MeasurePopulationType.DATEOFCOMPLIANCE))
                         .findFirst()
                         .orElse(null)
                 != null) {
             // dateOfNonCompliance is another population not calculated
-            groupDefSizeDiff = 3;
+            groupDefSizeDiff = 1;
         }
 
         if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of populations defined than the GroupDef");
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
         }
 
         if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
         }
 
         reportGroup.setCode(measureGroup.getCode());
@@ -344,55 +341,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     }
                 }
             }
-
-            if (groupDef.isBooleanBasis()) {
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), true);
-                addExtension(reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), true);
-
-            } else {
-                addExtension(
-                        reportGroup, EXT_TOTAL_DENOMINATOR_URL, getReportPopulation(groupDef, TOTALDENOMINATOR), false);
-                addExtension(
-                        reportGroup, EXT_TOTAL_NUMERATOR_URL, getReportPopulation(groupDef, TOTALNUMERATOR), false);
-            }
         }
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             var groupStrat = measureGroup.getStratifier().get(i);
             var reportStrat = reportGroup.addStratifier();
             var defStrat = groupDef.stratifiers().get(i);
             buildStratifier(bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
-        }
-    }
-
-    protected void addExtension(
-            MeasureReportGroupComponent group, String extUrl, PopulationDef populationDef, boolean useSubjects) {
-        int count;
-        if (useSubjects) {
-            count = populationDef.getSubjects().size();
-        } else {
-            count = populationDef.getResources().size();
-        }
-
-        group.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
-    }
-
-    /**
-     *
-     * Resource result --> Patient Key, Resource result --> can intersect on patient for Boolean basis, can't for Resource
-     * boolean result --> Patient Key, Boolean result --> can intersect on Patient
-     * code result --> Patient Key, Code result --> can intersect on Patient
-     */
-    protected void validateStratifierBasisType(Map<String, CriteriaResult> subjectValues, boolean isBooleanBasis) {
-
-        if (!subjectValues.entrySet().isEmpty() && !isBooleanBasis) {
-            var list = subjectValues.values().stream()
-                    .filter(x -> x.rawValue() instanceof Resource)
-                    .collect(Collectors.toList());
-            if (list.size() != subjectValues.values().size()) {
-                throw new IllegalArgumentException(
-                        "stratifier expression criteria results must match the same type as population.");
-            }
         }
     }
 
@@ -413,8 +367,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-
-        validateStratifierBasisType(subjectValues, groupDef.isBooleanBasis());
 
         // Stratifiers should be of the same basis as population
         if (groupDef.isBooleanBasis()) {
@@ -495,38 +447,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratumPopulation, subjectIds, mgpc);
         }
-
-        // add totalDenominator and totalNumerator extensions
-        buildStratumExtPopulation(groupDef, TOTALDENOMINATOR, subjectIds, stratum, EXT_TOTAL_DENOMINATOR_URL);
-        buildStratumExtPopulation(groupDef, TOTALNUMERATOR, subjectIds, stratum, EXT_TOTAL_NUMERATOR_URL);
-    }
-
-    protected void buildStratumExtPopulation(
-            GroupDef groupDef,
-            MeasurePopulationType measurePopulationType,
-            List<String> subjectIds,
-            StratifierGroupComponent stratum,
-            String extUrl) {
-        Set<String> subjectPop;
-        var reportPopulation = getReportPopulation(groupDef, measurePopulationType);
-        assert reportPopulation != null;
-        if (groupDef.isBooleanBasis()) {
-            subjectPop = reportPopulation.getSubjects().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                    .collect(Collectors.toSet());
-        } else {
-            subjectPop = reportPopulation.getResources().stream()
-                    .filter(Resource.class::isInstance)
-                    .map(Resource.class::cast)
-                    .map(x -> x.getResourceType().toString().concat("/").concat(x.getIdPart()))
-                    .collect(Collectors.toSet());
-        }
-        int count;
-
-        Set<String> intersection = new HashSet<>(subjectIds);
-        intersection.retainAll(subjectPop);
-        count = intersection.size();
-        stratum.addExtension().setUrl(extUrl).setValue(new StringType(Integer.toString(count)));
     }
 
     protected void buildStratumPopulation(
@@ -960,7 +880,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             if (key == null) {
-                throw new IllegalArgumentException(String.format("found a null key for the wrapped value: %s", value));
+                throw new InvalidRequestException(String.format("found a null key for the wrapped value: %s", value));
             }
 
             return key;

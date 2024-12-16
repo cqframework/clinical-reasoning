@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ParameterDefinition;
@@ -53,6 +55,41 @@ class CqlFhirParametersConverterTests {
         EvaluationResult testData = new EvaluationResult();
         testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
         testData.expressionResults.put("Numerator", new ExpressionResult(true, null));
+
+        Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
+
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    void TestEvaluationResultToEmptyListParameters() {
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("Patient").setResource(new Patient());
+        BooleanType nullBooleanValue = new BooleanType((String) null);
+        nullBooleanValue.addExtension("http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList", new BooleanType(true));
+        expected.addParameter().setName("Encounters").setValue(nullBooleanValue);
+
+        EvaluationResult testData = new EvaluationResult();
+        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
+        testData.expressionResults.put("Encounters", new ExpressionResult(Collections.emptyList(), null));
+
+        Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
+
+        assertTrue(expected.equalsDeep(actual));
+    }
+
+    @Test
+    void TestEvaluationResultNullParameters() {
+        Parameters expected = new Parameters();
+        expected.addParameter().setName("Patient").setResource(new Patient());
+        BooleanType nullBooleanValue = new BooleanType((String) null);
+        nullBooleanValue.addExtension(
+                "http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
+        expected.addParameter().setName("Null").setValue(nullBooleanValue);
+
+        EvaluationResult testData = new EvaluationResult();
+        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
+        testData.expressionResults.put("Null", new ExpressionResult(null, null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 

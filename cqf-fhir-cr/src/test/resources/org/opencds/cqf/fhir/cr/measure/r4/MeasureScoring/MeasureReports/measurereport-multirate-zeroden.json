@@ -48,16 +48,6 @@
         } ]
       },
       "count": 0
-    } ],
-    "extension":[
-      {
-        "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-        "valueString":"0"
-      },
-      {
-        "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-        "valueString":"0"
-      }
-    ]
+    } ]
   } ]
 }

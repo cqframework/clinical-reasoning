@@ -226,16 +226,6 @@
           },
           "count":1
         }
-      ],
-      "extension":[
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-          "valueString":"1"
-        },
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-          "valueString":"1"
-        }
       ]
     },
     {
@@ -306,16 +296,6 @@
           },
           "count":1
         }
-      ],
-      "extension":[
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-          "valueString":"1"
-        },
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-          "valueString":"1"
-        }
       ]
     },
     {
@@ -385,16 +365,6 @@
             ]
           },
           "count":1
-        }
-      ],
-      "extension":[
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-denominator-membership",
-          "valueString":"2"
-        },
-        {
-          "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-cqfm-numerator-membership",
-          "valueString":"1"
         }
       ]
     }

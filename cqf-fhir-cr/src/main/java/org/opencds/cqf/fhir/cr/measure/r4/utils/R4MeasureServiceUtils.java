@@ -18,6 +18,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
@@ -150,6 +151,7 @@ public class R4MeasureServiceUtils {
 
     public Optional<Reference> getReporter(String reporter) {
         if (reporter != null && !reporter.isEmpty() && !reporter.contains("/")) {
+            // This value may come from configuration, not a user request
             throw new IllegalArgumentException(
                     "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
         }
@@ -164,6 +166,7 @@ public class R4MeasureServiceUtils {
             } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {
                 reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
             } else {
+                // This value may come from configuration, not a user request
                 throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
             }
         }
@@ -214,12 +217,12 @@ public class R4MeasureServiceUtils {
             if (bundle.getEntry().size() > 1) {
                 var msg = String.format(
                         "Measure Identifier: %s, found more than one matching measure resource", identifier);
-                throw new IllegalArgumentException(msg);
+                throw new InvalidRequestException(msg);
             }
             return (Measure) bundle.getEntryFirstRep().getResource();
         } else {
             var msg = String.format("Measure Identifier: %s, found no matching measure resources", identifier);
-            throw new IllegalArgumentException(msg);
+            throw new InvalidRequestException(msg);
         }
     }
 
@@ -294,7 +297,7 @@ public class R4MeasureServiceUtils {
             return getMeasureGroupScoringTypes(measure);
         } else {
             if (!measure.hasScoring()) {
-                throw new IllegalArgumentException(String.format(
+                throw new InvalidRequestException(String.format(
                         "Measure: %s, does not have a defined Measure Scoring Type.", measure.getIdPart()));
             }
             return Collections.singletonList(MeasureScoring.fromCode(
@@ -304,7 +307,7 @@ public class R4MeasureServiceUtils {
 
     public void listThrowIllegalArgumentIfEmpty(List<String> value, String parameterName) {
         if (value == null || value.isEmpty()) {
-            throw new IllegalArgumentException(parameterName + " parameter requires a value.");
+            throw new InvalidRequestException(parameterName + " parameter requires a value.");
         }
     }
 

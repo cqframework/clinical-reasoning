@@ -22,16 +22,18 @@ public class CqlOptions {
         return this.cqlEngineOptions;
     }
 
-    public void setCqlEngineOptions(CqlEngineOptions cqlEngineOptions) {
+    public CqlOptions setCqlEngineOptions(CqlEngineOptions cqlEngineOptions) {
         this.cqlEngineOptions = cqlEngineOptions;
+        return this;
     }
 
     public boolean useEmbeddedLibraries() {
         return this.useEmbeddedLibraries;
     }
 
-    public void setUseEmbeddedLibraries(boolean useEmbeddedLibraries) {
+    public CqlOptions setUseEmbeddedLibraries(boolean useEmbeddedLibraries) {
         this.useEmbeddedLibraries = useEmbeddedLibraries;
+        return this;
     }
 
     public static CqlOptions defaultOptions() {

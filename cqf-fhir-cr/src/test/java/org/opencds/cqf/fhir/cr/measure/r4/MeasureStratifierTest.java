@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -177,26 +179,20 @@ class MeasureStratifierTest {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
         }
     }
-    /**
-     * Boolean Basis Measure with Stratifier defined that produces resource based results.
-     * 9 Encounters are returned as a result of this stratifier expression. One stratum per unique 'Encounter' found.
-     * Example: Encounter/patient-1-encounter-1 as a stratum value returned.
-     * This is validating that even though the Measure is Boolean basis, a stratifier expression that produces results of a different basis IS possible if the expression can be evaluated in the correct context.
-     * If this expression produced both 'boolean' AND 'resource' results then it should not be allowed.
-     */
+
+    // Previously, we didn't expect this to fail but with the new validation logic we decided that
+    // it now ought to.
     @Test
     void cohortBooleanDifferentTypeStrat() {
-        given.when()
-                .measureId("CohortBooleanStratDifferentType")
-                .evaluate()
-                .then()
-                .firstGroup()
-                .firstStratifier()
-                .stratumCount(9) // one for each encounter
-                .up()
-                .up()
-                .report();
+        try {
+            given.when().measureId("CohortBooleanStratDifferentType").evaluate().then();
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                    "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
+                    exception.getMessage());
+        }
     }
+
     /**
      * Boolean Basis Measure with Stratifier defined as a component.
      * MultiComponent stratifiers blend results of multiple criteria (Gender of Patient and Payer, instead of just one or the other)
@@ -240,6 +236,7 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population.
      * Given that Population results are "Encounter" resources, intersection of results with Patient.gender is not possible. All results would be empty
@@ -254,9 +251,10 @@ class MeasureStratifierTest {
                     .then()
                     .report();
             fail("Since this is Resource based, it can't intersect with subject based expression");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage()
-                    .contains("stratifier expression criteria results must match the same type as population"));
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                    "stratifier expression criteria results for expression: [Gender Stratification] must fall within accepted types for population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
+                    exception.getMessage());
         }
     }
 

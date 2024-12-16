@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -16,7 +17,7 @@ class InvalidMeasureTest {
     @Test
     void evaluateThrowsErrorWithEmptyMeasure() {
         var when = GIVEN_INVALID_MEASURE_REPO.when().measureId("Empty").evaluate();
-        var e = assertThrows(IllegalArgumentException.class, () -> when.then());
+        var e = assertThrows(InvalidRequestException.class, when::then);
         assertTrue(e.getMessage().contains("does not have a primary library"));
     }
 

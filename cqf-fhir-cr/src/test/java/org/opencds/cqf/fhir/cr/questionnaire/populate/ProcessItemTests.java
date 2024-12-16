@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,11 +133,14 @@ class ProcessItemTests {
         final PopulateRequest prePopulateRequest =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
+        final QuestionnaireResponseItemComponent questionnaireResponseItemComponent =
+                new QuestionnaireResponseItemComponent();
         doReturn(null)
                 .when(expressionProcessor)
                 .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
         // execute
-        final List<IBase> actual = processItem.getInitialValue(prePopulateRequest, questionnaireItemComponent);
+        final List<IBase> actual = processItem.getInitialValue(
+                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent);
         // validate
         assertTrue(actual.isEmpty());
         verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
@@ -153,6 +157,8 @@ class ProcessItemTests {
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
         questionnaireItemComponent.setLinkId("linkId");
+        final QuestionnaireResponseItemComponent questionnaireResponseItemComponent =
+                new QuestionnaireResponseItemComponent();
         final CqfExpression expression = withExpression();
         doReturn(expression)
                 .when(expressionProcessor)
@@ -161,7 +167,8 @@ class ProcessItemTests {
                 .when(expressionProcessor)
                 .getExpressionResultForItem(prePopulateRequest, expression, "linkId");
         // execute
-        final List<IBase> actual = processItem.getInitialValue(prePopulateRequest, questionnaireItemComponent);
+        final List<IBase> actual = processItem.getInitialValue(
+                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent);
         // validate
         assertEquals(expected, actual);
         verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);

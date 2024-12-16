@@ -70,7 +70,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -102,7 +102,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -121,7 +121,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -144,7 +144,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -167,7 +167,7 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -191,7 +191,7 @@ class PackageVisitorTests {
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-package-capabilities.json"));
         repo.transaction(bundle);
         List<String> capabilities = Arrays.asList("computable", "publishable", "executable");
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -222,7 +222,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-active-no-versions.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -283,7 +283,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -319,7 +319,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -356,7 +356,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -375,7 +375,7 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, null);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -429,24 +429,24 @@ class PackageVisitorTests {
     @Test
     public void packageVisitorShouldUseExpansionCacheIfProvided() {
         // Arrange
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+        var bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        IValueSetExpansionCache mockCache = Mockito.mock(IValueSetExpansionCache.class);
-        PackageVisitor packageVisitor = new PackageVisitor(repo, mockCache);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var mockCache = Mockito.mock(IValueSetExpansionCache.class);
+        var packageVisitor = new PackageVisitor(repo, mockCache);
 
-        String canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
-        IValueSetAdapter mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);
+        var canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
+        var mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);
         when(mockValueSetAdapter1.getExpansion()).thenReturn(new ValueSetExpansionComponent());
         when(mockValueSetAdapter1.getCanonical()).thenReturn(canonical1);
 
         when(mockCache.getExpansionForCanonical(canonical1, null)).thenReturn(mockValueSetAdapter1);
 
         // Act
-        Parameters params = parameters();
+        var params = parameters();
         libraryAdapter.accept(packageVisitor, params);
 
         // Assert

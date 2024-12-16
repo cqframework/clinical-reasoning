@@ -192,7 +192,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .filter(r -> r.fhirType().equals("ValueSet"))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
-        var expansionCache = this.getExpansionCache();
+        var expansionCache = getExpansionCache();
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
         if (expansionCache.isPresent()) {

@@ -48,10 +48,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(Repository repository) {
-        super(repository);
-        terminologyServerClient = new TerminologyServerClient(fhirContext());
-        expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
-        setupResourceTypes();
+        this(repository, null);
     }
 
     public PackageVisitor(Repository repository, IValueSetExpansionCache cache) {

@@ -49,7 +49,6 @@ import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.ValueSetAdapter;

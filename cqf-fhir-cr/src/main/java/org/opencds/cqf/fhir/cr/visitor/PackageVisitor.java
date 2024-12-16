@@ -206,7 +206,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             });
         }
-        valueSets.stream().forEach(valueSet -> {
+        valueSets.forEach(valueSet -> {
             if (!expandedList.contains(valueSet.getUrl())) {
                 expandHelper.expandValueSet(
                         valueSet,

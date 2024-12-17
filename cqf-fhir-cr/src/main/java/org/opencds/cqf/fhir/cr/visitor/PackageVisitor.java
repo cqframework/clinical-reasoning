@@ -48,9 +48,17 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(Repository repository) {
-        super(repository);
+        this(repository, null);
+    }
+
+    public PackageVisitor(Repository repository, IValueSetExpansionCache cache) {
+        super(repository, cache);
         terminologyServerClient = new TerminologyServerClient(fhirContext());
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
+    }
+
+    public void setupResourceTypes() {
         switch (fhirVersion()) {
             case DSTU3:
                 resourceTypes.put(
@@ -184,15 +192,34 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .filter(r -> r.fhirType().equals("ValueSet"))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
-
-        valueSets.stream()
-                .forEach(valueSet -> expandHelper.expandValueSet(
+        var expansionCache = getExpansionCache();
+        var expansionParamsHash = expansionCache.map(
+                e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
+        if (expansionCache.isPresent()) {
+            valueSets.forEach(v -> {
+                var cachedExpansion = expansionCache
+                        .get()
+                        .getExpansionForCanonical(v.getCanonical(), expansionParamsHash.orElse(null));
+                if (cachedExpansion != null) {
+                    v.setExpansion(cachedExpansion.getExpansion());
+                    expandedList.add(v.getUrl());
+                }
+            });
+        }
+        valueSets.forEach(valueSet -> {
+            if (!expandedList.contains(valueSet.getUrl())) {
+                expandHelper.expandValueSet(
                         valueSet,
                         params,
                         terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
                         valueSets,
                         expandedList,
-                        new Date()));
+                        new Date());
+                if (expansionCache.isPresent()) {
+                    expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
+                }
+            }
+        });
     }
 
     protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {

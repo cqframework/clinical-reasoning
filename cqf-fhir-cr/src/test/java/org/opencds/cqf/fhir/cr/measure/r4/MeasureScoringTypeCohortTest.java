@@ -157,4 +157,36 @@ public class MeasureScoringTypeCohortTest {
                 .up()
                 .report();
     }
+
+    @Test
+    void cohortBooleanEncounterPeriod() {
+
+        given.when()
+            .measureId("CohortBooleanEncounterPeriod")
+            .subject("Patient/patient-9")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1)
+            .up()
+            .up()
+            .report();
+    }
+
+    @Test
+    void cohortBooleanEncounterPeriodQICore() {
+
+        given.when()
+            .measureId("CohortBooleanEncounterPeriodQICore")
+            .subject("Patient/patient-9")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(1)
+            .up()
+            .up()
+            .report();
+    }
 }

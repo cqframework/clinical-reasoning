@@ -53,6 +53,7 @@ public class TestDataGenerator {
                 if (i == 9) {
                     // resource based numerator will show 1 inNumerator, the other in denException
                     createEncounter(patientId, encounterPeriod, EncounterStatus.INPROGRESS, i, 2);
+                    createEncounter(patientId, null, EncounterStatus.FINISHED, i, 3);
                 }
             }
         }
@@ -89,7 +90,9 @@ public class TestDataGenerator {
         var encounterId = "Encounter/patient-" + patientCount + "-encounter-" + encounterCount;
         Encounter encounter = new Encounter();
         encounter.setId(encounterId);
-        encounter.setPeriod(encounterPeriod);
+        if(encounterPeriod != null) {
+            encounter.setPeriod(encounterPeriod);
+        }
         encounter.setStatus(encounterStatus);
         encounter.setSubject(new Reference(patientId));
         repository.create(encounter);

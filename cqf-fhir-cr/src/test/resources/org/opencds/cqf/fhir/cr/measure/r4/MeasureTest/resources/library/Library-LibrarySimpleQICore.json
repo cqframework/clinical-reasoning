@@ -1,0 +1,17 @@
+{
+  "resourceType": "Library",
+  "id": "LibrarySimpleQICore",
+  "url": "http://example.com/Library/LibrarySimpleQICore",
+  "name": "LibrarySimple",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SimpleCqlQICore.cql"
+  } ]
+}

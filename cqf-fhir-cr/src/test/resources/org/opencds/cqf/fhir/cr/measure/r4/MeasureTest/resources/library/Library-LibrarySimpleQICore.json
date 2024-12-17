@@ -2,7 +2,7 @@
   "resourceType": "Library",
   "id": "LibrarySimpleQICore",
   "url": "http://example.com/Library/LibrarySimpleQICore",
-  "name": "LibrarySimple",
+  "name": "LibrarySimpleQICore",
   "status": "active",
   "type": {
     "coding": [ {

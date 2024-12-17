@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -34,14 +39,19 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
@@ -406,5 +416,43 @@ class PackageVisitorTests {
                 assertTrue(expectedResourceReturned);
             }
         }
+    }
+
+    @Test
+    public void packageVisitorShouldUseExpansionCacheIfProvided() {
+        // Arrange
+        var bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var mockCache = Mockito.mock(IValueSetExpansionCache.class);
+        var packageVisitor = new PackageVisitor(repo, mockCache);
+
+        var canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
+        var mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);
+        when(mockValueSetAdapter1.getExpansion()).thenReturn(new ValueSetExpansionComponent());
+        when(mockValueSetAdapter1.getCanonical()).thenReturn(canonical1);
+
+        when(mockCache.getExpansionForCanonical(canonical1, null)).thenReturn(mockValueSetAdapter1);
+
+        // Act
+        var params = parameters();
+        libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        // there are three ValueSets being expanded and only the first one is in the cache
+        verify(mockCache, times(1)).getExpansionForCanonical(canonical1, null);
+
+        verify(mockCache, times(1))
+                .getExpansionForCanonical(
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|20210526", null);
+        verify(mockCache, times(1))
+                .getExpansionForCanonical("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|2022-11-19", null);
+
+        // the other two will be added to the cache after expansion if possible
+        verify(mockCache, times(2)).addToCache(any(), isNull());
+        verify(mockCache, times(1)).getExpansionParametersHash(any(LibraryAdapter.class));
     }
 }

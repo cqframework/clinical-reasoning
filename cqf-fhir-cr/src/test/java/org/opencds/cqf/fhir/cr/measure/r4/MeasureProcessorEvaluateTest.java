@@ -153,63 +153,41 @@ class MeasureProcessorEvaluateTest {
         assertStratifiers(expectedMeasureScore, expectedMeasureCount, stratifiers);
     }
 
-    @ParameterizedTest
-    @MethodSource("parametersTestParams")
-    void measureEvalWithOrWithoutParametersSimple(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureScore, int expectedMeasureCount) {
-        var when = Measure.given()
-            .repositoryFor("ANC")
-            .when()
-            .measureId("ANC_SIMPLE")
-            .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
-            .periodStart("2018-01-01")
-            .periodEnd("2030-12-31")
-            .reportType("subject")
-            .parameters(parameters)
-            .evaluate();
-        MeasureReport report = when.then().report();
-        assertNotNull(report);
-        assertEquals(1, report.getGroup().size());
-        final MeasureReportGroupComponent group = report.getGroupFirstRep();
-        assertEquals(expectedMeasureScore, group.getMeasureScore().getValue().intValue());
-
-        group.getPopulation().forEach(population -> {
-            assertPopulation(expectedMeasureCount, population);
-        });
-
-        assertStratifiers(expectedMeasureScore, expectedMeasureCount, group.getStratifier());
-    }
-
-    private static Stream<Arguments> simpleParametersParams() {
+    private static Stream<Arguments> simpleParametersParams2() {
         return Stream.of(
-            Arguments.of(null, 0, 0),
-            Arguments.of(Parameters.parameters(Parameters.part("encounter", "2d0ecfb4-9dec-4daa-a261-e37e426d0d7b")), 1, 1)
+            Arguments.of(null, 0),
+            Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "bogus")), 0),
+            Arguments.of(Parameters.parameters(Parameters.part("bogusPractitionerParam", "simpleCqlParamsPractitioner1")), 0),
+            Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "bogus")), 0),
+            Arguments.of(Parameters.parameters(Parameters.part("bogusEncounterParam", "simpleCqlParamsEncounter1")), 0),
+            Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "simpleCqlParamsPractitioner1")), 1),
+            Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "simpleCqlParamsEncounter1")), 1)
         );
     }
 
     @ParameterizedTest
-    @MethodSource("simpleParametersParams")
-    void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureScore, int expectedMeasureCount) {
+    @MethodSource("simpleParametersParams2")
+    void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {
         var when = Measure.given()
-            .repositoryFor("ANC")
+            .repositoryFor("SimpleCqlParameters")
             .when()
-            .measureId("ANC_SIMPLE")
-            .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
+            .measureId("simpleCqlParameters")
+            .subject("Patient/simpleCqlParamsPatient1")
             .periodStart("2018-01-01")
             .periodEnd("2030-12-31")
             .reportType("subject")
             .parameters(parameters)
             .evaluate();
-        MeasureReport report = when.then().report();
+
+        var report = when.then().report();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
-        final MeasureReportGroupComponent group = report.getGroupFirstRep();
-        assertEquals(expectedMeasureScore, group.getMeasureScore().getValue().intValue());
+
+        var group = report.getGroupFirstRep();
 
         group.getPopulation().forEach(population -> {
             assertPopulation(expectedMeasureCount, population);
         });
-
-        assertStratifiers(expectedMeasureScore, expectedMeasureCount, group.getStratifier());
     }
 
     private void assertPopulation(

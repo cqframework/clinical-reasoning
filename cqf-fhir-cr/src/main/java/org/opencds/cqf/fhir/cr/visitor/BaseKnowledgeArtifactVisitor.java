@@ -34,10 +34,11 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     protected final Repository repository;
-    protected Optional<IValueSetExpansionCache> valueSetExpansionCache = Optional.empty();
+    protected final Optional<IValueSetExpansionCache> valueSetExpansionCache;
 
     protected BaseKnowledgeArtifactVisitor(Repository repository) {
         this.repository = repository;
+        this.valueSetExpansionCache = Optional.empty();
     }
 
     protected BaseKnowledgeArtifactVisitor(Repository repository, IValueSetExpansionCache valueSetExpansionCache) {

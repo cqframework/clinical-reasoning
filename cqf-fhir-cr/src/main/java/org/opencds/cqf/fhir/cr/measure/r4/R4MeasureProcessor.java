@@ -179,7 +179,6 @@ public class R4MeasureProcessor {
         return this.repository.read(Measure.class, id);
     }
 
-    // LUKETODO:  Additional CQL parameter test
     private Map<String, Object> resolveParameterMap(Parameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
         R4FhirModelResolver modelResolver = new R4FhirModelResolver();

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -19,10 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
@@ -117,28 +116,30 @@ class MeasureProcessorEvaluateTest {
         assertEquals("2022-01-31", formatter.format(report.getPeriod().getEnd()));
     }
 
-
     private static Stream<Arguments> parametersTestParams() {
         return Stream.of(
-            Arguments.of(null, 0, 0),
-            Arguments.of(Parameters.parameters(Parameters.part("encounter", "2d0ecfb4-9dec-4daa-a261-e37e426d0d7b")), 1, 1)
-        );
+                Arguments.of(null, 0, 0),
+                Arguments.of(
+                        Parameters.parameters(Parameters.part("encounter", "2d0ecfb4-9dec-4daa-a261-e37e426d0d7b")),
+                        1,
+                        1));
     }
 
     @ParameterizedTest
     @MethodSource("parametersTestParams")
-    void measure_eval_with_parameters_mega(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureScore, int expectedMeasureCount) {
+    void measure_eval_with_parameters_mega(
+            @Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureScore, int expectedMeasureCount) {
         // This test should fail on numerator due to the encounter parameter not being set
         var when = Measure.given()
-            .repositoryFor("ANC")
-            .when()
-            .measureId("ANCIND01")
-            .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
-            .periodStart("2018-01-01")
-            .periodEnd("2030-12-31")
-            .reportType("subject")
-            .parameters(parameters)
-            .evaluate();
+                .repositoryFor("ANC")
+                .when()
+                .measureId("ANCIND01")
+                .subject("Patient/457865b6-8f02-49e2-8a77-21b73eb266d4")
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("subject")
+                .parameters(parameters)
+                .evaluate();
         MeasureReport report = when.then().report();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
@@ -155,29 +156,33 @@ class MeasureProcessorEvaluateTest {
 
     private static Stream<Arguments> simpleParametersParams2() {
         return Stream.of(
-            Arguments.of(null, 0),
-            Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "bogus")), 0),
-            Arguments.of(Parameters.parameters(Parameters.part("bogusPractitionerParam", "simpleCqlParamsPractitioner1")), 0),
-            Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "bogus")), 0),
-            Arguments.of(Parameters.parameters(Parameters.part("bogusEncounterParam", "simpleCqlParamsEncounter1")), 0),
-            Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "simpleCqlParamsPractitioner1")), 1),
-            Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "simpleCqlParamsEncounter1")), 1)
-        );
+                Arguments.of(null, 0),
+                Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "bogus")), 0),
+                Arguments.of(
+                        Parameters.parameters(
+                                Parameters.part("bogusPractitionerParam", "simpleCqlParamsPractitioner1")),
+                        0),
+                Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "bogus")), 0),
+                Arguments.of(
+                        Parameters.parameters(Parameters.part("bogusEncounterParam", "simpleCqlParamsEncounter1")), 0),
+                Arguments.of(
+                        Parameters.parameters(Parameters.part("practitionerParam", "simpleCqlParamsPractitioner1")), 1),
+                Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "simpleCqlParamsEncounter1")), 1));
     }
 
     @ParameterizedTest
     @MethodSource("simpleParametersParams2")
     void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {
         var when = Measure.given()
-            .repositoryFor("SimpleCqlParameters")
-            .when()
-            .measureId("simpleCqlParameters")
-            .subject("Patient/simpleCqlParamsPatient1")
-            .periodStart("2018-01-01")
-            .periodEnd("2030-12-31")
-            .reportType("subject")
-            .parameters(parameters)
-            .evaluate();
+                .repositoryFor("SimpleCqlParameters")
+                .when()
+                .measureId("simpleCqlParameters")
+                .subject("Patient/simpleCqlParamsPatient1")
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("subject")
+                .parameters(parameters)
+                .evaluate();
 
         var report = when.then().report();
         assertNotNull(report);
@@ -191,8 +196,7 @@ class MeasureProcessorEvaluateTest {
     }
 
     private void assertPopulation(
-            int expectedMeasureCount,
-            MeasureReport.MeasureReportGroupPopulationComponent population) {
+            int expectedMeasureCount, MeasureReport.MeasureReportGroupPopulationComponent population) {
         assertTrue(population.hasCount());
         assertTrue(population.hasCode());
         assertTrue(population.getCode().hasCoding());
@@ -215,27 +219,26 @@ class MeasureProcessorEvaluateTest {
             List<MeasureReportGroupStratifierComponent> stratifiers) {
 
         var stratifierGroupComponents = stratifiers.stream()
-            .map(MeasureReportGroupStratifierComponent::getStratum)
-            .filter(not(Collection::isEmpty))
-            .map(strat -> strat.get(0))
-            .toList();
-
+                .map(MeasureReportGroupStratifierComponent::getStratum)
+                .filter(not(Collection::isEmpty))
+                .map(strat -> strat.get(0))
+                .toList();
 
         var stratumScores = stratifierGroupComponents.stream()
-            .map(StratifierGroupComponent::getMeasureScore)
-            .map(Quantity::getValue)
-            .map(BigDecimal::intValue)
-            .toList();
+                .map(StratifierGroupComponent::getMeasureScore)
+                .map(Quantity::getValue)
+                .map(BigDecimal::intValue)
+                .toList();
 
         assertEquals(1, stratumScores.size());
         assertEquals(expectedMeasureScore, stratumScores.get(0));
 
         var stratCountByPopType = stratifierGroupComponents.stream()
-            .map(StratifierGroupComponent::getPopulation)
-            .flatMap(List::stream)
-            .collect(Collectors.toMap(
-                pop -> pop.getCode().getCodingFirstRep().getCode(),
-                StratifierGroupPopulationComponent::getCount));
+                .map(StratifierGroupComponent::getPopulation)
+                .flatMap(List::stream)
+                .collect(Collectors.toMap(
+                        pop -> pop.getCode().getCodingFirstRep().getCode(),
+                        StratifierGroupPopulationComponent::getCount));
 
         assertEquals(1, stratCountByPopType.get("initial-population"));
         assertEquals(1, stratCountByPopType.get("denominator"));

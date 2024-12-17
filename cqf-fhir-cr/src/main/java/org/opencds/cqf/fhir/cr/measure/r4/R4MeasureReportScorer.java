@@ -120,6 +120,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 var score = calcProportionScore(
                         getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
                         getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR));
+                // LUKETODO:  improvement notation
+                // LUKETODO:  new feature in cdr $qpp-build since cdr assumes increase always
+                // LUKETODO:  vituity authored the measures incorrectly as decrease.... maybe ... but Jusin needs to think about it
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));

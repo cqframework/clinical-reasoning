@@ -1,6 +1,6 @@
 {
   "resourceType": "Library",
-  "id": "DischargedonAntithromboticTherapyFHIR-Valid",
+  "id": "InvalidMeasureScorerMissing",
   "meta": {
     "versionId": "1",
     "lastUpdated": "2021-05-17T10:33:50.000-06:00",
@@ -8,9 +8,9 @@
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm" ]
   },
   "language": "en",
-  "url": "https://madie.cms.gov/Library/DischargedonAntithromboticTherapyFHIR-Valid",
+  "url": "https://madie.cms.gov/Library/InvalidMeasureScorerMissing",
   "version": "1.0.001",
-  "name": "DischargedonAntithromboticTherapyFHIR-Valid",
+  "name": "InvalidMeasureScorerMissing",
   "status": "active",
   "experimental": false,
   "type": {
@@ -24,6 +24,6 @@
   "description": "Discharged on Antithrombotic Therapy FHIR",
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/DischargedonAntithromboticTherapyFHIR-Valid.cql"
+    "url": "../../cql/InvalidMeasureScorerMissing.cql"
   } ]
 }

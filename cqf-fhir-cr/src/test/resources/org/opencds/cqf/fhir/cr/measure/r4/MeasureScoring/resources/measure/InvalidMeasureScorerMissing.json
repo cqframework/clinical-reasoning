@@ -1,15 +1,15 @@
 {
   "resourceType": "Measure",
-  "id": "MeasureScoringInvalid",
-  "url": "https://madie.cms.gov/Measure/MeasureScoringInvalid",
+  "id": "InvalidMeasureScorerMissing",
+  "url": "https://madie.cms.gov/Measure/InvalidMeasureScorerMissing",
   "version": "0.9.000",
-  "name": "MeasureScoringInvalid",
+  "name": "InvalidMeasureScorerMissing",
   "effectivePeriod": {
     "start": "2025-01-01",
     "end": "2025-12-31"
   },
   "library": [
-    "https://madie.cms.gov/Library/MeasureScoringInvalid"
+    "https://madie.cms.gov/Library/InvalidMeasureScorerMissing"
   ],
   "group": [
     {

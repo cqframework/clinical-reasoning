@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -205,14 +204,12 @@ class MeasureScorerTest {
      * test to validate that measure with MeasureScorer specified at the group level
      * and nothing on measure-level MeasureScorer
      */
-    // LUKETODO:  simplify:
     @Test
-    @Disabled
     void measure_eval_group_measurescorer() {
         var when = org.opencds.cqf.fhir.cr.measure.r4.Measure.given()
                 .repositoryFor("MeasureScoring")
                 .when()
-                .measureId("DischargedonAntithromboticTherapyFHIR-Valid")
+                .measureId("GroupLevelMeasureScorerNoMeasureLevel")
                 .subject(null)
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
@@ -221,17 +218,16 @@ class MeasureScorerTest {
         MeasureReport report = when.then().report();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
-        assertEquals(3, report.getGroupFirstRep().getPopulation().get(0).getCount());
+        assertEquals(4, report.getGroupFirstRep().getPopulation().get(0).getCount());
     }
 
-    // LUKETODO:  simplify:
     @Test
     void measure_eval_group_measurescorer_invalidMeasureScore() {
         // Removed MeasureScorer from Measure, should trigger exception
         var when = org.opencds.cqf.fhir.cr.measure.r4.Measure.given()
                 .repositoryFor("MeasureScoring")
                 .when()
-                .measureId("MeasureScoringInvalid")
+                .measureId("InvalidMeasureScorerMissing")
                 .subject(null)
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
@@ -239,7 +235,7 @@ class MeasureScorerTest {
                 .evaluate();
 
         String errorMsg =
-                "MeasureScoring must be specified on Group or Measure for Measure: https://madie.cms.gov/Measure/MeasureScoringInvalid";
+                "MeasureScoring must be specified on Group or Measure for Measure: https://madie.cms.gov/Measure/InvalidMeasureScorerMissing";
         var e = assertThrows(InvalidRequestException.class, when::then);
         assertEquals(errorMsg, e.getMessage());
     }

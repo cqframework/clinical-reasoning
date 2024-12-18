@@ -1,0 +1,18 @@
+{
+  "resourceType":"Patient",
+  "id":"SimpleCqlParamsPatient1",
+  "active":true,
+  "name":[
+    {
+      "family":"Hadi",
+      "given":[
+        "Bareera"
+      ]
+    }
+  ],
+  "gender":"female",
+  "birthDate":"1999-01-14",
+  "generalPractitioner": {
+    "reference": "Practitioner/SimpleCqlParamsPractitioner1"
+  }
+}

@@ -1,4 +1,4 @@
-library GlycemicControlHypoglycemicInitialPopulation version '0.0.004'
+library SimpleAdditionalDataAndCustomOptions version '0.0.004'
 
 using FHIR version '4.0.1'
 

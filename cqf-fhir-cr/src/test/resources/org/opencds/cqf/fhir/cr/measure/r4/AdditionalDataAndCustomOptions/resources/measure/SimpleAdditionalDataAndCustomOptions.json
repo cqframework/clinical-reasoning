@@ -1,11 +1,11 @@
 {
   "resourceType": "Measure",
-  "id": "GlycemicControlHypoglycemicInitialPopulation",
-  "url": "http://test-case.com/fhir/measures/Measure/GlycemicControlHypoglycemicInitialPopulation",
+  "id": "SimpleAdditionalDataAndCustomOptions",
+  "url": "http://test-case.com/fhir/measures/Measure/SimpleAdditionalDataAndCustomOptions",
   "version": "0.000.01",
-  "name": "GlycemicControlHypoglycemicInitialPopulation",
-  "title": "Glycemic Control, Hypoglycemia Initial Population",
-  "library": [ "http://test-case.com/fhir/measures/Library/GlycemicControlHypoglycemicInitialPopulation" ],
+  "name": "SimpleAdditionalDataAndCustomOptions",
+  "title": "SimpleAdditionalDataAndCustomOptions",
+  "library": [ "http://test-case.com/fhir/measures/Library/SimpleAdditionalDataAndCustomOptions" ],
   "scoring": {
     "coding": [ {
       "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",

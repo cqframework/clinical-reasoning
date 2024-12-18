@@ -1,0 +1,121 @@
+{
+  "resourceType": "Measure",
+  "id": "MeasureScoringInvalid",
+  "url": "https://madie.cms.gov/Measure/MeasureScoringInvalid",
+  "version": "0.9.000",
+  "name": "MeasureScoringInvalid",
+  "effectivePeriod": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  },
+  "library": [
+    "https://madie.cms.gov/Library/MeasureScoringInvalid"
+  ],
+  "group": [
+    {
+      "id": "64f0daaf56d636294b157ea1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "Encounter"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-type",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+                "code": "process",
+                "display": "Process"
+              }
+            ]
+          }
+        }
+      ],
+      "description": "Ischemic stroke patients prescribed or continuing to take antithrombotic therapy at hospital discharge",
+      "population": [
+        {
+          "id": "937BAF2A-D36A-4EE5-B2B2-762A0FE04502",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "description": "Inpatient hospitalizations (non-elective admissions) for patients age 18 and older, discharged from inpatient care with a principal diagnosis of ischemic or hemorrhagic stroke, and ends during the measurement period",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        },
+        {
+          "id": "302C1DCC-7FE6-41EF-A94E-FDAE24B7BB1B",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "description": "Inpatient hospitalizations for patients with a principal diagnosis of Ischemic stroke",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator"
+          }
+        },
+        {
+          "id": "4B649804-9C55-4949-8CE0-01B462CAA74C",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator Exclusions"
+          }
+        },
+        {
+          "id": "99961E3A-EFC4-4858-A3EE-F7F1D5B222FB",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator"
+          }
+        },
+        {
+          "id": "5f33f3ea-6ffb-4897-85dd-872dd7ac55b8",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator-exclusion",
+                "display": "Numerator Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier"
+          }
+        }
+      ]
+    }
+  ]
+}

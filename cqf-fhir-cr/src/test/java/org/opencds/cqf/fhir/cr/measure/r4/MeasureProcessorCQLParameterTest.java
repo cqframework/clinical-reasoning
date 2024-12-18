@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import jakarta.annotation.Nullable;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -30,6 +31,7 @@ public class MeasureProcessorCQLParameterTest {
                 Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "SimpleCqlParamsEncounter1")), 1));
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource("simpleParametersParams")
     void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {

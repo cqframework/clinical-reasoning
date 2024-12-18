@@ -1,9 +1,9 @@
 {
   "resourceType": "Library",
-  "id": "simpleCqlParameters",
-  "url": "http://fhir.org/guides/who/anc-cds/Library/simpleCqlParameters",
-  "name": "simpleCqlParameters",
-  "title": "simpleCqlParameters",
+  "id": "SimpleCqlParameters",
+  "url": "http://fhir.org/guides/who/anc-cds/Library/SimpleCqlParameters",
+  "name": "SimpleCqlParameters",
+  "title": "SimpleCqlParameters",
   "status": "active",
   "type": {
     "coding": [ {

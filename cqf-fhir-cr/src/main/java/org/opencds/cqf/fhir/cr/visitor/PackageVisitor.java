@@ -36,8 +36,11 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
+    private static final Logger myLogger = LoggerFactory.getLogger(PackageVisitor.class);
     private static final String CANONICAL_TYPE = "canonical";
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
@@ -196,6 +199,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
         if (expansionCache.isPresent()) {
+            var startCache = (new Date()).getTime();
             valueSets.forEach(v -> {
                 var cachedExpansion = expansionCache
                         .get()
@@ -205,9 +209,12 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     expandedList.add(v.getUrl());
                 }
             });
+            myLogger.info("retrieved cached ValueSet Expansions in: "
+                    + String.valueOf(((new Date()).getTime() - startCache) / 1000) + "s");
         }
         valueSets.forEach(valueSet -> {
             if (!expandedList.contains(valueSet.getUrl())) {
+                var expansionStartTime = new Date().getTime();
                 expandHelper.expandValueSet(
                         valueSet,
                         params,
@@ -215,9 +222,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         valueSets,
                         expandedList,
                         new Date());
-                if (expansionCache.isPresent()) {
-                    expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
-                }
+                myLogger.info("Expanded " + valueSet.getUrl() + " in "
+                        + String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000) + "s");
+            }
+            if (expansionCache.isPresent()) {
+                expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
             }
         });
     }

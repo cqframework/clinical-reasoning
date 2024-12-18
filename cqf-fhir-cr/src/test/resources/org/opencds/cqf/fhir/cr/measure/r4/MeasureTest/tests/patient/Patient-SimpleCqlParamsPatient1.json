@@ -1,6 +1,6 @@
 {
   "resourceType":"Patient",
-  "id":"simpleCqlParamsPatient1",
+  "id":"SimpleCqlParamsPatient1",
   "active":true,
   "name":[
     {
@@ -13,6 +13,6 @@
   "gender":"female",
   "birthDate":"1999-01-14",
   "generalPractitioner": {
-    "reference": "Practitioner/simpleCqlParamsPractitioner1"
+    "reference": "Practitioner/SimpleCqlParamsPractitioner1"
   }
 }

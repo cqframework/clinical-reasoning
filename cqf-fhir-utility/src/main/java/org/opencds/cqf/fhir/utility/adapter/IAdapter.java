@@ -120,7 +120,10 @@ public interface IAdapter<T extends IBase> {
         } else if (result instanceof IBaseReference reference) {
             return reference.getReferenceElement().getValue();
         } else {
-            throw new UnprocessableEntityException("Path : {} on element of type {} could not be resolved", path, base.getClass().getSimpleName() );
+            throw new UnprocessableEntityException(
+                    "Path : {} on element of type {} could not be resolved",
+                    path,
+                    base.getClass().getSimpleName());
         }
     }
 

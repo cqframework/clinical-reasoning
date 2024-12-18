@@ -86,6 +86,7 @@ class DraftVisitorTests {
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(draftVisitor, params);
 
         assertNotNull(returnedBundle);
+        assertEquals(4, returnedBundle.getEntry().size());
         Optional<BundleEntryComponent> maybeLib = returnedBundle.getEntry().stream()
                 .filter(entry -> entry.getResponse().getLocation().contains("Library"))
                 .findAny();

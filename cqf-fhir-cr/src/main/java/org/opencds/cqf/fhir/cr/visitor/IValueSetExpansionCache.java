@@ -7,6 +7,7 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 public interface IValueSetExpansionCache {
     IValueSetAdapter getExpansionForCanonical(String canonical, String expansionParametersHash);
 
+    // make it private/protected
     Optional<String> getExpansionParametersHash(IKnowledgeArtifactAdapter artifactContainingExpansionParameters);
 
     boolean addToCache(IValueSetAdapter expandedValueSet, String expansionParametersHash);

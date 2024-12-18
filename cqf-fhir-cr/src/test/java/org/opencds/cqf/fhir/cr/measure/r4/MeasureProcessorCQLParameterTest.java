@@ -36,7 +36,7 @@ public class MeasureProcessorCQLParameterTest {
     @MethodSource("simpleParametersParams")
     void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {
         var when = Measure.given()
-                .repositoryFor("MeasureTest")
+                .repositoryFor("CqlParameters")
                 .when()
                 .measureId("SimpleCqlParameters")
                 .subject("Patient/SimpleCqlParamsPatient1")

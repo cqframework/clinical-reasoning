@@ -13,7 +13,7 @@
   },
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/simpleCqlParameters.cql"
+    "url": "../../cql/commonCql.cql"
     }
   ]
 }

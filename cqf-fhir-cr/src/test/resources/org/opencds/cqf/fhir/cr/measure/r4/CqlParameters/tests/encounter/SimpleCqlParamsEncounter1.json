@@ -1,6 +1,6 @@
 {
   "resourceType":"Encounter",
-  "id":"simpleCqlParamsEncounter1",
+  "id":"SimpleCqlParamsEncounter1",
   "meta":{
     "profile":[
       "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
@@ -25,7 +25,7 @@
     }
   ],
   "subject":{
-    "reference":"Patient/simpleCqlParamsPatient1"
+    "reference":"Patient/SimpleCqlParamsPatient1"
   },
   "period":{
     "start":"2021-01-26T08:11:12+00:00",

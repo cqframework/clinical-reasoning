@@ -84,7 +84,7 @@ public class MeasureSDETest {
                 .up()
                 .containedByCoding("F")
                 .observationHasExtensionUrl()
-                .observationCount(6)
+                .observationCount(5)
                 .up()
                 .report();
     }

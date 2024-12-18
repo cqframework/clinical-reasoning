@@ -1,7 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -10,6 +14,52 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class MeasurementPeriodBuilderTests {
     private static final Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
+
+    @Test
+    void measure_eval() {
+        var report = GIVEN_REPO
+                .when()
+                .measureId("UberSimple")
+                .periodStart(LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneId.systemDefault()))
+                .subject("Patient/female-1914")
+                .reportType("subject")
+                .evaluate()
+                .then()
+                .report();
+
+        assertEquals(
+                LocalDate.of(2022, Month.JANUARY, 1)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant(),
+                report.getPeriod().getStart().toInstant());
+        assertEquals(
+                LocalDate.of(2022, Month.JUNE, 29)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant(),
+                report.getPeriod().getEnd().toInstant());
+    }
+
+    @Test
+    void measure_eval_UTC() {
+        var start = LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay(ZoneOffset.UTC);
+        var end = LocalDate.of(2022, Month.JUNE, 29).atStartOfDay(ZoneOffset.UTC);
+        var report = GIVEN_REPO
+                .when()
+                .measureId("UberSimple")
+                .periodStart(start)
+                .periodEnd(end)
+                .subject("Patient/female-1914")
+                .reportType("subject")
+                .evaluate()
+                .then()
+                .report();
+
+        var actualPeriod = report.getPeriod();
+
+        assertEquals(start.toInstant(), actualPeriod.getStart().toInstant());
+        assertEquals(end.toInstant(), actualPeriod.getEnd().toInstant());
+    }
 
     @Test
     void uberSimple_UsesMeasurementPeriodToIncludeResource() {

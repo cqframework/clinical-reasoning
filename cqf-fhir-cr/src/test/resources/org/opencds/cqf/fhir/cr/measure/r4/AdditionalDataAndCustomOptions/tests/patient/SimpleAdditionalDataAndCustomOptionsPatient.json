@@ -1,0 +1,10 @@
+{
+  "resourceType": "Patient",
+  "id": "SimpleAdditionalDataAndCustomOptionsPatient",
+  "meta": {
+    "versionId": "127425491"
+  },
+  "active": true,
+  "gender": "female",
+  "birthDate": "2021-07-07"
+}

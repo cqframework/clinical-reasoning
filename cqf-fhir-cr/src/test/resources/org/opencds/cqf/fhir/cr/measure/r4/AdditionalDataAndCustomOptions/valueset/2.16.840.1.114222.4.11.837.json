@@ -1,0 +1,40 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.114222.4.11.837",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2012-10-25T12:28:31.000-04:00"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+  "version": "20121025",
+  "name": "Ethnicity",
+  "title": "Ethnicity",
+  "status": "active",
+  "date": "2012-10-25T12:28:31-04:00",
+  "publisher": "CDC NCHS",
+  "description": "The purpose of this value set is to represent CDC concepts for Ethnicity",
+  "expansion": {
+    "identifier": "urn:uuid:4ee1b2a1-fb24-4145-afaa-30345e5e0ea2",
+    "timestamp": "2022-03-09T10:12:54-05:00",
+    "total": 2,
+    "offset": 0,
+    "parameter": [ {
+      "name": "count",
+      "valueInteger": 1000
+    }, {
+      "name": "offset",
+      "valueInteger": 0
+    } ],
+    "contains": [ {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2135-2",
+      "display": "Hispanic or Latino"
+    }, {
+      "system": "urn:oid:2.16.840.1.113883.6.238",
+      "version": "1.2",
+      "code": "2186-5",
+      "display": "Not Hispanic or Latino"
+    } ]
+  }
+}

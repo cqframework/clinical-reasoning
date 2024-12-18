@@ -1,0 +1,32 @@
+{
+  "resourceType": "Measure",
+  "id": "GlycemicControlHypoglycemicInitialPopulation",
+  "url": "http://test-case.com/fhir/measures/Measure/GlycemicControlHypoglycemicInitialPopulation",
+  "version": "0.000.01",
+  "name": "GlycemicControlHypoglycemicInitialPopulation",
+  "title": "Glycemic Control, Hypoglycemia Initial Population",
+  "library": [ "http://test-case.com/fhir/measures/Library/GlycemicControlHypoglycemicInitialPopulation" ],
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "cohort",
+      "display": "Cohort"
+    } ]
+  },
+  "group": [ {
+    "population": [ {
+      "id": "initial-population",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "Initial Population"
+      }
+    } ]
+  } ]
+}

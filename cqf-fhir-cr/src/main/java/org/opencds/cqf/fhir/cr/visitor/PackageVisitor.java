@@ -214,21 +214,19 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             var elapsed = String.valueOf(((new Date()).getTime() - startCache) / 1000);
             myLogger.info("retrieved cached ValueSet Expansions in: {}s", elapsed);
         }
-        valueSets.forEach(valueSet -> {
+        missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();
-            if (!expandedList.contains(url)) {
-                var expansionStartTime = new Date().getTime();
-                expandHelper.expandValueSet(
-                        valueSet,
-                        params,
-                        terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
-                        valueSets,
-                        expandedList,
-                        new Date());
-                var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
-                myLogger.info("Expanded {} in {}s", url, elapsed);
-            }
-            if (expansionCache.isPresent() && missingInCache.contains(valueSet)) {
+            var expansionStartTime = new Date().getTime();
+            expandHelper.expandValueSet(
+                    valueSet,
+                    params,
+                    terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
+                    valueSets,
+                    expandedList,
+                    new Date());
+            var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
+            myLogger.info("Expanded {} in {}s", url, elapsed);
+            if (expansionCache.isPresent()) {
                 expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
             }
         });

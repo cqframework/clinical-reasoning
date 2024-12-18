@@ -198,6 +198,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var expansionCache = getExpansionCache();
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
+        var missingInCache = new ArrayList<>(valueSets);
         if (expansionCache.isPresent()) {
             var startCache = (new Date()).getTime();
             valueSets.forEach(v -> {
@@ -207,6 +208,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 if (cachedExpansion != null) {
                     v.setExpansion(cachedExpansion.getExpansion());
                     expandedList.add(v.getUrl());
+                    missingInCache.remove(v);
                 }
             });
             myLogger.info("retrieved cached ValueSet Expansions in: "
@@ -225,7 +227,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 myLogger.info("Expanded " + valueSet.getUrl() + " in "
                         + String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000) + "s");
             }
-            if (expansionCache.isPresent()) {
+            if (expansionCache.isPresent() && missingInCache.contains(valueSet)) {
                 expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
             }
         });

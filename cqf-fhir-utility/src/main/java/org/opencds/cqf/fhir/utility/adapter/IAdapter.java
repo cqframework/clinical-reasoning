@@ -111,18 +111,16 @@ public interface IAdapter<T extends IBase> {
         return resolvePathList(base, path).stream().map(i -> (B) i).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     public default String resolvePathString(IBase base, String path) {
         var result = resolvePath(base, path);
         if (result == null) {
             return null;
-        } else if (result instanceof IPrimitiveType) {
-            return ((IPrimitiveType<String>) result).getValue();
-        } else if (result instanceof IBaseReference) {
-            return ((IBaseReference) result).getReferenceElement().getValue();
+        } else if (result instanceof IPrimitiveType primitive && primitive.getValue() instanceof String string) {
+            return string;
+        } else if (result instanceof IBaseReference reference) {
+            return reference.getReferenceElement().getValue();
         } else {
-            throw new UnprocessableEntityException("Path : " + path + " on element of type "
-                    + base.getClass().getSimpleName() + "could not be resolved");
+            throw new UnprocessableEntityException("Path : {} on element of type {} could not be resolved", path, base.getClass().getSimpleName() );
         }
     }
 

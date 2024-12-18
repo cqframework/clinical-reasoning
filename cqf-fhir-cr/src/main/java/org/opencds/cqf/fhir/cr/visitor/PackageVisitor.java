@@ -226,7 +226,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         expandedList,
                         new Date());
                 var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
-                myLogger.info("Expanded {} in {}s",url,elapsed);
+                myLogger.info("Expanded {} in {}s", url, elapsed);
             }
             if (expansionCache.isPresent() && missingInCache.contains(valueSet)) {
                 expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));

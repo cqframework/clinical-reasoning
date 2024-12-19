@@ -115,7 +115,7 @@ public interface IAdapter<T extends IBase> {
         var result = resolvePath(base, path);
         if (result == null) {
             return null;
-        } else if (result instanceof IPrimitiveType primitive && primitive.getValue() instanceof String string) {
+        } else if (result instanceof IPrimitiveType<?> primitive && primitive.getValue() instanceof String string) {
             return string;
         } else if (result instanceof IBaseReference reference) {
             return reference.getReferenceElement().getValue();

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -304,6 +305,45 @@ class ExpandHelperTest {
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
             assertNull(filteredExpansionParams.getParameter(parameterUrl));
         });
+    }
+
+    @Test
+    void expandingAddsAVersion() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+        // setup ValueSets
+        var url = baseUrl + "/ValueSet/leaf";
+        var initiallyNoVersionNoExpansion = createLeafWithUrl(url);
+        initiallyNoVersionNoExpansion.setExpansion(null);
+        initiallyNoVersionNoExpansion.setVersion(null);
+        var adapter = (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(initiallyNoVersionNoExpansion);
+        var version = "1.2.3";
+        var expandedValueSet = createLeafWithUrl(url);
+        expandedValueSet.setVersion(version);
+
+        // shouldn't be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // should be used
+        var client = mockTerminologyServerWithValueSetR4(expandedValueSet);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                new ArrayList<String>(),
+                new Date());
+        // leaf was expanded
+        assertEquals(3, initiallyNoVersionNoExpansion.getExpansion().getContains().size());
+        // leaf got a version
+        assertEquals(version, initiallyNoVersionNoExpansion.getVersion());
+        // trivial checks
+        verify(rep, never()).search(any(), any(), any());
+        verify(client, times(1)).expand(eq(adapter), any(), any());
     }
 
     ValueSet createLeafWithUrl(String url) {

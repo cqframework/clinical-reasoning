@@ -86,6 +86,10 @@ public class ExpandHelper {
             try {
                 var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
+                // expansions are only valid for a particular version
+                if (!valueSet.hasVersion()) {
+                    valueSet.setVersion(expandedValueSet.getVersion());
+                }
                 valueSet.setExpansion(expandedValueSet.getExpansion());
             } catch (Exception ex) {
                 throw new UnprocessableEntityException(String.format(

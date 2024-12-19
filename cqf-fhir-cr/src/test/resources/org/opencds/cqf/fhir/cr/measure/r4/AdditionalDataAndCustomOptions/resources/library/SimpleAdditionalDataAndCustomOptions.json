@@ -1,0 +1,27 @@
+{
+  "resourceType": "Library",
+  "id": "SimpleAdditionalDataAndCustomOptions",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/library-cqfm" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "Encounter"
+  } ],
+  "url": "http://test-case.com/fhir/measures/Library/SimpleAdditionalDataAndCustomOptions",
+  "version": "0.0.004",
+  "name": "SimpleAdditionalDataAndCustomOptions",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library",
+      "display": "Logic Library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/SimpleAdditionalDataAndCustomOptions.cql"
+  } ]
+}

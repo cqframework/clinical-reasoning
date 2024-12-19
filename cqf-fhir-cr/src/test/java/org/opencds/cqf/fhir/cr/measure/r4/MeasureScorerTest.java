@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
@@ -196,6 +198,46 @@ class MeasureScorerTest {
                     "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: null",
                     exception.getMessage());
         }
+    }
+
+    /**
+     * test to validate that measure with MeasureScorer specified at the group level
+     * and nothing on measure-level MeasureScorer
+     */
+    @Test
+    void measure_eval_group_measurescorer() {
+        var when = org.opencds.cqf.fhir.cr.measure.r4.Measure.given()
+                .repositoryFor("MeasureScoring")
+                .when()
+                .measureId("GroupLevelMeasureScorerNoMeasureLevel")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("population")
+                .evaluate();
+        MeasureReport report = when.then().report();
+        assertNotNull(report);
+        assertEquals(1, report.getGroup().size());
+        assertEquals(4, report.getGroupFirstRep().getPopulation().get(0).getCount());
+    }
+
+    @Test
+    void measure_eval_group_measurescorer_invalidMeasureScore() {
+        // Removed MeasureScorer from Measure, should trigger exception
+        var when = org.opencds.cqf.fhir.cr.measure.r4.Measure.given()
+                .repositoryFor("MeasureScoring")
+                .when()
+                .measureId("InvalidMeasureScorerMissing")
+                .subject(null)
+                .periodStart("2018-01-01")
+                .periodEnd("2030-12-31")
+                .reportType("population")
+                .evaluate();
+
+        String errorMsg =
+                "MeasureScoring must be specified on Group or Measure for Measure: https://madie.cms.gov/Measure/InvalidMeasureScorerMissing";
+        var e = assertThrows(InvalidRequestException.class, when::then);
+        assertEquals(errorMsg, e.getMessage());
     }
 
     private MeasureDef mockMeasureDef(int numGroups) {

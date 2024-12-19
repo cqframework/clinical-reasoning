@@ -26,7 +26,6 @@ class AdapterTest {
         var library = new Library();
         library.setDate(new Date());
         var adapter = IAdapterFactory.createAdapterForResource(library);
-        // library.addRelatedArtifact().setResource("test");
         assertThrows(UnprocessableEntityException.class, () -> adapter.resolvePathString(library,"date"));
     }
 }

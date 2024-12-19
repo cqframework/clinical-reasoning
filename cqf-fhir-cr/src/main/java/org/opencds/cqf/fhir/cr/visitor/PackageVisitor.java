@@ -36,8 +36,11 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
+    private static final Logger myLogger = LoggerFactory.getLogger(PackageVisitor.class);
     private static final String CANONICAL_TYPE = "canonical";
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
@@ -195,7 +198,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var expansionCache = getExpansionCache();
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
+        var missingInCache = new ArrayList<>(valueSets);
         if (expansionCache.isPresent()) {
+            var startCache = (new Date()).getTime();
             valueSets.forEach(v -> {
                 var cachedExpansion = expansionCache
                         .get()
@@ -203,21 +208,26 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 if (cachedExpansion != null) {
                     v.setExpansion(cachedExpansion.getExpansion());
                     expandedList.add(v.getUrl());
+                    missingInCache.remove(v);
                 }
             });
+            var elapsed = String.valueOf(((new Date()).getTime() - startCache) / 1000);
+            myLogger.info("retrieved cached ValueSet Expansions in: {}s", elapsed);
         }
-        valueSets.forEach(valueSet -> {
-            if (!expandedList.contains(valueSet.getUrl())) {
-                expandHelper.expandValueSet(
-                        valueSet,
-                        params,
-                        terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
-                        valueSets,
-                        expandedList,
-                        new Date());
-                if (expansionCache.isPresent()) {
-                    expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
-                }
+        missingInCache.forEach(valueSet -> {
+            var url = valueSet.getUrl();
+            var expansionStartTime = new Date().getTime();
+            expandHelper.expandValueSet(
+                    valueSet,
+                    params,
+                    terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
+                    valueSets,
+                    expandedList,
+                    new Date());
+            var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
+            myLogger.info("Expanded {} in {}s", url, elapsed);
+            if (expansionCache.isPresent()) {
+                expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
             }
         });
     }

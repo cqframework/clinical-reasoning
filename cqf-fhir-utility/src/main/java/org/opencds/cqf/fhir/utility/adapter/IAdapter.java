@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -110,10 +111,20 @@ public interface IAdapter<T extends IBase> {
         return resolvePathList(base, path).stream().map(i -> (B) i).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     public default String resolvePathString(IBase base, String path) {
-        var result = (IPrimitiveType<String>) resolvePath(base, path);
-        return result == null ? null : result.getValue();
+        var result = resolvePath(base, path);
+        if (result == null) {
+            return null;
+        } else if (result instanceof IPrimitiveType<?> primitive && primitive.getValue() instanceof String string) {
+            return string;
+        } else if (result instanceof IBaseReference reference) {
+            return reference.getReferenceElement().getValue();
+        } else {
+            throw new UnprocessableEntityException(
+                    "Path : {} on element of type {} could not be resolved",
+                    path,
+                    base.getClass().getSimpleName());
+        }
     }
 
     public default IBase resolvePath(IBase base, String path) {

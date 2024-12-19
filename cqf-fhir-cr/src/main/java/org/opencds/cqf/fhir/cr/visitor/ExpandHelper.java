@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.ValueSets;
@@ -26,9 +27,11 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
-
+    private static final Logger myLogger = LoggerFactory.getLogger(ExpandHelper.class);
     private final Repository repository;
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove =
@@ -152,9 +155,8 @@ public class ExpandHelper {
         var expansion = valueSet.newExpansion();
         valueSet.getValueSetIncludes().forEach(reference -> {
             // Grab the ValueSet
-            var split = reference.split("\\|");
-            var url = split.length == 1 ? reference : split[0];
-            var version = split.length == 1 ? null : split[1];
+            var url = Canonicals.getUrl(reference);
+            var version = Canonicals.getVersion(reference);
             var includedVS =
                     getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url, version);
             if (includedVS != null) {

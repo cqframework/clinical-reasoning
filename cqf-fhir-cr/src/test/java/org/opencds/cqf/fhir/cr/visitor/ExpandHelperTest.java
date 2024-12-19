@@ -338,7 +338,8 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         // leaf was expanded
-        assertEquals(3, initiallyNoVersionNoExpansion.getExpansion().getContains().size());
+        assertEquals(
+                3, initiallyNoVersionNoExpansion.getExpansion().getContains().size());
         // leaf got a version
         assertEquals(version, initiallyNoVersionNoExpansion.getVersion());
         // trivial checks

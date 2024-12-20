@@ -3,8 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import com.google.common.base.Strings;
-import jakarta.annotation.Nullable;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -12,11 +10,8 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -56,45 +51,36 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
-        r4Processor = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+        r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
 
     @Override
-    public Bundle evaluate(
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subject, // practitioner passed in here
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
-            Parameters parameters,
-            String productLine,
-            String reporter) {
+    public Bundle evaluate(R4MeasureEvaluatorMultipleRequest request) {
+        measurePeriodValidator.validatePeriodStartAndEnd(request.getPeriodStart(), request.getPeriodEnd());
 
-        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
+        var dataEndpoint = request.getDataEndpoint();
+        var  contentEndpoint = request.getContentEndpoint();
+        var  terminologyEndpoint = request.getTerminologyEndpoint();
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
             // if needing to use proxy repository, override constructors
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4Processor = new R4MeasureProcessor(
-                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+            r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
+
+        var subject = request.getSubject();
+
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(request.getMeasureId(), request.getMeasureIdentifier(), request.getMeasureUrl());
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
-        var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subject);
+        var evalType = MeasureEvalType.fromCode(request.getReportType())
+                .orElse(subject == null || subject.isEmpty() ? MeasureEvalType.POPULATION : MeasureEvalType.SUBJECT);
 
         // get subjects
         var subjects = getSubjects(subjectProvider, subject);
@@ -109,29 +95,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             populationMeasureReport(
                     bundle,
                     measures,
-                    periodStart,
-                    periodEnd,
-                    reportType,
                     evalType,
-                    subject,
                     subjects,
-                    parameters,
-                    additionalData,
-                    productLine,
-                    reporter);
+                    request);
         } else {
             subjectMeasureReport(
                     bundle,
                     measures,
-                    periodStart,
-                    periodEnd,
-                    reportType,
                     evalType,
                     subjects,
-                    parameters,
-                    additionalData,
-                    productLine,
-                    reporter);
+                    request);
         }
 
         return bundle;
@@ -140,16 +113,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void populationMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
             MeasureEvalType evalType,
-            String subjectParam,
             List<String> subjects,
-            Parameters parameters,
-            Bundle additionalData,
-            String productLine,
-            String reporter) {
+            R4MeasureEvaluatorMultipleRequest request) {
 
         // one aggregated MeasureReport per Measure
         var totalMeasures = measures.size();
@@ -157,14 +123,24 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+                measure,
+                request.getPeriodStart(),
+                request.getPeriodEnd(),
+                request.getReportType(),
+                subjects,
+                request.getAdditionalData(),
+                request.getParameters(),
+                evalType);
 
             // add ProductLine after report is generated
-            measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+            measureReport =
+                r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
 
             // add subject reference for non-individual reportTypes
-            measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
+            measureReport =
+                r4MeasureServiceUtils.addSubjectReference(measureReport, null, request.getSubject());
 
+            var reporter = request.getReporter();
             // add reporter if available
             if (reporter != null && !reporter.isEmpty()) {
                 measureReport.setReporter(
@@ -190,15 +166,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     protected void subjectMeasureReport(
             Bundle bundle,
             List<Measure> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
             MeasureEvalType evalType,
             List<String> subjects,
-            Parameters parameters,
-            Bundle additionalData,
-            String productLine,
-            String reporter) {
+            R4MeasureEvaluatorMultipleRequest request) {
 
         // create individual reports for each subject, and each measure
         var totalReports = subjects.size() * measures.size();
@@ -213,16 +183,19 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
                         measure,
-                        periodStart,
-                        periodEnd,
-                        reportType,
+                        request.getPeriodStart(),
+                        request.getPeriodEnd(),
+                        request.getReportType(),
                         Collections.singletonList(subject),
-                        additionalData,
-                        parameters,
+                        request.getAdditionalData(),
+                        request.getParameters(),
                         evalType);
 
                 // add ProductLine after report is generated
-                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+                measureReport =
+                    r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
+
+                var reporter = request.getReporter();
 
                 // add reporter if available
                 if (reporter != null && !reporter.isEmpty()) {

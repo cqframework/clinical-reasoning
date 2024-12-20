@@ -223,20 +223,19 @@ public class MultiMeasure {
 
         public MultiMeasure.When evaluate() {
             this.operation = () -> service.evaluate(
-                    measureId,
-                    measureUrl,
-                    measureIdentifier,
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    reporter);
+                R4MeasureEvaluatorMultipleRequest.builder()
+                    .setMeasureId(measureId)
+                    .setMeasureUrl(measureUrl)
+                    .setMeasureIdentifier(measureIdentifier)
+                    .setPeriodStart(periodStart)
+                    .setPeriodEnd(periodEnd)
+                    .setReportType(reportType)
+                    .setSubject(subject)
+                    .setAdditionalData(additionalData)
+                    .setParameters(parameters)
+                    .setProductLine(productLine)
+                    .setReporter(reporter)
+                    .build());
             return this;
         }
 

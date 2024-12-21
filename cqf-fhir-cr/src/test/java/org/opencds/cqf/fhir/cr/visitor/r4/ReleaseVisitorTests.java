@@ -460,31 +460,6 @@ class ReleaseVisitorTests {
     }
 
     @Test
-    void releaseResource_latestFromTx_NotSupported_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        repo.transaction(bundle);
-
-        String actualErrorMessage = "";
-
-        Parameters params = parameters(
-                part("version", "1.2.3"),
-                part("versionBehavior", new CodeType("default")),
-                part("latestFromTxServer", new BooleanType(true)));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-
-        try {
-            libraryAdapter.accept(releaseVisitor, params);
-        } catch (Exception e) {
-            actualErrorMessage = e.getMessage();
-        }
-        assertTrue(actualErrorMessage.contains("not yet implemented"));
-    }
-
-    @Test
     void release_missing_approvalDate_validation_test() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));

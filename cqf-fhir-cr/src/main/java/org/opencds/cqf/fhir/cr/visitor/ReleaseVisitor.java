@@ -1,14 +1,13 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
+import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-
-import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,7 +47,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String DEPENDSON = "depends-on";
     protected final TerminologyServerClient terminologyServerClient;
 
-
     public ReleaseVisitor(Repository repository) {
         super(repository);
         terminologyServerClient = new TerminologyServerClient(fhirContext());
@@ -59,8 +57,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {
         var latestFromTxServer = VisitorHelper.getBooleanParameter("latestFromTxServer", operationParameters)
                 .orElse(false);
-        Optional<IEndpointAdapter> terminologyEndpoint =
-                VisitorHelper.getResourceParameter("terminologyEndpoint", operationParameters).map(r -> (IEndpointAdapter) createAdapterForResource(r));
+        Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
+                        "terminologyEndpoint", operationParameters)
+                .map(r -> (IEndpointAdapter) createAdapterForResource(r));
         if (latestFromTxServer && !terminologyEndpoint.isPresent()) {
             throw new UnprocessableEntityException("latestFromTxServer = true but no terminologyEndpoint is available");
         }
@@ -225,7 +224,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             && resourceType.equals("ValueSet")
                             && prereleaseReferenceVersion == null
                             && latestFromTxServer) {
-                        var latest = terminologyServerClient.getResource(endpoint, preReleaseReference, this.fhirVersion());
+                        var latest =
+                                terminologyServerClient.getResource(endpoint, preReleaseReference, this.fhirVersion());
                         if (latest.isPresent()) {
                             checkNonExperimental(latest.get(), experimentalBehavior, repository);
                             // release components recursively
@@ -390,11 +390,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
                         } else {
                             maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
-                                            dependency.getReference(), repository, ACTIVE);
+                                    dependency.getReference(), repository, ACTIVE);
                         }
                         maybeAdapter.ifPresent(adapter -> {
-                            String versionedReference =
-                            addVersionToReference(dependency.getReference(), adapter);
+                            String versionedReference = addVersionToReference(dependency.getReference(), adapter);
                             dependency.setReference(versionedReference);
                             alreadyUpdatedDependencies.put(url, adapter.get());
                         });

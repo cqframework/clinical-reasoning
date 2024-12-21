@@ -20,7 +20,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -482,31 +481,6 @@ class ReleaseVisitorTests {
                     }
                 },
                 repo);
-    }
-
-    @Test
-    void releaseResource_latestFromTx_NotSupported_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
-                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
-        repo.transaction(bundle);
-
-        String actualErrorMessage = "";
-
-        Parameters params = parameters(
-                part("version", "1.2.3"),
-                part("versionBehavior", new CodeType("default")),
-                part("latestFromTxServer", new BooleanType(true)));
-        var releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-
-        try {
-            libraryAdapter.accept(releaseVisitor, params);
-        } catch (Exception e) {
-            actualErrorMessage = e.getMessage();
-        }
-        assertTrue(actualErrorMessage.contains("not yet implemented"));
     }
 
     @Test

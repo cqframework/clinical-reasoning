@@ -33,14 +33,14 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         measurePeriodValidator.validatePeriodStartAndEnd(request.getPeriodStart(), request.getPeriodEnd());
 
-        var repo =
-            Repositories.proxy(
+        var repo = Repositories.proxy(
                 repository,
                 true,
                 request.getDataEndpoint(),
                 request.getContentEndpoint(),
                 request.getTerminologyEndpoint());
-        var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
+        var processor = new R4MeasureProcessor(
+                repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();

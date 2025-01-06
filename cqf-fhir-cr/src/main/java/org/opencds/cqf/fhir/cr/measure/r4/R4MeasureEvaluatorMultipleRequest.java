@@ -1,22 +1,28 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
+import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import java.time.ZonedDateTime;
-import java.util.List;
 
+/**
+ * Object to capture parameters for evaluating multiple measures
+ */
 public class R4MeasureEvaluatorMultipleRequest {
 
     private final List<IdType> measureId;
     private final List<String> measureUrl;
     private final List<String> measureIdentifier;
+
     @Nullable
     private final ZonedDateTime periodStart;
+
     @Nullable
     private final ZonedDateTime periodEnd;
+
     private final String reportType;
     private final String subject;
     private final Endpoint contentEndpoint;
@@ -111,10 +117,13 @@ public class R4MeasureEvaluatorMultipleRequest {
         private List<IdType> measureId;
         private List<String> measureUrl;
         private List<String> measureIdentifier;
+
         @Nullable
         private ZonedDateTime periodStart;
+
         @Nullable
         private ZonedDateTime periodEnd;
+
         private String reportType;
         private String subject;
         private Endpoint contentEndpoint;

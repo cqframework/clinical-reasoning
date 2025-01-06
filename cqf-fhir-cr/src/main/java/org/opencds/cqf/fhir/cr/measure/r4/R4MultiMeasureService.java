@@ -51,7 +51,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
-        r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+        r4Processor = new R4MeasureProcessor(
+                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -61,14 +62,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         measurePeriodValidator.validatePeriodStartAndEnd(request.getPeriodStart(), request.getPeriodEnd());
 
         var dataEndpoint = request.getDataEndpoint();
-        var  contentEndpoint = request.getContentEndpoint();
-        var  terminologyEndpoint = request.getTerminologyEndpoint();
+        var contentEndpoint = request.getContentEndpoint();
+        var terminologyEndpoint = request.getTerminologyEndpoint();
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
             // if needing to use proxy repository, override constructors
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4Processor = new R4MeasureProcessor(repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+            r4Processor = new R4MeasureProcessor(
+                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
@@ -76,7 +78,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         var subject = request.getSubject();
 
-        List<Measure> measures = r4MeasureServiceUtils.getMeasures(request.getMeasureId(), request.getMeasureIdentifier(), request.getMeasureUrl());
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(
+                request.getMeasureId(), request.getMeasureIdentifier(), request.getMeasureUrl());
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
         var evalType = MeasureEvalType.fromCode(request.getReportType())
@@ -92,19 +95,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // evaluate Measures
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
-            populationMeasureReport(
-                    bundle,
-                    measures,
-                    evalType,
-                    subjects,
-                    request);
+            populationMeasureReport(bundle, measures, evalType, subjects, request);
         } else {
-            subjectMeasureReport(
-                    bundle,
-                    measures,
-                    evalType,
-                    subjects,
-                    request);
+            subjectMeasureReport(bundle, measures, evalType, subjects, request);
         }
 
         return bundle;
@@ -123,22 +116,20 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                measure,
-                request.getPeriodStart(),
-                request.getPeriodEnd(),
-                request.getReportType(),
-                subjects,
-                request.getAdditionalData(),
-                request.getParameters(),
-                evalType);
+                    measure,
+                    request.getPeriodStart(),
+                    request.getPeriodEnd(),
+                    request.getReportType(),
+                    subjects,
+                    request.getAdditionalData(),
+                    request.getParameters(),
+                    evalType);
 
             // add ProductLine after report is generated
-            measureReport =
-                r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
+            measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
 
             // add subject reference for non-individual reportTypes
-            measureReport =
-                r4MeasureServiceUtils.addSubjectReference(measureReport, null, request.getSubject());
+            measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, request.getSubject());
 
             var reporter = request.getReporter();
             // add reporter if available
@@ -192,8 +183,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         evalType);
 
                 // add ProductLine after report is generated
-                measureReport =
-                    r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
+                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, request.getProductLine());
 
                 var reporter = request.getReporter();
 

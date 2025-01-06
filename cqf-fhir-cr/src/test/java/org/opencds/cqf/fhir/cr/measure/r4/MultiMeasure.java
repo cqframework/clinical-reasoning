@@ -222,8 +222,7 @@ public class MultiMeasure {
         }
 
         public MultiMeasure.When evaluate() {
-            this.operation = () -> service.evaluate(
-                R4MeasureEvaluatorMultipleRequest.builder()
+            this.operation = () -> service.evaluate(R4MeasureEvaluatorMultipleRequest.builder()
                     .setMeasureId(measureId)
                     .setMeasureUrl(measureUrl)
                     .setMeasureIdentifier(measureIdentifier)

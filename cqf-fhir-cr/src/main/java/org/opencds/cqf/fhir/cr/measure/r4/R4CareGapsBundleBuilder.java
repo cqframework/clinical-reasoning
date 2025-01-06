@@ -102,15 +102,14 @@ public class R4CareGapsBundleBuilder {
 
         for (String subject : subjects) {
             // Measure Reports
-            Bundle result = r4MultiMeasureService.evaluate(
-                R4MeasureEvaluatorMultipleRequest.builder()
+            Bundle result = r4MultiMeasureService.evaluate(R4MeasureEvaluatorMultipleRequest.builder()
                     .setMeasureId(measureId)
                     .setPeriodStart(r4CareGapsParameters.getPeriodStart())
                     .setPeriodEnd(r4CareGapsParameters.getPeriodEnd())
                     .setReportType(MeasureEvalType.SUBJECT.toCode())
                     .setSubject(subject)
                     .setReporter(reporter)
-                .build());
+                    .build());
 
             // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.
             var patient = repository.read(Patient.class, new IdType(subject));

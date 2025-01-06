@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -8,15 +9,19 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import java.time.ZonedDateTime;
 
-// LUKETODO: javadoc
+/**
+ * Object to capture parameters for evaluating a single measure
+ */
 public class R4MeasureEvaluatorSingleRequest {
     private final Either3<CanonicalType, IdType, Measure> measure;
+
     @Nullable
     private final ZonedDateTime periodStart;
+
     @Nullable
     private final ZonedDateTime periodEnd;
+
     private final String reportType;
     private final String subjectId;
     private final String lastReceivedOn;
@@ -105,10 +110,13 @@ public class R4MeasureEvaluatorSingleRequest {
     public static class Builder {
 
         private Either3<CanonicalType, IdType, Measure> measure;
+
         @Nullable
         private ZonedDateTime periodStart;
+
         @Nullable
         private ZonedDateTime periodEnd;
+
         private String reportType;
         private String subjectId;
         private String lastReceivedOn;

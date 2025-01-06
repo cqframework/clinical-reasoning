@@ -131,7 +131,6 @@ public class SearchHelper {
      * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
      * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
      *
-     * @param <CanonicalType>
      * @param repository the repository to search
      * @param dependencyInfo the canonical url to search for
      * @return

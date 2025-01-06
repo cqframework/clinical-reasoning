@@ -122,7 +122,7 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
             resourcesToCreate.add(newResource);
             var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts();
             for (var ra : ownedRelatedArtifacts) {
-                var url = sourceResourceAdapter.resolvePathString(ra, "url");
+                var url = sourceResourceAdapter.resolvePathString(ra, "resource");
                 processReferencedResourceForDraft(url, version, resourcesToCreate);
             }
         }

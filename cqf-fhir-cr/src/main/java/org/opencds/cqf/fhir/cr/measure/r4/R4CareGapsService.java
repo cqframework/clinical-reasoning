@@ -22,7 +22,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 /**
  * Care Gap service that processes and produces care-gaps report as a result
  */
-public class R4CareGapsService {
+public class R4CareGapsService implements R4CareGapsServiceInterface {
     private final R4CareGapsProcessor r4CareGapsProcessor;
 
     public R4CareGapsService(
@@ -53,15 +53,16 @@ public class R4CareGapsService {
      * @return Parameters that includes zero to many document bundles that include Care Gap Measure
      *         Reports will be returned.
      */
+    @Override
     public Parameters getCareGapsReport(
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            @Nullable String subject,
-            List<String> status,
-            List<IdType> measureId,
-            List<String> measureIdentifier,
-            List<CanonicalType> measureUrl,
-            boolean notDocument) {
+        @Nullable ZonedDateTime periodStart,
+        @Nullable ZonedDateTime periodEnd,
+        @Nullable String subject,
+        List<String> status,
+        List<IdType> measureId,
+        List<String> measureIdentifier,
+        List<CanonicalType> measureUrl,
+        boolean notDocument) {
 
         return r4CareGapsProcessor.getCareGapsReport(
                 periodStart,
@@ -72,8 +73,9 @@ public class R4CareGapsService {
                 notDocument);
     }
 
-    protected List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
-            List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
+    @Override
+    public List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
+        List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
         Optional.ofNullable(measureId).ifPresent(list -> measureId.stream()

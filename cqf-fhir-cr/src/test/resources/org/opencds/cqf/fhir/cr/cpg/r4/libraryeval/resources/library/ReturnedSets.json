@@ -1,0 +1,17 @@
+{
+    "resourceType": "Library",
+    "id": "ReturnedSets",
+    "url": "http://example.com/Library/ReturnedSets",
+    "name": "ReturnedSets",
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      } ]
+    },
+    "content": [ {
+      "contentType": "text/cql",
+      "url": "../../cql/ReturnedSets.cql"
+    } ]
+}

@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
 class LibraryEvaluationServiceTest {
@@ -123,25 +122,35 @@ class LibraryEvaluationServiceTest {
         Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));
         var libId = new IdType("Library", "ReturnedSets");
         var when = Library.given()
-            .repositoryFor("libraryeval")
-            .when()
-            .id(libId)
-            .parameters(params)
-            .evaluateLibrary();
+                .repositoryFor("libraryeval")
+                .when()
+                .id(libId)
+                .parameters(params)
+                .evaluateLibrary();
         var report = when.then().parameters();
         assertNotNull(report);
         assertTrue(report.hasParameter("Conditions"));
         assertTrue(report.hasParameter("Encounters"));
         assertTrue(report.hasParameter("Related Encounters"));
 
-        var relatedEncountersByName = report.getParameter("Related Encounters")
-            .getPart()
-            .stream()
-            .collect(Collectors.toMap(ParametersParameterComponent::getName,
-                ParametersParameterComponent::getResource));
+        var relatedEncountersByName = report.getParameter("Related Encounters").getPart().stream()
+                .collect(Collectors.toMap(
+                        ParametersParameterComponent::getName, ParametersParameterComponent::getResource));
 
-        assertEquals("Condition/SimpleCondition", relatedEncountersByName.get("condition").getIdElement().toUnqualifiedVersionless().getValue());
-        assertEquals("Encounter/SimpleEncounter", relatedEncountersByName.get("encounter").getIdElement().toUnqualifiedVersionless().getValue());
+        assertEquals(
+                "Condition/SimpleCondition",
+                relatedEncountersByName
+                        .get("condition")
+                        .getIdElement()
+                        .toUnqualifiedVersionless()
+                        .getValue());
+        assertEquals(
+                "Encounter/SimpleEncounter",
+                relatedEncountersByName
+                        .get("encounter")
+                        .getIdElement()
+                        .toUnqualifiedVersionless()
+                        .getValue());
     }
 
     // ToDo: bundle test

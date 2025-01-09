@@ -15,20 +15,20 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 public interface R4CareGapsProcessorInterface {
 
     Parameters getCareGapsReport(
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        String subject,
-        List<String> status,
-        List<Either3<IdType, String, CanonicalType>> measure,
-        boolean notDocument);
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument);
 
     R4CareGapsParameters setCareGapParameters(
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        String subject,
-        List<String> status,
-        List<Either3<IdType, String, CanonicalType>> measure,
-        boolean notDocument);
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument);
 
     List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure);
 
@@ -40,8 +40,7 @@ public interface R4CareGapsProcessorInterface {
 
     Parameters initializeResult();
 
-    void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure,
-        List<String> statuses);
+    void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses);
 
     void measureCompatibilityCheck(List<Measure> measures);
 

@@ -69,12 +69,12 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     @Override
     public Parameters getCareGapsReport(
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        String subject,
-        List<String> status,
-        List<Either3<IdType, String, CanonicalType>> measure,
-        boolean notDocument) {
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument) {
 
         // set Parameters
         R4CareGapsParameters r4CareGapsParams =
@@ -107,12 +107,12 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     @Override
     public R4CareGapsParameters setCareGapParameters(
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        String subject,
-        List<String> status,
-        List<Either3<IdType, String, CanonicalType>> measure,
-        boolean notDocument) {
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String subject,
+            List<String> status,
+            List<Either3<IdType, String, CanonicalType>> measure,
+            boolean notDocument) {
         R4CareGapsParameters r4CareGapsParams = new R4CareGapsParameters();
         r4CareGapsParams.setMeasure(measure);
         r4CareGapsParams.setPeriodStart(periodStart);
@@ -176,8 +176,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     }
 
     @Override
-    public void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure,
-        List<String> statuses) {
+    public void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {

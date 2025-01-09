@@ -55,14 +55,14 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
      */
     @Override
     public Parameters getCareGapsReport(
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        @Nullable String subject,
-        List<String> status,
-        List<IdType> measureId,
-        List<String> measureIdentifier,
-        List<CanonicalType> measureUrl,
-        boolean notDocument) {
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            @Nullable String subject,
+            List<String> status,
+            List<IdType> measureId,
+            List<String> measureIdentifier,
+            List<CanonicalType> measureUrl,
+            boolean notDocument) {
 
         return r4CareGapsProcessor.getCareGapsReport(
                 periodStart,
@@ -75,7 +75,7 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
 
     @Override
     public List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
-        List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
+            List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
 
         List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
         Optional.ofNullable(measureId).ifPresent(list -> measureId.stream()

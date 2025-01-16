@@ -305,11 +305,20 @@ public class MeasureEvaluator {
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
-
-            EvaluationResult result =
-                    libraryEngine.getEvaluationResult(id, subjectId, null, null, null, null, zonedDateTime, context);
-
-            evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
+            try {
+                EvaluationResult result = libraryEngine.getEvaluationResult(
+                        id, subjectId, null, null, null, null, zonedDateTime, context);
+                evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
+            } catch (Exception e) {
+                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+                // applicable)
+                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
+                // Capture error for MeasureReportBuilder
+                if (!error.isEmpty()) {
+                    measureDef.addError(error);
+                    logger.error(error);
+                }
+            }
         }
 
         return measureDef;

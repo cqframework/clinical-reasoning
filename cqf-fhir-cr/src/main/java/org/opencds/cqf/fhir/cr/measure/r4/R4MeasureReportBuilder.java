@@ -194,7 +194,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         public void addOperationOutcomes() {
             var errorMsgs = this.measureDef.errors();
             for (var error : errorMsgs) {
-                this.addContained(createOperationOutcome(error));
+                addContained(createOperationOutcome(error));
             }
         }
 

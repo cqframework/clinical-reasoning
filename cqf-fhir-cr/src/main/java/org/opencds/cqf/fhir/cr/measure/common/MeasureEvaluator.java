@@ -314,10 +314,8 @@ public class MeasureEvaluator {
                 // applicable)
                 var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
-                if (!error.isEmpty()) {
-                    measureDef.addError(error);
-                    logger.error(error);
-                }
+                measureDef.addError(error);
+                logger.error(error, e);
             }
         }
 

@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "female-1988-encounter-3",
+  "id": "female-1988-2-encounter-invalid-period",
   "status": "finished",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",

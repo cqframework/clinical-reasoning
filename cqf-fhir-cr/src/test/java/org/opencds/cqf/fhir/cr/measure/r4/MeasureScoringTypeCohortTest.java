@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -89,22 +88,15 @@ public class MeasureScoringTypeCohortTest {
 
     @Test
     void cohortBooleanMissingRequiredPopulation() {
-        try {
-            given.when()
-                    .measureId("CohortBooleanMissingReqdPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage()
-                    .contains("MeasurePopulationType: numerator, is not a member of allowed 'cohort' populations"));
-        }
+        given.when()
+                .measureId("CohortBooleanMissingReqdPopulation")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "MeasurePopulationType: numerator, is not a member of allowed 'cohort' populations")
+                .report();
     }
 
     @Test
@@ -125,22 +117,14 @@ public class MeasureScoringTypeCohortTest {
 
     @Test
     void cohortBooleanExtraInvalidPopulation() {
-        try {
-            given.when()
-                    .measureId("CohortBooleanExtraInvalidPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage()
-                    .contains("MeasurePopulationType: denominator, is not a member of allowed 'cohort' populations"));
-        }
+        given.when()
+                .measureId("CohortBooleanExtraInvalidPopulation")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "MeasurePopulationType: denominator, is not a member of allowed 'cohort' populations")
+                .report();
     }
 
     @Test

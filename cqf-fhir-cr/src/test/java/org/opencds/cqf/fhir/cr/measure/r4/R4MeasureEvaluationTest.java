@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,11 +48,14 @@ import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -352,20 +355,24 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             define Gender: Patient.gender
             """;
 
-        try {
-            runTest(
-                    cql,
-                    List.of(jane_doe().getId(), john_doe().getId()),
-                    stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
-                    setupMockRetrieverProvider(),
-                    null);
-            fail("expected IllegalArgumentException");
-        } catch (InvalidRequestException exception) {
-            assertThat(
-                    exception.getMessage(),
-                    equalTo(
-                            "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test"));
-        }
+        var report = runTest(
+                cql,
+                List.of(jane_doe().getId(), john_doe().getId()),
+                stratified_measure(populationBasisTypeForMeasure, populationBasisTypeForGroup),
+                setupMockRetrieverProvider(),
+                null);
+
+        assertEquals(MeasureReportStatus.ERROR, report.getStatus());
+        hasContainedOperationOutcomeMsg(
+                report,
+                "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test");
+    }
+
+    public void hasContainedOperationOutcomeMsg(MeasureReport report, String msg) {
+        assertTrue(report.getContained().stream()
+                .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
+                .map(y -> (OperationOutcome) y)
+                .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
     }
 
     @Test

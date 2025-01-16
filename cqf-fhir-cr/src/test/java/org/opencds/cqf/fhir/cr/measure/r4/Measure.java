@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
@@ -676,6 +677,21 @@ public class Measure {
                 }
             }
             return refs;
+        }
+
+        public SelectedReport hasContainedOperationOutcome() {
+            assertTrue(report().hasContained()
+                    && report().getContained().stream()
+                            .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome)));
+            return this;
+        }
+
+        public SelectedReport hasContainedOperationOutcomeMsg(String msg) {
+            assertTrue(report().getContained().stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
+                    .map(y -> (OperationOutcome) y)
+                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+            return this;
         }
     }
 

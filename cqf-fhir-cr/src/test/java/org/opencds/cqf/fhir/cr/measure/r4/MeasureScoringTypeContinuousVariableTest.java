@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -108,28 +107,15 @@ public class MeasureScoringTypeContinuousVariableTest {
 
     @Test
     void continuousVariableBooleanMissingRequiredPopulation() {
-        try {
-            given.when()
-                    .measureId("ContinuousVariableBooleanMissingReqdPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .population("measure-population")
-                    .hasCount(10)
-                    .up()
-                    .population("measure-population-exclusion")
-                    .hasCount(10)
-                    .up()
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage()
-                    .contains("'continuous-variable' measure is missing required population: initial-population"));
-        }
+        given.when()
+                .measureId("ContinuousVariableBooleanMissingReqdPopulation")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "'continuous-variable' measure is missing required population: initial-population")
+                .report();
     }
 
     @Test
@@ -156,30 +142,15 @@ public class MeasureScoringTypeContinuousVariableTest {
 
     @Test
     void continuousVariableBooleanExtraInvalidPopulation() {
-        try {
-            given.when()
-                    .measureId("ContinuousVariableBooleanExtraInvalidPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .population("measure-population")
-                    .hasCount(10)
-                    .up()
-                    .population("measure-population-exclusion")
-                    .hasCount(10)
-                    .up()
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "MeasurePopulationType: denominator, is not a member of allowed 'continuous-variable' populations"));
-        }
+        given.when()
+                .measureId("ContinuousVariableBooleanExtraInvalidPopulation")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "MeasurePopulationType: denominator, is not a member of allowed 'continuous-variable' populations")
+                .report();
     }
 
     @Test

@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -139,34 +138,14 @@ public class MeasureScoringTypeProportionTest {
 
     @Test
     void proportionBooleanMissingRequiredPopulation() {
-        try {
-            given.when()
-                    .measureId("ProportionBooleanMissingReqdPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .population("denominator-exclusion")
-                    .hasCount(2)
-                    .up()
-                    .population("denominator-exception")
-                    .hasCount(2) // because subject was also in Numerator
-                    .up()
-                    .population("numerator-exclusion")
-                    .hasCount(2)
-                    .up()
-                    .population("numerator")
-                    .hasCount(2)
-                    .up()
-                    .hasScore("0.3333333333333333")
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage().contains("'proportion' measure is missing required population: denominator"));
-        }
+        given.when()
+                .measureId("ProportionBooleanMissingReqdPopulation")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("'proportion' measure is missing required population: denominator")
+                .report();
     }
 
     @Test
@@ -203,37 +182,15 @@ public class MeasureScoringTypeProportionTest {
 
     @Test
     void proportionBooleanExtraInvalidPopulation() {
-        try {
-            given.when()
-                    .measureId("ProportionBooleanExtraInvalidPopulation")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .population("denominator-exclusion")
-                    .hasCount(2)
-                    .up()
-                    .population("denominator-exception")
-                    .hasCount(2) // because subject was also in Numerator
-                    .up()
-                    .population("numerator-exclusion")
-                    .hasCount(2)
-                    .up()
-                    .population("numerator")
-                    .hasCount(2)
-                    .up()
-                    .hasScore("0.3333333333333333")
-                    .up()
-                    .report();
-            fail("This should throw error");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(
-                    e.getMessage()
-                            .contains(
-                                    "MeasurePopulationType: measure-population, is not a member of allowed 'proportion' populations"));
-        }
+        given.when()
+                .measureId("ProportionBooleanExtraInvalidPopulation")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "MeasurePopulationType: measure-population, is not a member of allowed 'proportion' populations")
+                .report();
     }
 
     @Test

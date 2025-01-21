@@ -208,6 +208,8 @@ public class ApplyProcessor implements IApplyProcessor {
         for (int i = 0; i < goals.size(); i++) {
             var goal = processGoal.convertGoal(request, goals.get(i));
             if (Boolean.TRUE.equals(request.getContainResources())) {
+                var goalId = Ids.newId(request.getFhirVersion(), String.valueOf(i + 1));
+                goal.setId(goalId);
                 request.getModelResolver().setValue(requestOrchestration, "contained", Collections.singletonList(goal));
             } else {
                 var goalId = Ids.newId(request.getFhirVersion(), "Goal", String.valueOf(i + 1));

@@ -6,7 +6,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.17.0-SNAPSHOT</version>
+    <version>3.17.0</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -22,10 +22,10 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.20.0</cql.version>
+        <cql.version>3.21.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.1.14</spring.version>
-        <hapi.version>7.4.5</hapi.version>
+        <hapi.version>7.6.1</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
@@ -572,13 +572,13 @@
                     <configuration>
                         <signature>
                             <groupId>com.toasttab.android</groupId>
-                            <artifactId>gummy-bears-api-26</artifactId>
+                            <artifactId>gummy-bears-api-34</artifactId>
                             <version>0.10.0</version>
                         </signature>
                     </configuration>
                     <executions>
                         <execution>
-                            <id>check-android-26-compliance</id>
+                            <id>check-android-34-compliance</id>
                             <phase>test</phase>
                             <goals>
                                 <goal>check</goal>

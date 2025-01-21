@@ -114,13 +114,12 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
     }
 
-    @SuppressWarnings({"squid:S1612"})
     default void addProfileReferences(List<IDependencyInfo> references, String referenceSource) {
-        var profiles = get().getMeta().getProfile().stream()
-                .map(p -> (IBaseHasExtensions & IPrimitiveType<String>) p)
-                .collect(Collectors.toList());
-        profiles.forEach(profile -> references.add(new DependencyInfo(
-                referenceSource, profile.getValueAsString(), profile.getExtension(), profile::setValue)));
+        get().getMeta().getProfile().forEach(x -> {
+            var p = (IPrimitiveType<String>) x;
+            var e = (IBaseHasExtensions) x;
+            references.add(new DependencyInfo(referenceSource, p.getValueAsString(), e.getExtension(), p::setValue));
+        });
     }
 
     @SuppressWarnings("unchecked")

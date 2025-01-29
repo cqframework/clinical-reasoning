@@ -45,6 +45,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String ACTIVE = "active";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     private static final String DEPENDSON = "depends-on";
+    private static final String VALUESET = "ValueSet";
     protected final TerminologyServerClient terminologyServerClient;
 
     public ReleaseVisitor(Repository repository) {
@@ -60,7 +61,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     @SuppressWarnings("unchecked")
     @Override
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {
-        var latestFromTxServer = VisitorHelper.getBooleanParameter("latestFromTxServer", operationParameters)
+        boolean latestFromTxServer = VisitorHelper.getBooleanParameter("latestFromTxServer", operationParameters)
                 .orElse(false);
         Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
                         "terminologyEndpoint", operationParameters)
@@ -226,7 +227,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     var resourceType = Canonicals.getResourceType(preReleaseReference);
                     var prereleaseReferenceVersion = Canonicals.getVersion(preReleaseReference);
                     if (resourceType != null
-                            && resourceType.equals("ValueSet")
+                            && resourceType.equals(VALUESET)
                             && prereleaseReferenceVersion == null
                             && latestFromTxServer) {
                         var latest =
@@ -372,7 +373,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                                     .filter(canonical ->
                                             Canonicals.getUrl(canonical).equals(dependency.getReference()))
                                     .findAny();
-                        } else if (resourceType.equals("ValueSet")) {
+                        } else if (resourceType.equals(VALUESET)) {
                             expansionParametersVersion = canonicalVersionExpansionParameters.stream()
                                     .filter(canonical ->
                                             Canonicals.getUrl(canonical).equals(dependency.getReference()))
@@ -389,7 +390,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     // dependency
                     if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
                         final var url = dependencyUrl;
-                        if (resourceType != null && resourceType.equals("ValueSet") && latestFromTxServer) {
+                        if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
                             maybeAdapter = terminologyServerClient
                                     .getResource(endpoint, dependency.getReference(), this.fhirVersion())
                                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));

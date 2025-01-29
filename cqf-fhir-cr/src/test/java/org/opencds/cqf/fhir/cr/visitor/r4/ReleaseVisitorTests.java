@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -469,7 +469,7 @@ class ReleaseVisitorTests {
 
     @Test
     void release_latest_from_tx_server_sets_versions() {
-        // SpecificationLibrary - root is experimental but HAS experimental children 
+        // SpecificationLibrary - root is experimental but HAS experimental children
         final var leafOid = "2.16.840.1.113762.1.4.1146.6";
         final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
         var bundle = (Bundle) jsonParser.parseResource(
@@ -477,35 +477,40 @@ class ReleaseVisitorTests {
         repo.transaction(bundle);
         removeVersionsFromLibraryAndGrouperAndUpdate(repo, leafOid);
         var latestVSet = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.6"));
-        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
 
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
         endpoint.setAddress(authoritativeSource);
         endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
                 Constants.VSAC_USERNAME, new org.hl7.fhir.r4.model.StringType("username")));
-        endpoint.addExtension(
-                new org.hl7.fhir.r4.model.Extension(Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));
-        // var client = new TerminologyServerClient(fhirContext);
+        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));
+
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getResource(any(),any(),any())).thenReturn(Optional.of(latestVSet));
+        when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(
-            part("version", new StringType("1.2.7")), 
-            part("versionBehavior", new CodeType("default")), 
-            booleanPart("latestFromTxServer", true),
-            part("terminologyEndpoint", (org.hl7.fhir.r4.model.Endpoint)endpoint.get()));
+                part("version", new StringType("1.2.7")),
+                part("versionBehavior", new CodeType("default")),
+                booleanPart("latestFromTxServer", true),
+                part("terminologyEndpoint", (org.hl7.fhir.r4.model.Endpoint) endpoint.get()));
         libraryAdapter.accept(releaseVisitor, params);
         var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
         var include = grouper.getCompose().getIncludeFirstRep();
         assertNotNull(Canonicals.getVersion(include.getValueSet().get(0).getValue()));
-        assertTrue(Canonicals.getVersion(include.getValueSet().get(0).getValue()).equals(latestVSet.getVersion()));
+        assertTrue(
+                Canonicals.getVersion(include.getValueSet().get(0).getValue()).equals(latestVSet.getVersion()));
         var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
-        var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream().filter(ra -> ra.getResource().contains(leafOid)).findAny();
+        var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains(leafOid))
+                .findAny();
         assertTrue(leafRelatedArtifact.isPresent());
         assertNotNull(Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
-        assertTrue(Canonicals.getVersion(leafRelatedArtifact.get().getResource()).equals(latestVSet.getVersion()));
+        assertTrue(
+                Canonicals.getVersion(leafRelatedArtifact.get().getResource()).equals(latestVSet.getVersion()));
     }
 
     void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {

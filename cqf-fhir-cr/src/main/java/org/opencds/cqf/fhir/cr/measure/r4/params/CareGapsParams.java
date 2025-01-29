@@ -165,7 +165,7 @@ public class CareGapsParams {
 				: theMeasureId.stream()
 				.map(IdType::new)
 				.collect(Collectors.toList());
-	};
+	}
 
 	@Override
 	public boolean equals(Object o) {

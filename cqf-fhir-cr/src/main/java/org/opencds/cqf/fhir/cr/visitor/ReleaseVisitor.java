@@ -52,6 +52,11 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         terminologyServerClient = new TerminologyServerClient(fhirContext());
     }
 
+    public ReleaseVisitor(Repository repository, TerminologyServerClient terminologyServerClient) {
+        super(repository);
+        this.terminologyServerClient = terminologyServerClient;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {

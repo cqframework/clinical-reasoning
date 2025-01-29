@@ -2,9 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -205,140 +204,127 @@ class SimpleMeasureProcessorTest {
 
         @Test
         void exm108_partialSubjectId_1() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("numer-EXM108")
-                        .reportType("subject")
-                        .evaluate()
-                        .then()
-                        .firstGroup()
-                        .population("numerator")
-                        .hasCount(1)
-                        .up()
-                        .population("denominator")
-                        .hasCount(1);
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("numer-EXM108")
+                    .reportType("subject")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/numer-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_partialSubjectId_2() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("denom-EXM108")
-                        .reportType("subject")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("denom-EXM108")
+                    .reportType("subject")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/denom-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_fullSubjectId_1() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("Patient/numer-EXM108")
-                        .reportType("subject")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("Patient/numer-EXM108")
+                    .reportType("subject")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/numer-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_fullSubjectId_2() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("Patient/denom-EXM108")
-                        .reportType("subject")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("Patient/denom-EXM108")
+                    .reportType("subject")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/denom-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_population() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .reportType("population")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .reportType("population")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/denom-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_noReportType_noSubject_runsPopulation() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg(
+                            "Exception for subjectId: Patient/denom-EXM108, Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean")
+                    .report();
         }
 
         @Test
         void exm108_noType_hasSubject_runsIndividual() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("Patient/numer-EXM108")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("Patient/numer-EXM108")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/numer-EXM108")
+                    .report();
         }
 
         @Test
         void exm108_singlePatient_hasMetadata() {
-            try {
-                given.when()
-                        .measureId(MEASURE_ID)
-                        .periodStart("2018-12-31")
-                        .periodEnd("2019-12-31")
-                        .subject("Patient/numer-EXM108")
-                        .reportType("subject")
-                        .evaluate()
-                        .then();
-                fail("Expected InvalidRequestException");
-            } catch (InvalidRequestException exception) {
-                assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-            }
+            given.when()
+                    .measureId(MEASURE_ID)
+                    .periodStart("2018-12-31")
+                    .periodEnd("2019-12-31")
+                    .subject("Patient/numer-EXM108")
+                    .reportType("subject")
+                    .evaluate()
+                    .then()
+                    .hasStatus(MeasureReportStatus.ERROR)
+                    .hasContainedOperationOutcome()
+                    .hasContainedOperationOutcomeMsg("Patient/numer-EXM108")
+                    .report();
         }
     }
 }

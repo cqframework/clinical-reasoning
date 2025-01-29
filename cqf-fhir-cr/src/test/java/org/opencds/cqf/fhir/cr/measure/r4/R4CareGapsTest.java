@@ -479,7 +479,7 @@ class R4CareGapsTest {
                 .status("not-applicable")
                 .getCareGapsReport()
                 .then()
-                .hasBundleCount(9); // All 8 subjects have a bundle
+                .hasBundleCount(10); // All 10 subjects have a bundle
     }
 
     @Test
@@ -676,26 +676,23 @@ class R4CareGapsTest {
 
     @Test
     void MinimalProportionBooleanBasisSingleGroupWithDOC_DocumentMode_YES_date_of_compliance() {
-        try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Patient/male-2022")
-                    .periodStart(
-                            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
-                    .notDocument(false)
-                    .status("prospective-gap")
-                    .getCareGapsReport()
-                    .then();
-            fail("this should fail with a date of compliance expression");
-        } catch (InvalidRequestException exception) {
-            assertEquals(
-                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
-                    exception.getMessage());
-        }
+        var report = GIVEN_REPO
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
+                .notDocument(false)
+                .status("prospective-gap")
+                .getCareGapsReport()
+                .then()
+                .report();
+        // MeasureReport no longer throws an error, and care-gaps will not render a DetectedIssue because it did not
+        // find a qualifying "prospective-gap"
+        // Previous Error "group expression criteria results for expression: [date of compliance] and scoring:
+        // [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure:
+        // http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+        assertEquals(0, report.getParameter().size());
     }
 
     @Test
@@ -715,26 +712,23 @@ class R4CareGapsTest {
 
     @Test
     void MinimalProportionBooleanBasisSingleGroupWithDOC_NonDocumentMode_YES_date_of_compliance() {
-        try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Patient/male-2022")
-                    .periodStart(
-                            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
-                    .notDocument(true)
-                    .status("prospective-gap")
-                    .getCareGapsReport()
-                    .then();
-            fail("this should fail with a date of compliance expression");
-        } catch (InvalidRequestException exception) {
-            assertEquals(
-                    "group expression criteria results for expression: [date of compliance] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
-                    exception.getMessage());
-        }
+        var report = GIVEN_REPO
+                .when()
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance")
+                .notDocument(true)
+                .status("prospective-gap")
+                .getCareGapsReport()
+                .then()
+                .report();
+        // Previous error thrown  "group expression criteria results for expression: [date of compliance] and scoring:
+        // [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure:
+        // http://example.com/Measure/MinimalProportionBooleanBasisSingleGroupWithDOC-YES-date-of-compliance",
+        // MeasureReport no longer throws an error, and care-gaps will not render a DetectedIssue because it did not
+        // find a qualifying "prospective-gap"
+        assertEquals(0, report.getParameter().size());
     }
 
     @Test

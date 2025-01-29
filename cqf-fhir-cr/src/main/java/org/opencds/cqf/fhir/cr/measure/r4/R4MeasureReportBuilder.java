@@ -38,9 +38,12 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -187,6 +190,22 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 throw new InvalidRequestException("Invalid full reference: " + reference);
             }
         }
+
+        public void addOperationOutcomes() {
+            var errorMsgs = this.measureDef.errors();
+            for (var error : errorMsgs) {
+                addContained(createOperationOutcome(error));
+            }
+        }
+
+        private OperationOutcome createOperationOutcome(String errorMsg) {
+            OperationOutcome op = new OperationOutcome();
+            op.addIssue()
+                    .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                    .setCode(IssueType.EXCEPTION)
+                    .setDiagnostics(errorMsg);
+            return op;
+        }
     }
 
     @Override
@@ -209,14 +228,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         addEvaluatedResource(bc);
         addSupplementalData(bc);
+        bc.addOperationOutcomes();
 
         for (var r : bc.contained().values()) {
             bc.report().addContained(r);
         }
 
         this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
-
+        setReportStatus(bc);
         return bc.report();
+    }
+
+    private void setReportStatus(BuilderContext bc) {
+        if (bc.report().hasContained()
+                && bc.report().getContained().stream()
+                        .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome))) {
+            // Measure Reports that have encountered an error during evaluation will be set to status 'Error'
+            bc.report().setStatus(MeasureReportStatus.ERROR);
+        }
     }
 
     protected void addSupplementalData(BuilderContext bc) {

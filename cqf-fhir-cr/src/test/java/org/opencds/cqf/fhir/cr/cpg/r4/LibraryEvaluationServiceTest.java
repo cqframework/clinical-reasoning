@@ -9,10 +9,12 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.Test;
 
 class LibraryEvaluationServiceTest {
@@ -113,6 +115,42 @@ class LibraryEvaluationServiceTest {
         assertEquals("invalid parameters", report.getParameterFirstRep().getName());
         assertTrue(report.getParameterFirstRep().hasResource());
         assertTrue(report.getParameterFirstRep().getResource() instanceof OperationOutcome);
+    }
+
+    @Test
+    void libraryEvaluationWithReturnedSets() {
+        Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));
+        var libId = new IdType("Library", "ReturnedSets");
+        var when = Library.given()
+                .repositoryFor("libraryeval")
+                .when()
+                .id(libId)
+                .parameters(params)
+                .evaluateLibrary();
+        var report = when.then().parameters();
+        assertNotNull(report);
+        assertTrue(report.hasParameter("Conditions"));
+        assertTrue(report.hasParameter("Encounters"));
+        assertTrue(report.hasParameter("Related Encounters"));
+
+        var relatedEncountersByName = report.getParameter("Related Encounters").getPart().stream()
+                .collect(Collectors.toMap(
+                        ParametersParameterComponent::getName, ParametersParameterComponent::getResource));
+
+        assertEquals(
+                "Condition/SimpleCondition",
+                relatedEncountersByName
+                        .get("condition")
+                        .getIdElement()
+                        .toUnqualifiedVersionless()
+                        .getValue());
+        assertEquals(
+                "Encounter/SimpleEncounter",
+                relatedEncountersByName
+                        .get("encounter")
+                        .getIdElement()
+                        .toUnqualifiedVersionless()
+                        .getValue());
     }
 
     // ToDo: bundle test

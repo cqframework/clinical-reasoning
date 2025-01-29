@@ -24,11 +24,14 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DetectedIssue;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -36,6 +39,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -537,6 +541,26 @@ public class CareGaps {
         // reportType individual
         public SelectedMeasureReport measureReportTypeIndividual() {
             assertEquals(MeasureReportType.INDIVIDUAL, measureReport().getType());
+            return this;
+        }
+
+        public SelectedMeasureReport hasContainedOperationOutcome() {
+            assertTrue(measureReport().hasContained()
+                    && measureReport().getContained().stream()
+                            .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome)));
+            return this;
+        }
+
+        public SelectedMeasureReport hasContainedOperationOutcomeMsg(String msg) {
+            assertTrue(measureReport().getContained().stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
+                    .map(y -> (OperationOutcome) y)
+                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+            return this;
+        }
+
+        public SelectedMeasureReport hasStatus(MeasureReportStatus status) {
+            assertEquals(status, measureReport().getStatus());
             return this;
         }
     }

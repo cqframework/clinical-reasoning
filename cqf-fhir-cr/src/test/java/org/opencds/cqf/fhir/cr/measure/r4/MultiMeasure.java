@@ -27,12 +27,15 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -370,6 +373,26 @@ public class MultiMeasure {
 
         public SelectedMeasureReport hasEvaluatedResourceCount(int count) {
             assertEquals(count, report().getEvaluatedResource().size());
+            return this;
+        }
+
+        public SelectedMeasureReport hasMeasureReportStatus(MeasureReportStatus status) {
+            assertEquals(status, report().getStatus());
+            return this;
+        }
+
+        public SelectedMeasureReport hasContainedOperationOutcome() {
+            assertTrue(report().hasContained()
+                    && report().getContained().stream()
+                            .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome)));
+            return this;
+        }
+
+        public SelectedMeasureReport hasContainedOperationOutcomeMsg(String msg) {
+            assertTrue(report().getContained().stream()
+                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
+                    .map(y -> (OperationOutcome) y)
+                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
             return this;
         }
 

@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -200,16 +201,14 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanComponentStrat() {
-        try {
-            given.when()
-                    .measureId("CohortBooleanStratComponent")
-                    .evaluate()
-                    .then()
-                    .report();
-            fail("components are not implemented and should fail");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage().contains("multi-component stratifiers are not yet supported"));
-        }
+        given.when()
+                .measureId("CohortBooleanStratComponent")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("multi-component stratifiers are not yet supported")
+                .report();
     }
 
     /**
@@ -244,18 +243,15 @@ class MeasureStratifierTest {
      */
     @Test
     void ratioResourceDifferentTypeStrat() {
-        try {
-            given.when()
-                    .measureId("RatioResourceStratDifferentType")
-                    .evaluate()
-                    .then()
-                    .report();
-            fail("Since this is Resource based, it can't intersect with subject based expression");
-        } catch (InvalidRequestException exception) {
-            assertEquals(
-                    "stratifier expression criteria results for expression: [Gender Stratification] must fall within accepted types for population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType",
-                    exception.getMessage());
-        }
+        given.when()
+                .measureId("RatioResourceStratDifferentType")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "stratifier expression criteria results for expression: [Gender Stratification] must fall within accepted types for population basis: [Encounter] for Measure: http://example.com/Measure/RatioResourceStratDifferentType")
+                .report();
     }
 
     /**

@@ -52,6 +52,7 @@ import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
@@ -505,13 +506,7 @@ class ReleaseVisitorTests {
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
 
-        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
-        var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
-        endpoint.setAddress(authoritativeSource);
-        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
-                Constants.VSAC_USERNAME, new org.hl7.fhir.dstu3.model.StringType("username")));
-        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
-                Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType("password")));
+        var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
         when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
@@ -539,7 +534,18 @@ class ReleaseVisitorTests {
                 .equals(latestVSet.getVersion()));
     }
 
-    void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
+    private IEndpointAdapter createEndpoint(String authoritativeSource) {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.dstu3.model.StringType("username")));
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType("password")));
+        return endpoint;
+    }
+
+    private void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
         // remove versions from references
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
         library.getRelatedArtifact().forEach(ra -> {

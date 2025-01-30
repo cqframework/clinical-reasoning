@@ -50,6 +50,7 @@ import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
@@ -476,13 +477,7 @@ class ReleaseVisitorTests {
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
 
-        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R5);
-        var endpoint = factory.createEndpoint(new org.hl7.fhir.r5.model.Endpoint());
-        endpoint.setAddress(authoritativeSource);
-        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
-                Constants.VSAC_USERNAME, new org.hl7.fhir.r5.model.StringType("username")));
-        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
-                Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
+        var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
         when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
@@ -507,6 +502,17 @@ class ReleaseVisitorTests {
         assertNotNull(Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
         assertTrue(
                 Canonicals.getVersion(leafRelatedArtifact.get().getResource()).equals(latestVSet.getVersion()));
+    }
+
+    private IEndpointAdapter createEndpoint(String authoritativeSource) {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R5);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r5.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.r5.model.StringType("username")));
+        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
+        return endpoint;
     }
 
     void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {

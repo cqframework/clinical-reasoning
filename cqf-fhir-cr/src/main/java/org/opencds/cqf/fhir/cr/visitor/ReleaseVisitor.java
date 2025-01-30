@@ -112,7 +112,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         var updatedOwnedComponents = updatedComponents.stream()
                 .filter(r ->
                         ownedComponentMap.get(((IKnowledgeArtifactAdapter) createAdapterForResource(r)).getCanonical()))
-                .collect(Collectors.toList());
+                .toList();
 
         // update metadata for owned components
         updatedOwnedComponents.forEach(r -> updateMetadata(
@@ -234,11 +234,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     var latest = latestComponentRespectingVersions(
                             preReleaseReference, endpoint, latestFromTxServer, isOwned);
                     if (latest.isPresent()) {
-                        if (isOwned) {
-                            updatedResourceReferences.put(latest.get().getCanonical(), true);
-                        } else {
-                            updatedResourceReferences.put(latest.get().getCanonical(), false);
-                        }
+                        updatedResourceReferences.put(latest.get().getCanonical(), isOwned);
                         // release components recursively
                         updatedComponents.addAll(updateAllComponents(
                                 latest.get(), latestFromTxServer, updatedResourceReferences, endpoint));

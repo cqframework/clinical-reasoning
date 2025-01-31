@@ -260,6 +260,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 && prereleaseReferenceVersion == null
                 && latestFromTxServer) {
             // ValueSets we don't own go to the Tx Server if latestFromTxServer is true
+            // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
+            // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
             latest = terminologyServerClient
                     .getResource(endpoint, preReleaseReference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
@@ -396,6 +398,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependencyVersion(
             IDependencyInfo dependency, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
+        // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
+        // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
                     .getResource(endpoint, dependency.getReference(), this.fhirVersion())

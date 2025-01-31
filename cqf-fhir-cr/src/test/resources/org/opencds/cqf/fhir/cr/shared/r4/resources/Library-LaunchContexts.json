@@ -11,7 +11,7 @@
   ],
   "url": "http://fhir.org/test/Library/LaunchContexts",
   "version": "1.0.0",
-  "name": "HelloWorld",
+  "name": "LaunchContexts",
   "relatedArtifact": [
     {
       "type": "depends-on",
@@ -54,6 +54,11 @@
       "min": 0,
       "max": "1",
       "type": "Patient"
+    },
+    {
+      "name": "PatientHeight",
+      "use": "out",
+      "type": "Observation"
     }
   ],
   "dataRequirement": [
@@ -67,7 +72,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../cql/HelloWorld.cql"
+      "url": "../cql/LaunchContexts.cql"
     }
   ]
 }

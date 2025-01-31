@@ -54,8 +54,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.3"
+        "method": "POST"
       }
     },
     {
@@ -109,8 +108,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.4"
+        "method": "POST"
       }
     },
     {
@@ -164,8 +162,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.5.4"
+        "method": "POST"
       }
     },
     {
@@ -219,8 +216,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.5.5"
+        "method": "POST"
       }
     },
     {
@@ -274,8 +270,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.5.4"
+        "method": "POST"
       }
     },
     {
@@ -329,8 +324,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-sdc-profile-example-multi-subject.5.5"
+        "method": "POST"
       }
     }
   ]

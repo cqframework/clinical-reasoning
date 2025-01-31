@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static java.util.Objects.nonNull;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
@@ -55,23 +57,33 @@ public class ProcessItemWithContext extends ProcessItem {
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-        final List<IBaseResource> populationContext =
-                expressionProcessor.getExpressionResultForItem(request, contextExpression, itemLinkId).stream()
-                        .map(r -> {
-                            if (r instanceof IBaseResource) {
-                                return (IBaseResource) r;
-                            } else {
-                                var message = String.format(
-                                        "Encountered error populating item (%s): Context value is expected to be a resource.",
-                                        itemLinkId);
-                                logger.error(message);
-                                request.logException(message);
-                                return null;
-                            }
-                        })
-                        // filtering nulls here to prevent unnecessary duplicate responseItems
-                        .filter(r -> nonNull(r))
-                        .collect(Collectors.toList());
+        List<IBaseResource> populationContext;
+        try {
+            populationContext =
+                    expressionProcessor.getExpressionResultForItem(request, contextExpression, itemLinkId).stream()
+                            .map(r -> {
+                                if (r instanceof IBaseResource baseResource) {
+                                    return baseResource;
+                                } else {
+                                    var message = String.format(
+                                            "Encountered error populating item (%s): Context value is expected to be a resource.",
+                                            itemLinkId);
+                                    logger.error(message);
+                                    request.logException(message);
+                                    return null;
+                                }
+                            })
+                            // filtering nulls here to prevent unnecessary duplicate responseItems
+                            .filter(r -> nonNull(r))
+                            .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            var message =
+                    String.format("Encountered error evaluating expression: %s", contextExpression.getExpression());
+            logger.error(message);
+            request.logException(message);
+            populationContext = new ArrayList<>();
+        }
         if (populationContext.isEmpty()) {
             // We always want to return a responseItem even if we have nothing to populate
             populationContext.add(null);
@@ -147,78 +159,63 @@ public class ProcessItemWithContext extends ProcessItem {
             IOperationRequest request, IBaseResource context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
-        var pathSplit = elementId.split("\\.");
-        if (pathSplit.length > 2) {
-            pathValue = getNestedPath(request, context, profile, elementId, pathSplit);
-        } else {
-            var path = pathSplit[pathSplit.length - 1].replace("[x]", "");
-            pathValue = request.resolveRawPath(context, path);
+        var sliceName = Helpers.getSliceName(elementId);
+        var element = profile.getElement(elementId);
+        var elementPath = element.getPath();
+        var answerType = element.getTypeCode();
+        var path = elementPath.substring(elementPath.indexOf(".") + 1).replace("[x]", "");
+        if (StringUtils.isNotBlank(sliceName)) {
+            path = path.split("\\.")[0];
         }
-        return pathValue;
-    }
-
-    private Object getNestedPath(
-            IOperationRequest request,
-            Object pathValue,
-            IStructureDefinitionAdapter profile,
-            String elementId,
-            String[] pathSplit) {
-        String slice = null;
-        for (int i = 1; i < pathSplit.length; i++) {
-            if (pathValue instanceof List && !((List<?>) pathValue).isEmpty()) {
-                if (slice != null && ((List<?>) pathValue).size() > 1) {
-                    pathValue = getSliceValue(request, profile, pathValue, elementId, pathSplit, slice, i);
-                } else {
-                    pathValue = ((List<?>) pathValue).get(0);
-                }
+        pathValue = request.getModelResolver().resolvePath(context, path);
+        if (pathValue instanceof ArrayList<?> pathList) {
+            if (elementId.contains(":")) {
+                pathValue = getSliceValue(request, profile, path, sliceName, pathList);
+            } else {
+                pathValue = (pathList.get(0));
             }
-            slice = pathSplit[i].contains(":") ? pathSplit[i].substring(pathSplit[i].indexOf(":") + 1) : null;
-            pathValue = request.resolveRawPath(
-                    pathValue, pathSplit[i].replace("[x]", "").replace(":" + slice, ""));
         }
+        if (pathValue != null
+                && !((IBase) pathValue).fhirType().equals(answerType)
+                && pathValue instanceof IPrimitiveType<?> stringPath) {
+            pathValue = stringTypeForVersion(request.getFhirVersion(), stringPath.getValueAsString());
+        }
+
         return pathValue;
     }
 
-    @SuppressWarnings("unchecked")
     private Object getSliceValue(
             IOperationRequest request,
             IStructureDefinitionAdapter profile,
-            Object pathValue,
-            String elementId,
-            String[] pathSplit,
-            String slice,
-            int i) {
-        final var sliceName = slice;
-        final var filterIndex = i;
-        final var pathValues = ((List<?>) pathValue);
-        var filterElements = profile.getDifferentialElements().stream()
-                .filter(e -> {
-                    var id = request.resolvePathString(e, "id");
-                    return !id.equals(elementId)
-                            && request.resolveRawPath(e, "sliceName") == null
-                            && id.contains(sliceName);
-                })
+            String path,
+            String sliceName,
+            ArrayList<?> pathList) {
+        var filterElements = profile.getSliceElements(sliceName).stream()
+                .filter(e -> e.hasDefaultOrFixedOrPattern())
                 .collect(Collectors.toList());
-        var filterValues = new ArrayList<>();
-        filterElements.forEach(e -> {
-            var path = request.resolvePathString(e, "path");
-            var elementPath = elementId.replace(":" + sliceName, "");
-            var filterPath = path.replace(elementPath.substring(0, elementPath.indexOf(pathSplit[filterIndex])), "");
-            var filterValue = request.resolvePath(e, "fixed");
-            pathValues.stream().forEach(v -> {
-                var value = request.resolvePath((IBase) v, filterPath);
-                if (value instanceof IPrimitiveType && filterValue instanceof IPrimitiveType) {
-                    if (((IPrimitiveType<String>) value)
-                            .getValueAsString()
-                            .equals(((IPrimitiveType<String>) filterValue).getValueAsString())) {
-                        filterValues.add(v);
+        return pathList.stream()
+                .map(v -> (IBase) v)
+                .filter(value -> {
+                    for (var filterElement : filterElements) {
+                        var filterSplit = filterElement.getPath().split("\\.");
+                        var sliceIndex = -1;
+                        for (int i = 0; i < filterSplit.length; i++) {
+                            if (filterSplit[i].equals(path)) {
+                                sliceIndex = i;
+                            }
+                        }
+                        var filterPath = filterSplit[sliceIndex + 1];
+                        var filterValue = request.resolvePath(value, filterPath);
+                        var filter = filterElement.getDefaultOrFixedOrPattern();
+                        if (filter instanceof IPrimitiveType<?> filterString
+                                && filterValue instanceof IPrimitiveType<?> valueString
+                                && filterString.getValueAsString().equals(valueString.getValueAsString())) {
+                            return true;
+                        }
                     }
-                } else if (value.equals(filterValue)) {
-                    filterValues.add(v);
-                }
-            });
-        });
-        pathValue = filterValues.isEmpty() ? null : filterValues.get(0);
-        return pathValue;
+                    return false;
+                })
+                .findFirst()
+                .orElse(null);
     }
 }

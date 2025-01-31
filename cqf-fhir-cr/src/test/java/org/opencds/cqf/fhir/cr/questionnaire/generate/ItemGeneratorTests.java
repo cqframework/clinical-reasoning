@@ -6,10 +6,16 @@ import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@ExtendWith(MockitoExtension.class)
 class ItemGeneratorTests {
     private final String ROUTE_ONE_PATIENT_PROFILE =
             "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient";
@@ -18,14 +24,16 @@ class ItemGeneratorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
+    @Mock
+    LibraryEngine libraryEngine;
+
     @Test
     void testGenerateRequest() {
-        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4);
+        var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         assertThrows(UnsupportedOperationException.class, () -> request.getSubjectId());
         assertThrows(UnsupportedOperationException.class, () -> request.getData());
         assertThrows(UnsupportedOperationException.class, () -> request.getUseServerData());
         assertThrows(UnsupportedOperationException.class, () -> request.getParameters());
-        assertThrows(UnsupportedOperationException.class, () -> request.getLibraryEngine());
     }
 
     @Test
@@ -34,9 +42,7 @@ class ItemGeneratorTests {
                 .when()
                 .profileUrl(new CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(9)
-                .itemHasInitialValue("1.4.1")
-                .itemHasHiddenValueExtension("1.4.1")
+                .hasItemCount(8)
                 .itemHasInitialExpression("1.1.1");
     }
 
@@ -46,9 +52,7 @@ class ItemGeneratorTests {
                 .when()
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
-                .hasItemCount(9)
-                .itemHasInitialValue("1.4.1")
-                .itemHasHiddenValueExtension("1.4.1")
+                .hasItemCount(8)
                 .itemHasInitialExpression("1.1.1");
     }
 
@@ -83,25 +87,16 @@ class ItemGeneratorTests {
                 .when()
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition"))
                 .then()
-                .hasItemCount(6);
+                .hasItemCount(2);
     }
 
     @Test
-    void generateHiddenItem() {
+    void generateItemWithDefaults() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition2"))
                 .then()
-                .hasItemCount(3);
-    }
-
-    @Test
-    void generate() {
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .profileId(Ids.newId(fhirContextR4, "chf-bodyweight-change"))
-                .then()
-                .hasItemCount(11);
+                .hasItemCount(2);
     }
 
     @Test
@@ -110,7 +105,20 @@ class ItemGeneratorTests {
                 .when()
                 .profileId(Ids.newId(fhirContextR4, "LaunchContexts"))
                 .then()
-                .hasItemCount(3)
-                .hasLaunchContextExtension(5);
+                .hasItemCount(2)
+                .hasLaunchContextExtension(5)
+                .itemHasExtractionValueExtension("1");
+    }
+
+    @Test
+    @Disabled("nested profile generation not yet implemented")
+    void generateItemForProfileWithExtensionSlices() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileId(Ids.newId(fhirContextR4, "NzPatient"))
+                .then()
+                .hasItemCount(11)
+                // .hasLaunchContextExtension(5)
+                .itemHasExtractionValueExtension("1");
     }
 }

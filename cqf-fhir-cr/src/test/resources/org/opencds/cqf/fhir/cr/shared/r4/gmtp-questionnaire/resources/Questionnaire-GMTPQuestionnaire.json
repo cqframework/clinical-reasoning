@@ -1,0 +1,503 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "GMTPQuestionnaire",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "http://fhir.org/guides/cqf/us/common/Library/GMTPInitialExpressions"
+    }
+  ],
+  "url": "http://fhir.org/guides/cqf/us/common/Questionnaire/GMTPQuestionnaire",
+  "version": "0.1.0",
+  "name": "GMTPQuestionnaire",
+  "title": "Genetic/Molecular testing preauthorization request",
+  "status": "active",
+  "experimental": true,
+  "date": "2023-10-12T00:00:00+00:00",
+  "description": "Automated online preauthorization is available for some tests. Please log into the Availity Portal at Availity.com for a list of available questionnaires. If the appropriate questionnaire is not available, please complete this form.",
+  "item": [
+    {
+      "linkId": "provider-info",
+      "text": "Requesting Provider Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Requesting Provider Name"
+              }
+            }
+          ],
+          "linkId": "provider-info|name",
+          "text": "Requesting provider name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Requesting Provider Phone"
+              }
+            }
+          ],
+          "linkId": "provider-info|phone-number",
+          "text": "Phone",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Requesting Provider Address"
+              }
+            }
+          ],
+          "linkId": "provider-info|address",
+          "text": "Ordering provider address",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Requesting Provider NPI"
+              }
+            }
+          ],
+          "linkId": "provider-info|npi",
+          "text": "Ordering provider Tax ID/NPI #",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Requesting Provider Fax"
+              }
+            }
+          ],
+          "linkId": "provider-info|fax",
+          "text": "Fax",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "servicing-provider",
+      "text": "Laboratory performing testing/Servicing Provider",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Servicing Provider Name"
+              }
+            }
+          ],
+          "linkId": "servicing-provider|name",
+          "text": "Requesting provider name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Servicing Provider Phone"
+              }
+            }
+          ],
+          "linkId": "servicing-provider|phone-number",
+          "text": "Phone",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Servicing Provider Address"
+              }
+            }
+          ],
+          "linkId": "servicing-provider|address",
+          "text": "Ordering provider address",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Servicing Provider NPI"
+              }
+            }
+          ],
+          "linkId": "servicing-provider|npi",
+          "text": "Ordering provider Tax ID/NPI #",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Servicing Provider Fax"
+              }
+            }
+          ],
+          "linkId": "servicing-provider|fax",
+          "text": "Fax",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Billing Provider different from Servicing Provider"
+          }
+        }
+      ],
+      "linkId": "billing-provider-question",
+      "text": "Is the billing provider/referring lab different from servicing provider?",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "code": "Y",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "N",
+            "display": "No"
+          }
+        }
+      ],
+      "item": [
+        {
+          "enableWhen": [
+            {
+              "question": "billing-provider-question",
+              "operator": "=",
+              "answerCoding": {
+                "code": "Y"
+              }
+            }
+          ],
+          "linkId": "billing-provider-info",
+          "text": "Billing provider/referring lab information",
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Billing Provider Name"
+                  }
+                }
+              ],
+              "linkId": "billing-provider-info|name",
+              "text": "Requesting provider name",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Billing Provider Phone"
+                  }
+                }
+              ],
+              "linkId": "billing-provider-info|phone-number",
+              "text": "Phone",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Billing Provider Address"
+                  }
+                }
+              ],
+              "linkId": "billing-provider-info|address",
+              "text": "Ordering provider address",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Billing Provider NPI"
+                  }
+                }
+              ],
+              "linkId": "billing-provider-info|npi",
+              "text": "Ordering provider Tax ID/NPI #",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Billing Provider Fax"
+                  }
+                }
+              ],
+              "linkId": "billing-provider-info|fax",
+              "text": "Fax",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "test-requested",
+      "text": "Test requested",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Date of Service"
+              }
+            }
+          ],
+          "linkId": "test-requested|service-date",
+          "text": "Date of service",
+          "type": "date"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Test ID"
+              }
+            }
+          ],
+          "linkId": "test-requested|test-id",
+          "text": "Test ID",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Test name"
+              }
+            }
+          ],
+          "linkId": "test-requested|test-name",
+          "text": "Test name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Diagnosis Descriptions"
+              }
+            }
+          ],
+          "linkId": "test-requested|diagnosis-description",
+          "text": "Diagnosis description",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Test ICD Codes"
+              }
+            }
+          ],
+          "linkId": "test-requested|diagnosis-icd-code",
+          "text": "ICD-10 code(s)",
+          "type": "open-choice",
+          "repeats": true,
+          "answerValueSet": "http://hl7.org/fhir/ValueSet/icd-10"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Test CPT Codes"
+              }
+            }
+          ],
+          "linkId": "test-requested|diagnosis-cpt-code",
+          "text": "CPT code(s)",
+          "type": "open-choice",
+          "repeats": true,
+          "answerValueSet": "http://terminology.hl7.org/ValueSet/cpt-all"
+        }
+      ]
+    },
+    {
+      "linkId": "clinical-trial",
+      "text": "Clinical Trial Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Part of clinical trial"
+              }
+            }
+          ],
+          "linkId": "clinical-trial-question",
+          "text": "Is the requested test part of a clinical trial?",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "Y",
+                "display": "Yes"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "N",
+                "display": "No"
+              }
+            }
+          ],
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Clinical Trial ID"
+                  }
+                }
+              ],
+              "enableWhen": [
+                {
+                  "question": "clinical-trial-question",
+                  "operator": "=",
+                  "answerCoding": {
+                    "code": "Y"
+                  }
+                }
+              ],
+              "linkId": "clinical-trial|yes-clinial-trial",
+              "text": "If Yes, provide the registration or ID number for the specific trial in which this test is being studied.",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "history",
+      "text": "Patient history and related findings",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "history|patient-history",
+          "text": "Patient history including age at diagnosis",
+          "type": "string"
+        },
+        {
+          "linkId": "history|family-history",
+          "text": "Family history, including age at diagnosis, availability for testing e.g., family member deceased, refused testing or patient not in contact with affected family member and any genetic testing performed on family member - attach pedigree, if available",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Previous genetic testing for condition"
+              }
+            }
+          ],
+          "linkId": "history|other-findings",
+          "text": "Other findings/testing completed - previous genetic testing for condition",
+          "type": "string"
+        },
+        {
+          "linkId": "history|treatment-relation",
+          "text": "How will testing be used in relation to treatment or management of the patient?",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "person-filling-out-form",
+      "text": "Person filling out form",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "person-filling-out-form|name",
+          "text": "Name",
+          "type": "string"
+        },
+        {
+          "linkId": "person-filling-out-form|phone-number",
+          "text": "Phone number",
+          "type": "string"
+        },
+        {
+          "linkId": "person-filling-out-form|facility",
+          "text": "Phone number",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "sigmoidoscopy-complication-casefeature-definition2",
+  "meta": {
+      "versionId": "2",
+      "lastUpdated": "2024-10-31T23:29:51.0102621+00:00"
+  },
+  "extension": [
+      {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext",
+          "valueCode": "Observation"
+      },
+      {
+          "extension": [
+              {
+                  "url": "definition",
+                  "valueCanonical": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.code.coding"
+              },
+              {
+                  "url": "fixed-value",
+                  "valueCoding": {
+                      "system": "http://example.org/sdh/demo/CodeSystem/cc-screening-codes",
+                      "code": "sigmoidoscopy-complication"
+                  }
+              }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+      },
+      {
+          "extension": [
+              {
+                  "url": "definition",
+                  "valueCanonical": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.subject"
+              },
+              {
+                  "url": "expression",
+                  "valueExpression": {
+                      "language": "text/fhirpath",
+                      "expression": "%resource.subject"
+                  }
+              }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+      },
+      {
+          "extension": [
+              {
+                  "url": "definition",
+                  "valueCanonical": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.issued"
+              },
+              {
+                  "url": "expression",
+                  "valueExpression": {
+                      "language": "text/fhirpath",
+                      "expression": "(%resource.authored | %resource.meta.lastUpdated | now()).first()"
+                  }
+              }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+      },
+      {
+          "extension": [
+              {
+                  "url": "definition",
+                  "valueCanonical": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.performer"
+              },
+              {
+                  "url": "expression",
+                  "valueExpression": {
+                      "language": "text/fhirpath",
+                      "expression": "%resource.author"
+                  }
+              }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+      }
+  ],
+  "url": "http://example.org/sdh/demo/Questionnaire/sigmoidoscopy-complication-casefeature-definition2",
+  "status": "draft",
+  "item": [
+      {
+          "linkId": "1",
+          "text": "Sigmoidoscopy Complication",
+          "type": "group",
+          "item": [
+              {
+                  "linkId": "1.2",
+                  "definition": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.value[x]",
+                  "text": "Yes (concern with invasive procedure, for example)",
+                  "type": "boolean",
+                  "required": true,
+                  "repeats": false,
+                  "initial": [
+                      {
+                          "valueBoolean": false
+                      }
+                  ]
+              }
+          ]
+      }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "activity-example-recordinference-ad",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recordinferenceactivity",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computableactivity"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "shareable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "computable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "publishable"
+    }
+  ],
+  "url": "http://hl7.org/fhir/uv/cpg/ActivityDefinition/activity-example-recordinference-ad",
+  "version": "2.0.0",
+  "name": "ActivityExampleRecordInferenceAD",
+  "title": "Activity Example Record Inference AD",
+  "status": "active",
+  "experimental": true,
+  "date": "2024-11-26T06:42:34+00:00",
+  "publisher": "HL7 International / Clinical Decision Support",
+  "contact": [
+    {
+      "name": "HL7 International / Clinical Decision Support",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/dss"
+        }
+      ]
+    }
+  ],
+  "description": "Example Activity Definition for a recommendation to record an inference",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "001",
+          "display": "World"
+        }
+      ]
+    }
+  ],
+  "kind": "Task",
+  "profile": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recordinferencetask",
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type-cs",
+        "code": "record-inference",
+        "display": "Record an inference"
+      }
+    ]
+  },
+  "intent": "proposal",
+  "doNotPerform": false,
+  "dynamicValue": [
+    {
+      "path" : "contained",
+      "expression" : {
+        "language" : "text/cql-expression",
+        "expression" : "FHIR.Observation { id: FHIR.id { value: 'inference' }, status: FHIR.ObservationStatus {value: 'final' }, code: FHIR.CodeableConcept { coding: List<FHIR.Coding> { FHIR.Coding { code: FHIR.code { value: 'Inference' } } } }, subject: FHIR.Reference { reference: FHIR.string { value: Patient.id.value } }, issued: FHIR.instant { value: Now() } }"
+      }
+    },
+    {
+      "path": "input[0].type",
+      "expression": {
+        "language": "text/cql-expression",
+        "expression": "%resource.code"
+      }
+    },
+    {
+      "path": "input[0].valueReference",
+      "expression": {
+        "language": "text/cql-expression",
+        "expression": "FHIR.Reference { reference: FHIR.string { value: '#inference' } }"
+      }
+    }
+  ]
+}

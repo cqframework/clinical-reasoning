@@ -75,12 +75,20 @@ public interface IOperationRequest {
         return resolvePathList(base, "extension").stream().map(e -> (E) e).collect(Collectors.toList());
     }
 
-    default List<IBaseExtension<?, ?>> getExtensionsByUrl(IBase base, String url) {
-        return getExtensions(base).stream().filter(e -> e.getUrl().equals(url)).collect(Collectors.toList());
+    @SuppressWarnings("unchecked")
+    default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(IBase base, String url) {
+        return getExtensions(base).stream()
+                .map(e -> (E) e)
+                .filter(e -> e.getUrl().equals(url))
+                .collect(Collectors.toList());
     }
 
-    default IBaseExtension<?, ?> getExtensionByUrl(IBase base, String url) {
-        return getExtensionsByUrl(base, url).stream().findFirst().orElse(null);
+    @SuppressWarnings("unchecked")
+    default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(IBase base, String url) {
+        return getExtensionsByUrl(base, url).stream()
+                .map(e -> (E) e)
+                .findFirst()
+                .orElse(null);
     }
 
     default boolean hasExtension(IBase base, String url) {
@@ -126,5 +134,32 @@ public interface IOperationRequest {
     @SuppressWarnings("unchecked")
     default <T extends IBase> T resolvePath(IBase base, String path, Class<T> clazz) {
         return (T) resolvePath(base, path);
+    }
+
+    @SuppressWarnings("unchecked")
+    default <T extends IBase> Class<T> getClassForType(String type) {
+        try {
+            return (Class<T>) Class.forName(String.format(
+                    "org.hl7.fhir.%s.model.%s", getFhirVersion().toString().toLowerCase(), type));
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    default IBase newValue(String type) {
+        return newValue(getClassForType(type));
+    }
+
+    default IBase newValue(Class<? extends IBase> clazz) {
+        try {
+            return clazz.getConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    default IBase newValue(String type, IBase value) {
+        var newValue = newValue(type);
+        return newValue;
     }
 }

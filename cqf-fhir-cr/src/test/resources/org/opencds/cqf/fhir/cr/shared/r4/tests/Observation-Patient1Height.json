@@ -34,5 +34,10 @@
       "reference": "Practitioner/Practitioner1"
     }
   ],
-  "valueInteger": 50
+  "valueQuantity": {
+    "value": "50",
+    "unit": "cm",
+    "system": "http://unitsofmeasure.org",
+    "code": "cm"
+  }
 }

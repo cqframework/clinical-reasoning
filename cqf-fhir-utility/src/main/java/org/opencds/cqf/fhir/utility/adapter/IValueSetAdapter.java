@@ -11,7 +11,13 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
 
     public <T extends IBaseBackboneElement> T getExpansion();
 
+    public boolean hasExpansion();
+
+    public <T extends IBaseBackboneElement> List<T> getExpansionContains();
+
     public <T extends IBaseBackboneElement> T newExpansion();
+
+    public <T extends IBaseBackboneElement> List<T> getComposeIncludes();
 
     public List<String> getValueSetIncludes();
 

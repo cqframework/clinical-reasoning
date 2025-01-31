@@ -251,17 +251,18 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<IKnowledgeArtifactAdapter> latest = Optional.empty();
         var resourceType = Canonicals.getResourceType(preReleaseReference);
         var prereleaseReferenceVersion = Canonicals.getVersion(preReleaseReference);
-        // ValueSets go to the Tx Server regardless of ownership if latestFromTxServer is true
-        if (resourceType != null
+        if (isOwned) {
+            // get the latest version regardless of status because we own the resource so Drafts are ok (they'll be
+            // updated as part of $release)
+            latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
+        } else if (resourceType != null
                 && resourceType.equals(VALUESET)
                 && prereleaseReferenceVersion == null
                 && latestFromTxServer) {
+            // ValueSets we don't own go to the Tx Server if latestFromTxServer is true
             latest = terminologyServerClient
                     .getResource(endpoint, preReleaseReference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
-        } else if (isOwned) {
-            // get the latest version regardless of status because it's owned and we're releasing it
-            latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
         } else {
             // get the latest ACTIVE version only because it's NOT owned
             latest = VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, ACTIVE);
@@ -387,22 +388,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         if (!StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
         } else {
-            maybeAdapter = tryFindLatestDependencyVersion(
-                    dependency,
-                    Canonicals.getUrl(dependency.getReference()),
-                    resourceType,
-                    latestFromTxServer,
-                    endpoint);
+            maybeAdapter = tryFindLatestDependencyVersion(dependency, resourceType, latestFromTxServer, endpoint);
         }
         return maybeAdapter;
     }
 
     private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependencyVersion(
-            IDependencyInfo dependency,
-            String url,
-            String resourceType,
-            boolean latestFromTxServer,
-            IEndpointAdapter endpoint) {
+            IDependencyInfo dependency, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
@@ -420,7 +412,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Map<String, IDomainResource> alreadyUpdatedDependencies) {
         var maybeLatest = getLatestArtifactAndThrowErrorIfOwnedMissing(component, releasedResources);
         if (maybeLatest.isPresent()) {
-            updateCacheAndReference(component, releasedResources, maybeLatest.get(), alreadyUpdatedDependencies);
+            updateCacheAndReference(component, maybeLatest.get(), alreadyUpdatedDependencies);
         }
         return maybeLatest;
     }
@@ -440,7 +432,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private <T extends ICompositeType & IBaseHasExtensions> void updateCacheAndReference(
             T component,
-            List<IDomainResource> releasedResources,
             IKnowledgeArtifactAdapter updatedResource,
             Map<String, IDomainResource> alreadyUpdatedDependencies) {
         // add to cache if resolvable

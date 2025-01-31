@@ -139,6 +139,10 @@
         "resourceType": "ValueSet",
         "id": "dxtc",
         "url": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+        "extension":[{
+            "url": "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource",
+            "valueUri": "https://www.test.com/fhir/ValueSet/dxtc"
+        }],
         "version": "1.2.3-draft",
         "status": "draft",
         "compose": {
@@ -182,6 +186,10 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.6",
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+        "extension" : [{
+            "url": "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource",
+            "valueUri": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6"
+          }],
         "identifier": [
           {
             "system": "urn:ietf:rfc:3986",

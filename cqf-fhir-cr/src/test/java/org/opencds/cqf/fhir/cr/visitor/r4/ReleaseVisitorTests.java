@@ -4,10 +4,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -21,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -37,16 +41,21 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
@@ -460,28 +469,73 @@ class ReleaseVisitorTests {
     }
 
     @Test
-    void releaseResource_latestFromTx_NotSupported_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+    void release_latest_from_tx_server_sets_versions() {
+        // SpecificationLibrary - root is experimental but HAS experimental children
+        final var leafOid = "2.16.840.1.113762.1.4.1146.6";
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
-
-        String actualErrorMessage = "";
-
-        Parameters params = parameters(
-                part("version", "1.2.3"),
-                part("versionBehavior", new CodeType("default")),
-                part("latestFromTxServer", new BooleanType(true)));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+        removeVersionsFromLibraryAndGrouperAndUpdate(repo, leafOid);
+        var latestVSet = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.6"));
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
-        try {
-            libraryAdapter.accept(releaseVisitor, params);
-        } catch (Exception e) {
-            actualErrorMessage = e.getMessage();
-        }
-        assertTrue(actualErrorMessage.contains("not yet implemented"));
+        var endpoint = createEndpoint(authoritativeSource);
+
+        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
+        var releaseVisitor = new ReleaseVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(
+                part("version", new StringType("1.2.7")),
+                part("versionBehavior", new CodeType("default")),
+                booleanPart("latestFromTxServer", true),
+                part("terminologyEndpoint", (org.hl7.fhir.r4.model.Endpoint) endpoint.get()));
+        libraryAdapter.accept(releaseVisitor, params);
+        var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
+        var include = grouper.getCompose().getIncludeFirstRep();
+        assertNotNull(Canonicals.getVersion(include.getValueSet().get(0).getValue()));
+        assertTrue(
+                Canonicals.getVersion(include.getValueSet().get(0).getValue()).equals(latestVSet.getVersion()));
+        var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
+        var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains(leafOid))
+                .findAny();
+        assertTrue(leafRelatedArtifact.isPresent());
+        assertNotNull(Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
+        assertTrue(
+                Canonicals.getVersion(leafRelatedArtifact.get().getResource()).equals(latestVSet.getVersion()));
+    }
+
+    private IEndpointAdapter createEndpoint(String authoritativeSource) {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.r4.model.StringType("username")));
+        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));
+        return endpoint;
+    }
+
+    void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
+        // remove versions from references
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
+        library.getRelatedArtifact().forEach(ra -> {
+            if (ra.getResource().contains(leafOid)) {
+                ra.setResource(Canonicals.getUrl(ra.getResource()));
+            }
+        });
+        var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
+        grouper.getCompose().getInclude().forEach(include -> {
+            var valueSetCanonical = include.getValueSet().get(0);
+            if (valueSetCanonical.getValue().contains(leafOid)) {
+                valueSetCanonical.setValue(Canonicals.getUrl(valueSetCanonical.getValue()));
+            }
+        });
+        repo.update(library);
+        repo.update(grouper);
     }
 
     @Test

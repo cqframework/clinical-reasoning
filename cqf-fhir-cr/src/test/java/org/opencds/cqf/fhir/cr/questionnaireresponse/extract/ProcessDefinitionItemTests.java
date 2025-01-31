@@ -177,8 +177,4 @@ class ProcessDefinitionItemTests {
         assertEquals("test1", names.get(0).getText());
         assertEquals("test2", names.get(1).getText());
     }
-
-    @Test
-    @Disabled
-    void testItemWithContextExtensionAndFixedValueExtension() {}
 }

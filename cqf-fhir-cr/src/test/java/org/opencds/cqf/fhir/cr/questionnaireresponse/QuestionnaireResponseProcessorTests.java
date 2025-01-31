@@ -98,7 +98,6 @@ class QuestionnaireResponseProcessorTests {
         var resources = BundleHelper.getEntryResources(result);
         var obs = (Observation) resources.get(0);
         assertTrue(obs.hasCode());
-        // assertTrue(obs.hasSubject());
         assertTrue(obs.hasValueBooleanType());
     }
 
@@ -128,7 +127,7 @@ class QuestionnaireResponseProcessorTests {
                 .getBundle();
         var organization = (Organization) BundleHelper.getEntryResourceFirstRep(bundle);
         assertNotNull(organization);
-        // assertEquals(String.format("extract-%s", questionnaireResponseId), organization.getIdPart());
+        assertEquals(String.format("extract-%s", questionnaireResponseId), organization.getIdPart());
         assertEquals("Acme Clinic", organization.getName());
     }
 

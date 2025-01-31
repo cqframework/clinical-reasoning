@@ -15,8 +15,6 @@ class HelperTests {
         assertNull(Helpers.parseR5ItemType(null, false, false));
         assertNotNull(Helpers.parseR5ItemType(null, true, false));
         assertNotNull(Helpers.parseR5ItemType(null, false, true));
-        // assertThrows(IllegalArgumentException.class, () -> Helpers.parseR4ItemType(null, false, false));
-        // assertThrows(IllegalArgumentException.class, () -> Helpers.parseR5ItemType(null, false, false));
     }
 
     @Test

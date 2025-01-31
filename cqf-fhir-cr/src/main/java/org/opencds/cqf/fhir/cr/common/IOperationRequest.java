@@ -157,9 +157,4 @@ public interface IOperationRequest {
             throw new IllegalArgumentException(e);
         }
     }
-
-    default IBase newValue(String type, IBase value) {
-        var newValue = newValue(type);
-        return newValue;
-    }
 }

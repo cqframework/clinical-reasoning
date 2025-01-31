@@ -14,6 +14,8 @@ import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
 
 class ResourceAdapter extends BaseResourceAdapter {
 
+    protected final AdapterFactory adapterFactory;
+
     public ResourceAdapter(IBaseResource resource) {
         super(resource);
         if (resource == null) {
@@ -23,6 +25,7 @@ class ResourceAdapter extends BaseResourceAdapter {
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
+        adapterFactory = new AdapterFactory();
     }
 
     protected Resource getResource() {

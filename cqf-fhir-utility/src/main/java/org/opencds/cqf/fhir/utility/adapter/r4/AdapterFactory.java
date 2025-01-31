@@ -18,6 +18,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -95,5 +97,15 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ICodeableConceptAdapter createCodeableConcept(ICompositeType codeableConcept) {
         return new CodeableConceptAdapter(codeableConcept);
+    }
+
+    @Override
+    public ICodingAdapter createCoding(ICompositeType coding) {
+        return new CodingAdapter(coding);
+    }
+
+    @Override
+    public IElementDefinitionAdapter createElementDefinition(ICompositeType element) {
+        return new ElementDefinitionAdapter(element);
     }
 }

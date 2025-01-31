@@ -16,6 +16,8 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +49,17 @@ public class GenerateProcessor implements IGenerateProcessor {
     public IBaseResource generate(GenerateRequest request, String id) {
         request.setQuestionnaire(
                 generate(id == null ? request.getProfile().getIdElement().getIdPart() : id));
-        var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ssZ");
+        var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
         request.getQuestionnaireAdapter()
                 .setVersion(
                         String.format("%s-%s", request.getProfileAdapter().getVersion(), formatter.format(new Date())));
         var item = generateItem(request);
-        request.addQuestionnaireItem(item.getLeft());
-        if (!item.getRight().isEmpty()) {
-            // Add launchContexts
-            request.addLaunchContextExtensions(item.getRight());
+        if (item != null) {
+            request.addQuestionnaireItem(item.getLeft());
+            if (!item.getRight().isEmpty()) {
+                request.addCqlLibraryExtension();
+                request.addLaunchContextExtensions(item.getRight());
+            }
         }
         return request.getQuestionnaire();
     }
@@ -65,19 +69,21 @@ public class GenerateProcessor implements IGenerateProcessor {
         logger.info(
                 "Generating Questionnaire Item for StructureDefinition/{}",
                 request.getProfile().getIdElement().getIdPart());
-        request.setDifferentialElements(
-                getElements(request, request.resolvePath(request.getProfile(), "differential")));
+        request.setDifferentialElements(request.getProfileAdapter().getDifferentialElements().stream()
+                .filter(e -> e.getId().split("\\.").length > 1)
+                .collect(Collectors.toList()));
         request.setSnapshotElements(getElements(request, getProfileSnapshot(request)));
         return itemGenerator.generate(request);
     }
 
-    @SuppressWarnings("unchecked")
-    protected <E extends ICompositeType> List<E> getElements(GenerateRequest request, IBase baseElement) {
+    protected List<IElementDefinitionAdapter> getElements(GenerateRequest request, IBase baseElement) {
+        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
         return baseElement == null
                 ? null
                 : request.resolvePathList(baseElement, "element").stream()
                         .filter(e -> request.resolvePathString(e, "path").split("\\.").length > 1)
-                        .map(e -> (E) e)
+                        .map(e -> (ICompositeType) e)
+                        .map(adapterFactory::createElementDefinition)
                         .collect(Collectors.toList());
     }
 

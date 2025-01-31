@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +15,8 @@ import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -210,5 +213,35 @@ class ActivityDefinitionProcessorTests {
         assertEquals(
                 "http://hl7.org/fhir/uv/cpg/Measure/activity-example-generatereport",
                 input.getValue().primitiveValue());
+    }
+
+    @Test
+    void testRecordInferredObservationTask() {
+        var result = activityDefinitionProcessorR4.apply(
+                Eithers.forMiddle3(Ids.newId(
+                        activityDefinitionProcessorR4.fhirContext(),
+                        "ActivityDefinition",
+                        "activity-example-recordinference-ad")),
+                "Patient1",
+                "Encounter1",
+                "Practitioner1",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        assertNotNull(result);
+        var task = (Task) result;
+        assertTrue(task.hasContained());
+        var contained = task.getContained().get(0);
+        assertNotNull(contained);
+        assertInstanceOf(Observation.class, contained);
+        assertTrue(task.hasInput());
+        var input = task.getInput().get(0);
+        assertTrue(input.hasType());
+        var inputRef = (Reference) input.getValue();
+        assertNotNull(inputRef);
+        assertEquals("#" + contained.getId(), inputRef.getReference());
     }
 }

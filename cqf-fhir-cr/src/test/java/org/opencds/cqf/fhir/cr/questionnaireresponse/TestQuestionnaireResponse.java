@@ -27,7 +27,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
-    private static InputStream open(String asset) {
+    public static InputStream open(String asset) {
         var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
@@ -76,6 +76,8 @@ public class TestQuestionnaireResponse {
         private final QuestionnaireResponseProcessor processor;
         private String questionnaireResponseId;
         private IBaseResource questionnaireResponse;
+        private String questionnaireId;
+        private IBaseResource questionnaire;
 
         public When(QuestionnaireResponseProcessor processor) {
             this.processor = processor;
@@ -91,12 +93,39 @@ public class TestQuestionnaireResponse {
             return this;
         }
 
+        public When questionnaireId(String questionnaireId) {
+            this.questionnaireId = questionnaireId;
+            return this;
+        }
+
+        public When questionnaire(IBaseResource questionnaire) {
+            this.questionnaire = questionnaire;
+            return this;
+        }
+
         public Extract extract() {
             return new Extract(
                     processor.repository,
-                    processor.extract(Eithers.for2(
-                            Ids.newId(processor.fhirVersion, "QuestionnaireResponse", questionnaireResponseId),
-                            questionnaireResponse)));
+                    processor.extract(
+                            Eithers.for2(
+                                    questionnaireResponseId == null
+                                            ? null
+                                            : Ids.newId(
+                                                    processor.fhirVersion,
+                                                    "QuestionnaireResponse",
+                                                    questionnaireResponseId),
+                                    questionnaireResponse),
+                            questionnaire == null && questionnaireId == null
+                                    ? null
+                                    : Eithers.for2(
+                                            questionnaireId == null
+                                                    ? null
+                                                    : Ids.newId(
+                                                            processor.fhirVersion, "Questionnaire", questionnaireId),
+                                            questionnaire),
+                            null,
+                            null,
+                            true));
         }
     }
 

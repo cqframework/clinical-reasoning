@@ -1,19 +1,26 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
@@ -21,6 +28,7 @@ import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -40,7 +48,8 @@ class QuestionnaireProcessorTests {
                 .subjectId("OPA-Patient1")
                 .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
+                .hasItems(35)
+                .itemHasAnswerValue("1.1", new org.hl7.fhir.r4.model.StringType("Acme Clinic"));
 
         given().repository(repositoryR4)
                 .when()
@@ -74,7 +83,8 @@ class QuestionnaireProcessorTests {
                 .subjectId("OPA-Patient1")
                 .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
-                .isEqualsToExpected(org.hl7.fhir.r4.model.QuestionnaireResponse.class);
+                .hasItems(35)
+                .hasErrors();
     }
 
     @Test
@@ -254,42 +264,67 @@ class QuestionnaireProcessorTests {
                 .subjectId("Patient1")
                 .thenPopulate(true)
                 .hasItems(2)
-                .itemHasAnswerValue("1", new org.hl7.fhir.r4.model.IntegerType(50));
+                .itemHasAnswerValue("1", new org.hl7.fhir.r4.model.Quantity(50));
     }
 
     @Test
-    @Disabled("Currently failing due to an issue in the CHF CQL")
     void testIntegration() {
+        var patientId = "Patient1";
         var questionnaire = given().repository(repositoryR4)
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "chf-bodyweight-change"))
+                .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "LaunchContexts"))
                 .thenGenerate()
+                .hasItems(2)
                 .questionnaire;
-        var questionnaireResponse = given().repository(repositoryR4)
+        var questionnaireResponse = (QuestionnaireResponse) given().repository(repositoryR4)
                 .when()
                 .questionnaire(questionnaire)
-                .subjectId("chf-scenario1-patient")
+                .subjectId(patientId)
                 .context(Arrays.asList(
                         (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
-                                newPart(fhirContextR4, "Reference", "content", "Patient/chf-scenario1-patient")),
+                                newPart(fhirContextR4, "Reference", "content", "Patient/" + patientId)),
                         (IBaseBackboneElement) newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "encounter"),
-                                newPart(fhirContextR4, "Reference", "content", "Encounter/chf-scenario1-encounter"))))
+                                newPart(fhirContextR4, "Reference", "content", "Encounter/Encounter1"))))
                 .thenPopulate(true)
-                .hasItems(11)
-                // .itemHasAnswerValue("1.2.1", "-1.4")
-                .itemHasAuthorExt("1.2.1")
+                .hasNoErrors()
+                .hasItems(2)
+                .itemHasAnswer("1.1")
+                .itemHasAuthorExt("1.1")
                 .questionnaireResponse;
-        TestQuestionnaireResponse.given()
+        assertEquals("Patient/" + patientId, questionnaireResponse.getSubject().getReference());
+        assertNotNull(questionnaireResponse.getAuthored());
+        var bundle = TestQuestionnaireResponse.given()
                 .repository(repositoryR4)
                 .when()
                 .questionnaireResponse(questionnaireResponse)
+                .questionnaire(questionnaire)
                 .extract()
-                .hasEntry(1);
+                .hasEntry(1)
+                .getBundle();
+        assertInstanceOf(Observation.class, BundleHelper.getEntryResourceFirstRep(bundle));
+        var observation = (Observation) BundleHelper.getEntryResourceFirstRep(bundle);
+        assertEquals("Patient/" + patientId, observation.getSubject().getReference());
+        assertTrue(observation.hasCategory());
+        assertTrue(observation.hasCode());
+        assertTrue(observation.hasEffective());
+        assertTrue(observation.hasValueQuantity());
+        assertEquals("cm", observation.getValueQuantity().getUnit());
+    }
+
+    @Test
+    void testGMTPQuestionnaire() {
+        given().repositoryFor(fhirContextR4, "r4/gmtp-questionnaire")
+                .when()
+                .questionnaireUrl(canonicalTypeForVersion(
+                        FhirVersionEnum.R4, "http://fhir.org/guides/cqf/us/common/Questionnaire/GMTPQuestionnaire"))
+                .subjectId("USCorePatient-GMTP-1")
+                .thenPopulate(true)
+                .hasNoErrors();
     }
 }

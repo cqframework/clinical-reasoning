@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -20,6 +21,7 @@ import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
 public class StructureDefinitionAdapter extends ResourceAdapter implements IStructureDefinitionAdapter {
@@ -262,5 +264,19 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     @Override
     public boolean getExperimental() {
         return get().getExperimental();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getSnapshotElements() {
+        return get().getSnapshot().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getDifferentialElements() {
+        return get().getDifferential().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .collect(Collectors.toList());
     }
 }

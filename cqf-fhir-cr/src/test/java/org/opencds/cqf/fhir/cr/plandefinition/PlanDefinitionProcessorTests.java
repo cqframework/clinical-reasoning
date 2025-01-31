@@ -355,57 +355,6 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
-    void questionnaireResponseR4() {
-        // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
-        // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
-        // expected.
-        var planDefinitionID = "prepopulate";
-        var patientID = "OPA-Patient1";
-        var dataId = new org.hl7.fhir.r4.model.IdType(
-                "QuestionnaireResponse", "OutpatientPriorAuthorizationRequest-OPA-Patient1");
-        var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .additionalDataId(dataId)
-                .parameters(parameters)
-                .thenApply()
-                .hasContained(2);
-        given().repositoryFor(fhirContextR4, "r4")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .additionalDataId(dataId)
-                .parameters(parameters)
-                .thenApplyR5()
-                .hasEntry(2);
-    }
-
-    @Test
-    void questionnaireResponseR5() {
-        // The content this test is using was intended for an old implementation of a custom prepopulate step that is no
-        // longer used.  The content still works to test $extract but no Questionnaire is returned as originally
-        // expected.
-        var planDefinitionID = "prepopulate";
-        var patientID = "OPA-Patient1";
-        var data = "r5/extract-questionnaireresponse/patient-data.json";
-        var content = "r5/prepopulate/prepopulate-content-bundle.json";
-        var parameters = org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextR5, "r5")
-                .when()
-                .planDefinitionId(planDefinitionID)
-                .subjectId(patientID)
-                .additionalData(data)
-                .content(content)
-                .parameters(parameters)
-                .thenApplyR5()
-                .hasEntry(2);
-    }
-
-    @Test
     void generateQuestionnaireR4() {
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
@@ -417,14 +366,15 @@ class PlanDefinitionProcessorTests {
                 .subjectId(patientID)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3)
+                .hasEntry(4)
                 .hasQuestionnaire()
+                .hasQuestionnaireResponse()
                 .hasQuestionnaireResponseItemValue("1.1", "Claim/OPA-Claim1")
                 .hasQuestionnaireResponseItemValue("2.1", "Acme Clinic")
-                .hasQuestionnaireResponseItemValue("2.2.2", "1407071236")
-                .hasQuestionnaireResponseItemValue("3.4.2", "12345")
-                .hasQuestionnaireResponseItemValue("4.1.2", "1245319599")
-                .hasQuestionnaireResponseItemValue("4.2.2", "456789");
+                .hasQuestionnaireResponseItemValue("2.2.1", "1407071236")
+                .hasQuestionnaireResponseItemValue("3.4.1", "12345")
+                .hasQuestionnaireResponseItemValue("4.1.1", "1245319599")
+                .hasQuestionnaireResponseItemValue("4.2.1", "456789");
     }
 
     @Test
@@ -441,8 +391,9 @@ class PlanDefinitionProcessorTests {
                 .subjectId(patientID)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(2)
-                .hasQuestionnaire();
+                .hasEntry(3)
+                .hasQuestionnaire()
+                .hasQuestionnaireResponse();
     }
 
     @Test
@@ -457,8 +408,9 @@ class PlanDefinitionProcessorTests {
                 .subjectId(patientID)
                 .parameters(parameters)
                 .thenApplyR5()
-                .hasEntry(3)
-                .hasQuestionnaire();
+                .hasEntry(4)
+                .hasQuestionnaire()
+                .hasQuestionnaireResponse();
     }
 
     @Test

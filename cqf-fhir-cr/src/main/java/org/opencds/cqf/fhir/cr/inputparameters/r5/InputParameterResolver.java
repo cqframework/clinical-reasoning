@@ -7,7 +7,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -32,6 +31,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<? extends IBaseBackboneElement> context,
+            List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         super(repository, subjectId, encounterId, practitionerId, useServerData, data);
         this.parameters = resolveParameters(parameters, context, launchContext);
@@ -62,7 +62,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
     @Override
     protected final Parameters resolveParameters(
             IBaseParameters baseParameters,
-            List<? extends IBaseBackboneElement> context,
+            List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
@@ -115,7 +115,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
 
     protected void resolveLaunchContext(
             Parameters params,
-            List<? extends IBaseBackboneElement> contexts,
+            List<IParametersParameterComponentAdapter> contexts,
             List<IBaseExtension<?, ?>> launchContexts) {
         launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
             var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
@@ -147,11 +147,12 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         });
     }
 
-    private List<ParametersParameterComponent> getContent(List<? extends IBaseBackboneElement> contexts, String name) {
+    private List<ParametersParameterComponent> getContent(
+            List<IParametersParameterComponentAdapter> contexts, String name) {
         return contexts == null
                 ? null
                 : contexts.stream()
-                        .map(c -> (ParametersParameterComponent) c)
+                        .map(c -> (ParametersParameterComponent) c.get())
                         .filter(c -> c.getPart().stream()
                                 .filter(p -> p.getName().equals("name"))
                                 .anyMatch(p -> ((StringType) p.getValue())

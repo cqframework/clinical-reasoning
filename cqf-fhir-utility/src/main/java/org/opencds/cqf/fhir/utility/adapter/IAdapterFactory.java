@@ -92,4 +92,8 @@ public interface IAdapterFactory {
     public IEndpointAdapter createEndpoint(IBaseResource endpoint);
 
     public ICodeableConceptAdapter createCodeableConcept(ICompositeType codeableConcept);
+
+    public ICodingAdapter createCoding(ICompositeType coding);
+
+    public IElementDefinitionAdapter createElementDefinition(ICompositeType element);
 }

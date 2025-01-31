@@ -135,8 +135,7 @@
             "code": "boolean"
           }
         ],
-        "mustSupport": true,
-        "fixedBoolean": false
+        "mustSupport": true
       }
     ]
   }

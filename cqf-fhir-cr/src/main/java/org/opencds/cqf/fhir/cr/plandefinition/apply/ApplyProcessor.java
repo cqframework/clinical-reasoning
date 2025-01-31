@@ -110,6 +110,7 @@ public class ApplyProcessor implements IApplyProcessor {
             addEntry(resultBundle, newEntryWithResource(resource));
         }
         if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
+            addEntry(resultBundle, newEntryWithResource(request.getQuestionnaire()));
             addEntry(resultBundle, newEntryWithResource(populateProcessor.populate(request.toPopulateRequest())));
         }
 
@@ -119,10 +120,14 @@ public class ApplyProcessor implements IApplyProcessor {
     protected void initApply(ApplyRequest request) {
         var questionnaire = generateProcessor.generate(
                 request.getPlanDefinition().getIdElement().getIdPart());
-        var url = request.resolvePathString(request.getPlanDefinition(), "url")
-                .replace("/PlanDefinition/", "/Questionnaire/");
+        var url = request.resolvePathString(request.getPlanDefinition(), "url");
         if (url != null) {
-            request.getModelResolver().setValue(questionnaire, "url", uriTypeForVersion(request.getFhirVersion(), url));
+            request.getModelResolver()
+                    .setValue(
+                            questionnaire,
+                            "url",
+                            uriTypeForVersion(
+                                    request.getFhirVersion(), url.replace("/PlanDefinition/", "/Questionnaire/")));
         }
         var version = request.resolvePathString(request.getPlanDefinition(), "version");
         if (version != null) {

@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
@@ -319,6 +318,7 @@ public class PlanDefinition {
         final IParser jsonParser;
         final ModelResolver modelResolver;
         IBaseResource questionnaire;
+        IBaseResource questionnaireResponse;
         Map<String, IBaseBackboneElement> items;
 
         public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
@@ -327,17 +327,14 @@ public class PlanDefinition {
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            var questionnaireResponse = getEntryResources(this.generatedBundle).stream()
+            questionnaireResponse = getEntryResources(this.generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
                     .findFirst()
                     .orElse(null);
-            questionnaire = questionnaireResponse == null
-                    ? null
-                    : ((IDomainResource) questionnaireResponse)
-                            .getContained().stream()
-                                    .filter(c -> c.fhirType().equals("Questionnaire"))
-                                    .findFirst()
-                                    .orElse(null);
+            questionnaire = getEntryResources(this.generatedBundle).stream()
+                    .filter(r -> r.fhirType().equals("Questionnaire"))
+                    .findFirst()
+                    .orElse(null);
             if (questionnaireResponse != null) {
                 items = new HashMap<>();
                 populateItems(getItems(questionnaireResponse));
@@ -401,6 +398,11 @@ public class PlanDefinition {
 
         public GeneratedBundle hasQuestionnaire() {
             assertNotNull(questionnaire);
+            return this;
+        }
+
+        public GeneratedBundle hasQuestionnaireResponse() {
+            assertNotNull(questionnaireResponse);
             return this;
         }
 

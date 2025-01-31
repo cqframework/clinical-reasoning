@@ -73,8 +73,7 @@ public class ObservationResolver {
             case "date":
                 obs.setValue(new DateTimeType(((DateType) answer.getValue()).getValue()));
                 break;
-            case "decimal":
-            case "integer":
+            case "decimal", "integer":
                 if (item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
                     obs.setValue(getQuantity(answer, item));
                 } else {

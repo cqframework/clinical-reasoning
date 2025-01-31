@@ -18,6 +18,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -166,7 +167,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(profile, false, true, modelResolver)
+        return new GenerateRequest(profile, false, true, libraryEngine, modelResolver)
                 .setDefaultLibraryUrl(defaultLibraryUrl)
                 .setQuestionnaire(questionnaire);
     }
@@ -303,6 +304,11 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public String getOperationName() {
         return "apply";
+    }
+
+    @Override
+    public IBase getContext() {
+        return getPlanDefinition();
     }
 
     @Override

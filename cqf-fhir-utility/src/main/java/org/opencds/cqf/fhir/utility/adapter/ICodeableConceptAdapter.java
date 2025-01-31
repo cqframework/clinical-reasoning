@@ -4,7 +4,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface ICodeableConceptAdapter extends IAdapter<ICompositeType> {
-    <T extends ICompositeType> List<T> getCoding();
+    List<ICodingAdapter> getCoding();
 
     boolean hasCoding(String code);
 }

@@ -34,7 +34,7 @@
       }
     }
   ],
-  "url": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition",
+  "url": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition2",
   "name": "SigmoidoscopyComplication",
   "title": "Sigmoidoscopy Complication",
   "status": "draft",

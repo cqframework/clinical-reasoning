@@ -205,6 +205,14 @@ public class TestItemGenerator {
             return this;
         }
 
+        public GeneratedItem itemHasExtractionValueExtension(String linkId) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            assertTrue(item.getExtension().stream()
+                    .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE)));
+            return this;
+        }
+
         public GeneratedItem hasId(String expectedId) {
             assertEquals(expectedId, questionnaire.getIdElement().getIdPart());
             return this;

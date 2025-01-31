@@ -1,30 +1,35 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchContextExt;
-import static org.opencds.cqf.fhir.utility.VersionUtilities.codeTypeForVersion;
+import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,55 +41,72 @@ public class ItemGenerator {
 
     protected final Repository repository;
     protected final CqlEngine engine;
-    protected final IElementProcessor elementProcessor;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
+    protected final ElementHasCaseFeature elementHasCaseFeature;
+    protected final ItemTypeIsChoice itemTypeIsChoice;
 
     public ItemGenerator(Repository repository) {
-        this(repository, IElementProcessor.createProcessor(repository));
-    }
-
-    public ItemGenerator(Repository repository, IElementProcessor elementProcessor) {
         this.repository = repository;
         engine = Engines.forRepository(this.repository);
-        this.elementProcessor = elementProcessor;
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
+        elementHasCaseFeature = new ElementHasCaseFeature();
+        itemTypeIsChoice = new ItemTypeIsChoice(repository);
     }
 
     public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generate(GenerateRequest request) {
         final String linkId =
                 String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
         try {
-            var questionnaireItem = createQuestionnaireItem(request, linkId);
-            int childCount = request.getItems(questionnaireItem).size();
+            int childCount = 0;
             var caseFeature = getFeatureExpression(request);
             var parentElements = getElements(request, null, null);
-            processElements(request, questionnaireItem, parentElements, childCount, linkId, caseFeature);
+            var results = processElements(request, parentElements, childCount, linkId, caseFeature);
+            var childItems = results.getLeft();
+            var valueExtensions = results.getRight();
+            if (childItems.isEmpty() && valueExtensions.isEmpty()) {
+                return null;
+            }
+            var questionnaireItem = createQuestionnaireItem(request, linkId);
+            if (!childItems.isEmpty()) {
+                request.getModelResolver().setValue(questionnaireItem, "item", childItems);
+            }
+            if (!valueExtensions.isEmpty()) {
+                request.getModelResolver().setValue(questionnaireItem, "extension", valueExtensions);
+            }
+
             // If we have a caseFeature we need to include launchContext extensions and Item Population Context
             List<T> launchContextExts = new ArrayList<>();
             if (caseFeature != null) {
                 var itemContextExt = questionnaireItem.addExtension();
                 itemContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
                 itemContextExt.setValue(caseFeature.toExpressionType(request.getFhirVersion()));
-                // Assume Patient
+                // Assume Patient for now - this should probably be the context of the Library if we can determine that
                 launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), "patient"));
                 var featureLibrary = request.getAdapterFactory()
                         .createLibrary(SearchHelper.searchRepositoryByCanonical(
                                 repository,
                                 VersionUtilities.canonicalTypeForVersion(
                                         request.getFhirVersion(), caseFeature.getLibraryUrl())));
+
                 // Add any other in parameters that match launch context codes
                 var inParameters = featureLibrary.getParameter().stream()
-                        .filter(p -> {
-                            var name = request.resolvePathString(p, "name").toUpperCase();
-                            return (name.equals("PRACTITIONER"))
-                                    || request.resolvePathString(p, "use").equals("in")
-                                            && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
-                                                    .map(Object::toString)
-                                                    .collect(Collectors.toList())
-                                                    .contains(name);
-                        })
+                        .filter(
+                                p -> // StringUtils.isNotBlank(request.resolvePathString(p, "name")) &&
+                                // request.resolvePathString(p, "use").equals("in"))
+                                {
+                                    var name =
+                                            request.resolvePathString(p, "name").toUpperCase();
+                                    return (name.equals("PRACTITIONER"))
+                                            || request.resolvePathString(p, "use")
+                                                            .equals("in")
+                                                    && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
+                                                            .stream()
+                                                            .map(Object::toString)
+                                                            .collect(Collectors.toList())
+                                                            .contains(name);
+                                })
                         .map(p -> request.resolvePathString(p, "name").toLowerCase())
                         .collect(Collectors.toList());
                 inParameters.forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), p)));
@@ -106,42 +128,108 @@ public class ItemGenerator {
         return expression;
     }
 
-    protected <E extends ICompositeType> void processElements(
+    protected <E extends IBaseExtension<?, ?>> Pair<List<IBaseBackboneElement>, List<E>> processElements(
             GenerateRequest request,
-            IBaseBackboneElement item,
-            List<E> elements,
+            List<IElementDefinitionAdapter> elements,
             int childCount,
             String itemLinkId,
             CqfExpression caseFeature) {
+        List<IBaseBackboneElement> items = new ArrayList<>();
+        List<E> valueExtensions = new ArrayList<>();
         for (var element : elements) {
-            childCount++;
-            var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
-            var childElements = getElements(
-                    request,
-                    request.resolvePathString(element, "path"),
-                    request.resolvePathString(element, "sliceName"));
-            // if child elements exist ignore the type and create a group
-            var elementType = getElementType(request, element);
-            var childItem =
-                    processElement(request, element, elementType, childLinkId, caseFeature, !childElements.isEmpty());
-            if (childElements.isEmpty()) {
-                request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
-            } else {
-                processElements(request, childItem, childElements, 0, childLinkId, caseFeature);
-                request.getModelResolver().setValue(item, "item", Collections.singletonList(childItem));
+            if (element.hasExtension(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE)) {
+                valueExtensions.add(element.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE));
+            } else if (!element.hasDefaultOrFixedOrPattern()) {
+                // elements with default values do not need to be generated
+                // they will be pulled from the profile during extraction
+
+                IBaseBackboneElement item;
+                childCount++;
+                var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
+                item = processElement(request, caseFeature, element, childLinkId);
+                if (item == null) {
+                    childCount--;
+                } else {
+                    items.add(item);
+                }
             }
+        }
+        return new ImmutablePair<>(items, valueExtensions);
+    }
+
+    protected IBaseBackboneElement processProfile(
+            GenerateRequest request, IStructureDefinitionAdapter profileAdapter, String childLinkId) {
+        // generate a new group item from the profile
+        // if the generated group item has only 1 child return it
+        throw new NotImplementedException("Nested profile generation is not currently supported.");
+    }
+
+    protected IStructureDefinitionAdapter getElementProfile(GenerateRequest request, String elementProfile) {
+        try {
+            return (IStructureDefinitionAdapter) request.getAdapterFactory()
+                    .createKnowledgeArtifactAdapter((IDomainResource) searchRepositoryByCanonical(
+                            request.getRepository(),
+                            canonicalTypeForVersion(request.getFhirVersion(), elementProfile)));
+        } catch (Exception e) {
+            return null;
         }
     }
 
     protected IBaseBackboneElement processElement(
+            GenerateRequest request, CqfExpression caseFeature, IElementDefinitionAdapter element, String childLinkId) {
+        // if the element type has a profile we will generate a new group item
+        // from that profile if we can find it in the repository
+        IStructureDefinitionAdapter profileAdapter = null;
+        var elementProfile = element.getTypeProfile();
+        if (StringUtils.isNotBlank(elementProfile)) {
+            profileAdapter = getElementProfile(request, elementProfile);
+            if (profileAdapter != null) {
+                return processProfile(request, profileAdapter, childLinkId);
+            }
+        }
+        // if child elements exist process them first
+        var childElements = getElements(request, element.getPath(), element.getSliceName());
+        var results = processElements(request, childElements, 0, childLinkId, caseFeature);
+        var childItems = results.getLeft();
+        var valueExtensions = results.getRight();
+        var item = createItemForElement(request, element, childLinkId, caseFeature, !childItems.isEmpty());
+        if (!childItems.isEmpty()) {
+            request.getModelResolver().setValue(item, "item", childItems);
+        }
+        if (!valueExtensions.isEmpty()) {
+            request.getModelResolver().setValue(item, "extension", valueExtensions);
+        }
+        return item;
+    }
+
+    protected IBaseBackboneElement createItemForElement(
             GenerateRequest request,
-            ICompositeType element,
-            String elementType,
+            IElementDefinitionAdapter element,
             String childLinkId,
             CqfExpression caseFeature,
             Boolean isGroup) {
         try {
-            return elementProcessor.processElement(request, element, elementType, childLinkId, caseFeature, isGroup);
+            var elementType = getElementType(request, element);
+            final var itemType = Helpers.parseItemTypeForVersion(
+                    request.getFhirVersion(), elementType, element.hasBinding(), isGroup);
+            if (itemType == null) {
+                return null;
+            }
+            final String definition = request.getProfileAdapter().getUrl() + "#" + element.getId();
+            final var required = element.hasMin() && element.getMin() > 0;
+            final var repeats = element.hasMax() && !element.getMax().equals("1");
+            final var item = initializeQuestionnaireItem(
+                    request, itemType, definition, childLinkId, getElementText(element), required, repeats);
+            if (Helpers.isGroupItemType(itemType)) {
+                return item;
+            }
+            if (Helpers.isChoiceItemType(itemType)) {
+                itemTypeIsChoice.addProperties(element, item);
+            }
+            if (caseFeature != null) {
+                elementHasCaseFeature.addProperties(request, caseFeature, request.getProfileAdapter(), element, item);
+            }
+            return item;
         } catch (Exception ex) {
             final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
             logger.warn(message);
@@ -149,67 +237,60 @@ public class ItemGenerator {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected <E extends ICompositeType> List<E> getElements(
+    protected List<IElementDefinitionAdapter> getElements(
             GenerateRequest request, String parentPath, String sliceName) {
-        List<E> elements = new ArrayList<>();
+        List<IElementDefinitionAdapter> elements = new ArrayList<>();
         // Add all elements from the differential
-        if (request.getDifferentialElements() != null) {
-            elements.addAll(request.getDifferentialElements().stream()
-                    .map(e -> (E) e)
-                    .filter(e -> filterElement(request, e, null, parentPath, sliceName, false))
-                    .collect(Collectors.toList()));
-        }
+        elements.addAll(request.getDifferentialElements().stream()
+                .filter(e -> filterElement(request, e, null, parentPath, sliceName, false))
+                .collect(Collectors.toList()));
         // Add elements from the snapshot that were not in the differential
         if (request.getSnapshotElements() != null) {
-            elements.addAll(request.getSnapshotElements().stream()
-                    .map(e -> (E) e)
+            elements.addAll(request.getProfileAdapter().getSnapshotElements().stream()
                     .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getRequiredOnly()))
                     .collect(Collectors.toList()));
         }
         return elements;
     }
 
-    protected <E extends ICompositeType> Boolean filterElement(
+    protected boolean filterElement(
             GenerateRequest request,
-            E element,
-            List<E> existingElements,
+            IElementDefinitionAdapter element,
+            List<IElementDefinitionAdapter> existingElements,
             String parentPath,
             String sliceName,
-            Boolean requiredOnly) {
-        var path = request.resolvePathString(element, "path");
-        if (elementExists(request, existingElements, path)) {
+            boolean requiredOnly) {
+        var path = element.getPath();
+        if (elementExists(existingElements, path)) {
             return false;
         }
-
+        if (element.hasDefaultOrFixedOrPattern()) {
+            return false;
+        }
         // filter out slicing definitions
-        if (request.resolvePath(element, "slicing") != null) {
+        if (element.hasSlicing()) {
             return false;
         }
         if (notInPath(path, parentPath)) {
             return false;
         }
+        if (sliceName != null) {
+            return element.getId().contains(sliceName);
+        }
+        if (requiredOnly) {
+            return element.isRequired();
+        }
+        if (request.getSupportedOnly()) {
+            return element.getMustSupport();
+        }
 
-        if (sliceName != null && !request.resolvePathString(element, "id").contains(sliceName)) {
-            return false;
-        }
-        if (Boolean.TRUE.equals(requiredOnly) && !isRequiredPath(request, element)) {
-            return false;
-        }
-        if (Boolean.TRUE.equals(request.getSupportedOnly())) {
-            var mustSupportElement = request.resolvePath(element, "mustSupport", IBaseBooleanDatatype.class);
-            if (mustSupportElement == null || mustSupportElement.getValue().equals(Boolean.FALSE)) {
-                return false;
-            }
-        }
         return true;
     }
 
-    protected <E extends ICompositeType> boolean elementExists(
-            GenerateRequest request, List<E> existingElements, String path) {
+    protected boolean elementExists(List<IElementDefinitionAdapter> existingElements, String path) {
         return existingElements != null
                 && !existingElements.isEmpty()
-                && existingElements.stream().anyMatch(e -> path.equals(request.resolvePathString(e, "path")));
+                && existingElements.stream().anyMatch(e -> e.getPath().equals(path));
     }
 
     protected boolean notInPath(String path, String parentPath) {
@@ -238,24 +319,19 @@ public class ItemGenerator {
         return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
     }
 
-    protected String resolveElementType(GenerateRequest request, ICompositeType element) {
-        var typeList = request.resolvePathList(element, "type");
-        return typeList.isEmpty() ? null : request.resolvePathString(typeList.get(0), "code");
-    }
-
-    protected String getElementType(GenerateRequest request, ICompositeType element) {
-        var type = resolveElementType(request, element);
-        if (type == null) {
+    protected String getElementType(GenerateRequest request, IElementDefinitionAdapter element) {
+        var type = element == null ? null : element.getTypeCode();
+        if (type == null && element != null) {
             // Attempt to resolve the type from the Snapshot if it is available
-            var path = request.resolvePathString(element, "path");
+            var path = element.getPath();
             var snapshot = request.getSnapshotElements() == null
                     ? null
                     : request.getSnapshotElements().stream()
-                            .filter(e -> path.equals(request.resolvePathString(e, "path")))
+                            .filter(e -> e.getPath().equals(path))
                             .findFirst()
                             .orElse(null);
             if (snapshot != null) {
-                type = resolveElementType(request, snapshot);
+                type = snapshot.getTypeCode();
             }
         }
         return type;
@@ -267,37 +343,70 @@ public class ItemGenerator {
                 : request.getProfileAdapter().getName();
         var item = createQuestionnaireItemComponent(
                 request, text, linkId, request.getProfileAdapter().getUrl(), false);
-        var extractContext = item.addExtension();
-        extractContext.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT);
-        extractContext.setValue(codeTypeForVersion(
-                request.getFhirVersion(), request.getProfileAdapter().getType()));
+        var definitionExtract = item.addExtension();
+        definitionExtract.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT);
+        definitionExtract.setValue(canonicalTypeForVersion(
+                request.getFhirVersion(), request.getProfileAdapter().getUrl()));
         return item;
     }
 
     protected IBaseBackboneElement createQuestionnaireItemComponent(
             GenerateRequest request, String text, String linkId, String definition, Boolean isDisplay) {
+        Object itemType;
+        switch (request.getFhirVersion()) {
+            case R4:
+                itemType = Boolean.TRUE.equals(isDisplay)
+                        ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                        : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
+                break;
+            case R5:
+                itemType = Boolean.TRUE.equals(isDisplay)
+                        ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                        : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
+                break;
+
+            default:
+                itemType = null;
+        }
+        return initializeQuestionnaireItem(request, itemType, definition, linkId, text, false, false);
+    }
+
+    protected IBaseBackboneElement initializeQuestionnaireItem(
+            GenerateRequest request,
+            Object itemType,
+            String definition,
+            String linkId,
+            String text,
+            boolean required,
+            boolean repeats) {
         switch (request.getFhirVersion()) {
             case R4:
                 return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(
-                                Boolean.TRUE.equals(isDisplay)
-                                        ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
-                                        : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP)
+                        .setType((org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType) itemType)
                         .setDefinition(definition)
                         .setLinkId(linkId)
-                        .setText(text);
+                        .setText(text)
+                        .setRequired(required)
+                        .setRepeats(repeats);
             case R5:
                 return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType(
-                                Boolean.TRUE.equals(isDisplay)
-                                        ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
-                                        : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP)
+                        .setType((org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType) itemType)
                         .setDefinition(definition)
                         .setLinkId(linkId)
-                        .setText(text);
+                        .setText(text)
+                        .setRequired(required)
+                        .setRepeats(repeats);
 
             default:
                 return null;
         }
+    }
+
+    protected String getElementText(IElementDefinitionAdapter element) {
+        return element.hasLabel() ? element.getLabel() : getElementDescription(element);
+    }
+
+    protected String getElementDescription(IElementDefinitionAdapter element) {
+        return element.hasShort() ? element.getShort() : element.getPath();
     }
 }

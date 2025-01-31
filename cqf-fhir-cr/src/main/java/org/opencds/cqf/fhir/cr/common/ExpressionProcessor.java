@@ -66,7 +66,12 @@ public class ExpressionProcessor {
                 ? null
                 : request.getLibraryEngine()
                         .resolveExpression(
-                                request.getSubjectId().getIdPart(), expression, parameters, request.getData());
+                                request.getSubjectId().getIdPart(),
+                                expression,
+                                parameters,
+                                request.getData(),
+                                request.getContext(),
+                                null);
         return result == null
                 ? new ArrayList<>()
                 : result.stream().filter(Objects::nonNull).collect(Collectors.toList());

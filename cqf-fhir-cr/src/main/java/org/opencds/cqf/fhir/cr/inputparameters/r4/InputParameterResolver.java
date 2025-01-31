@@ -123,10 +123,6 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             var types = launchContext.getExtensionsByUrl("type").stream()
                     .map(type -> type.getValueAsPrimitive().getValueAsString())
                     .collect(Collectors.toList());
-            // if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
-            //     throw new IllegalArgumentException(String.format("Unsupported launch context for %s: %s", name,
-            // type));
-            // }
             var content = getContent(contexts, name);
             if (content != null && !content.isEmpty()) {
                 var value = getValue(types, content);
@@ -140,10 +136,6 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                         params.addParameter(part(cqlParameterName, resource));
                     });
                 }
-                //  else {
-                //     throw new IllegalArgumentException(
-                //             String.format("Unable to retrieve resource for context: %s", name));
-                // }
             }
         });
     }

@@ -449,7 +449,10 @@ public class ProcessDefinitionItem {
                 sliceIndex = i;
             }
         }
-        var sliceName = identifiers[sliceIndex];
+        var sliceName = sliceIndex == -1 ? null : identifiers[sliceIndex];
+        if (sliceName == null) {
+            return;
+        }
         var slicePath = sliceName.split(":")[0];
         var slicePropertyDef = propertyDefs.get(sliceName);
         var sliceClass = slicePropertyDef instanceof BaseRuntimeChildDatatypeDefinition def

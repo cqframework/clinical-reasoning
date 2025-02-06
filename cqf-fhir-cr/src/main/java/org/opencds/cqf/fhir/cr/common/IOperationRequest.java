@@ -135,26 +135,4 @@ public interface IOperationRequest {
     default <T extends IBase> T resolvePath(IBase base, String path, Class<T> clazz) {
         return (T) resolvePath(base, path);
     }
-
-    @SuppressWarnings("unchecked")
-    default <T extends IBase> Class<T> getClassForType(String type) {
-        try {
-            return (Class<T>) Class.forName(String.format(
-                    "org.hl7.fhir.%s.model.%s", getFhirVersion().toString().toLowerCase(), type));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    default IBase newValue(String type) {
-        return newValue(getClassForType(type));
-    }
-
-    default IBase newValue(Class<? extends IBase> clazz) {
-        try {
-            return clazz.getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
 }

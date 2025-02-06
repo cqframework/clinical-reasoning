@@ -80,16 +80,6 @@ public class Helpers {
         }
     }
 
-    public static boolean isGroupItem(Object item) {
-        if (item instanceof org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent r4Item) {
-            return r4Item.getType() == org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
-        }
-        if (item instanceof org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent r5Item) {
-            return r5Item.getType() == org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
-        }
-        return false;
-    }
-
     public static boolean isGroupItemType(Object itemType) {
         if (itemType instanceof org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType r4ItemType) {
             return r4ItemType == org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;

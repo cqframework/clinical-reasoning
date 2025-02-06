@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -390,9 +391,11 @@ public class PlanDefinition {
         }
 
         public GeneratedBundle hasCommunicationRequestPayload() {
-            assertTrue(getEntryResources(generatedBundle).stream()
+            var communications = getEntryResources(generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                    .allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+                    .collect(Collectors.toList());
+            assertFalse(communications.isEmpty());
+            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
         }
 
@@ -498,6 +501,17 @@ public class PlanDefinition {
         public GeneratedCarePlan hasQuestionnaire() {
             assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
                     .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedCarePlan hasCommunicationRequestPayload() {
+            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
+                    .stream()
+                            .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                            .collect(Collectors.toList());
+            assertFalse(communications.isEmpty());
+            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
         }
     }

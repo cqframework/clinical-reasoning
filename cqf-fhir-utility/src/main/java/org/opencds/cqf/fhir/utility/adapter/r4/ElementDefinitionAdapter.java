@@ -28,7 +28,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
                     "object passed as elementDefinition argument is not a ElementDefinition data type");
         }
         this.elementDefinition = (ElementDefinition) elementDefinition;
-        fhirContext = FhirContext.forR5Cached();
+        fhirContext = FhirContext.forR4Cached();
         modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         adapterFactory = new AdapterFactory();
     }

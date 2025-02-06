@@ -340,6 +340,30 @@ class PlanDefinitionProcessorTests {
     }
 
     @Test
+    void nestedActivity() {
+        var planDefinitionID = "NestedActivity";
+        var patientID = "Patient/Patient1";
+        var practitionerID = "Practitioner/Practitioner1";
+        var data = "r4/tests/Bundle-DischargeInstructions-Patient-Data.json";
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .practitionerId(practitionerID)
+                .additionalData(data)
+                .thenApply()
+                .hasCommunicationRequestPayload();
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .practitionerId(practitionerID)
+                .additionalData(data)
+                .thenApplyR5()
+                .hasCommunicationRequestPayload();
+    }
+
+    @Test
     void questionnaireTask() {
         var planDefinitionID = "prepopulate";
         var patientID = "OPA-Patient1";

@@ -143,7 +143,8 @@ public class ApplyRequest implements ICpgRequest {
                         libraryEngine,
                         modelResolver,
                         inputParameterResolver)
-                .setQuestionnaire(questionnaire);
+                .setQuestionnaire(questionnaire)
+                .setContainResources(containResources);
     }
 
     public org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest toActivityRequest(
@@ -335,8 +336,9 @@ public class ApplyRequest implements ICpgRequest {
         return this;
     }
 
-    public void setContainResources(Boolean value) {
+    public ApplyRequest setContainResources(Boolean value) {
         containResources = value;
+        return this;
     }
 
     public Boolean getContainResources() {

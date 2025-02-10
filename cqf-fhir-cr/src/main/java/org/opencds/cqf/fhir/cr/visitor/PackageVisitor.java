@@ -232,7 +232,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         });
     }
 
-    protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
+    public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
         // if not, set type = transaction
         // special case of count = 0 -> set type = searchset so we can display bundle.total
@@ -261,7 +261,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
      * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
      * @param bundle the bundle to page
      */
-    protected void pageBundleBasedOnCountAndOffset(
+    public static void pageBundleBasedOnCountAndOffset(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         if (offset.isPresent()) {
             var entries = BundleHelper.getEntry(bundle);

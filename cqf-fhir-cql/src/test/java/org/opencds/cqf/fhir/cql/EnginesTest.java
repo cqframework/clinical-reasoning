@@ -9,17 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmPackageManager;
+import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.cql.model.NamespaceInfo;
@@ -27,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
@@ -75,7 +76,7 @@ class EnginesTest {
         var settings = EvaluationSettings.getDefault()
                 .withModelCache(new HashMap<>())
                 .withValueSetCache(new HashMap<>())
-                .withNpmProcessor(NpmProcessorOptimized.fromParams(FhirVersionEnum.R4, List.of(), List.of()))
+                .withNpmProcessor(mock(NpmProcessor.class))
                 .withLibraryCache(new HashMap<>())
                 .withLibrarySourceProviders(List.of(new StringLibrarySourceProvider(new ArrayList<>())))
                 .withTerminologySettings(new TerminologySettings())
@@ -194,7 +195,7 @@ class EnginesTest {
 
     @Test
     void npmProcessorIgContextNull() {
-        var npmProcessor = NpmProcessorOptimized.fromParams(FhirVersionEnum.R4, List.of(), List.of());
+        var npmProcessor = new NpmProcessor(null);
         var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
 
         var engine = getEngine(settings);
@@ -208,7 +209,10 @@ class EnginesTest {
 
     @Test
     void npmProcessorPackageManagerNull() {
-        var npmProcessor = NpmProcessorOptimized.EMPTY;
+        var npmProcessor = mock(NpmProcessor.class);
+        when(npmProcessor.getPackageManager()).thenReturn(null);
+        when(npmProcessor.getIgContext()).thenReturn(mock(IGContext.class));
+        when(npmProcessor.getPackageManager()).thenReturn(null);
 
         var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
 
@@ -223,13 +227,12 @@ class EnginesTest {
 
     @Test
     void npmProcessorWithDupeNamespacesById() {
+        var npmProcessor = mock(NpmProcessor.class);
         var namespaceInfo1 = new NamespaceInfo("1", "a");
         var namespaceInfo2 = new NamespaceInfo("1", "b");
-        var npmProcessor =
-            NpmProcessorOptimized.fromParams(
-                FhirVersionEnum.R4,
-                List.of(),
-                List.of(namespaceInfo1, namespaceInfo2));
+        when(npmProcessor.getNamespaces()).thenReturn(List.of(namespaceInfo1, namespaceInfo2));
+        when(npmProcessor.getIgContext()).thenReturn(mock(IGContext.class));
+        when(npmProcessor.getPackageManager()).thenReturn(mock(NpmPackageManager.class));
         var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
 
         var engine = getEngine(settings);
@@ -243,13 +246,12 @@ class EnginesTest {
 
     @Test
     void npmProcessorWithDupeNamespacesByUrl() {
+        var npmProcessor = mock(NpmProcessor.class);
         var namespaceInfo1 = new NamespaceInfo("1", "a");
         var namespaceInfo2 = new NamespaceInfo("2", "a");
-        var npmProcessor =
-            NpmProcessorOptimized.fromParams(
-                FhirVersionEnum.R4,
-                List.of(),
-                List.of(namespaceInfo1, namespaceInfo2));
+        when(npmProcessor.getNamespaces()).thenReturn(List.of(namespaceInfo1, namespaceInfo2));
+        when(npmProcessor.getIgContext()).thenReturn(mock(IGContext.class));
+        when(npmProcessor.getPackageManager()).thenReturn(mock(NpmPackageManager.class));
         var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
 
         var engine = getEngine(settings);
@@ -268,7 +270,7 @@ class EnginesTest {
 
         var igContext = new IGContext(new LoggerAdapter(log));
         igContext.initializeFromIni(ini.toString());
-        var settings = EvaluationSettings.getDefault().withNpmProcessor(NpmProcessorOptimized.fromIgContext(igContext));
+        var settings = EvaluationSettings.getDefault().withNpmProcessor(new NpmProcessor(igContext));
 
         var engine = getEngine(settings);
         var lm = engine.getEnvironment().getLibraryManager();
@@ -356,6 +358,19 @@ class EnginesTest {
         var retrievedPatients = retrieve(Patient.class, federatedDataProvider);
 
         assertThat(retrievedPatients, hasSize(1));
+    }
+
+    private static class NpmProcessorWithDupeNamespaces extends NpmProcessor {
+
+        public NpmProcessorWithDupeNamespaces(IGContext igContext) {
+            super(igContext);
+        }
+
+        @Override
+        public List<NamespaceInfo> getNamespaces() {
+            final NamespaceInfo namespaceInfo = new NamespaceInfo("1", "1");
+            return List.of(namespaceInfo, namespaceInfo);
+        }
     }
 
     private static <T extends Resource> List<T> retrieve(Class<T> clazz, FederatedDataProvider provider) {

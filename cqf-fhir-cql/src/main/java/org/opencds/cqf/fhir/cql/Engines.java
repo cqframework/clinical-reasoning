@@ -103,21 +103,21 @@ public class Engines {
     private static void registerNpmSupport(
             EvaluationSettings settings, LibraryManager libraryManager, ModelManager modelManager) {
         var npmProcessor = settings.getNpmProcessor();
-        if (npmProcessor == null || npmProcessor.isEmpty()) {
+        if (npmProcessor == null || npmProcessor.getIgContext() == null || npmProcessor.getPackageManager() == null) {
             return;
         }
 
         ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
-                npmProcessor.getFhirVersionString());
+                npmProcessor.getIgContext().getFhirVersion());
         LoggerAdapter adapter = new LoggerAdapter(logger);
         libraryManager
                 .getLibrarySourceLoader()
                 .registerProvider(new NpmLibrarySourceProvider(
-                        npmProcessor.getNpmList(), reader, adapter));
+                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
         modelManager
                 .getModelInfoLoader()
                 .registerModelInfoProvider(new NpmModelInfoProvider(
-                        npmProcessor.getNpmList(), reader, adapter));
+                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
 
         // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
         // list, and b) there are packages with different package ids but the same base canonical (e.g.

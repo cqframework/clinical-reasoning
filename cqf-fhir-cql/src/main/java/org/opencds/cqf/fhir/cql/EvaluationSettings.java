@@ -13,7 +13,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
-import javax.annotation.Nullable;
 
 public class EvaluationSettings {
 
@@ -26,7 +25,7 @@ public class EvaluationSettings {
 
     private RetrieveSettings retrieveSettings;
     private TerminologySettings terminologySettings;
-    private NpmProcessorOptimized npmProcessor;
+    private NpmProcessor npmProcessor;
 
     public static EvaluationSettings getDefault() {
         return new EvaluationSettings();
@@ -55,16 +54,8 @@ public class EvaluationSettings {
         this.retrieveSettings = new RetrieveSettings(settings.retrieveSettings);
         this.terminologySettings = new TerminologySettings(settings.terminologySettings);
         this.librarySourceProviders = new ArrayList<>(settings.librarySourceProviders);
-        this.npmProcessor = getNpmProcessor(settings.npmProcessor);
-    }
-
-    @Nullable
-    private NpmProcessorOptimized getNpmProcessor(NpmProcessorOptimized npmProcessor) {
-        if (npmProcessor == null) {
-            return null;
-        }
-
-        return npmProcessor.copy();
+        this.npmProcessor =
+                settings.npmProcessor != null ? new NpmProcessor(settings.npmProcessor.getIgContext()) : null;
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {
@@ -158,15 +149,15 @@ public class EvaluationSettings {
         return this;
     }
 
-    public NpmProcessorOptimized getNpmProcessor() {
+    public NpmProcessor getNpmProcessor() {
         return npmProcessor;
     }
 
-    public void setNpmProcessor(NpmProcessorOptimized npmProcessor) {
+    public void setNpmProcessor(NpmProcessor npmProcessor) {
         this.npmProcessor = npmProcessor;
     }
 
-    public EvaluationSettings withNpmProcessor(NpmProcessorOptimized npmProcessor) {
+    public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
         setNpmProcessor(npmProcessor);
         return this;
     }

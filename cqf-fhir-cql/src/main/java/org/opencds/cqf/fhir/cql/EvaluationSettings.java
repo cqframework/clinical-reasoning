@@ -13,6 +13,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
+import javax.annotation.Nullable;
 
 public class EvaluationSettings {
 
@@ -54,8 +55,16 @@ public class EvaluationSettings {
         this.retrieveSettings = new RetrieveSettings(settings.retrieveSettings);
         this.terminologySettings = new TerminologySettings(settings.terminologySettings);
         this.librarySourceProviders = new ArrayList<>(settings.librarySourceProviders);
-        this.npmProcessor =
-                settings.npmProcessor != null ? new NpmProcessor(settings.npmProcessor.getIgContext()) : null;
+        this.npmProcessor = getNpmProcessor(settings.npmProcessor);
+    }
+
+    @Nullable
+    private NpmProcessor getNpmProcessor(NpmProcessor npmProcessor) {
+        if (npmProcessor == null) {
+            return null;
+        }
+
+        return new NpmProcessor(npmProcessor.getIgContext());
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {

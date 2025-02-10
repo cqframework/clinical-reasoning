@@ -26,7 +26,7 @@ public class EvaluationSettings {
 
     private RetrieveSettings retrieveSettings;
     private TerminologySettings terminologySettings;
-    private NpmProcessor npmProcessor;
+    private NpmProcessorOptimized npmProcessor;
 
     public static EvaluationSettings getDefault() {
         return new EvaluationSettings();
@@ -59,12 +59,12 @@ public class EvaluationSettings {
     }
 
     @Nullable
-    private NpmProcessor getNpmProcessor(NpmProcessor npmProcessor) {
+    private NpmProcessorOptimized getNpmProcessor(NpmProcessorOptimized npmProcessor) {
         if (npmProcessor == null) {
             return null;
         }
 
-        return new NpmProcessor(npmProcessor.getIgContext());
+        return npmProcessor.copy();
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {
@@ -158,15 +158,15 @@ public class EvaluationSettings {
         return this;
     }
 
-    public NpmProcessor getNpmProcessor() {
+    public NpmProcessorOptimized getNpmProcessor() {
         return npmProcessor;
     }
 
-    public void setNpmProcessor(NpmProcessor npmProcessor) {
+    public void setNpmProcessor(NpmProcessorOptimized npmProcessor) {
         this.npmProcessor = npmProcessor;
     }
 
-    public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
+    public EvaluationSettings withNpmProcessor(NpmProcessorOptimized npmProcessor) {
         setNpmProcessor(npmProcessor);
         return this;
     }

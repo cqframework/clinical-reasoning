@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -24,6 +23,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.NpmProcessorOptimized;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -193,7 +193,7 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setCqlOptions(cqlOptions);
         evaluationSettings.setTerminologySettings(terminologySettings);
         evaluationSettings.setRetrieveSettings(retrieveSettings);
-        evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
+        evaluationSettings.setNpmProcessor(NpmProcessorOptimized.fromIgContext(igContext));
 
         for (LibraryParameter library : libraries) {
             var repository = createRepository(

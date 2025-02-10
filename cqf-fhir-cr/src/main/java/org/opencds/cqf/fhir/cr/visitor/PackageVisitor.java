@@ -261,7 +261,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
      * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
      * @param bundle the bundle to page
      */
-    protected void pageBundleBasedOnCountAndOffset(
+    public static void pageBundleBasedOnCountAndOffset(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         if (offset.isPresent()) {
             var entries = BundleHelper.getEntry(bundle);

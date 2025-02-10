@@ -232,7 +232,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         });
     }
 
-    protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
+    public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
         // if not, set type = transaction
         // special case of count = 0 -> set type = searchset so we can display bundle.total

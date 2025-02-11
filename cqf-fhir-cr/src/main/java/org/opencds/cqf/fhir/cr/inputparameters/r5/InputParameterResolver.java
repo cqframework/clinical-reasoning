@@ -68,11 +68,14 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
         }
-        var subjectClass =
-                fhirContext().getResourceDefinition(subjectId.getResourceType()).getImplementingClass();
-        var subject = readRepository(subjectClass, subjectId);
-        if (subject != null) {
-            params.addParameter(part("%subject", (Resource) subject));
+        if (subjectId != null) {
+            var subjectClass = fhirContext()
+                    .getResourceDefinition(subjectId.getResourceType())
+                    .getImplementingClass();
+            var subject = readRepository(subjectClass, subjectId);
+            if (subject != null) {
+                params.addParameter(part("%subject", (Resource) subject));
+            }
         }
         if (encounterId != null && !encounterId.isEmpty()) {
             var encounter = readRepository(Encounter.class, encounterId);
@@ -107,6 +110,8 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                         || type.equals(ResourceType.RelatedPerson.name());
             case STUDY:
                 return type.equals(ResourceType.ResearchStudy.name());
+            case CLINICAL:
+                return true;
 
             default:
                 return false;
@@ -119,18 +124,14 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             List<IBaseExtension<?, ?>> launchContexts) {
         launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
             var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
-            var type = launchContext
-                    .getExtensionByUrl("type")
-                    .getValueAsPrimitive()
-                    .getValueAsString();
-            if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
-                throw new IllegalArgumentException(String.format("Unsupported launch context for %s: %s", name, type));
-            }
+            var types = launchContext.getExtensionsByUrl("type").stream()
+                    .map(type -> type.getValueAsPrimitive().getValueAsString())
+                    .collect(Collectors.toList());
             var content = getContent(contexts, name);
             if (content == null || content.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
             }
-            var value = getValue(type, content);
+            var value = getValue(types, content);
             if (!value.isEmpty()) {
                 var resource =
                         (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R5));
@@ -163,15 +164,28 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                         .collect(Collectors.toList());
     }
 
-    private List<IBaseResource> getValue(String type, List<ParametersParameterComponent> content) {
+    private List<IBaseResource> getValue(List<String> types, List<ParametersParameterComponent> content) {
         return content.stream()
                 .map(p -> {
-                    if (p.getValue() instanceof Reference) {
-                        return readRepository(
-                                fhirContext().getResourceDefinition(type).getImplementingClass(),
-                                ((Reference) p.getValue()).getReferenceElement());
+                    if (p.getValue() instanceof Reference ref) {
+                        Resource resource = null;
+                        for (var type : types) {
+                            try {
+                                resource = (Resource) readRepository(
+                                        fhirContext()
+                                                .getResourceDefinition(type)
+                                                .getImplementingClass(),
+                                        ref.getReferenceElement());
+                                if (resource != null) {
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                // Do nothing
+                            }
+                        }
+                        return resource;
                     } else {
-                        return (Resource) p.getResource();
+                        return p.getResource();
                     }
                 })
                 .filter(p -> p != null)

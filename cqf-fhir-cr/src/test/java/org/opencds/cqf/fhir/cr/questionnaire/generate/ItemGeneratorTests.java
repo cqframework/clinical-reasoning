@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@SuppressWarnings("squid:S2699")
 @ExtendWith(MockitoExtension.class)
 class ItemGeneratorTests {
     private final String ROUTE_ONE_PATIENT_PROFILE =
@@ -30,10 +31,10 @@ class ItemGeneratorTests {
     @Test
     void testGenerateRequest() {
         var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
-        assertThrows(UnsupportedOperationException.class, () -> request.getSubjectId());
-        assertThrows(UnsupportedOperationException.class, () -> request.getData());
-        assertThrows(UnsupportedOperationException.class, () -> request.getUseServerData());
-        assertThrows(UnsupportedOperationException.class, () -> request.getParameters());
+        assertThrows(UnsupportedOperationException.class, request::getSubjectId);
+        assertThrows(UnsupportedOperationException.class, request::getData);
+        assertThrows(UnsupportedOperationException.class, request::getUseServerData);
+        assertThrows(UnsupportedOperationException.class, request::getParameters);
     }
 
     @Test

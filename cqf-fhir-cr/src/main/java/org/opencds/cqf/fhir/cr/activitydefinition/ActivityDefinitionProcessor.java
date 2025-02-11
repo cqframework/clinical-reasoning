@@ -181,16 +181,49 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
         if (StringUtils.isBlank(subjectId)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
         }
-        final ApplyRequest request = new ApplyRequest(
+        final ApplyRequest request = buildApplyRequest(
+                activityDefinition,
+                subjectId,
+                encounterId,
+                practitionerId,
+                organizationId,
+                userType,
+                userLanguage,
+                userTaskContext,
+                setting,
+                settingContext,
+                parameters,
+                useServerData,
+                data,
+                libraryEngine);
+        initApplyProcessor();
+        return applyProcessor.apply(request);
+    }
+
+    protected <C extends IPrimitiveType<String>, R extends IBaseResource> ApplyRequest buildApplyRequest(
+            Either3<C, IIdType, R> activityDefinition,
+            String subject,
+            String encounter,
+            String practitioner,
+            String organization,
+            IBaseDatatype userType,
+            IBaseDatatype userLanguage,
+            IBaseDatatype userTaskContext,
+            IBaseDatatype setting,
+            IBaseDatatype settingContext,
+            IBaseParameters parameters,
+            boolean useServerData,
+            IBaseBundle data,
+            LibraryEngine libraryEngine) {
+        if (StringUtils.isBlank(subject)) {
+            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+        }
+        return new ApplyRequest(
                 resolveActivityDefinition(activityDefinition),
-                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, "Patient")),
-                encounterId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounterId, "Encounter")),
-                practitionerId == null
-                        ? null
-                        : Ids.newId(fhirVersion, Ids.ensureIdType(practitionerId, "Practitioner")),
-                organizationId == null
-                        ? null
-                        : Ids.newId(fhirVersion, Ids.ensureIdType(organizationId, "Organization")),
+                Ids.newId(fhirVersion, Ids.ensureIdType(subject, "Patient")),
+                encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter")),
+                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
+                organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization")),
                 userType,
                 userLanguage,
                 userTaskContext,
@@ -201,8 +234,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 data,
                 libraryEngine,
                 modelResolver);
-        initApplyProcessor();
-        return applyProcessor.apply(request);
     }
 
     protected void initApplyProcessor() {

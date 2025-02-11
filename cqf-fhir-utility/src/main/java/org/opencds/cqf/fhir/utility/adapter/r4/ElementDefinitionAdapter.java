@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -218,7 +219,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ICompositeType> T getBinding() {
+    public <T extends IBaseDatatypeElement> T getBinding() {
         return (T) get().getBinding();
     }
 

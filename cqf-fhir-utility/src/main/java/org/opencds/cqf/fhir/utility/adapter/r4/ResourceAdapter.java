@@ -33,7 +33,7 @@ class ResourceAdapter extends BaseResourceAdapter {
     }
 
     protected Optional<DomainResource> getDomainResource() {
-        return ofNullable(resource instanceof DomainResource ? (DomainResource) resource : null);
+        return ofNullable(resource instanceof DomainResource domainResource ? domainResource : null);
     }
 
     @Override

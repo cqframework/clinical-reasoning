@@ -18,6 +18,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -51,6 +53,7 @@ public class TestQuestionnaireResponse {
 
     public static class Given {
         private Repository repository;
+        private IExtractProcessor extractProcessor;
 
         public Given repository(Repository repository) {
             this.repository = repository;
@@ -63,8 +66,13 @@ public class TestQuestionnaireResponse {
             return this;
         }
 
+        public Given extractProcessor(IExtractProcessor extractProcessor) {
+            this.extractProcessor = extractProcessor;
+            return this;
+        }
+
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository);
+            return new QuestionnaireResponseProcessor(repository, EvaluationSettings.getDefault(), extractProcessor);
         }
 
         public When when() {

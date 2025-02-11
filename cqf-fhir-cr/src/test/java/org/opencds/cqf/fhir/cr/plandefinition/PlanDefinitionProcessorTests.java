@@ -22,6 +22,7 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S2699")
 class PlanDefinitionProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -70,13 +71,9 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void applyNoSubjectThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            var planDefinitionID = "hello-world-patient-view";
-            given().repositoryFor(fhirContextR4, "r4")
-                    .when()
-                    .planDefinitionId(planDefinitionID)
-                    .thenApply();
-        });
+        var planDefinitionID = "hello-world-patient-view";
+        var when = given().repositoryFor(fhirContextR4, "r4").when().planDefinitionId(planDefinitionID);
+        assertThrows(IllegalArgumentException.class, when::thenApply);
     }
 
     @Test

@@ -75,7 +75,8 @@ public class EvaluateRequest implements ICqlOperationRequest {
 
     @Override
     public IBase getContext() {
-        return getLibrary();
+        // The is used for FHIRPath evaluation which the $evaluate operation does not support
+        return null;
     }
 
     @Override

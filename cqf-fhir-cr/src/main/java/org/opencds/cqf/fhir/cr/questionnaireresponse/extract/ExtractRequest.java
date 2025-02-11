@@ -202,26 +202,4 @@ public class ExtractRequest implements IQuestionnaireRequest {
     public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
         this.operationOutcome = operationOutcome;
     }
-
-    @SuppressWarnings("unchecked")
-    public <T extends IBase> Class<T> getClassForType(String type) {
-        try {
-            return (Class<T>) Class.forName(String.format(
-                    "org.hl7.fhir.%s.model.%s", getFhirVersion().toString().toLowerCase(), type));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    public IBase newValue(String type) {
-        return newValue(getClassForType(type));
-    }
-
-    public IBase newValue(Class<? extends IBase> clazz) {
-        try {
-            return clazz.getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
 }

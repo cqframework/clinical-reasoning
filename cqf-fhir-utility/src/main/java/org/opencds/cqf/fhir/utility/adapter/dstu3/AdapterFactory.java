@@ -32,11 +32,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IResourceAdapter createResource(IBaseResource resource) {
         if (resource instanceof MetadataResource) {
-            return createKnowledgeArtifactAdapter((MetadataResource) resource);
+            return createKnowledgeArtifactAdapter((IDomainResource) resource);
         } else if (resource instanceof Endpoint) {
             return createEndpoint(resource);
-        } else if (resource instanceof Parameters) {
-            return createParameters((Parameters) resource);
+        } else if (resource instanceof Parameters parameters) {
+            return createParameters(parameters);
         } else {
             return new ResourceAdapter(resource);
         }
@@ -47,19 +47,19 @@ public class AdapterFactory implements IAdapterFactory {
         IKnowledgeArtifactAdapter adapter;
         if (resource instanceof Library) {
             adapter = createLibrary(resource);
-        } else if (resource instanceof Measure) {
-            adapter = new MeasureAdapter((Measure) resource);
-        } else if (resource instanceof PlanDefinition) {
-            adapter = new PlanDefinitionAdapter((PlanDefinition) resource);
-        } else if (resource instanceof Questionnaire) {
-            adapter = new QuestionnaireAdapter((Questionnaire) resource);
-        } else if (resource instanceof StructureDefinition) {
-            adapter = new StructureDefinitionAdapter((StructureDefinition) resource);
-        } else if (resource instanceof ValueSet) {
-            adapter = new ValueSetAdapter((ValueSet) resource);
+        } else if (resource instanceof Measure measure) {
+            adapter = new MeasureAdapter(measure);
+        } else if (resource instanceof PlanDefinition planDefinition) {
+            adapter = new PlanDefinitionAdapter(planDefinition);
+        } else if (resource instanceof Questionnaire questionnaire) {
+            adapter = new QuestionnaireAdapter(questionnaire);
+        } else if (resource instanceof StructureDefinition structureDefinition) {
+            adapter = new StructureDefinitionAdapter(structureDefinition);
+        } else if (resource instanceof ValueSet valueSet) {
+            adapter = new ValueSetAdapter(valueSet);
         } else {
-            if (resource instanceof MetadataResource) {
-                adapter = new KnowledgeArtifactAdapter((MetadataResource) resource);
+            if (resource instanceof MetadataResource metadataResource) {
+                adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {
                 throw new UnprocessableEntityException(
                         String.format("Resource must be instance of %s", MetadataResource.class.getName()));

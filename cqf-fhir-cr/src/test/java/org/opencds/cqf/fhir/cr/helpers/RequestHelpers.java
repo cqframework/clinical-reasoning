@@ -7,7 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
-import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
+import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
@@ -24,16 +24,17 @@ public class RequestHelpers {
     public static final String PROFILE_ID = "profileId";
     public static final String PROFILE_URL = "http://test.fhir.org/fhir/StructureDefinition/";
 
-    public static ApplyRequest newPDApplyRequestForVersion(FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+    public static org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest newPDApplyRequestForVersion(
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
         return newPDApplyRequestForVersion(fhirVersion, libraryEngine, null, null);
     }
 
-    public static ApplyRequest newPDApplyRequestForVersion(
+    public static org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, ModelResolver modelResolver) {
         return newPDApplyRequestForVersion(fhirVersion, libraryEngine, modelResolver, null);
     }
 
-    public static ApplyRequest newPDApplyRequestForVersion(
+    public static org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
@@ -52,7 +53,7 @@ public class RequestHelpers {
                 fhirVersion, planDefinition, libraryEngine, modelResolver, inputParameterResolver);
     }
 
-    public static ApplyRequest newPDApplyRequestForVersion(
+    public static org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest newPDApplyRequestForVersion(
             FhirVersionEnum fhirVersion,
             IBaseResource planDefinition,
             LibraryEngine libraryEngine,
@@ -105,7 +106,7 @@ public class RequestHelpers {
                 userLanguage = null;
                 break;
         }
-        return new ApplyRequest(
+        return new org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest(
                 planDefinition,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Encounter")),
@@ -175,5 +176,19 @@ public class RequestHelpers {
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion),
                 null);
+    }
+
+    public static EvaluateRequest newEvaluateRequestForVersion(
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource library) {
+        return new EvaluateRequest(
+                library,
+                Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
+                null,
+                null,
+                true,
+                null,
+                null,
+                libraryEngine,
+                FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
 }

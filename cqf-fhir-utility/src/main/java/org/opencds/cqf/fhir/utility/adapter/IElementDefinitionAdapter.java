@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface IElementDefinitionAdapter extends IAdapter<ICompositeType> {
@@ -80,7 +81,7 @@ public interface IElementDefinitionAdapter extends IAdapter<ICompositeType> {
 
     boolean getMustSupport();
 
-    <T extends ICompositeType> T getBinding();
+    <T extends IBaseDatatypeElement> T getBinding();
 
     boolean hasBinding();
 

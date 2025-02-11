@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -13,6 +14,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Paths;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Observation;
@@ -22,13 +27,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @TestInstance(Lifecycle.PER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class ActivityDefinitionProcessorTests {
     private Repository repositoryDstu3;
     private Repository repositoryR4;
@@ -36,6 +47,9 @@ class ActivityDefinitionProcessorTests {
     private ActivityDefinitionProcessor activityDefinitionProcessorDstu3;
     private ActivityDefinitionProcessor activityDefinitionProcessorR4;
     private ActivityDefinitionProcessor activityDefinitionProcessorR5;
+
+    @Mock
+    LibraryEngine libraryEngine;
 
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
@@ -58,22 +72,35 @@ class ActivityDefinitionProcessorTests {
     }
 
     @Test
+    void testRequest() {
+        var activityDefinition = new ActivityDefinition();
+        doReturn(repositoryR4).when(libraryEngine).getRepository();
+        var request = activityDefinitionProcessorR4.buildApplyRequest(
+                Eithers.forRight3(activityDefinition),
+                "patientId",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                libraryEngine);
+        assertEquals("apply", request.getOperationName());
+        assertEquals("patientId", request.getSubjectId().getIdPart());
+        assertEquals(activityDefinition, request.getContext());
+    }
+
+    @Test
     void applyNoSubjectThrowsException() {
+        Either3<IPrimitiveType<String>, IIdType, IBaseResource> id = Eithers.forMiddle3(Ids.newId(
+                activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "activityDefinition-test"));
         assertThrows(IllegalArgumentException.class, () -> {
-            activityDefinitionProcessorR4.apply(
-                    Eithers.forMiddle3(Ids.newId(
-                            activityDefinitionProcessorR4.fhirContext(),
-                            "ActivityDefinition",
-                            "activityDefinition-test")),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+            activityDefinitionProcessorR4.apply(id, null, null, null, null, null, null, null, null, null);
         });
     }
 

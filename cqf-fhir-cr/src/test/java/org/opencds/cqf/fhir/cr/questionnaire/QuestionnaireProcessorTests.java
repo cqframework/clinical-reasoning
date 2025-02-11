@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S2699")
 class QuestionnaireProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
@@ -39,6 +40,20 @@ class QuestionnaireProcessorTests {
             new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
     private final Repository repositoryR5 =
             new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+
+    @Test
+    void processors() {
+        var bundle = given().repository(repositoryR4)
+                .generateProcessor(new GenerateProcessor(repositoryR4))
+                .packageProcessor(new PackageProcessor(repositoryR4))
+                .populateProcessor(new PopulateProcessor())
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
+                .isPut(Boolean.FALSE)
+                .thenPackage()
+                .getBundle();
+        assertNotNull(bundle);
+    }
 
     @Test
     void populateR4() {
@@ -101,22 +116,18 @@ class QuestionnaireProcessorTests {
 
     @Test
     void populateNoQuestionnaireThrowsException() {
-        assertThrows(ResourceNotFoundException.class, () -> {
-            given().repository(repositoryR4)
-                    .when()
-                    .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"))
-                    .thenPopulate(true);
-        });
+        var when = given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "null"));
+        assertThrows(ResourceNotFoundException.class, () -> when.thenPopulate(true));
     }
 
     @Test
     void populateNoSubjectThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            given().repository(repositoryR4)
-                    .when()
-                    .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                    .thenPopulate(false);
-        });
+        var when = given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"));
+        assertThrows(IllegalArgumentException.class, () -> when.thenPopulate(false));
     }
 
     @Test
@@ -240,20 +251,6 @@ class QuestionnaireProcessorTests {
                 .thenPackage()
                 .hasEntry(18)
                 .firstEntryIsType(org.hl7.fhir.r4.model.Questionnaire.class);
-    }
-
-    @Test
-    void processors() {
-        var bundle = given().repository(repositoryR4)
-                .generateProcessor(new GenerateProcessor(repositoryR4))
-                .packageProcessor(new PackageProcessor(repositoryR4))
-                .populateProcessor(new PopulateProcessor())
-                .when()
-                .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                .isPut(Boolean.FALSE)
-                .thenPackage()
-                .getBundle();
-        assertNotNull(bundle);
     }
 
     @Test

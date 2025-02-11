@@ -12,9 +12,11 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@SuppressWarnings("squid:S2699")
 class QuestionnaireResponseProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
@@ -25,6 +27,17 @@ class QuestionnaireResponseProcessorTests {
                 .questionnaireResponseId(questionnaireResponse)
                 .extract()
                 .isEqualsToExpected(Ids.newId(fhirContext, "Bundle", "extract-" + questionnaireResponse));
+    }
+
+    @Test
+    void processors() {
+        var bundle = given().repositoryFor(fhirContextR4, "r4")
+                .extractProcessor(new ExtractProcessor())
+                .when()
+                .questionnaireResponseId("QRSharonDecision")
+                .extract()
+                .getBundle();
+        assertNotNull(bundle);
     }
 
     @Test
@@ -39,6 +52,9 @@ class QuestionnaireResponseProcessorTests {
             testExtract(fhirContextR4, "r4", "mypain-no-url");
         });
     }
+
+    @Test
+    void testContainedQuestionnaire() {}
 
     @Test
     void isSubjectExtension() {

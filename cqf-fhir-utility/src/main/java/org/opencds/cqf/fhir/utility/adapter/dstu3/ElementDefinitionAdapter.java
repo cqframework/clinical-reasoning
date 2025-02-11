@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
@@ -209,7 +210,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ICompositeType> T getBinding() {
+    public <T extends IBaseDatatypeElement> T getBinding() {
         return (T) get().getBinding();
     }
 
@@ -222,7 +223,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
     public String getBindingValueSet() {
         if (hasBinding()) {
             var valueSet = get().getBinding().getValueSet();
-            return valueSet instanceof Reference ? ((Reference) valueSet).getReference() : valueSet.primitiveValue();
+            return valueSet instanceof Reference reference ? reference.getReference() : valueSet.primitiveValue();
         }
         return null;
     }

@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToResource;
+import static org.opencds.cqf.fhir.utility.Resources.getClassForTypeAndVersion;
+import static org.opencds.cqf.fhir.utility.Resources.newBase;
+import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
@@ -66,7 +69,9 @@ public class ProcessDefinitionItem {
         var resourceType = getResourceType(linkId, definitionProfile, definition, profile);
         var extractResource = getExtractResource();
         var isCreatedResource = extractResource == null;
-        var resource = isCreatedResource ? (IBaseResource) request.newValue(resourceType) : extractResource;
+        var resource = isCreatedResource
+                ? (IBaseResource) newBaseForVersion(resourceType, request.getFhirVersion())
+                : extractResource;
         processResource(request, resource, profile, isCreatedResource, item, valueExtensions);
         return resource;
     }
@@ -339,12 +344,12 @@ public class ProcessDefinitionItem {
             var element = repeats ? null : getElement(request, parent, path);
             if (element == null) {
                 if (propertyDefs.get(prop) instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
-                    element = request.newValue(datatypeDef.getDatatype());
+                    element = newBase(datatypeDef.getDatatype());
                 } else if (adapter != null) {
                     var elementDef = adapter.getElementByPath(path);
-                    element = request.newValue(elementDef.getTypeCode());
+                    element = newBaseForVersion(elementDef.getTypeCode(), request.getFhirVersion());
                 } else if (propertyDefs.get(prop) instanceof RuntimeChildChoiceDefinition choiceDef) {
-                    element = request.newValue(getChoices(choiceDef).get(0));
+                    element = newBase(getChoices(choiceDef).get(0));
                 }
             }
             processItems(
@@ -419,7 +424,7 @@ public class ProcessDefinitionItem {
             if (answerValue != null) {
                 var parentValue = useParent
                         ? parent
-                        : request.newValue(
+                        : newBase(
                                 ((BaseRuntimeChildDatatypeDefinition) propertyDefs.get(parentProperty)).getDatatype());
                 setAnswerValue(
                         request, parentValue, propertyDefs.get(childProperty), childProperty, answerValue, profile);
@@ -457,14 +462,14 @@ public class ProcessDefinitionItem {
         var slicePropertyDef = propertyDefs.get(sliceName);
         var sliceClass = slicePropertyDef instanceof BaseRuntimeChildDatatypeDefinition def
                 ? def.getDatatype()
-                : request.getClassForType("Extension");
+                : getClassForTypeAndVersion("Extension", request.getFhirVersion());
         var sliceElements = profile.getSliceElements(sliceName);
         var answerPath = getChildProperty(identifiers, sliceIndex + 1);
         var extensionUrl = getExtensionUrl(profile, sliceName);
         answers.stream().forEach(answer -> {
             var answerValue = request.resolvePath(answer, VALUE_PATH);
             if (answerValue != null) {
-                var sliceValue = request.newValue(sliceClass);
+                var sliceValue = newBase(sliceClass);
                 setAnswerValue(request, sliceValue, propertyDefs.get(answerPath), answerPath, answerValue, profile);
                 for (var slice : sliceElements) {
                     var sliceElementPath =
@@ -525,7 +530,7 @@ public class ProcessDefinitionItem {
             if (pathDefinition instanceof RuntimeChildPrimitiveDatatypeDefinition
                     && answerValue instanceof IPrimitiveType) {
                 var newValue = (IPrimitiveType<?>)
-                        request.newValue(((RuntimeChildPrimitiveDatatypeDefinition) pathDefinition).getDatatype());
+                        newBase(((RuntimeChildPrimitiveDatatypeDefinition) pathDefinition).getDatatype());
                 newValue.setValueAsString(((IPrimitiveType<?>) answerValue).getValueAsString());
                 request.getModelResolver().setValue(parent, answerPath, newValue);
             }
@@ -544,7 +549,8 @@ public class ProcessDefinitionItem {
             props.put(identifiers[i], def);
             if (i < identifiers.length - 1) {
                 if (def instanceof RuntimeChildExtension) {
-                    targetDef = request.getFhirContext().getElementDefinition(request.getClassForType("Extension"));
+                    targetDef = request.getFhirContext()
+                            .getElementDefinition(getClassForTypeAndVersion("Extension", request.getFhirVersion()));
                 } else if (def instanceof RuntimeChildChoiceDefinition choiceDef) {
                     var elementDef = adapter == null ? null : adapter.getElementByPath(identifiers[i]);
                     if (elementDef == null) {
@@ -581,7 +587,7 @@ public class ProcessDefinitionItem {
                 profile == null ? null : profile.getElementByPath(answerPath.split(":")[0]);
         var answerType = pathElement == null ? null : pathElement.getTypeCode();
         if (answerType != null && !answerValue.fhirType().equals(answerType)) {
-            var newAnswerValue = request.newValue(answerType);
+            var newAnswerValue = newBaseForVersion(answerType, request.getFhirVersion());
             request.getModelResolver().setValue(newAnswerValue, VALUE_PATH, answerValue);
             answerValue = newAnswerValue;
         } else {

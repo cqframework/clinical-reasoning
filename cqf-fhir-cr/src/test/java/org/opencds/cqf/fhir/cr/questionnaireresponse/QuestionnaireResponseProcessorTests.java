@@ -54,9 +54,6 @@ class QuestionnaireResponseProcessorTests {
     }
 
     @Test
-    void testContainedQuestionnaire() {}
-
-    @Test
     void isSubjectExtension() {
         testExtract(fhirContextR4, "r4", "sdc-profile-example-multi-subject");
         testExtract(fhirContextR5, "r5", "sdc-profile-example-multi-subject");

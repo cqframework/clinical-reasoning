@@ -89,17 +89,16 @@ public class ProcessAction {
                 var generateRequest = request.toGenerateRequest(profile);
                 var item = generateProcessor.generateItem(generateRequest);
                 if (item != null) {
-                    request.addQuestionnaireItem(item.getLeft());
-                    request.addLaunchContextExtensions(item.getRight());
                     // If input has text extension use it to override
                     if (request.hasExtension(input, Constants.CPG_INPUT_TEXT)) {
-                        var itemText = ((IPrimitiveType<String>)
-                                        request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
-                                                .getValue())
-                                .getValue();
-                        request.getModelResolver().setValue(item, "text", itemText);
+                        var itemText =
+                                ((IPrimitiveType<String>) request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
+                                        .getValue());
+                        request.getModelResolver().setValue(item.getLeft(), "text", itemText);
                         // item Constants.CPG_INPUT_DESCRIPTION
                     }
+                    request.addQuestionnaireItem(item.getLeft());
+                    request.addLaunchContextExtensions(item.getRight());
                 }
             }
         } catch (Exception e) {

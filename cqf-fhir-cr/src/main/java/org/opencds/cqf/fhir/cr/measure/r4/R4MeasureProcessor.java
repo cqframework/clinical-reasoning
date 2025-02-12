@@ -111,13 +111,12 @@ public class R4MeasureProcessor {
                 npmResourceHolder);
     }
 
-    private Measure getMeasure(
-            Either3<CanonicalType, IdType, Measure> theMeasure, NpmResourceHolder npmResourceHolder) {
+    private Measure getMeasure(Either3<CanonicalType, IdType, Measure> measure, NpmResourceHolder npmResourceHolder) {
         if (npmResourceHolder.getMeasure().isPresent()) {
             return npmResourceHolder.getMeasure().get();
         }
 
-        return theMeasure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
     }
 
     protected MeasureReport evaluateMeasure(
@@ -144,10 +143,13 @@ public class R4MeasureProcessor {
 
         var url = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
-            var errorMsg = String.format("Unable to find Library with url: %s", url);
-            throw new ResourceNotFoundException(errorMsg);
+        // LUKETODO:  we try to find the Library, so try the Holder first
+        if (npmResourceHolder.getOptMainLibrary().isEmpty()) {
+            Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+            if (b.getEntry().isEmpty()) {
+                var errorMsg = String.format("Unable to find Library with url: %s", url);
+                throw new ResourceNotFoundException(errorMsg);
+            }
         }
 
         var id = VersionedIdentifiers.forUrl(url);

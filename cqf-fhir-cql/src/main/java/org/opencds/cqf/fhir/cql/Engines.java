@@ -23,12 +23,10 @@ import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -130,67 +128,61 @@ public class Engines {
         //        final String url = toUrl(versionedIdentifier);
         //        }
 
-        loader.registerProvider(new LibrarySourceProvider() {
-            @Override
-            public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
-                if (optMainLibrary.isEmpty()) {
-                    return null;
-                }
-
-                final Library library = optMainLibrary.get();
-                if (!doesLibraryMatch(versionedIdentifier, library)) {
-                    return null;
-                }
-
-                final List<Attachment> content = library.getContent();
-
-                final Optional<Attachment> optCqlData = content.stream()
-                        .filter(c -> c.getContentType().equals("text/cql"))
-                        .findFirst();
-
-                if (optCqlData.isEmpty()) {
-                    return null;
-                }
-
-                final Attachment attachment = optCqlData.get();
-
-                return new ByteArrayInputStream(attachment.getData());
+        loader.registerProvider(versionedIdentifier -> {
+            if (optMainLibrary.isEmpty()) {
+                return null;
             }
+
+            final Library library = optMainLibrary.get();
+            if (!doesLibraryMatch(versionedIdentifier, library)) {
+                return null;
+            }
+
+            final List<Attachment> content = library.getContent();
+
+            final Optional<Attachment> optCqlData = content.stream()
+                    .filter(c -> c.getContentType().equals("text/cql"))
+                    .findFirst();
+
+            if (optCqlData.isEmpty()) {
+                return null;
+            }
+
+            final Attachment attachment = optCqlData.get();
+
+            return new ByteArrayInputStream(attachment.getData());
         });
 
-        modelManager.getModelInfoLoader().registerModelInfoProvider(new ModelInfoProvider() {
-            @Override
-            public ModelInfo load(ModelIdentifier modelIdentifier) {
-                if (optMainLibrary.isEmpty()) {
-                    return null;
-                }
-
-                final Library library = optMainLibrary.get();
-
-                if (!doesLibraryMatch(modelIdentifier, library)) {
-                    return null;
-                }
-
-                final List<Attachment> content = library.getContent();
-
-                final Optional<Attachment> optCqlData = content.stream()
-                        .filter(c -> c.getContentType().equals("application/xml"))
-                        .findFirst();
-
-                if (optCqlData.isEmpty()) {
-                    return null;
-                }
-
-                final Attachment attachment = optCqlData.get();
-
-                final InputStream inputStream = new ByteArrayInputStream(attachment.getData());
-
-                return JAXB.unmarshal(inputStream, ModelInfo.class);
+        modelManager.getModelInfoLoader().registerModelInfoProvider(modelIdentifier -> {
+            if (optMainLibrary.isEmpty()) {
+                return null;
             }
+
+            final Library library = optMainLibrary.get();
+
+            if (!doesLibraryMatch(modelIdentifier, library)) {
+                return null;
+            }
+
+            final List<Attachment> content = library.getContent();
+
+            final Optional<Attachment> optCqlData = content.stream()
+                    .filter(c -> c.getContentType().equals("application/xml"))
+                    .findFirst();
+
+            if (optCqlData.isEmpty()) {
+                return null;
+            }
+
+            final Attachment attachment = optCqlData.get();
+
+            final InputStream inputStream = new ByteArrayInputStream(attachment.getData());
+
+            return JAXB.unmarshal(inputStream, ModelInfo.class);
         });
     }
 
-    private static String toUrl(VersionedIdentifier theVersionedIdentifier) {
+    private static String toUrl(VersionedIdentifier versionedIdentifier) {
         //        org.hl7.fhir
         //
         //        {https://hl7.org/fhir}/Library/{id}
@@ -198,17 +190,13 @@ public class Engines {
         // LUKETODO:  convert sytem to URL
 
         // org.hl7.fhir  // from CQL  Use NamespaceManager and NamespaceInfo to conver
-        return "https://" + theVersionedIdentifier.getSystem() + "/Library/" + theVersionedIdentifier.getId();
+        return "https://" + versionedIdentifier.getSystem() + "/Library/" + versionedIdentifier.getId();
     }
 
-    // LUKETODO:  is this right?
     private static boolean doesLibraryMatch(VersionedIdentifier versionedIdentifier, Library libraryCandidate) {
-        final List<Identifier> identifiers = libraryCandidate.getIdentifier();
+        // LUKETODO:  this doesn't work
 
-        if (identifiers.stream()
-                .anyMatch(identifier -> versionedIdentifier.getSystem().equals(identifier.getSystem())
-                        && versionedIdentifier.getId().equals(identifier.getId()))) {
-
+        if (versionedIdentifier.getId().equals(libraryCandidate.getIdPart())) {
             final Optional<Attachment> optCqlData = libraryCandidate.getContent().stream()
                     .filter(content -> content.getContentType().equals("text/cql"))
                     .findFirst();
@@ -222,14 +210,9 @@ public class Engines {
     }
 
     private static boolean doesLibraryMatch(ModelIdentifier modelIdentifier, Library libraryCandidate) {
-        final List<Identifier> identifiers = libraryCandidate.getIdentifier();
-
-        if (identifiers.stream()
-                .anyMatch(identifier -> modelIdentifier.getSystem().equals(identifier.getSystem())
-                        && modelIdentifier.getId().equals(identifier.getId()))) {
-
+        if (modelIdentifier.getId().equals(libraryCandidate.getIdPart())) {
             final Optional<Attachment> optCqlData = libraryCandidate.getContent().stream()
-                    .filter(content -> content.getContentType().equals("application/xml"))
+                    .filter(content -> content.getContentType().equals("text/cql"))
                     .findFirst();
 
             if (optCqlData.isPresent()) {

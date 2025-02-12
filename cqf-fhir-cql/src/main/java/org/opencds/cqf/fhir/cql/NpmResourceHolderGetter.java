@@ -6,5 +6,5 @@ import org.hl7.fhir.r4.model.CanonicalType;
 public interface NpmResourceHolderGetter {
 
     // LUKETODO:  unit test this:
-    NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl);
+    NpmResourceHolder loadNpmResources(CanonicalType measureUrl);
 }

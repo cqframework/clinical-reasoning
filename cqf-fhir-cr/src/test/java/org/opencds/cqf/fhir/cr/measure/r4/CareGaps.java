@@ -150,7 +150,12 @@ public class CareGaps {
 
         private R4CareGapsService buildCareGapsService() {
             return new R4CareGapsService(
-                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator, npmResourceHolderGetter);
+                    careGapsProperties,
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodEvaluator,
+                    npmResourceHolderGetter);
         }
 
         public When when() {

@@ -109,7 +109,8 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils, npmResourceHolderGetter);
+            return new R4CollectDataService(
+                    repository, evaluationOptions, measureServiceUtils, npmResourceHolderGetter);
         }
 
         public When when() {

@@ -149,7 +149,8 @@ public class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
+            return new R4MultiMeasureService(
+                    repository, evaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
         }
 
         public MultiMeasure.When when() {

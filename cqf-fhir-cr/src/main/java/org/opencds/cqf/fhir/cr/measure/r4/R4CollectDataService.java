@@ -70,8 +70,12 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-            // LUKETODO:  pass a non-empty value?
-                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils, this.npmResourceHolderGetter);
+                // LUKETODO:  pass a non-empty value?
+                this.repository,
+                this.measureEvaluationOptions,
+                this.subjectProvider,
+                this.measureServiceUtils,
+                this.npmResourceHolderGetter);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);

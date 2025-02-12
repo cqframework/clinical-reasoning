@@ -35,8 +35,12 @@ public class R4CareGapsService {
             NpmResourceHolderGetter npmResourceHolderGetter) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
-                careGapsProperties, repository, measureEvaluationOptions, serverBase,
-            measurePeriodEvaluator, npmResourceHolderGetter);
+                careGapsProperties,
+                repository,
+                measureEvaluationOptions,
+                serverBase,
+                measurePeriodEvaluator,
+                npmResourceHolderGetter);
     }
 
     /**

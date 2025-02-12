@@ -166,7 +166,12 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmResourceHolderGetter);
+            return new R4MeasureService(
+                    repository,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    measureServiceUtils,
+                    npmResourceHolderGetter);
         }
 
         public When when() {

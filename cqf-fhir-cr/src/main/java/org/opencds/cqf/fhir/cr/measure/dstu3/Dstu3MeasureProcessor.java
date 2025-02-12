@@ -90,8 +90,11 @@ public class Dstu3MeasureProcessor {
 
         var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
         var context = Engines.forRepository(
-            // LUKETODO:  pass a non-empty value?
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData, NpmResourceHolder.EMPTY);
+                // LUKETODO:  pass a non-empty value?
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                NpmResourceHolder.EMPTY);
 
         CompiledLibrary lib;
         try {

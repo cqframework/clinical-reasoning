@@ -94,16 +94,25 @@ public class R4MeasureProcessor {
             Parameters parameters,
             MeasureEvalType evalType) {
         var npmResourceHolder = measure.isLeft()
-            ? npmResourceHolderGetter.loadNpmResources(measure.leftOrThrow())
-            : NpmResourceHolder.EMPTY;
+                ? npmResourceHolderGetter.loadNpmResources(measure.leftOrThrow())
+                : NpmResourceHolder.EMPTY;
 
         var retrievedMeasure = getMeasure(measure, npmResourceHolder);
 
         return evaluateMeasure(
-                retrievedMeasure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, npmResourceHolder);
+                retrievedMeasure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                npmResourceHolder);
     }
 
-    private Measure getMeasure(Either3<CanonicalType, IdType, Measure> theMeasure, NpmResourceHolder npmResourceHolder) {
+    private Measure getMeasure(
+            Either3<CanonicalType, IdType, Measure> theMeasure, NpmResourceHolder npmResourceHolder) {
         if (npmResourceHolder.getMeasure().isPresent()) {
             return npmResourceHolder.getMeasure().get();
         }
@@ -143,7 +152,10 @@ public class R4MeasureProcessor {
 
         var id = VersionedIdentifiers.forUrl(url);
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData, npmResourceHolder);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                npmResourceHolder);
 
         CompiledLibrary lib;
         try {

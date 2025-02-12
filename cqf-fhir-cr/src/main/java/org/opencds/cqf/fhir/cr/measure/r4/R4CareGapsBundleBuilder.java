@@ -90,8 +90,8 @@ public class R4CareGapsBundleBuilder {
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService =
-                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
+        r4MultiMeasureService = new R4MultiMeasureService(
+                repository, measureEvaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(

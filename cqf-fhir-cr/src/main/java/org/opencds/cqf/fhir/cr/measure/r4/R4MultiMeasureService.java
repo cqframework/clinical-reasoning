@@ -62,7 +62,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils, npmResourceHolderGetter);
+                repository,
+                this.measureEvaluationOptions,
+                subjectProvider,
+                r4MeasureServiceUtils,
+                npmResourceHolderGetter);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -91,7 +95,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
             r4Processor = new R4MeasureProcessor(
-                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils, npmResourceHolderGetter);
+                    repository,
+                    this.measureEvaluationOptions,
+                    subjectProvider,
+                    r4MeasureServiceUtils,
+                    npmResourceHolderGetter);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
@@ -162,7 +170,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    Eithers.forRight3(measure), periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+                    Eithers.forRight3(measure),
+                    periodStart,
+                    periodEnd,
+                    reportType,
+                    subjects,
+                    additionalData,
+                    parameters,
+                    evalType);
 
             // add ProductLine after report is generated
             measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -217,7 +232,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                Eithers.forRight3(measure),
+                        Eithers.forRight3(measure),
                         periodStart,
                         periodEnd,
                         reportType,

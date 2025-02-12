@@ -61,7 +61,11 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(
-                repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils, this.resourceHolderGetter);
+                repo,
+                this.measureEvaluationOptions,
+                this.subjectProvider,
+                this.measureServiceUtils,
+                this.resourceHolderGetter);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();

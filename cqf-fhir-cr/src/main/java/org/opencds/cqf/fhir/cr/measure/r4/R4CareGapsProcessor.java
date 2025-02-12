@@ -55,7 +55,7 @@ public class R4CareGapsProcessor {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
-        NpmResourceHolderGetter npmResourceHolderGetter) {
+            NpmResourceHolderGetter npmResourceHolderGetter) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 

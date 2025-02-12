@@ -23,6 +23,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -89,7 +90,8 @@ public class Dstu3MeasureProcessor {
 
         var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+            // LUKETODO:  pass a non-empty value?
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData, NpmResourceHolder.EMPTY);
 
         CompiledLibrary lib;
         try {

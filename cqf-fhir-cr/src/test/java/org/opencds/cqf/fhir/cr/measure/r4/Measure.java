@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -53,6 +54,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -116,6 +119,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private final NpmResourceHolderGetter npmResourceHolderGetter;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -133,6 +137,14 @@ public class Measure {
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+
+            // LUKETODO:  implement somehow
+            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
+                @Override
+                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
+                    return null;
+                }
+            };
         }
 
         public Given repository(Repository repository) {
@@ -154,7 +166,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmResourceHolderGetter);
         }
 
         public When when() {

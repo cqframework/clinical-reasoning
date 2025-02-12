@@ -132,7 +132,8 @@ public class LibraryEngine {
 
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        // LUKETODO:  can we ever get a non-empty value here?
+        var engine = Engines.forRepository(repository, requestSettings, bundle, NpmResourceHolder.EMPTY);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -314,7 +315,8 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            engine = Engines.forRepository(repository, settings, additionalData);
+            // LUKETODO:  can we ever get a non-empty value here?
+            engine = Engines.forRepository(repository, settings, additionalData, NpmResourceHolder.EMPTY);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

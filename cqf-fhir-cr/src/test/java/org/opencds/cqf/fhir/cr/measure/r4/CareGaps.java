@@ -33,6 +33,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -94,6 +96,7 @@ public class CareGaps {
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
         private final MeasurePeriodValidator measurePeriodEvaluator;
+        private final NpmResourceHolderGetter npmResourceHolderGetter;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -114,6 +117,13 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
+            // LUKETODO:  implement this:
+            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
+                @Override
+                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
+                    return null;
+                }
+            };
         }
 
         public CareGaps.Given repository(Repository repository) {
@@ -140,7 +150,7 @@ public class CareGaps {
 
         private R4CareGapsService buildCareGapsService() {
             return new R4CareGapsService(
-                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
+                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator, npmResourceHolderGetter);
         }
 
         public When when() {

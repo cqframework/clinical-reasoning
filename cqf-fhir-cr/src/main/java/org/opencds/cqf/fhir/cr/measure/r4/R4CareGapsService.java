@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -30,10 +31,12 @@ public class R4CareGapsService {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodEvalutator) {
+            MeasurePeriodValidator measurePeriodEvaluator,
+            NpmResourceHolderGetter npmResourceHolderGetter) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
-                careGapsProperties, repository, measureEvaluationOptions, serverBase, measurePeriodEvalutator);
+                careGapsProperties, repository, measureEvaluationOptions, serverBase,
+            measurePeriodEvaluator, npmResourceHolderGetter);
     }
 
     /**

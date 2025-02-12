@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -26,15 +27,18 @@ public class R4CollectDataService {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
+    private final NpmResourceHolderGetter npmResourceHolderGetter;
 
     public R4CollectDataService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtils measureServiceUtils) {
+            R4MeasureServiceUtils measureServiceUtils,
+            NpmResourceHolderGetter npmResourceHolderGetter) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
+        this.npmResourceHolderGetter = npmResourceHolderGetter;
     }
 
     /**
@@ -66,7 +70,8 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils);
+            // LUKETODO:  pass a non-empty value?
+                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils, this.npmResourceHolderGetter);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);

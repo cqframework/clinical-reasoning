@@ -11,11 +11,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -67,6 +70,7 @@ public class CollectData {
         private Repository repository;
         private final MeasureEvaluationOptions evaluationOptions;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private final NpmResourceHolderGetter npmResourceHolderGetter;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -82,6 +86,14 @@ public class CollectData {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+
+            // LUKETODO: implement this:
+            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
+                @Override
+                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
+                    return null;
+                }
+            };
         }
 
         public Given repository(Repository repository) {
@@ -97,7 +109,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils);
+            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils, npmResourceHolderGetter);
         }
 
         public When when() {

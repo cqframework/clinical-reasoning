@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -46,24 +47,28 @@ public class R4CareGapsProcessor {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
     private final R4RepositorySubjectProvider subjectProvider;
+    private final NpmResourceHolderGetter npmResourceHolderGetter;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+        NpmResourceHolderGetter npmResourceHolderGetter) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+        this.npmResourceHolderGetter = npmResourceHolderGetter;
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,
                 measureEvaluationOptions,
                 serverBase,
                 configuredResources,
-                measurePeriodValidator);
+                measurePeriodValidator,
+                npmResourceHolderGetter);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 

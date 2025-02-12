@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -37,6 +38,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -95,6 +98,7 @@ public class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
+        private NpmResourceHolderGetter npmResourceHolderGetter;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -112,6 +116,14 @@ public class MultiMeasure {
             this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
+
+            // LUKETODO:  implement
+            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
+                @Override
+                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
+                    return null;
+                }
+            };
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -137,7 +149,7 @@ public class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
         }
 
         public MultiMeasure.When when() {

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.visitor.r5;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
@@ -733,6 +735,8 @@ class ReleaseVisitorTests {
         var releaseVisitor = new ReleaseVisitor(repo);
         var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
+        var retiredLeaf = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.77-old"))
+                .copy();
         var testLibrary = originalLibrary.copy();
         var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
         var params =
@@ -744,10 +748,19 @@ class ReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         var releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        var maybeLeafRA = releasedLibrary.getRelatedArtifact().stream()
+        var maybeActiveLeafRA = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.6"))
                 .findFirst();
-        assertTrue(maybeLeafRA.isPresent());
-        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource()).equals("1.0.1"));
+        assertTrue(maybeActiveLeafRA.isPresent());
+        assertEquals("1.0.1", Canonicals.getVersion(maybeActiveLeafRA.get().getResource()));
+        var maybeRetiredLeafRA = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.77"))
+                .findFirst();
+        assertTrue(maybeRetiredLeafRA.isPresent());
+        assertEquals(
+                retiredLeaf.getUrl() + "|" + retiredLeaf.getVersion(),
+                maybeRetiredLeafRA.get().getResource());
+        assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
+        assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
     }
 }

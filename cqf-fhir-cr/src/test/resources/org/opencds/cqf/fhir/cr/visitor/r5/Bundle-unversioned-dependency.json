@@ -145,7 +145,8 @@
           "include": [
             {
               "valueSet": [
-                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6"
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.77"
               ]
             }
           ]
@@ -180,7 +181,7 @@
       "fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|1.0.0",
       "resource": {
         "resourceType": "ValueSet",
-        "id": "2.16.840.1.113762.1.4.1146.6",
+        "id": "2.16.840.1.113762.1.4.1146.6-old",
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
         "identifier": [
           {
@@ -235,14 +236,14 @@
       },
       "request": {
         "method": "PUT",
-        "url": "ValueSet/2.16.840.1.113762.1.4.1146.6"
+        "url": "ValueSet/2.16.840.1.113762.1.4.1146.6-old"
       }
     },
     {
       "fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6|1.0.1",
       "resource": {
         "resourceType": "ValueSet",
-        "id": "2.16.840.1.113762.1.4.1146.6",
+        "id": "2.16.840.1.113762.1.4.1146.6-new",
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
         "identifier": [
           {
@@ -297,7 +298,47 @@
       },
       "request": {
         "method": "PUT",
-        "url": "ValueSet/2.16.840.1.113762.1.4.1146.6"
+        "url": "ValueSet/2.16.840.1.113762.1.4.1146.6-new"
+      }
+    },
+    {
+      "fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.77|3.2.0",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1146.77-old",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.77",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:oid:2.16.840.1.113762.1.4.1146.77"
+          }
+        ],
+        "version": "3.2.0",
+        "status": "retired"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1146.77-old"
+      }
+    },
+    {
+      "fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.77|3.2.3",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1146.77-new",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.77",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:oid:2.16.840.1.113762.1.4.1146.77"
+          }
+        ],
+        "version": "3.2.3",
+        "status": "draft"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1146.77-new"
       }
     },
     {

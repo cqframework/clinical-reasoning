@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -82,7 +81,7 @@ public class ResourceValidator {
 
             this.validator = this.context
                     .newValidator()
-                    .registerValidatorModule(new FhirInstanceValidator(new CachingValidationSupport(supportChain)));
+                    .registerValidatorModule(new FhirInstanceValidator(new ValidationSupportChain(supportChain)));
         }
     }
 

@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -17,8 +18,10 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class ApplyOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider() {
-        return new ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider();
+    ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider(
+            IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider(
+                activityDefinitionProcessorFactory);
     }
 
     @Bean

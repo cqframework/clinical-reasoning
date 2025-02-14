@@ -15,7 +15,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class ValueSetPackageProvider {
     private final IValueSetProcessorFactory valueSetProcessorFactory;

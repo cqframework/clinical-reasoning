@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.operation;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -182,7 +183,7 @@ interface ParameterBinder {
                 throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
             }
 
-            var context = parameters.getStructureFhirVersionEnum().newContextCached();
+            var context = FhirContext.forCached(parameters.getStructureFhirVersionEnum());
             var terser = context.newTerser();
             var params = ParametersUtil.getNamedParameters(context, parameters, this.name());
             Parameters.removeParameter(parameters, this.name());

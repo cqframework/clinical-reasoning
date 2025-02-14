@@ -20,8 +20,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class StructureDefinitionQuestionnaireProvider {
     private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
 
-    public StructureDefinitionQuestionnaireProvider(
-            IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
+    public StructureDefinitionQuestionnaireProvider(IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
         this.questionnaireProcessorFactory = questionnaireProcessorFactory;
     }
 

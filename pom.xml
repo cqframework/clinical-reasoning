@@ -25,7 +25,8 @@
         <cql.version>3.22.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.1.14</spring.version>
-        <hapi.version>7.6.1</hapi.version>
+<!--        <hapi.version>7.6.1</hapi.version>-->
+        <hapi.version>7.7.18-SNAPSHOT</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
@@ -89,6 +90,8 @@
         <module>cqf-fhir-jackson</module>
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
+        <!-- Replaces hapi-fhir-storage-cr -->
+        <module>cqf-fhir-storage-cr</module>
 
         <!-- TODO: See if we can retire this once we have all the mapping/adapters/runtimes in a
         consistent state -->
@@ -97,7 +100,6 @@
         <!-- These don't publish a module, but ensures documentation snippets build correctly -->
         <module>docs</module>
         <module>cqf-fhir-benchmark</module>
-        <module>cqf-fhir-storage-cr</module>
     </modules>
 
     <dependencyManagement>
@@ -251,7 +253,8 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
+                <!-- Specific version needed for cqf-fhir-storage-cr tests -->
+                <version>1.15</version>
             </dependency>
 
             <!-- Logging -->

@@ -128,8 +128,8 @@ public class CrR4Config {
     }
 
     @Bean
-    SubmitDataProvider r4SubmitDataProvider() {
-        return new SubmitDataProvider();
+    SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
+        return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
 
     @Bean

@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Bean;
 public class QuestionnaireOperationConfig {
     @Bean
     ca.uhn.fhir.cr.r4.structuredefinition.StructureDefinitionQuestionnaireProvider
-            r4StructureDefinitionQuestionnaireProvider(
-            IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
-        return new ca.uhn.fhir.cr.r4.structuredefinition.StructureDefinitionQuestionnaireProvider(questionnaireProcessorFactory);
+            r4StructureDefinitionQuestionnaireProvider(IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.structuredefinition.StructureDefinitionQuestionnaireProvider(
+                questionnaireProcessorFactory);
     }
 
     @Bean(name = "questionnaireOperationLoader")

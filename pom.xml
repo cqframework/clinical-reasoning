@@ -97,6 +97,7 @@
         <!-- These don't publish a module, but ensures documentation snippets build correctly -->
         <module>docs</module>
         <module>cqf-fhir-benchmark</module>
+        <module>cqf-fhir-storage-cr</module>
     </modules>
 
     <dependencyManagement>

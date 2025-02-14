@@ -115,10 +115,10 @@ public class TerminologyServerClient {
         var statusParam = Searches.exceptStatus("draft");
         urlParams.putAll(statusParam);
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
-                    .search()
-                    .forResource(getValueSetClass(versionEnum))
-                    .where(urlParams)
-                    .execute());
+                .search()
+                .forResource(getValueSetClass(versionEnum))
+                .where(urlParams)
+                .execute());
     }
 
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {

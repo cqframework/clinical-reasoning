@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -22,30 +20,20 @@ import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import org.checkerframework.checker.units.qual.A;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class TerminologyServerClientTest {
     private static final String url = "www.test.com";
@@ -259,34 +247,36 @@ public class TerminologyServerClientTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
     void addressUrlParsing(FhirVersionEnum supportedVersion) {
-            var ctx = new FhirContext(supportedVersion);
-            var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
-            // remove the FHIR type and the ID if included
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
-            // remove a FHIR type if one was included
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
-            // don't break on the actual base url
-            assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
-            // ensure it's forcing https
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
-            // remove trailing slashes
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
-
+        var ctx = new FhirContext(supportedVersion);
+        var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
+        // remove the FHIR type and the ID if included
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
+        // remove a FHIR type if one was included
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
+        // don't break on the actual base url
+        assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
+        // ensure it's forcing https
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
+        // remove trailing slashes
+        assertEquals(
+                theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
     }
 
     @SuppressWarnings("unchecked")
     @ParameterizedTest
-    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
     void getLatestNonDraftSetsModifier(FhirVersionEnum supportedVersion) {
         // setup
         var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
@@ -297,9 +287,11 @@ public class TerminologyServerClientTest {
         when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
         ArgumentCaptor<Map<String, List<IQueryParameterType>>> urlParamsCaptor = ArgumentCaptor.forClass(Map.class);
         var whereMock = mock(IQuery.class);
-        when(clientMock.search()
-            .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
-            .where(urlParamsCaptor.capture())).thenReturn(whereMock);
+        when(clientMock
+                        .search()
+                        .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
+                        .where(urlParamsCaptor.capture()))
+                .thenReturn(whereMock);
         doReturn(BundleHelper.newBundle(supportedVersion)).when(whereMock).execute();
 
         // test
@@ -308,7 +300,7 @@ public class TerminologyServerClientTest {
         var capturedUrlParams = urlParamsCaptor.getValue();
         var token = (TokenParam) capturedUrlParams.get("status").get(0);
 
-        //assert
+        // assert
         assertEquals("draft", token.getValue());
         assertSame(TokenParamModifier.NOT, token.getModifier());
     }

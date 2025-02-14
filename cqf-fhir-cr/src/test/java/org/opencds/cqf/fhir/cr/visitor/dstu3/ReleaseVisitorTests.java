@@ -511,7 +511,7 @@ class ReleaseVisitorTests {
         var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
+        when(clientMock.getLatestNonDraftResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(

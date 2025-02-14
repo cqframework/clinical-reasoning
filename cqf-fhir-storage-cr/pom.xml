@@ -52,6 +52,7 @@
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-jackson</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
 
         <dependency>

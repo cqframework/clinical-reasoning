@@ -264,7 +264,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
             // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
             latest = terminologyServerClient
-                    .getResource(endpoint, preReleaseReference, this.fhirVersion())
+                    .getLatestNonDraftResource(endpoint, preReleaseReference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
@@ -405,7 +405,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
-                    .getResource(endpoint, reference, this.fhirVersion())
+                    .getLatestNonDraftResource(endpoint, reference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version

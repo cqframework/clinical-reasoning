@@ -1,11 +1,14 @@
 package org.opencds.cqf.fhir.utility.client;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -13,14 +16,36 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.checkerframework.checker.units.qual.A;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class TerminologyServerClientTest {
     private static final String url = "www.test.com";
@@ -233,11 +258,10 @@ public class TerminologyServerClientTest {
         assertNull(noException);
     }
 
-    @Test
-    void addressUrlParsing() {
-        var supportedVersions = Arrays.asList(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
-        for (final var version : supportedVersions) {
-            var ctx = new FhirContext(version);
+    @ParameterizedTest
+    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    void addressUrlParsing(FhirVersionEnum supportedVersion) {
+            var ctx = new FhirContext(supportedVersion);
             var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
             // remove the FHIR type and the ID if included
             assertEquals(
@@ -257,6 +281,35 @@ public class TerminologyServerClientTest {
             assertEquals(
                     theCorrectBaseServerUrl,
                     TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
-        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @ParameterizedTest
+    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    void getLatestNonDraftSetsModifier(FhirVersionEnum supportedVersion) {
+        // setup
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
+        when(contextMock.getVersion().getVersion()).thenReturn(supportedVersion);
+        var clientMock = mock(IGenericClient.class, new ReturnsDeepStubs());
+        var endpointMock = mock(IEndpointAdapter.class, new ReturnsDeepStubs());
+        when(endpointMock.getAddress()).thenReturn(authoritativeSource);
+        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        ArgumentCaptor<Map<String, List<IQueryParameterType>>> urlParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        var whereMock = mock(IQuery.class);
+        when(clientMock.search()
+            .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
+            .where(urlParamsCaptor.capture())).thenReturn(whereMock);
+        doReturn(BundleHelper.newBundle(supportedVersion)).when(whereMock).execute();
+
+        // test
+        var client = new TerminologyServerClient(contextMock);
+        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3", supportedVersion);
+        var capturedUrlParams = urlParamsCaptor.getValue();
+        var token = (TokenParam) capturedUrlParams.get("status").get(0);
+
+        //assert
+        assertEquals("draft", token.getValue());
+        assertSame(TokenParamModifier.NOT, token.getModifier());
     }
 }

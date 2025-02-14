@@ -208,4 +208,12 @@ public class VisitorHelper {
                 .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }
+
+    public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersionExceptStatus(
+            String inputReference, Repository repository, String status) {
+        return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+                        repository, inputReference, Searches.exceptStatus(status)))
+                .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                        .createKnowledgeArtifactAdapter(res));
+    }
 }

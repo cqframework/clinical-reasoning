@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private static final String ACTIVE = "active";
+    private static final String DRAFT = "draft";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     private static final String DEPENDSON = "depends-on";
     private static final String VALUESET = "ValueSet";
@@ -263,11 +264,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
             // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
             latest = terminologyServerClient
-                    .getResource(endpoint, preReleaseReference, this.fhirVersion())
+                    .getLatestNonDraftResource(endpoint, preReleaseReference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
-            // get the latest ACTIVE version only because it's NOT owned
-            latest = VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, ACTIVE);
+            // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
+            latest = VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, ACTIVE)
+                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(preReleaseReference, repository, DRAFT));
         }
         return latest;
     }
@@ -390,22 +392,25 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         if (!StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
         } else {
-            maybeAdapter = tryFindLatestDependencyVersion(dependency, resourceType, latestFromTxServer, endpoint);
+            maybeAdapter =
+                    tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
         }
         return maybeAdapter;
     }
 
-    private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependencyVersion(
-            IDependencyInfo dependency, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
+    private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependency(
+            String reference, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
-                    .getResource(endpoint, dependency.getReference(), this.fhirVersion())
+                    .getLatestNonDraftResource(endpoint, reference, this.fhirVersion())
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
-            maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(dependency.getReference(), repository, ACTIVE);
+            // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
+            maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, ACTIVE)
+                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(reference, repository, DRAFT));
         }
         return maybeAdapter;
     }
@@ -595,7 +600,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             throw new ResourceNotFoundException("Resource not found.");
         }
 
-        if (!artifact.getStatus().equals("draft")) {
+        if (!artifact.getStatus().equals(DRAFT)) {
             throw new PreconditionFailedException(String.format(
                     "Resource with ID: '%s' does not have a status of 'draft'.",
                     artifact.get().getIdElement().getIdPart()));
@@ -624,7 +629,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         if (version == null || version.isEmpty()) {
             throw new UnprocessableEntityException("The version argument is required");
         }
-        if (version.contains("draft")) {
+        if (version.contains(DRAFT)) {
             throw new UnprocessableEntityException("The version cannot contain 'draft'");
         }
         if (version.contains("/") || version.contains("\\") || version.contains("|")) {

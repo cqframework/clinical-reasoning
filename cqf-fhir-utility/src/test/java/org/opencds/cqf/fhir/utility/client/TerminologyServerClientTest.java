@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.client;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,13 +14,25 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
-import java.util.Arrays;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
+import java.util.List;
+import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class TerminologyServerClientTest {
@@ -233,30 +246,62 @@ public class TerminologyServerClientTest {
         assertNull(noException);
     }
 
-    @Test
-    void addressUrlParsing() {
-        var supportedVersions = Arrays.asList(FhirVersionEnum.DSTU3, FhirVersionEnum.R4, FhirVersionEnum.R5);
-        for (final var version : supportedVersions) {
-            var ctx = new FhirContext(version);
-            var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
-            // remove the FHIR type and the ID if included
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
-            // remove a FHIR type if one was included
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
-            // don't break on the actual base url
-            assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
-            // ensure it's forcing https
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
-            // remove trailing slashes
-            assertEquals(
-                    theCorrectBaseServerUrl,
-                    TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
-        }
+    @ParameterizedTest
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    void addressUrlParsing(FhirVersionEnum supportedVersion) {
+        var ctx = new FhirContext(supportedVersion);
+        var theCorrectBaseServerUrl = "https://cts.nlm.nih.gov/fhir";
+        // remove the FHIR type and the ID if included
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
+        // remove a FHIR type if one was included
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
+        // don't break on the actual base url
+        assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
+        // ensure it's forcing https
+        assertEquals(
+                theCorrectBaseServerUrl,
+                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
+        // remove trailing slashes
+        assertEquals(
+                theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
+    }
+
+    @SuppressWarnings("unchecked")
+    @ParameterizedTest
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
+    void getLatestNonDraftSetsModifier(FhirVersionEnum supportedVersion) {
+        // setup
+        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
+        when(contextMock.getVersion().getVersion()).thenReturn(supportedVersion);
+        var clientMock = mock(IGenericClient.class, new ReturnsDeepStubs());
+        var endpointMock = mock(IEndpointAdapter.class, new ReturnsDeepStubs());
+        when(endpointMock.getAddress()).thenReturn(authoritativeSource);
+        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
+        ArgumentCaptor<Map<String, List<IQueryParameterType>>> urlParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        var whereMock = mock(IQuery.class);
+        when(clientMock
+                        .search()
+                        .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
+                        .where(urlParamsCaptor.capture()))
+                .thenReturn(whereMock);
+        doReturn(BundleHelper.newBundle(supportedVersion)).when(whereMock).execute();
+
+        // test
+        var client = new TerminologyServerClient(contextMock);
+        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3", supportedVersion);
+        var capturedUrlParams = urlParamsCaptor.getValue();
+        var token = (TokenParam) capturedUrlParams.get("status").get(0);
+
+        // assert
+        assertEquals("draft", token.getValue());
+        assertSame(TokenParamModifier.NOT, token.getModifier());
     }
 }

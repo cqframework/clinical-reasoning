@@ -498,16 +498,18 @@ class ReleaseVisitorTests {
         var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
         var include = grouper.getCompose().getIncludeFirstRep();
         assertNotNull(Canonicals.getVersion(include.getValueSet().get(0).getValue()));
-        assertTrue(
-                Canonicals.getVersion(include.getValueSet().get(0).getValue()).equals(latestVSet.getVersion()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(include.getValueSet().get(0).getValue()));
         var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
         var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getResource().contains(leafOid))
                 .findAny();
         assertTrue(leafRelatedArtifact.isPresent());
         assertNotNull(Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
-        assertTrue(
-                Canonicals.getVersion(leafRelatedArtifact.get().getResource()).equals(latestVSet.getVersion()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
     }
 
     private IEndpointAdapter createEndpoint(String authoritativeSource) {

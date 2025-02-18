@@ -22,13 +22,15 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PlanDefinitionApplyProvider {
-    @Autowired
-    IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+    private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+
+    public PlanDefinitionApplyProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    }
 
     /**
      * Implements the <a href=

@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -17,8 +18,9 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class PopulateOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider r4QuestionnairePopulateProvider() {
-        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider();
+    ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider r4QuestionnairePopulateProvider(
+            IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider(theQuestionnaireProcessorFactory);
     }
 
     @Bean(name = "populateOperationLoader")

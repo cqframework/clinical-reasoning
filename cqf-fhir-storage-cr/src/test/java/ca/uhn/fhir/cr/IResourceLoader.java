@@ -35,7 +35,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -126,7 +125,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
         return parser.parseResource(resourceString);
     }
 
-    public default String stringFromResource(String theLocation) {
+    default String stringFromResource(String theLocation) {
         InputStream is = null;
         try {
             if (theLocation.startsWith(File.separator)) {
@@ -140,17 +139,6 @@ public interface IResourceLoader extends IDaoRegistryUser {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
         }
-    }
-
-    default Object loadTransaction(String theLocation) {
-        IBaseBundle resource = (IBaseBundle) readResource(theLocation);
-        return transaction(resource, new SystemRequestDetails());
-    }
-
-    private Bundle.BundleEntryComponent createEntry(IBaseResource resource) {
-        return new Bundle.BundleEntryComponent()
-                .setResource((Resource) resource)
-                .setRequest(createRequest(resource));
     }
 
     private Bundle.BundleEntryRequestComponent createRequest(IBaseResource resource) {

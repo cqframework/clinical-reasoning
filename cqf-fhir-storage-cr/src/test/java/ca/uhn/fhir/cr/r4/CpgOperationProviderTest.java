@@ -115,7 +115,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer {
         Parameters libraryParameter = parameters(
                 canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
                 stringPart("name", "SimpleR4Library"));
-        // var data = loadBundle(Bundle.class,"SimpleDataBundle.json");
         var data = (Bundle) readResource("SimpleDataBundle.json");
         Parameters params = parameters(
                 part("library", libraryParameter),

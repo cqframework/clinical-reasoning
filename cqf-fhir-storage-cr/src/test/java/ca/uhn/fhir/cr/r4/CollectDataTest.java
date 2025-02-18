@@ -23,15 +23,13 @@ public class CollectDataTest extends BaseCrR4TestServer {
         parametersEval.addParameter("practitioner", practitioner);
         parametersEval.addParameter("subject", subject);
 
-        var report = ourClient
+        return ourClient
                 .operation()
                 .onInstance("Measure/" + measureId)
                 .named(ProviderConstants.CR_OPERATION_COLLECTDATA)
                 .withParameters(parametersEval)
                 .returnResourceType(Parameters.class)
                 .execute();
-
-        return report;
     }
 
     @Test

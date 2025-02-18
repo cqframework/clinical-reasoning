@@ -16,11 +16,14 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseExtractProvider {
-    @Autowired
-    IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory;
+    private final IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory;
+
+    public QuestionnaireResponseExtractProvider(
+            IQuestionnaireResponseProcessorFactory theQuestionnaireResponseProcessorFactory) {
+        questionnaireResponseProcessorFactory = theQuestionnaireResponseProcessorFactory;
+    }
 
     /**
      * Implements the <a href="http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html>$extract</a>

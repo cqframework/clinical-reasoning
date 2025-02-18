@@ -6,6 +6,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Ids;
 
 public class IdHelper {
+
+    private IdHelper() {}
+
     public static IIdType getIdType(FhirVersionEnum fhirVersion, String resourceType, String id) {
         if (StringUtils.isBlank(id)) {
             return null;

@@ -43,7 +43,6 @@ class StringTimePeriodHandlerTest {
 
     private static final LocalDate LOCAL_DATE_2024_01_01 = LocalDate.of(2024, Month.JANUARY, 1);
     private static final LocalDate LOCAL_DATE_2024_01_02 = LocalDate.of(2024, Month.JANUARY, 2);
-    private static final LocalDate LOCAL_DATE_2024_02_01 = LocalDate.of(2024, Month.FEBRUARY, 1);
     private static final LocalDate LOCAL_DATE_2024_02_25 = LocalDate.of(2024, Month.FEBRUARY, 25);
     private static final LocalDate LOCAL_DATE_2024_02_26 = LocalDate.of(2024, Month.FEBRUARY, 26);
     private static final LocalDate LOCAL_DATE_2024_02_29 = LocalDate.of(2024, Month.FEBRUARY, 29);
@@ -64,7 +63,6 @@ class StringTimePeriodHandlerTest {
 
     private static final LocalDateTime _2024_01_01_12_00_00 = LOCAL_DATE_2024_01_01.atTime(LOCAL_TIME_12_00_00);
     private static final LocalDateTime _2024_01_02_12_00_00 = LOCAL_DATE_2024_01_02.atTime(LOCAL_TIME_12_00_00);
-    private static final LocalDateTime _2024_02_01_00_00_00 = LOCAL_DATE_2024_02_01.atTime(LOCAL_TIME_00_00_00);
 
     private static final LocalDateTime _2024_02_25_00_00_00 = LOCAL_DATE_2024_02_25.atTime(LOCAL_TIME_00_00_00);
     private static final LocalDateTime _2024_02_26_23_59_59 = LOCAL_DATE_2024_02_26.atTime(LOCAL_TIME_23_59_59);

@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -17,9 +18,10 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class ExtractOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider
-            r4QuestionnaireResponseExtractProvider() {
-        return new ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider();
+    ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider r4QuestionnaireResponseExtractProvider(
+            IQuestionnaireResponseProcessorFactory theQuestionnaireResponseProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider(
+                theQuestionnaireResponseProcessorFactory);
     }
 
     @Bean(name = "extractOperationLoader")

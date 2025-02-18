@@ -18,11 +18,13 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class LibraryEvaluateProvider {
-    @Autowired
-    ILibraryProcessorFactory libraryProcessorFactory;
+    private final ILibraryProcessorFactory libraryProcessorFactory;
+
+    public LibraryEvaluateProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
+        libraryProcessorFactory = theLibraryProcessorFactory;
+    }
 
     /**
      * Evaluates a CQL library and returns the results as a Parameters resource.

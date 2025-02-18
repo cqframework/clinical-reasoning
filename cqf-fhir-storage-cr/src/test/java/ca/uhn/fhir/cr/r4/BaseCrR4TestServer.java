@@ -109,6 +109,7 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 
         ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
         ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
+        // LUKETODO:
         ourClient.setLogRequestAndResponse(true);
 
         ourParser = ourCtx.newJsonParser().setPrettyPrint(true);

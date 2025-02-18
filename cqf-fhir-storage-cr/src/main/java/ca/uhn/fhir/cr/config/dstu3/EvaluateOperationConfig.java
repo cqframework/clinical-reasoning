@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.ILibraryProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -17,8 +18,9 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class EvaluateOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider dstu3LibraryEvaluateProvider() {
-        return new ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider();
+    ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider dstu3LibraryEvaluateProvider(
+            ILibraryProcessorFactory theLibraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider(theLibraryProcessorFactory);
     }
 
     @Bean(name = "evaluateOperationLoader")

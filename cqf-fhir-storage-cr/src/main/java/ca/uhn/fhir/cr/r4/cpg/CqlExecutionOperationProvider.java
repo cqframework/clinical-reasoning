@@ -11,12 +11,14 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CqlExecutionOperationProvider {
 
-    @Autowired
-    ICqlExecutionServiceFactory cqlExecutionServiceFactory;
+    private final ICqlExecutionServiceFactory cqlExecutionServiceFactory;
+
+    public CqlExecutionOperationProvider(ICqlExecutionServiceFactory theCqlExecutionServiceFactory) {
+        cqlExecutionServiceFactory = theCqlExecutionServiceFactory;
+    }
 
     /**
      * Evaluates a CQL expression and returns the results as a Parameters resource.

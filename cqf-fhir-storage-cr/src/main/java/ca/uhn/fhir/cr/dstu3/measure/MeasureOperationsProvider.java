@@ -14,13 +14,15 @@ import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MeasureOperationsProvider {
-    @Autowired
-    IMeasureServiceFactory dstu3MeasureProcessorFactory;
+    private final IMeasureServiceFactory dstu3MeasureProcessorFactory;
+
+    public MeasureOperationsProvider(IMeasureServiceFactory theDstu3MeasureProcessorFactory) {
+        dstu3MeasureProcessorFactory = theDstu3MeasureProcessorFactory;
+    }
 
     /**
      * Implements the <a href=

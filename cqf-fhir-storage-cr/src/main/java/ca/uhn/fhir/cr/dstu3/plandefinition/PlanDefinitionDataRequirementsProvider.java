@@ -18,11 +18,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PlanDefinitionDataRequirementsProvider {
-    @Autowired
-    IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+    private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+
+    public PlanDefinitionDataRequirementsProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = PlanDefinition.class)
     public IBaseResource getDataRequirements(

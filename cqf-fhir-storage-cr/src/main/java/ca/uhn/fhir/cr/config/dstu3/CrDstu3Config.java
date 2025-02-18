@@ -30,8 +30,8 @@ public class CrDstu3Config {
     }
 
     @Bean
-    MeasureOperationsProvider dstu3MeasureOperationsProvider() {
-        return new MeasureOperationsProvider();
+    MeasureOperationsProvider dstu3MeasureOperationsProvider(IMeasureServiceFactory theDstu3MeasureProcessorFactory) {
+        return new MeasureOperationsProvider(theDstu3MeasureProcessorFactory);
     }
 
     @Bean

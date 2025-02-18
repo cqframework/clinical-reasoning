@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Collection;
@@ -69,7 +70,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
         IBaseResource library;
         try {
-            library = this.libraryDao.read(id);
+            library = this.libraryDao.read(id, new SystemRequestDetails());
         } catch (ResourceGoneException | ResourceNotFoundException e) {
             // TODO: This needs to be smarter... the issue is that ELM is cached with
             // library name and version as the key since

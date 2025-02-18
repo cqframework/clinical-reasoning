@@ -18,11 +18,13 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireDataRequirementsProvider {
-    @Autowired
-    IQuestionnaireProcessorFactory questionnaireFactory;
+    private final IQuestionnaireProcessorFactory questionnaireFactory;
+
+    public QuestionnaireDataRequirementsProvider(IQuestionnaireProcessorFactory theQuestionnaireFactory) {
+        questionnaireFactory = theQuestionnaireFactory;
+    }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
     public IBaseResource getDataRequirements(

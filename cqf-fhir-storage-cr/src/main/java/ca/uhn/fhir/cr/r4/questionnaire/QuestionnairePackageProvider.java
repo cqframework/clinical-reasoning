@@ -17,11 +17,13 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnairePackageProvider {
-    @Autowired
-    IQuestionnaireProcessorFactory questionnaireProcessorFactory;
+    private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
+
+    public QuestionnairePackageProvider(IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
+        questionnaireProcessorFactory = theQuestionnaireProcessorFactory;
+    }
 
     /**
      * Implements a $package operation following the <a href=

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.Collection;
@@ -65,7 +66,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 
         IBaseResource valueSet;
         try {
-            valueSet = this.valueSetDao.read(id.toUnqualifiedVersionless());
+            valueSet = this.valueSetDao.read(id.toUnqualifiedVersionless(), new SystemRequestDetails());
         }
         // This happens when a Library is deleted entirely, so it's impossible to look up
         // name and version.

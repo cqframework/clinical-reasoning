@@ -2,6 +2,9 @@ package ca.uhn.fhir.cr.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.ILibraryProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.cr.common.IValueSetProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
@@ -18,18 +21,21 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class PackageOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider r4PlanDefinitionPackageProvider() {
-        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider();
+    ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider r4PlanDefinitionPackageProvider(
+            IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider(thePlanDefinitionProcessorFactory);
     }
 
     @Bean
-    ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider r4QuestionnairePackageProvider() {
-        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider();
+    ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider r4QuestionnairePackageProvider(
+            IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider(theQuestionnaireProcessorFactory);
     }
 
     @Bean
-    ca.uhn.fhir.cr.r4.library.LibraryPackageProvider r4LibraryPackageProvider() {
-        return new ca.uhn.fhir.cr.r4.library.LibraryPackageProvider();
+    ca.uhn.fhir.cr.r4.library.LibraryPackageProvider r4LibraryPackageProvider(
+            ILibraryProcessorFactory theLibraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.library.LibraryPackageProvider(theLibraryProcessorFactory);
     }
 
     @Bean

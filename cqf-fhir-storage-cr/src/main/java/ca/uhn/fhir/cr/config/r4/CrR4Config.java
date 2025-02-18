@@ -70,8 +70,9 @@ public class CrR4Config {
     }
 
     @Bean
-    CqlExecutionOperationProvider r4CqlExecutionOperationProvider() {
-        return new CqlExecutionOperationProvider();
+    CqlExecutionOperationProvider r4CqlExecutionOperationProvider(
+            ICqlExecutionServiceFactory theCqlExecutionServiceFactory) {
+        return new CqlExecutionOperationProvider(theCqlExecutionServiceFactory);
     }
 
     @Bean

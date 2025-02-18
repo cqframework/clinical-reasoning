@@ -19,11 +19,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class LibraryPackageProvider {
-    @Autowired
-    ILibraryProcessorFactory libraryProcessorFactory;
+    private final ILibraryProcessorFactory libraryProcessorFactory;
+
+    public LibraryPackageProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
+        libraryProcessorFactory = theLibraryProcessorFactory;
+    }
 
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
     public IBaseBundle packagePlanDefinition(

@@ -21,15 +21,13 @@ public class DataRequirementsTest extends BaseCrR4TestServer {
         parametersEval.addParameter("periodStart", new DateType(periodStart));
         parametersEval.addParameter("periodEnd", new DateType(periodEnd));
 
-        var report = ourClient
+        return ourClient
                 .operation()
                 .onInstance("Measure/" + measureId)
                 .named(ProviderConstants.CR_OPERATION_DATAREQUIREMENTS)
                 .withParameters(parametersEval)
                 .returnResourceType(Library.class)
                 .execute();
-
-        return report;
     }
 
     @Test

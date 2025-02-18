@@ -2,6 +2,8 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.ILibraryProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.cr.common.IValueSetProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
@@ -19,8 +21,9 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class PackageOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider dstu3PlanDefinitionPackageProvider() {
-        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider();
+    ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider dstu3PlanDefinitionPackageProvider(
+            IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionPackageProvider(thePlanDefinitionProcessorFactory);
     }
 
     @Bean
@@ -30,8 +33,9 @@ public class PackageOperationConfig {
     }
 
     @Bean
-    ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider dstu3LibraryPackageProvider() {
-        return new ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider();
+    ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider dstu3LibraryPackageProvider(
+            ILibraryProcessorFactory theLibraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.library.LibraryPackageProvider(theLibraryProcessorFactory);
     }
 
     @Bean

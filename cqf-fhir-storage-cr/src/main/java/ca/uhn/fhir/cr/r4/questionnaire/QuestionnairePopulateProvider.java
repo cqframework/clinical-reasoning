@@ -23,11 +23,13 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnairePopulateProvider {
-    @Autowired
-    IQuestionnaireProcessorFactory questionnaireProcessorFactory;
+    private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
+
+    public QuestionnairePopulateProvider(IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
+        questionnaireProcessorFactory = theQuestionnaireProcessorFactory;
+    }
 
     /**
      * Implements the <a href=

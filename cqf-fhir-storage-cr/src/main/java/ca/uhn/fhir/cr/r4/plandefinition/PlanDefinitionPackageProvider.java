@@ -19,11 +19,13 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PlanDefinitionPackageProvider {
-    @Autowired
-    IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+    private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+
+    public PlanDefinitionPackageProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    }
 
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
     public IBaseBundle packagePlanDefinition(

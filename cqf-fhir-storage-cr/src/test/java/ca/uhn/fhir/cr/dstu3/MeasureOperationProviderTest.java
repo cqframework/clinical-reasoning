@@ -16,14 +16,11 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {TestCrDstu3Config.class})
-public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
-    private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationProviderTest.class);
+class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 
     @Autowired
     MeasureOperationsProvider myMeasureOperationsProvider;
@@ -37,9 +34,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
                 expected.getMeasure().getReference(), expected.getPatient().getReference());
 
         assertThat(actual.hasGroup()).as(errorLocator).isEqualTo(expected.hasGroup());
-        assertThat(actual.getGroup().size())
-                .as(errorLocator)
-                .isEqualTo(expected.getGroup().size());
+        assertThat(actual.getGroup()).as(errorLocator).hasSameSizeAs(expected.getGroup());
 
         for (MeasureReportGroupComponent mrgcExpected : expected.getGroup()) {
             Optional<MeasureReportGroupComponent> mrgcActualOptional = actual.getGroup().stream()
@@ -90,7 +85,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
         parametersEval1.addParameter().setName("periodEnd").setValue(new DateType(periodEnd));
         parametersEval1.addParameter().setName("patient").setValue(new StringType(patient));
         parametersEval1.addParameter().setName("reportType").setValue(new StringType(reportType));
-        if (!(additionalData == null)) {
+        if (additionalData != null) {
             parametersEval1.addParameter().setName("additionalData").setResource(additionalData);
         }
 
@@ -105,7 +100,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 
     // validate dstu3 evaluate calculates as expected
     @Test
-    public void test_EXM124_FHIR3_72000() throws IOException {
+    void test_EXM124_FHIR3_72000() {
         loadBundle("ca/uhn/fhir/cr/dstu3/connectathon/EXM124-FHIR3-7.2.000-bundle.json");
         var actual = getActual(
                 "2019-01-01",
@@ -121,7 +116,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 
     // validate dstu3 evaluate executes for measure EXM104
     @Test
-    public void test_EXM104_FHIR3_81000() throws IOException {
+    void test_EXM104_FHIR3_81000() {
         loadBundle("ca/uhn/fhir/cr/dstu3/connectathon/EXM104-FHIR3-8.1.000-bundle.json");
         var actual = getActual(
                 "2019-01-01",
@@ -135,7 +130,7 @@ public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
 
     // validate dstu3 evaluate executes for measure EXM105
     @Test
-    void test_EXM105_FHIR3() throws IOException {
+    void test_EXM105_FHIR3() {
         loadBundle("Exm105Fhir3Measure.json");
         var actual = getActual(
                 "2019-01-01",

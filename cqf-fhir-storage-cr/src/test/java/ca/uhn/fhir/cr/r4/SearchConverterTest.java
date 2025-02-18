@@ -186,6 +186,6 @@ class SearchConverterTest {
     }
 
     FhirContext withFhirContext() {
-        return new FhirContext();
+        return FhirContext.forR4Cached();
     }
 }

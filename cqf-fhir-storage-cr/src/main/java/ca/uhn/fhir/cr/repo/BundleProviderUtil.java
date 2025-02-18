@@ -224,28 +224,15 @@ public class BundleProviderUtil {
                 links.setPrev(RestfulServerUtils.createPagingLink(
                         links, request, searchIdToUse, result.getPreviousPageId(), request.getParameters()));
             }
-        } else if (searchIdToUse != null) {
-            /*
-             * We're doing offset pages - Note that we only return paging links if we actually included
-             * some results in the response. We do this to avoid situations where people have faked the
-             * offset number to some huge number to avoid them getting back paging links that don't
-             * make sense.
-             */
-            if (!resourceList.isEmpty()) {
-                if (numTotalResults == null || offset + numToReturn < numTotalResults) {
-                    links.setNext((RestfulServerUtils.createPagingLink(
-                            links,
-                            request,
-                            searchIdToUse,
-                            offset + numToReturn,
-                            numToReturn,
-                            request.getParameters())));
-                }
-                if (offset > 0) {
-                    int start = Math.max(0, offset - pageSize);
-                    links.setPrev(RestfulServerUtils.createPagingLink(
-                            links, request, searchIdToUse, start, pageSize, request.getParameters()));
-                }
+        } else if (searchIdToUse != null && !resourceList.isEmpty()) {
+            if (numTotalResults == null || offset + numToReturn < numTotalResults) {
+                links.setNext((RestfulServerUtils.createPagingLink(
+                        links, request, searchIdToUse, offset + numToReturn, numToReturn, request.getParameters())));
+            }
+            if (offset > 0) {
+                int start = Math.max(0, offset - pageSize);
+                links.setPrev(RestfulServerUtils.createPagingLink(
+                        links, request, searchIdToUse, start, pageSize, request.getParameters()));
             }
         }
 

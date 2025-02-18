@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
@@ -25,8 +26,9 @@ public class ApplyOperationConfig {
     }
 
     @Bean
-    ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider() {
-        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider();
+    ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider(
+            IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider(thePlanDefinitionProcessorFactory);
     }
 
     @Bean(name = "applyOperationLoader")

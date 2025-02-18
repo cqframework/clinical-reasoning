@@ -2,6 +2,9 @@ package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.ILibraryProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.cr.common.IValueSetProcessorFactory;
 import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
@@ -18,20 +21,23 @@ import org.springframework.context.annotation.Import;
 @Import(CrProcessorConfig.class)
 public class DataRequirementsOperationConfig {
     @Bean
-    ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider dstu3LibraryDataRequirementsProvider() {
-        return new ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider();
+    ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider dstu3LibraryDataRequirementsProvider(
+            ILibraryProcessorFactory theLibraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider(theLibraryProcessorFactory);
     }
 
     @Bean
     ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider
-            dstu3PlanDefinitionDataRequirementsProvider() {
-        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider();
+            dstu3PlanDefinitionDataRequirementsProvider(
+                    IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider(
+                thePlanDefinitionProcessorFactory);
     }
 
     @Bean
-    ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider
-            dstu3QuestionnaireDataRequirementsProvider() {
-        return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider();
+    ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider dstu3QuestionnaireDataRequirementsProvider(
+            IQuestionnaireProcessorFactory theQuestionnaireFactory) {
+        return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider(theQuestionnaireFactory);
     }
 
     @Bean

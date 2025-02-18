@@ -18,11 +18,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class LibraryDataRequirementsProvider {
-    @Autowired
-    ILibraryProcessorFactory libraryProcessorFactory;
+    private final ILibraryProcessorFactory libraryProcessorFactory;
+
+    public LibraryDataRequirementsProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
+        libraryProcessorFactory = theLibraryProcessorFactory;
+    }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Library.class)
     public IBaseResource getDataRequirements(

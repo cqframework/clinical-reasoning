@@ -1,7 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -12,9 +11,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -111,61 +108,11 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
                                 && x.getCode().hasCoding()
                                 && x.getCode().getCoding().get(0).getCode().equals(populationName))
                         .findFirst();
-        assertThat(population.isPresent())
+        assertThat(population)
                 .as(String.format("population \"%s\" not found in report", populationName))
-                .isTrue();
+                .isPresent();
         assertThat(population.get().getCount())
                 .as(String.format("expected count for population \"%s\" did not match", populationName))
                 .isEqualTo(expectedCount);
-    }
-
-    private void runWithPatient(
-            String measureId,
-            String patientId,
-            int initialPopulationCount,
-            int denominatorCount,
-            int denominatorExclusionCount,
-            int numeratorCount,
-            boolean enrolledDuringParticipationPeriod,
-            String participationPeriod) {
-
-        var returnMeasureReport = runEvaluateMeasure("2022-01-01", "2022-12-31", patientId, measureId, "subject", null);
-
-        for (MeasureReport.MeasureReportGroupPopulationComponent population :
-                returnMeasureReport.getGroupFirstRep().getPopulation())
-            switch (population.getCode().getCodingFirstRep().getCode()) {
-                case "initial-population" -> assertEquals(initialPopulationCount, population.getCount());
-                case "denominator" -> assertEquals(denominatorCount, population.getCount());
-                case "denominator-exclusion" -> assertEquals(denominatorExclusionCount, population.getCount());
-                case "numerator" -> assertEquals(numeratorCount, population.getCount());
-            }
-
-        Observation enrolledDuringParticipationPeriodObs = null;
-        Observation participationPeriodObs = null;
-        for (Resource r : returnMeasureReport.getContained()) {
-            if (r instanceof Observation o) {
-                if (o.getCode().getText().equals("Enrolled During Participation Period")) {
-                    enrolledDuringParticipationPeriodObs = o;
-                } else if (o.getCode().getText().equals("Participation Period")) {
-                    participationPeriodObs = o;
-                }
-            }
-        }
-
-        assertNotNull(enrolledDuringParticipationPeriodObs);
-        assertEquals(
-                Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
-                enrolledDuringParticipationPeriodObs
-                        .getValueCodeableConcept()
-                        .getCodingFirstRep()
-                        .getCode());
-
-        assertNotNull(participationPeriodObs);
-        assertEquals(
-                participationPeriod,
-                participationPeriodObs
-                        .getValueCodeableConcept()
-                        .getCodingFirstRep()
-                        .getCode());
     }
 }

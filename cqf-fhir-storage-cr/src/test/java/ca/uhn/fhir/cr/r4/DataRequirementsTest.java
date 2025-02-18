@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-public class DataRequirementsTest extends BaseCrR4TestServer {
+class DataRequirementsTest extends BaseCrR4TestServer {
     public Library runDataRequirements(String periodStart, String periodEnd, String measureId) {
 
         var parametersEval = new Parameters();

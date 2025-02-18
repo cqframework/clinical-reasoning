@@ -8,7 +8,7 @@ import org.hl7.fhir.dstu3.model.BooleanType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class LibraryOperationsProviderTest extends BaseCrDstu3TestServer {
+class LibraryOperationsProviderTest extends BaseCrDstu3TestServer {
     @Autowired
     LibraryEvaluateProvider libraryEvaluateProvider;
 

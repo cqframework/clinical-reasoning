@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class CrResourceListenerTest extends BaseCrR4TestServer {
+class CrResourceListenerTest extends BaseCrR4TestServer {
     @Autowired
     EvaluationSettings myEvaluationSettings;
 
@@ -58,7 +58,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
     }
 
     @Test
-    void testCodeCacheInvalidation() throws InterruptedException {
+    void testCodeCacheInvalidation() {
 
         assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("ValueSet");
 
@@ -84,7 +84,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
     }
 
     @Test
-    void testElmCacheInvalidation() throws InterruptedException {
+    void testElmCacheInvalidation() {
 
         assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("Library");
 
@@ -111,7 +111,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
     }
 
     @Test
-    void testAddNewVersionOfSameLibrary() throws InterruptedException {
+    void testAddNewVersionOfSameLibrary() {
 
         assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("Library");
         // load measure bundle with measure library version
@@ -137,7 +137,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
     }
 
     @Test
-    void testNewVersionLibraryAdd() throws InterruptedException {
+    void testNewVersionLibraryAdd() {
 
         assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("Library");
         // load measure bundle with measure library version
@@ -163,7 +163,7 @@ public class CrResourceListenerTest extends BaseCrR4TestServer {
     }
 
     @Test
-    void testNewVersionValueSetAdd() throws InterruptedException {
+    void testNewVersionValueSetAdd() {
 
         assertThat(myResourceChangeListenerRegistry.getWatchedResourceNames()).contains("ValueSet");
         // load measure bundle with measure library version

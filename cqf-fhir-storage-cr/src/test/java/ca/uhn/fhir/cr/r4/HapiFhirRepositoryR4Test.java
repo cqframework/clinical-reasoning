@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
+class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
     @Autowired
     RestfulServer restfulServer;
@@ -112,10 +112,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
         var result = theRepository.search(Bundle.class, Patient.class, withCountParam(100));
         assertEquals(expectedPatientCount, result.getTotal());
         // count all resources in result
-        int counter = 0;
-        for (Object i : result.getEntry()) {
-            counter++;
-        }
+        long counter = result.getEntry().size();
         // verify all patient resources captured
         assertThat(counter)
                 .as("Patient search results don't match available resources")
@@ -146,10 +143,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
         ourPagingProvider.setMaximumPageSize(100);
         var result = theRepository.search(Bundle.class, Patient.class, withCountParam(100));
         // count all resources in result
-        int counter = 0;
-        for (Object i : result.getEntry()) {
-            counter++;
-        }
+        long counter = result.getEntry().size();
         // verify all patient resources captured
         assertThat(counter)
                 .as("Patient search results don't match available resources")
@@ -161,10 +155,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
         ourPagingProvider.setMaximumPageSize(1000);
         var result = theRepository.search(Bundle.class, Encounter.class, withCountParam(1000));
         // count all resources in result
-        int counter = 0;
-        for (Object i : result.getEntry()) {
-            counter++;
-        }
+        long counter = result.getEntry().size();
         // verify all encounter resources captured
         assertThat(counter)
                 .as("Encounter search results don't match available resources")
@@ -225,10 +216,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
         var result = theRepository.search(Bundle.class, Encounter.class, searchParams);
 
         // count all resources in result
-        int counter = 0;
-        for (Object i : result.getEntry()) {
-            counter++;
-        }
+        long counter = result.getEntry().size();
         // verify patient encounter was the only one found
         assertThat(counter)
                 .as("Encounter search results don't match available resources")
@@ -241,10 +229,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
         var result = theRepository.search(Bundle.class, Immunization.class, withCountParam(1000));
         // count all resources in result
-        int counter = 0;
-        for (Object i : result.getEntry()) {
-            counter++;
-        }
+        long counter = result.getEntry().size();
         // verify all immunization resources captured
         assertThat(counter)
                 .as("Immunization search results don't match available resources")

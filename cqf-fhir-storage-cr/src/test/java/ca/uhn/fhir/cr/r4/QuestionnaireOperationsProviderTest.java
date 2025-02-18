@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
+class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
     @Autowired
     QuestionnairePopulateProvider questionnairePopulateProvider;
 

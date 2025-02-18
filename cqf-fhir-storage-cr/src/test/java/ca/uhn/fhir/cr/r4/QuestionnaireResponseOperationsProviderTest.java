@@ -4,19 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
-import java.io.IOException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
+class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
     @Autowired
     QuestionnaireResponseExtractProvider questionnaireResponseExtractProvider;
 
     @Test
-    void testExtract() throws IOException {
+    void testExtract() {
         var requestDetails = setupRequestDetails();
         loadResource(Questionnaire.class, "ca/uhn/fhir/cr/r4/Questionnaire-MyPainQuestionnaire.json", requestDetails);
         var questionnaireResponse = readResource(

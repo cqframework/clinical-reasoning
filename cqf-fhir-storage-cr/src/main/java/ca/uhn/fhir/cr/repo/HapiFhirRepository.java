@@ -364,7 +364,10 @@ public class HapiFhirRepository implements Repository {
         try {
             return (R) restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details);
         } catch (IOException e) {
+            // LUKETODO:  Exception?
             throw new RuntimeException(Msg.code(2315) + e);
         }
     }
+
+    // LUKETODO:  unsafeCast()?
 }

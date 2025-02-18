@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 class CareGapsProviderTest extends BaseCrR4TestServer {
 
     @Test
-    public void careGapsEndToEnd() {
+    void careGapsEndToEnd() {
 
         // 1. Initialize Payer content
         var measureBundle = (Bundle) readResource("CaregapsColorectalCancerScreeningsFHIR-bundle.json");

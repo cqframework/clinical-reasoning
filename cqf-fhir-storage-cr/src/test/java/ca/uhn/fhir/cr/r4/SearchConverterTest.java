@@ -29,7 +29,7 @@ class SearchConverterTest {
     private SearchConverter myFixture;
 
     @BeforeEach
-    public void setupFixture() {
+    void setupFixture() {
         myFixture = new SearchConverter();
     }
 

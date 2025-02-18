@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
+class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
     @Autowired
     PlanDefinitionApplyProvider planDefinitionApplyProvider;
 

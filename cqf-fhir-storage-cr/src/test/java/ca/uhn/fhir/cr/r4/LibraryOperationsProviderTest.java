@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class LibraryOperationsProviderTest extends BaseCrR4TestServer {
+class LibraryOperationsProviderTest extends BaseCrR4TestServer {
     @Autowired
     LibraryEvaluateProvider libraryEvaluateProvider;
 

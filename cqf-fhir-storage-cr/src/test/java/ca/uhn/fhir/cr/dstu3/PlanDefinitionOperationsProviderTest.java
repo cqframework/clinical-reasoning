@@ -12,7 +12,7 @@ import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PlanDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {
+class PlanDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {
     @Autowired
     PlanDefinitionApplyProvider planDefinitionApplyProvider;
 

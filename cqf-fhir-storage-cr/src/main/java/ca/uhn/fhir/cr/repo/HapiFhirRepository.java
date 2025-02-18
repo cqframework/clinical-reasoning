@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -159,7 +160,7 @@ public class HapiFhirRepository implements Repository {
                         ? responseEncoding.getEncoding()
                         : null;
 
-        return (B) BundleProviderUtil.createBundleFromBundleProvider(
+        return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
                 restfulServer,
                 requestDetails,
                 count,
@@ -168,7 +169,7 @@ public class HapiFhirRepository implements Repository {
                 bundleProvider,
                 start,
                 bundleType,
-                pagingAction);
+                pagingAction));
     }
 
     // TODO: The main use case for this is paging through Bundles, but I suppose that technically
@@ -232,7 +233,7 @@ public class HapiFhirRepository implements Repository {
                 .setAction(RestOperationTypeEnum.METADATA)
                 .addHeaders(headers)
                 .create();
-        return (C) method.provideCapabilityStatement(restfulServer, details);
+        return unsafeCast(method.provideCapabilityStatement(restfulServer, details));
     }
 
     @Override
@@ -241,7 +242,7 @@ public class HapiFhirRepository implements Repository {
                 .setAction(RestOperationTypeEnum.TRANSACTION)
                 .addHeaders(headers)
                 .create();
-        return (B) daoRegistry.getSystemDao().transaction(details, bundle);
+        return unsafeCast(daoRegistry.getSystemDao().transaction(details, bundle));
     }
 
     @Override
@@ -360,14 +361,17 @@ public class HapiFhirRepository implements Repository {
         return restfulServer.getFhirContext();
     }
 
-    protected <R extends Object> R invoke(RequestDetails details) {
+    protected <R> R invoke(RequestDetails details) {
         try {
-            return (R) restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details);
+            return unsafeCast(
+                    restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details));
         } catch (IOException e) {
-            // LUKETODO:  Exception?
-            throw new RuntimeException(Msg.code(2315) + e);
+            throw new InternalErrorException(Msg.code(2315) + e);
         }
     }
 
-    // LUKETODO:  unsafeCast()?
+    @SuppressWarnings("unchecked")
+    private static <T> T unsafeCast(Object object) {
+        return (T) object;
+    }
 }

@@ -24,12 +24,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,14 +71,7 @@ public class TestCrConfig {
         ourRestServer.registerProvider(appCtx.getBean(GraphQLProvider.class));
         ourRestServer.registerProvider(appCtx.getBean(DiffProvider.class));
         ourRestServer.registerProvider(appCtx.getBean(ValueSetOperationProvider.class));
-
-        // to do
-        String serverAddress = null;
-        if (!Strings.isNullOrEmpty(serverAddress)) {
-            ourRestServer.setServerAddressStrategy(new HardcodedServerAddressStrategy(serverAddress));
-        } else {
-            ourRestServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
-        }
+        ourRestServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
 
         return ourRestServer;
     }

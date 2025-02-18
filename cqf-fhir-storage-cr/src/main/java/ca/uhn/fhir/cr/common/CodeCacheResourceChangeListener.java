@@ -85,7 +85,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
         for (String key : valuesets) {
             if (key.contains(url)) {
                 globalValueSetCache.remove(key);
-                ourLog.warn("Successfully removed valueSet from ValueSetCache: " + url + " due to updated resource");
+                ourLog.warn("Successfully removed valueSet from ValueSetCache: {} due to updated resource", url);
             }
         }
     }

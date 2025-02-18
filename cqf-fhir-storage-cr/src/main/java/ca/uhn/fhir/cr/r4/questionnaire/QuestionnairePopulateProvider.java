@@ -133,8 +133,14 @@ public class QuestionnairePopulateProvider {
     }
 
     private boolean isUseServerData(BooleanType local, BooleanType useServerData) {
-        return local != null
-                ? local.booleanValue()
-                : useServerData == null ? Boolean.TRUE : useServerData.booleanValue();
+        if (local != null) {
+            return local.booleanValue();
+        }
+
+        if (useServerData != null) {
+            return useServerData.booleanValue();
+        }
+
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -14,6 +15,11 @@ public class RepositoryConfigCondition implements Condition {
     @Override
     public boolean matches(ConditionContext conditionContext, AnnotatedTypeMetadata annotatedTypeMetadata) {
         ConfigurableListableBeanFactory beanFactory = conditionContext.getBeanFactory();
+
+        if (beanFactory == null) {
+            throw new InternalErrorException("Unable to create bean CrConfigCondition: Missing bean factory");
+        }
+
         try {
             RestfulServer bean = beanFactory.getBean(RestfulServer.class);
             if (bean == null) {

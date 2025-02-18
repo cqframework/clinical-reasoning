@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -146,7 +145,7 @@ class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
     // TODO: This test is failing because the Dstu3MeasureProcessor in the evaluator is not checking the additionalData
     // bundle for the patient
     @Test
-    void testMeasureEvaluateWithAdditionalData() throws IOException {
+    void testMeasureEvaluateWithAdditionalData() {
         loadBundle("Exm105FhirR3MeasurePartBundle.json");
 
         var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");

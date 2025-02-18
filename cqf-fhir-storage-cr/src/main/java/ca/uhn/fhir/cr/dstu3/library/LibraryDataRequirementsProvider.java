@@ -22,8 +22,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class LibraryDataRequirementsProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
 
-    public LibraryDataRequirementsProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
-        libraryProcessorFactory = theLibraryProcessorFactory;
+    public LibraryDataRequirementsProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        this.libraryProcessorFactory = libraryProcessorFactory;
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Library.class)

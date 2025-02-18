@@ -22,20 +22,20 @@ import org.springframework.context.annotation.Import;
 public class PackageOperationConfig {
     @Bean
     ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider r4PlanDefinitionPackageProvider(
-            IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
-        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider(thePlanDefinitionProcessorFactory);
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionPackageProvider(planDefinitionProcessorFactory);
     }
 
     @Bean
     ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider r4QuestionnairePackageProvider(
-            IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
-        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider(theQuestionnaireProcessorFactory);
+            IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider(questionnaireProcessorFactory);
     }
 
     @Bean
     ca.uhn.fhir.cr.r4.library.LibraryPackageProvider r4LibraryPackageProvider(
-            ILibraryProcessorFactory theLibraryProcessorFactory) {
-        return new ca.uhn.fhir.cr.r4.library.LibraryPackageProvider(theLibraryProcessorFactory);
+            ILibraryProcessorFactory libraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.library.LibraryPackageProvider(libraryProcessorFactory);
     }
 
     @Bean

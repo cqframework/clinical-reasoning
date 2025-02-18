@@ -23,8 +23,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class LibraryPackageProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
 
-    public LibraryPackageProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
-        libraryProcessorFactory = theLibraryProcessorFactory;
+    public LibraryPackageProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        this.libraryProcessorFactory = libraryProcessorFactory;
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)

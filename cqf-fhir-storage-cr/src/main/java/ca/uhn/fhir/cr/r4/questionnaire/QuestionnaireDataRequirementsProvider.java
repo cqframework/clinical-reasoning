@@ -22,8 +22,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class QuestionnaireDataRequirementsProvider {
     private final IQuestionnaireProcessorFactory questionnaireFactory;
 
-    public QuestionnaireDataRequirementsProvider(IQuestionnaireProcessorFactory theQuestionnaireFactory) {
-        questionnaireFactory = theQuestionnaireFactory;
+    public QuestionnaireDataRequirementsProvider(IQuestionnaireProcessorFactory questionnaireFactory) {
+        this.questionnaireFactory = questionnaireFactory;
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)

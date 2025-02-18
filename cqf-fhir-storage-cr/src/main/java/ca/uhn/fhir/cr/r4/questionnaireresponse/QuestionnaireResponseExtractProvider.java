@@ -21,8 +21,8 @@ public class QuestionnaireResponseExtractProvider {
     private final IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory;
 
     public QuestionnaireResponseExtractProvider(
-            IQuestionnaireResponseProcessorFactory theQuestionnaireResponseProcessorFactory) {
-        questionnaireResponseProcessorFactory = theQuestionnaireResponseProcessorFactory;
+            IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory) {
+        this.questionnaireResponseProcessorFactory = questionnaireResponseProcessorFactory;
     }
 
     /**

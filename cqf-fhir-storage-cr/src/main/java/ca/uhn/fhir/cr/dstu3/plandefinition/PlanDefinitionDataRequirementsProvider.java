@@ -22,8 +22,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class PlanDefinitionDataRequirementsProvider {
     private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
 
-    public PlanDefinitionDataRequirementsProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
-        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    public PlanDefinitionDataRequirementsProvider(IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = PlanDefinition.class)

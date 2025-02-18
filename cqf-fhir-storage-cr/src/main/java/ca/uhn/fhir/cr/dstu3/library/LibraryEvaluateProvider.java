@@ -22,8 +22,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class LibraryEvaluateProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
 
-    public LibraryEvaluateProvider(ILibraryProcessorFactory theLibraryProcessorFactory) {
-        libraryProcessorFactory = theLibraryProcessorFactory;
+    public LibraryEvaluateProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        this.libraryProcessorFactory = libraryProcessorFactory;
     }
 
     /**

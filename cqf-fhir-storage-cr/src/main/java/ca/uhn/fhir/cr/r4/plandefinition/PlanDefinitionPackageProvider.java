@@ -23,8 +23,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class PlanDefinitionPackageProvider {
     private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
 
-    public PlanDefinitionPackageProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
-        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    public PlanDefinitionPackageProvider(IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)

@@ -46,12 +46,12 @@ public interface IResourceLoader extends IDaoRegistryUser {
     /**
      * Method to load bundles
      * @param type, resource type
-     * @param theLocation, location of the resource
+     * @param location, location of the resource
      * @return of type bundle
      * @param <T>
      */
-    default <T extends IBaseBundle> T loadBundle(Class<T> type, String theLocation) {
-        var bundle = readResource(type, theLocation);
+    default <T extends IBaseBundle> T loadBundle(Class<T> type, String location) {
+        var bundle = readResource(type, location);
         getDaoRegistry().getSystemDao().transaction(new SystemRequestDetails(), bundle);
 
         return bundle;
@@ -60,7 +60,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
     /**
      * Method to read resource
      * @param type, resource type
-     * @param theLocation, location of the resource
+     * @param location, location of the resource
      * @return of type resource
      * @param <T>
      */

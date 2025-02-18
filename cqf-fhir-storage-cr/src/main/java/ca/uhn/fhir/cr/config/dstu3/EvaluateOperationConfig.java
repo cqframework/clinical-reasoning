@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Import;
 public class EvaluateOperationConfig {
     @Bean
     ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider dstu3LibraryEvaluateProvider(
-            ILibraryProcessorFactory theLibraryProcessorFactory) {
-        return new ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider(theLibraryProcessorFactory);
+            ILibraryProcessorFactory libraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.library.LibraryEvaluateProvider(libraryProcessorFactory);
     }
 
     @Bean(name = "evaluateOperationLoader")

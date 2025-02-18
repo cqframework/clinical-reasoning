@@ -22,22 +22,22 @@ import org.springframework.context.annotation.Import;
 public class DataRequirementsOperationConfig {
     @Bean
     ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider dstu3LibraryDataRequirementsProvider(
-            ILibraryProcessorFactory theLibraryProcessorFactory) {
-        return new ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider(theLibraryProcessorFactory);
+            ILibraryProcessorFactory libraryProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.library.LibraryDataRequirementsProvider(libraryProcessorFactory);
     }
 
     @Bean
     ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider
             dstu3PlanDefinitionDataRequirementsProvider(
-                    IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
+                    IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
         return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider(
-                thePlanDefinitionProcessorFactory);
+                planDefinitionProcessorFactory);
     }
 
     @Bean
     ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider dstu3QuestionnaireDataRequirementsProvider(
-            IQuestionnaireProcessorFactory theQuestionnaireFactory) {
-        return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider(theQuestionnaireFactory);
+            IQuestionnaireProcessorFactory questionnaireFactory) {
+        return new ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireDataRequirementsProvider(questionnaireFactory);
     }
 
     @Bean

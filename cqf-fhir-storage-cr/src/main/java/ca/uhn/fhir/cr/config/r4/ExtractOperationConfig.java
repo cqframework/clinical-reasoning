@@ -19,9 +19,9 @@ import org.springframework.context.annotation.Import;
 public class ExtractOperationConfig {
     @Bean
     ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider r4QuestionnaireResponseExtractProvider(
-            IQuestionnaireResponseProcessorFactory theQuestionnaireResponseProcessorFactory) {
+            IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory) {
         return new ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider(
-                theQuestionnaireResponseProcessorFactory);
+                questionnaireResponseProcessorFactory);
     }
 
     @Bean(name = "extractOperationLoader")

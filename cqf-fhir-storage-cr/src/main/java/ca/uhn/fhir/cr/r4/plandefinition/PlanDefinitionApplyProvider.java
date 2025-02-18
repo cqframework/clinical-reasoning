@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component;
 public class PlanDefinitionApplyProvider {
     private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
 
-    public PlanDefinitionApplyProvider(IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
-        planDefinitionProcessorFactory = thePlanDefinitionProcessorFactory;
+    public PlanDefinitionApplyProvider(IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
     }
 
     /**

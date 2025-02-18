@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 public class MeasureOperationsProvider {
     private final IMeasureServiceFactory dstu3MeasureProcessorFactory;
 
-    public MeasureOperationsProvider(IMeasureServiceFactory theDstu3MeasureProcessorFactory) {
-        dstu3MeasureProcessorFactory = theDstu3MeasureProcessorFactory;
+    public MeasureOperationsProvider(IMeasureServiceFactory dstu3MeasureProcessorFactory) {
+        this.dstu3MeasureProcessorFactory = dstu3MeasureProcessorFactory;
     }
 
     /**

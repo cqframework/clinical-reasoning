@@ -27,8 +27,8 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 public class QuestionnairePopulateProvider {
     private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
 
-    public QuestionnairePopulateProvider(IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
-        questionnaireProcessorFactory = theQuestionnaireProcessorFactory;
+    public QuestionnairePopulateProvider(IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
+        this.questionnaireProcessorFactory = questionnaireProcessorFactory;
     }
 
     /**

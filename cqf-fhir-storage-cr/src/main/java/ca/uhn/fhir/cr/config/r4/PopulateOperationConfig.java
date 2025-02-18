@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Import;
 public class PopulateOperationConfig {
     @Bean
     ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider r4QuestionnairePopulateProvider(
-            IQuestionnaireProcessorFactory theQuestionnaireProcessorFactory) {
-        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider(theQuestionnaireProcessorFactory);
+            IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
+        return new ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider(questionnaireProcessorFactory);
     }
 
     @Bean(name = "populateOperationLoader")

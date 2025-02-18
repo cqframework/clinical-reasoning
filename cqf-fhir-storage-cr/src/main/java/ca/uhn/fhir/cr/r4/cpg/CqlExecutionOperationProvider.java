@@ -16,8 +16,8 @@ public class CqlExecutionOperationProvider {
 
     private final ICqlExecutionServiceFactory cqlExecutionServiceFactory;
 
-    public CqlExecutionOperationProvider(ICqlExecutionServiceFactory theCqlExecutionServiceFactory) {
-        cqlExecutionServiceFactory = theCqlExecutionServiceFactory;
+    public CqlExecutionOperationProvider(ICqlExecutionServiceFactory cqlExecutionServiceFactory) {
+        this.cqlExecutionServiceFactory = cqlExecutionServiceFactory;
     }
 
     /**

@@ -27,8 +27,8 @@ public class ApplyOperationConfig {
 
     @Bean
     ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionApplyProvider dstu3PlanDefinitionApplyProvider(
-            IPlanDefinitionProcessorFactory thePlanDefinitionProcessorFactory) {
-        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionApplyProvider(thePlanDefinitionProcessorFactory);
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        return new ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionApplyProvider(planDefinitionProcessorFactory);
     }
 
     @Bean(name = "applyOperationLoader")

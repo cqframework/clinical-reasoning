@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.r4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -128,14 +129,12 @@ class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
         var nextUrl = next.getUrl();
         var nextResult = theRepository.link(Bundle.class, nextUrl);
         assertEquals(20, nextResult.getEntry().size());
-        assertEquals(
-                false,
-                result.getEntry().stream()
+        assertFalse(result.getEntry().stream()
+                .map(e -> e.getResource().getIdPart())
+                .anyMatch(i -> nextResult.getEntry().stream()
                         .map(e -> e.getResource().getIdPart())
-                        .anyMatch(i -> nextResult.getEntry().stream()
-                                .map(e -> e.getResource().getIdPart())
-                                .toList()
-                                .contains(i)));
+                        .toList()
+                        .contains(i)));
     }
 
     void transactionReadsPatientResources(HapiFhirRepository theRepository) {

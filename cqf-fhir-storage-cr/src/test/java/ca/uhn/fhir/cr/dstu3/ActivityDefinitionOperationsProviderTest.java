@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionApplyProvider;
@@ -38,7 +39,7 @@ class ActivityDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {
                 null,
                 null,
                 requestDetails);
-        assertTrue(result instanceof ProcedureRequest);
+        assertInstanceOf(ProcedureRequest.class, result);
         ProcedureRequest request = (ProcedureRequest) result;
         assertTrue(request.getDoNotPerform());
     }

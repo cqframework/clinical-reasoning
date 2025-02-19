@@ -13,11 +13,11 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -26,7 +26,6 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -82,8 +81,11 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 
         ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
         ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-        // LUKETODO:
-        ourClient.setLogRequestAndResponse(true);
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestBody(true);
+        loggingInterceptor.setLogResponseBody(true);
+        ourClient.registerInterceptor(loggingInterceptor);
 
         ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -108,22 +110,6 @@ public abstract class BaseCrDstu3TestServer extends BaseJpaDstu3Test implements 
 
     public Bundle loadBundle(String theLocation) {
         return loadBundle(Bundle.class, theLocation);
-    }
-
-    public Bundle makeBundle(List<? extends Resource> resources) {
-        return makeBundle(resources.toArray(new Resource[resources.size()]));
-    }
-
-    public Bundle makeBundle(Resource... resources) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(resources != null ? resources.length : 0);
-        if (resources != null) {
-            for (Resource l : resources) {
-                bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
-            }
-        }
-        return bundle;
     }
 
     protected RequestDetails setupRequestDetails() {

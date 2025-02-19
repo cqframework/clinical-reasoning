@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.r4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
@@ -63,7 +64,7 @@ class CpgOperationProviderTest extends BaseCrR4TestServer {
         // execute simple cql expression
         Parameters params = parameters(stringPart("expression", "5 * 5"));
         Parameters results = runCqlExecution(params);
-        assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
+        assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
 

@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.cr;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -33,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.springframework.core.io.DefaultResourceLoader;
 
 /**
@@ -64,32 +60,32 @@ public interface IResourceLoader extends IDaoRegistryUser {
      * @return of type resource
      * @param <T>
      */
-    default <T extends IBaseResource> T readResource(Class<T> type, String theLocation) {
-        return ClasspathUtil.loadResource(getFhirContext(), type, theLocation);
+    default <T extends IBaseResource> T readResource(Class<T> type, String location) {
+        return ClasspathUtil.loadResource(getFhirContext(), type, location);
     }
 
     /**
      * Method to load resource
      * @param type, resource type
-     * @param theLocation, location of the resource
+     * @param location, location of the resource
      * @return of type resource
      * @param <T>
      */
-    default <T extends IBaseResource> T loadResource(Class<T> type, String theLocation, RequestDetails requestDetails) {
-        var resource = readResource(type, theLocation);
+    default <T extends IBaseResource> T loadResource(Class<T> type, String location, RequestDetails requestDetails) {
+        var resource = readResource(type, location);
         getDaoRegistry().getResourceDao(type).update(resource, requestDetails);
 
         return resource;
     }
 
-    public default IBaseResource readResource(String theLocation) {
+    default IBaseResource readResource(String theLocation) {
         String resourceString = stringFromResource(theLocation);
         return EncodingEnum.detectEncoding(resourceString)
                 .newParser(getFhirContext())
                 .parseResource(resourceString);
     }
 
-    public default IBaseResource readAndLoadResource(String theLocation) {
+    default IBaseResource readAndLoadResource(String theLocation) {
         String resourceString = stringFromResource(theLocation);
         if (theLocation.endsWith("json")) {
             return loadResource(parseResource("json", resourceString));
@@ -98,7 +94,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
         }
     }
 
-    public default IBaseResource loadResource(IBaseResource resource) {
+    default IBaseResource loadResource(IBaseResource resource) {
         if (getDaoRegistry() == null) {
             return resource;
         }
@@ -107,25 +103,20 @@ public interface IResourceLoader extends IDaoRegistryUser {
         return resource;
     }
 
-    public default IBaseResource parseResource(String encoding, String resourceString) {
-        IParser parser;
-        switch (encoding.toLowerCase()) {
-            case "json":
-                parser = getFhirContext().newJsonParser();
-                break;
-            case "xml":
-                parser = getFhirContext().newXmlParser();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
-        }
+    default IBaseResource parseResource(String encoding, String resourceString) {
+        IParser parser =
+                switch (encoding.toLowerCase()) {
+                    case "json" -> getFhirContext().newJsonParser();
+                    case "xml" -> getFhirContext().newXmlParser();
+                    default -> throw new IllegalArgumentException(
+                            String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
+                };
 
         return parser.parseResource(resourceString);
     }
 
     default String stringFromResource(String theLocation) {
-        InputStream is = null;
+        InputStream is;
         try {
             if (theLocation.startsWith(File.separator)) {
                 is = new FileInputStream(theLocation);
@@ -138,22 +129,5 @@ public interface IResourceLoader extends IDaoRegistryUser {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
         }
-    }
-
-    default <T extends IBaseResource> T newResource(Class<T> resourceClass, String idPart) {
-        checkNotNull(resourceClass);
-        checkNotNull(idPart);
-
-        T newResource = newResource(resourceClass);
-        newResource.setId((IIdType) Ids.newId(getFhirContext(), newResource.fhirType(), idPart));
-
-        return newResource;
-    }
-
-    @SuppressWarnings("unchecked")
-    default <T extends IBaseResource> T newResource(Class<T> resourceClass) {
-        checkNotNull(resourceClass);
-
-        return (T) this.getFhirContext().getResourceDefinition(resourceClass).newInstance();
     }
 }

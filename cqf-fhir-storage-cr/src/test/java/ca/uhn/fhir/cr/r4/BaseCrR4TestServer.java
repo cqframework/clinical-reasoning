@@ -19,11 +19,11 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -66,7 +66,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
     @Autowired
     EvaluationSettings myEvaluationSettings;
 
-    @SuppressWarnings("deprecation")
     @AfterEach
     public void after() {
         ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
@@ -109,8 +108,11 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
 
         ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
         ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-        // LUKETODO:
-        ourClient.setLogRequestAndResponse(true);
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestBody(true);
+        loggingInterceptor.setLogResponseBody(true);
+        ourClient.registerInterceptor(loggingInterceptor);
 
         ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -136,10 +138,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
     public void loadBundle(String theLocation) {
         var bundy = (Bundle) readResource(theLocation);
         ourClient.transaction().withBundle(bundy).execute();
-    }
-
-    public Bundle makeBundle(List<? extends Resource> resources) {
-        return makeBundle(resources.toArray(new Resource[resources.size()]));
     }
 
     public Bundle makeBundle(Resource... resources) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider;
@@ -38,7 +39,7 @@ class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer {
                 null,
                 null,
                 requestDetails);
-        assertTrue(result instanceof MedicationRequest);
+        assertInstanceOf(MedicationRequest.class, result);
         MedicationRequest request = (MedicationRequest) result;
         assertTrue(request.getDoNotPerform());
     }

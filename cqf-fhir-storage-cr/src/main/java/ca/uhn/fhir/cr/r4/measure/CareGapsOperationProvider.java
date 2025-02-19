@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -93,7 +92,7 @@ public class CareGapsOperationProvider {
                         status,
                         measureId == null
                                 ? null
-                                : measureId.stream().map(IdType::new).collect(Collectors.toList()),
+                                : measureId.stream().map(IdType::new).toList(),
                         measureIdentifier,
                         measureUrl,
                         Optional.ofNullable(nonDocument)

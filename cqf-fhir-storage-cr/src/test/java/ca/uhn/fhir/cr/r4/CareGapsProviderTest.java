@@ -116,9 +116,12 @@ class CareGapsProviderTest extends BaseCrR4TestServer {
                                 .getResource()
                                 .getResourceType()
                                 .name()))
-                .findFirst()
-                .get();
+                .findFirst();
+
+        assertTrue(detectedIssue.isPresent());
+
         var extension = (Extension) detectedIssue
+                .get()
                 .getResource()
                 .getChildByName("modifierExtension")
                 .getValues()
@@ -129,6 +132,6 @@ class CareGapsProviderTest extends BaseCrR4TestServer {
                 .filter(code ->
                         "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode()))
                 .findFirst();
-        assertTrue(!coding.isEmpty());
+        assertTrue(coding.isPresent());
     }
 }

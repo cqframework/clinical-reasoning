@@ -24,6 +24,8 @@ form_data = {
 print(f"About to start job. [target_cdr_cr_branch={target_cdr_cr_branch}, current_clinical_reasoning_branch ={current_clinical_reasoning_branch}]")
 print("Triggering Remote CI process on gitlab.com.")
 # LUKETODO: delete log
+print(f"request JSON: {form_data}")
+# LUKETODO: delete log
 print("requests.post URL: https://gitlab.com/api/v4/projects/66223517/trigger/pipeline")
 
 result = requests.post("https://gitlab.com/api/v4/projects/66223517/trigger/pipeline", data=form_data)

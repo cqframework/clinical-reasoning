@@ -13,7 +13,7 @@ target_cdr_cr_branch = os.getenv("CDR_CR_BRANCH")
 if not target_cdr_cr_branch:
     print("Defaulting CDR-CR branch to main as this is an automatic build.")
     # LUKETODO:  this is the branch that we call against in cdr-cr, so swap this at the last minute
-    # target_cdr_branch = "main"
+    # target_cdr_branch = "main
     target_cdr_branch = "ld-20250214-cr-hapi-fhir-carveout"
 
 form_data = {
@@ -27,6 +27,11 @@ print("Triggering Remote CI process on gitlab.com.")
 result = requests.post("https://gitlab.com/api/v4/projects/66223517/trigger/pipeline", data=form_data)
 if result.status_code > 399:
     print(result.json())
+
+# LUKETODO: delete
+print("result.status_code: {}", result.status_code)
+# LUKETODO: delete
+print("result.json(): {}", result.json())
 trigger_json = result.json()
 pipeline_id = trigger_json["id"]
 

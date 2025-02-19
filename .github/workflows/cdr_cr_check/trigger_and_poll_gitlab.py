@@ -23,14 +23,16 @@ form_data = {
 }
 print(f"About to start job. [target_cdr_cr_branch={target_cdr_cr_branch}, current_clinical_reasoning_branch ={current_clinical_reasoning_branch}]")
 print("Triggering Remote CI process on gitlab.com.")
+# LUKETODO: delete log
+print("requests.post URL: https://gitlab.com/api/v4/projects/66223517/trigger/pipeline")
 
 result = requests.post("https://gitlab.com/api/v4/projects/66223517/trigger/pipeline", data=form_data)
 if result.status_code > 399:
-    print(result.json())
+    print(f"status code: {result.status_code}, result.json(): {result.json()}")
 
-# LUKETODO: delete
+# LUKETODO: delete log
 print("result.status_code: {}", result.status_code)
-# LUKETODO: delete
+# LUKETODO: delete log
 print("result.json(): {}", result.json())
 trigger_json = result.json()
 pipeline_id = trigger_json["id"]
@@ -39,6 +41,8 @@ def poll_for_pipeline_status(pipeline_id):
     query_params = {
         "private_token": project_api_read_token
     }
+    # LUKETODO: delete log
+    print(f"requests.get URL: https://gitlab.com/api/v4/projects/66223517/pipelines/{pipeline_id}")
     resp = requests.get(f"https://gitlab.com/api/v4/projects/66223517/pipelines/{pipeline_id}", params=query_params)
     pipeline_status_json = resp.json()
     return pipeline_status_json

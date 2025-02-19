@@ -14,7 +14,7 @@ if not target_cdr_cr_branch:
     print("Defaulting CDR-CR branch to main as this is an automatic build.")
     # LUKETODO:  this is the branch that we call against in cdr-cr, so swap this at the last minute
     # target_cdr_branch = "main
-    target_cdr_branch = "ld-20250214-cr-hapi-fhir-carveout"
+    target_cdr_cr_branch = "ld-20250214-cr-hapi-fhir-carveout"
 
 form_data = {
     "token": trigger_token,

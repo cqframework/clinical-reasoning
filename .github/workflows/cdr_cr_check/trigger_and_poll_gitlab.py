@@ -3,12 +3,18 @@ import os
 import sys
 from time import sleep
 import requests
+import logging
 
 complete_statuses = ["failed", "success", "canceled"]
 trigger_token = os.getenv("TRIGGER_TOKEN")
 project_api_read_token = os.getenv("READ_API_TOKEN")
+# LUKETODO: what if this is empty?
 current_clinical_reasoning_branch = os.getenv("CLINICAL_REASONING_BRANCH")
 target_cdr_cr_branch = os.getenv("CDR_CR_BRANCH")
+
+# Enable logging
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
 if not target_cdr_cr_branch:
     print("Defaulting CDR-CR branch to main as this is an automatic build.")
@@ -30,7 +36,7 @@ print("requests.post URL: https://gitlab.com/api/v4/projects/66223517/trigger/pi
 
 result = requests.post("https://gitlab.com/api/v4/projects/66223517/trigger/pipeline", data=form_data)
 if result.status_code > 399:
-    print(f"status code: {result.status_code}, result.json(): {result.json()}")
+    print(f"status code: {result.status_code}, result.json(): {result.json()}, headers: {result.headers}")
 
 # LUKETODO: delete log
 print("result.status_code: {}", result.status_code)

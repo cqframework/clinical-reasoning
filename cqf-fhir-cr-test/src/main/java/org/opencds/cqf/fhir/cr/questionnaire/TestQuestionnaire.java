@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
@@ -45,6 +46,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PlanDefinition.class);
+
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private TestQuestionnaire() {
@@ -304,7 +307,7 @@ public class TestQuestionnaire {
                         jsonParser.encodeResourceToString(questionnaire),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }
@@ -382,7 +385,7 @@ public class TestQuestionnaire {
                         jsonParser.encodeResourceToString(questionnaireResponse),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

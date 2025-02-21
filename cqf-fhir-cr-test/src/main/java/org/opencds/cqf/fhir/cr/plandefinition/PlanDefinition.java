@@ -54,6 +54,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class PlanDefinition {
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PlanDefinition.class);
+
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private PlanDefinition() {
@@ -372,7 +374,7 @@ public class PlanDefinition {
                 JSONAssert.assertEquals(
                         load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundle), true);
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
@@ -385,7 +387,7 @@ public class PlanDefinition {
                         jsonParser.encodeResourceToString(generatedBundle),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
@@ -463,7 +465,7 @@ public class PlanDefinition {
                 JSONAssert.assertEquals(
                         load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(generatedCarePlan), true);
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
@@ -476,7 +478,7 @@ public class PlanDefinition {
                         jsonParser.encodeResourceToString(generatedCarePlan),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
+                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;

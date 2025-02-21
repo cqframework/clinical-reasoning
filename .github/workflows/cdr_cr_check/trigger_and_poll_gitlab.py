@@ -12,6 +12,14 @@ project_api_read_token = os.getenv("READ_API_TOKEN")
 current_clinical_reasoning_branch = os.getenv("CLINICAL_REASONING_BRANCH")
 target_cdr_cr_branch = os.getenv("CDR_CR_BRANCH")
 
+if not trigger_token:
+    print("CDR-CR failed to run because TRIGGER_TOKEN was not set")
+    sys.exit(1)
+
+if not project_api_read_token :
+    print("CDR-CR failed to run because READ_API_TOKEN was not set")
+    sys.exit(1)
+
 # Enable logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("urllib3").setLevel(logging.DEBUG)
@@ -30,7 +38,10 @@ form_data = {
 print(f"About to start job. [target_cdr_cr_branch={target_cdr_cr_branch}, current_clinical_reasoning_branch ={current_clinical_reasoning_branch}]")
 print("Triggering Remote CI process on gitlab.com.")
 # LUKETODO: delete log
-print(f"request JSON: {form_data}")
+form_data_obfuscated = form_data.copy()
+form_data_obfuscated.pop("token")
+print(f"has token? {form_data.get('token') is not None}")
+print(f"request JSON with token removed: {form_data_obfuscated}")
 # LUKETODO: delete log
 print("requests.post URL: https://gitlab.com/api/v4/projects/66223517/trigger/pipeline")
 

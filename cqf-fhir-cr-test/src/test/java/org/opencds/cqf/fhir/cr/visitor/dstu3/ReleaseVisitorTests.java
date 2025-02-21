@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor.dstu3;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +30,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
@@ -509,7 +511,7 @@ class ReleaseVisitorTests {
         var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
+        when(clientMock.getLatestNonDraftResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(
@@ -521,8 +523,9 @@ class ReleaseVisitorTests {
         var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
         var include = grouper.getCompose().getIncludeFirstRep();
         assertNotNull(Canonicals.getVersion(include.getValueSet().get(0).getValue()));
-        assertTrue(
-                Canonicals.getVersion(include.getValueSet().get(0).getValue()).equals(latestVSet.getVersion()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(include.getValueSet().get(0).getValue()));
         var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
         var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getResource().getReference().contains(leafOid))
@@ -530,8 +533,9 @@ class ReleaseVisitorTests {
         assertTrue(leafRelatedArtifact.isPresent());
         assertNotNull(
                 Canonicals.getVersion(leafRelatedArtifact.get().getResource().getReference()));
-        assertTrue(Canonicals.getVersion(leafRelatedArtifact.get().getResource().getReference())
-                .equals(latestVSet.getVersion()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(leafRelatedArtifact.get().getResource().getReference()));
     }
 
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
@@ -762,6 +766,8 @@ class ReleaseVisitorTests {
         var releaseVisitor = new ReleaseVisitor(repo);
         var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
+        var retiredLeaf = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.77-old"))
+                .copy();
         var testLibrary = originalLibrary.copy();
         var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
         var params =
@@ -773,11 +779,23 @@ class ReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         var releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        var maybeLeafRA = releasedLibrary.getRelatedArtifact().stream()
+        var maybeActiveLeafRA = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getResource().getReference().contains("2.16.840.1.113762.1.4.1146.6"))
                 .findFirst();
-        assertTrue(maybeLeafRA.isPresent());
-        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource().getReference())
-                .equals("1.0.1"));
+        assertTrue(maybeActiveLeafRA.isPresent());
+        assertEquals(
+                "1.0.1",
+                Canonicals.getVersion(maybeActiveLeafRA.get().getResource().getReference()));
+        var maybeRetiredLeafRA = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().getReference().contains("2.16.840.1.113762.1.4.1146.77"))
+                .findFirst();
+        assertTrue(maybeRetiredLeafRA.isPresent());
+        assertEquals(
+                retiredLeaf.getUrl() + "|" + retiredLeaf.getVersion(),
+                maybeRetiredLeafRA.get().getResource().getReference());
+        assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
+        assertEquals(
+                "3.2.0",
+                Canonicals.getVersion(maybeRetiredLeafRA.get().getResource().getReference()));
     }
 }

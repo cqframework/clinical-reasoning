@@ -109,6 +109,18 @@ public class TerminologyServerClient {
                 .execute());
     }
 
+    public java.util.Optional<IDomainResource> getLatestNonDraftResource(
+            IEndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+        var urlParams = Searches.byCanonical(url);
+        var statusParam = Searches.exceptStatus("draft");
+        urlParams.putAll(statusParam);
+        return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+                .search()
+                .forResource(getValueSetClass(versionEnum))
+                .where(urlParams)
+                .execute());
+    }
+
     private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {
         switch (fhirVersion) {
             case DSTU3:

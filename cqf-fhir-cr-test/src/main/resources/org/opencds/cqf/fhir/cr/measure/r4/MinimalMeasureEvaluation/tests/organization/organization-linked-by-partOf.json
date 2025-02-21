@@ -1,0 +1,7 @@
+{
+  "resourceType": "Organization",
+  "id": "organization-linked-by-partOf",
+  "partOf": {
+    "reference": "Organization/organization-linked-by-managingOrganization"
+  }
+}

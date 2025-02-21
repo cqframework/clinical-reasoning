@@ -47,6 +47,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class TestQuestionnaire {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private TestQuestionnaire() {
+        // private constructor
+    }
+
     public static Given given() {
         return new Given();
     }
@@ -311,10 +315,10 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public GeneratedQuestionnaire itemHasInitial(String theLinkId) {
+        public GeneratedQuestionnaire itemHasInitial(String linkId) {
             var matchingItems = items.stream()
-                    .filter(i -> request.getItemLinkId(i).equals(theLinkId))
-                    .collect(Collectors.toList());
+                    .filter(i -> request.getItemLinkId(i).equals(linkId))
+                    .toList();
             for (var item : matchingItems) {
                 assertFalse(request.resolvePathList(item, "initial").isEmpty());
             }

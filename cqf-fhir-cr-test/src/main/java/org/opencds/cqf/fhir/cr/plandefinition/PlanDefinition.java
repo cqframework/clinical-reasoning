@@ -56,6 +56,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class PlanDefinition {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private PlanDefinition() {
+        // private constructor
+    }
+
     private static InputStream open(String asset) {
         var path = Paths.get(getResourcePath(PlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();

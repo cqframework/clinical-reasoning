@@ -463,7 +463,7 @@ public class Measure {
             return new SelectedContained(c, this);
         }
 
-        public SelectedContained containedByValue(String theCodeValue) {
+        public SelectedContained containedByValue(String codeValue) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the CodeableConcept value for individual Measure Reports
@@ -475,30 +475,30 @@ public class Measure {
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(theCodeValue))
+                            .equals(codeValue))
                     .findFirst()
                     .orElseThrow());
         }
 
-        public SelectedContained containedByCoding(String theCodeCoding) {
+        public SelectedContained containedByCoding(String codeCoding) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the Observation.Coding.code for Summary Measure Reports, as value then becomes a count
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
+                    .filter(Observation.class::isInstance)
                     .filter(y -> ((Observation) y)
                             .getCode()
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(theCodeCoding))
+                            .equals(codeCoding))
                     .findFirst()
                     .orElseThrow());
         }
 
-        private List<Resource> getContainedResources(MeasureReport theMeasureReport) {
-            return ContainedHelper.getAllContainedResources(theMeasureReport);
+        private List<Resource> getContainedResources(MeasureReport measureReport) {
+            return ContainedHelper.getAllContainedResources(measureReport);
         }
 
         public SelectedReport containedObservationsHaveMatchingExtension() {
@@ -524,8 +524,8 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport containedListHasCorrectResourceType(String theResourceType) {
-            var resourceType = ContainedHelper.getAllContainedResources(value()).stream()
+        public SelectedReport containedListHasCorrectResourceType(String resourceType) {
+            var resourceTypeToUse = ContainedHelper.getAllContainedResources(value()).stream()
                     .filter(t -> t.getResourceType().equals(ResourceType.List))
                     .map(x -> (ListResource) x)
                     .findFirst()
@@ -533,15 +533,15 @@ public class Measure {
                     .getEntryFirstRep()
                     .getItem()
                     .getReference();
-            assertTrue(resourceType.contains(theResourceType));
+            assertTrue(resourceTypeToUse.contains(resourceType));
             return this;
         }
 
-        private List<String> getContainedIdsPerResourceType(ResourceType theResourceType) {
+        private List<String> getContainedIdsPerResourceType(ResourceType resourceType) {
             List<String> containedIds = new ArrayList<>();
             List<Resource> resources = ContainedHelper.getAllContainedResources(value());
             for (Resource resource : resources) {
-                if (resource.getResourceType().equals(theResourceType)) {
+                if (resource.getResourceType().equals(resourceType)) {
                     containedIds.add(resource.getId());
                 }
             }
@@ -600,13 +600,13 @@ public class Measure {
             return this;
         }
 
-        private int getPopulationCount(MeasureReport theMeasureReport, String theSubjectResultId) {
+        private int getPopulationCount(MeasureReport measureReport, String subjectResultId) {
             // find population with reference to contained List resource
-            var groups = theMeasureReport.getGroup();
+            var groups = measureReport.getGroup();
             for (MeasureReportGroupComponent group : groups) {
                 var population = group.getPopulation().stream()
                         .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
-                        .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
+                        .filter(x -> x.getSubjectResults().getReference().contains(subjectResultId))
                         .findFirst()
                         .orElse(null);
                 if (population == null && group.getStratifier() != null) {
@@ -621,7 +621,7 @@ public class Measure {
                                         && stratumPopulation
                                                 .getSubjectResults()
                                                 .getReference()
-                                                .contains(theSubjectResultId)) {
+                                                .contains(subjectResultId)) {
                                     return stratumPopulation.getCount();
                                 }
                             }
@@ -636,10 +636,10 @@ public class Measure {
             return 0;
         }
 
-        private int getListEntrySize(MeasureReport theMeasureReport, String theResourceId) {
-            var entry = (ListResource) ContainedHelper.getAllContainedResources(theMeasureReport).stream()
+        private int getListEntrySize(MeasureReport measureReport, String resourceId) {
+            var entry = (ListResource) ContainedHelper.getAllContainedResources(measureReport).stream()
                     .filter(t -> t.getResourceType().equals(ResourceType.List))
-                    .filter(x -> x.getId().equals(theResourceId))
+                    .filter(x -> x.getId().equals(resourceId))
                     .findAny()
                     .orElseThrow();
             return entry.getEntry().size();
@@ -741,15 +741,15 @@ public class Measure {
             return this;
         }
 
-        public SelectedContained observationHasCode(String theCode) {
+        public SelectedContained observationHasCode(String code) {
             var obs = (Observation) value();
-            assertEquals(theCode, obs.getCode().getCoding().get(0).getCode());
+            assertEquals(code, obs.getCode().getCoding().get(0).getCode());
             return this;
         }
 
-        public SelectedContained observationCount(int theCount) {
+        public SelectedContained observationCount(int count) {
             var obs = (Observation) value();
-            assertEquals(theCount, obs.getValueIntegerType().getValue());
+            assertEquals(count, obs.getValueIntegerType().getValue());
             return this;
         }
     }

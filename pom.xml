@@ -91,7 +91,7 @@
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
         <!-- Replaces hapi-fhir-storage-cr -->
-        <module>cqf-fhir-storage-cr</module>
+        <module>cqf-fhir-cr-hapi</module>
 
         <!-- TODO: See if we can retire this once we have all the mapping/adapters/runtimes in a
         consistent state -->

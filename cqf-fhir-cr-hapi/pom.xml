@@ -9,7 +9,7 @@
         <version>3.19.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cqf-fhir-storage-cr</artifactId>
+    <artifactId>cqf-fhir-cr-hapi</artifactId>
     <name>FHIR Clinical Reasoning Storage CR</name>
     <description>Implementations of clinical reasoning hapi-fhir storage operations</description>
 

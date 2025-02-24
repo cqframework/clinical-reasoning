@@ -1,0 +1,162 @@
+package org.opencds.cqf.fhir.cr.hapi.r4;
+
+import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.fhir.cr.hapi.IResourceLoader;
+import org.opencds.cqf.fhir.cr.hapi.TestHapiFhirCrPartitionConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.ApplyOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.DataRequirementsOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.EvaluateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.ExtractOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.PackageOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.PopulateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrStorageSettingsConfigurer;
+import org.opencds.cqf.fhir.cr.hapi.config.test.r4.TestCrR4Config;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.concurrent.TimeUnit;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.context.ContextConfiguration;
+
+@ContextConfiguration(
+        classes = {
+            TestHapiFhirCrPartitionConfig.class,
+            TestCrR4Config.class,
+            ApplyOperationConfig.class,
+            DataRequirementsOperationConfig.class,
+            EvaluateOperationConfig.class,
+            ExtractOperationConfig.class,
+            PackageOperationConfig.class,
+            PopulateOperationConfig.class
+        })
+public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResourceLoader {
+
+    public static IGenericClient ourClient;
+    public static FhirContext ourCtx;
+    public static CloseableHttpClient ourHttpClient;
+    public static Server ourServer;
+    public static String ourServerBase;
+    public static DatabaseBackedPagingProvider ourPagingProvider;
+    public static IParser ourParser;
+
+    private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
+
+    @Autowired
+    EvaluationSettings myEvaluationSettings;
+
+    @AfterEach
+    public void after() {
+        ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
+        myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+        myEvaluationSettings.getLibraryCache().clear();
+        myEvaluationSettings.getValueSetCache().clear();
+    }
+
+    @Autowired
+    RestfulServer ourRestfulServer;
+
+    @Autowired
+    TestCrStorageSettingsConfigurer myTestCrStorageSettingsConfigurer;
+
+    @BeforeEach
+    public void beforeStartServer() throws Exception {
+        myTestCrStorageSettingsConfigurer.setUpConfiguration();
+
+        ourServer = new Server(0);
+
+        ServletContextHandler proxyHandler = new ServletContextHandler();
+        proxyHandler.setContextPath("/");
+
+        ServletHolder servletHolder = new ServletHolder();
+        servletHolder.setServlet(ourRestfulServer);
+        proxyHandler.addServlet(servletHolder, "/fhir/*");
+
+        ourCtx = ourRestfulServer.getFhirContext();
+
+        ourServer.setHandler(proxyHandler);
+        JettyUtil.startServer(ourServer);
+        int port = JettyUtil.getPortForStartedServer(ourServer);
+        ourServerBase = "http://localhost:" + port + "/fhir";
+
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourHttpClient = builder.build();
+
+        ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
+        ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestBody(true);
+        loggingInterceptor.setLogResponseBody(true);
+        ourClient.registerInterceptor(loggingInterceptor);
+
+        ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
+
+        ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
+        ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+        ourRestfulServer.setPagingProvider(ourPagingProvider);
+
+        mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
+        ourClient.registerInterceptor(mySimpleHeaderInterceptor);
+        myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+    }
+
+    @Override
+    public DaoRegistry getDaoRegistry() {
+        return myDaoRegistry;
+    }
+
+    @Override
+    public FhirContext getFhirContext() {
+        return ourCtx;
+    }
+
+    public void loadBundle(String theLocation) {
+        var bundy = (Bundle) readResource(theLocation);
+        ourClient.transaction().withBundle(bundy).execute();
+    }
+
+    public Bundle makeBundle(Resource... resources) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(resources != null ? resources.length : 0);
+        if (resources != null) {
+            for (Resource l : resources) {
+                bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
+            }
+        }
+        return bundle;
+    }
+
+    protected RequestDetails setupRequestDetails() {
+        var requestDetails = new ServletRequestDetails();
+        requestDetails.setServletRequest(new MockHttpServletRequest());
+        requestDetails.setServer(ourRestfulServer);
+        requestDetails.setFhirServerBase(ourServerBase);
+        return requestDetails;
+    }
+}

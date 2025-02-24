@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.fhir.cr.hapi.repo.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.NumberOrListParam;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.hapi.repo.SearchConverter;
 
 class SearchConverterTest {
     private SearchConverter myFixture;

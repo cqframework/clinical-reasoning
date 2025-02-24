@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -9,6 +8,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
+import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 
 public class DataRequirementsOperationProvider {
     private final IDataRequirementsServiceFactory r4DataRequirementsServiceFactory;

@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import java.util.Arrays;
+import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -9,9 +12,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import java.util.Arrays;
-import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvider;
@@ -37,14 +37,12 @@ public class PackageOperationConfig {
     }
 
     @Bean
-    LibraryPackageProvider r4LibraryPackageProvider(
-            ILibraryProcessorFactory libraryProcessorFactory) {
+    LibraryPackageProvider r4LibraryPackageProvider(ILibraryProcessorFactory libraryProcessorFactory) {
         return new LibraryPackageProvider(libraryProcessorFactory);
     }
 
     @Bean
-    ValueSetPackageProvider r4ValueSetPackageProvider(
-            IValueSetProcessorFactory valueSetProcessorFactory) {
+    ValueSetPackageProvider r4ValueSetPackageProvider(IValueSetProcessorFactory valueSetProcessorFactory) {
         return new ValueSetPackageProvider(valueSetProcessorFactory);
     }
 

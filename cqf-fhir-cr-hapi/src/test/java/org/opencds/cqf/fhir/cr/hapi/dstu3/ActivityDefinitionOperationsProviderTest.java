@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.hapi.dstu3;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.hapi.dstu3.activitydefinition.ActivityDefinitionApplyProvider;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.hapi.dstu3.activitydefinition.ActivityDefinitionApplyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class ActivityDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {

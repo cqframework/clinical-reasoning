@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.hapi.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import java.util.Arrays;
+import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -9,9 +12,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import java.util.Arrays;
-import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.plandefinition.PlanDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.questionnaire.QuestionnaireDataRequirementsProvider;
@@ -31,11 +31,9 @@ public class DataRequirementsOperationConfig {
     }
 
     @Bean
-    PlanDefinitionDataRequirementsProvider
-            dstu3PlanDefinitionDataRequirementsProvider(
-                    IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
-        return new PlanDefinitionDataRequirementsProvider(
-                planDefinitionProcessorFactory);
+    PlanDefinitionDataRequirementsProvider dstu3PlanDefinitionDataRequirementsProvider(
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        return new PlanDefinitionDataRequirementsProvider(planDefinitionProcessorFactory);
     }
 
     @Bean
@@ -45,8 +43,7 @@ public class DataRequirementsOperationConfig {
     }
 
     @Bean
-    ValueSetDataRequirementsProvider dstu3ValueSetDataRequirementsProvider(
-            IValueSetProcessorFactory valueSetFactory) {
+    ValueSetDataRequirementsProvider dstu3ValueSetDataRequirementsProvider(IValueSetProcessorFactory valueSetFactory) {
         return new ValueSetDataRequirementsProvider(valueSetFactory);
     }
 

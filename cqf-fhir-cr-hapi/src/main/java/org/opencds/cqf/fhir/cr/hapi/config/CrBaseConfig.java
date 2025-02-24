@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
-import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import java.time.ZoneOffset;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

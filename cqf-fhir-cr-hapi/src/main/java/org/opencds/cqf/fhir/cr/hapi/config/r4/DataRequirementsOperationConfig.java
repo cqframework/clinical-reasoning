@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import java.util.Arrays;
+import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -9,9 +12,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import java.util.Arrays;
-import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnaireDataRequirementsProvider;
@@ -33,8 +33,7 @@ public class DataRequirementsOperationConfig {
     @Bean
     PlanDefinitionDataRequirementsProvider r4PlanDefinitionDataRequirementsProvider(
             IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
-        return new PlanDefinitionDataRequirementsProvider(
-                planDefinitionProcessorFactory);
+        return new PlanDefinitionDataRequirementsProvider(planDefinitionProcessorFactory);
     }
 
     @Bean
@@ -44,8 +43,7 @@ public class DataRequirementsOperationConfig {
     }
 
     @Bean
-    ValueSetDataRequirementsProvider r4ValueSetDataRequirementsProvider(
-            IValueSetProcessorFactory valueSetFactory) {
+    ValueSetDataRequirementsProvider r4ValueSetDataRequirementsProvider(IValueSetProcessorFactory valueSetFactory) {
         return new ValueSetDataRequirementsProvider(valueSetFactory);
     }
 

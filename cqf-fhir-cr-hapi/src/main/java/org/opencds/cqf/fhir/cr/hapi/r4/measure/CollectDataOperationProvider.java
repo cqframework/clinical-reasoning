@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -11,6 +9,8 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 
 public class CollectDataOperationProvider {
     private final ICollectDataServiceFactory r4CollectDataServiceFactory;

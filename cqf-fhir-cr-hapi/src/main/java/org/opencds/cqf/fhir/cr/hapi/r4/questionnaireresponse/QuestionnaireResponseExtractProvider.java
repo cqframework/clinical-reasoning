@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaireresponse;
 
-import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -15,6 +14,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class QuestionnaireResponseExtractProvider {

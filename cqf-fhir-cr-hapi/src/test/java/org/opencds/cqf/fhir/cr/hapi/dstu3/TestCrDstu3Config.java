@@ -1,9 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3;
 
-import org.opencds.cqf.fhir.cr.hapi.TestHapiFhirCrPartitionConfig;
-import org.opencds.cqf.fhir.cr.hapi.config.dstu3.CrDstu3Config;
-import org.opencds.cqf.fhir.cr.hapi.config.test.TestCqlProperties;
-import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrConfig;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +14,10 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
+import org.opencds.cqf.fhir.cr.hapi.TestHapiFhirCrPartitionConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.dstu3.CrDstu3Config;
+import org.opencds.cqf.fhir.cr.hapi.config.test.TestCqlProperties;
+import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrConfig;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 import org.springframework.context.annotation.Bean;

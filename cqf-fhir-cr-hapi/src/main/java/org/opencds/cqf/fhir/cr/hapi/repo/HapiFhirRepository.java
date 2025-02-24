@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.repo;
 
-import static org.opencds.cqf.fhir.cr.hapi.repo.RequestDetailsCloner.startWith;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.opencds.cqf.fhir.cr.hapi.repo.RequestDetailsCloner.startWith;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

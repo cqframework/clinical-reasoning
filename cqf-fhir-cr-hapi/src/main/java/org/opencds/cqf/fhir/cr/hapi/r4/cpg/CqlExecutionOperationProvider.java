@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cpg;
 
-import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -11,6 +10,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 
 public class CqlExecutionOperationProvider {
 

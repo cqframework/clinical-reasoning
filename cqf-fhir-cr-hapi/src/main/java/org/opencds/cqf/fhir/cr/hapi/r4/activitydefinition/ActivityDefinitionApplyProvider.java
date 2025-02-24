@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.activitydefinition;
 
-import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -17,6 +16,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
 

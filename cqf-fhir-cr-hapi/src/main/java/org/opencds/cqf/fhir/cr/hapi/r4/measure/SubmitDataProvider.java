@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -13,6 +12,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 
 public class SubmitDataProvider {
     private final ISubmitDataProcessorFactory r4SubmitDataProcessorFactory;

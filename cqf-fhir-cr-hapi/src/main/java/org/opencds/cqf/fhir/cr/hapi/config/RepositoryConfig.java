@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.RepositoryFactoryForRepositoryInterface;
 import org.opencds.cqf.fhir.cr.hapi.repo.HapiFhirRepository;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

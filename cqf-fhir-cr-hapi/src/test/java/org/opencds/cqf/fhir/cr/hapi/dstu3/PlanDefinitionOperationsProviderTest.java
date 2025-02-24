@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.hapi.dstu3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.opencds.cqf.fhir.cr.hapi.dstu3.plandefinition.PlanDefinitionApplyProvider;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.hapi.dstu3.plandefinition.PlanDefinitionApplyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class PlanDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {

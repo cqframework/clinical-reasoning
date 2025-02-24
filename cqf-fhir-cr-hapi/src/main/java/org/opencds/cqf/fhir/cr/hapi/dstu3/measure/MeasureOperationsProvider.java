@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -14,6 +13,7 @@ import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.springframework.stereotype.Component;
 
 @Component

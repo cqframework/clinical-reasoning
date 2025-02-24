@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
-import org.opencds.cqf.fhir.cr.hapi.common.*;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.hapi.common.*;
 import org.opencds.cqf.fhir.cr.library.LibraryProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;

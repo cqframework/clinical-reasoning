@@ -1,10 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.fhir.cr.hapi.IResourceLoader;
-import org.opencds.cqf.fhir.cr.hapi.config.dstu3.ApplyOperationConfig;
-import org.opencds.cqf.fhir.cr.hapi.config.dstu3.EvaluateOperationConfig;
-import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrStorageSettingsConfigurer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -27,6 +23,10 @@ import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.BeforeEach;
+import org.opencds.cqf.fhir.cr.hapi.IResourceLoader;
+import org.opencds.cqf.fhir.cr.hapi.config.dstu3.ApplyOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.dstu3.EvaluateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrStorageSettingsConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;

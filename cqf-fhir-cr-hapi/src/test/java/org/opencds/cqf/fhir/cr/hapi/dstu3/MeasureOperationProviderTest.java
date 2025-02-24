@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.hapi.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -15,6 +14,7 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.hapi.dstu3.measure.MeasureOperationsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 

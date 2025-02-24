@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.hapi.r4.questionnaire;
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -22,6 +21,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class QuestionnairePopulateProvider {

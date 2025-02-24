@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -14,6 +12,8 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 
 public class CareGapsOperationProvider {
     private final ICareGapsServiceFactory r4CareGapsProcessorFactory;

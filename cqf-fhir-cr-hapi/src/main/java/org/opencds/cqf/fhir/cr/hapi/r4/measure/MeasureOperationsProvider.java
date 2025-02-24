@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -15,6 +13,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class MeasureOperationsProvider {

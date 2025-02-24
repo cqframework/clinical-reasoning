@@ -3,9 +3,9 @@ package org.opencds.cqf.fhir.cr.hapi.dstu3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.opencds.cqf.fhir.cr.hapi.dstu3.library.LibraryEvaluateProvider;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.hapi.dstu3.library.LibraryEvaluateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class LibraryOperationsProviderTest extends BaseCrDstu3TestServer {

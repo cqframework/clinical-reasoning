@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "contract-test",
+  "name": "Contract_Test",
+  "title": "CreateContract",
+  "status": "draft",
+  "description": "Create the contract.",
+  "kind": "Contract"
+}

@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "library-EXM108-8.3.000",
+  "url": "http://fhir.org/guides/dbcg/connectathon/Library/EXM108",
+  "version": "8.3.000",
+  "name": "EXM108",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/EXM108.cql"
+  } ]
+}

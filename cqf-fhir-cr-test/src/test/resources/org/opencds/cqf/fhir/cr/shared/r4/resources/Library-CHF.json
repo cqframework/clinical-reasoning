@@ -1,0 +1,398 @@
+{
+  "resourceType": "Library",
+  "id": "CHF",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "shareable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "computable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeCapability",
+      "valueCode": "publishable"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-knowledgeRepresentationLevel",
+      "valueCode": "structured"
+    }
+  ],
+  "url": "http://hl7.org/fhir/uv/cpg/Library/CHF",
+  "version": "2.0.0-draft",
+  "name": "CHF",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      }
+    ]
+  },
+  "date": "2024-08-25T03:33:21+00:00",
+  "publisher": "HL7 International / Clinical Decision Support",
+  "contact": [
+    {
+      "name": "HL7 International / Clinical Decision Support",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/dss"
+        }
+      ]
+    }
+  ],
+  "description": "Logic for an example congestive heart failure pathway",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "001",
+          "display": "World"
+        }
+      ]
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "display": "Code System SNOMED-CT",
+      "resource": "http://snomed.info/sct"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code System LOINC",
+      "resource": "http://loinc.org"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code System CHFCodes",
+      "resource": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code System Condition Clinical Status Code",
+      "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code System Condition Verification Status Code",
+      "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+    }
+  ],
+  "parameter": [
+    {
+      "name": "Encounter",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Encounter"
+    },
+    {
+      "name": "Patient",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Patient"
+    },
+    {
+      "name": "Body Weight",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Body Weight Change Assertion",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Daily Body Weight",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Resource"
+    },
+    {
+      "name": "Daily Body Weight Change",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Resource"
+    },
+    {
+      "name": "Body Weight Change",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Current Body Weight",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Observation"
+    },
+    {
+      "name": "Previous Body Weight",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Observation"
+    },
+    {
+      "name": "Current Body Weight Change",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "integer"
+    },
+    {
+      "name": "Urine Output",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Current Urine Output",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Observation"
+    },
+    {
+      "name": "Net Intake/Output",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Current Net Intake/Output",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Observation"
+    },
+    {
+      "name": "Jugular Venous Pressure",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Oxygen Saturation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Potassium",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Creatinine",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "eGFR",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Observation"
+    },
+    {
+      "name": "Eligibility Criteria",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Condition"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+              "code": "body-weight-change"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "9192-6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+              "code": "net-intake-output"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+              "code": "jvp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "2708-6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "86919-8",
+              "display": "Potassium goal [Moles/volume] Serum or Plasma"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://loinc.org",
+              "code": "39802-4",
+              "display": "Creatinine in dialysis fluid/Creatinine in serum or plasma"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Observation",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Observation"
+      ],
+      "codeFilter": [
+        {
+          "path": "code",
+          "code": [
+            {
+              "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+              "code": "egfr"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../cql/CHF.cql"
+    }
+  ]
+}

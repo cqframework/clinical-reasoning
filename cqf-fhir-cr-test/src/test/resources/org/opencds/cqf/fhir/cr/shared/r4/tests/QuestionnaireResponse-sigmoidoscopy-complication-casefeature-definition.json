@@ -1,0 +1,175 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "sigmoidoscopy-complication-casefeature-definition",
+  "contained": [
+    {
+      "resourceType": "Questionnaire",
+      "id": "sigmoidoscopy-complication-casefeature-definition",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Sigmoidoscopy Complications",
+                "reference": "http://example.org/sdh/demo/Library/ColorectalCancerCaseFeatures"
+              }
+            }
+          ],
+          "linkId": "1",
+          "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation",
+          "text": "Sigmoidoscopy Complication",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "1.1",
+              "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code",
+              "text": "Yes (concern with invasive procedure, for example)",
+              "type": "group",
+              "required": true,
+              "repeats": false,
+              "item": [
+                {
+                  "linkId": "1.1.1",
+                  "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding",
+                  "text": "Observation.code.coding",
+                  "type": "group",
+                  "required": true,
+                  "repeats": false,
+                  "item": [
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+                          "valueBoolean": true
+                        }
+                      ],
+                      "linkId": "1.1.1.1",
+                      "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding.system",
+                      "text": "Observation.code.coding.system",
+                      "type": "url",
+                      "required": true,
+                      "repeats": false,
+                      "readOnly": true,
+                      "initial": [
+                        {
+                          "valueUri": "http://example.org/sdh/demo/CodeSystem/cc-screening-codes"
+                        }
+                      ]
+                    },
+                    {
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+                          "valueBoolean": true
+                        }
+                      ],
+                      "linkId": "1.1.1.2",
+                      "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding.code",
+                      "text": "Observation.code.coding.code",
+                      "type": "choice",
+                      "required": true,
+                      "repeats": false,
+                      "readOnly": true,
+                      "initial": [
+                        {
+                          "valueString": "sigmoidoscopy-complication"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+                  "valueBoolean": true
+                }
+              ],
+              "linkId": "1.2",
+              "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.value[x]",
+              "text": "Yes (concern with invasive procedure, for example)",
+              "type": "boolean",
+              "required": true,
+              "repeats": false,
+              "readOnly": true,
+              "initial": [
+                {
+                  "valueBoolean": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire",
+      "valueReference": {
+        "reference": "#sigmoidoscopy-complication-casefeature-definition"
+      }
+    }
+  ],
+  "status": "in-progress",
+  "subject": {
+    "reference": "Patient/nocoverageconcern-sedconcern-sigcomp"
+  },
+  "item": [
+    {
+      "linkId": "1",
+      "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation",
+      "text": "Sigmoidoscopy Complication",
+      "item": [
+        {
+          "linkId": "1.1",
+          "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code",
+          "text": "Yes (concern with invasive procedure, for example)",
+          "item": [
+            {
+              "linkId": "1.1.1",
+              "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding",
+              "text": "Observation.code.coding",
+              "item": [
+                {
+                  "linkId": "1.1.1.1",
+                  "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding.system",
+                  "text": "Observation.code.coding.system",
+                  "answer": [
+                    {
+                      "valueUri": "http://example.org/sdh/demo/CodeSystem/cc-screening-codes"
+                    }
+                  ]
+                },
+                {
+                  "linkId": "1.1.1.2",
+                  "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.code.coding.code",
+                  "text": "Observation.code.coding.code",
+                  "answer": [
+                    {
+                      "valueString": "sigmoidoscopy-complication"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "1.2",
+          "definition": "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition#Observation.value[x]",
+          "text": "Yes (concern with invasive procedure, for example)",
+          "answer": [
+            {
+              "valueBoolean": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

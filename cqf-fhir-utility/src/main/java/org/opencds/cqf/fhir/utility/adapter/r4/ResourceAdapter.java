@@ -14,11 +14,14 @@ import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
 
 class ResourceAdapter extends BaseResourceAdapter {
 
+    protected final AdapterFactory adapterFactory;
+
     ResourceAdapter(IBaseResource resource) {
         super(resource);
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R4)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
+        adapterFactory = new AdapterFactory();
     }
 
     protected Resource getResource() {
@@ -30,7 +33,7 @@ class ResourceAdapter extends BaseResourceAdapter {
     }
 
     protected Optional<DomainResource> getDomainResource() {
-        return ofNullable(resource instanceof DomainResource ? (DomainResource) resource : null);
+        return ofNullable(resource instanceof DomainResource domainResource ? domainResource : null);
     }
 
     @Override

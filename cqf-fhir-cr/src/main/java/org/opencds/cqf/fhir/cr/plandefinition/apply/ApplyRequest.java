@@ -18,6 +18,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -142,7 +143,8 @@ public class ApplyRequest implements ICpgRequest {
                         libraryEngine,
                         modelResolver,
                         inputParameterResolver)
-                .setQuestionnaire(questionnaire);
+                .setQuestionnaire(questionnaire)
+                .setContainResources(containResources);
     }
 
     public org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest toActivityRequest(
@@ -166,7 +168,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(profile, false, true, modelResolver)
+        return new GenerateRequest(profile, false, true, libraryEngine, modelResolver)
                 .setDefaultLibraryUrl(defaultLibraryUrl)
                 .setQuestionnaire(questionnaire);
     }
@@ -306,6 +308,11 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
+    public IBase getContext() {
+        return getPlanDefinition();
+    }
+
+    @Override
     public IBaseResource getQuestionnaire() {
         return questionnaire;
     }
@@ -329,8 +336,9 @@ public class ApplyRequest implements ICpgRequest {
         return this;
     }
 
-    public void setContainResources(Boolean value) {
+    public ApplyRequest setContainResources(Boolean value) {
         containResources = value;
+        return this;
     }
 
     public Boolean getContainResources() {

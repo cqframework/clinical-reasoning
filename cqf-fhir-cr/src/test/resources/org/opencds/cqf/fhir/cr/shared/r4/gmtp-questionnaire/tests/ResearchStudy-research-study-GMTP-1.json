@@ -1,0 +1,30 @@
+{
+  "resourceType": "ResearchStudy",
+  "id": "research-study-GMTP-1",
+  "identifier": [
+    {
+      "system": "https://clinicaltrials.gov",
+      "value": "NCT02326129"
+    }
+  ],
+  "title": "Clinical Study on Treatment X",
+  "status": "active",
+  "period": {
+    "start": "2023-11-01",
+    "end": "2025-11-30"
+  },
+  "sponsor": {
+    "reference": "Organization/billing-provider-GMTP-1"
+  },
+  "condition": [
+    {
+      "coding": [
+        {
+          "code": "E11.618",
+          "system": "http://hl7.org/fhir/sid/icd-10-cm",
+          "display": "Type 2 diabetes mellitus with other diabetic arthropathy"
+        }
+      ]
+    }
+  ]
+}

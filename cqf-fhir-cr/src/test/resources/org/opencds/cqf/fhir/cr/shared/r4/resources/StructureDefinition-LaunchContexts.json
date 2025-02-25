@@ -36,8 +36,8 @@
     {
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
       "valueExpression": {
-        "language": "text/cql.identifier",
-        "expression": "Patient",
+        "language": "text/cql-identifier",
+        "expression": "PatientHeight",
         "reference": "http://fhir.org/test/Library/LaunchContexts"
       }
     }
@@ -72,11 +72,10 @@
         "mustSupport": false
       },
       {
-        "id": "Observation.code:PatientAgeCode",
-        "path": "Observation.code",
-        "sliceName": "PatientAgeCode",
-        "short": "Patient Age in Years",
-        "definition": "Patient Age in Years",
+        "id": "Observation.category",
+        "path": "Observation.category",
+        "short": "Vital Signs",
+        "definition": "Vital Signs",
         "min": 1,
         "max": "1",
         "type": [
@@ -87,23 +86,141 @@
         "fixedCodeableConcept": {
           "coding": [
             {
-              "system": "http://example.org/sdh/demo/CodeSystem/cc-screening-codes",
-              "code": "patient-age",
-              "display": "Patient Age in Years"
+              "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+              "code": "vital-signs"
             }
           ]
         }
       },
       {
-        "id": "Observation.value[x]",
-        "path": "Observation.value[x]",
-        "short": "Patient Age in Years",
-        "definition": "Patient Age in Years",
+        "id": "Observation.code:PatientHeightCode",
+        "path": "Observation.code",
+        "sliceName": "PatientHeightCode",
+        "short": "Patient Height in centimeters",
+        "definition": "Patient Height in centimeters",
         "min": 1,
         "max": "1",
         "type": [
           {
-            "code": "integer"
+            "code": "CodeableConcept"
+          }
+        ],
+        "fixedCodeableConcept": {
+          "coding": [
+            {
+              "code": "1153637007",
+              "system": "http://snomed.info/sct",
+              "display": "Body height measure (observable entity)"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Observation.value[x]:valueQuantity",
+        "path": "Observation.value[x]",
+        "sliceName": "valueQuantity",
+        "short": "Patient Height in centimeters",
+        "definition": "Patient Height in centimeters",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Quantity"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "Observation.value[x]:valueQuantity.value",
+        "path": "Observation.value[x].value",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "Observation.value[x]:valueQuantity.unit",
+        "path": "Observation.value[x].unit",
+        "min": 1,
+        "fixedString": "cm",
+        "mustSupport": true
+      },
+      {
+        "id": "Observation.value[x]:valueQuantity.system",
+        "path": "Observation.value[x].system",
+        "min": 1,
+        "fixedUri": "http://unitsofmeasure.org",
+        "mustSupport": true
+      },
+      {
+        "id": "Observation.value[x]:valueQuantity.code",
+        "path": "Observation.value[x].code",
+        "short": "cm",
+        "definition": "Centimeters",
+        "min": 1,
+        "fixedCode": "cm"
+      },
+      {
+        "extension": [
+          {
+            "extension": [
+              {
+                "url": "definition",
+                "valueCanonical": "http://fhir.org/test/StructureDefinition/LaunchContexts#Observation.subject"
+              },
+              {
+                "url": "expression",
+                "valueExpression": {
+                  "language": "text/fhirpath",
+                  "expression": "%resource.subject"
+                }
+              }
+            ],
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+          }
+        ],
+        "id": "Observation.subject",
+        "path": "Observation.subject",
+        "short": "Who the observation is about",
+        "definition": "The patient this observation is about.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient"
+            ]
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "extension": [
+          {
+            "extension": [
+              {
+                "url": "definition",
+                "valueCanonical": "http://fhir.org/test/StructureDefinition/LaunchContexts#Observation.effective[x]"
+              },
+              {
+                "url": "expression",
+                "valueExpression": {
+                  "language": "text/fhirpath",
+                  "expression": "%resource.authored"
+                }
+              }
+            ],
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractValue"
+          }
+        ],
+        "id": "Observation.effective[x]",
+        "path": "Observation.effective[x]",
+        "short": "Clinically relevant time for observation",
+        "definition": "The time the observed value is asserted as being true.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "dateTime"
           }
         ],
         "mustSupport": true

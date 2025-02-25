@@ -109,11 +109,15 @@ public class QuestionnaireResponseProcessor {
                     .filter(r -> r.fhirType().equals(QUESTIONNAIRE)
                             && canonical
                                     .getValueAsString()
-                                    .equals(r.getIdElement().getIdPart()))
+                                    .equals(getContainedId(r.getIdElement().getIdPart())))
                     .findFirst()
                     .orElse(null);
         }
         return questionnaire;
+    }
+
+    private String getContainedId(String id) {
+        return id.startsWith("#") ? id : "#" + id;
     }
 
     public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource) {
@@ -153,7 +157,8 @@ public class QuestionnaireResponseProcessor {
                 data,
                 useServerData,
                 libraryEngine,
-                modelResolver);
+                modelResolver,
+                null);
         var processor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
         return processor.extract(request);
     }

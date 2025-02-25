@@ -99,7 +99,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#RequestGroup/ChildRoutineVisit-PlanDefinition-1.0.0"
+        "reference": "#ChildRoutineVisit-PlanDefinition-1.0.0"
       }
     }
   ]

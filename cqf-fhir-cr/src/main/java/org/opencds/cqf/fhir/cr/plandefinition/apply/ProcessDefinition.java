@@ -52,13 +52,11 @@ public class ProcessDefinition {
                             "%s-%s", actionId, resource.getIdElement().getIdPart()));
                 }
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);
+                var reference = Boolean.TRUE.equals(request.getContainResources())
+                        ? String.format("#%s", resource.getIdElement().getIdPart())
+                        : resource.getIdElement().getValue();
                 request.getModelResolver()
-                        .setValue(
-                                requestAction,
-                                "resource",
-                                buildReference(
-                                        request.getFhirVersion(),
-                                        resource.getIdElement().getValue()));
+                        .setValue(requestAction, "resource", buildReference(request.getFhirVersion(), reference));
                 if (Boolean.TRUE.equals(request.getContainResources())) {
                     request.getModelResolver()
                             .setValue(requestOrchestration, "contained", Collections.singletonList(resource));

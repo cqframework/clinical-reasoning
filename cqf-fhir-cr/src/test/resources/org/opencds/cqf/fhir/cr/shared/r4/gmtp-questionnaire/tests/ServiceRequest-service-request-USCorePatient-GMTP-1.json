@@ -1,0 +1,48 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "service-request-USCorePatient-GMTP-1",
+  "status": "active",
+  "intent": "order",
+  "subject": {
+    "reference": "Patient/USCorePatient-GMTP-1"
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "405825005",
+        "system": "http://snomed.info/sct",
+        "display": "Molecular genetic test (procedure)"
+      },
+      {
+        "code": "Z13.89",
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "display": " Encounter for screening for other disorder"
+      },
+      {
+        "code": "81479",
+        "system": "http://www.ama-assn.org/go/cpt",
+        "display": "Unlisted molecular pathology procedure"
+      }
+    ]
+  },
+  "reasonReference": [
+    {
+      "reference": "Condition/related-Condition-GMTP-1"
+    }
+  ],
+  "occurrenceDateTime": "2023-12-15T19:32:52-05:00",
+  "requester": {
+    "reference": "Practitioner/requesting-provider-USCorePatient-GMTP-1"
+  },
+  "performer": [
+    {
+      "reference": "Organization/servicing-provider-GMTP-1"
+    }
+  ],
+  "authoredOn": "2023-11-29T19:32:52-05:00",
+  "insurance": [
+    {
+      "reference": "Coverage/coverage-GMTP-1"
+    }
+  ]
+}

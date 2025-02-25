@@ -1361,10 +1361,6 @@
           "discriminator": [
             {
               "type": "value",
-              "path": "value"
-            },
-            {
-              "type": "value",
               "path": "system"
             }
           ],
@@ -1377,7 +1373,19 @@
         "path": "Organization.identifier",
         "sliceName": "FacilityNPI",
         "min": 1,
-        "max": "1"
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Organization.identifier:FacilityNPI.value",
+        "path": "Organization.identifier.value",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
       },
       {
         "id": "Organization.identifier:FacilityNPI.system",
@@ -1392,9 +1400,16 @@
         "fixedUri": "http://hl7.org.fhir/sid/us-npi"
       },
       {
-        "id": "Organization.identifier:FacilityNPI.value",
+        "id": "Organization.identifier:FacilityPTAN",
+        "path": "Organization.identifier",
+        "sliceName": "FacilityPTAN",
+        "min": 1,
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Organization.identifier:FacilityPTAN.value",
         "path": "Organization.identifier.value",
-        "label": "Facility NPI",
         "min": 1,
         "max": "1",
         "type": [
@@ -1402,13 +1417,6 @@
             "code": "string"
           }
         ]
-      },
-      {
-        "id": "Organization.identifier:FacilityPTAN",
-        "path": "Organization.identifier",
-        "sliceName": "FacilityPTAN",
-        "min": 1,
-        "max": "1"
       },
       {
         "id": "Organization.identifier:FacilityPTAN.system",
@@ -1421,18 +1429,6 @@
           }
         ],
         "fixedUri": "http://www.acme.org/practitioners"
-      },
-      {
-        "id": "Organization.identifier:FacilityPTAN.value",
-        "path": "Organization.identifier.value",
-        "label": "Facility PTAN",
-        "min": 1,
-        "max": "1",
-        "type": [
-          {
-            "code": "string"
-          }
-        ]
       }
     ]
   }

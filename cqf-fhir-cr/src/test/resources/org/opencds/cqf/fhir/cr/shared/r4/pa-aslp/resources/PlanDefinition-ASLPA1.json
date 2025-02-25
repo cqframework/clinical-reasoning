@@ -147,6 +147,10 @@
                 "expression": "Sleep Study",
                 "reference": "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
               }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text",
+              "valueString": "Input Text Test"
             }
           ],
           "type": "ServiceRequest",

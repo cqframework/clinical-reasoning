@@ -1,25 +1,38 @@
 package org.opencds.cqf.fhir.cr.library;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.cr.library.TestLibrary.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.library.TestLibrary.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Paths;
+import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@ExtendWith(MockitoExtension.class)
 class LibraryProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
+
+    @Mock
+    LibraryEngine libraryEngine;
 
     @Test
     void defaultSettings() {
@@ -27,6 +40,15 @@ class LibraryProcessorTests {
                 new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new LibraryProcessor(repository);
         assertNotNull(processor.evaluationSettings());
+    }
+
+    @Test
+    void testRequest() {
+        var library = new Library();
+        var request = RequestHelpers.newEvaluateRequestForVersion(FhirVersionEnum.R4, libraryEngine, library);
+        assertEquals("evaluate", request.getOperationName());
+        assertEquals("patientId", request.getSubjectId().getIdPart());
+        assertNull(request.getContext());
     }
 
     @Test

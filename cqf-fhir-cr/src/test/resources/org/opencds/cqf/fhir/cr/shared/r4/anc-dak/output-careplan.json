@@ -105,7 +105,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#RequestGroup/ANCDT17"
+        "reference": "#ANCDT17"
       }
     }
   ]

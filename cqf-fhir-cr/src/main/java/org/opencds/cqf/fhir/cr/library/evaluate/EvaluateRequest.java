@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -70,6 +71,12 @@ public class EvaluateRequest implements ICqlOperationRequest {
     @Override
     public String getOperationName() {
         return "evaluate";
+    }
+
+    @Override
+    public IBase getContext() {
+        // The is used for FHIRPath evaluation which the $evaluate operation does not support
+        return null;
     }
 
     @Override

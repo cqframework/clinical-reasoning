@@ -1,0 +1,830 @@
+{
+  "resourceType": "Library",
+  "id": "GMTPInitialExpressions",
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "options",
+      "parameter": [
+        {
+          "name": "translatorVersion",
+          "valueString": "3.11.0"
+        },
+        {
+          "name": "option",
+          "valueString": "EnableAnnotations"
+        },
+        {
+          "name": "option",
+          "valueString": "EnableLocators"
+        },
+        {
+          "name": "option",
+          "valueString": "DisableListDemotion"
+        },
+        {
+          "name": "option",
+          "valueString": "DisableListPromotion"
+        },
+        {
+          "name": "format",
+          "valueString": "JSON"
+        },
+        {
+          "name": "format",
+          "valueString": "XML"
+        },
+        {
+          "name": "analyzeDataRequirements",
+          "valueBoolean": false
+        },
+        {
+          "name": "collapseDataRequirements",
+          "valueBoolean": false
+        },
+        {
+          "name": "compatibilityLevel",
+          "valueString": "1.5"
+        },
+        {
+          "name": "enableCqlOnly",
+          "valueBoolean": false
+        },
+        {
+          "name": "errorLevel",
+          "valueString": "Info"
+        },
+        {
+          "name": "signatureLevel",
+          "valueString": "All"
+        },
+        {
+          "name": "validateUnits",
+          "valueBoolean": true
+        },
+        {
+          "name": "verifyOnly",
+          "valueBoolean": false
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+      "valueReference": {
+        "reference": "Device/cqf-tooling"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+      "valueReference": {
+        "reference": "#options"
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cqf/us/common/Library/GMTPInitialExpressions",
+  "version": "0.1.0",
+  "name": "GMTPInitialExpressions",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      }
+    ]
+  },
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "display": "USCore model information",
+      "resource": "http://hl7.org/fhir/Library/USCore-ModelInfo"
+    },
+    {
+      "type": "depends-on",
+      "display": "FHIR model information",
+      "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+    },
+    {
+      "type": "depends-on",
+      "display": "Library FHIRHelpers",
+      "resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
+    },
+    {
+      "type": "depends-on",
+      "display": "Library UC",
+      "resource": "http://fhir.org/guides/cqf/us/common/Library/USCoreCommon|0.1.0"
+    },
+    {
+      "type": "depends-on",
+      "display": "Library UCE",
+      "resource": "http://fhir.org/guides/cqf/us/common/Library/USCoreElements|0.1.0"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code system LOINC",
+      "resource": "http://loinc.org"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code system Identifier Type",
+      "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code system ConditionCategory",
+      "resource": "http://terminology.hl7.org/CodeSystem/condition-category"
+    },
+    {
+      "type": "depends-on",
+      "display": "Code system ConditionVerificationStatusCodes",
+      "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+    }
+  ],
+  "parameter": [
+    {
+      "name": "Patient",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Resource"
+    },
+    {
+      "name": "All Problem List Items",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Resource"
+    },
+    {
+      "name": "Patient history",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Resource"
+    },
+    {
+      "name": "Requesting Provider Name",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Requesting Provider Phone",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Requesting Provider Address",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Requesting Provider NPI",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Requesting Provider Fax",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Servicing Provider Name",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Servicing Provider Phone",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Servicing Provider Address",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Servicing Provider NPI",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Servicing Provider Fax",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider Name",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider Phone",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider Address",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider NPI",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider Fax",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Date of Service",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "dateTime"
+    },
+    {
+      "name": "Requested Test",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "CodeableConcept"
+    },
+    {
+      "name": "Test ID",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Test name",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Test ICD Codes",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Coding"
+    },
+    {
+      "name": "Test CPT Codes",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Coding"
+    },
+    {
+      "name": "ALL ICD and CPT Test Codes",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Coding"
+    },
+    {
+      "name": "Test Related Condition",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "Condition"
+    },
+    {
+      "name": "Diagnosis Descriptions",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Billing Provider different from Servicing Provider",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Research Subject",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "ResearchSubject"
+    },
+    {
+      "name": "Clinical Trial",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "ResearchStudy"
+    },
+    {
+      "name": "Clinical Trial Organization",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Resource"
+    },
+    {
+      "name": "BillingProvider is Clinical Trial Organisation",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    },
+    {
+      "name": "Is Research Subject",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    },
+    {
+      "name": "Part of clinical trial",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "Clinical Trial ID",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    },
+    {
+      "name": "Previous genetic testing for condition",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "type": "string"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "Patient",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+      ],
+      "mustSupport": [
+        "code",
+        "code.display"
+      ]
+    },
+    {
+      "type": "ServiceRequest",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "name"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "name",
+        "family",
+        "family.value"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "telecom"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "identifier"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "identifier",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "telecom"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "telecom",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "ServiceRequest",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Coverage",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Coverage"
+      ],
+      "mustSupport": [
+        "id"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value",
+        "system",
+        "system.value",
+        "value",
+        "value.value"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id",
+        "code"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id",
+        "code",
+        "coding"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id",
+        "code",
+        "coding",
+        "display"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id",
+        "code",
+        "coding",
+        "display",
+        "value"
+      ]
+    },
+    {
+      "type": "Patient",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+      ]
+    },
+    {
+      "type": "ResearchSubject",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
+      ],
+      "mustSupport": [
+        "individual",
+        "individual.reference"
+      ]
+    },
+    {
+      "type": "ResearchStudy",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
+      ]
+    },
+    {
+      "type": "ResearchSubject",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
+      ],
+      "mustSupport": [
+        "individual",
+        "individual.reference",
+        "study",
+        "study.reference"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id",
+        "code"
+      ]
+    },
+    {
+      "type": "ResearchStudy",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
+      ],
+      "mustSupport": [
+        "id",
+        "condition"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "ServiceRequest",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+      ],
+      "mustSupport": [
+        "occurrence",
+        "id",
+        "reasonReference",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+      ]
+    },
+    {
+      "type": "Practitioner",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Organization",
+      "profile": [
+        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+      ],
+      "mustSupport": [
+        "id",
+        "id.value"
+      ]
+    },
+    {
+      "type": "Condition",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Condition"
+      ],
+      "mustSupport": [
+        "id"
+      ]
+    },
+    {
+      "type": "ResearchSubject",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
+      ],
+      "mustSupport": [
+        "individual",
+        "individual.reference"
+      ]
+    },
+    {
+      "type": "ResearchSubject",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
+      ],
+      "mustSupport": [
+        "individual",
+        "individual.reference"
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../cql/GMTPInitialExpressions.cql"
+    }
+  ]
+}

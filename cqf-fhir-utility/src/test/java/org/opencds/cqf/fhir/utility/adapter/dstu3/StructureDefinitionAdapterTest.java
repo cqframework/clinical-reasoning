@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class StructureDefinitionAdapterTest {
@@ -176,5 +177,17 @@ class StructureDefinitionAdapterTest {
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
         });
+    }
+
+    @Test
+    void adapter_get_elements() {
+        var structureDef = new StructureDefinition();
+        structureDef.getDifferential().addElement().addType().setCode("String");
+        structureDef.getDifferential().addElement().addType().setCode("Quantity");
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        var snapshotElements = adapter.getSnapshotElements();
+        assertEquals(0, snapshotElements.size());
+        var differentialElements = adapter.getDifferentialElements();
+        assertEquals(2, differentialElements.size());
     }
 }

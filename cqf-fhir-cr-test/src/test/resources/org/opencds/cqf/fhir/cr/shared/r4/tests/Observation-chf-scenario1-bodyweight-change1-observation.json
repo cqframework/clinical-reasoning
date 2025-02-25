@@ -1,0 +1,57 @@
+{
+  "resourceType": "Observation",
+  "id": "chf-scenario1-bodyweight-change1-observation",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/chf-bodyweight-change"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-instantiatesCaseFeature",
+      "valueCanonical": "http://hl7.org/fhir/uv/cpg/StructureDefinition/chf-bodyweight-change"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseFeatureType",
+      "valueCode": "inferred"
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "vital-signs"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/uv/cpg/CodeSystem/chf-codes",
+        "code": "body-weight-change"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/chf-scenario1-patient"
+  },
+  "encounter": {
+    "reference": "Encounter/chf-scenario1-encounter"
+  },
+  "effectiveDateTime": "2019-02-01T07:00:00Z",
+  "issued": "2019-02-01T07:00:00Z",
+  "performer": [
+    {
+      "reference": "PractitionerRole/chf-scenario1-practitionerrole"
+    }
+  ],
+  "valueQuantity": {
+    "value": -1.4,
+    "unit": "kg/d",
+    "system": "http://unitsofmeasure.org",
+    "code": "kg/d"
+  }
+}

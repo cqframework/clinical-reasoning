@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -68,7 +69,8 @@ public class Resources {
      */
     public static <T extends IBaseResource> T clone(T resource) {
         checkNotNull(resource);
-        var terser = resource.getStructureFhirVersionEnum().newContextCached().newTerser();
+        var terser =
+                FhirContext.forCached(resource.getStructureFhirVersionEnum()).newTerser();
         return terser.clone(resource);
     }
 
@@ -80,8 +82,7 @@ public class Resources {
      */
     public static String stringify(IBaseResource resource) {
         checkNotNull(resource);
-        return resource.getStructureFhirVersionEnum()
-                .newContextCached()
+        return FhirContext.forCached(resource.getStructureFhirVersionEnum())
                 .newJsonParser()
                 .setPrettyPrint(true)
                 .encodeResourceToString(resource);

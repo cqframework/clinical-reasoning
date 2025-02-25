@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "appointmentresponse-test",
+  "name": "AppointmentResponse_Test",
+  "title": "CreateAppointmentResponse",
+  "status": "draft",
+  "description": "Create the appointment response.",
+  "kind": "AppointmentResponse"
+}

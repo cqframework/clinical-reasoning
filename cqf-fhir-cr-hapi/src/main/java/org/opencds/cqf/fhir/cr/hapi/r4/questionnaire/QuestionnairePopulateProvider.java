@@ -81,11 +81,12 @@ public class QuestionnairePopulateProvider {
             throws InternalErrorException, FHIRException {
         CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
         Bundle dataToUse = data == null ? bundle : data;
+        var subjectId = subject == null ? null : subject.getReference();
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
                         Eithers.for3(canonicalType, id, questionnaire),
-                        subject.getReference(),
+                        subjectId,
                         context,
                         launchContext,
                         parameters,
@@ -117,11 +118,12 @@ public class QuestionnairePopulateProvider {
             throws InternalErrorException, FHIRException {
         CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
         Bundle dataToUse = data == null ? bundle : data;
+        var subjectId = subject == null ? null : subject.getReference();
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
                         Eithers.for3(canonicalType, null, questionnaire),
-                        subject.getReference(),
+                        subjectId,
                         context,
                         launchContext,
                         parameters,

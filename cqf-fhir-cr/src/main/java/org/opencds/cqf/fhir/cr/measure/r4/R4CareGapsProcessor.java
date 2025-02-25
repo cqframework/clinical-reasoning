@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Care Gaps Processor houses construction of result body with input of different Result Bodies, such as Document Bundle vs non-document bundle
  */
-public class R4CareGapsProcessor {
+public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsProcessor.class);
     private final Repository repository;
@@ -67,6 +67,7 @@ public class R4CareGapsProcessor {
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
+    @Override
     public Parameters getCareGapsReport(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -104,7 +105,8 @@ public class R4CareGapsProcessor {
         return result.setParameter(components);
     }
 
-    protected R4CareGapsParameters setCareGapParameters(
+    @Override
+    public R4CareGapsParameters setCareGapParameters(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String subject,
@@ -121,7 +123,8 @@ public class R4CareGapsProcessor {
         return r4CareGapsParams;
     }
 
-    protected List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
+    @Override
+    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
         return measure.stream()
                 .map(x -> x.fold(
                         id -> repository.read(Measure.class, id),
@@ -130,7 +133,8 @@ public class R4CareGapsProcessor {
                 .collect(Collectors.toList());
     }
 
-    protected List<String> getSubjects(String subject) {
+    @Override
+    public List<String> getSubjects(String subject) {
         var subjects = subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
         if (!subjects.isEmpty()) {
             ourLog.info(String.format("care-gaps report requested for: %s subjects.", subjects.size()));
@@ -140,7 +144,8 @@ public class R4CareGapsProcessor {
         return subjects;
     }
 
-    protected void addConfiguredResource(String id, String key) {
+    @Override
+    public void addConfiguredResource(String id, String key) {
         // read resource from repository
         Resource resource = repository.read(Organization.class, new IdType(RESOURCE_TYPE_ORGANIZATION, id));
 
@@ -155,7 +160,8 @@ public class R4CareGapsProcessor {
         configuredResources.put(key, resource);
     }
 
-    protected void checkMeasureImprovementNotation(Measure measure) {
+    @Override
+    public void checkMeasureImprovementNotation(Measure measure) {
         if (!measure.hasImprovementNotation()) {
             ourLog.warn(
                     "Measure '{}' does not specify an improvement notation, defaulting to: '{}'.",
@@ -164,11 +170,13 @@ public class R4CareGapsProcessor {
         }
     }
 
-    protected Parameters initializeResult() {
+    @Override
+    public Parameters initializeResult() {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
     }
 
-    protected void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
+    @Override
+    public void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -183,7 +191,8 @@ public class R4CareGapsProcessor {
         }
     }
 
-    protected void measureCompatibilityCheck(List<Measure> measures) {
+    @Override
+    public void measureCompatibilityCheck(List<Measure> measures) {
         for (Measure measure : measures) {
             checkMeasureScoringType(measure);
             checkMeasureImprovementNotation(measure);
@@ -192,7 +201,8 @@ public class R4CareGapsProcessor {
         }
     }
 
-    protected void checkMeasureBasis(Measure measure) {
+    @Override
+    public void checkMeasureBasis(Measure measure) {
         var msg = String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart());
         R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
         var measureDef = measureDefBuilder.build(measure);
@@ -209,7 +219,8 @@ public class R4CareGapsProcessor {
      * This is helpful when creating DetectedIssues per GroupComponent so endUsers can attribute evidence of a Care-Gap to the specific MeasureReport result
      * @param measure Measure resource
      */
-    protected void checkMeasureGroupComponents(Measure measure) {
+    @Override
+    public void checkMeasureGroupComponents(Measure measure) {
         // if a Multi-rate Measure, enforce groupId to be populated
         if (measure.getGroup().size() > 1) {
             for (MeasureGroupComponent group : measure.getGroup()) {
@@ -223,7 +234,8 @@ public class R4CareGapsProcessor {
         }
     }
 
-    protected void checkMeasureScoringType(Measure measure) {
+    @Override
+    public void checkMeasureScoringType(Measure measure) {
         List<MeasureScoring> scoringTypes = r4MeasureServiceUtils.getMeasureScoringDef(measure);
         for (MeasureScoring measureScoringType : scoringTypes) {
             if (!MeasureScoring.PROPORTION.equals(measureScoringType)
@@ -235,7 +247,8 @@ public class R4CareGapsProcessor {
         }
     }
 
-    protected void checkConfigurationReferences() {
+    @Override
+    public void checkConfigurationReferences() {
         careGapsProperties.validateRequiredProperties();
 
         addConfiguredResource(careGapsProperties.getCareGapsReporter(), CareGapsConstants.CARE_GAPS_REPORTER_KEY);

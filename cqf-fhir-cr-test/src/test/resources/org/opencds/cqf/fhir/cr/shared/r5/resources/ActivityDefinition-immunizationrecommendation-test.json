@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "immunizationrecommendation-test",
+  "name": "ImmunizationRecommendation_Test",
+  "title": "CreateImmunizationRecommendation",
+  "status": "draft",
+  "description": "Create the immunization recommendation.",
+  "kind": "ImmunizationRecommendation"
+}

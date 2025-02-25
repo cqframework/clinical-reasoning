@@ -1,0 +1,23 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "servicerequest-test",
+  "name": "ServiceRequest_Test",
+  "title": "CreateServiceRequest",
+  "status": "draft",
+  "description": "Create the service request.",
+  "kind": "ServiceRequest",
+  "intent": "proposal",
+  "code": {
+    "coding": [
+      {
+        "system": "http://test/fhir/system",
+        "code": "Test"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "text": "body site test"
+    }
+  ]
+}

@@ -96,7 +96,8 @@ public class Resources {
      */
     public static <T extends IBaseResource> T clone(T resource) {
         checkNotNull(resource);
-        var terser = FhirContext.forCached(resource.getStructureFhirVersionEnum()).newTerser();
+        var terser =
+                FhirContext.forCached(resource.getStructureFhirVersionEnum()).newTerser();
         return terser.clone(resource);
     }
 

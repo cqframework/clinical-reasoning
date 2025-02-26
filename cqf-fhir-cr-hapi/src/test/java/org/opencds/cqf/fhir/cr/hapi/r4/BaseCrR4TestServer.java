@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -40,8 +42,6 @@ import org.opencds.cqf.fhir.cr.hapi.config.test.r4.TestCrR4Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(
         classes = {

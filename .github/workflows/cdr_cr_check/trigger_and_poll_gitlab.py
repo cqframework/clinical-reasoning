@@ -8,7 +8,6 @@ import logging
 complete_statuses = ["failed", "success", "canceled"]
 trigger_token = os.getenv("TRIGGER_TOKEN")
 project_api_read_token = os.getenv("READ_API_TOKEN")
-# LUKETODO: what if this is empty?
 current_clinical_reasoning_branch = os.getenv("CLINICAL_REASONING_BRANCH")
 target_cdr_cr_branch = os.getenv("CDR_CR_BRANCH")
 
@@ -37,22 +36,11 @@ form_data = {
 }
 print(f"About to start job. [target_cdr_cr_branch={target_cdr_cr_branch}, current_clinical_reasoning_branch ={current_clinical_reasoning_branch}]")
 print("Triggering Remote CI process on gitlab.com.")
-# LUKETODO: delete log
-form_data_obfuscated = form_data.copy()
-form_data_obfuscated.pop("token")
-print(f"has token? {form_data.get('token') is not None}")
-print(f"request JSON with token removed: {form_data_obfuscated}")
-# LUKETODO: delete log
-print("requests.post URL: https://gitlab.com/api/v4/projects/66223517/trigger/pipeline")
 
 result = requests.post("https://gitlab.com/api/v4/projects/66223517/trigger/pipeline", data=form_data)
 if result.status_code > 399:
     print(f"status code: {result.status_code}, result.json(): {result.json()}, headers: {result.headers}")
 
-# LUKETODO: delete log
-print("result.status_code: {}", result.status_code)
-# LUKETODO: delete log
-print("result.json(): {}", result.json())
 trigger_json = result.json()
 pipeline_id = trigger_json["id"]
 
@@ -60,8 +48,6 @@ def poll_for_pipeline_status(pipeline_id):
     query_params = {
         "private_token": project_api_read_token
     }
-    # LUKETODO: delete log
-    print(f"requests.get URL: https://gitlab.com/api/v4/projects/66223517/pipelines/{pipeline_id}")
     resp = requests.get(f"https://gitlab.com/api/v4/projects/66223517/pipelines/{pipeline_id}", params=query_params)
     pipeline_status_json = resp.json()
     return pipeline_status_json

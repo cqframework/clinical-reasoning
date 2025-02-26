@@ -82,7 +82,7 @@ public class ResourceValidator {
 
             this.validator = this.context
                     .newValidator()
-                    .registerValidatorModule(new FhirInstanceValidator(new CachingValidationSupport(supportChain)));
+                    .registerValidatorModule(new FhirInstanceValidator(supportChain));
         }
     }
 

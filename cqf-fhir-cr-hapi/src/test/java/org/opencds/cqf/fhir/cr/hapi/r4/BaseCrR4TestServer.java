@@ -25,7 +25,6 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -123,6 +122,29 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         ourClient = initClient(mySimpleHeaderInterceptor);
     }
 
+    @Override
+    public DaoRegistry getDaoRegistry() {
+        return myDaoRegistry;
+    }
+
+    @Override
+    public FhirContext getFhirContext() {
+        return ourCtx;
+    }
+
+    public void loadBundle(String theLocation) {
+        var bundy = (Bundle) readResource(theLocation);
+        ourClient.transaction().withBundle(bundy).execute();
+    }
+
+    protected RequestDetails setupRequestDetails() {
+        var requestDetails = new ServletRequestDetails();
+        requestDetails.setServletRequest(new MockHttpServletRequest());
+        requestDetails.setServer(ourRestfulServer);
+        requestDetails.setFhirServerBase(ourServerBase);
+        return requestDetails;
+    }
+
     private static IGenericClient initClient(SimpleRequestHeaderInterceptor simpleHeaderInterceptor) {
         final IGenericClient genericClient = ourCtx.newRestfulGenericClient(ourServerBase);
 
@@ -142,40 +164,5 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         }
 
         return genericClient;
-    }
-
-    @Override
-    public DaoRegistry getDaoRegistry() {
-        return myDaoRegistry;
-    }
-
-    @Override
-    public FhirContext getFhirContext() {
-        return ourCtx;
-    }
-
-    public void loadBundle(String theLocation) {
-        var bundy = (Bundle) readResource(theLocation);
-        ourClient.transaction().withBundle(bundy).execute();
-    }
-
-    public Bundle makeBundle(Resource... resources) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(resources != null ? resources.length : 0);
-        if (resources != null) {
-            for (Resource l : resources) {
-                bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
-            }
-        }
-        return bundle;
-    }
-
-    protected RequestDetails setupRequestDetails() {
-        var requestDetails = new ServletRequestDetails();
-        requestDetails.setServletRequest(new MockHttpServletRequest());
-        requestDetails.setServer(ourRestfulServer);
-        requestDetails.setFhirServerBase(ourServerBase);
-        return requestDetails;
     }
 }

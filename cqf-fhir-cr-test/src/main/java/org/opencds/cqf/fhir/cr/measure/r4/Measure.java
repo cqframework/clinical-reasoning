@@ -692,10 +692,11 @@ public class Measure {
         }
 
         private static String formatDate(Date javaUtilDate) {
-            return javaUtilDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .format(FORMATTER);
+            return javaUtilDate
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime()
+                    .format(FORMATTER);
         }
     }
 

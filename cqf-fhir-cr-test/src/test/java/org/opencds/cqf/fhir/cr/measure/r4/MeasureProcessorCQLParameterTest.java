@@ -72,6 +72,8 @@ public class MeasureProcessorCQLParameterTest {
             case "numerator":
                 assertEquals(expectedMeasureCount, population.getCount());
                 break;
+            default:
+                throw new IllegalArgumentException("Unexpected population code: " + code);
         }
     }
 }

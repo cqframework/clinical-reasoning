@@ -330,7 +330,7 @@ class PlanDefinitionProcessorTests {
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
                 .thenApplyR5()
-                .generatedBundle;
+                .generatedBundleBundle;
         var resources = BundleHelper.getEntryResources(result);
         var resource1 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(1);
         var resource2 = (org.hl7.fhir.r4.model.CommunicationRequest) resources.get(2);

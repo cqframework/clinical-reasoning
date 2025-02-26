@@ -9,6 +9,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -22,7 +24,6 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -106,14 +107,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         builder.setConnectionManager(connectionManager);
         ourHttpClient = builder.build();
 
-        ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-        ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-
-        var loggingInterceptor = new LoggingInterceptor();
-        loggingInterceptor.setLogRequestBody(true);
-        loggingInterceptor.setLogResponseBody(true);
-        ourClient.registerInterceptor(loggingInterceptor);
-
         ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
         ourRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -121,8 +114,9 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         ourRestfulServer.setPagingProvider(ourPagingProvider);
 
         mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-        ourClient.registerInterceptor(mySimpleHeaderInterceptor);
         myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+
+        ourClient = initClient(mySimpleHeaderInterceptor);
     }
 
     @Override
@@ -140,23 +134,29 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         ourClient.transaction().withBundle(bundy).execute();
     }
 
-    public Bundle makeBundle(Resource... resources) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(resources != null ? resources.length : 0);
-        if (resources != null) {
-            for (Resource l : resources) {
-                bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
-            }
-        }
-        return bundle;
-    }
-
     protected RequestDetails setupRequestDetails() {
         var requestDetails = new ServletRequestDetails();
         requestDetails.setServletRequest(new MockHttpServletRequest());
         requestDetails.setServer(ourRestfulServer);
         requestDetails.setFhirServerBase(ourServerBase);
         return requestDetails;
+    }
+
+    private static IGenericClient initClient(SimpleRequestHeaderInterceptor simpleHeaderInterceptor) {
+        final IRestfulClientFactory restfulClientFactory = ourCtx.getRestfulClientFactory();
+
+        restfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+        restfulClientFactory.setSocketTimeout(600 * 1000);
+
+        final IGenericClient genericClient = restfulClientFactory.newGenericClient(ourServerBase);
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestBody(true);
+        loggingInterceptor.setLogResponseBody(true);
+
+        genericClient.registerInterceptor(loggingInterceptor);
+        genericClient.registerInterceptor(simpleHeaderInterceptor);
+
+        return genericClient;
     }
 }

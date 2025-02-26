@@ -450,7 +450,7 @@ class ReleaseVisitorTests {
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
+                    if (!(resource instanceof ValueSet)) {
                         var adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         var start = ((Period) adapter.getEffectivePeriod()).getStart();

@@ -17,8 +17,6 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -67,7 +65,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
     interface Validator<T> {
@@ -163,7 +161,6 @@ public class Measure {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4MeasureService service;
 
         When(R4MeasureService service) {
@@ -404,7 +401,7 @@ public class Measure {
                     period.getStart(),
                     String.format(
                             "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodStart), DATE_FORMAT.format(period.getStart())));
+                            formatDate(periodStart), formatDate(period.getStart())));
             return this;
         }
 
@@ -415,7 +412,7 @@ public class Measure {
                     period.getEnd(),
                     String.format(
                             "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodEnd), DATE_FORMAT.format(period.getEnd())));
+                            formatDate(periodEnd), formatDate(period.getEnd())));
             return this;
         }
 
@@ -693,6 +690,13 @@ public class Measure {
                     .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
             return this;
         }
+
+        private static String formatDate(Date javaUtilDate) {
+            return javaUtilDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(FORMATTER);
+        }
     }
 
     static class SelectedExtension extends Selected<Extension, SelectedReport> {
@@ -754,7 +758,7 @@ public class Measure {
         }
     }
 
-    static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
+    public static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedReport parent) {
             super(value, parent);

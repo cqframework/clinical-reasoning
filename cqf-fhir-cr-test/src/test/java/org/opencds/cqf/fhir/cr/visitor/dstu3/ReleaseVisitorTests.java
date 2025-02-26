@@ -479,7 +479,7 @@ class ReleaseVisitorTests {
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
+                    if (!(resource instanceof ValueSet)) {
                         IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();
@@ -489,7 +489,7 @@ class ReleaseVisitorTests {
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
                         String startString = year + "-" + month + "-" + day;
-                        assertEquals(startString, effectivePeriodToPropagate);
+                        assertEquals(effectivePeriodToPropagate, startString);
                     }
                 },
                 repo);

@@ -454,7 +454,7 @@ class ReleaseVisitorTests {
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
+                    if (!(resource instanceof ValueSet)) {
                         IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();

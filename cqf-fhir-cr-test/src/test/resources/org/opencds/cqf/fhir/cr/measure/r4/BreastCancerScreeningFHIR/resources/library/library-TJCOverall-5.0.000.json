@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "library-TJCOverall-5.0.000",
+  "url": "http://fhir.org/guides/dbcg/connectathon/Library/TJCOverall",
+  "version": "5.0.000",
+  "name": "TJCOverall",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/TJCOverall.cql"
+  } ]
+}

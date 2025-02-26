@@ -1,0 +1,23 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1110.48",
+  "meta": {
+    "versionId": "5",
+    "lastUpdated": "2019-10-29T01:00:18.000-04:00"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.48",
+  "version": "20191029",
+  "name": "Device Application",
+  "status": "active",
+  "date": "2019-10-29T01:00:18-04:00",
+  "publisher": "TJC EH Steward",
+  "compose": {
+    "include": [ {
+      "system": "http://snomed.info/sct",
+      "concept": [ {
+        "code": "360030002",
+        "display": "Application of device (procedure)"
+      } ]
+    } ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "resourceType": "Group",
+  "id": "group-patients-1",
+  "type": "person",
+  "actual": true,
+  "name": "Patient Group",
+  "member": [
+    {  "entity": {  "reference": "Patient/female-1931" } },
+    {  "entity": {  "reference": "Patient/female-1944" } },
+    {  "entity": {  "reference": "Patient/female-1988" } },
+    {  "entity": {  "reference": "Patient/female-2021" } },
+    {  "entity": {  "reference": "Patient/male-1931" } },
+    {  "entity": {  "reference": "Patient/male-1944" } },
+    {  "entity": {  "reference": "Patient/male-1988" } },
+    {  "entity": {  "reference": "Patient/male-2022" } }
+  ]
+}

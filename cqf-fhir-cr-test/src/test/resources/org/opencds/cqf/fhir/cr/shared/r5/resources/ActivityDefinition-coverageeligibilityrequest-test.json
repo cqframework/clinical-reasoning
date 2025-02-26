@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "coverageeligibilityrequest-test",
+  "name": "CoverageEligibilityRequest_Test",
+  "title": "CreateCoverageEligibilityEequest",
+  "status": "draft",
+  "description": "Create the coverage eligibility request.",
+  "kind": "CoverageEligibilityRequest"
+}

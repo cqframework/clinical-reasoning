@@ -9,6 +9,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -39,6 +40,8 @@ import org.opencds.cqf.fhir.cr.hapi.config.test.r4.TestCrR4Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(
         classes = {
@@ -107,12 +110,6 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         ourHttpClient = builder.build();
 
         ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-        ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-
-        var loggingInterceptor = new LoggingInterceptor();
-        loggingInterceptor.setLogRequestBody(true);
-        loggingInterceptor.setLogResponseBody(true);
-        ourClient.registerInterceptor(loggingInterceptor);
 
         ourParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -121,8 +118,30 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         ourRestfulServer.setPagingProvider(ourPagingProvider);
 
         mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
-        ourClient.registerInterceptor(mySimpleHeaderInterceptor);
         myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+
+        ourClient = initClient(mySimpleHeaderInterceptor);
+    }
+
+    private static IGenericClient initClient(SimpleRequestHeaderInterceptor simpleHeaderInterceptor) {
+        final IGenericClient genericClient = ourCtx.newRestfulGenericClient(ourServerBase);
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestBody(true);
+        loggingInterceptor.setLogResponseBody(true);
+
+        genericClient.registerInterceptor(loggingInterceptor);
+        genericClient.registerInterceptor(simpleHeaderInterceptor);
+
+        if (genericClient instanceof BaseClient baseClient) {
+            // This line alone makes the tests 10x quicker saving us 3+ second /metadata calls
+            // per test method.
+            baseClient.setDontValidateConformance(true);
+        } else {
+            fail("Expected genericClient to be an instance of BaseClient");
+        }
+
+        return genericClient;
     }
 
     @Override

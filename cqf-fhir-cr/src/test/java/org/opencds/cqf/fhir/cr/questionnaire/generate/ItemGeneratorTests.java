@@ -119,7 +119,6 @@ class ItemGeneratorTests {
                 .profileId(Ids.newId(fhirContextR4, "NzPatient"))
                 .then()
                 .hasItemCount(11)
-                // .hasLaunchContextExtension(5)
                 .itemHasExtractionValueExtension("1");
     }
 }

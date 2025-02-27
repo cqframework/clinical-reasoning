@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -35,7 +34,6 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
-import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
@@ -46,9 +44,12 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PlanDefinition.class);
+    private static final org.slf4j.Logger logger =
+        org.slf4j.LoggerFactory.getLogger(TestQuestionnaire.class);
 
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
+    private static final String UNABLE_TO_COMPARE_JSONS = "Unable to compare Jsons: ";
+    private static final String OPERATION_OUTCOME = "OperationOutcome";
 
     private TestQuestionnaire() {
         // private constructor
@@ -235,7 +236,7 @@ public class TestQuestionnaire {
                     null);
         }
 
-        public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
+        public GeneratedQuestionnaireResponse thenPopulate(boolean buildRequest) {
             if (buildRequest) {
                 var populateRequest = buildRequest();
                 return new GeneratedQuestionnaireResponse(
@@ -266,7 +267,7 @@ public class TestQuestionnaire {
     }
 
     public static class GeneratedQuestionnaire {
-        public IBaseResource questionnaire;
+        IBaseResource questionnaire;
         Repository repository;
         IParser jsonParser;
         PopulateRequest request;
@@ -307,8 +308,8 @@ public class TestQuestionnaire {
                         jsonParser.encodeResourceToString(questionnaire),
                         true);
             } catch (JSONException e) {
-                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
-                fail("Unable to compare Jsons: " + e.getMessage());
+                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
+                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
             }
         }
 
@@ -333,7 +334,7 @@ public class TestQuestionnaire {
             assertTrue(request.hasExtension(questionnaire, Constants.EXT_CRMI_MESSAGES));
             assertTrue(request.hasContained(questionnaire));
             assertTrue(request.getContained(questionnaire).stream()
-                    .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+                    .anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
 
             return this;
         }
@@ -385,8 +386,8 @@ public class TestQuestionnaire {
                         jsonParser.encodeResourceToString(questionnaireResponse),
                         true);
             } catch (JSONException e) {
-                logger.error("Unable to compare Jsons: " + e.getMessage(), e);
-                fail("Unable to compare Jsons: " + e.getMessage());
+                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
+                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
             }
         }
 
@@ -404,7 +405,7 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {
             var answer = request.resolvePathList(items.get(linkId), "answer", IBase.class);
             var answers =
-                    answer.stream().map(a -> request.resolvePath(a, "value")).collect(Collectors.toList());
+                    answer.stream().map(a -> request.resolvePath(a, "value")).toList();
             assertNotNull(answers);
             assertTrue(
                     answers.stream().anyMatch(a -> a.toString().equals(value.toString())),
@@ -426,7 +427,7 @@ public class TestQuestionnaire {
             assertTrue(request.hasExtension(questionnaireResponse, Constants.EXT_CRMI_MESSAGES));
             assertTrue(request.hasContained(questionnaireResponse));
             assertTrue(request.getContained(questionnaireResponse).stream()
-                    .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+                    .anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
 
             return this;
         }
@@ -434,7 +435,7 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaireResponse hasNoErrors() {
             assertFalse(request.hasExtension(questionnaireResponse, Constants.EXT_CRMI_MESSAGES));
             assertTrue(request.getContained(questionnaireResponse).stream()
-                    .noneMatch(r -> r.fhirType().equals("OperationOutcome")));
+                    .noneMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
 
             return this;
         }

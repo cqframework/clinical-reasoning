@@ -32,7 +32,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> (T) parametersParameters.getValue());
     }
 
@@ -43,7 +43,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> (T) parametersParameters.getResource());
     }
 
@@ -74,7 +74,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Boolean>) parametersParameters.getValue()).getValue());
     }
 
@@ -84,7 +84,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Date>) parametersParameters.getValue()).getValue());
     }
 
@@ -94,7 +94,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Integer>) parametersParameters.getValue()).getValue());
     }
 
@@ -104,7 +104,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<String>) parametersParameters.getValue()).getValue());
     }
 

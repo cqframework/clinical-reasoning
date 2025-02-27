@@ -59,7 +59,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.context = context == null
                 ? new ArrayList<>()
                 : context.stream()
-                        .map(c -> getAdapterFactory().createParametersParameters(c))
+                        .map(c -> getAdapterFactory().createParametersParameter(c))
                         .collect(Collectors.toList());
         this.subjectId = getSubjectId(subjectId);
         this.parameters = parameters;

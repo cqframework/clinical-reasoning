@@ -166,17 +166,17 @@ public class CqlFhirParametersConverter {
             value = this.fhirTypeConverter.toFhirType(value);
         }
 
-        if (value instanceof IBaseDatatype) {
+        if (value instanceof IBaseDatatype dataType) {
             var ppca = this.addPart(pa, name);
-            ppca.setValue((IBaseDatatype) value);
-        } else if (value instanceof IBaseBackboneElement) {
+            ppca.setValue(dataType);
+        } else if (value instanceof IBaseBackboneElement backboneValue) {
             // Likely already a parameter part
-            var ppca = this.adapterFactory.createParametersParameter((IBaseBackboneElement) value);
+            var ppca = this.adapterFactory.createParametersParameter(backboneValue);
             ppca.setName(name);
             pa.addParameter(ppca.get());
-        } else if (value instanceof IBaseResource) {
+        } else if (value instanceof IBaseResource resource) {
             var ppca = this.addPart(pa, name);
-            ppca.setResource((IBaseResource) value);
+            ppca.setResource(resource);
         } else {
             throw new IllegalArgumentException(String.format(
                     "unknown type when trying to convert to parameters: %s",

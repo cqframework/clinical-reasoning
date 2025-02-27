@@ -10,8 +10,8 @@
     </parent>
 
     <artifactId>cqf-fhir-cr-hapi</artifactId>
-    <name>FHIR Clinical Reasoning Storage CR</name>
-    <description>Implementations of clinical reasoning hapi-fhir storage operations</description>
+    <name>FHIR Clinical Reasoning CR HAPI</name>
+    <description>Implementations of clinical reasoning hapi-fhir operations</description>
 
     <properties>
         <spring-security-core.version>5.7.8</spring-security-core.version>

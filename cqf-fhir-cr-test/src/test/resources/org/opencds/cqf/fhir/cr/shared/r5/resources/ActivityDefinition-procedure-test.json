@@ -1,0 +1,30 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "procedure-test",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind",
+      "valueString": "Procedure"
+    }
+  ],
+  "url": "http://test.fhir.org/ActivityDefinition/procedure-test",
+  "name": "Procedure_Test",
+  "title": "CreateProcedure",
+  "status": "draft",
+  "description": "Create the procedure.",
+  "kind": "Task",
+  "doNotPerform": false,
+  "code": {
+    "coding": [
+      {
+        "system": "http://test/fhir/system",
+        "code": "Test"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "text": "body site test"
+    }
+  ]
+}

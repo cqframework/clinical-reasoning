@@ -1,0 +1,43 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "test-nested-error-2",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
+    ]
+  },
+  "url": "http://fhir.org/test/PlanDefinition/test-nested-error-2",
+  "version": "1.0.0",
+  "name": "Test Nested Error 2",
+  "title": "Test Nested Error 2",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ]
+  },
+  "status": "draft",
+  "experimental": true,
+  "date": "2024-06-13T00:00:00-08:00",
+  "description": "This PlanDefinition defines a simple recommendation to test nested dynamic value errors.",
+  "library": [
+    "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld"
+  ],
+  "action": [
+    {
+      "id": "dynamic-value-error",
+      "dynamicValue": [
+        {
+          "path": "title",
+          "expression": {
+            "language": "text/cql",
+            "expression": "NoExpression"
+          }
+        }
+      ]
+    }
+  ]
+}

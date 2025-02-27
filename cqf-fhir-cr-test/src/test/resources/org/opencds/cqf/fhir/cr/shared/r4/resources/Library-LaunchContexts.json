@@ -1,0 +1,78 @@
+{
+  "resourceType": "Library",
+  "id": "LaunchContexts",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+      "valueReference": {
+        "reference": "Device/cqf-tooling"
+      }
+    }
+  ],
+  "url": "http://fhir.org/test/Library/LaunchContexts",
+  "version": "1.0.0",
+  "name": "LaunchContexts",
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "display": "FHIR model information",
+      "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+    }
+  ],
+  "parameter": [
+    {
+      "name": "Encounter",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Encounter"
+    },
+    {
+      "name": "Practitioner",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Practitioner"
+    },
+    {
+      "name": "Location",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Location"
+    },
+    {
+      "name": "Study",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "ResearchStudy"
+    },
+    {
+      "name": "Patient",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "Patient"
+    },
+    {
+      "name": "PatientHeight",
+      "use": "out",
+      "type": "Observation"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "Patient",
+      "profile": [
+        "http://hl7.org/fhir/StructureDefinition/Patient"
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../cql/LaunchContexts.cql"
+    }
+  ]
+}

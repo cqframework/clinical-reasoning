@@ -1,0 +1,9 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "devicerequest-test",
+  "name": "DeviceRequset_Test",
+  "title": "CreateDeviceRequest",
+  "status": "draft",
+  "description": "Create the device request.",
+  "kind": "DeviceRequest"
+}

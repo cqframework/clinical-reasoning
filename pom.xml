@@ -85,10 +85,14 @@
         <module>cqf-fhir-test</module>
         <module>cqf-fhir-cql</module>
         <module>cqf-fhir-cr</module>
+        <!-- Test module for cqf-fhir-cr and test code used by cqf-fhir-benchmark -->
+        <module>cqf-fhir-cr-test</module>
         <module>cqf-fhir-cr-cli</module>
         <module>cqf-fhir-jackson</module>
         <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
+        <!-- Replaces hapi-fhir-storage-cr -->
+        <module>cqf-fhir-cr-hapi</module>
 
         <!-- TODO: See if we can retire this once we have all the mapping/adapters/runtimes in a
         consistent state -->
@@ -250,7 +254,8 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
+                <!-- Specific version needed for cqf-fhir-storage-cr tests -->
+                <version>1.15</version>
             </dependency>
 
             <!-- Logging -->

@@ -1,0 +1,178 @@
+{
+  "resourceType": "Library",
+  "id": "USCoreCommon",
+  "contained": [ {
+    "resourceType": "Parameters",
+    "id": "options",
+    "parameter": [ {
+      "name": "translatorVersion",
+      "valueString": "3.11.0"
+    }, {
+      "name": "option",
+      "valueString": "EnableAnnotations"
+    }, {
+      "name": "option",
+      "valueString": "EnableLocators"
+    }, {
+      "name": "option",
+      "valueString": "DisableListDemotion"
+    }, {
+      "name": "option",
+      "valueString": "DisableListPromotion"
+    }, {
+      "name": "format",
+      "valueString": "JSON"
+    }, {
+      "name": "format",
+      "valueString": "XML"
+    }, {
+      "name": "analyzeDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "collapseDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "compatibilityLevel",
+      "valueString": "1.5"
+    }, {
+      "name": "enableCqlOnly",
+      "valueBoolean": false
+    }, {
+      "name": "errorLevel",
+      "valueString": "Info"
+    }, {
+      "name": "signatureLevel",
+      "valueString": "All"
+    }, {
+      "name": "validateUnits",
+      "valueBoolean": true
+    }, {
+      "name": "verifyOnly",
+      "valueBoolean": false
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+    "valueReference": {
+      "reference": "#options"
+    }
+  } ],
+  "url": "http://fhir.org/guides/cqf/us/common/Library/USCoreCommon",
+  "version": "0.1.0",
+  "name": "USCoreCommon",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "USCore model information",
+    "resource": "http://hl7.org/fhir/Library/USCore-ModelInfo"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Code system LOINC",
+    "resource": "http://loinc.org"
+  }, {
+    "type": "depends-on",
+    "display": "Code system SNOMEDCT",
+    "resource": "http://snomed.info/sct"
+  }, {
+    "type": "depends-on",
+    "display": "Code system CVX",
+    "resource": "http://hl7.org/fhir/sid/cvx"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ActCode",
+    "resource": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+  }, {
+    "type": "depends-on",
+    "display": "Code system RoleCode",
+    "resource": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+  }, {
+    "type": "depends-on",
+    "display": "Code system Diagnosis Role",
+    "resource": "http://terminology.hl7.org/CodeSystem/diagnosis-role"
+  }, {
+    "type": "depends-on",
+    "display": "Code system RequestIntent",
+    "resource": "http://hl7.org/fhir/request-intent"
+  }, {
+    "type": "depends-on",
+    "display": "Code system MedicationRequestCategory",
+    "resource": "http://terminology.hl7.org/CodeSystem/medicationrequest-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionClinicalStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionVerificationStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+  }, {
+    "type": "depends-on",
+    "display": "Code system AllergyIntoleranceClinicalStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
+  }, {
+    "type": "depends-on",
+    "display": "Code system AllergyIntoleranceVerificationStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ObservationCategoryCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/observation-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system USCoreObservationCategory",
+    "resource": "http://hl7.org/fhir/us/core/CodeSystem/us-core-observation-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ObservationStatusCodes",
+    "resource": "http://hl7.org/fhir/observation-status"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionCategory",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system USCoreConditionCategory",
+    "resource": "http://hl7.org/fhir/us/core/CodeSystem/condition-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system CDC Race and Ethnicity Codes",
+    "resource": "urn:oid:2.16.840.1.113883.6.238"
+  }, {
+    "type": "depends-on",
+    "display": "Code system CommunicationCategoryCodeSystem",
+    "resource": "http://terminology.hl7.org/CodeSystem/communication-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system IdentifierType",
+    "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
+  } ],
+  "parameter": [ {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  } ],
+  "dataRequirement": [ {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+  } ],
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../cql/USCoreCommon.cql"
+    } ]
+}

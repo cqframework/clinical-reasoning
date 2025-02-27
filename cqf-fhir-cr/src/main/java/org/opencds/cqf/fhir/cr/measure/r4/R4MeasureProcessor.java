@@ -27,6 +27,8 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -44,17 +46,20 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final NpmResourceHolderGetter npmResourceHolderGetter;
 
     public R4MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils r4MeasureServiceUtils) {
+            R4MeasureServiceUtils r4MeasureServiceUtils,
+            NpmResourceHolderGetter npmResourceHolderGetter) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.npmResourceHolderGetter = npmResourceHolderGetter;
     }
 
     public MeasureReport evaluateMeasure(
@@ -88,9 +93,30 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType) {
-        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+        var npmResourceHolder = measure.isLeft()
+                ? npmResourceHolderGetter.loadNpmResources(measure.leftOrThrow())
+                : NpmResourceHolder.EMPTY;
+
+        var retrievedMeasure = getMeasure(measure, npmResourceHolder);
+
+        return evaluateMeasure(
+                retrievedMeasure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                npmResourceHolder);
+    }
+
+    private Measure getMeasure(Either3<CanonicalType, IdType, Measure> measure, NpmResourceHolder npmResourceHolder) {
+        if (npmResourceHolder.getMeasure().isPresent()) {
+            return npmResourceHolder.getMeasure().get();
+        }
+
+        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
     }
 
     protected MeasureReport evaluateMeasure(
@@ -101,7 +127,8 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+            NpmResourceHolder npmResourceHolder) {
 
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -116,15 +143,21 @@ public class R4MeasureProcessor {
 
         var url = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
-            var errorMsg = String.format("Unable to find Library with url: %s", url);
-            throw new ResourceNotFoundException(errorMsg);
+        // LUKETODO:  we try to find the Library, so try the Holder first
+        if (npmResourceHolder.getOptMainLibrary().isEmpty()) {
+            Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+            if (b.getEntry().isEmpty()) {
+                var errorMsg = String.format("Unable to find Library with url: %s", url);
+                throw new ResourceNotFoundException(errorMsg);
+            }
         }
 
         var id = VersionedIdentifiers.forUrl(url);
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                npmResourceHolder);
 
         CompiledLibrary lib;
         try {
@@ -169,6 +202,7 @@ public class R4MeasureProcessor {
     }
 
     protected Measure resolveByUrl(CanonicalType url) {
+
         var parts = Canonicals.getParts(url);
         var result = this.repository.search(
                 Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));

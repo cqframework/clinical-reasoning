@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -110,29 +109,30 @@ public class ExtensionBuilders {
     @SuppressWarnings("unchecked")
     public static <T extends IBaseExtension<?, ?>> T buildSdcLaunchContextExt(
             FhirVersionEnum fhirVersion, String code, List<String> resourceTypes) {
+        var acceptedResourceTypes = resourceTypes;
         var system = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
         var display = "";
         switch (code) {
             case "patient":
                 display = "Patient";
-                resourceTypes = Arrays.asList(display);
+                acceptedResourceTypes = List.of(display);
                 break;
             case "encounter":
                 display = "Encounter";
-                resourceTypes = Arrays.asList(display);
+                acceptedResourceTypes = List.of(display);
                 break;
             case "location":
                 display = "Location";
-                resourceTypes = Arrays.asList(display);
+                acceptedResourceTypes = List.of(display);
                 break;
             case "practitioner", "user":
                 code = "user";
                 display = "User";
-                resourceTypes = resourceTypes == null ? Arrays.asList("Practitioner") : resourceTypes;
+                acceptedResourceTypes = acceptedResourceTypes == null ? List.of("Practitioner") : acceptedResourceTypes;
                 break;
             case "study":
                 display = "ResearchStudy";
-                resourceTypes = Arrays.asList(display);
+                acceptedResourceTypes = List.of(display);
                 break;
             case "clinical":
                 display = "Clinical";
@@ -145,12 +145,14 @@ public class ExtensionBuilders {
             case R4:
                 var r4Ext = new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
                 r4Ext.addExtension("name", new org.hl7.fhir.r4.model.Coding(system, code, display));
-                resourceTypes.stream().forEach(r -> r4Ext.addExtension("type", new org.hl7.fhir.r4.model.CodeType(r)));
+                acceptedResourceTypes.stream()
+                        .forEach(r -> r4Ext.addExtension("type", new org.hl7.fhir.r4.model.CodeType(r)));
                 return (T) r4Ext;
             case R5:
                 var r5Ext = new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
                 r5Ext.addExtension("name", new org.hl7.fhir.r5.model.Coding(system, code, display));
-                resourceTypes.stream().forEach(r -> r5Ext.addExtension("type", new org.hl7.fhir.r5.model.CodeType(r)));
+                acceptedResourceTypes.stream()
+                        .forEach(r -> r5Ext.addExtension("type", new org.hl7.fhir.r5.model.CodeType(r)));
                 return (T) r5Ext;
 
             default:

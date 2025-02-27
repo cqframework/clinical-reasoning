@@ -82,7 +82,8 @@ public class GenerateProcessor implements IGenerateProcessor {
                 ? null
                 : request.resolvePathList(baseElement, "element").stream()
                         .filter(e -> request.resolvePathString(e, "path").split("\\.").length > 1)
-                        .map(e -> (ICompositeType) e)
+                        .filter(ICompositeType.class::isInstance)
+                        .map(ICompositeType.class::cast)
                         .map(adapterFactory::createElementDefinition)
                         .collect(Collectors.toList());
     }

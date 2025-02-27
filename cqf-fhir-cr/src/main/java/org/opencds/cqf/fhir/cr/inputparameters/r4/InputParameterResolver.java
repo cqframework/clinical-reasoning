@@ -21,12 +21,10 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
-import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
@@ -89,29 +87,6 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             resolveLaunchContext(params, context, launchContext);
         }
         return params;
-    }
-
-    protected boolean validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE code, String type) {
-        switch (code) {
-            case PATIENT:
-                return type.equals(ResourceType.Patient.name());
-            case ENCOUNTER:
-                return type.equals(ResourceType.Encounter.name());
-            case LOCATION:
-                return type.equals(ResourceType.Location.name());
-            case USER:
-                return type.equals(ResourceType.Patient.name())
-                        || type.equals(ResourceType.Practitioner.name())
-                        || type.equals(ResourceType.PractitionerRole.name())
-                        || type.equals(ResourceType.RelatedPerson.name());
-            case STUDY:
-                return type.equals(ResourceType.ResearchStudy.name());
-            case CLINICAL:
-                return true;
-
-            default:
-                return false;
-        }
     }
 
     protected void resolveLaunchContext(

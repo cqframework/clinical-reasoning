@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchCon
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +56,7 @@ public class ItemGenerator {
         itemTypeIsChoice = new ItemTypeIsChoice(repository);
     }
 
+    @Nullable
     public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generate(GenerateRequest request) {
         final String linkId =
                 String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
@@ -92,21 +94,15 @@ public class ItemGenerator {
 
                 // Add any other in parameters that match launch context codes
                 var inParameters = featureLibrary.getParameter().stream()
-                        .filter(
-                                p -> // StringUtils.isNotBlank(request.resolvePathString(p, "name")) &&
-                                // request.resolvePathString(p, "use").equals("in"))
-                                {
-                                    var name =
-                                            request.resolvePathString(p, "name").toUpperCase();
-                                    return (name.equals("PRACTITIONER"))
-                                            || request.resolvePathString(p, "use")
-                                                            .equals("in")
-                                                    && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
-                                                            .stream()
-                                                            .map(Object::toString)
-                                                            .collect(Collectors.toList())
-                                                            .contains(name);
-                                })
+                        .filter(p -> {
+                            var name = request.resolvePathString(p, "name").toUpperCase();
+                            return (name.equals("PRACTITIONER"))
+                                    || request.resolvePathString(p, "use").equals("in")
+                                            && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
+                                                    .map(Object::toString)
+                                                    .collect(Collectors.toList())
+                                                    .contains(name);
+                        })
                         .map(p -> request.resolvePathString(p, "name").toLowerCase())
                         .collect(Collectors.toList());
                 inParameters.forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), p)));

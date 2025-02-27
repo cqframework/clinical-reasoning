@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,9 +88,18 @@ public class ProcessAction {
                 var profile = searchRepositoryByCanonical(repository, profiles.get(0));
                 var generateRequest = request.toGenerateRequest(profile);
                 var item = generateProcessor.generateItem(generateRequest);
-                request.addQuestionnaireItem(item.getLeft());
-                request.addLaunchContextExtensions(item.getRight());
-                // If input has text extension use it to override
+                if (item != null) {
+                    // If input has text extension use it to override
+                    if (request.hasExtension(input, Constants.CPG_INPUT_TEXT)) {
+                        var itemText =
+                                ((IPrimitiveType<String>) request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
+                                        .getValue());
+                        request.getModelResolver().setValue(item.getLeft(), "text", itemText);
+                        // item Constants.CPG_INPUT_DESCRIPTION
+                    }
+                    request.addQuestionnaireItem(item.getLeft());
+                    request.addLaunchContextExtensions(item.getRight());
+                }
             }
         } catch (Exception e) {
             var message = String.format(

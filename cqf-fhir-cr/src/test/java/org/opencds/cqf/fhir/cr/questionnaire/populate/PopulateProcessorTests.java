@@ -62,8 +62,8 @@ class PopulateProcessorTests {
         assertEquals(
                 prePopulatedQuestionnaireId + "-" + PATIENT_ID,
                 actual.getIdElement().getIdPart());
-        assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals("#" + prePopulatedQuestionnaireId, request.resolvePathString(actual, "questionnaire"));
+        assertContainedOperationOutcome(request, actual, null);
+        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
         assertEquals(
                 QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
                 ((QuestionnaireResponse) actual).getStatus());
@@ -95,8 +95,8 @@ class PopulateProcessorTests {
         assertEquals(
                 prePopulatedQuestionnaireId + "-" + PATIENT_ID,
                 actual.getIdElement().getIdPart());
-        assertContainedResources(request, actual, null, originalQuestionnaire);
-        assertEquals("#" + prePopulatedQuestionnaireId, request.resolvePathString(actual, "questionnaire"));
+        assertContainedOperationOutcome(request, actual, null);
+        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
         assertEquals(
                 org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS,
                 ((org.hl7.fhir.r5.model.QuestionnaireResponse) actual).getStatus());
@@ -127,15 +127,10 @@ class PopulateProcessorTests {
         }
     }
 
-    private void assertContainedResources(
-            PopulateRequest request,
-            IBaseResource actual,
-            IBaseOperationOutcome expectedOperationOutcome,
-            IBaseResource expectedQuestionnaire) {
+    private void assertContainedOperationOutcome(
+            PopulateRequest request, IBaseResource actual, IBaseOperationOutcome expectedOperationOutcome) {
         final var operationOutcome = getContainedByResourceType(request, actual, "OperationOutcome");
         assertEquals(expectedOperationOutcome, operationOutcome);
-        final var questionnaire = getContainedByResourceType(request, actual, "Questionnaire");
-        assertEquals(expectedQuestionnaire, questionnaire);
     }
 
     private IBaseResource getContainedByResourceType(
@@ -157,7 +152,7 @@ class PopulateProcessorTests {
         // execute
         request.resolveOperationOutcome(questionnaire);
         // validate
-        assertContainedResources(request, questionnaire, operationOutcome, null);
+        assertContainedOperationOutcome(request, questionnaire, operationOutcome);
     }
 
     @Test
@@ -171,7 +166,7 @@ class PopulateProcessorTests {
         // execute
         request.resolveOperationOutcome(questionnaire);
         // validate
-        assertContainedResources(request, questionnaire, null, null);
+        assertContainedOperationOutcome(request, questionnaire, null);
     }
 
     private OperationOutcome withOperationOutcomeWithIssue() {

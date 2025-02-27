@@ -8,7 +8,6 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -129,8 +128,21 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly, String id) {
-        var request =
-                new GenerateRequest(resolveStructureDefinition(profile), supportedOnly, requiredOnly, modelResolver);
+        return generateQuestionnaire(profile, supportedOnly, requiredOnly, id, null);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
+            Either3<C, IIdType, R> profile,
+            boolean supportedOnly,
+            boolean requiredOnly,
+            String id,
+            LibraryEngine libraryEngine) {
+        var request = new GenerateRequest(
+                resolveStructureDefinition(profile),
+                supportedOnly,
+                requiredOnly,
+                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                modelResolver);
         return generateQuestionnaire(request, id);
     }
 
@@ -185,12 +197,9 @@ public class QuestionnaireProcessor {
             IBaseBundle data,
             boolean useServerData,
             LibraryEngine libraryEngine) {
-        if (StringUtils.isBlank(subjectId)) {
-            throw new IllegalArgumentException("Missing required parameter: 'subject'");
-        }
         return new PopulateRequest(
                 questionnaire,
-                Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
+                subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 context,
                 launchContext,
                 parameters,

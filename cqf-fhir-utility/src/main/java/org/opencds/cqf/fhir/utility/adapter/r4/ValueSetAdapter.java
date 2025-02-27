@@ -14,7 +14,9 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
@@ -95,12 +97,29 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         return getValueSet().getExpansion();
     }
 
+    @Override
+    public boolean hasExpansion() {
+        return getValueSet().hasExpansion();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ValueSetExpansionContainsComponent> getExpansionContains() {
+        return getExpansion().getContains();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public ValueSetExpansionComponent newExpansion() {
         var expansion = new ValueSet.ValueSetExpansionComponent(new DateTimeType(Date.from(Instant.now())));
         expansion.getContains();
         return expansion;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ConceptSetComponent> getComposeIncludes() {
+        return getValueSet().getCompose().getInclude();
     }
 
     @Override

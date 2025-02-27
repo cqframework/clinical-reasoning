@@ -89,7 +89,7 @@
             ]
           },
           "resource": {
-            "reference": "ServiceRequest/opioidcds-urine-screening-request"
+            "reference": "#opioidcds-urine-screening-request"
           },
           "action": [
             {
@@ -164,7 +164,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#RequestGroup/opioidcds-10-patient-view"
+        "reference": "#opioidcds-10-patient-view"
       }
     }
   ]

@@ -57,13 +57,13 @@ public class MeasureOperationParameterConverter {
     protected void addChild(IBaseParameters parameters, String name, IBaseDatatype value) {
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+            part = this.adapterFactory.createParametersParameter(parametersAdapter.addParameter());
         }
 
         part.setName(name);

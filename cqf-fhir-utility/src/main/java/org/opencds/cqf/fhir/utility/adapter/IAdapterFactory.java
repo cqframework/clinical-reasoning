@@ -77,11 +77,11 @@ public interface IAdapterFactory {
      * Creates an adapter that exposes common ParametersParameterComponent operations across multiple
      * versions of FHIR
      *
-     * @param parametersParametersComponent a FHIR ParametersParameterComponent Structure
+     * @param parametersParameterComponent a FHIR ParametersParameterComponent Structure
      * @return an adapter exposing common api calls
      */
-    public IParametersParameterComponentAdapter createParametersParameters(
-            IBaseBackboneElement parametersParametersComponent);
+    public IParametersParameterComponentAdapter createParametersParameter(
+            IBaseBackboneElement parametersParameterComponent);
 
     /**
      * Creates an adapter that exposes common Attachment operations across multiple versions of FHIR

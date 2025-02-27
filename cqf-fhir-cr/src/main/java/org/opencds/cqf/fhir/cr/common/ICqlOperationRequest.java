@@ -31,7 +31,7 @@ public interface ICqlOperationRequest extends IOperationRequest {
     default void resolvePrefetchData(IBaseBundle data, List<? extends IBaseBackboneElement> prefetchData) {
         var factory = getAdapterFactory();
         prefetchData.stream()
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(p -> p.getPartValues("data"))
                 .filter(IBaseBundle.class::isInstance)
                 .flatMap(b -> BundleHelper.getEntryResources((IBaseBundle) b).stream())

@@ -84,7 +84,7 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IParametersParameterComponentAdapter createParametersParameters(
+    public IParametersParameterComponentAdapter createParametersParameter(
             IBaseBackboneElement parametersParametersComponent) {
         return new ParametersParameterComponentAdapter(parametersParametersComponent);
     }

@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 
 public class MeasureValidationUtils {
+    private MeasureValidationUtils() {}
 
     protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, String score) {
         validateGroupScore(group, new BigDecimal(score));

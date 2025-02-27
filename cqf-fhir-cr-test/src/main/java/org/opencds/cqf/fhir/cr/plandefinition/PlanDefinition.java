@@ -109,9 +109,8 @@ public class PlanDefinition {
         }
 
         public PlanDefinitionProcessor buildProcessor(Repository repository) {
-            if (repository instanceof IgRepository) {
-                ((IgRepository) repository)
-                        .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+            if (repository instanceof IgRepository igRepository) {
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
@@ -452,13 +451,13 @@ public class PlanDefinition {
 
     public static class GeneratedCarePlan {
         final Repository repository;
-        final IBaseResource generatedCarePlan;
+        final IBaseResource carePlan;
         final IParser jsonParser;
         final ModelResolver modelResolver;
 
-        public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlan) {
+        public GeneratedCarePlan(Repository repository, IBaseResource carePlan) {
             this.repository = repository;
-            this.generatedCarePlan = generatedCarePlan;
+            this.carePlan = carePlan;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
@@ -467,7 +466,7 @@ public class PlanDefinition {
         public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(generatedCarePlan), true);
+                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(carePlan), true);
             } catch (JSONException | IOException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
                 fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
@@ -479,7 +478,7 @@ public class PlanDefinition {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedCarePlanId)),
-                        jsonParser.encodeResourceToString(generatedCarePlan),
+                        jsonParser.encodeResourceToString(carePlan),
                         true);
             } catch (JSONException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
@@ -490,20 +489,20 @@ public class PlanDefinition {
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasContained(int count) {
-            assertEquals(count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, CONTAINED)).size());
+            assertEquals(count, ((List<IBaseResource>) modelResolver.resolvePath(carePlan, CONTAINED)).size());
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasOperationOutcome() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, CONTAINED))
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(carePlan, CONTAINED))
                     .stream().anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasQuestionnaire() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, CONTAINED))
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(carePlan, CONTAINED))
                     .stream().anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)));
             return this;
         }

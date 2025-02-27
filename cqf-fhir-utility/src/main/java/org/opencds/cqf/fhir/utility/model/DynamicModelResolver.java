@@ -174,14 +174,13 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     }
 
     @SuppressWarnings("unchecked")
-    protected BaseRuntimeElementCompositeDefinition<?> resolveRuntimeDefinition(IBase base) {
+    protected <T extends IBase> BaseRuntimeElementCompositeDefinition<T> resolveRuntimeDefinition(IBase base) {
         if (base instanceof IAnyResource) {
-            return fhirContext.getResourceDefinition((IAnyResource) base);
+            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getResourceDefinition((IAnyResource) base);
         } else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
-            return (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(base.getClass());
+            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
         } else if (base instanceof ICompositeType) {
-            return (BaseRuntimeElementCompositeDefinition<ICompositeType>)
-                    fhirContext.getElementDefinition(base.getClass());
+            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
         }
 
         throw new UnknownType(String.format(

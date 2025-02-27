@@ -17,31 +17,31 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 class ParametersParameterComponentAdapter implements IParametersParameterComponentAdapter {
 
     private final FhirContext fhirContext = FhirContext.forR5Cached();
-    private final Parameters.ParametersParameterComponent parametersParametersComponent;
+    private final Parameters.ParametersParameterComponent parametersParameterComponent;
     private final ModelResolver modelResolver;
 
     protected Parameters.ParametersParameterComponent getParametersParameterComponent() {
-        return this.parametersParametersComponent;
+        return this.parametersParameterComponent;
     }
 
-    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
-        if (parametersParametersComponent == null) {
-            throw new IllegalArgumentException("parametersParametersComponent can not be null");
+    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParameterComponent) {
+        if (parametersParameterComponent == null) {
+            throw new IllegalArgumentException("parametersParameterComponent can not be null");
         }
 
-        if (!parametersParametersComponent.fhirType().equals("Parameters.parameter")) {
+        if (!parametersParameterComponent.fhirType().equals("Parameters.parameter")) {
             throw new IllegalArgumentException(
-                    "element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
+                    "element passed as parametersParameterComponent argument is not a ParametersParameterComponent Element");
         }
 
-        this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+        this.parametersParameterComponent = (ParametersParameterComponent) parametersParameterComponent;
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }
 
     @Override
     public IBaseBackboneElement get() {
-        return this.parametersParametersComponent;
+        return this.parametersParameterComponent;
     }
 
     @Override

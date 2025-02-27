@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -58,6 +59,32 @@ public class Resources {
         }
 
         return backboneElement;
+    }
+
+    public static IBase newBaseForVersion(String type, FhirVersionEnum fhirVersion) {
+        return Resources.newBase(Resources.getClassForTypeAndVersion(type, fhirVersion));
+    }
+
+    public static <T extends IBase> T newBase(Class<T> baseClass) {
+        T base = null;
+        try {
+            base = baseClass.getConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "bClass must be a type with an empty default constructor to use this function");
+        }
+
+        return base;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IBase> Class<T> getClassForTypeAndVersion(String type, FhirVersionEnum fhirVersion) {
+        try {
+            return (Class<T>) Class.forName(String.format(
+                    "org.hl7.fhir.%s.model.%s", fhirVersion.toString().toLowerCase(), type));
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

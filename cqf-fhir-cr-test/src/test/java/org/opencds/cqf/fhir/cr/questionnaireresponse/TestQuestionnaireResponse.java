@@ -18,6 +18,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -27,7 +29,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
-    private static InputStream open(String asset) {
+    public static InputStream open(String asset) {
         var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
@@ -51,6 +53,7 @@ public class TestQuestionnaireResponse {
 
     public static class Given {
         private Repository repository;
+        private IExtractProcessor extractProcessor;
 
         public Given repository(Repository repository) {
             this.repository = repository;
@@ -63,8 +66,13 @@ public class TestQuestionnaireResponse {
             return this;
         }
 
+        public Given extractProcessor(IExtractProcessor extractProcessor) {
+            this.extractProcessor = extractProcessor;
+            return this;
+        }
+
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository);
+            return new QuestionnaireResponseProcessor(repository, EvaluationSettings.getDefault(), extractProcessor);
         }
 
         public When when() {
@@ -76,6 +84,8 @@ public class TestQuestionnaireResponse {
         private final QuestionnaireResponseProcessor processor;
         private String questionnaireResponseId;
         private IBaseResource questionnaireResponse;
+        private String questionnaireId;
+        private IBaseResource questionnaire;
 
         public When(QuestionnaireResponseProcessor processor) {
             this.processor = processor;
@@ -91,12 +101,39 @@ public class TestQuestionnaireResponse {
             return this;
         }
 
+        public When questionnaireId(String questionnaireId) {
+            this.questionnaireId = questionnaireId;
+            return this;
+        }
+
+        public When questionnaire(IBaseResource questionnaire) {
+            this.questionnaire = questionnaire;
+            return this;
+        }
+
         public Extract extract() {
             return new Extract(
                     processor.repository,
-                    processor.extract(Eithers.for2(
-                            Ids.newId(processor.fhirVersion, "QuestionnaireResponse", questionnaireResponseId),
-                            questionnaireResponse)));
+                    processor.extract(
+                            Eithers.for2(
+                                    questionnaireResponseId == null
+                                            ? null
+                                            : Ids.newId(
+                                                    processor.fhirVersion,
+                                                    "QuestionnaireResponse",
+                                                    questionnaireResponseId),
+                                    questionnaireResponse),
+                            questionnaire == null && questionnaireId == null
+                                    ? null
+                                    : Eithers.for2(
+                                            questionnaireId == null
+                                                    ? null
+                                                    : Ids.newId(
+                                                            processor.fhirVersion, "Questionnaire", questionnaireId),
+                                            questionnaire),
+                            null,
+                            null,
+                            true));
         }
     }
 

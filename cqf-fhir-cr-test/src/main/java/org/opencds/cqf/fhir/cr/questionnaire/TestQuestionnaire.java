@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -34,6 +35,7 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
@@ -235,7 +237,7 @@ public class TestQuestionnaire {
                     null);
         }
 
-        public GeneratedQuestionnaireResponse thenPopulate(boolean buildRequest) {
+        public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
             if (buildRequest) {
                 var populateRequest = buildRequest();
                 return new GeneratedQuestionnaireResponse(
@@ -255,8 +257,13 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaire thenGenerate() {
-            return new GeneratedQuestionnaire(
-                    repository, null, processor.generateQuestionnaire(Eithers.for3(null, profileId, null)));
+            var request = new GenerateRequest(
+                    processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
+                    false,
+                    true,
+                    new LibraryEngine(repository, processor.evaluationSettings),
+                    processor.modelResolver);
+            return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }
 
         public DataRequirementsLibrary thenDataRequirements() {
@@ -269,7 +276,7 @@ public class TestQuestionnaire {
         IBaseResource questionnaire;
         Repository repository;
         IParser jsonParser;
-        PopulateRequest request;
+        GenerateRequest request;
         List<IBaseBackboneElement> items;
         IIdType expectedQuestionnaireId;
 
@@ -283,7 +290,7 @@ public class TestQuestionnaire {
             }
         }
 
-        public GeneratedQuestionnaire(Repository repository, PopulateRequest request, IBaseResource questionnaire) {
+        public GeneratedQuestionnaire(Repository repository, GenerateRequest request, IBaseResource questionnaire) {
             this.repository = repository;
             this.request = request;
             this.questionnaire = questionnaire;
@@ -293,10 +300,7 @@ public class TestQuestionnaire {
                 populateItems(request.getItems(questionnaire));
                 expectedQuestionnaireId = Ids.newId(
                         questionnaire.getClass(),
-                        String.format(
-                                "%s-%s",
-                                request.getQuestionnaire().getIdElement().getIdPart(),
-                                request.getSubjectId().getIdPart()));
+                        request.getQuestionnaire().getIdElement().getIdPart());
             }
         }
 
@@ -313,7 +317,7 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaire hasItems(int expectedItemCount) {
-            assertEquals(items.size(), expectedItemCount);
+            assertEquals(expectedItemCount, items.size());
 
             return this;
         }
@@ -378,18 +382,6 @@ public class TestQuestionnaire {
             }
         }
 
-        public void isEqualsToExpected(Class<? extends IBaseResource> resourceType) {
-            try {
-                JSONAssert.assertEquals(
-                        jsonParser.encodeResourceToString(repository.read(resourceType, expectedId)),
-                        jsonParser.encodeResourceToString(questionnaireResponse),
-                        true);
-            } catch (JSONException e) {
-                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
-                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
-            }
-        }
-
         public GeneratedQuestionnaireResponse hasItems(int expectedItemCount) {
             assertEquals(expectedItemCount, items.size());
 
@@ -404,11 +396,15 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {
             var answer = request.resolvePathList(items.get(linkId), "answer", IBase.class);
             var answers =
-                    answer.stream().map(a -> request.resolvePath(a, "value")).toList();
+                    answer.stream().map(a -> request.resolvePath(a, "value")).collect(Collectors.toList());
             assertNotNull(answers);
-            assertTrue(
-                    answers.stream().anyMatch(a -> a.toString().equals(value.toString())),
-                    "expected answer to contain value: " + value);
+            if (value instanceof IPrimitiveType) {
+                assertTrue(
+                        answers.stream().anyMatch(a -> a.toString().equals(value.toString())),
+                        "expected answer to contain value: " + value);
+            } else {
+                assertTrue(answers.stream().anyMatch(value.getClass()::isInstance));
+            }
             return this;
         }
 

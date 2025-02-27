@@ -3,11 +3,12 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public class CodeableConceptAdapter implements ICodeableConceptAdapter {
@@ -15,6 +16,7 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
     private final CodeableConcept codeableConcept;
     private final FhirContext fhirContext;
     private final ModelResolver modelResolver;
+    private final AdapterFactory adapterFactory;
 
     public CodeableConceptAdapter(ICompositeType codeableConcept) {
         if (!(codeableConcept instanceof CodeableConcept)) {
@@ -22,8 +24,9 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
                     "object passed as codeableConcept argument is not a CodeableConcept data type");
         }
         this.codeableConcept = (CodeableConcept) codeableConcept;
-        this.fhirContext = FhirContext.forR5Cached();
-        this.modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        fhirContext = FhirContext.forR5Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        adapterFactory = new AdapterFactory();
     }
 
     @Override
@@ -41,10 +44,9 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
         return modelResolver;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<Coding> getCoding() {
-        return get().getCoding();
+    public List<ICodingAdapter> getCoding() {
+        return get().getCoding().stream().map(adapterFactory::createCoding).collect(Collectors.toList());
     }
 
     @Override

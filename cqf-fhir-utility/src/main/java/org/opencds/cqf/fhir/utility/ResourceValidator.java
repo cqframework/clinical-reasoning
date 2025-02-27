@@ -79,9 +79,8 @@ public class ResourceValidator {
 
             supportChain.addValidationSupport(profileSupport);
 
-            this.validator = this.context
-                    .newValidator()
-                    .registerValidatorModule(new FhirInstanceValidator(new ValidationSupportChain(supportChain)));
+            this.validator =
+                    this.context.newValidator().registerValidatorModule(new FhirInstanceValidator(supportChain));
         }
     }
 

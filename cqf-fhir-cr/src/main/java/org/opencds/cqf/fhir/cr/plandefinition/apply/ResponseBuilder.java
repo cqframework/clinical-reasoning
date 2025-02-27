@@ -55,10 +55,8 @@ public class ResponseBuilder {
         if (request.hasOrganizationId()) {
             requestOrchestration.setAuthor(new org.hl7.fhir.dstu3.model.Reference(request.getOrganizationId()));
         }
-        if (request.getUserLanguage() instanceof org.hl7.fhir.dstu3.model.CodeableConcept) {
-            requestOrchestration.setLanguage(((org.hl7.fhir.dstu3.model.CodeableConcept) request.getUserLanguage())
-                    .getCodingFirstRep()
-                    .getCode());
+        if (request.getUserLanguage() instanceof org.hl7.fhir.dstu3.model.CodeableConcept userLanguage) {
+            requestOrchestration.setLanguage(userLanguage.getCodingFirstRep().getCode());
         }
         return requestOrchestration;
     }
@@ -85,10 +83,8 @@ public class ResponseBuilder {
         if (request.hasOrganizationId()) {
             requestOrchestration.setAuthor(new org.hl7.fhir.r4.model.Reference(request.getOrganizationId()));
         }
-        if (request.getUserLanguage() instanceof org.hl7.fhir.r4.model.CodeableConcept) {
-            requestOrchestration.setLanguage(((org.hl7.fhir.r4.model.CodeableConcept) request.getUserLanguage())
-                    .getCodingFirstRep()
-                    .getCode());
+        if (request.getUserLanguage() instanceof org.hl7.fhir.r4.model.CodeableConcept userLanguage) {
+            requestOrchestration.setLanguage(userLanguage.getCodingFirstRep().getCode());
         }
         return requestOrchestration;
     }
@@ -115,10 +111,8 @@ public class ResponseBuilder {
         if (request.hasOrganizationId()) {
             requestOrchestration.setAuthor(new org.hl7.fhir.r5.model.Reference(request.getOrganizationId()));
         }
-        if (request.getUserLanguage() instanceof org.hl7.fhir.r5.model.CodeableConcept) {
-            requestOrchestration.setLanguage(((org.hl7.fhir.r5.model.CodeableConcept) request.getUserLanguage())
-                    .getCodingFirstRep()
-                    .getCode());
+        if (request.getUserLanguage() instanceof org.hl7.fhir.r5.model.CodeableConcept userLanguage) {
+            requestOrchestration.setLanguage(userLanguage.getCodingFirstRep().getCode());
         }
         return requestOrchestration;
     }
@@ -172,10 +166,11 @@ public class ResponseBuilder {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,
                     new org.hl7.fhir.dstu3.model.Reference(
-                            "#" + operationOutcome.getIdElement().getValue()));
+                            "#" + operationOutcome.getIdElement().getIdPart()));
         }
 
-        carePlan.addActivity().setReference(new org.hl7.fhir.dstu3.model.Reference(requestOrchestration));
+        carePlan.addActivity()
+                .setReference(new org.hl7.fhir.dstu3.model.Reference("#" + requestOrchestration.getIdPart()));
         carePlan.addContained(requestOrchestration);
 
         for (var resource : request.getExtractedResources()) {
@@ -222,10 +217,11 @@ public class ResponseBuilder {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,
                     new org.hl7.fhir.r4.model.Reference(
-                            "#" + operationOutcome.getIdElement().getValue()));
+                            "#" + operationOutcome.getIdElement().getIdPart()));
         }
 
-        carePlan.addActivity().setReference(new org.hl7.fhir.r4.model.Reference(requestOrchestration));
+        carePlan.addActivity()
+                .setReference(new org.hl7.fhir.r4.model.Reference("#" + requestOrchestration.getIdPart()));
         carePlan.addContained(requestOrchestration);
 
         for (var resource : request.getExtractedResources()) {
@@ -276,10 +272,12 @@ public class ResponseBuilder {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,
                     new org.hl7.fhir.r5.model.Reference(
-                            "#" + operationOutcome.getIdElement().getValue()));
+                            "#" + operationOutcome.getIdElement().getIdPart()));
         }
 
-        carePlan.addActivity().setPlannedActivityReference(new org.hl7.fhir.r5.model.Reference(requestOrchestration));
+        carePlan.addActivity()
+                .setPlannedActivityReference(
+                        new org.hl7.fhir.r5.model.Reference("#" + requestOrchestration.getIdPart()));
         carePlan.addContained(requestOrchestration);
 
         for (var resource : request.getExtractedResources()) {

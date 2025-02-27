@@ -6,38 +6,50 @@ import org.hl7.fhir.instance.model.api.IBase;
 public class ItemValueTransformer {
     private ItemValueTransformer() {}
 
-    @SuppressWarnings("rawtypes")
     public static org.hl7.fhir.dstu3.model.Type transformValueToItem(org.hl7.fhir.dstu3.model.Type value) {
-        if (value instanceof org.hl7.fhir.dstu3.model.CodeableConcept) {
-            return ((org.hl7.fhir.dstu3.model.CodeableConcept) value)
-                    .getCoding()
-                    .get(0);
+        if (value instanceof org.hl7.fhir.dstu3.model.CodeableConcept codeType) {
+            return codeType.getCoding().get(0);
         }
-        if (value instanceof org.hl7.fhir.dstu3.model.Enumeration) {
-            return new org.hl7.fhir.dstu3.model.StringType(
-                    ((org.hl7.fhir.dstu3.model.Enumeration) value).asStringValue());
+        if (value instanceof org.hl7.fhir.dstu3.model.Enumeration<?> enumType) {
+            return new org.hl7.fhir.dstu3.model.StringType(enumType.asStringValue());
+        }
+        if (value instanceof org.hl7.fhir.dstu3.model.IdType idType) {
+            return new org.hl7.fhir.dstu3.model.StringType(idType.asStringValue());
+        }
+        if (value instanceof org.hl7.fhir.dstu3.model.Identifier identifier) {
+            return new org.hl7.fhir.dstu3.model.StringType(identifier.getValue());
         }
         return value;
     }
 
-    @SuppressWarnings("rawtypes")
     public static org.hl7.fhir.r4.model.Type transformValueToItem(org.hl7.fhir.r4.model.Type value) {
-        if (value instanceof org.hl7.fhir.r4.model.CodeableConcept) {
-            return ((org.hl7.fhir.r4.model.CodeableConcept) value).getCoding().get(0);
+        if (value instanceof org.hl7.fhir.r4.model.CodeableConcept codeType) {
+            return codeType.getCoding().get(0);
         }
-        if (value instanceof org.hl7.fhir.r4.model.Enumeration) {
-            return new org.hl7.fhir.r4.model.StringType(((org.hl7.fhir.r4.model.Enumeration) value).getCode());
+        if (value instanceof org.hl7.fhir.r4.model.Enumeration<?> enumType) {
+            return new org.hl7.fhir.r4.model.StringType(enumType.getCode());
+        }
+        if (value instanceof org.hl7.fhir.r4.model.IdType idType) {
+            return new org.hl7.fhir.r4.model.StringType(idType.asStringValue());
+        }
+        if (value instanceof org.hl7.fhir.r4.model.Identifier identifier) {
+            return new org.hl7.fhir.r4.model.StringType(identifier.getValue());
         }
         return value;
     }
 
-    @SuppressWarnings("rawtypes")
     public static org.hl7.fhir.r5.model.DataType transformValueToItem(org.hl7.fhir.r5.model.DataType value) {
-        if (value instanceof org.hl7.fhir.r5.model.CodeableConcept) {
-            return ((org.hl7.fhir.r5.model.CodeableConcept) value).getCoding().get(0);
+        if (value instanceof org.hl7.fhir.r5.model.CodeableConcept codeType) {
+            return codeType.getCoding().get(0);
         }
-        if (value instanceof org.hl7.fhir.r5.model.Enumeration) {
-            return new org.hl7.fhir.r5.model.StringType(((org.hl7.fhir.r5.model.Enumeration) value).getCode());
+        if (value instanceof org.hl7.fhir.r5.model.Enumeration<?> enumType) {
+            return new org.hl7.fhir.r5.model.StringType(enumType.getCode());
+        }
+        if (value instanceof org.hl7.fhir.r5.model.IdType idType) {
+            return new org.hl7.fhir.r5.model.StringType(idType.asStringValue());
+        }
+        if (value instanceof org.hl7.fhir.r5.model.Identifier identifier) {
+            return new org.hl7.fhir.r5.model.StringType(identifier.getValue());
         }
         return value;
     }
@@ -57,22 +69,22 @@ public class ItemValueTransformer {
     }
 
     public static org.hl7.fhir.dstu3.model.Type transformValueToResource(org.hl7.fhir.dstu3.model.Type value) {
-        if (value instanceof org.hl7.fhir.dstu3.model.Coding) {
-            return new org.hl7.fhir.dstu3.model.CodeableConcept().addCoding((org.hl7.fhir.dstu3.model.Coding) value);
+        if (value instanceof org.hl7.fhir.dstu3.model.Coding codingType) {
+            return new org.hl7.fhir.dstu3.model.CodeableConcept().addCoding(codingType);
         }
         return value;
     }
 
     public static org.hl7.fhir.r4.model.Type transformValueToResource(org.hl7.fhir.r4.model.Type value) {
-        if (value instanceof org.hl7.fhir.r4.model.Coding) {
-            return new org.hl7.fhir.r4.model.CodeableConcept().addCoding((org.hl7.fhir.r4.model.Coding) value);
+        if (value instanceof org.hl7.fhir.r4.model.Coding codingType) {
+            return new org.hl7.fhir.r4.model.CodeableConcept().addCoding(codingType);
         }
         return value;
     }
 
     public static org.hl7.fhir.r5.model.DataType transformValueToResource(org.hl7.fhir.r5.model.DataType value) {
-        if (value instanceof org.hl7.fhir.r5.model.Coding) {
-            return new org.hl7.fhir.r5.model.CodeableConcept().addCoding((org.hl7.fhir.r5.model.Coding) value);
+        if (value instanceof org.hl7.fhir.r5.model.Coding codingType) {
+            return new org.hl7.fhir.r5.model.CodeableConcept().addCoding(codingType);
         }
         return value;
     }

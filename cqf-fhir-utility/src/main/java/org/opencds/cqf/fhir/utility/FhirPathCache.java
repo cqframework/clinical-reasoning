@@ -17,10 +17,7 @@ public class FhirPathCache {
     }
 
     public static IFhirPath cachedForVersion(FhirVersionEnum fhirVersionEnum) {
-        return CACHE.computeIfAbsent(fhirVersionEnum, x -> x.newContext().newFhirPath());
-        // TODO: LD: This is commented out because it will fail to compile with the current version of hapi-fhir,
-        // but once we upgrade, the above code will fail to compile and must be replaced with the below code.
-        //        return CACHE.computeIfAbsent(fhirVersionEnum, fhirVersion -> FhirContext.forVersion(fhirVersion)
-        //                .newFhirPath());
+        return CACHE.computeIfAbsent(
+                fhirVersionEnum, x -> FhirContext.forVersion(x).newFhirPath());
     }
 }

@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -17,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
@@ -32,6 +35,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final FhirContext fhirContext;
     private final FhirVersionEnum fhirVersion;
     private final String defaultLibraryUrl;
+    private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
     private IQuestionnaireAdapter questionnaireAdapter;
 
@@ -43,7 +47,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
             IBaseBundle bundle,
             boolean useServerData,
             LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            ModelResolver modelResolver,
+            IInputParameterResolver inputParameterResolver) {
         checkNotNull(questionnaireResponse, "expected non-null value for questionnaireResponse");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
@@ -55,6 +60,16 @@ public class ExtractRequest implements IQuestionnaireRequest {
         this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
+        this.inputParameterResolver = inputParameterResolver != null
+                ? inputParameterResolver
+                : createResolver(
+                        libraryEngine.getRepository(),
+                        this.subjectId,
+                        null,
+                        null,
+                        this.parameters,
+                        this.useServerData,
+                        this.data);
         fhirContext = this.libraryEngine.getRepository().fhirContext();
         fhirVersion = this.questionnaireResponse.getStructureFhirVersionEnum();
         defaultLibraryUrl = "";
@@ -94,25 +109,27 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     public boolean isDefinitionItem(ItemPair item) {
-        return hasExtension(
-                        item.getItem() == null ? item.getResponseItem() : item.getItem(),
-                        Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-                || StringUtils.isNotBlank(resolvePathString(
-                        item.getItem() == null ? item.getResponseItem() : item.getItem(), "definition"));
+        var targetItem = item.getItem() == null ? item.getResponseItem() : item.getItem();
+        return hasExtension(targetItem, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                || hasExtension(targetItem, Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT)
+                || StringUtils.isNotBlank(resolvePathString(targetItem, "definition"));
     }
 
-    public IBaseExtension<?, ?> getItemExtractionContext() {
+    @SuppressWarnings("unchecked")
+    public <T extends IBaseExtension<?, ?>> T getDefinitionExtract() {
         var qrExt = getExtensions(questionnaireResponse).stream()
-                .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT))
+                .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                        || e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT))
                 .findFirst()
                 .orElse(null);
         if (qrExt != null) {
-            return qrExt;
+            return (T) qrExt;
         }
         return questionnaire == null
                 ? null
-                : getExtensions(questionnaire).stream()
-                        .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT))
+                : (T) getExtensions(questionnaire).stream()
+                        .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                                || e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT))
                         .findFirst()
                         .orElse(null);
     }
@@ -132,6 +149,11 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
+    public IBase getContext() {
+        return getQuestionnaireResponse();
+    }
+
+    @Override
     public IIdType getSubjectId() {
         return subjectId;
     }
@@ -148,7 +170,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
 
     @Override
     public IBaseParameters getParameters() {
-        return parameters;
+        return inputParameterResolver.getParameters();
     }
 
     @Override

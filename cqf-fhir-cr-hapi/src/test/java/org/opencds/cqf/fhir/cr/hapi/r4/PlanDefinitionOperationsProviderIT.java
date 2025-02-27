@@ -18,7 +18,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvide
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
+class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
     @Autowired
     PlanDefinitionApplyProvider planDefinitionApplyProvider;
 

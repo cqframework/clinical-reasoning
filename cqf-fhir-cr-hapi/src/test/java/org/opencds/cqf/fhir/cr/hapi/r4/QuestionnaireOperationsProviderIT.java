@@ -18,7 +18,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvide
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePopulateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
+class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
     @Autowired
     QuestionnairePopulateProvider questionnairePopulateProvider;
 

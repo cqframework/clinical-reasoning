@@ -12,7 +12,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryEvaluateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class LibraryOperationsProviderTest extends BaseCrR4TestServer {
+class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     @Autowired
     LibraryEvaluateProvider libraryEvaluateProvider;
 

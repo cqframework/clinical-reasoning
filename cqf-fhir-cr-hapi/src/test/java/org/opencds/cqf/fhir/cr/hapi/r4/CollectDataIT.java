@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-class CollectDataTest extends BaseCrR4TestServer {
+class CollectDataIT extends BaseCrR4TestServer {
     public Parameters runCollectData(
             String periodStart, String periodEnd, String measureId, String subject, String practitioner) {
 

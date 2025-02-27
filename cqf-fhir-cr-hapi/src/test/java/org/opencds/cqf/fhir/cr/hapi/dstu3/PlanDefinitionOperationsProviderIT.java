@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.plandefinition.PlanDefinitionApplyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class PlanDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {
+class PlanDefinitionOperationsProviderIT extends BaseCrDstu3TestServer {
     @Autowired
     PlanDefinitionApplyProvider planDefinitionApplyProvider;
 

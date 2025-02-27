@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-class MeasureOperationProviderTest extends BaseCrR4TestServer {
+class MeasureOperationProviderIT extends BaseCrR4TestServer {
     public MeasureReport runEvaluateMeasure(
             String periodStart,
             String periodEnd,

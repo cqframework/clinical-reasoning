@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-class CrResourceListenerTest extends BaseCrR4TestServer {
+class CrResourceListenerIT extends BaseCrR4TestServer {
     @Autowired
     EvaluationSettings myEvaluationSettings;
 

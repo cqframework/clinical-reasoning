@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
+class QuestionnaireResponseOperationsProviderIT extends BaseCrR4TestServer {
     @Autowired
     QuestionnaireResponseExtractProvider questionnaireResponseExtractProvider;
 

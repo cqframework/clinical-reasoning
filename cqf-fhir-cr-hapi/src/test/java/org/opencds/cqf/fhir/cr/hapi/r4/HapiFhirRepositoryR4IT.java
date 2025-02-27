@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.repo.HapiFhirRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
+class HapiFhirRepositoryR4IT extends BaseCrR4TestServer {
 
     @Autowired
     RestfulServer restfulServer;

@@ -28,7 +28,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CpgOperationProviderTest extends BaseCrR4TestServer {
+class CpgOperationProviderIT extends BaseCrR4TestServer {
     @BeforeEach
     void setup() {
         var requestDetails = setupRequestDetails();

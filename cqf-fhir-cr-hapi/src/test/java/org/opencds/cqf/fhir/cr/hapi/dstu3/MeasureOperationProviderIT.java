@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {TestCrDstu3Config.class})
-class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
+class MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 
     @Autowired
     MeasureOperationsProvider myMeasureOperationsProvider;

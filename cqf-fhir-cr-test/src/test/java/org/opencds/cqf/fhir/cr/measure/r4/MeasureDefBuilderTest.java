@@ -47,7 +47,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 /**
  * Test MeasureDefBuilder on different scenarios around group level Measure settings and if they are properly being set
  */
-public class MeasureDefBuilderTest {
+class MeasureDefBuilderTest {
     private final CodeableConcept increase = new CodeableConcept(new Coding(
             MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
             IMPROVEMENT_NOTATION_SYSTEM_INCREASE,

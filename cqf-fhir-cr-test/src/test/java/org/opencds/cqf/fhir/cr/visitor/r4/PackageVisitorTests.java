@@ -419,7 +419,7 @@ class PackageVisitorTests {
     }
 
     @Test
-    public void packageVisitorShouldUseExpansionCacheIfProvided() {
+    void packageVisitorShouldUseExpansionCacheIfProvided() {
         // Arrange
         var bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));

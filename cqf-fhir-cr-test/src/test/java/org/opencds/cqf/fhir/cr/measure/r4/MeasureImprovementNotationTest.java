@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class MeasureImprovementNotationTest {
+class MeasureImprovementNotationTest {
     // undefined improvementNotation
     // measure defined
     // group defined

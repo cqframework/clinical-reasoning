@@ -44,8 +44,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
-    private static final org.slf4j.Logger logger =
-        org.slf4j.LoggerFactory.getLogger(TestQuestionnaire.class);
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TestQuestionnaire.class);
 
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
     private static final String UNABLE_TO_COMPARE_JSONS = "Unable to compare Jsons: ";

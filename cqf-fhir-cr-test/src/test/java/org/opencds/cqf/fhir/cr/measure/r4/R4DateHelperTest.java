@@ -24,7 +24,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Precision;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
-public class R4DateHelperTest {
+class R4DateHelperTest {
 
     @Test
     public void checkDate() {

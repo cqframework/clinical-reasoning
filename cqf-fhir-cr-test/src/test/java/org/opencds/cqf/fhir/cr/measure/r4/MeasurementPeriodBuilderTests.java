@@ -12,7 +12,7 @@ import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasurementPeriodBuilderTests {
+class MeasurementPeriodBuilderTests {
     private static final Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @Test

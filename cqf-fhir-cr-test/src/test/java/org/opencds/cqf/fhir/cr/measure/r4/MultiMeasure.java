@@ -45,7 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class MultiMeasure {
+class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface

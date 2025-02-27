@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
@@ -39,7 +40,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -303,6 +303,7 @@ public class CareGaps {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
             return (DetectedIssue) parser.parseResource(parser.encodeResourceToString(theResource));
         }
+
         // Composition getters
         public SelectedComposition composition() {
             return this.composition(g -> resourceToComposition(g.getEntry().stream()
@@ -311,7 +312,6 @@ public class CareGaps {
                     .get()
                     .getResource()));
         }
-        ;
 
         public SelectedComposition composition(Selector<Composition, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -334,7 +334,6 @@ public class CareGaps {
                             .size());
             return this;
         }
-        ;
 
         public SelectedMeasureReport measureReport(Selector<MeasureReport, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -388,7 +387,6 @@ public class CareGaps {
                     .get()
                     .getResource()));
         }
-        ;
 
         public SelectedOrganization organization(Selector<Organization, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -433,7 +431,7 @@ public class CareGaps {
 
         public SelectedDetectedIssue hasContainedMeasureReport() {
             var containedResource = detectedIssueReport().getContained().get(0);
-            assertTrue(containedResource instanceof MeasureReport);
+            assertInstanceOf(MeasureReport.class, containedResource);
             return this;
         }
 
@@ -447,9 +445,7 @@ public class CareGaps {
         }
 
         public SelectedDetectedIssue hasPatientReference(String patientRef) {
-            assertEquals(
-                    patientRef,
-                    detectedIssueReport().getPatient().getReference().toString());
+            assertEquals(patientRef, detectedIssueReport().getPatient().getReference());
             return this;
         }
 
@@ -484,12 +480,12 @@ public class CareGaps {
             return this;
         }
         // author
-        public SelectedComposition hasAuthor(String OrgReference) {
+        public SelectedComposition hasAuthor(String orgReference) {
             // author not empty
             assertNotNull(compositionReport().getAuthor().get(0));
             // author was found
             assertNotNull(compositionReport().getAuthor().stream()
-                    .filter(x -> x.getReference().contains(OrgReference))
+                    .filter(x -> x.getReference().contains(orgReference))
                     .findFirst()
                     .get());
             return this;

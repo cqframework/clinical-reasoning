@@ -153,13 +153,6 @@ public class HapiFhirRepository implements Repository {
             bundleType = BundleTypeEnum.SEARCHSET;
         }
 
-        var responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
-                requestDetails, restfulServer.getDefaultResponseEncoding());
-        var linkEncoding =
-                requestDetails.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null
-                        ? responseEncoding.getEncoding()
-                        : null;
-
         return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
                 restfulServer,
                 requestDetails,

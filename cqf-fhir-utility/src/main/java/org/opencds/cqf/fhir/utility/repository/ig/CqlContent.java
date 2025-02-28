@@ -11,13 +11,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-class CqlContent {
+public class CqlContent {
 
     private CqlContent() {
         // intentionally empty
     }
 
-    static void loadCqlContent(IBaseResource resource, Path resourcePath) {
+    public static void loadCqlContent(IBaseResource resource, Path resourcePath) {
         requireNonNull(resource, "resource can not be null");
         requireNonNull(resourcePath, "resourcePath can not be null");
 

@@ -19,11 +19,11 @@ class ValueSetProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
     private final Repository repositoryDstu3 = new IgRepository(
-            fhirContextDstu3, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3"));
+            fhirContextDstu3, Paths.get(getResourcePath(TestValueSet.class) + "/" + CLASS_PATH + "/dstu3"));
     private final Repository repositoryR4 =
-            new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+            new IgRepository(fhirContextR4, Paths.get(getResourcePath(TestValueSet.class) + "/" + CLASS_PATH + "/r4"));
     private final Repository repositoryR5 =
-            new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+            new IgRepository(fhirContextR5, Paths.get(getResourcePath(TestValueSet.class) + "/" + CLASS_PATH + "/r5"));
 
     @Test
     void processors() {

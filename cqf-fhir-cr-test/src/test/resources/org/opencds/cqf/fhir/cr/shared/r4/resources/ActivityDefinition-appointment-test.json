@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "appointment-test",
-  "name": "Appointment_Test",
-  "title": "CreateAppointment",
-  "status": "draft",
-  "description": "Create the appointment.",
-  "kind": "Appointment"
-}

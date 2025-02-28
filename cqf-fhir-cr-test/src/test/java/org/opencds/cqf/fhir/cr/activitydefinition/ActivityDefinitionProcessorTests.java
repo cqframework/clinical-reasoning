@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -54,7 +55,7 @@ class ActivityDefinitionProcessorTests {
     private Repository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
-                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
+                Paths.get(getResourcePath(TestPlanDefinition.class) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 
     private ActivityDefinitionProcessor createProcessor(Repository repository) {

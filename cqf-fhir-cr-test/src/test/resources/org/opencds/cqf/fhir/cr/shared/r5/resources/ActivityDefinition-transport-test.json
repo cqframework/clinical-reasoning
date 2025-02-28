@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "transport-test",
-  "name": "Transport_Test",
-  "title": "CreateTransport",
-  "status": "draft",
-  "description": "Create the transport.",
-  "kind": "Transport"
-}

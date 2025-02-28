@@ -3,8 +3,8 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
-import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
+import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.CLASS_PATH;
+import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,16 +30,16 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void defaultSettings() {
-        var repository =
-                new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var repository = new IgRepository(
+                fhirContextR4, Paths.get(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/r4"));
         var processor = new PlanDefinitionProcessor(repository);
         assertNotNull(processor.evaluationSettings());
     }
 
     @Test
     void processor() {
-        var repository =
-                new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var repository = new IgRepository(
+                fhirContextR5, Paths.get(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/r5"));
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
@@ -168,7 +168,7 @@ class PlanDefinitionProcessorTests {
         var patientId = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterId = "Encounter/helloworld-patient-1-encounter-1";
         var repository = new IgRepository(
-                fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/anc-dak"));
+                fhirContextR4, Paths.get(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/r4/anc-dak"));
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
                 org.opencds.cqf.fhir.utility.r4.Parameters.part("encounter", "helloworld-patient-1-encounter-1"));
         given().repository(repository)

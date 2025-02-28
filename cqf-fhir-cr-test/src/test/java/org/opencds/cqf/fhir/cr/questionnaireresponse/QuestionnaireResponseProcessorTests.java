@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.given;
+import static org.opencds.cqf.fhir.cr.QuestionnaireResponse.TestQuestionnaireResponse.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.CodeableConcept;

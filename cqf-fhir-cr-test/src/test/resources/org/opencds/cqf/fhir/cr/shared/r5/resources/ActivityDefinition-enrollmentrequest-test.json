@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "enrollmentrequest-test",
-  "name": "EnrollmentRequest_Test",
-  "title": "CreateEnrollmentRequest",
-  "status": "draft",
-  "description": "Create the enrollment request.",
-  "kind": "EnrollmentRequest"
-}

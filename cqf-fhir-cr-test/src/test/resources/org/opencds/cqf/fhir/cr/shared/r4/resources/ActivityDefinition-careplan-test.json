@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "careplan-test",
-  "name": "CarePlan_Test",
-  "title": "CreateCarePlan",
-  "status": "draft",
-  "description": "Create the care plan.",
-  "kind": "CarePlan"
-}

@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "claim-test",
-  "name": "Claim_Test",
-  "title": "CreateClaim",
-  "status": "draft",
-  "description": "Create the claim.",
-  "kind": "Claim"
-}

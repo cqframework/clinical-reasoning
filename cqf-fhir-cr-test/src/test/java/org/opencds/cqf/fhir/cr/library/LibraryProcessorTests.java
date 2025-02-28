@@ -53,8 +53,8 @@ class LibraryProcessorTests {
 
     @Test
     void processor() {
-        var repository =
-                new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var repository = new IgRepository(
+                fhirContextR5, Paths.get(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());

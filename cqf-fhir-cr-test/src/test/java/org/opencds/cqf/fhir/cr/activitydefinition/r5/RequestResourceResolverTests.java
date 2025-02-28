@@ -35,7 +35,7 @@ import org.hl7.fhir.r5.model.VisionPrescription;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.opencds.cqf.fhir.cr.activitydefinition.RequestResourceResolver.Given;
+import org.opencds.cqf.fhir.cr.activitydefinition.TestRequestResourceResolver.Given;
 import org.opencds.cqf.fhir.utility.Ids;
 
 @TestInstance(Lifecycle.PER_CLASS)

@@ -1,9 +1,0 @@
-{
-  "resourceType": "ActivityDefinition",
-  "id": "nutritionorder-test",
-  "name": "NutritionOrder_Test",
-  "title": "CreateNutritionOrder",
-  "status": "draft",
-  "description": "Create the nutrition order.",
-  "kind": "NutritionOrder"
-}

@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
+import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.given;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.concurrent.TimeUnit;
-import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.When;
+import org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.When;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;

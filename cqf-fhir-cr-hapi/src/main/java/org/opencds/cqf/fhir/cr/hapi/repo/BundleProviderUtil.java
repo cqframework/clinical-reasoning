@@ -249,14 +249,9 @@ public class BundleProviderUtil {
             List<IBaseResource> resourceList) {
         IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
 
-        bundleFactory.addRootPropertiesToBundle(
-                result.getUuid(), links, result.size(), result.getPublished());
+        bundleFactory.addRootPropertiesToBundle(result.getUuid(), links, result.size(), result.getPublished());
         bundleFactory.addResourcesToBundle(
-                new ArrayList<>(resourceList),
-                bundleType,
-                links.serverBase,
-                server.getBundleInclusionRule(),
-                includes);
+                new ArrayList<>(resourceList), bundleType, links.serverBase, server.getBundleInclusionRule(), includes);
 
         return bundleFactory.getResourceBundle();
     }

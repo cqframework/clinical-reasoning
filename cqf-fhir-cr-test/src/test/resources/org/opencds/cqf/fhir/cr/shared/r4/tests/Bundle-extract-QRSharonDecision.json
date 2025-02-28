@@ -120,8 +120,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-QRSharonDecision.1.6"
+        "method": "POST"
       }
     },
     {
@@ -181,8 +180,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-QRSharonDecision.2.1"
+        "method": "POST"
       }
     },
     {
@@ -242,8 +240,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-QRSharonDecision.2.2"
+        "method": "POST"
       }
     },
     {
@@ -303,8 +300,7 @@
         ]
       },
       "request": {
-        "method": "PUT",
-        "url": "Observation/extract-QRSharonDecision.2.3"
+        "method": "POST"
       }
     }
   ]

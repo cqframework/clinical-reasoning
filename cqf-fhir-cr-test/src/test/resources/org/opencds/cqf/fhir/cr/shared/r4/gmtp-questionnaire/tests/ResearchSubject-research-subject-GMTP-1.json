@@ -1,0 +1,11 @@
+{
+  "resourceType": "ResearchSubject",
+  "id": "research-subject-GMTP-1",
+  "individual": {
+    "reference": "Patient/USCorePatient-GMTP-1"
+  },
+  "study": {
+    "reference": "ResearchStudy/research-study-GMTP-1"
+  },
+  "status": "on-study"
+}

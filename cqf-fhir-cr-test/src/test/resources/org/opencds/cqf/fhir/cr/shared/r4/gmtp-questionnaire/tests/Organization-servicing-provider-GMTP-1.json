@@ -1,0 +1,39 @@
+{
+  "resourceType": "Organization",
+  "id": "servicing-provider-GMTP-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "1564221867"
+    }
+  ],
+  "active": true,
+  "name": "Healthcare Clinic",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1 (987) 6543210",
+      "use": "mobile"
+    },
+    {
+      "system": "fax",
+      "value": "+1 (987) 6543210"
+    }
+  ],
+  "address": [
+    {
+      "line": [
+        "789 Elm Street"
+      ],
+      "city": "Metropolis",
+      "state": "NY",
+      "postalCode": "67890",
+      "country": "USA"
+    }
+  ]
+}

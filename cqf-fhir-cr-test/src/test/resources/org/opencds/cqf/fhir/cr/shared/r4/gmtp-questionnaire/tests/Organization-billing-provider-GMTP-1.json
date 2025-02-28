@@ -1,0 +1,39 @@
+{
+  "resourceType": "Organization",
+  "id": "billing-provider-GMTP-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "1144221849"
+    }
+  ],
+  "active": true,
+  "name": "Oak Street Billing Provider",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1 (123) 4567890",
+      "use": "mobile"
+    },
+    {
+      "system": "fax",
+      "value": "+1 (123) 4567890"
+    }
+  ],
+  "address": [
+    {
+      "line": [
+        "456 Oak Street"
+      ],
+      "city": "Anytown",
+      "state": "MA",
+      "postalCode": "54321",
+      "country": "USA"
+    }
+  ]
+}

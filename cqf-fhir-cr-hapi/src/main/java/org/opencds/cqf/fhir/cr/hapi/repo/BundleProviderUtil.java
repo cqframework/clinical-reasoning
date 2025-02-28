@@ -241,48 +241,48 @@ public class BundleProviderUtil {
     }
 
     private static IBaseResource buildBundle(
-            IRestfulServer<?> theServer,
-            Set<Include> theIncludes,
-            IBundleProvider theResult,
-            BundleTypeEnum theBundleType,
-            BundleLinks theLinks,
-            List<IBaseResource> theResourceList) {
-        IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+            IRestfulServer<?> server,
+            Set<Include> includes,
+            IBundleProvider result,
+            BundleTypeEnum bundleType,
+            BundleLinks links,
+            List<IBaseResource> resourceList) {
+        IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
 
         bundleFactory.addRootPropertiesToBundle(
-                theResult.getUuid(), theLinks, theResult.size(), theResult.getPublished());
+                result.getUuid(), links, result.size(), result.getPublished());
         bundleFactory.addResourcesToBundle(
-                new ArrayList<>(theResourceList),
-                theBundleType,
-                theLinks.serverBase,
-                theServer.getBundleInclusionRule(),
-                theIncludes);
+                new ArrayList<>(resourceList),
+                bundleType,
+                links.serverBase,
+                server.getBundleInclusionRule(),
+                includes);
 
         return bundleFactory.getResourceBundle();
     }
 
-    private static void removeNullIfNeeded(List<IBaseResource> theResourceList) {
+    private static void removeNullIfNeeded(List<IBaseResource> resourceList) {
         /*
          * Remove any null entries in the list - This generally shouldn't happen but can if data has
          * been manually purged from the JPA database
          */
         boolean hasNull = false;
-        for (IBaseResource next : theResourceList) {
+        for (IBaseResource next : resourceList) {
             if (next == null) {
                 hasNull = true;
                 break;
             }
         }
         if (hasNull) {
-            theResourceList.removeIf(Objects::isNull);
+            resourceList.removeIf(Objects::isNull);
         }
     }
 
-    private static void validateAllResourcesHaveId(List<IBaseResource> theResourceList) {
+    private static void validateAllResourcesHaveId(List<IBaseResource> resourceList) {
         /*
          * Make sure all returned resources have an ID (if not, this is a bug in the user server code)
          */
-        for (IBaseResource next : theResourceList) {
+        for (IBaseResource next : resourceList) {
             if ((next.getIdElement() == null || next.getIdElement().isEmpty())
                     && !(next instanceof IBaseOperationOutcome)) {
                 throw new InternalErrorException(Msg.code(2311)

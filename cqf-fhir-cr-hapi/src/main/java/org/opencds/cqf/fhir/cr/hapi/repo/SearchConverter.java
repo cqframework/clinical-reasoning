@@ -73,11 +73,11 @@ public class SearchConverter {
         }
     }
 
-    private void addTokenToSearchIfNeeded(Map.Entry<String, List<IQueryParameterType>> theEntry) {
-        if (isTokenParam(theEntry.getValue().get(0))) {
-            var tokenKey = theEntry.getKey();
+    private void addTokenToSearchIfNeeded(Map.Entry<String, List<IQueryParameterType>> entry) {
+        if (isTokenParam(entry.getValue().get(0))) {
+            var tokenKey = entry.getKey();
             var tokenList = new TokenOrListParam();
-            for (IQueryParameterType rec : theEntry.getValue()) {
+            for (IQueryParameterType rec : entry.getValue()) {
                 tokenList.add((TokenParam) rec);
             }
             searchParameterMap.add(tokenKey, tokenList);

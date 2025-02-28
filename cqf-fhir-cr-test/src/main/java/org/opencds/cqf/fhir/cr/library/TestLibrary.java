@@ -51,7 +51,7 @@ public class TestLibrary {
     }
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Paths.get(String.format("%s/%s/%s", getResourcePath(TestLibrary.class), CLASS_PATH, asset));
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -83,7 +83,8 @@ public class TestLibrary {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext,
+                    Paths.get(String.format("%s/%s/%s", getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
         }
 
@@ -93,9 +94,8 @@ public class TestLibrary {
         }
 
         public LibraryProcessor buildProcessor(Repository repository) {
-            if (repository instanceof IgRepository) {
-                ((IgRepository) repository)
-                        .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+            if (repository instanceof IgRepository igRepository) {
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();

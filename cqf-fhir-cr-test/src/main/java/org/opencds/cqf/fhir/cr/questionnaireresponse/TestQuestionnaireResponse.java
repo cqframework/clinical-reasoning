@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.QuestionnaireResponse;
+package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +20,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -36,7 +35,8 @@ public class TestQuestionnaireResponse {
     }
 
     public static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Paths.get(
+                String.format("%s/%s/%s", getResourcePath(TestQuestionnaireResponse.class), CLASS_PATH, asset));
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -68,7 +68,8 @@ public class TestQuestionnaireResponse {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext,
+                    Paths.get(String.format("%s/%s/%s", getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
         }
 

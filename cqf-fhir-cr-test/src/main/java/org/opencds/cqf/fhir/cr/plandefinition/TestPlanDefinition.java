@@ -68,7 +68,7 @@ public class TestPlanDefinition {
     }
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset);
+        var path = Paths.get(String.format("%s/%s/%s", getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset));
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -107,7 +107,8 @@ public class TestPlanDefinition {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext,
+                    Paths.get(String.format("%s/%s/%s", getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
         }
 

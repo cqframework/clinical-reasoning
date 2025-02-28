@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.opencds.cqf.fhir.cr.QuestionnaireResponse.TestQuestionnaireResponse.open;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newExtractRequestForVersion;
+import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.open;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;

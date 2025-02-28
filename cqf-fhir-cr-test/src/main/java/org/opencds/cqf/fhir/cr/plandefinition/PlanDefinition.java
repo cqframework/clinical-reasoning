@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -53,6 +52,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@SuppressWarnings({"squid:S5960"})
 public class PlanDefinition {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PlanDefinition.class);
 
@@ -68,7 +68,7 @@ public class PlanDefinition {
     }
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(PlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Paths.get(getResourcePath(PlanDefinition.class), CLASS_PATH, asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -82,7 +82,14 @@ public class PlanDefinition {
     }
 
     public static String load(String asset) throws IOException {
-        return load(open(asset));
+        if (asset == null) {
+            return null;
+        }
+        final InputStream inputStream = open(asset);
+        if (inputStream == null) {
+            return null;
+        }
+        return load(inputStream);
     }
 
     public static Given given() {
@@ -325,25 +332,25 @@ public class PlanDefinition {
 
     public static class GeneratedBundle {
         final Repository repository;
-        final IBaseBundle generatedBundle;
+        final IBaseBundle generatedBundleInner;
         final IParser jsonParser;
         final ModelResolver modelResolver;
         IBaseResource questionnaire;
         IBaseResource questionnaireResponse;
         Map<String, IBaseBackboneElement> items;
 
-        public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
+        public GeneratedBundle(Repository repository, IBaseBundle generatedBundleInner) {
             this.repository = repository;
-            this.generatedBundle = generatedBundle;
+            this.generatedBundleInner = generatedBundleInner;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            questionnaireResponse = getEntryResources(this.generatedBundle).stream()
+            questionnaireResponse = getEntryResources(this.generatedBundleInner).stream()
                     .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
                     .findFirst()
                     .orElse(null);
-            questionnaire = getEntryResources(this.generatedBundle).stream()
-                    .filter(r -> r.fhirType().equals("Questionnaire"))
+            questionnaire = getEntryResources(this.generatedBundleInner).stream()
+                    .filter(r -> r.fhirType().equals(QUESTIONNAIRE))
                     .findFirst()
                     .orElse(null);
             if (questionnaireResponse != null) {
@@ -374,7 +381,8 @@ public class PlanDefinition {
         public GeneratedBundle isEqualsTo(String expectedBundleAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundle), true);
+                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(
+                        generatedBundleInner), true);
             } catch (JSONException | IOException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
                 fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
@@ -386,7 +394,7 @@ public class PlanDefinition {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedBundleId)),
-                        jsonParser.encodeResourceToString(generatedBundle),
+                        jsonParser.encodeResourceToString(generatedBundleInner),
                         true);
             } catch (JSONException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
@@ -396,14 +404,14 @@ public class PlanDefinition {
         }
 
         public GeneratedBundle hasEntry(int count) {
-            assertEquals(count, getEntry(generatedBundle).size());
+            assertEquals(count, getEntry(generatedBundleInner).size());
             return this;
         }
 
         public GeneratedBundle hasCommunicationRequestPayload() {
-            var communications = getEntryResources(generatedBundle).stream()
+            var communications = getEntryResources(generatedBundleInner).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                    .collect(Collectors.toList());
+                    .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
@@ -419,7 +427,7 @@ public class PlanDefinition {
             return this;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "squid:S2259"})
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
             var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
             var answers = answerPath instanceof List<?>
@@ -437,33 +445,33 @@ public class PlanDefinition {
 
         @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaireOperationOutcome() {
-            assertTrue(getEntryResources(generatedBundle).stream()
-                    .anyMatch(r -> r.fhirType().equals("Questionnaire")
-                            && ((List<IBaseResource>) modelResolver.resolvePath(r, "contained"))
-                                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome"))));
+            assertTrue(getEntryResources(generatedBundleInner).stream()
+                    .anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)
+                            && ((List<IBaseResource>) modelResolver.resolvePath(r, CONTAINED))
+                                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME))));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedBundle entryHasOperationOutcome(int entry) {
             var resource = getEntryResource(
-                    generatedBundle.getStructureFhirVersionEnum(),
-                    getEntry(generatedBundle).get(entry));
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(resource, "contained"))
-                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome")));
+                    generatedBundleInner.getStructureFhirVersionEnum(),
+                    getEntry(generatedBundleInner).get(entry));
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(resource, CONTAINED))
+                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME)));
             return this;
         }
     }
 
     public static class GeneratedCarePlan {
         final Repository repository;
-        final IBaseResource generatedCarePlan;
+        final IBaseResource generatedCarePlanInner;
         final IParser jsonParser;
         final ModelResolver modelResolver;
 
-        public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlan) {
+        public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlanInner) {
             this.repository = repository;
-            this.generatedCarePlan = generatedCarePlan;
+            this.generatedCarePlanInner = generatedCarePlanInner;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
@@ -472,7 +480,8 @@ public class PlanDefinition {
         public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(generatedCarePlan), true);
+                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(
+                        generatedCarePlanInner), true);
             } catch (JSONException | IOException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
                 fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
@@ -484,7 +493,7 @@ public class PlanDefinition {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedCarePlanId)),
-                        jsonParser.encodeResourceToString(generatedCarePlan),
+                        jsonParser.encodeResourceToString(generatedCarePlanInner),
                         true);
             } catch (JSONException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
@@ -496,30 +505,31 @@ public class PlanDefinition {
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasContained(int count) {
             assertEquals(
-                    count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained")).size());
+                    count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED)).size());
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasOperationOutcome() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
-                    .stream().anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
+                    .stream().anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasQuestionnaire() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
-                    .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
+                    .stream().anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasCommunicationRequestPayload() {
-            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
+            var communications = ((List<IBaseResource>) modelResolver.resolvePath(
+                generatedCarePlanInner, CONTAINED))
                     .stream()
                             .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                            .collect(Collectors.toList());
+                            .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;

@@ -160,7 +160,6 @@ public class TestItemGenerator {
                 JSONAssert.assertEquals(
                         load(expectedItemAssetName), jsonParser.encodeResourceToString(questionnaire), true);
             } catch (JSONException | IOException e) {
-                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }
@@ -172,7 +171,6 @@ public class TestItemGenerator {
                         jsonParser.encodeResourceToString(questionnaire),
                         true);
             } catch (JSONException e) {
-                e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
             }
         }

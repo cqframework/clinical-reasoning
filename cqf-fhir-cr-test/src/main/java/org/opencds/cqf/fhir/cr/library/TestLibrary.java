@@ -260,9 +260,7 @@ public class TestLibrary {
                                                             .getVersion()
                                                             .getVersion(),
                                                     libraryUrl),
-                                    libraryId == null
-                                            ? null
-                                            : Ids.newId(repository.fhirContext(), LIBRARY, libraryId),
+                                    libraryId == null ? null : Ids.newId(repository.fhirContext(), LIBRARY, libraryId),
                                     null),
                             subjectId,
                             expression,

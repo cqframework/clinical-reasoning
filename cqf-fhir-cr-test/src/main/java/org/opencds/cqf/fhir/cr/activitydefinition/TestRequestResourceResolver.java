@@ -19,6 +19,10 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 public class TestRequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private TestRequestResourceResolver() {
+        // private constructor
+    }
+
     public static class Given {
         private IRequestResolverFactory resolverFactory;
         private Repository repository;

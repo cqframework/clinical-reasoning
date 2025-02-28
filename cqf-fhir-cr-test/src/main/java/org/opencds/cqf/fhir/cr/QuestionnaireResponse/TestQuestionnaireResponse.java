@@ -31,6 +31,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private TestQuestionnaireResponse() {
+        // private constructor
+    }
+
     public static InputStream open(String asset) {
         var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();

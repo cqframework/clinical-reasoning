@@ -44,6 +44,11 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestLibrary {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
+    private static final String LIBRARY = "Library";
+
+    private TestLibrary() {
+        // private constructor
+    }
 
     private static InputStream open(String asset) {
         var path = Paths.get(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
@@ -223,12 +228,12 @@ public class TestLibrary {
             if (isPackagePut == null) {
                 return new GeneratedPackage(
                         processor.packageLibrary(
-                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId))),
+                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), LIBRARY, libraryId))),
                         repository.fhirContext());
             } else {
                 return new GeneratedPackage(
                         processor.packageLibrary(
-                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), LIBRARY, libraryId)),
                                 isPackagePut),
                         repository.fhirContext());
             }
@@ -236,7 +241,7 @@ public class TestLibrary {
 
         public DataRequirementsLibrary thenDataRequirements() {
             return new DataRequirementsLibrary(processor.dataRequirements(
-                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)), parameters));
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), LIBRARY, libraryId)), parameters));
         }
 
         public Evaluation thenEvaluate() {
@@ -257,7 +262,7 @@ public class TestLibrary {
                                                     libraryUrl),
                                     libraryId == null
                                             ? null
-                                            : Ids.newId(repository.fhirContext(), "Library", libraryId),
+                                            : Ids.newId(repository.fhirContext(), LIBRARY, libraryId),
                                     null),
                             subjectId,
                             expression,

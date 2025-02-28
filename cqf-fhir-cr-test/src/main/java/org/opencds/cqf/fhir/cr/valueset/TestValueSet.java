@@ -23,6 +23,10 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 public class TestValueSet {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private TestValueSet() {
+        // private constructor
+    }
+
     public static Given given() {
         return new Given();
     }

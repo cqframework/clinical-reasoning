@@ -36,6 +36,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class TestItemGenerator {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
+    private TestItemGenerator() {
+        // private constructor
+    }
+
     private static InputStream open(String asset) {
         return TestItemGenerator.class.getResourceAsStream(asset);
     }

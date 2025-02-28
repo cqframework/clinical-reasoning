@@ -381,8 +381,7 @@ public class PlanDefinition {
         public GeneratedBundle isEqualsTo(String expectedBundleAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(
-                        generatedBundleInner), true);
+                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundleInner), true);
             } catch (JSONException | IOException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
                 fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
@@ -480,8 +479,9 @@ public class PlanDefinition {
         public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(
-                        generatedCarePlanInner), true);
+                        load(expectedCarePlanAssetName),
+                        jsonParser.encodeResourceToString(generatedCarePlanInner),
+                        true);
             } catch (JSONException | IOException e) {
                 logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
                 fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
@@ -525,8 +525,7 @@ public class PlanDefinition {
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasCommunicationRequestPayload() {
-            var communications = ((List<IBaseResource>) modelResolver.resolvePath(
-                generatedCarePlanInner, CONTAINED))
+            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
                     .stream()
                             .filter(r -> r.fhirType().equals("CommunicationRequest"))
                             .toList();

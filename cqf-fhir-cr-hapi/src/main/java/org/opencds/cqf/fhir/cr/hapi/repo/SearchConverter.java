@@ -62,14 +62,7 @@ public class SearchConverter {
             // if list of parameters is the value
             if (entry.getValue().size() > 1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())) {
                 // is value a TokenParam
-                if (isTokenParam(entry.getValue().get(0))) {
-                    var tokenKey = entry.getKey();
-                    var tokenList = new TokenOrListParam();
-                    for (IQueryParameterType rec : entry.getValue()) {
-                        tokenList.add((TokenParam) rec);
-                    }
-                    searchParameterMap.add(tokenKey, tokenList);
-                }
+                addTokenToSearchIfNeeded(entry);
 
                 // parameter type is single value list
             } else {
@@ -77,6 +70,17 @@ public class SearchConverter {
                     setParameterTypeValue(entry.getKey(), value);
                 }
             }
+        }
+    }
+
+    private void addTokenToSearchIfNeeded(Map.Entry<String, List<IQueryParameterType>> theEntry) {
+        if (isTokenParam(theEntry.getValue().get(0))) {
+            var tokenKey = theEntry.getKey();
+            var tokenList = new TokenOrListParam();
+            for (IQueryParameterType rec : theEntry.getValue()) {
+                tokenList.add((TokenParam) rec);
+            }
+            searchParameterMap.add(tokenKey, tokenList);
         }
     }
 

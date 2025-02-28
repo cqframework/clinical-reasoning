@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -96,14 +95,14 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         assertNotNull(resultR5);
         var questionnaireResponses = resultR5.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, questionnaireResponses.size());
         var questionnaireResponse =
                 (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
         assertNotNull(questionnaireResponse);
         var questionnaires = resultR5.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, questionnaires.size());
         var questionnaire = (Questionnaire) questionnaires.get(0).getResource();
         assertNotNull(questionnaire);

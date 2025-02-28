@@ -36,6 +36,28 @@ public class BundleProviderUtil {
 
     private BundleProviderUtil() {}
 
+    private record OffsetLimitInfo(Integer offset, Integer limit) {
+        int addOffsetAndLimit() {
+            return offsetOrZero() + limitOrZero();
+        }
+
+        int maxOfDifference() {
+            return Math.max(offsetOrZero() - limitOrZero(), 0);
+        }
+
+        private int offsetOrZero() {
+            return defaultZeroIfNull(offset);
+        }
+
+        private int limitOrZero() {
+            return defaultZeroIfNull(offset);
+        }
+
+        private int defaultZeroIfNull(Integer value) {
+            return defaultIfNull(value, 0);
+        }
+    }
+
     public static IBaseResource createBundleFromBundleProvider(
             IRestfulServer<?> server,
             RequestDetails request,
@@ -46,28 +68,17 @@ public class BundleProviderUtil {
             int offset,
             BundleTypeEnum bundleType,
             String searchId) {
-        IVersionSpecificBundleFactory bundleFactory = server.getFhirContext().newBundleFactory();
-        final Integer offsetToUse;
-        Integer limitToUse = limit;
-
-        if (result.getCurrentPageOffset() != null) {
-            offsetToUse = result.getCurrentPageOffset();
-            limitToUse = result.getCurrentPageSize();
-            Validate.notNull(
-                    limitToUse, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
-        } else {
-            offsetToUse = RestfulServerUtils.tryToExtractNamedParameter(request, Constants.PARAM_OFFSET);
-        }
 
         int numToReturn;
         String searchIdToUse = null;
         List<IBaseResource> resourceList;
         Integer numTotalResults = result.size();
+        final OffsetLimitInfo offsetLimitInfo = extractOffsetPageInfo(result, request, limit);
 
-        int pageSize;
-        if (offsetToUse != null || !server.canStoreSearchResults()) {
-            if (limitToUse != null) {
-                pageSize = limitToUse;
+        final int pageSize;
+        if (offsetLimitInfo.offset != null || !server.canStoreSearchResults()) {
+            if (offsetLimitInfo.limit != null) {
+                pageSize = offsetLimitInfo.limit;
             } else {
                 if (server.getDefaultPageSize() != null) {
                     pageSize = server.getDefaultPageSize();
@@ -77,7 +88,7 @@ public class BundleProviderUtil {
             }
             numToReturn = pageSize;
 
-            if (offsetToUse != null || result.getCurrentPageOffset() != null) {
+            if (offsetLimitInfo.offset != null || result.getCurrentPageOffset() != null) {
                 // When offset query is done result already contains correct amount (+ ir includes
                 // etc.) so return everything
                 resourceList = result.getResources(0, Integer.MAX_VALUE);
@@ -90,10 +101,10 @@ public class BundleProviderUtil {
 
         } else {
             IPagingProvider pagingProvider = server.getPagingProvider();
-            if (limitToUse == null || limitToUse.equals(0)) {
+            if (offsetLimitInfo.limit == null || offsetLimitInfo.limit.equals(0)) {
                 pageSize = pagingProvider.getDefaultPageSize();
             } else {
-                pageSize = Math.min(pagingProvider.getMaximumPageSize(), limitToUse);
+                pageSize = Math.min(pagingProvider.getMaximumPageSize(), offsetLimitInfo.limit);
             }
             numToReturn = pageSize;
 
@@ -127,33 +138,8 @@ public class BundleProviderUtil {
             }
         }
 
-        /*
-         * Remove any null entries in the list - This generally shouldn't happen but can if data has
-         * been manually purged from the JPA database
-         */
-        boolean hasNull = false;
-        for (IBaseResource next : resourceList) {
-            if (next == null) {
-                hasNull = true;
-                break;
-            }
-        }
-        if (hasNull) {
-            resourceList.removeIf(Objects::isNull);
-        }
-
-        /*
-         * Make sure all returned resources have an ID (if not, this is a bug in the user server code)
-         */
-        for (IBaseResource next : resourceList) {
-            if ((next.getIdElement() == null || next.getIdElement().isEmpty())
-                    && !(next instanceof IBaseOperationOutcome)) {
-                throw new InternalErrorException(Msg.code(2311)
-                        + "Server method returned resource of type["
-                        + next.getClass().getSimpleName()
-                        + "] with no ID specified (IResource#setId(IdDt) must be called)");
-            }
-        }
+        removeNullIfNeeded(resourceList);
+        validateAllResourcesHaveId(resourceList);
 
         BundleLinks links = new BundleLinks(
                 request.getFhirServerBase(),
@@ -169,8 +155,8 @@ public class BundleProviderUtil {
                         links,
                         request.getRequestPath(),
                         request.getTenantId(),
-                        offsetToUse + limitToUse,
-                        limitToUse,
+                        offsetLimitInfo.addOffsetAndLimit(),
+                        offsetLimitInfo.limit,
                         request.getParameters()));
             }
             if (isNotBlank(result.getPreviousPageId())) {
@@ -178,32 +164,32 @@ public class BundleProviderUtil {
                         links,
                         request.getRequestPath(),
                         request.getTenantId(),
-                        Math.max(offsetToUse - limitToUse, 0),
-                        limitToUse,
+                        offsetLimitInfo.maxOfDifference(),
+                        offsetLimitInfo.limit,
                         request.getParameters()));
             }
         }
 
-        if (offsetToUse != null || (!server.canStoreSearchResults() && !isEverythingOperation(request))) {
+        if (offsetLimitInfo.offset != null || (!server.canStoreSearchResults() && !isEverythingOperation(request))) {
             // Paging without caching
             // We're doing offset pages
             int requestedToReturn = numToReturn;
-            if (server.getPagingProvider() == null && offsetToUse != null) {
+            if (server.getPagingProvider() == null && offsetLimitInfo.offset != null) {
                 // There is no paging provider at all, so assume we're querying up to all the results we
                 // need every time
-                requestedToReturn += offsetToUse;
+                requestedToReturn += offsetLimitInfo.offset;
             }
             if ((numTotalResults == null || requestedToReturn < numTotalResults) && !resourceList.isEmpty()) {
                 links.setNext(RestfulServerUtils.createOffsetPagingLink(
                         links,
                         request.getRequestPath(),
                         request.getTenantId(),
-                        defaultIfNull(offsetToUse, 0) + numToReturn,
+                        defaultIfNull(offsetLimitInfo.offset, 0) + numToReturn,
                         numToReturn,
                         request.getParameters()));
             }
 
-            if (offsetToUse != null && offsetToUse > 0) {
+            if (offsetLimitInfo.offset != null && offsetLimitInfo.offset > 0) {
                 int start = Math.max(0, offset - pageSize);
                 links.setPrev(RestfulServerUtils.createOffsetPagingLink(
                         links,
@@ -236,11 +222,75 @@ public class BundleProviderUtil {
             }
         }
 
-        bundleFactory.addRootPropertiesToBundle(result.getUuid(), links, result.size(), result.getPublished());
+        return buildBundle(server, includes, result, bundleType, links, resourceList);
+    }
+
+    private static OffsetLimitInfo extractOffsetPageInfo(
+            IBundleProvider result, RequestDetails request, Integer limit) {
+        Integer offsetToUse;
+        Integer limitToUse = limit;
+        if (result.getCurrentPageOffset() != null) {
+            offsetToUse = result.getCurrentPageOffset();
+            limitToUse = result.getCurrentPageSize();
+            Validate.notNull(
+                    limitToUse, "IBundleProvider returned a non-null offset, but did not return a non-null page size");
+        } else {
+            offsetToUse = RestfulServerUtils.tryToExtractNamedParameter(request, Constants.PARAM_OFFSET);
+        }
+        return new OffsetLimitInfo(offsetToUse, limitToUse);
+    }
+
+    private static IBaseResource buildBundle(
+            IRestfulServer<?> theServer,
+            Set<Include> theIncludes,
+            IBundleProvider theResult,
+            BundleTypeEnum theBundleType,
+            BundleLinks theLinks,
+            List<IBaseResource> theResourceList) {
+        IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+
+        bundleFactory.addRootPropertiesToBundle(
+                theResult.getUuid(), theLinks, theResult.size(), theResult.getPublished());
         bundleFactory.addResourcesToBundle(
-                new ArrayList<>(resourceList), bundleType, links.serverBase, server.getBundleInclusionRule(), includes);
+                new ArrayList<>(theResourceList),
+                theBundleType,
+                theLinks.serverBase,
+                theServer.getBundleInclusionRule(),
+                theIncludes);
 
         return bundleFactory.getResourceBundle();
+    }
+
+    private static void removeNullIfNeeded(List<IBaseResource> theResourceList) {
+        /*
+         * Remove any null entries in the list - This generally shouldn't happen but can if data has
+         * been manually purged from the JPA database
+         */
+        boolean hasNull = false;
+        for (IBaseResource next : theResourceList) {
+            if (next == null) {
+                hasNull = true;
+                break;
+            }
+        }
+        if (hasNull) {
+            theResourceList.removeIf(Objects::isNull);
+        }
+    }
+
+    private static void validateAllResourcesHaveId(List<IBaseResource> theResourceList) {
+        /*
+         * Make sure all returned resources have an ID (if not, this is a bug in the user server code)
+         */
+        for (IBaseResource next : theResourceList) {
+            if ((next.getIdElement() == null || next.getIdElement().isEmpty())
+                    && !(next instanceof IBaseOperationOutcome)) {
+                throw new InternalErrorException(Msg.code(2311)
+                        + "Server method returned resource of type["
+                        + next.getClass().getSimpleName()
+                        + "] with no ID specified (IResource#setId(IdDt) must be called)");
+            }
+        }
     }
 
     private static boolean isEverythingOperation(RequestDetails request) {

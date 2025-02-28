@@ -82,7 +82,6 @@
     {
       "extension": [],
       "title": "Facility Information",
-      "description": "",
       "input": [
         {
           "type": "Organization",
@@ -94,7 +93,6 @@
     },
     {
       "title": "Beneficiary Information",
-      "description": "",
       "input": [
         {
           "type": "Patient",
@@ -106,7 +104,6 @@
     },
     {
       "title": "Operating Physician Information",
-      "description": "",
       "input": [
         {
           "type": "Practitioner",
@@ -118,7 +115,6 @@
     },
     {
       "title": "Attending Physician Information",
-      "description": "",
       "input": [
         {
           "type": "Practitioner",

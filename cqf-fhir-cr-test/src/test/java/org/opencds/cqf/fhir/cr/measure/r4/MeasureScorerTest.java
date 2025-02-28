@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.test.FhirResourceLoader;
+import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 
 class MeasureScorerTest {
 

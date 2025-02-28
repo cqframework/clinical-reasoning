@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -14,8 +16,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
+import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
@@ -27,9 +31,9 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
 
     @Test
     void testGenerateQuestionnaire() {
-        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
-        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
-        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-PatientData.json");
+        var resourceLoader = new FhirResourceLoader(
+                getFhirContext(), TestOperationProvider.class, List.of("shared/r4/pa-aslp"), true);
+        resourceLoader.getResources().forEach(this::loadResource);
 
         var requestDetails = setupRequestDetails();
         var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
@@ -90,10 +94,18 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
                 requestDetails);
 
         assertNotNull(resultR5);
+        var questionnaireResponses = resultR5.getEntry().stream()
+                .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
+                .collect(Collectors.toList());
+        assertEquals(1, questionnaireResponses.size());
         var questionnaireResponse =
-                (QuestionnaireResponse) resultR5.getEntry().get(1).getResource();
+                (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
         assertNotNull(questionnaireResponse);
-        var questionnaire = (Questionnaire) questionnaireResponse.getContained().get(0);
+        var questionnaires = resultR5.getEntry().stream()
+                .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
+                .collect(Collectors.toList());
+        assertEquals(1, questionnaires.size());
+        var questionnaire = (Questionnaire) questionnaires.get(0).getResource();
         assertNotNull(questionnaire);
         assertThat(questionnaire.getItem().get(0).getItem().get(0).getText()).isEqualTo("Sleep Study");
         assertTrue(questionnaireResponse.getItem().get(0).getItem().get(0).hasAnswer());

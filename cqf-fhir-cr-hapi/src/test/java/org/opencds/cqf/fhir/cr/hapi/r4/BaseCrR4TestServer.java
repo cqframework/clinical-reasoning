@@ -129,6 +129,10 @@ public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResou
         return ourCtx;
     }
 
+    public void loadResourceFromPath(String path) {
+        loadResource(readResource(path));
+    }
+
     public void loadBundle(String theLocation) {
         var bundy = (Bundle) readResource(theLocation);
         ourClient.transaction().withBundle(bundy).execute();

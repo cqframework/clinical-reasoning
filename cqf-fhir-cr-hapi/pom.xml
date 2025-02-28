@@ -134,6 +134,18 @@
             <version>${hapi.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.fhir</groupId>
+            <artifactId>cqf-fhir-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.fhir</groupId>
+            <artifactId>cqf-fhir-cr-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

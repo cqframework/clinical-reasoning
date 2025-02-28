@@ -78,7 +78,6 @@
     {
       "extension": [],
       "title": "Facility Information",
-      "description": "",
       "input": [
         {
           "requirement": {
@@ -92,7 +91,6 @@
     },
     {
       "title": "Beneficiary Information",
-      "description": "",
       "input": [
         {
           "requirement": {
@@ -106,7 +104,6 @@
     },
     {
       "title": "Operating Physician Information",
-      "description": "",
       "input": [
         {
           "requirement": {
@@ -120,7 +117,6 @@
     },
     {
       "title": "Attending Physician Information",
-      "description": "",
       "input": [
         {
           "requirement": {

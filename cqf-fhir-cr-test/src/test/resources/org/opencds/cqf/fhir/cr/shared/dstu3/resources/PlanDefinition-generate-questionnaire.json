@@ -84,7 +84,6 @@
     {
       "extension": [],
       "title": "Prior Auth Route One",
-      "description": "",
       "condition": [
         {
           "kind": "applicability",

@@ -1,7 +1,8 @@
-package org.opencds.cqf.fhir.test;
+package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.repository.ig.CqlContent;
 
 public class FhirResourceLoader implements ResourceLoader {
 
@@ -74,6 +76,9 @@ public class FhirResourceLoader implements ResourceLoader {
     }
 
     private IBaseResource loadTestResources(String location) {
-        return readResource(fhirContext, location);
+        var path = Paths.get(location);
+        var resource = readResource(fhirContext, location);
+        CqlContent.loadCqlContent(resource, path.getParent());
+        return resource;
     }
 }

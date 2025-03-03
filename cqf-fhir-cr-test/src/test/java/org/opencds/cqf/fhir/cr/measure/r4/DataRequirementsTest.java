@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("squid:S2699")
 class DataRequirementsTest {
     @Test
     void dataRequirements_resourceBasisMeasure_withMeasurementPeriod() {
@@ -85,7 +86,7 @@ class DataRequirementsTest {
                 .periodEnd("2024-12-31")
                 .DataRequirements();
 
-        assertThrows(ResourceNotFoundException.class, () -> when.then().report());
+        assertThrows(ResourceNotFoundException.class, when::then);
     }
 
     @Test

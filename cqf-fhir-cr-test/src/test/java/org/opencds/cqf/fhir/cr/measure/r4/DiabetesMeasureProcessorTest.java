@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.io.IOException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("squid:S2699")
 class DiabetesMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
@@ -29,7 +29,7 @@ class DiabetesMeasureProcessorTest {
     }
 
     @Test
-    void a1c_population() throws IOException {
+    void a1c_population() {
         given.when()
                 .measureId("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR")
                 .periodStart("2019-01-01")

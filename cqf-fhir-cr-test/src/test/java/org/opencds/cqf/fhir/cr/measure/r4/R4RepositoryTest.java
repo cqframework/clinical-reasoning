@@ -48,7 +48,7 @@ class R4RepositoryTest {
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         Patient john = new Patient();
         john.setId(new IdType("Patient", "id-john-doe"));
         MethodOutcome methodOutcome = repository.create(john, null);

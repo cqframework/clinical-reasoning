@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -45,6 +44,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@SuppressWarnings("squid:S5960")
 public class TestQuestionnaire {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TestQuestionnaire.class);
 
@@ -238,7 +238,7 @@ public class TestQuestionnaire {
                     null);
         }
 
-        public GeneratedQuestionnaireResponse thenPopulate(Boolean buildRequest) {
+        public GeneratedQuestionnaireResponse thenPopulate(boolean buildRequest) {
             if (buildRequest) {
                 var populateRequest = buildRequest();
                 return new GeneratedQuestionnaireResponse(
@@ -397,7 +397,7 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {
             var answer = request.resolvePathList(items.get(linkId), "answer", IBase.class);
             var answers =
-                    answer.stream().map(a -> request.resolvePath(a, "value")).collect(Collectors.toList());
+                    answer.stream().map(a -> request.resolvePath(a, "value")).toList();
             assertNotNull(answers);
             if (value instanceof IPrimitiveType) {
                 assertTrue(

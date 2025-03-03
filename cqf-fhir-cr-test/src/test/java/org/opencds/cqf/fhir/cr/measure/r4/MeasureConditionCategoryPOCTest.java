@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("squid:S2699")
 public class MeasureConditionCategoryPOCTest {
     protected static Given given = Measure.given().repositoryFor("ConditionCategoryPoc");
 

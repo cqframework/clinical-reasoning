@@ -31,8 +31,6 @@ class InputParametersTest {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory adapterFactoryDstu3 =
-            new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
     private final org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory adapterFactoryR4 =
             new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
     private final org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory adapterFactoryR5 =

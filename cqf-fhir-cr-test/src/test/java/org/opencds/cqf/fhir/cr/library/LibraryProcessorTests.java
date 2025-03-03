@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S2699")
 @ExtendWith(MockitoExtension.class)
 class LibraryProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();

@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@SuppressWarnings("squid:S5960")
 public class TestItemGenerator {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 

@@ -62,6 +62,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S2699")
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
@@ -555,7 +556,7 @@ public class Measure {
             var lists = value().getContained().stream()
                     .filter(t -> t instanceof ListResource)
                     .map(x -> (ListResource) x)
-                    .collect(Collectors.toList());
+                    .toList();
             for (ListResource list : lists) {
                 // all contained lists have correct ResourceType
                 var size = list.getEntry().size();
@@ -624,8 +625,7 @@ public class Measure {
                             }
                         }
                     }
-                } else {
-                    // population != null
+                } else if (population != null) {
                     return population.getCount();
                 }
             }

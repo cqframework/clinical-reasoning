@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  * * populations (ex: initial-population), which include stratifiers
  * No duplicate references in evaluated resources
  */
+@SuppressWarnings("squid:S2699")
 class MeasureEvaluatedResourcesTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(

@@ -158,14 +158,12 @@ class R4MeasureReportBuilderTest {
     @Test
     void errorMismatchedGroupsSizes_tooMany() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2);
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of());
+        final List<String> subjectIds = List.of();
 
         try {
-            r4MeasureReportBuilder.build(
-                    buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of()),
-                    MeasureReportType.INDIVIDUAL,
-                    null,
-                    List.of());
+            r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
         } catch (InvalidRequestException exception) {
             assertEquals(
@@ -177,14 +175,12 @@ class R4MeasureReportBuilderTest {
     @Test
     void errorMismatchedGroupsSizes_tooFew() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2);
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of());
+        final List<String> subjectIds = List.of();
 
         try {
-            r4MeasureReportBuilder.build(
-                    buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of()),
-                    MeasureReportType.INDIVIDUAL,
-                    null,
-                    List.of());
+            r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
         } catch (InvalidRequestException exception) {
             assertEquals(

@@ -68,8 +68,9 @@ class R4DateHelperTest {
     @Test
     void checkNull() {
         var helper = new R4DateHelper();
+        final Interval measurementPeriodInterval = new Interval(new java.util.Date(), true, new java.util.Date(), true);
         try {
-            helper.buildMeasurementPeriod(new Interval(new java.util.Date(), true, new java.util.Date(), true));
+            helper.buildMeasurementPeriod(measurementPeriodInterval);
             fail();
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or Date"));

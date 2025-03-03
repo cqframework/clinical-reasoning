@@ -31,7 +31,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
     PlanDefinitionDataRequirementsProvider planDefinitionDataRequirementsProvider;
 
     @Test
-    void testGenerateQuestionnaire() throws URISyntaxException, IOException, ClassNotFoundException {
+    void testGenerateQuestionnaire() {
         // This test is duplicating test data from the cr-test package.  Ideally it should be reusing the test resources
         // from that package
         var resourceLoader = new FhirResourceLoader(getFhirContext(), this.getClass(), List.of("pa-aslp"), true);

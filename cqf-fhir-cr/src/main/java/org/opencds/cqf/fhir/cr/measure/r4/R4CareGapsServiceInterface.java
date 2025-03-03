@@ -11,6 +11,7 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 /**
  * Describe operations provided by caregaps services for downstream implementors
  */
+@SuppressWarnings("squid:S107")
 public interface R4CareGapsServiceInterface {
 
     Parameters getCareGapsReport(

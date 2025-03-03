@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -44,17 +45,10 @@ class MeasureScoringTypeCompositeTest {
 
     @Test
     void compositeBoolean() {
+        final When evaluate =
+                given.when().measureId("CompositeBooleanAllPopulations").evaluate();
         try {
-            given.when()
-                    .measureId("CompositeBooleanAllPopulations")
-                    .evaluate()
-                    .then()
-                    .firstGroup()
-                    .population("initial-population")
-                    .hasCount(10)
-                    .up()
-                    .up()
-                    .report();
+            evaluate.then();
             fail("This is not a covered scoring Type and should fail");
         } catch (InvalidRequestException e) {
             assertTrue(

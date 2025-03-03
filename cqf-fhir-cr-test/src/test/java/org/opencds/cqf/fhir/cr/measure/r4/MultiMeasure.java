@@ -146,7 +146,6 @@ class MultiMeasure {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4MultiMeasureService service;
 
         When(R4MultiMeasureService service) {
@@ -272,7 +271,7 @@ class MultiMeasure {
             var reports = report().getEntry().stream()
                     .map(t -> (MeasureReport) t.getResource())
                     .filter(x -> x.getMeasure().equals(measureUrl))
-                    .collect(Collectors.toList());
+                    .toList();
             var msg = String.format(
                     "measureReport count: %s, does not match for measure url: %s", reports.size(), measureUrl);
             assertEquals(count, reports.size(), msg);
@@ -290,7 +289,7 @@ class MultiMeasure {
                     g.getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
-                            .collect(Collectors.toList()),
+                            .toList(),
                     measureUrl));
         }
 

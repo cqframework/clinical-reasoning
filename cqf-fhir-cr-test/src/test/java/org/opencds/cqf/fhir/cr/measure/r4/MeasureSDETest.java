@@ -14,9 +14,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S2699")
 class MeasureSDETest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(
@@ -148,12 +150,11 @@ class MeasureSDETest {
      */
     @Test
     void CohortBooleanSDEMissingUsage() {
+        final When evaluate =
+                given.when().measureId("CohortBooleanSDEMissingUsage").evaluate();
+
         try {
-            given.when()
-                    .measureId("CohortBooleanSDEMissingUsage")
-                    .evaluate()
-                    .then()
-                    .report();
+            evaluate.then();
             fail("should throw error");
         } catch (InvalidRequestException e) {
             assertTrue(

@@ -18,6 +18,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import jakarta.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -43,6 +43,8 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
@@ -89,7 +91,7 @@ class PackageVisitorTests {
                                                 .getValueSet()
                                                 .size()
                                         == 0))
-                .collect(Collectors.toList());
+                .toList();
 
         // Ensure expansion is populated for all leaf value sets
         leafValueSets.forEach(valueSet -> assertNotNull(valueSet.getExpansion()));
@@ -114,8 +116,13 @@ class PackageVisitorTests {
         assertTrue(exception.getMessage().contains("Cannot expand ValueSet without a terminology server: "));
     }
 
-    @Test
-    void packageOperation_should_fail_credentials_missing_username() {
+    @ParameterizedTest
+    @CsvSource({
+        ",some-api-key,Cannot expand ValueSet without VSAC Username.",
+        "someUsername,,Cannot expand ValueSet without VSAC API Key.",
+        "someUsername,some-api-key,Terminology Server expansion failed for ValueSet "
+    })
+    void packageOperation_should_fail(@Nullable String username, String apiKey, String expectedError) {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(loadedBundle);
@@ -124,57 +131,15 @@ class PackageVisitorTests {
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Endpoint terminologyEndpoint = new Endpoint();
-        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(null));
-        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, params);
         });
 
-        assertTrue(exception.getMessage().contains("Cannot expand ValueSet without VSAC Username."));
-    }
-
-    @Test
-    void packageOperation_should_fail_credentials_missing_apikey() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Endpoint terminologyEndpoint = new Endpoint();
-        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
-        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(null));
-        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
-
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
-
-        assertTrue(exception.getMessage().contains("Cannot expand ValueSet without VSAC API Key."));
-    }
-
-    @Test
-    void packageOperation_should_fail_credentials_invalid() {
-        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-                .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Endpoint terminologyEndpoint = new Endpoint();
-        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType("someUsername"));
-        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType("some-api-key"));
-        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
-
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
-
-        assertTrue(exception.getMessage().contains("Terminology Server expansion failed for ValueSet "));
+        assertTrue(exception.getMessage().contains(expectedError));
     }
 
     @Test
@@ -232,7 +197,7 @@ class PackageVisitorTests {
         List<MetadataResource> updatedResources = updatedCanonicalVersionPackage.getEntry().stream()
                 .map(entry -> (MetadataResource) entry.getResource())
                 .filter(resource -> resource.getUrl().contains("to-add-missing-version"))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(2, updatedResources.size());
         for (MetadataResource updatedResource : updatedResources) {
             assertEquals(updatedResource.getVersion(), versionToUpdateTo);
@@ -404,7 +369,7 @@ class PackageVisitorTests {
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
             List<MetadataResource> resources = packaged.getEntry().stream()
                     .map(entry -> (MetadataResource) entry.getResource())
-                    .collect(Collectors.toList());
+                    .toList();
             for (MetadataResource resource : resources) {
                 Boolean noExtraResourcesReturned =
                         includedTypeURLs.getValue().stream().anyMatch(url -> url.equals(resource.getUrl()));

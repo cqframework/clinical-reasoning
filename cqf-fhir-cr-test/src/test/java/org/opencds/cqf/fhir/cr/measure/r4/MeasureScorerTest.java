@@ -35,9 +35,9 @@ class MeasureScorerTest {
         var measureUrl = "http://content.alphora.com/fhir/uv/mips-qm-content-r4/Measure/multirate-groupid";
         var measureScoringDef = getMeasureScoringDef(measureUrl);
         var measureReport = getMeasureReport(measureUrl);
+        R4MeasureReportScorer scorer = new R4MeasureReportScorer();
 
         try {
-            R4MeasureReportScorer scorer = new R4MeasureReportScorer();
             scorer.score(measureUrl, measureScoringDef, measureReport);
             fail("this should throw error");
         } catch (InvalidRequestException e) {
@@ -294,10 +294,10 @@ class MeasureScorerTest {
 
     private List<Measure> getMeasures() {
         // Measures
-        FhirResourceLoader measures = new FhirResourceLoader(
+        FhirResourceLoader measuresInner = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/Measures/"), false);
         List<Measure> measureList = new ArrayList<>();
-        var resourceList = measures.getResources();
+        var resourceList = measuresInner.getResources();
         for (IBaseResource resource : resourceList) {
             measureList.add((Measure) resource);
         }
@@ -305,10 +305,10 @@ class MeasureScorerTest {
     }
 
     private List<MeasureReport> getMeasureReports() {
-        FhirResourceLoader measureReports = new FhirResourceLoader(
+        FhirResourceLoader measureReportsInner = new FhirResourceLoader(
                 FhirContext.forR4(), this.getClass(), List.of("MeasureScoring/MeasureReports/"), false);
         List<MeasureReport> measureReportList = new ArrayList<>();
-        var reportResourceList = measureReports.getResources();
+        var reportResourceList = measureReportsInner.getResources();
         for (IBaseResource resource : reportResourceList) {
             measureReportList.add((MeasureReport) resource);
         }

@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 
+@SuppressWarnings("java:S107")
 public class CqlExecutionOperationProvider {
 
     private final ICqlExecutionServiceFactory cqlExecutionServiceFactory;

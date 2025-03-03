@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
 
     private final R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory;

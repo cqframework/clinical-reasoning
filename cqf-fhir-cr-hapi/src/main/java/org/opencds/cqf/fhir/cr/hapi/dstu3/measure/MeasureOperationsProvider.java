@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
     private final IMeasureServiceFactory dstu3MeasureProcessorFactory;
 

@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("java:S107")
 public class LibraryEvaluateProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
 

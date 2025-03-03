@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("java:S107")
 public class ActivityDefinitionApplyProvider {
     private final IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory;
 

@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 
+@SuppressWarnings("java:S107")
 public class CareGapsOperationProvider {
     private final ICareGapsServiceFactory r4CareGapsProcessorFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;

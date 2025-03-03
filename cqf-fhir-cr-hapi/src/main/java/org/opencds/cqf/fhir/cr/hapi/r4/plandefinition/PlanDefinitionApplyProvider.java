@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("java:S107")
 public class PlanDefinitionApplyProvider {
     private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
 

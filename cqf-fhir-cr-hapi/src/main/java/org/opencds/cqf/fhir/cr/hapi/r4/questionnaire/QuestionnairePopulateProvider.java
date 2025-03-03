@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("java:S107")
 public class QuestionnairePopulateProvider {
     private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
 

@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("java:S107")
 public class StructureDefinitionQuestionnaireProvider {
     private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
 

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -107,13 +106,13 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     public List<IElementDefinitionAdapter> getSnapshotElements() {
         return get().getSnapshot().getElement().stream()
                 .map(adapterFactory::createElementDefinition)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<IElementDefinitionAdapter> getDifferentialElements() {
         return get().getDifferential().getElement().stream()
                 .map(adapterFactory::createElementDefinition)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

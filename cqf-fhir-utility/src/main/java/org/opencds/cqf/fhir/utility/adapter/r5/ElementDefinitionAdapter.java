@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -80,7 +80,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
 
     @Override
     public List<ICodingAdapter> getCode() {
-        return get().getCode().stream().map(adapterFactory::createCoding).collect(Collectors.toList());
+        return get().getCode().stream().map(adapterFactory::createCoding).toList();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
 
     @Override
     public List<String> getAlias() {
-        return get().getAlias().stream().map(a -> a.asStringValue()).collect(Collectors.toList());
+        return get().getAlias().stream().map(PrimitiveType::asStringValue).toList();
     }
 
     @Override
@@ -136,7 +136,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends IBase> List<T> getType() {
-        return get().getType().stream().map(t -> (T) t).collect(Collectors.toList());
+        return get().getType().stream().map(t -> (T) t).toList();
     }
 
     @Override

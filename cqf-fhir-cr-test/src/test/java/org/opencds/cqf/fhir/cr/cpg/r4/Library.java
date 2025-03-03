@@ -109,7 +109,6 @@ public class Library {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4CqlExecutionService cqlService;
         private final R4LibraryEvaluationService libraryEvalService;
 
@@ -231,14 +230,14 @@ public class Library {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            Parameters parameters;
+            Parameters parametersInner;
             try {
-                parameters = this.operation.get();
+                parametersInner = this.operation.get();
             } catch (Exception e) {
                 throw new IllegalStateException("error when running 'then' and invoking the chosen operation", e);
             }
 
-            return new Library.SelectedParameters(parameters);
+            return new Library.SelectedParameters(parametersInner);
         }
     }
 

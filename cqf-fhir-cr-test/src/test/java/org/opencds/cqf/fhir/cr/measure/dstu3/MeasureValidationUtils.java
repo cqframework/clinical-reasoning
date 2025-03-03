@@ -120,11 +120,11 @@ public class MeasureValidationUtils {
         }
 
         for (Resource resource : expected.getContained()) {
-            if (resource.hasId() && listResources.containsKey(resource.getId())) {
-                if (resource.getResourceType().equals(ResourceType.List)) {
-                    validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
-                    validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
-                }
+            if (resource.hasId()
+                    && listResources.containsKey(resource.getId())
+                    && resource.getResourceType().equals(ResourceType.List)) {
+                validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
+                validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
             }
         }
     }

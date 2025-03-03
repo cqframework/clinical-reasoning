@@ -213,16 +213,6 @@ public class Measure {
             return new SelectedReference<>(this, r);
         }
 
-        // public SelectedReference<SelectedReport> evaluatedResource(String name) {
-        // return this.reference(x -> x.getEvaluatedResource().stream()
-        // .filter(y -> y.getReference().equals(name)).findFirst().get());
-        // }
-
-        // public SelectedReport hasEvaluatedResourceCount(int count) {
-        // assertEquals(count, report().getEvaluatedResource().size());
-        // return this;
-        // }
-
         public SelectedReport hasContainedResourceCount(int count) {
             assertEquals(count, report().getContained().size());
             return this;

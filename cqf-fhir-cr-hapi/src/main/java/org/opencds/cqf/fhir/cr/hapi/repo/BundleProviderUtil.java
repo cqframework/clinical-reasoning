@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -266,7 +267,6 @@ public class BundleProviderUtil {
             String searchId,
             OffsetLimitInfo offsetLimitInfo) {
 
-        String searchIdToUse = null;
         Integer numTotalResults = result.size();
         List<IBaseResource> resourceList;
         int numToReturn;
@@ -295,6 +295,21 @@ public class BundleProviderUtil {
             numTotalResults = result.size();
         }
 
+        final String searchIdToUse =
+                computeSearchId(request, result, searchId, numTotalResults, numToReturn, pagingProvider);
+
+        return new InitialPagingResults(pageSize, resourceList, numToReturn, searchIdToUse, numTotalResults);
+    }
+
+    @Nullable
+    private static String computeSearchId(
+            RequestDetails request,
+            IBundleProvider result,
+            String searchId,
+            Integer numTotalResults,
+            int numToReturn,
+            IPagingProvider pagingProvider) {
+        String searchIdToUse = null;
         if (searchId != null) {
             searchIdToUse = searchId;
         } else {
@@ -308,7 +323,7 @@ public class BundleProviderUtil {
                 }
             }
         }
-        return new InitialPagingResults(pageSize, resourceList, numToReturn, searchIdToUse, numTotalResults);
+        return searchIdToUse;
     }
 
     @Nonnull

@@ -15,22 +15,26 @@ import org.junit.jupiter.api.Test;
 class CqlEvaluationServiceTest {
     @Test
     void libraryEvaluationService_inlineAsthma() {
-        var content = "library AsthmaTest version '1.0.0'\n" + "\n"
-                + "using FHIR version '4.0.1'\n"
-                + "\n"
-                + "include FHIRHelpers version '4.0.1'\n"
-                + "\n"
-                + "codesystem \"SNOMED\": 'http://snomed.info/sct'\n"
-                + "\n"
-                + "code \"Asthma\": '195967001' from \"SNOMED\"\n"
-                + "\n"
-                + "context Patient\n"
-                + "\n"
-                + "define \"Asthma Diagnosis\":\n"
-                + "    [Condition: \"Asthma\"]\n"
-                + "\n"
-                + "define \"Has Asthma Diagnosis\":\n"
-                + "    exists(\"Asthma Diagnosis\")\n";
+        var content =
+                """
+            library AsthmaTest version '1.0.0'
+
+            using FHIR version '4.0.1'
+
+            include FHIRHelpers version '4.0.1'
+
+            codesystem "SNOMED": 'http://snomed.info/sct'
+
+            code "Asthma": '195967001' from "SNOMED"
+
+            context Patient
+
+            define "Asthma Diagnosis"
+
+            [Condition: "Asthma"]
+                define "Has Asthma Diagnosis":
+                    exists("Asthma Diagnosis")
+            """;
         var when = Library.given()
                 .repositoryFor("libraryeval")
                 .when()
@@ -44,24 +48,28 @@ class CqlEvaluationServiceTest {
 
     @Test
     void libraryEvaluationService_contentAndExpression() {
-        var content = "library SimpleR4Library\n" + "\n"
-                + "using FHIR version '4.0.1'\n"
-                + "\n"
-                + "include FHIRHelpers version '4.0.1' called FHIRHelpers\n"
-                + "\n"
-                + "context Patient\n"
-                + "\n"
-                + "define simpleBooleanExpression: true\n"
-                + "\n"
-                + "define observationRetrieve: [Observation]\n"
-                + "\n"
-                + "define observationHasCode: not IsNull(([Observation]).code)\n"
-                + "\n"
-                + "define \"Initial Population\": observationHasCode\n"
-                + "\n"
-                + "define \"Denominator\": \"Initial Population\"\n"
-                + "\n"
-                + "define \"Numerator\": \"Denominator\"";
+        var content =
+                """
+            library SimpleR4Library
+
+            using FHIR version '4.0.1'
+
+            include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+            context Patient
+
+            define simpleBooleanExpression: true
+
+            define observationRetrieve: [Observation]
+
+            define observationHasCode: not IsNull(([Observation]).code)
+
+            define "Initial Population": observationHasCode
+
+            define "Denominator": "Initial Population"
+
+            define "Numerator": "Denominator"";
+            """;
         var when = Library.given()
                 .repositoryFor("libraryeval")
                 .when()
@@ -74,7 +82,6 @@ class CqlEvaluationServiceTest {
         assertEquals(1, results.getParameter().size());
         assertTrue(results.getParameter("Numerator").getValue() instanceof BooleanType);
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
-        ;
     }
 
     @Test

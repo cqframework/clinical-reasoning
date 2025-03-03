@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 
+@SuppressWarnings("java:S5960")
 public class MeasureValidationUtils {
     private MeasureValidationUtils() {}
 
@@ -109,11 +109,10 @@ public class MeasureValidationUtils {
         validateStratumScore(stratum, new BigDecimal(score));
     }
 
-    protected static void validateEvaluatedResourceExtension(
-            List<Reference> measureReferences, String resourceId, String... populations) {
+    protected static void validateEvaluatedResourceExtension(List<Reference> measureReferences, String resourceId) {
         List<Reference> resourceReferences = measureReferences.stream()
                 .filter(x -> x.getReference().equals(resourceId))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, resourceReferences.size());
     }
 

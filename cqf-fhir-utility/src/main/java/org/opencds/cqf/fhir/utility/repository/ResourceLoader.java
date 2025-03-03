@@ -63,7 +63,6 @@ public interface ResourceLoader {
         try {
             File f = new File(location);
             if (f.isFile()) {
-                // if (location.startsWith(File.separator)) {
                 is = new FileInputStream(location);
             } else {
                 is = getRelativeClass().getResourceAsStream(location);

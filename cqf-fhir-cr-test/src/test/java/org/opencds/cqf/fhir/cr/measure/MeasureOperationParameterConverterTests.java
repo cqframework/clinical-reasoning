@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -145,38 +148,13 @@ class MeasureOperationParameterConverterTests {
         assertTrue(expected.equalsDeep(actual));
     }
 
-    @Test
-    void nullMeasurementPeriod() {
+    @ParameterizedTest
+    @CsvSource({",", "2019-01-01,", ",2020-01-01"})
+    void nullMeasurementPeriod(@Nullable String periodStart, @Nullable String periodEnd) {
 
         Parameters parameters = new Parameters();
 
-        measureOperationParameterConverter.addMeasurementPeriod(parameters, null, null);
-
-        long actualCount = parameters.getParameter().stream()
-                .filter(x -> x.getName().equals("Measurement Period"))
-                .count();
-        assertEquals(0, actualCount);
-    }
-
-    @Test
-    void nullMeasurementPeriodStart() {
-
-        Parameters parameters = new Parameters();
-
-        measureOperationParameterConverter.addMeasurementPeriod(parameters, "2019-01-01", null);
-
-        long actualCount = parameters.getParameter().stream()
-                .filter(x -> x.getName().equals("Measurement Period"))
-                .count();
-        assertEquals(0, actualCount);
-    }
-
-    @Test
-    void nullMeasurementPeriodEnd() {
-
-        Parameters parameters = new Parameters();
-
-        measureOperationParameterConverter.addMeasurementPeriod(parameters, null, "2020-01-01");
+        measureOperationParameterConverter.addMeasurementPeriod(parameters, periodStart, periodEnd);
 
         long actualCount = parameters.getParameter().stream()
                 .filter(x -> x.getName().equals("Measurement Period"))

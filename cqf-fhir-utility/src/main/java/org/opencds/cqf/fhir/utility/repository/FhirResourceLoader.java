@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.repository.ig.CqlContent;
 
@@ -29,7 +28,7 @@ public class FhirResourceLoader implements ResourceLoader {
                 .map(x -> this.getFilePaths(x, recursive))
                 .flatMap(Collection::stream)
                 .map(this::loadTestResources)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Class<?> getRelativeClass() {

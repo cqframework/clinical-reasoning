@@ -108,7 +108,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
         Optional<String> artifactRoute = VisitorHelper.getStringParameter("artifactRoute", packageParameters);
         Optional<String> endpointUri = VisitorHelper.getStringParameter("endpointUri", packageParameters);
-        Optional<IBaseResource> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters);
+        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters).map(ep -> (IEndpointAdapter)ep);
         Optional<IBaseResource> terminologyEndpoint =
                 VisitorHelper.getResourceParameter("terminologyEndpoint", packageParameters);
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
@@ -157,10 +157,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
-            recursiveGather(adapter, packagedResources, capability, include, versionTuple);
+            recursiveGather(adapter, packagedResources, capability, include, versionTuple, endpoint.orElse(null), terminologyServerClient);
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
+            myLogger.info(String.valueOf(packagedResources.size()));
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
             BundleHelper.setEntry(packagedBundle, included);
         }
@@ -189,7 +190,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             }
         }
         var params = (IParametersAdapter) createAdapterForResource(expansionParams);
-        var expandedList = new ArrayList<String>();
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals("ValueSet"))
@@ -199,6 +199,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
         var missingInCache = new ArrayList<>(valueSets);
+        var expandedList = new ArrayList<String>();
         if (expansionCache.isPresent()) {
             var startCache = (new Date()).getTime();
             valueSets.forEach(v -> {
@@ -212,7 +213,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             });
             var elapsed = String.valueOf(((new Date()).getTime() - startCache) / 1000);
-            myLogger.info("retrieved cached ValueSet Expansions in: {}s", elapsed);
+            myLogger.info("retrieved {} cached ValueSet Expansions in: {}s", expandedList.size(), elapsed);
         }
         missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();

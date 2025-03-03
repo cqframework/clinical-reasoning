@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -27,6 +28,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@SuppressWarnings("squid:S5960")
 public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
@@ -50,7 +52,14 @@ public class TestQuestionnaireResponse {
     }
 
     public static String load(String asset) throws IOException {
-        return load(open(asset));
+        if (asset == null) {
+            return null;
+        }
+        final InputStream inputStream = open(asset);
+        if (inputStream == null) {
+            return null;
+        }
+        return load(inputStream);
     }
 
     public static Given given() {
@@ -127,20 +136,19 @@ public class TestQuestionnaireResponse {
                     repository,
                     processor.extract(
                             Eithers.for2(
-                                    questionnaireResponseId == null
-                                            ? null
-                                            : Ids.newId(fhirVersion, "QuestionnaireResponse", questionnaireResponseId),
+                                    getQuestionnaireId(questionnaireResponseId, "QuestionnaireResponse"),
                                     questionnaireResponse),
                             questionnaire == null && questionnaireId == null
                                     ? null
-                                    : Eithers.for2(
-                                            questionnaireId == null
-                                                    ? null
-                                                    : Ids.newId(fhirVersion, "Questionnaire", questionnaireId),
-                                            questionnaire),
+                                    : Eithers.for2(getQuestionnaireId(questionnaireId, "Questionnaire"), questionnaire),
                             null,
                             null,
                             true));
+        }
+
+        @Nullable
+        private IIdType getQuestionnaireId(String questionnaireId, String questionnaire) {
+            return questionnaireId == null ? null : Ids.newId(fhirVersion, questionnaire, questionnaireId);
         }
     }
 
@@ -160,10 +168,8 @@ public class TestQuestionnaireResponse {
 
         public Extract isEqualsTo(String expectedBundleAssetName) {
             assertDoesNotThrow(
-                    () -> {
-                        JSONAssert.assertEquals(
-                                load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true);
-                    },
+                    () -> JSONAssert.assertEquals(
+                            load(expectedBundleAssetName), jsonParser.encodeResourceToString(bundle), true),
                     "Unable to compare Jsons: ");
             return this;
         }
@@ -171,12 +177,10 @@ public class TestQuestionnaireResponse {
         public Extract isEqualsToExpected(IIdType expectedBundleId) {
             var expectedBundle = repository.read(bundle.getClass(), expectedBundleId);
             assertDoesNotThrow(
-                    () -> {
-                        JSONAssert.assertEquals(
-                                jsonParser.encodeResourceToString(expectedBundle),
-                                jsonParser.encodeResourceToString(bundle),
-                                true);
-                    },
+                    () -> JSONAssert.assertEquals(
+                            jsonParser.encodeResourceToString(expectedBundle),
+                            jsonParser.encodeResourceToString(bundle),
+                            true),
                     "Unable to compare Jsons: ");
             return this;
         }

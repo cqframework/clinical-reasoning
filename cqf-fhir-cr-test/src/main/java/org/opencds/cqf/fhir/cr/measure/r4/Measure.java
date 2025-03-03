@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -62,7 +63,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-@SuppressWarnings("squid:S2699")
+@SuppressWarnings({"squid:S2699", "squid:S5960"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
@@ -468,7 +469,7 @@ public class Measure {
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
+                    .filter(Observation.class::isInstance)
                     .filter(y -> ((Observation) y)
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
@@ -554,7 +555,7 @@ public class Measure {
          */
         public SelectedReport subjectResultsHaveResourceType(String resourceType) {
             var lists = value().getContained().stream()
-                    .filter(t -> t instanceof ListResource)
+                    .filter(ListResource.class::isInstance)
                     .map(x -> (ListResource) x)
                     .toList();
             for (ListResource list : lists) {
@@ -602,35 +603,53 @@ public class Measure {
             // find population with reference to contained List resource
             var groups = measureReport.getGroup();
             for (MeasureReportGroupComponent group : groups) {
-                var population = group.getPopulation().stream()
-                        .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
-                        .filter(x -> x.getSubjectResults().getReference().contains(subjectResultId))
-                        .findFirst()
-                        .orElse(null);
-                if (population == null && group.getStratifier() != null) {
-                    var stratifiers = group.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()
-                                        && stratumPopulation
-                                                .getSubjectResults()
-                                                .getReference()
-                                                .contains(subjectResultId)) {
-                                    return stratumPopulation.getCount();
-                                }
-                            }
-                        }
-                    }
-                } else if (population != null) {
-                    return population.getCount();
+                final Integer stratumPopulation = getPopulationCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
                 }
             }
             // if reached then no match found
             return 0;
+        }
+
+        @Nullable
+        private Integer getPopulationCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var population = group.getPopulation().stream()
+                    .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
+                    .filter(x -> x.getSubjectResults().getReference().contains(subjectResultId))
+                    .findFirst()
+                    .orElse(null);
+            if (population == null && group.getStratifier() != null) {
+                final Integer stratumPopulation = getStratumCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
+                }
+            } else if (population != null) {
+                return population.getCount();
+            }
+            return null;
+        }
+
+        @Nullable
+        private Integer getStratumCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var stratifiers = group.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()
+                                && stratumPopulation
+                                        .getSubjectResults()
+                                        .getReference()
+                                        .contains(subjectResultId)) {
+                            return stratumPopulation.getCount();
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         private int getListEntrySize(MeasureReport measureReport, String resourceId) {
@@ -648,32 +667,38 @@ public class Measure {
             var groupPops = value().getGroup();
             for (MeasureReportGroupComponent groupPop : groupPops) {
                 // standard population elements
-                var pops = groupPop.getPopulation();
-                for (MeasureReportGroupPopulationComponent pop : pops) {
-                    if (pop.getSubjectResults().hasReference()) {
-                        refs.add(pop.getSubjectResults().getReference());
-                    }
+                subjectResultReference(groupPop, refs);
+            }
+            return refs;
+        }
+
+        private void subjectResultReference(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var pops = groupPop.getPopulation();
+            for (MeasureReportGroupPopulationComponent pop : pops) {
+                if (pop.getSubjectResults().hasReference()) {
+                    refs.add(pop.getSubjectResults().getReference());
                 }
-                // stratifier results have references too
-                if (groupPop.getStratifier() != null) {
-                    var stratifiers = groupPop.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()) {
-                                    refs.add(stratumPopulation
-                                            .getSubjectResults()
-                                            .getReference());
-                                }
-                            }
+            }
+            // stratifier results have references too
+            if (groupPop.getStratifier() != null) {
+                subjectResultReferenceStratifier(groupPop, refs);
+            }
+        }
+
+        private void subjectResultReferenceStratifier(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var stratifiers = groupPop.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()) {
+                            refs.add(stratumPopulation.getSubjectResults().getReference());
                         }
                     }
                 }
             }
-            return refs;
         }
 
         public SelectedReport hasContainedOperationOutcome() {

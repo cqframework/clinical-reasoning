@@ -6,16 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
@@ -29,10 +31,14 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
     PlanDefinitionDataRequirementsProvider planDefinitionDataRequirementsProvider;
 
     @Test
-    void testGenerateQuestionnaire() {
-        var resourceLoader = new FhirResourceLoader(
-                getFhirContext(), TestOperationProvider.class, List.of("shared/r4/pa-aslp"), true);
+    void testGenerateQuestionnaire() throws URISyntaxException, IOException, ClassNotFoundException {
+        // This test is duplicating test data from the cr-test package.  Ideally it should be reusing the test resources
+        // from that package
+        var resourceLoader = new FhirResourceLoader(getFhirContext(), this.getClass(), List.of("pa-aslp"), true);
         resourceLoader.getResources().forEach(this::loadResource);
+
+        var planDef = read(new IdType("PlanDefinition/ASLPA1"));
+        assertNotNull(planDef);
 
         var requestDetails = setupRequestDetails();
         var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";

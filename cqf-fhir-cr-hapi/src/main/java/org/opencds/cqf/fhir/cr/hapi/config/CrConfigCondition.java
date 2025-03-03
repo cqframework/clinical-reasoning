@@ -25,19 +25,13 @@ public class CrConfigCondition implements Condition {
         }
 
         try {
-            RestfulServer bean = beanFactory.getBean(RestfulServer.class);
-            if (bean == null) {
-                return false;
-            }
+            beanFactory.getBean(RestfulServer.class);
         } catch (Exception e) {
             ourLog.warn("CrConfigCondition not met: Missing RestfulServer bean");
             return false;
         }
         try {
-            EvaluationSettings bean = beanFactory.getBean(EvaluationSettings.class);
-            if (bean == null) {
-                return false;
-            }
+            beanFactory.getBean(EvaluationSettings.class);
         } catch (Exception e) {
             ourLog.warn("CrConfigCondition not met: Missing EvaluationSettings bean");
             return false;

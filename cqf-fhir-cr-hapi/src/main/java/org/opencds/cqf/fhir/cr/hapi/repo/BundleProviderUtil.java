@@ -25,12 +25,14 @@ import java.util.Set;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import javax.annotation.Nonnull;
 
 /**
  * This class pulls existing methods from the BaseResourceReturningMethodBinding class used for taking
  * the results of a BundleProvider and turning it into a Bundle.  It is intended to be used only by the
  * HapiFhirRepository.
  */
+@SuppressWarnings("java:S107")
 public class BundleProviderUtil {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleProviderUtil.class);
 
@@ -58,6 +60,9 @@ public class BundleProviderUtil {
         }
     }
 
+    private record InitialPagingResults(int pageSize, List<IBaseResource> resourceList, int numToReturn, String searchId,
+                                        Integer numTotalResults) {}
+
     public static IBaseResource createBundleFromBundleProvider(
             IRestfulServer<?> server,
             RequestDetails request,
@@ -69,83 +74,37 @@ public class BundleProviderUtil {
             BundleTypeEnum bundleType,
             String searchId) {
 
-        int numToReturn;
-        String searchIdToUse = null;
-        List<IBaseResource> resourceList;
-        Integer numTotalResults = result.size();
         final OffsetLimitInfo offsetLimitInfo = extractOffsetPageInfo(result, request, limit);
 
-        final int pageSize;
-        if (offsetLimitInfo.offset != null || !server.canStoreSearchResults()) {
-            if (offsetLimitInfo.limit != null) {
-                pageSize = offsetLimitInfo.limit;
-            } else {
-                if (server.getDefaultPageSize() != null) {
-                    pageSize = server.getDefaultPageSize();
-                } else {
-                    pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
-                }
-            }
-            numToReturn = pageSize;
+        final InitialPagingResults initialPagingResults =
+            extractInitialPagingResults(server, request, result, offset, searchId, offsetLimitInfo);
 
-            if (offsetLimitInfo.offset != null || result.getCurrentPageOffset() != null) {
-                // When offset query is done result already contains correct amount (+ ir includes
-                // etc.) so return everything
-                resourceList = result.getResources(0, Integer.MAX_VALUE);
-            } else if (numToReturn > 0) {
-                resourceList = result.getResources(0, numToReturn);
-            } else {
-                resourceList = Collections.emptyList();
-            }
-            RestfulServerUtils.validateResourceListNotNull(resourceList);
+        removeNullIfNeeded(initialPagingResults.resourceList);
+        validateAllResourcesHaveId(initialPagingResults.resourceList);
 
-        } else {
-            IPagingProvider pagingProvider = server.getPagingProvider();
-            if (offsetLimitInfo.limit == null || offsetLimitInfo.limit.equals(0)) {
-                pageSize = pagingProvider.getDefaultPageSize();
-            } else {
-                pageSize = Math.min(pagingProvider.getMaximumPageSize(), offsetLimitInfo.limit);
-            }
-            numToReturn = pageSize;
+        final BundleLinks links = buildLinks(server, request, linkSelf, includes, result, offset,
+            bundleType, offsetLimitInfo, initialPagingResults);
 
-            if (numTotalResults != null) {
-                numToReturn = Math.min(numToReturn, numTotalResults - offset);
-            }
+        return buildBundle(server, includes, result, bundleType, links, initialPagingResults.resourceList);
+    }
 
-            if (numToReturn > 0 || result.getCurrentPageId() != null) {
-                resourceList = result.getResources(offset, numToReturn + offset);
-            } else {
-                resourceList = Collections.emptyList();
-            }
-            RestfulServerUtils.validateResourceListNotNull(resourceList);
-
-            if (numTotalResults == null) {
-                numTotalResults = result.size();
-            }
-
-            if (searchId != null) {
-                searchIdToUse = searchId;
-            } else {
-                if (numTotalResults == null || numTotalResults > numToReturn) {
-                    searchIdToUse = pagingProvider.storeResultList(request, result);
-                    if (isBlank(searchIdToUse)) {
-                        ourLog.info(
-                                "Found {} results but paging provider did not provide an ID to use for paging",
-                                numTotalResults);
-                        searchIdToUse = null;
-                    }
-                }
-            }
-        }
-
-        removeNullIfNeeded(resourceList);
-        validateAllResourcesHaveId(resourceList);
+    @Nonnull
+    private static BundleLinks buildLinks(
+            IRestfulServer<?> server,
+            RequestDetails request,
+            String linkSelf,
+            Set<Include> includes,
+            IBundleProvider result,
+            int offset,
+            BundleTypeEnum bundleType,
+            OffsetLimitInfo offsetLimitInfo,
+            InitialPagingResults initialPagingResults) {
 
         BundleLinks links = new BundleLinks(
                 request.getFhirServerBase(),
-                includes,
+            includes,
                 RestfulServerUtils.prettyPrintResponse(server, request),
-                bundleType);
+            bundleType);
         links.setSelf(linkSelf);
 
         if (result.getCurrentPageOffset() != null) {
@@ -170,59 +129,78 @@ public class BundleProviderUtil {
             }
         }
 
-        if (offsetLimitInfo.offset != null || (!server.canStoreSearchResults() && !isEverythingOperation(request))) {
-            // Paging without caching
-            // We're doing offset pages
-            int requestedToReturn = numToReturn;
-            if (server.getPagingProvider() == null && offsetLimitInfo.offset != null) {
-                // There is no paging provider at all, so assume we're querying up to all the results we
-                // need every time
-                requestedToReturn += offsetLimitInfo.offset;
-            }
-            if ((numTotalResults == null || requestedToReturn < numTotalResults) && !resourceList.isEmpty()) {
-                links.setNext(RestfulServerUtils.createOffsetPagingLink(
-                        links,
-                        request.getRequestPath(),
-                        request.getTenantId(),
-                        defaultIfNull(offsetLimitInfo.offset, 0) + numToReturn,
-                        numToReturn,
-                        request.getParameters()));
-            }
-
-            if (offsetLimitInfo.offset != null && offsetLimitInfo.offset > 0) {
-                int start = Math.max(0, offset - pageSize);
-                links.setPrev(RestfulServerUtils.createOffsetPagingLink(
-                        links,
-                        request.getRequestPath(),
-                        request.getTenantId(),
-                        start,
-                        pageSize,
-                        request.getParameters()));
-            }
+        if (offsetLimitInfo.offset != null || (!server.canStoreSearchResults() && !isEverythingOperation(
+            request))) {
+            handleOffsetPage(server, request, offset, offsetLimitInfo, initialPagingResults, links);
         } else if (isNotBlank(result.getCurrentPageId())) {
-            // We're doing named pages
-            searchIdToUse = result.getUuid();
-            if (isNotBlank(result.getNextPageId())) {
-                links.setNext(RestfulServerUtils.createPagingLink(
-                        links, request, searchIdToUse, result.getNextPageId(), request.getParameters()));
-            }
-            if (isNotBlank(result.getPreviousPageId())) {
-                links.setPrev(RestfulServerUtils.createPagingLink(
-                        links, request, searchIdToUse, result.getPreviousPageId(), request.getParameters()));
-            }
-        } else if (searchIdToUse != null && !resourceList.isEmpty()) {
-            if (numTotalResults == null || offset + numToReturn < numTotalResults) {
-                links.setNext((RestfulServerUtils.createPagingLink(
-                        links, request, searchIdToUse, offset + numToReturn, numToReturn, request.getParameters())));
-            }
-            if (offset > 0) {
-                int start = Math.max(0, offset - pageSize);
-                links.setPrev(RestfulServerUtils.createPagingLink(
-                        links, request, searchIdToUse, start, pageSize, request.getParameters()));
-            }
+            handleCurrentPage(request, result, initialPagingResults, links);
+        } else if (initialPagingResults.searchId != null && !initialPagingResults.resourceList.isEmpty()) {
+            handleSearchId(request, offset, initialPagingResults, links);
+        }
+        return links;
+    }
+
+    private static void handleSearchId(RequestDetails request, int offset,
+        InitialPagingResults initialPagingResults, BundleLinks links) {
+        if (initialPagingResults.numTotalResults == null || offset
+            + initialPagingResults.numToReturn < initialPagingResults.numTotalResults) {
+            links.setNext((RestfulServerUtils.createPagingLink(
+                links, request, initialPagingResults.searchId, offset + initialPagingResults.numToReturn, initialPagingResults.numToReturn, request.getParameters())));
+        }
+        if (offset > 0) {
+            int start = Math.max(0, offset - initialPagingResults.pageSize);
+            links.setPrev(RestfulServerUtils.createPagingLink(
+                links,
+                request, initialPagingResults.searchId, start, initialPagingResults.pageSize, request.getParameters()));
+        }
+    }
+
+    private static void handleCurrentPage(RequestDetails request, IBundleProvider result,
+        InitialPagingResults initialPagingResults, BundleLinks links) {
+        String searchIdToUse;
+        // We're doing named pages
+        searchIdToUse = result.getUuid();
+        if (isNotBlank(result.getNextPageId())) {
+            links.setNext(RestfulServerUtils.createPagingLink(
+                links, request, searchIdToUse, result.getNextPageId(), request.getParameters()));
+        }
+        if (isNotBlank(result.getPreviousPageId())) {
+            links.setPrev(RestfulServerUtils.createPagingLink(
+                links, request, initialPagingResults.searchId, result.getPreviousPageId(), request.getParameters()));
+        }
+    }
+
+    private static void handleOffsetPage(IRestfulServer<?> server, RequestDetails request,
+        int offset, OffsetLimitInfo offsetLimitInfo, InitialPagingResults initialPagingResults, BundleLinks links) {
+        // Paging without caching
+        // We're doing offset pages
+        int requestedToReturn = initialPagingResults.numToReturn;
+        if (server.getPagingProvider() == null && offsetLimitInfo.offset != null) {
+            // There is no paging provider at all, so assume we're querying up to all the results we
+            // need every time
+            requestedToReturn += offsetLimitInfo.offset;
+        }
+        if ((
+            initialPagingResults.numTotalResults == null || requestedToReturn < initialPagingResults.numTotalResults) && !initialPagingResults.resourceList.isEmpty()) {
+            links.setNext(RestfulServerUtils.createOffsetPagingLink(
+                links,
+                    request.getRequestPath(),
+                    request.getTenantId(),
+                    defaultIfNull(offsetLimitInfo.offset, 0) + initialPagingResults.numToReturn,
+                initialPagingResults.numToReturn,
+                    request.getParameters()));
         }
 
-        return buildBundle(server, includes, result, bundleType, links, resourceList);
+        if (offsetLimitInfo.offset != null && offsetLimitInfo.offset > 0) {
+            int start = Math.max(0, offset - initialPagingResults.pageSize);
+            links.setPrev(RestfulServerUtils.createOffsetPagingLink(
+                links,
+                    request.getRequestPath(),
+                    request.getTenantId(),
+                    start,
+                    initialPagingResults.pageSize,
+                    request.getParameters()));
+        }
     }
 
     private static OffsetLimitInfo extractOffsetPageInfo(
@@ -238,6 +216,113 @@ public class BundleProviderUtil {
             offsetToUse = RestfulServerUtils.tryToExtractNamedParameter(request, Constants.PARAM_OFFSET);
         }
         return new OffsetLimitInfo(offsetToUse, limitToUse);
+    }
+
+    private static InitialPagingResults extractInitialPagingResults(
+            IRestfulServer<?> server,
+            RequestDetails request,
+            IBundleProvider result,
+            int offset,
+            String searchId,
+            OffsetLimitInfo offsetLimitInfo) {
+
+        if (offsetLimitInfo.offset != null || !server.canStoreSearchResults()) {
+            return handleOffset(server, result, offsetLimitInfo);
+        }
+
+        return handleNonOffset(server, request, result, offset, searchId, offsetLimitInfo);
+    }
+
+    @Nonnull
+    private static InitialPagingResults handleNonOffset(
+            IRestfulServer<?> server,
+            RequestDetails request,
+            IBundleProvider result,
+            int offset,
+            String searchId,
+            OffsetLimitInfo offsetLimitInfo ) {
+
+        String searchIdToUse = null;
+        Integer numTotalResults = result.size();
+        List<IBaseResource> resourceList;
+        int numToReturn;
+        final int pageSize;
+        IPagingProvider pagingProvider = server.getPagingProvider();
+
+        if (offsetLimitInfo.limit == null || offsetLimitInfo.limit.equals(0)) {
+            pageSize = pagingProvider.getDefaultPageSize();
+        } else {
+            pageSize = Math.min(pagingProvider.getMaximumPageSize(), offsetLimitInfo.limit);
+        }
+        numToReturn = pageSize;
+
+        if (numTotalResults != null) {
+            numToReturn = Math.min(numToReturn, numTotalResults - offset);
+        }
+
+        if (numToReturn > 0 || result.getCurrentPageId() != null) {
+            resourceList = result.getResources(offset, numToReturn + offset);
+        } else {
+            resourceList = Collections.emptyList();
+        }
+        RestfulServerUtils.validateResourceListNotNull(resourceList);
+
+        if (numTotalResults == null) {
+            numTotalResults = result.size();
+        }
+
+        if (searchId != null) {
+            searchIdToUse = searchId;
+        } else {
+            if (numTotalResults == null || numTotalResults > numToReturn) {
+                searchIdToUse = pagingProvider.storeResultList(request, result);
+                if (isBlank(searchIdToUse)) {
+                    ourLog.info(
+                        "Found {} results but paging provider did not provide an ID to use for paging",
+                        numTotalResults);
+                    searchIdToUse = null;
+                }
+            }
+        }
+        return new InitialPagingResults(pageSize, resourceList, numToReturn, searchIdToUse,
+            numTotalResults);
+    }
+
+    @Nonnull
+    private static InitialPagingResults handleOffset(
+            IRestfulServer<?> server,
+            IBundleProvider result,
+            OffsetLimitInfo offsetLimitInfo) {
+        String searchIdToUse = null;
+        final int pageSize;
+        int numToReturn;
+        Integer numTotalResults = result.size();
+
+        List<IBaseResource> resourceList;
+        if (offsetLimitInfo.limit != null) {
+            pageSize = offsetLimitInfo.limit;
+        } else {
+            if (server.getDefaultPageSize() != null) {
+                pageSize = server.getDefaultPageSize();
+            } else {
+                pageSize = numTotalResults != null ? numTotalResults : Integer.MAX_VALUE;
+            }
+        }
+        numToReturn = pageSize;
+
+        if (offsetLimitInfo.offset != null || result.getCurrentPageOffset() != null) {
+            // When offset query is done result already contains correct amount (+ ir includes
+            // etc.) so return everything
+            resourceList = result.getResources(0, Integer.MAX_VALUE);
+        } else if (numToReturn > 0) {
+            resourceList = result.getResources(0, numToReturn);
+        } else {
+            resourceList = Collections.emptyList();
+        }
+        RestfulServerUtils.validateResourceListNotNull(resourceList);
+
+        return new InitialPagingResults(pageSize, resourceList, numToReturn, searchIdToUse,
+            numTotalResults);
     }
 
     private static IBaseResource buildBundle(

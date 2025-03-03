@@ -3,12 +3,15 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("java:S2699")
 class SimpleMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("EXM108");
@@ -180,18 +183,21 @@ class SimpleMeasureProcessorTest {
                     "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-Encounter|8.3.000", report.getMeasure());
             assertEquals("Patient/numer-EXM108", report.getSubject().getReference());
 
-            // TODO: The MeasureProcessor assumes local timezone if none is specified.
-            // Need to make the test smart enough to handle that.
             assertEquals(report.getPeriod().getStartElement().getYear(), (Integer) 2018);
-            // assertEquals(report.getPeriod().getStartElement().getMonth(), (Integer)12);
             assertEquals(report.getPeriod().getStartElement().getDay(), (Integer) 31);
 
             assertEquals(report.getPeriod().getEndElement().getYear(), (Integer) 2019);
-            // assertEquals(report.getPeriod().getEndElement().getMonth(), (Integer)12);
             assertEquals(report.getPeriod().getEndElement().getDay(), (Integer) 31);
 
-            // TODO: Should be the evaluation date. Or approximately "now"
             assertNotNull(report.getDate());
+            assertEquals(
+                    LocalDateTime.now().withSecond(0).withNano(0),
+                    report.getDate()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime()
+                            .withSecond(0)
+                            .withNano(0));
         }
     }
 
@@ -199,8 +205,6 @@ class SimpleMeasureProcessorTest {
     class BasisBoolean {
 
         private static final String MEASURE_ID = "measure-EXM108-8.3.000-basis-boolean";
-        private static final String EXCEPTION_MESSAGE =
-                "group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean";
 
         @Test
         void exm108_partialSubjectId_1() {

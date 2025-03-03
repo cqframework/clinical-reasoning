@@ -238,7 +238,6 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         var dps = new HashMap<String, DataProvider>();
         dps.put(MeasureConstants.FHIR_MODEL_URI, dataProvider);
 
-        // TODO: Set up engine environment
         var engine = new CqlEngine(new Environment(ll, dps, null));
         var id = new VersionedIdentifier().withId("Test");
         var lib = engine.getEnvironment().getLibraryManager().resolveLibrary(id);

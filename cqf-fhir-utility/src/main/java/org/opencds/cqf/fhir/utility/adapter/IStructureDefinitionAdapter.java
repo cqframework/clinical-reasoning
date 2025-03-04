@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
@@ -44,6 +43,6 @@ public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
     default List<IElementDefinitionAdapter> getSliceElements(String sliceName) {
         return getDifferentialElements().stream()
                 .filter(e -> e.getId().contains(sliceName) && StringUtils.isBlank(e.getSliceName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

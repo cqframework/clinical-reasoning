@@ -1,0 +1,11 @@
+{
+  "resourceType": "Group",
+  "id": "group-practitioners-1",
+  "type": "practitioner",
+  "actual": true,
+  "name": "Practitioner Group",
+  "member": [
+    {  "entity": {  "reference": "Practitioner/tester" } }
+
+  ]
+}

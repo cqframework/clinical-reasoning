@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -46,7 +45,7 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
 
     @Override
     public List<ICodingAdapter> getCoding() {
-        return get().getCoding().stream().map(adapterFactory::createCoding).collect(Collectors.toList());
+        return get().getCoding().stream().map(adapterFactory::createCoding).toList();
     }
 
     @Override

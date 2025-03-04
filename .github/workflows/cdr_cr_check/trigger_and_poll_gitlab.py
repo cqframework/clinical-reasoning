@@ -25,7 +25,8 @@ logging.getLogger("urllib3").setLevel(logging.DEBUG)
 
 if not target_cdr_cr_branch:
     print("Defaulting CDR-CR branch to main as this is an automatic build.")
-    # LUKETODO:  this is the branch that we call against in cdr-cr, so swap this at the last minute
+    # TODO: LD  uncomment the line below and remove the line below that once the pipeline changes
+    # have been merged to the main branch of the cdr-cr repository.
     # target_cdr_branch = "main
     target_cdr_cr_branch = "ld-20250214-cr-hapi-fhir-carveout"
 

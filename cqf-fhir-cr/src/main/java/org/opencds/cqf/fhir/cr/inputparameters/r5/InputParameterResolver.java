@@ -7,7 +7,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -25,13 +24,12 @@ import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
-import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +51,7 @@ public class InputParameterResolver extends BaseInputParameterResolver {
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            List<? extends IBaseBackboneElement> context,
+            List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         super(repository, subjectId, encounterId, practitionerId, useServerData, data);
         this.parameters = resolveParameters(parameters, context, launchContext);
@@ -62,17 +60,20 @@ public class InputParameterResolver extends BaseInputParameterResolver {
     @Override
     protected final Parameters resolveParameters(
             IBaseParameters baseParameters,
-            List<? extends IBaseBackboneElement> context,
+            List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         var params = parameters();
         if (baseParameters != null) {
             params.getParameter().addAll(((Parameters) baseParameters).getParameter());
         }
-        var subjectClass =
-                fhirContext().getResourceDefinition(subjectId.getResourceType()).getImplementingClass();
-        var subject = readRepository(subjectClass, subjectId);
-        if (subject != null) {
-            params.addParameter(part("%subject", (Resource) subject));
+        if (subjectId != null) {
+            var subjectClass = fhirContext()
+                    .getResourceDefinition(subjectId.getResourceType())
+                    .getImplementingClass();
+            var subject = readRepository(subjectClass, subjectId);
+            if (subject != null) {
+                params.addParameter(part("%subject", (Resource) subject));
+            }
         }
         if (encounterId != null && !encounterId.isEmpty()) {
             var encounter = readRepository(Encounter.class, encounterId);
@@ -92,45 +93,20 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         return params;
     }
 
-    protected boolean validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE code, String type) {
-        switch (code) {
-            case PATIENT:
-                return type.equals(ResourceType.Patient.name());
-            case ENCOUNTER:
-                return type.equals(ResourceType.Encounter.name());
-            case LOCATION:
-                return type.equals(ResourceType.Location.name());
-            case USER:
-                return type.equals(ResourceType.Patient.name())
-                        || type.equals(ResourceType.Practitioner.name())
-                        || type.equals(ResourceType.PractitionerRole.name())
-                        || type.equals(ResourceType.RelatedPerson.name());
-            case STUDY:
-                return type.equals(ResourceType.ResearchStudy.name());
-
-            default:
-                return false;
-        }
-    }
-
     protected void resolveLaunchContext(
             Parameters params,
-            List<? extends IBaseBackboneElement> contexts,
+            List<IParametersParameterComponentAdapter> contexts,
             List<IBaseExtension<?, ?>> launchContexts) {
         launchContexts.stream().map(e -> (Extension) e).forEach(launchContext -> {
             var name = ((Coding) launchContext.getExtensionByUrl("name").getValue()).getCode();
-            var type = launchContext
-                    .getExtensionByUrl("type")
-                    .getValueAsPrimitive()
-                    .getValueAsString();
-            if (!validateContext(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(name.toUpperCase()), type)) {
-                throw new IllegalArgumentException(String.format("Unsupported launch context for %s: %s", name, type));
-            }
+            var types = launchContext.getExtensionsByUrl("type").stream()
+                    .map(type -> type.getValueAsPrimitive().getValueAsString())
+                    .collect(Collectors.toList());
             var content = getContent(contexts, name);
             if (content == null || content.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Missing content for context: %s", name));
             }
-            var value = getValue(type, content);
+            var value = getValue(types, content);
             if (!value.isEmpty()) {
                 var resource =
                         (Resource) (value.size() == 1 ? value.get(0) : BundleHelper.newBundle(FhirVersionEnum.R5));
@@ -147,11 +123,12 @@ public class InputParameterResolver extends BaseInputParameterResolver {
         });
     }
 
-    private List<ParametersParameterComponent> getContent(List<? extends IBaseBackboneElement> contexts, String name) {
+    private List<ParametersParameterComponent> getContent(
+            List<IParametersParameterComponentAdapter> contexts, String name) {
         return contexts == null
                 ? null
                 : contexts.stream()
-                        .map(c -> (ParametersParameterComponent) c)
+                        .map(c -> (ParametersParameterComponent) c.get())
                         .filter(c -> c.getPart().stream()
                                 .filter(p -> p.getName().equals("name"))
                                 .anyMatch(p -> ((StringType) p.getValue())
@@ -162,15 +139,28 @@ public class InputParameterResolver extends BaseInputParameterResolver {
                         .collect(Collectors.toList());
     }
 
-    private List<IBaseResource> getValue(String type, List<ParametersParameterComponent> content) {
+    private List<IBaseResource> getValue(List<String> types, List<ParametersParameterComponent> content) {
         return content.stream()
                 .map(p -> {
-                    if (p.getValue() instanceof Reference) {
-                        return readRepository(
-                                fhirContext().getResourceDefinition(type).getImplementingClass(),
-                                ((Reference) p.getValue()).getReferenceElement());
+                    if (p.getValue() instanceof Reference ref) {
+                        Resource resource = null;
+                        for (var type : types) {
+                            try {
+                                resource = (Resource) readRepository(
+                                        fhirContext()
+                                                .getResourceDefinition(type)
+                                                .getImplementingClass(),
+                                        ref.getReferenceElement());
+                                if (resource != null) {
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                // Do nothing
+                            }
+                        }
+                        return resource;
                     } else {
-                        return (Resource) p.getResource();
+                        return p.getResource();
                     }
                 })
                 .filter(p -> p != null)

@@ -35,13 +35,13 @@ public class OperationParametersParser {
         requireNonNull(name, "name must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+            part = this.adapterFactory.createParametersParameter(parametersAdapter.addParameter());
         }
 
         part.setName(name);
@@ -54,13 +54,13 @@ public class OperationParametersParser {
         requireNonNull(name, "name must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
-            part = this.adapterFactory.createParametersParameters(parametersAdapter.addParameter());
+            part = this.adapterFactory.createParametersParameter(parametersAdapter.addParameter());
         }
 
         part.setName(name);
@@ -75,7 +75,7 @@ public class OperationParametersParser {
         requireNonNull(name, "name must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         IBaseResource value = parts.stream()
@@ -94,7 +94,7 @@ public class OperationParametersParser {
         requireNonNull(parameters, "parameters must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         Map<String, IBaseResource> resources =
@@ -111,7 +111,7 @@ public class OperationParametersParser {
         requireNonNull(name, "name must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         IBaseDatatype value = parts.stream()
@@ -130,7 +130,7 @@ public class OperationParametersParser {
         requireNonNull(parameters, "parameters must not be null");
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
         List<IParametersParameterComponentAdapter> parts = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         Map<String, IBaseDatatype> values =
@@ -144,7 +144,7 @@ public class OperationParametersParser {
         requireNonNull(parameters, "parameters must not be null");
         var parametersAdapter = adapterFactory.createParameters(parameters);
         var parts = parametersAdapter.getParameter().stream()
-                .map(x -> adapterFactory.createParametersParameters(x))
+                .map(x -> adapterFactory.createParametersParameter(x))
                 .collect(Collectors.toList());
 
         Map<String, Object> parameterParts = new HashMap<>();

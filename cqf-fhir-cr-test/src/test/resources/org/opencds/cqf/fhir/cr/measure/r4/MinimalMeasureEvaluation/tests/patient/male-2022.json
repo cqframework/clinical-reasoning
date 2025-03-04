@@ -1,0 +1,8 @@
+{
+  "resourceType": "Patient",
+  "id": "male-2022",
+  "gender": "male",
+  "birthDate": "2022-01-01",
+  "generalPractitioner":
+    {"reference": "Practitioner/tester"}
+}

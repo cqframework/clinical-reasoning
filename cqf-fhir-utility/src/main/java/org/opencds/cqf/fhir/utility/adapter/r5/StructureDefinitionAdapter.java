@@ -20,6 +20,7 @@ import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
 public class StructureDefinitionAdapter extends ResourceAdapter implements IStructureDefinitionAdapter {
@@ -262,5 +263,19 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     @Override
     public boolean getExperimental() {
         return get().getExperimental();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getSnapshotElements() {
+        return get().getSnapshot().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .toList();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getDifferentialElements() {
+        return get().getDifferential().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .toList();
     }
 }

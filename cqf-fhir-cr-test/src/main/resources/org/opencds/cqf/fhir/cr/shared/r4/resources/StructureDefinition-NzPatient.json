@@ -1,0 +1,248 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "NzPatient",
+  "extension": [
+      {
+          "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
+          "valueString": "Base.Individuals"
+      },
+      {
+          "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category",
+          "valueCode": "patient"
+      }
+  ],
+  "url": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient",
+  "version": "1.1.0",
+  "name": "NzPatient",
+  "title": "NZ Patient",
+  "status": "active",
+  "description": "The base New Zealand Patient profile",
+  "jurisdiction": [
+      {
+          "coding": [
+              {
+                  "system": "urn:iso:std:iso:3166",
+                  "code": "NZ"
+              }
+          ]
+      }
+  ],
+  "purpose": "Describe the Base New Zealand Patient resource profileI",
+  "fhirVersion": "4.0.0",
+  "mapping": [
+      {
+          "identity": "rim",
+          "uri": "http://hl7.org/v3",
+          "name": "RIM Mapping"
+      },
+      {
+          "identity": "cda",
+          "uri": "http://hl7.org/v3/cda",
+          "name": "CDA (R2)"
+      },
+      {
+          "identity": "w5",
+          "uri": "http://hl7.org/fhir/fivews",
+          "name": "FiveWs Pattern Mapping"
+      },
+      {
+          "identity": "v2",
+          "uri": "http://hl7.org/v2",
+          "name": "HL7 v2 Mapping"
+      },
+      {
+          "identity": "loinc",
+          "uri": "http://loinc.org",
+          "name": "LOINC code for the element"
+      }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "derivation": "constraint",
+  "differential": {
+      "element": [
+          {
+              "id": "Patient.extension",
+              "path": "Patient.extension",
+              "slicing": {
+                  "discriminator": [
+                      {
+                          "type": "value",
+                          "path": "url"
+                      }
+                  ],
+                  "ordered": false,
+                  "rules": "open"
+              }
+          },
+          {
+              "id": "Patient.extension:ethnicity",
+              "path": "Patient.extension",
+              "sliceName": "ethnicity",
+              "min": 0,
+              "max": "6",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/nz-ethnicity"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:nzCitizen",
+              "path": "Patient.extension",
+              "sliceName": "nzCitizen",
+              "short": "Is this person a New Zealand citizen",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/nz-citizenship"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:dhb",
+              "path": "Patient.extension",
+              "sliceName": "dhb",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/dhb"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:domicile-code",
+              "path": "Patient.extension",
+              "sliceName": "domicile-code",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/domicile-code"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:pho",
+              "path": "Patient.extension",
+              "sliceName": "pho",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/pho"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:sex-at-birth",
+              "path": "Patient.extension",
+              "sliceName": "sex-at-birth",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/sex-at-birth"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.extension:iwi",
+              "path": "Patient.extension",
+              "sliceName": "iwi",
+              "min": 0,
+              "max": "1",
+              "type": [
+                  {
+                      "code": "Extension",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/nz-iwi"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.identifier",
+              "path": "Patient.identifier",
+              "slicing": {
+                  "discriminator": [
+                      {
+                          "type": "value",
+                          "path": "system"
+                      }
+                  ],
+                  "description": "Add NHI as a defined identifier type",
+                  "rules": "openAtEnd"
+              }
+          },
+          {
+              "id": "Patient.identifier:NHI",
+              "path": "Patient.identifier",
+              "sliceName": "NHI",
+              "short": "The currently active NHI",
+              "definition": "The NHI number is a unique number for all New Zealanders, assigned at birth",
+              "min": 0,
+              "max": "1",
+              "mustSupport": true
+          },
+          {
+              "id": "Patient.identifier:NHI.use",
+              "path": "Patient.identifier.use",
+              "short": "fixed to 'official'",
+              "fixedCode": "official"
+          },
+          {
+              "id": "Patient.identifier:NHI.system",
+              "path": "Patient.identifier.system",
+              "min": 1,
+              "fixedUri": "https://standards.digital.health.nz/ns/nhi-id"
+          },
+          {
+              "id": "Patient.telecom",
+              "path": "Patient.telecom",
+              "type": [
+                  {
+                      "code": "ContactPoint",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/NzContactpoint"
+                      ]
+                  }
+              ]
+          },
+          {
+              "id": "Patient.address",
+              "path": "Patient.address",
+              "type": [
+                  {
+                      "code": "Address",
+                      "profile": [
+                          "http://hl7.org.nz/fhir/StructureDefinition/NzAddress"
+                      ]
+                  }
+              ]
+          }
+      ]
+  }
+}

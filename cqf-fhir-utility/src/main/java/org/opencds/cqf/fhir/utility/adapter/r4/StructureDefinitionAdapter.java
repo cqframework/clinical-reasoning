@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
 public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter implements IStructureDefinitionAdapter {
@@ -118,5 +119,19 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     @Override
     public StructureDefinition copy() {
         return get().copy();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getSnapshotElements() {
+        return get().getSnapshot().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .toList();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getDifferentialElements() {
+        return get().getDifferential().getElement().stream()
+                .map(adapterFactory::createElementDefinition)
+                .toList();
     }
 }

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,12 +34,11 @@ public class PopulateProcessor implements IPopulateProcessor {
     @Override
     public IBaseResource processResponse(PopulateRequest request, List<IBaseBackboneElement> items) {
         final IBaseResource response = createQuestionnaireResponse(request);
-        response.setId(request.getQuestionnaire().getIdElement().getIdPart() + "-"
-                + request.getSubjectId().getIdPart());
+        var subject = request.getSubjectId() != null ? request.getSubjectId().getIdPart() : "response";
+        response.setId(
+                String.format("%s-%s", request.getQuestionnaire().getIdElement().getIdPart(), subject));
         request.getModelResolver().setValue(response, "item", items);
         request.resolveOperationOutcome(response);
-        request.getModelResolver()
-                .setValue(response, "contained", Collections.singletonList(request.getQuestionnaire()));
         logger.info("$populate operation completed");
         return response;
     }
@@ -95,15 +94,15 @@ public class PopulateProcessor implements IPopulateProcessor {
             case R4:
                 return new org.hl7.fhir.r4.model.QuestionnaireResponse()
                         .setStatus(org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                        .setQuestionnaire(
-                                "#" + ((org.hl7.fhir.r4.model.Questionnaire) request.getQuestionnaire()).getIdPart())
-                        .setSubject(new org.hl7.fhir.r4.model.Reference(request.getSubjectId()));
+                        .setQuestionnaire(request.getQuestionnaireAdapter().getCanonical())
+                        .setSubject(new org.hl7.fhir.r4.model.Reference(request.getSubjectId()))
+                        .setAuthored(new Date());
             case R5:
                 return new org.hl7.fhir.r5.model.QuestionnaireResponse()
                         .setStatus(org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                        .setQuestionnaire(
-                                "#" + ((org.hl7.fhir.r5.model.Questionnaire) request.getQuestionnaire()).getIdPart())
-                        .setSubject(new org.hl7.fhir.r5.model.Reference(request.getSubjectId()));
+                        .setQuestionnaire(request.getQuestionnaireAdapter().getCanonical())
+                        .setSubject(new org.hl7.fhir.r5.model.Reference(request.getSubjectId()))
+                        .setAuthored(new Date());
 
             default:
                 return null;

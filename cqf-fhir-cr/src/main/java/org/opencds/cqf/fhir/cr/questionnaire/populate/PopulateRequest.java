@@ -3,12 +3,16 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,12 +22,13 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaire;
     private final IIdType subjectId;
-    private final List<? extends IBaseBackboneElement> context;
+    private final List<IParametersParameterComponentAdapter> context;
     private final List<IBaseExtension<?, ?>> launchContext;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
@@ -50,8 +55,13 @@ public class PopulateRequest implements IQuestionnaireRequest {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.questionnaire = questionnaire;
-        this.subjectId = subjectId;
-        this.context = context;
+        this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
+        this.context = context == null
+                ? new ArrayList<>()
+                : context.stream()
+                        .map(c -> getAdapterFactory().createParametersParameter(c))
+                        .collect(Collectors.toList());
+        this.subjectId = getSubjectId(subjectId);
         this.parameters = parameters;
         this.data = data;
         this.useServerData = useServerData;
@@ -61,7 +71,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
         if (launchContext != null) {
             this.launchContext.add(launchContext);
         }
-        this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
         this.defaultLibraryUrl = resolveDefaultLibraryUrl();
         questionnaireAdapter = (IQuestionnaireAdapter)
                 getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) this.questionnaire);
@@ -77,9 +86,41 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 this.launchContext);
     }
 
+    @SuppressWarnings("unchecked")
+    protected IIdType getSubjectId(IIdType subject) {
+        var subjectContext = context.stream()
+                .filter(c -> c.getPartValues("name").stream()
+                        .anyMatch(p ->
+                                ((IPrimitiveType<String>) p).getValueAsString().equals("patient")))
+                .findFirst()
+                .orElse(null);
+        if (subjectContext == null && !context.isEmpty()) {
+            subjectContext = context.get(0);
+        }
+        if (subjectContext != null) {
+            var subjectContextValue =
+                    subjectContext.getPartValues("content").stream().findFirst().orElse(null);
+            if (subjectContextValue instanceof IBaseReference subjectRef) {
+                return subjectRef.getReferenceElement();
+            } else if (subjectContextValue instanceof IBaseResource subjectResource) {
+                return subjectResource.getIdElement();
+            }
+        }
+        if (subject != null) {
+            return subject;
+        }
+
+        throw new IllegalArgumentException("Unable to determine subject from launch context.");
+    }
+
     @Override
     public String getOperationName() {
         return "populate";
+    }
+
+    @Override
+    public IBase getContext() {
+        return getQuestionnaire();
     }
 
     @Override

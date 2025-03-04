@@ -1,0 +1,109 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "extract-defn-walkthrough-10",
+  "extension": [
+      {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract",
+          "valueCanonical": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient"
+      }
+  ],
+  "url": "https://fhir.forms-lab.com/Questionnaire/extract-defn-walkthrough-10",
+  "name": "assessment",
+  "title": "Definition walk-through blog post example - profile extract",
+  "status": "draft",
+  "publisher": "Brian Postlethwaite",
+  "useContext": [
+      {
+          "code": {
+              "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+              "code": "user",
+              "display": "User Type"
+          },
+          "valueCodeableConcept": {
+              "coding": [
+                  {
+                      "code": "extract",
+                      "display": "Demo Extract"
+                  }
+              ]
+          }
+      }
+  ],
+  "item": [
+      {
+          "linkId": "assessment.Demographics.sectionDemographics.Patient",
+          "text": "Patient",
+          "type": "group",
+          "item": [
+              {
+                  "linkId": "assessment.Demographics.sectionDemographics.Patient.name",
+                  "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.name",
+                  "text": "name",
+                  "type": "group",
+                  "item": [
+                      {
+                          "linkId": "first-name",
+                          "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.name.given",
+                          "text": "first name",
+                          "type": "string",
+                          "repeats": true
+                      },
+                      {
+                          "linkId": "family-name",
+                          "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.name.family",
+                          "text": "last",
+                          "type": "string"
+                      }
+                  ]
+              },
+              {
+                  "linkId": "nz-nhi",
+                  "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.identifier:NHI.value",
+                  "text": "nhi",
+                  "type": "string"
+              },
+              {
+                  "linkId": "nz-dhb",
+                  "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.extension:dhb.valueCodeableConcept.text",
+                  "text": "District Health Board",
+                  "type": "string"
+              },
+              {
+                  "linkId": "patient-gender",
+                  "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.gender",
+                  "text": "gender",
+                  "type": "choice",
+                  "answerOption": [
+                      {
+                          "valueCoding": {
+                              "system": "http://example.com/fhir/CodeSystem/example",
+                              "code": "male",
+                              "display": "Male"
+                          }
+                      },
+                      {
+                          "valueCoding": {
+                              "system": "http://example.com/fhir/CodeSystem/example",
+                              "code": "female",
+                              "display": "Female"
+                          }
+                      },
+                      {
+                          "valueCoding": {
+                              "system": "http://example.com/fhir/CodeSystem/example",
+                              "code": "other",
+                              "display": "Other"
+                          }
+                      }
+                  ]
+              },
+              {
+                  "linkId": "birth-date",
+                  "definition": "http://hl7.org.nz/fhir/StructureDefinition/NzPatient#Patient.birthDate",
+                  "text": "birthDate",
+                  "type": "date"
+              }
+          ]
+      }
+  ]
+}

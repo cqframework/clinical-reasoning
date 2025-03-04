@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public class CodeableConceptAdapter implements ICodeableConceptAdapter {
@@ -15,6 +15,7 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
     private final CodeableConcept codeableConcept;
     private final FhirContext fhirContext;
     private final ModelResolver modelResolver;
+    private final AdapterFactory adapterFactory;
 
     public CodeableConceptAdapter(ICompositeType codeableConcept) {
         if (!(codeableConcept instanceof CodeableConcept)) {
@@ -22,8 +23,9 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
                     "object passed as codeableConcept argument is not a CodeableConcept data type");
         }
         this.codeableConcept = (CodeableConcept) codeableConcept;
-        this.fhirContext = FhirContext.forDstu3Cached();
-        this.modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
+        fhirContext = FhirContext.forDstu3Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
+        adapterFactory = new AdapterFactory();
     }
 
     @Override
@@ -41,10 +43,9 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
         return modelResolver;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<Coding> getCoding() {
-        return get().getCoding();
+    public List<ICodingAdapter> getCoding() {
+        return get().getCoding().stream().map(adapterFactory::createCoding).toList();
     }
 
     @Override

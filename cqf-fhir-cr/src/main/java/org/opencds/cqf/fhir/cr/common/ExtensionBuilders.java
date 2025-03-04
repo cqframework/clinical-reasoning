@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -108,30 +108,34 @@ public class ExtensionBuilders {
 
     @SuppressWarnings("unchecked")
     public static <T extends IBaseExtension<?, ?>> T buildSdcLaunchContextExt(
-            FhirVersionEnum fhirVersion, String code, String resourceType) {
+            FhirVersionEnum fhirVersion, String code, List<String> resourceTypes) {
+        var acceptedResourceTypes = resourceTypes;
         var system = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
         var display = "";
         switch (code) {
             case "patient":
                 display = "Patient";
-                resourceType = display;
+                acceptedResourceTypes = List.of(display);
                 break;
             case "encounter":
                 display = "Encounter";
-                resourceType = display;
+                acceptedResourceTypes = List.of(display);
                 break;
             case "location":
                 display = "Location";
-                resourceType = display;
+                acceptedResourceTypes = List.of(display);
                 break;
-            case "practitioner":
-            case "user":
+            case "practitioner", "user":
+                code = "user";
                 display = "User";
-                resourceType = resourceType == null ? "Practitioner" : resourceType;
+                acceptedResourceTypes = acceptedResourceTypes == null ? List.of("Practitioner") : acceptedResourceTypes;
                 break;
             case "study":
                 display = "ResearchStudy";
-                resourceType = display;
+                acceptedResourceTypes = List.of(display);
+                break;
+            case "clinical":
+                display = "Clinical";
                 break;
 
             default:
@@ -139,19 +143,17 @@ public class ExtensionBuilders {
         }
         switch (fhirVersion) {
             case R4:
-                return (T) new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                        .setExtension(Arrays.asList(
-                                new org.hl7.fhir.r4.model.Extension(
-                                        "name", new org.hl7.fhir.r4.model.Coding(system, code, display)),
-                                new org.hl7.fhir.r4.model.Extension(
-                                        "type", new org.hl7.fhir.r4.model.CodeType(resourceType))));
+                var r4Ext = new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+                r4Ext.addExtension("name", new org.hl7.fhir.r4.model.Coding(system, code, display));
+                acceptedResourceTypes.stream()
+                        .forEach(r -> r4Ext.addExtension("type", new org.hl7.fhir.r4.model.CodeType(r)));
+                return (T) r4Ext;
             case R5:
-                return (T) new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                        .setExtension(Arrays.asList(
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "name", new org.hl7.fhir.r5.model.Coding(system, code, display)),
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "type", new org.hl7.fhir.r5.model.CodeType(resourceType))));
+                var r5Ext = new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+                r5Ext.addExtension("name", new org.hl7.fhir.r5.model.Coding(system, code, display));
+                acceptedResourceTypes.stream()
+                        .forEach(r -> r5Ext.addExtension("type", new org.hl7.fhir.r5.model.CodeType(r)));
+                return (T) r5Ext;
 
             default:
                 return null;

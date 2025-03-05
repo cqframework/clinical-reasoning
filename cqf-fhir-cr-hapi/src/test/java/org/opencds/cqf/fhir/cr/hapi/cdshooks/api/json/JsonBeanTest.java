@@ -8,7 +8,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
-public class JsonBeanTest {
+class JsonBeanTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonBeanTest.class);
 
 	@Test

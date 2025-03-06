@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure;
+import org.opencds.cqf.fhir.benchmark.measure.r4.Measure;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;

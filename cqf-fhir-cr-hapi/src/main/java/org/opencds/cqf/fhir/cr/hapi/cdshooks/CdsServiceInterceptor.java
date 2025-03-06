@@ -1,0 +1,74 @@
+package org.opencds.cqf.fhir.cr.hapi.cdshooks;
+
+import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.CDS_CR_MODULE_ID;
+
+import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
+import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class CdsServiceInterceptor implements IResourceChangeListener {
+    static final Logger ourLog = LoggerFactory.getLogger(CdsServiceInterceptor.class);
+
+    @Autowired
+    CdsServiceRegistryImpl cdsServiceRegistry;
+
+    public CdsServiceInterceptor() {}
+
+    @Override
+    public void handleInit(Collection<IIdType> resourceIds) {
+        handleChange(ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(
+                new ArrayList<>(resourceIds), Collections.emptyList(), Collections.emptyList()));
+    }
+
+    @Override
+    public void handleChange(IResourceChangeEvent resourceChangeEvent) {
+        if (resourceChangeEvent == null) return;
+        if (resourceChangeEvent.getCreatedResourceIds() != null
+                && !resourceChangeEvent.getCreatedResourceIds().isEmpty()) {
+            insert(resourceChangeEvent.getCreatedResourceIds());
+        }
+        if (resourceChangeEvent.getUpdatedResourceIds() != null
+                && !resourceChangeEvent.getUpdatedResourceIds().isEmpty()) {
+            update(resourceChangeEvent.getUpdatedResourceIds());
+        }
+        if (resourceChangeEvent.getDeletedResourceIds() != null
+                && !resourceChangeEvent.getDeletedResourceIds().isEmpty()) {
+            delete(resourceChangeEvent.getDeletedResourceIds());
+        }
+    }
+
+    private void insert(List<IIdType> createdIds) {
+        for (IIdType id : createdIds) {
+            try {
+                // TODO: rework the cr service into a service
+                cdsServiceRegistry.registerService(CDS_CR_MODULE_ID, null, null, false, CDS_CR_MODULE_ID);
+            } catch (Exception e) {
+                ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
+            }
+        }
+    }
+
+    private void update(List<IIdType> updatedIds) {
+        try {
+            delete(updatedIds);
+            insert(updatedIds);
+        } catch (Exception e) {
+            ourLog.info(String.format("Failed to update service(s) for %s", updatedIds));
+        }
+    }
+
+    private void delete(List<IIdType> deletedIds) {
+        for (IIdType id : deletedIds) {
+            cdsServiceRegistry.unregisterService(id.getIdPart(), CDS_CR_MODULE_ID);
+        }
+    }
+}

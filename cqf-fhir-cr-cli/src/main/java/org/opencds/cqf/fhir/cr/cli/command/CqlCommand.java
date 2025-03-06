@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
+// import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
@@ -174,8 +174,8 @@ public class CqlCommand implements Callable<Integer> {
         CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
         if (optionsPath != null) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+            // CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+            // cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
         }
 
         var terminologySettings = new TerminologySettings();

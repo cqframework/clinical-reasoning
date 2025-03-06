@@ -50,7 +50,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-jackson</artifactId>
+            <artifactId>cqf-fhir-xmlutil</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>

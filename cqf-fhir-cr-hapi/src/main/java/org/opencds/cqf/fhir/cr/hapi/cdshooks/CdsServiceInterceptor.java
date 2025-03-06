@@ -5,7 +5,11 @@ import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.CDS_CR_MODULE
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
+import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +24,15 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 
     @Autowired
     CdsServiceRegistryImpl cdsServiceRegistry;
+
+    @Autowired
+    ICrDiscoveryServiceFactory discoveryServiceFactory;
+
+    @Autowired
+    ICdsCrServiceFactory crServiceFactory;
+
+    @Autowired
+    ObjectMapper om;
 
     public CdsServiceInterceptor() {}
 
@@ -49,8 +62,20 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
     private void insert(List<IIdType> createdIds) {
         for (IIdType id : createdIds) {
             try {
-                // TODO: rework the cr service into a service
-                cdsServiceRegistry.registerService(CDS_CR_MODULE_ID, null, null, false, CDS_CR_MODULE_ID);
+                CdsServiceJson cdsServiceJson =
+                        discoveryServiceFactory.create(id.toString()).resolveService();
+                if (cdsServiceJson != null) {
+                    final CdsCrServiceMethod cdsCrServiceMethod =
+                            new CdsCrServiceMethod(cdsServiceJson, crServiceFactory);
+
+                    cdsServiceRegistry.registerService(
+                            CDS_CR_MODULE_ID,
+                            x -> (CdsServiceResponseJson) cdsCrServiceMethod.invoke(om, cdsServiceJson, id.toString()),
+                            cdsServiceJson,
+                            false,
+                            CDS_CR_MODULE_ID);
+                }
+
             } catch (Exception e) {
                 ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
             }

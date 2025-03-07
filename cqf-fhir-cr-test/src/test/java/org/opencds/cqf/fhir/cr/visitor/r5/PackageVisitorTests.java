@@ -482,12 +482,13 @@ class PackageVisitorTests {
         final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
         var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
-        Predicate<BundleEntryComponent> leafFinder = e -> e.getResource().getResourceType() == ResourceType.ValueSet && ((ValueSet) e.getResource()).getUrl().contains(leafOid);
+        Predicate<BundleEntryComponent> leafFinder = e -> e.getResource().getResourceType() == ResourceType.ValueSet
+                && ((ValueSet) e.getResource()).getUrl().contains(leafOid);
         // remove leaf from bundle
         var leafEntry = bundle.getEntry().stream().filter(leafFinder).findFirst();
-        var leafVset = leafEntry.map(e -> (ValueSet)e.getResource()).get();
+        var leafVset = leafEntry.map(e -> (ValueSet) e.getResource()).get();
         bundle.getEntry().remove(leafEntry.get());
-        
+
         repo.transaction(bundle);
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
@@ -496,17 +497,18 @@ class PackageVisitorTests {
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
         when(clientMock.getResource(any(IEndpointAdapter.class), any(), any())).thenReturn(Optional.of(leafVset));
         doAnswer(new Answer<ValueSet>() {
-            @Override
-            public ValueSet answer(InvocationOnMock invocation) throws Throwable {
-                return new ValueSet(); // Return a new instance of ValueSet
-            }
-        }).when(clientMock).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+                    @Override
+                    public ValueSet answer(InvocationOnMock invocation) throws Throwable {
+                        return new ValueSet(); // Return a new instance of ValueSet
+                    }
+                })
+                .when(clientMock)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
         var packageVisitor = new PackageVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
-        var params = parameters(
-                part("terminologyEndpoint", (org.hl7.fhir.r5.model.Endpoint) endpoint.get()));
+        var params = parameters(part("terminologyEndpoint", (org.hl7.fhir.r5.model.Endpoint) endpoint.get()));
         // create package
-        var packagedBundle = (Bundle)libraryAdapter.accept(packageVisitor, params);
+        var packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
         var containsVset = packagedBundle.getEntry().stream().anyMatch(leafFinder);
         // check for ValueSet
         assertTrue(containsVset);

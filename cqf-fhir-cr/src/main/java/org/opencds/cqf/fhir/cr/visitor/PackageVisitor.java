@@ -116,9 +116,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
         Optional<String> artifactRoute = VisitorHelper.getStringParameter("artifactRoute", packageParameters);
         Optional<String> endpointUri = VisitorHelper.getStringParameter("endpointUri", packageParameters);
-        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters).map(ep -> (IEndpointAdapter)createAdapterForResource(ep));
-        Optional<IEndpointAdapter> terminologyEndpoint =
-                VisitorHelper.getResourceParameter("terminologyEndpoint", packageParameters).map(ep -> (IEndpointAdapter)createAdapterForResource(ep));
+        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters)
+                .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
+        Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
+                        "terminologyEndpoint", packageParameters)
+                .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
         Optional<Integer> count = VisitorHelper.getIntegerParameter("count", packageParameters);
         Optional<Integer> offset = VisitorHelper.getIntegerParameter("offset", packageParameters);
@@ -165,11 +167,17 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
-            recursiveGather(adapter, packagedResources, capability, include, versionTuple, terminologyEndpoint.orElse(null), terminologyServerClient);
+            recursiveGather(
+                    adapter,
+                    packagedResources,
+                    capability,
+                    include,
+                    versionTuple,
+                    terminologyEndpoint.orElse(null),
+                    terminologyServerClient);
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
-            myLogger.info(String.valueOf(packagedResources.size()));
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
             BundleHelper.setEntry(packagedBundle, included);
         }
@@ -226,13 +234,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();
             var expansionStartTime = new Date().getTime();
-            expandHelper.expandValueSet(
-                    valueSet,
-                    params,
-                    terminologyEndpoint,
-                    valueSets,
-                    expandedList,
-                    new Date());
+            expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
             var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
             myLogger.info("Expanded {} in {}s", url, elapsed);
             if (expansionCache.isPresent()) {

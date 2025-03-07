@@ -131,8 +131,6 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         if (adapter == null) {
             return;
         }
-        myLogger.info(gatheredResources.keySet().stream().collect(Collectors.joining(",")));
-        myLogger.info(adapter.getCanonical());
         if (!gatheredResources.keySet().contains(adapter.getCanonical())) {
             gatheredResources.put(adapter.getCanonical(), adapter);
             findUnsupportedCapability(adapter, capability);

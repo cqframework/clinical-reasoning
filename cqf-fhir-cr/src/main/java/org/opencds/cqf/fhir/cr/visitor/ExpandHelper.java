@@ -84,8 +84,6 @@ public class ExpandHelper {
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
             try {
-                myLogger.info("Expanding using Tx Server: "
-                        + terminologyEndpoint.get().getAddress());
                 var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
                 // expansions are only valid for a particular version
@@ -233,7 +231,6 @@ public class ExpandHelper {
                                 .map(r -> (IValueSetAdapter) createAdapterForResource(r))
                                 .orElse(null);
                     } else {
-                        myLogger.info("pulled VS from repo: " + reference);
                         return VisitorHelper.tryGetLatestVersion(reference, repository)
                                 .map(a -> (IValueSetAdapter) a)
                                 .orElse(null);

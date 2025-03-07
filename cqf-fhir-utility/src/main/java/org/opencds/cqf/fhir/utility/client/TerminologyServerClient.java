@@ -79,7 +79,6 @@ public class TerminologyServerClient {
         if (parameters.getParameter(versionParamName) == null && valueSetVersion != null) {
             parameters.addParameter(Parameters.newStringPart(ctx, versionParamName, valueSetVersion));
         }
-        myLogger.info("Expanding with Parameters: " + ctx.newJsonParser().encodeResourceToString(parameters.get()));
         // Invoke on the type using the url parameter
         return fhirClient
                 .operation()

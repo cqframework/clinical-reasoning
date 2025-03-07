@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,16 +47,13 @@ class R4RepositoryTest {
                 .startsWith("library DependencyExample version '0.1.0'"));
     }
 
-    /*
-     * todo :: work on ProxyRepository create()
-     *
-     * @Test public void testCreate() { Patient john = new Patient(); john.setId(new
-     * IdType("Patient",
-     * "id-john-doe")); MethodOutcome methodOutcome = repository.create(john, null);
-     * assertTrue(methodOutcome.getCreated());
-     *
-     * repository.create(john, null); }
-     */
+    @Test
+    void testCreate() {
+        Patient john = new Patient();
+        john.setId(new IdType("Patient", "id-john-doe"));
+        MethodOutcome methodOutcome = repository.create(john, null);
+        assertTrue(methodOutcome.getCreated());
+    }
 
     @Test
     void search() {

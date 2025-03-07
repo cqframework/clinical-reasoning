@@ -33,7 +33,7 @@ class R4SubmitDataServiceTest {
     private final R4SubmitDataService testSubject = new R4SubmitDataService(repository);
 
     @Test
-    public void submitDataSimple() {
+    void submitDataSimple() {
 
         // create resources
         var measureReport = newResource(MeasureReport.class).setMeasure(MEASURE_FULL_ID);
@@ -52,7 +52,7 @@ class R4SubmitDataServiceTest {
     }
 
     @Test
-    public void submitDataMedium() throws ParseException {
+    void submitDataMedium() throws ParseException {
 
         // create resources
         var patient = newResource(Patient.class).setId(PATIENT_ID);

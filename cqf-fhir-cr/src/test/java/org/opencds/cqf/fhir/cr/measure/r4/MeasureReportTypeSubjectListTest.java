@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  *    has status
  *    has period
  */
-public class MeasureReportTypeSubjectListTest {
+class MeasureReportTypeSubjectListTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(
             FhirContext.forR4Cached(),

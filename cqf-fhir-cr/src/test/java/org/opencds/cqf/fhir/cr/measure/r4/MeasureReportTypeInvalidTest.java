@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -37,15 +38,14 @@ class MeasureReportTypeInvalidTest {
 
     @Test
     void invalidReportTypeValue() {
+        final When evaluate = given.when()
+                .measureId("ProportionResourceAllPopulations")
+                .subject("Group/group-patients-1")
+                .reportType("summary")
+                .evaluate();
+
         try {
-            given.when()
-                    .measureId("ProportionResourceAllPopulations")
-                    .subject("Group/group-patients-1")
-                    .reportType("summary")
-                    .evaluate()
-                    .then()
-                    .hasReportType("Summary")
-                    .report();
+            evaluate.then();
             fail("'summary' is not a valid value and should fail");
         } catch (UnsupportedOperationException e) {
             assertTrue(e.getMessage().contains("ReportType: summary, is not an accepted R4 EvalType value."));
@@ -54,14 +54,14 @@ class MeasureReportTypeInvalidTest {
 
     @Test
     void unsupportedReportTypeValue() {
+        final When evaluate = given.when()
+                .measureId("ProportionResourceAllPopulations")
+                .subject("Group/group-patients-1")
+                .reportType("patient-list")
+                .evaluate();
+
         try {
-            given.when()
-                    .measureId("ProportionResourceAllPopulations")
-                    .subject("Group/group-patients-1")
-                    .reportType("patient-list")
-                    .evaluate()
-                    .then()
-                    .report();
+            evaluate.then();
             fail("'patient-list' is not a valid value for R4 and should fail");
         } catch (UnsupportedOperationException e) {
             assertTrue(e.getMessage().contains("ReportType: patient-list, is not an accepted R4 EvalType value."));

@@ -1,17 +1,17 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("java:S2699")
 class BloodPressureMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("ControllingBloodPressureFHIR");
 
     @Test
     @Disabled("source bundle is missing needed data")
-    void exm165_singlePatient_numerator() throws IOException {
+    void exm165_singlePatient_numerator() {
 
         given.when()
                 .measureId("ControllingBloodPressureFHIR")
@@ -31,7 +31,7 @@ class BloodPressureMeasureProcessorTest {
 
     @Test
     @Disabled("source bundle is missing needed data")
-    void exm165_population() throws IOException {
+    void exm165_population() {
 
         given.when()
                 .measureId("ControllingBloodPressureFHIR")

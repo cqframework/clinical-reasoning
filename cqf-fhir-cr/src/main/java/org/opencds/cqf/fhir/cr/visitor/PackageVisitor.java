@@ -51,12 +51,20 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(Repository repository) {
-        this(repository, null);
+        this(repository, null, null);
     }
 
-    public PackageVisitor(Repository repository, IValueSetExpansionCache cache) {
+    public PackageVisitor(Repository repository, TerminologyServerClient client) {
+        this(repository, client, null);
+    }
+
+    public PackageVisitor(Repository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
         super(repository, cache);
-        terminologyServerClient = new TerminologyServerClient(fhirContext());
+        if (client == null) {
+            terminologyServerClient = new TerminologyServerClient(fhirContext());
+        } else {
+            terminologyServerClient = client;
+        }
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
         setupResourceTypes();
     }
@@ -108,9 +116,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
         Optional<String> artifactRoute = VisitorHelper.getStringParameter("artifactRoute", packageParameters);
         Optional<String> endpointUri = VisitorHelper.getStringParameter("endpointUri", packageParameters);
-        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters).map(ep -> (IEndpointAdapter)ep);
-        Optional<IBaseResource> terminologyEndpoint =
-                VisitorHelper.getResourceParameter("terminologyEndpoint", packageParameters);
+        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters).map(ep -> (IEndpointAdapter)createAdapterForResource(ep));
+        Optional<IEndpointAdapter> terminologyEndpoint =
+                VisitorHelper.getResourceParameter("terminologyEndpoint", packageParameters).map(ep -> (IEndpointAdapter)createAdapterForResource(ep));
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
         Optional<Integer> count = VisitorHelper.getIntegerParameter("count", packageParameters);
         Optional<Integer> offset = VisitorHelper.getIntegerParameter("offset", packageParameters);
@@ -157,7 +165,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
-            recursiveGather(adapter, packagedResources, capability, include, versionTuple, endpoint.orElse(null), terminologyServerClient);
+            recursiveGather(adapter, packagedResources, capability, include, versionTuple, terminologyEndpoint.orElse(null), terminologyServerClient);
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
@@ -175,7 +183,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // what is dependency, where did it originate? potentially the package?
     }
 
-    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IBaseResource> terminologyEndpoint) {
+    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IEndpointAdapter> terminologyEndpoint) {
         var expansionParams = newParameters(fhirContext());
         var rootSpecificationLibrary = getRootSpecificationLibrary(packagedBundle);
         if (rootSpecificationLibrary != null) {
@@ -221,7 +229,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             expandHelper.expandValueSet(
                     valueSet,
                     params,
-                    terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
+                    terminologyEndpoint,
                     valueSets,
                     expandedList,
                     new Date());

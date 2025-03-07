@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -25,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -44,14 +48,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
@@ -434,7 +446,7 @@ class PackageVisitorTests {
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var mockCache = Mockito.mock(IValueSetExpansionCache.class);
-        var packageVisitor = new PackageVisitor(repo, mockCache);
+        var packageVisitor = new PackageVisitor(repo, null, mockCache);
 
         var canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
         var mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);
@@ -460,5 +472,53 @@ class PackageVisitorTests {
         // the other two will be added to the cache after expansion if possible
         verify(mockCache, times(2)).addToCache(any(), isNull());
         verify(mockCache, times(1)).getExpansionParametersHash(any(LibraryAdapter.class));
+    }
+
+    @Test
+    void fallback_to_tx_server_if_valueset_missing_locally() {
+        // SpecificationLibrary - root is experimental but HAS experimental children
+        final var leafOid = "2.16.840.1.113762.1.4.1146.6";
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        Predicate<BundleEntryComponent> leafFinder = e -> e.getResource().getResourceType() == ResourceType.ValueSet && ((ValueSet) e.getResource()).getUrl().contains(leafOid);
+        // remove leaf from bundle
+        var leafEntry = bundle.getEntry().stream().filter(leafFinder).findFirst();
+        var leafVset = leafEntry.map(e -> (ValueSet)e.getResource()).get();
+        bundle.getEntry().remove(leafEntry.get());
+        
+        repo.transaction(bundle);
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var endpoint = createEndpoint(authoritativeSource);
+
+        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getResource(any(IEndpointAdapter.class), any(), any())).thenReturn(Optional.of(leafVset));
+        doAnswer(new Answer<ValueSet>() {
+            @Override
+            public ValueSet answer(InvocationOnMock invocation) throws Throwable {
+                return new ValueSet(); // Return a new instance of ValueSet
+            }
+        }).when(clientMock).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+        var packageVisitor = new PackageVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(
+                part("terminologyEndpoint", (org.hl7.fhir.dstu3.model.Endpoint) endpoint.get()));
+        // create package
+        var packagedBundle = (Bundle)libraryAdapter.accept(packageVisitor, params);
+        var containsVset = packagedBundle.getEntry().stream().anyMatch(leafFinder);
+        // check for ValueSet
+        assertTrue(containsVset);
+    }
+
+    private IEndpointAdapter createEndpoint(String authoritativeSource) {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.dstu3.model.StringType("username")));
+        endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType("password")));
+        return endpoint;
     }
 }

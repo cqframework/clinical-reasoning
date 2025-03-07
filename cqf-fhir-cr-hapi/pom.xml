@@ -102,6 +102,19 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-server-cds-hooks</artifactId>
+            <version>${hapi.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    
+
         <!-- This is needed for the threaded execution -->
         <dependency>
             <groupId>org.springframework.security</groupId>

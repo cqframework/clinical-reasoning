@@ -477,7 +477,6 @@ class PackageVisitorTests {
 
     @Test
     void fallback_to_tx_server_if_valueset_missing_locally() {
-        // SpecificationLibrary - root is experimental but HAS experimental children
         final var leafOid = "2.16.840.1.113762.1.4.1146.6";
         final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
         var bundle = (Bundle) jsonParser.parseResource(
@@ -486,7 +485,7 @@ class PackageVisitorTests {
                 && ((ValueSet) e.getResource()).getUrl().contains(leafOid);
         // remove leaf from bundle
         var leafEntry = bundle.getEntry().stream().filter(leafFinder).findFirst();
-        var leafVset = leafEntry.map(e -> (ValueSet) e.getResource()).get();
+        var missingVset = leafEntry.map(e -> (ValueSet) e.getResource()).get();
         bundle.getEntry().remove(leafEntry.get());
 
         repo.transaction(bundle);
@@ -495,7 +494,8 @@ class PackageVisitorTests {
         var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getResource(any(IEndpointAdapter.class), any(), any())).thenReturn(Optional.of(leafVset));
+        // expect the Tx Server to provide the missing ValueSet
+        when(clientMock.getResource(any(IEndpointAdapter.class), any(), any())).thenReturn(Optional.of(missingVset));
         doAnswer(new Answer<ValueSet>() {
                     @Override
                     public ValueSet answer(InvocationOnMock invocation) throws Throwable {

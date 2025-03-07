@@ -18,9 +18,9 @@ import org.opencds.cqf.fhir.utility.Ids;
 @SuppressWarnings("squid:S2699")
 @ExtendWith(MockitoExtension.class)
 class ItemGeneratorTests {
-    private final String ROUTE_ONE_PATIENT_PROFILE =
+    private static final String ROUTE_ONE_PATIENT_PROFILE =
             "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient";
-    private final String SLEEP_STUDY_PROFILE =
+    private static final String SLEEP_STUDY_PROFILE =
             "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order";
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();

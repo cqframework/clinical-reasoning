@@ -29,7 +29,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
@@ -101,7 +100,7 @@ class PackageVisitorTests {
                                                 .getValueSet()
                                                 .size()
                                         == 0))
-                .collect(Collectors.toList());
+                .toList();
 
         // Ensure expansion is populated for all leaf value sets
         leafValueSets.forEach(valueSet -> assertNotNull(valueSet.getExpansion()));
@@ -251,7 +250,7 @@ class PackageVisitorTests {
         List<MetadataResource> updatedResources = updatedCanonicalVersionPackage.getEntry().stream()
                 .map(entry -> (MetadataResource) entry.getResource())
                 .filter(resource -> resource.getUrl().contains("to-add-missing-version"))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(2, updatedResources.size());
         for (MetadataResource updatedResource : updatedResources) {
             assertEquals(updatedResource.getVersion(), versionToUpdateTo);
@@ -423,7 +422,7 @@ class PackageVisitorTests {
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
             List<MetadataResource> resources = packaged.getEntry().stream()
                     .map(entry -> (MetadataResource) entry.getResource())
-                    .collect(Collectors.toList());
+                    .toList();
             for (MetadataResource resource : resources) {
                 Boolean noExtraResourcesReturned =
                         includedTypeURLs.getValue().stream().anyMatch(url -> url.equals(resource.getUrl()));
@@ -438,7 +437,7 @@ class PackageVisitorTests {
     }
 
     @Test
-    public void packageVisitorShouldUseExpansionCacheIfProvided() {
+    void packageVisitorShouldUseExpansionCacheIfProvided() {
         // Arrange
         var bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));

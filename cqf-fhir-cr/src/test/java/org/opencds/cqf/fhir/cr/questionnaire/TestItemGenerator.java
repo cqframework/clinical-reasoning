@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -233,7 +232,7 @@ public class TestItemGenerator {
                             return false;
                         }
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             assertEquals(count, launchContextExts.size());
             return this;
         }

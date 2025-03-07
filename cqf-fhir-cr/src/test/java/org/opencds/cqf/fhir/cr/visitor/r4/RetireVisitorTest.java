@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
@@ -8,7 +10,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -59,16 +60,16 @@ class RetireVisitorTest {
         assertEquals(4, res.size());
         var libraries = repo.search(Bundle.class, Library.class, Map.of()).getEntry().stream()
                 .filter(x -> ((Library) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
-                .collect(Collectors.toList());
+                .toList();
 
         var valueSets = repo.search(Bundle.class, ValueSet.class, Map.of()).getEntry().stream()
                 .filter(x -> ((ValueSet) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
-                .collect(Collectors.toList());
+                .toList();
 
         var planDefinitions = repo.search(Bundle.class, PlanDefinition.class, Map.of()).getEntry().stream()
                 .filter(x ->
                         ((PlanDefinition) x.getResource()).getStatus().equals(Enumerations.PublicationStatus.RETIRED))
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(2, libraries.size());
         assertEquals(1, valueSets.size());

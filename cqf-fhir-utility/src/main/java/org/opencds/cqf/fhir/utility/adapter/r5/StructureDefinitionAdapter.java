@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -270,13 +269,13 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     public List<IElementDefinitionAdapter> getSnapshotElements() {
         return get().getSnapshot().getElement().stream()
                 .map(adapterFactory::createElementDefinition)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<IElementDefinitionAdapter> getDifferentialElements() {
         return get().getDifferential().getElement().stream()
                 .map(adapterFactory::createElementDefinition)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

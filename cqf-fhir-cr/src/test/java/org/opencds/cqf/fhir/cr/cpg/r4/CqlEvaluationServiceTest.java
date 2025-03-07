@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.cpg.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
@@ -15,22 +16,26 @@ import org.junit.jupiter.api.Test;
 class CqlEvaluationServiceTest {
     @Test
     void libraryEvaluationService_inlineAsthma() {
-        var content = "library AsthmaTest version '1.0.0'\n" + "\n"
-                + "using FHIR version '4.0.1'\n"
-                + "\n"
-                + "include FHIRHelpers version '4.0.1'\n"
-                + "\n"
-                + "codesystem \"SNOMED\": 'http://snomed.info/sct'\n"
-                + "\n"
-                + "code \"Asthma\": '195967001' from \"SNOMED\"\n"
-                + "\n"
-                + "context Patient\n"
-                + "\n"
-                + "define \"Asthma Diagnosis\":\n"
-                + "    [Condition: \"Asthma\"]\n"
-                + "\n"
-                + "define \"Has Asthma Diagnosis\":\n"
-                + "    exists(\"Asthma Diagnosis\")\n";
+        var content =
+                """
+        library AsthmaTest version '1.0.0'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1'
+
+        codesystem "SNOMED": 'http://snomed.info/sct'
+
+        code "Asthma": '195967001' from "SNOMED"
+
+        context Patient
+
+        define "Asthma Diagnosis"
+
+        [Condition: "Asthma"]
+            define "Has Asthma Diagnosis":
+                exists("Asthma Diagnosis")
+        """;
         var when = Library.given()
                 .repositoryFor("libraryeval")
                 .when()
@@ -44,24 +49,28 @@ class CqlEvaluationServiceTest {
 
     @Test
     void libraryEvaluationService_contentAndExpression() {
-        var content = "library SimpleR4Library\n" + "\n"
-                + "using FHIR version '4.0.1'\n"
-                + "\n"
-                + "include FHIRHelpers version '4.0.1' called FHIRHelpers\n"
-                + "\n"
-                + "context Patient\n"
-                + "\n"
-                + "define simpleBooleanExpression: true\n"
-                + "\n"
-                + "define observationRetrieve: [Observation]\n"
-                + "\n"
-                + "define observationHasCode: not IsNull(([Observation]).code)\n"
-                + "\n"
-                + "define \"Initial Population\": observationHasCode\n"
-                + "\n"
-                + "define \"Denominator\": \"Initial Population\"\n"
-                + "\n"
-                + "define \"Numerator\": \"Denominator\"";
+        var content =
+                """
+        library SimpleR4Library
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+        context Patient
+
+        define simpleBooleanExpression: true
+
+        define observationRetrieve: [Observation]
+
+        define observationHasCode: not IsNull(([Observation]).code)
+
+        define "Initial Population": observationHasCode
+
+        define "Denominator": "Initial Population"
+
+        define "Numerator": "Denominator"";
+        """;
         var when = Library.given()
                 .repositoryFor("libraryeval")
                 .when()
@@ -72,9 +81,8 @@ class CqlEvaluationServiceTest {
         var results = when.then().parameters();
         assertFalse(results.isEmpty());
         assertEquals(1, results.getParameter().size());
-        assertTrue(results.getParameter("Numerator").getValue() instanceof BooleanType);
+        assertInstanceOf(BooleanType.class, results.getParameter("Numerator").getValue());
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
-        ;
     }
 
     @Test
@@ -85,7 +93,7 @@ class CqlEvaluationServiceTest {
                 .expression("5*5")
                 .evaluateCql();
         var results = when.then().parameters();
-        assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
+        assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
 
@@ -100,7 +108,7 @@ class CqlEvaluationServiceTest {
                 .expression("year from %inputDate before 2020")
                 .evaluateCql();
         var results = when.then().parameters();
-        assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+        assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
 
@@ -117,7 +125,7 @@ class CqlEvaluationServiceTest {
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("evaluation error", report.getParameterFirstRep().getName());
         assertTrue(report.getParameterFirstRep().hasResource());
-        assertTrue(report.getParameterFirstRep().getResource() instanceof OperationOutcome);
+        assertInstanceOf(OperationOutcome.class, report.getParameterFirstRep().getResource());
         assertEquals(
                 "Unsupported interval point type for FHIR conversion java.lang.Integer",
                 ((OperationOutcome) report.getParameterFirstRep().getResource())

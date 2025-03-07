@@ -17,6 +17,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -122,10 +122,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
         // resolvable resources get descriptors
         for (final var dependency : dependenciesOnReleasedArtifact) {
             if (dependency
@@ -209,10 +209,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(67, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
@@ -262,10 +262,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         // this should be 69, but we're not handling contained reference correctly
         assertEquals(68, dependenciesOnReleasedArtifact.size());
@@ -322,11 +322,11 @@ class ReleaseVisitorTests {
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
                 .map(ra -> ra.getResource().getReference())
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
                 .map(ra -> ra.getResource().getReference())
-                .collect(Collectors.toList());
+                .toList();
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
@@ -449,8 +449,8 @@ class ReleaseVisitorTests {
 
         var warningMessages = logger.getLoggingEvents().stream()
                 .filter(event -> event.getLevel().equals(Level.WARN))
-                .map(event -> event.getMessage())
-                .collect(Collectors.toList());
+                .map(LoggingEvent::getMessage)
+                .toList();
 
         // SHOULD warn if the root is not experimental
         assertTrue(warningMessages.stream()
@@ -479,7 +479,7 @@ class ReleaseVisitorTests {
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
+                    if (!(resource instanceof ValueSet)) {
                         IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();
@@ -489,7 +489,7 @@ class ReleaseVisitorTests {
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
                         String startString = year + "-" + month + "-" + day;
-                        assertEquals(startString, effectivePeriodToPropagate);
+                        assertEquals(effectivePeriodToPropagate, startString);
                     }
                 },
                 repo);
@@ -679,9 +679,7 @@ class ReleaseVisitorTests {
                     part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType(versionBehaviour)));
             try {
                 libraryAdapter.accept(releaseVisitor, params);
-            } catch (FHIRException e) {
-                maybeException = e;
-            } catch (UnprocessableEntityException e) {
+            } catch (FHIRException | UnprocessableEntityException e) {
                 maybeException = e;
             }
             assertNotNull(maybeException);

@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  * This test is to verify and confirm that unsupported reportType value is appropriately handled
  *     invalid reportType value
  */
+@SuppressWarnings("squid:S2699")
 class MeasureReportTypeInvalidTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(

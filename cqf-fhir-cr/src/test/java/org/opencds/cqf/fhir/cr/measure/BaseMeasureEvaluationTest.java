@@ -36,7 +36,7 @@ public abstract class BaseMeasureEvaluationTest {
 
     public String library_header() {
         return String.format(
-                "library Test version '1.0.0'\n\nusing FHIR version '%1$s'\ninclude FHIRHelpers version '%1$s'\n\n",
+                "library Test version '1.0.0'%n%nusing FHIR version '%1$s'%ninclude FHIRHelpers version '%1$s'%n%n",
                 getFhirVersion());
     }
 

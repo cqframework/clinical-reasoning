@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 /**
  * the purpose of this test is to validate the output and required fields for evaluating MeasureScoring type Cohort
  */
+@SuppressWarnings("squid:S2699")
 class MeasureScoringTypeCohortTest {
     // req'd populations
     // exception works

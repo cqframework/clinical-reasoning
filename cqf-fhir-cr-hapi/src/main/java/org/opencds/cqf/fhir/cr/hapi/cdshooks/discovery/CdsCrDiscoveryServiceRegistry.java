@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nonnull;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -10,7 +10,8 @@ public class CdsCrDiscoveryServiceRegistry implements ICdsCrDiscoveryServiceRegi
     private final Map<FhirVersionEnum, Class<? extends ICrDiscoveryService>> crDiscoveryServices;
 
     public CdsCrDiscoveryServiceRegistry() {
-        crDiscoveryServices = new HashMap<>();
+        new EnumMap<>(FhirVersionEnum.class);
+        crDiscoveryServices = new EnumMap<>(FhirVersionEnum.class);
         crDiscoveryServices.put(FhirVersionEnum.DSTU3, CrDiscoveryServiceDstu3.class);
         crDiscoveryServices.put(FhirVersionEnum.R4, CrDiscoveryServiceR4.class);
         crDiscoveryServices.put(FhirVersionEnum.R5, CrDiscoveryServiceR5.class);

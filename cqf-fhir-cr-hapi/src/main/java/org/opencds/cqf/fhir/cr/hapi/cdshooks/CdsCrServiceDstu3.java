@@ -101,10 +101,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
     protected Parameters addCqlParameters(Parameters parameters, IBaseResource contextResource, String paramName) {
         // We are making  assumption that a Library created for a hook will provide parameters for  fields
         // specified for  hook
-        if (contextResource instanceof Bundle) {
-            ((Bundle) contextResource)
-                    .getEntry()
-                    .forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
+        if (contextResource instanceof Bundle contextBundle) {
+            contextBundle.getEntry().forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
         } else {
             parameters.addParameter(part(paramName, (Resource) contextResource));
         }
@@ -137,8 +135,8 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
             if (resource == null) {
                 continue;
             }
-            if (resource instanceof Bundle) {
-                resourceMap.putAll(getResourcesFromBundle((Bundle) resource));
+            if (resource instanceof Bundle bundle) {
+                resourceMap.putAll(getResourcesFromBundle(bundle));
             } else {
                 resourceMap.put(resource.fhirType() + resource.getId(), resource);
             }
@@ -150,7 +148,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
     public CdsServiceResponseJson encodeResponse(Object response) {
         assert response instanceof CarePlan;
         var carePlan = (CarePlan) response;
-        CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
+        CdsServiceResponseJson serviceResponseInner = new CdsServiceResponseJson();
         if (carePlan.hasActivity()) {
             Reference requestGroupRef = carePlan.getActivity().get(0).getReference();
             RequestGroup mainRequest = (RequestGroup) resolveResource(requestGroupRef);
@@ -159,10 +157,10 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
                     PlanDefinition.class,
                     new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
             List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-            mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+            mainRequest.getAction().forEach(action -> serviceResponseInner.addCard(resolveAction(action, links)));
         }
 
-        return serviceResponse;
+        return serviceResponseInner;
     }
 
     protected List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition planDefinition) {
@@ -199,7 +197,7 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 
         if (action.hasSelectionBehavior()) {
             card.setSelectionBehaviour(action.getSelectionBehavior().toCode());
-            action.getAction().forEach(x -> resolveSuggestion(x));
+            action.getAction().forEach(this::resolveSuggestion);
         }
 
         // Leaving this out until  spec details how to map system actions.

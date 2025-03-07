@@ -25,7 +25,7 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,14 +38,20 @@ public class TestCdsHooksConfig {
 
     public static final String CDS_HOOKS_OBJECT_MAPPER_FACTORY = "cdsHooksObjectMapperFactory";
 
-    @Autowired(required = false)
-    private DaoRegistry daoRegistry;
+    private final DaoRegistry daoRegistry;
 
-    @Autowired(required = false)
-    private MatchUrlService matchUrlService;
+    private final MatchUrlService matchUrlService;
 
-    @Autowired(required = false)
-    private RestfulServer restfulServer;
+    private final RestfulServer restfulServer;
+
+    public TestCdsHooksConfig(
+            Optional<DaoRegistry> daoRegistry,
+            Optional<MatchUrlService> matchUrlService,
+            Optional<RestfulServer> restfulServer) {
+        this.daoRegistry = daoRegistry.orElse(null);
+        this.matchUrlService = matchUrlService.orElse(null);
+        this.restfulServer = restfulServer.orElse(null);
+    }
 
     @Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
     public ObjectMapper objectMapper(FhirContext fhirContext) {

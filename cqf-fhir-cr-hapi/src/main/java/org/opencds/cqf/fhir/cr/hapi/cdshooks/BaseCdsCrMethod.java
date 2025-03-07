@@ -8,9 +8,9 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 abstract class BaseCdsCrMethod implements ICdsMethod {
-    private ICdsCrServiceFactory cdsCrServiceFactory;
+    private final ICdsCrServiceFactory cdsCrServiceFactory;
 
-    public BaseCdsCrMethod(ICdsCrServiceFactory cdsCrServiceFactory) {
+    protected BaseCdsCrMethod(ICdsCrServiceFactory cdsCrServiceFactory) {
         this.cdsCrServiceFactory = cdsCrServiceFactory;
     }
 
@@ -18,8 +18,8 @@ abstract class BaseCdsCrMethod implements ICdsMethod {
         try {
             return cdsCrServiceFactory.create(serviceId).invoke(json);
         } catch (Exception e) {
-            if (e.getCause() != null && e.getCause() instanceof BaseServerResponseException) {
-                throw (BaseServerResponseException) e.getCause();
+            if (e.getCause() instanceof BaseServerResponseException baseServerResponseException) {
+                throw baseServerResponseException;
             }
             throw new ConfigurationException(Msg.code(2434) + "Failed to invoke $apply on " + serviceId, e);
         }

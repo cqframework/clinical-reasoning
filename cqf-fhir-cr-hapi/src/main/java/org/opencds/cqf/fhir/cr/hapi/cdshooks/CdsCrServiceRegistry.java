@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nonnull;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -10,7 +10,7 @@ public class CdsCrServiceRegistry implements ICdsCrServiceRegistry {
     private final Map<FhirVersionEnum, Class<? extends ICdsCrService>> cdsCrServices;
 
     public CdsCrServiceRegistry() {
-        cdsCrServices = new HashMap<>();
+        cdsCrServices = new EnumMap<>(FhirVersionEnum.class);
         cdsCrServices.put(FhirVersionEnum.DSTU3, CdsCrServiceDstu3.class);
         cdsCrServices.put(FhirVersionEnum.R4, CdsCrServiceR4.class);
         cdsCrServices.put(FhirVersionEnum.R5, CdsCrServiceR5.class);

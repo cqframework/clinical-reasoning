@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.r4.model.TriggerDefinition;
 
@@ -26,7 +25,7 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
                 .filter(a -> a.hasTriggerDefinition())
                 .flatMap(a -> a.getTriggerDefinition().stream())
                 .filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT))
-                .collect(Collectors.toList());
+                .toList();
         if (triggerDefs == null || triggerDefs.isEmpty()) {
             return null;
         }
@@ -42,8 +41,8 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
         }
 
         int itemNo = 0;
-        if (!prefetchUrlList.stream()
-                .anyMatch(p -> p.equals("Patient/{{context.patientId}}")
+        if (prefetchUrlList.stream()
+                .noneMatch(p -> p.equals("Patient/{{context.patientId}}")
                         || p.equals("Patient?_id={{context.patientId}}")
                         || p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
             String key = getKey(++itemNo);

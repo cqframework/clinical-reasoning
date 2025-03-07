@@ -6,6 +6,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
 public class CdsCrUtils {
+
+    private CdsCrUtils() {
+        // private constructor
+    }
+
     public static IBaseResource readPlanDefinitionFromRepository(
             FhirVersionEnum fhirVersion, Repository repository, IIdType id) {
         switch (fhirVersion) {

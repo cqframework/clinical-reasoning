@@ -5,6 +5,9 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
+import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
@@ -22,7 +25,6 @@ import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactor
 import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -34,11 +36,12 @@ public class CrCdsHooksConfig {
 
     public static final String PLAN_DEFINITION_RESOURCE_NAME = "PlanDefinition";
 
-    @Autowired(required = false)
-    private IResourceChangeListenerRegistry resourceChangeListenerRegistry;
+    @Nullable
+    private final IRepositoryFactory repositoryFactory;
 
-    @Autowired(required = false)
-    private IRepositoryFactory repositoryFactory;
+    public CrCdsHooksConfig(Optional<IRepositoryFactory> repositoryFactory) {
+        this.repositoryFactory = repositoryFactory.orElse(null);
+    }
 
     @Bean
     public ICdsCrServiceRegistry cdsCrServiceRegistry() {
@@ -67,7 +70,8 @@ public class CrCdsHooksConfig {
                     | InvocationTargetException
                     | InstantiationException
                     | IllegalAccessException e) {
-                ourLog.error("Error encountered attempting to construct the CdsCrService: " + e.getMessage());
+                ourLog.error(
+                        "Error encountered attempting to construct the CdsCrService: %s".formatted(e.getMessage()));
                 return null;
             }
         };
@@ -102,20 +106,29 @@ public class CrCdsHooksConfig {
                     | InvocationTargetException
                     | InstantiationException
                     | IllegalAccessException e) {
-                ourLog.error("Error encountered attempting to construct the CrDiscoveryService: " + e.getMessage());
+                ourLog.error("Error encountered attempting to construct the CrDiscoveryService: %s"
+                        .formatted(e.getMessage()));
                 return null;
             }
         };
     }
 
     @Bean
-    public CdsServiceInterceptor cdsServiceInterceptor() {
-        if (resourceChangeListenerRegistry == null) {
+    public CdsServiceInterceptor cdsServiceInterceptor(
+            CdsServiceRegistryImpl cdsServiceRegistry,
+            ICrDiscoveryServiceFactory discoveryServiceFactory,
+            ICdsCrServiceFactory crServiceFactory,
+            ObjectMapper om,
+            Optional<IResourceChangeListenerRegistry> resourceChangeListenerRegistry) {
+        if (resourceChangeListenerRegistry.isEmpty()) {
             return null;
         }
-        CdsServiceInterceptor listener = new CdsServiceInterceptor();
-        resourceChangeListenerRegistry.registerResourceResourceChangeListener(
-                PLAN_DEFINITION_RESOURCE_NAME, SearchParameterMap.newSynchronous(), listener, 1000);
+        CdsServiceInterceptor listener =
+                new CdsServiceInterceptor(cdsServiceRegistry, discoveryServiceFactory, crServiceFactory, om);
+        resourceChangeListenerRegistry
+                .get()
+                .registerResourceResourceChangeListener(
+                        PLAN_DEFINITION_RESOURCE_NAME, SearchParameterMap.newSynchronous(), listener, 1000);
         return listener;
     }
 }

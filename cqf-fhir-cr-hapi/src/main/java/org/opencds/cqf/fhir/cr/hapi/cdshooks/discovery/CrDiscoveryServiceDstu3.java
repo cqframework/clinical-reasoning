@@ -20,6 +20,11 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 
     protected static final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
     protected static final int DEFAULT_MAX_URI_LENGTH = 8000;
+    private static final String MEDICATION_ADMINISTRATION = "MedicationAdministration";
+    private static final String MEDICATION_DISPENSE = "MedicationDispense";
+    private static final String MEDICATION_REQUEST = "MedicationRequest";
+    private static final String MEDICATION_STATEMENT = "MedicationStatement";
+    private static final String PROCEDURE_REQUEST = "ProcedureRequest";
     protected int maxUriLength;
 
     protected Repository repository;
@@ -190,19 +195,19 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 
     protected String mapCodePathToSearchParam(String dataType, String path) {
         switch (dataType) {
-            case "MedicationAdministration":
+            case MEDICATION_ADMINISTRATION:
                 if (path.equals("medication")) return "code";
                 break;
-            case "MedicationDispense":
+            case MEDICATION_DISPENSE:
                 if (path.equals("medication")) return "code";
                 break;
-            case "MedicationRequest":
+            case MEDICATION_REQUEST:
                 if (path.equals("medication")) return "code";
                 break;
-            case "MedicationStatement":
+            case MEDICATION_STATEMENT:
                 if (path.equals("medication")) return "code";
                 break;
-            case "ProcedureRequest":
+            case PROCEDURE_REQUEST:
                 if (path.equals("bodySite")) return "body-site";
                 break;
             default:
@@ -258,16 +263,16 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
             case "List":
             case "MeasureReport":
             case "Media":
-            case "MedicationAdministration":
-            case "MedicationDispense":
-            case "MedicationRequest":
-            case "MedicationStatement":
+            case MEDICATION_ADMINISTRATION:
+            case MEDICATION_DISPENSE:
+            case MEDICATION_REQUEST:
+            case MEDICATION_STATEMENT:
             case "NutritionOrder":
             case "Observation":
             case "Patient":
             case "Person":
             case "Procedure":
-            case "ProcedureRequest":
+            case PROCEDURE_REQUEST:
             case "Provenance":
             case "QuestionnaireResponse":
             case "ReferralRequest":
@@ -372,13 +377,13 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                 return "patient";
             case "Media":
                 return "subject";
-            case "MedicationAdministration":
+            case MEDICATION_ADMINISTRATION:
                 return "patient";
-            case "MedicationDispense":
+            case MEDICATION_DISPENSE:
                 return "patient";
-            case "MedicationRequest":
+            case MEDICATION_REQUEST:
                 return "subject";
-            case "MedicationStatement":
+            case MEDICATION_STATEMENT:
                 return "subject";
             case "NutritionOrder":
                 return "patient";
@@ -390,7 +395,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                 return "patient";
             case "Procedure":
                 return "patient";
-            case "ProcedureRequest":
+            case PROCEDURE_REQUEST:
                 return "patient";
             case "Provenance":
                 return "patient";

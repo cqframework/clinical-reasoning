@@ -17,24 +17,28 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CdsServiceInterceptor implements IResourceChangeListener {
     static final Logger ourLog = LoggerFactory.getLogger(CdsServiceInterceptor.class);
 
-    @Autowired
-    CdsServiceRegistryImpl cdsServiceRegistry;
+    private final CdsServiceRegistryImpl cdsServiceRegistry;
 
-    @Autowired
-    ICrDiscoveryServiceFactory discoveryServiceFactory;
+    private final ICrDiscoveryServiceFactory discoveryServiceFactory;
 
-    @Autowired
-    ICdsCrServiceFactory crServiceFactory;
+    private final ICdsCrServiceFactory crServiceFactory;
 
-    @Autowired
-    ObjectMapper om;
+    private final ObjectMapper om;
 
-    public CdsServiceInterceptor() {}
+    public CdsServiceInterceptor(
+            CdsServiceRegistryImpl cdsServiceRegistry,
+            ICrDiscoveryServiceFactory discoveryServiceFactory,
+            ICdsCrServiceFactory crServiceFactory,
+            ObjectMapper om) {
+        this.cdsServiceRegistry = cdsServiceRegistry;
+        this.discoveryServiceFactory = discoveryServiceFactory;
+        this.crServiceFactory = crServiceFactory;
+        this.om = om;
+    }
 
     @Override
     public void handleInit(Collection<IIdType> resourceIds) {

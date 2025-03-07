@@ -35,7 +35,7 @@
     <!-- test dependencies-->
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-jackson</artifactId>
+      <artifactId>cqf-fhir-xmlutil</artifactId>
       <version>3.19.0-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>

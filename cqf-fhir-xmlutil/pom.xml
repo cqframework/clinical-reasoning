@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.opencds.cqf.fhir</groupId>
-  <artifactId>cqf-fhir-jackson</artifactId>
+  <artifactId>cqf-fhir-xmlutil</artifactId>
   <version>3.19.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning (Jackson)</name>
@@ -19,11 +19,11 @@
   <dependencies>
     <dependency>
       <groupId>info.cqframework</groupId>
-      <artifactId>model-jackson</artifactId>
+      <artifactId>elm-xmlutil</artifactId>
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
-      <artifactId>elm-jackson</artifactId>
+      <artifactId>model-xmlutil</artifactId>
     </dependency>
   </dependencies>
 </project>

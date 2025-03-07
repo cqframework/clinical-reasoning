@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -13,6 +14,11 @@ import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryService;
+import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
@@ -55,33 +61,29 @@ public class TestCdsHooksConfig {
         final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
                 new CdsServiceRequestJsonDeserializer(fhirContext, objectMapper);
 
-        // Work out the shim here...
-        // TODO: LD:  somehow stub the ICdsCrServiceFactory and ICrDiscoveryServiceFactory for now before these params are eventually removed
-        return new CdsServiceRegistryImpl(cdsHooksContextBooter, cdsPrefetchSvc, objectMapper, cdsServiceRequestJsonDeserializer);
-//        return new CdsServiceRegistryImpl(
-//            cdsHooksContextBooter,
-//            cdsPrefetchSvc,
-//            objectMapper,
-//            StubbedICdsCrServiceFactory.INSTANCE,
-//            StubbedICrDiscoveryServiceFactory.INSTANCE,
-//            cdsServiceRequestJsonDeserializer);
+        return new CdsServiceRegistryImpl(
+                cdsHooksContextBooter,
+                cdsPrefetchSvc,
+                objectMapper,
+                StubbedICdsCrServiceFactory.INSTANCE,
+                StubbedICrDiscoveryServiceFactory.INSTANCE,
+                cdsServiceRequestJsonDeserializer);
+        // TODO: LD:  once we upgrade to a new version of hapi-fhir with CDS CR removed, replace
+        // the line above with the line below
+        //        return new CdsServiceRegistryImpl(cdsHooksContextBooter, cdsPrefetchSvc, objectMapper,
+        // cdsServiceRequestJsonDeserializer);
     }
 
     @Bean
     public ICdsConfigService cdsConfigService(
             FhirContext fhirContext,
-            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper/*,
-            IRepositoryFactory repositoryFactory*/) {
-        // Work out the shim here...
-        // TODO: LD:  somehow stub the ICdsCrServiceFactory and ICrDiscoveryServiceFactory for now before these params are eventually removed
-//        return new CdsConfigServiceImpl(
-//            fhirContext,
-//            objectMapper,
-//            CdsCrSettings.getDefault(),
-//            daoRegistry,
-//            repositoryFactory,
-//            restfulServer);
-        return new CdsConfigServiceImpl(fhirContext, objectMapper, daoRegistry, restfulServer);
+            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper,
+            IRepositoryFactory repositoryFactory) {
+        return new CdsConfigServiceImpl(
+                fhirContext, objectMapper, CdsCrSettings.getDefault(), daoRegistry, repositoryFactory, restfulServer);
+        // TODO: LD:  once we upgrade to a new version of hapi-fhir with CDS CR removed, replace
+        // the line above with the line below
+        //        return new CdsConfigServiceImpl(fhirContext, objectMapper, daoRegistry, restfulServer);
     }
 
     @Bean
@@ -114,25 +116,23 @@ public class TestCdsHooksConfig {
         return new CdsResolutionStrategySvc(daoRegistry);
     }
 
-//    // LUKETODO:  comment about this being a temporary stub
-//    enum StubbedICdsCrServiceFactory implements ICdsCrServiceFactory {
-//
-//        INSTANCE;
-//
-//        @Override
-//        public ICdsCrService create(String serviceId) {
-//            return null;
-//        }
-//    }
-//
-//    // LUKETODO:  comment about this being a temporary stub
-//    enum StubbedICrDiscoveryServiceFactory implements ICrDiscoveryServiceFactory {
-//
-//        INSTANCE;
-//
-//        @Override
-//        public ICrDiscoveryService create(String serviceId) {
-//            return null;
-//        }
-//    }
+    // TODO: LD: this is code for a temporary stub: delete when no longer needed above
+    enum StubbedICdsCrServiceFactory implements ICdsCrServiceFactory {
+        INSTANCE;
+
+        @Override
+        public ICdsCrService create(String serviceId) {
+            return null;
+        }
+    }
+
+    // TODO: LD: this is code for a temporary stub: delete when no longer needed above
+    enum StubbedICrDiscoveryServiceFactory implements ICrDiscoveryServiceFactory {
+        INSTANCE;
+
+        @Override
+        public ICrDiscoveryService create(String serviceId) {
+            return null;
+        }
+    }
 }

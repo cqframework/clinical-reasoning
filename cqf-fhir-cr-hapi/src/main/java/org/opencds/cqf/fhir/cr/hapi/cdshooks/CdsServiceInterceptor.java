@@ -14,9 +14,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CdsServiceInterceptor implements IResourceChangeListener {

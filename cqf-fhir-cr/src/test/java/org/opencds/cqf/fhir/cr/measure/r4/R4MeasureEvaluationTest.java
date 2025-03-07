@@ -80,6 +80,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("squid:S1135")
 class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private static final CodeType POPULATION_BASIS_BOOLEAN = new CodeType("boolean");

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
@@ -108,11 +107,10 @@ public class MeasureValidationUtils {
         validateStratumScore(stratum, new BigDecimal(score));
     }
 
-    protected static void validateEvaluatedResourceExtension(
-            List<Reference> measureReferences, String resourceId, String... populations) {
+    protected static void validateEvaluatedResourceExtension(List<Reference> measureReferences, String resourceId) {
         List<Reference> resourceReferences = measureReferences.stream()
                 .filter(x -> x.getReference().equals(resourceId))
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, resourceReferences.size());
     }
 
@@ -143,11 +141,11 @@ public class MeasureValidationUtils {
         }
 
         for (Resource resource : expected.getContained()) {
-            if (resource.hasId() && listResources.containsKey(resource.getId())) {
-                if (resource.getResourceType().equals(ResourceType.List)) {
-                    validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
-                    validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
-                }
+            if (resource.hasId()
+                    && listResources.containsKey(resource.getId())
+                    && resource.getResourceType().equals(ResourceType.List)) {
+                validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
+                validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
             }
         }
     }

@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -393,7 +392,7 @@ public class PlanDefinition {
         public GeneratedBundle hasCommunicationRequestPayload() {
             var communications = getEntryResources(generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                    .collect(Collectors.toList());
+                    .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
@@ -416,7 +415,7 @@ public class PlanDefinition {
                     ? ((List<?>) answerPath)
                             .stream()
                                     .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                                    .collect(Collectors.toList())
+                                    .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(
@@ -509,7 +508,7 @@ public class PlanDefinition {
             var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
                     .stream()
                             .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                            .collect(Collectors.toList());
+                            .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;

@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-@SuppressWarnings("squid:S125")
+@SuppressWarnings({"squid:S125", "squid:S1135"})
 class R4RepositorySubjectProviderTest {
 
     private static final String PAT_ID_1 = "pat1";

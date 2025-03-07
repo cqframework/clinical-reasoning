@@ -21,27 +21,27 @@ class DateHelperTest {
 
     private static Stream<Arguments> resolveRequestDateWithTimeParams() {
         return Stream.of(
-            Arguments.of(
-                "2019-01-17T12:30:00",
-                LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
-                LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
-                ZoneId.systemDefault()),
-            Arguments.of(
-                "2019-01-01T22:00:00.0-06:00",
-                LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
-                LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
-                ZoneId.of("America/Chicago")),
-            Arguments.of(
-                "2017-01-01T00:00:00.000Z",
-                LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
-                LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
-                ZoneOffset.UTC));
+                Arguments.of(
+                        "2019-01-17T12:30:00",
+                        LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
+                        LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
+                        ZoneId.systemDefault()),
+                Arguments.of(
+                        "2019-01-01T22:00:00.0-06:00",
+                        LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
+                        LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
+                        ZoneId.of("America/Chicago")),
+                Arguments.of(
+                        "2017-01-01T00:00:00.000Z",
+                        LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                        LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
+                        ZoneOffset.UTC));
     }
 
     @ParameterizedTest
     @MethodSource("resolveRequestDateWithTimeParams")
     void resolveRequestDateWithTime(
-        String date, LocalDateTime expectedStartTime, LocalDateTime expectedEndTime, ZoneId zoneId) {
+            String date, LocalDateTime expectedStartTime, LocalDateTime expectedEndTime, ZoneId zoneId) {
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertNotNull(resolvedDateStart);
         final DateTime expectedDateStart = getDateTimeForZoneId(expectedStartTime, zoneId);
@@ -60,14 +60,14 @@ class DateHelperTest {
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertNotNull(resolvedDateStart);
         assertDateTimesEqual(
-            new DateTime(getOffsetDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0))),
-            resolvedDateStart);
+                new DateTime(getOffsetDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JULY, 1, 0, 0, 0))),
+                resolvedDateStart);
 
         var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertNotNull(resolvedDateEnd);
         assertDateTimesEqual(
-            getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JULY, 1, 23, 59, 59, 999000000)),
-            resolvedDateEnd);
+                getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JULY, 1, 23, 59, 59, 999000000)),
+                resolvedDateEnd);
     }
 
     @Test
@@ -76,20 +76,20 @@ class DateHelperTest {
         var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
         assertNotNull(resolvedDateStart);
         final DateTime expectedDateStart =
-            getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0));
+                getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0));
         assertDateTimesEqual(expectedDateStart, resolvedDateStart);
 
         var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
         assertNotNull(resolvedDateEnd);
         final DateTime expectedDateEnd =
-            getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.DECEMBER, 31, 23, 59, 59, 999000000));
+                getDateTimeForDefaultOffset(LocalDateTime.of(2017, Month.DECEMBER, 31, 23, 59, 59, 999000000));
         assertDateTimesEqual(expectedDateEnd, resolvedDateEnd);
     }
 
     private void assertDateTimesEqual(DateTime expectedDateTime, DateTime actualDateTime) {
         assertEquals(
-            expectedDateTime.getDateTime().toInstant(),
-            actualDateTime.getDateTime().toInstant());
+                expectedDateTime.getDateTime().toInstant(),
+                actualDateTime.getDateTime().toInstant());
     }
 
     @Nonnull

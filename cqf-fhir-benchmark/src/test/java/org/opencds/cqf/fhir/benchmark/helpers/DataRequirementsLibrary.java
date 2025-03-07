@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.benchmark.helpers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DataRequirementsLibrary {
     final IBaseResource library;

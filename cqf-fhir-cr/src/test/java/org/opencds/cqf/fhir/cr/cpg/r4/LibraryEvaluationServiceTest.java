@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("squid:S1135")
 class LibraryEvaluationServiceTest {
     @Test
     void libraryEvaluationService_inlineAsthma() {

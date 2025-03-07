@@ -16,7 +16,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -289,7 +288,7 @@ public class CareGaps {
                     bundleReport().getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("DetectedIssue"))
-                            .collect(Collectors.toList())
+                            .toList()
                             .size());
             return this;
         }
@@ -330,7 +329,7 @@ public class CareGaps {
                     bundleReport().getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
-                            .collect(Collectors.toList())
+                            .toList()
                             .size());
             return this;
         }
@@ -354,13 +353,13 @@ public class CareGaps {
             List<String> bundleResourceReferences = bundleReport().getEntry().stream()
                     .map(BundleEntryComponent::getResource)
                     .map(x -> x.getResourceType().toString().concat("/" + x.getIdPart()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             // get resource References from evaluatedResources on Measure Report
             List<MeasureReport> measureReports = bundleReport().getEntry().stream()
                     .filter(x -> x.getResource() instanceof MeasureReport)
                     .map(g -> (MeasureReport) g.getResource())
-                    .collect(Collectors.toList());
+                    .toList();
 
             // check all references are found in patient bundle
             for (MeasureReport report : measureReports) {

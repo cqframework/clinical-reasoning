@@ -7,7 +7,6 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -18,7 +17,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationCompon
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -211,36 +209,6 @@ public class Measure {
         public SelectedReference<SelectedReport> reference(Selector<Reference, MeasureReport> referenceSelector) {
             var r = referenceSelector.select(report);
             return new SelectedReference<>(this, r);
-        }
-
-        // public SelectedReference<SelectedReport> evaluatedResource(String name) {
-        // return this.reference(x -> x.getEvaluatedResource().stream()
-        // .filter(y -> y.getReference().equals(name)).findFirst().get());
-        // }
-
-        // public SelectedReport hasEvaluatedResourceCount(int count) {
-        // assertEquals(count, report().getEvaluatedResource().size());
-        // return this;
-        // }
-
-        public SelectedReport hasContainedResourceCount(int count) {
-            assertEquals(count, report().getContained().size());
-            return this;
-        }
-
-        // TODO: SelectedContained resource class?
-        public SelectedReport hasContainedResource(Predicate<Resource> criteria) {
-            var contained = this.report().getContained().stream();
-            assertTrue(contained.anyMatch(criteria), "Did not find a resource matching this criteria ");
-            return this;
-        }
-
-        // TODO: SelectedExtension class?
-        public SelectedReport hasExtension(String url, int count) {
-            var ex = this.report.getExtensionsByUrl(url);
-            assertEquals(ex.size(), count);
-
-            return this;
         }
 
         @Override

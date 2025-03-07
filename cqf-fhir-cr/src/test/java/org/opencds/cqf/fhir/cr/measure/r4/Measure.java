@@ -17,8 +17,6 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,6 +29,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -64,10 +63,11 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings({"squid:S2699", "squid:S5960"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
     interface Validator<T> {
@@ -120,15 +120,15 @@ public class Measure {
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
             this.evaluationOptions
-                    .getEvaluationSettings()
-                    .getRetrieveSettings()
-                    .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
-                    .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+                .getEvaluationSettings()
+                .getRetrieveSettings()
+                .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
 
             this.evaluationOptions
-                    .getEvaluationSettings()
-                    .getTerminologySettings()
-                    .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+                .getEvaluationSettings()
+                .getTerminologySettings()
+                .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
@@ -142,8 +142,8 @@ public class Measure {
 
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
-                    FhirContext.forR4Cached(),
-                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                FhirContext.forR4Cached(),
+                Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
 
             return this;
         }
@@ -163,7 +163,6 @@ public class Measure {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4MeasureService service;
 
         When(R4MeasureService service) {
@@ -189,7 +188,7 @@ public class Measure {
 
         public When periodEnd(String periodEnd) {
             this.periodEnd =
-                    LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
+                LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 
@@ -200,7 +199,7 @@ public class Measure {
 
         public When periodStart(String periodStart) {
             this.periodStart = LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-                    .atStartOfDay(ZoneId.systemDefault());
+                .atStartOfDay(ZoneId.systemDefault());
             return this;
         }
 
@@ -241,26 +240,26 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    practitioner);
+                Eithers.forMiddle3(new IdType("Measure", measureId)),
+                periodStart,
+                periodEnd,
+                reportType,
+                subject,
+                null,
+                null,
+                null,
+                null,
+                additionalData,
+                parameters,
+                productLine,
+                practitioner);
             return this;
         }
 
         public SelectedReport then() {
             if (this.operation == null) {
                 throw new IllegalStateException(
-                        "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
+                    "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
             return new SelectedReport(this.operation.get());
@@ -287,9 +286,9 @@ public class Measure {
 
         public SelectedGroup group(String id) {
             return this.group(x -> x.getGroup().stream()
-                    .filter(g -> g.getId().equals(id))
-                    .findFirst()
-                    .get());
+                .filter(g -> g.getId().equals(id))
+                .findFirst()
+                .get());
         }
 
         public SelectedGroup group(Selector<MeasureReportGroupComponent, MeasureReport> groupSelector) {
@@ -304,9 +303,9 @@ public class Measure {
 
         public SelectedReference evaluatedResource(String name) {
             return this.reference(x -> x.getEvaluatedResource().stream()
-                    .filter(y -> y.getReference().equals(name))
-                    .findFirst()
-                    .get());
+                .filter(y -> y.getReference().equals(name))
+                .findFirst()
+                .get());
         }
 
         public SelectedReport hasEvaluatedResourceCount(int count) {
@@ -317,7 +316,7 @@ public class Measure {
         public SelectedReport evaluatedResourceHasNoDuplicateReferences() {
             var rawRefs = report().getEvaluatedResource().size();
             var distinctRefs =
-                    (int) report().getEvaluatedResource().stream().distinct().count();
+                (int) report().getEvaluatedResource().stream().distinct().count();
             assertEquals(rawRefs, distinctRefs, "duplicate reference found in evaluatedResources");
             return this;
         }
@@ -349,8 +348,8 @@ public class Measure {
 
         public SelectedReport hasMeasureVersion(String version) {
             assertEquals(
-                    version,
-                    report().getMeasure().substring(report().getMeasure().indexOf('|') + 1));
+                version,
+                report().getMeasure().substring(report().getMeasure().indexOf('|') + 1));
             return this;
         }
 
@@ -379,8 +378,8 @@ public class Measure {
 
         public SelectedReport improvementNotationCode(String code) {
             assertEquals(
-                    code,
-                    this.value().getImprovementNotation().getCodingFirstRep().getCode());
+                code,
+                this.value().getImprovementNotation().getCodingFirstRep().getCode());
 
             return this;
         }
@@ -400,22 +399,22 @@ public class Measure {
         public SelectedReport hasPeriodStart(Date periodStart) {
             var period = this.report().getPeriod();
             assertEquals(
-                    periodStart,
-                    period.getStart(),
-                    String.format(
-                            "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodStart), DATE_FORMAT.format(period.getStart())));
+                periodStart,
+                period.getStart(),
+                String.format(
+                    "Expected period start of %s but was: %s",
+                    formatDate(periodStart), formatDate(period.getStart())));
             return this;
         }
 
         public SelectedReport hasPeriodEnd(Date periodEnd) {
             var period = this.report().getPeriod();
             assertEquals(
-                    periodEnd,
-                    period.getEnd(),
-                    String.format(
-                            "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodEnd), DATE_FORMAT.format(period.getEnd())));
+                periodEnd,
+                period.getEnd(),
+                String.format(
+                    "Expected period start of %s but was: %s",
+                    formatDate(periodEnd), formatDate(period.getEnd())));
             return this;
         }
 
@@ -426,13 +425,13 @@ public class Measure {
 
         public SelectedExtension extension(String supplementalDataId) {
             return this.extension(t -> getExtensions(t).stream()
-                    .filter(x -> x.getValue()
-                            .getExtensionByUrl(SDE_DAVINCI_DEQM_EXT_URL)
-                            .getValue()
-                            .toString()
-                            .equals(supplementalDataId))
-                    .findFirst()
-                    .orElseThrow());
+                .filter(x -> x.getValue()
+                    .getExtensionByUrl(SDE_DAVINCI_DEQM_EXT_URL)
+                    .getValue()
+                    .toString()
+                    .equals(supplementalDataId))
+                .findFirst()
+                .orElseThrow());
         }
 
         /**
@@ -442,9 +441,9 @@ public class Measure {
          */
         public SelectedExtension extensionByValueReference(String resourceReference) {
             return this.extension(t -> getExtensions(t).stream()
-                    .filter(y -> ((Reference) y.getValue()).getReference().equals(resourceReference))
-                    .findFirst()
-                    .orElseThrow());
+                .filter(y -> ((Reference) y.getValue()).getReference().equals(resourceReference))
+                .findFirst()
+                .orElseThrow());
         }
 
         public List<Extension> getExtensions(MeasureReport measureReport) {
@@ -463,59 +462,59 @@ public class Measure {
             return new SelectedContained(c, this);
         }
 
-        public SelectedContained containedByValue(String theCodeValue) {
+        public SelectedContained containedByValue(String codeValue) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the CodeableConcept value for individual Measure Reports
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
-                    .filter(y -> ((Observation) y)
-                            .getValueCodeableConcept()
-                            .getCodingFirstRep()
-                            .getCode()
-                            .equals(theCodeValue))
-                    .findFirst()
-                    .orElseThrow());
+                .filter(Observation.class::isInstance)
+                .filter(y -> ((Observation) y)
+                    .getValueCodeableConcept()
+                    .getCodingFirstRep()
+                    .getCode()
+                    .equals(codeValue))
+                .findFirst()
+                .orElseThrow());
         }
 
-        public SelectedContained containedByCoding(String theCodeCoding) {
+        public SelectedContained containedByCoding(String codeCoding) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the Observation.Coding.code for Summary Measure Reports, as value then becomes a count
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
-                    .filter(y -> ((Observation) y)
-                            .getCode()
-                            .getCodingFirstRep()
-                            .getCode()
-                            .equals(theCodeCoding))
-                    .findFirst()
-                    .orElseThrow());
+                .filter(Observation.class::isInstance)
+                .filter(y -> ((Observation) y)
+                    .getCode()
+                    .getCodingFirstRep()
+                    .getCode()
+                    .equals(codeCoding))
+                .findFirst()
+                .orElseThrow());
         }
 
-        private List<Resource> getContainedResources(MeasureReport theMeasureReport) {
-            return ContainedHelper.getAllContainedResources(theMeasureReport);
+        private List<Resource> getContainedResources(MeasureReport measureReport) {
+            return ContainedHelper.getAllContainedResources(measureReport);
         }
 
         public SelectedReport containedObservationsHaveMatchingExtension() {
             Set<String> contained = value().getContained().stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.Observation))
-                    .map(Resource::getIdPart)
-                    .collect(Collectors.toSet());
+                .filter(t -> t.getResourceType().equals(ResourceType.Observation))
+                .map(Resource::getIdPart)
+                .collect(Collectors.toSet());
 
             Set<String> extIds = value().getExtensionsByUrl(SDE_REFERENCE_EXT_URL).stream()
-                    .map(x -> (Reference) x.getValue())
-                    .map(t -> t.getReference().replace("#", ""))
-                    .collect(Collectors.toSet());
+                .map(x -> (Reference) x.getValue())
+                .map(t -> t.getReference().replace("#", ""))
+                .collect(Collectors.toSet());
 
             assertEquals(
-                    contained.size(),
-                    extIds.size(),
-                    "Qty of SDE Observation resources don't match qty of SDE Extension references");
+                contained.size(),
+                extIds.size(),
+                "Qty of SDE Observation resources don't match qty of SDE Extension references");
             // contained Observations have a matching extension reference
             Set<String> intersection = new HashSet<>(contained);
             intersection.retainAll(extIds);
@@ -524,24 +523,24 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport containedListHasCorrectResourceType(String theResourceType) {
-            var resourceType = ContainedHelper.getAllContainedResources(value()).stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.List))
-                    .map(x -> (ListResource) x)
-                    .findFirst()
-                    .orElseThrow()
-                    .getEntryFirstRep()
-                    .getItem()
-                    .getReference();
-            assertTrue(resourceType.contains(theResourceType));
+        public SelectedReport containedListHasCorrectResourceType(String resourceType) {
+            var resourceTypeToUse = ContainedHelper.getAllContainedResources(value()).stream()
+                .filter(t -> t.getResourceType().equals(ResourceType.List))
+                .map(x -> (ListResource) x)
+                .findFirst()
+                .orElseThrow()
+                .getEntryFirstRep()
+                .getItem()
+                .getReference();
+            assertTrue(resourceTypeToUse.contains(resourceType));
             return this;
         }
 
-        private List<String> getContainedIdsPerResourceType(ResourceType theResourceType) {
+        private List<String> getContainedIdsPerResourceType(ResourceType resourceType) {
             List<String> containedIds = new ArrayList<>();
             List<Resource> resources = ContainedHelper.getAllContainedResources(value());
             for (Resource resource : resources) {
-                if (resource.getResourceType().equals(theResourceType)) {
+                if (resource.getResourceType().equals(resourceType)) {
                     containedIds.add(resource.getId());
                 }
             }
@@ -556,15 +555,15 @@ public class Measure {
          */
         public SelectedReport subjectResultsHaveResourceType(String resourceType) {
             var lists = value().getContained().stream()
-                    .filter(t -> t instanceof ListResource)
-                    .map(x -> (ListResource) x)
-                    .collect(Collectors.toList());
+                .filter(ListResource.class::isInstance)
+                .map(x -> (ListResource) x)
+                .toList();
             for (ListResource list : lists) {
                 // all contained lists have correct ResourceType
                 var size = list.getEntry().size();
                 var matchSize = (int) list.getEntry().stream()
-                        .filter(x -> x.getItem().getReference().startsWith(resourceType))
-                        .count();
+                    .filter(x -> x.getItem().getReference().startsWith(resourceType))
+                    .count();
                 assertEquals(size, matchSize, "SubjectResult List does not have correct ResourceType");
             }
             return this;
@@ -600,48 +599,65 @@ public class Measure {
             return this;
         }
 
-        private int getPopulationCount(MeasureReport theMeasureReport, String theSubjectResultId) {
+        private int getPopulationCount(MeasureReport measureReport, String subjectResultId) {
             // find population with reference to contained List resource
-            var groups = theMeasureReport.getGroup();
+            var groups = measureReport.getGroup();
             for (MeasureReportGroupComponent group : groups) {
-                var population = group.getPopulation().stream()
-                        .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
-                        .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
-                        .findFirst()
-                        .orElse(null);
-                if (population == null && group.getStratifier() != null) {
-                    var stratifiers = group.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()
-                                        && stratumPopulation
-                                                .getSubjectResults()
-                                                .getReference()
-                                                .contains(theSubjectResultId)) {
-                                    return stratumPopulation.getCount();
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // population != null
-                    return population.getCount();
+                final Integer stratumPopulation = getPopulationCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
                 }
             }
             // if reached then no match found
             return 0;
         }
 
-        private int getListEntrySize(MeasureReport theMeasureReport, String theResourceId) {
-            var entry = (ListResource) ContainedHelper.getAllContainedResources(theMeasureReport).stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.List))
-                    .filter(x -> x.getId().equals(theResourceId))
-                    .findAny()
-                    .orElseThrow();
+        @Nullable
+        private Integer getPopulationCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var population = group.getPopulation().stream()
+                .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
+                .filter(x -> x.getSubjectResults().getReference().contains(subjectResultId))
+                .findFirst()
+                .orElse(null);
+            if (population == null && group.getStratifier() != null) {
+                final Integer stratumPopulation = getStratumCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
+                }
+            } else if (population != null) {
+                return population.getCount();
+            }
+            return null;
+        }
+
+        @Nullable
+        private Integer getStratumCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var stratifiers = group.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()
+                            && stratumPopulation
+                            .getSubjectResults()
+                            .getReference()
+                            .contains(subjectResultId)) {
+                            return stratumPopulation.getCount();
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private int getListEntrySize(MeasureReport measureReport, String resourceId) {
+            var entry = (ListResource) ContainedHelper.getAllContainedResources(measureReport).stream()
+                .filter(t -> t.getResourceType().equals(ResourceType.List))
+                .filter(x -> x.getId().equals(resourceId))
+                .findAny()
+                .orElseThrow();
             return entry.getEntry().size();
         }
 
@@ -651,47 +667,61 @@ public class Measure {
             var groupPops = value().getGroup();
             for (MeasureReportGroupComponent groupPop : groupPops) {
                 // standard population elements
-                var pops = groupPop.getPopulation();
-                for (MeasureReportGroupPopulationComponent pop : pops) {
-                    if (pop.getSubjectResults().hasReference()) {
-                        refs.add(pop.getSubjectResults().getReference());
-                    }
-                }
-                // stratifier results have references too
-                if (groupPop.getStratifier() != null) {
-                    var stratifiers = groupPop.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()) {
-                                    refs.add(stratumPopulation
-                                            .getSubjectResults()
-                                            .getReference());
-                                }
-                            }
-                        }
-                    }
-                }
+                subjectResultReference(groupPop, refs);
             }
             return refs;
         }
 
+        private void subjectResultReference(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var pops = groupPop.getPopulation();
+            for (MeasureReportGroupPopulationComponent pop : pops) {
+                if (pop.getSubjectResults().hasReference()) {
+                    refs.add(pop.getSubjectResults().getReference());
+                }
+            }
+            // stratifier results have references too
+            if (groupPop.getStratifier() != null) {
+                subjectResultReferenceStratifier(groupPop, refs);
+            }
+        }
+
+        private void subjectResultReferenceStratifier(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var stratifiers = groupPop.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()) {
+                            refs.add(stratumPopulation.getSubjectResults().getReference());
+                        }
+                    }
+                }
+            }
+        }
+
         public SelectedReport hasContainedOperationOutcome() {
             assertTrue(report().hasContained()
-                    && report().getContained().stream()
-                            .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome)));
+                && report().getContained().stream()
+                .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome)));
             return this;
         }
 
         public SelectedReport hasContainedOperationOutcomeMsg(String msg) {
             assertTrue(report().getContained().stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
-                    .map(y -> (OperationOutcome) y)
-                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+                .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
+                .map(y -> (OperationOutcome) y)
+                .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
             return this;
+        }
+
+        private static String formatDate(Date javaUtilDate) {
+            return javaUtilDate
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(FORMATTER);
         }
     }
 
@@ -708,11 +738,11 @@ public class Measure {
 
         public SelectedExtension extensionHasSDEId(String id) {
             assertEquals(
-                    id,
-                    value().getValue()
-                            .getExtensionByUrl(EXT_CRITERIA_REFERENCE_URL)
-                            .getValue()
-                            .toString());
+                id,
+                value().getValue()
+                    .getExtensionByUrl(EXT_CRITERIA_REFERENCE_URL)
+                    .getValue()
+                    .toString());
             return this;
         }
     }
@@ -741,20 +771,20 @@ public class Measure {
             return this;
         }
 
-        public SelectedContained observationHasCode(String theCode) {
+        public SelectedContained observationHasCode(String code) {
             var obs = (Observation) value();
-            assertEquals(theCode, obs.getCode().getCoding().get(0).getCode());
+            assertEquals(code, obs.getCode().getCoding().get(0).getCode());
             return this;
         }
 
-        public SelectedContained observationCount(int theCount) {
+        public SelectedContained observationCount(int count) {
             var obs = (Observation) value();
-            assertEquals(theCount, obs.getValueIntegerType().getValue());
+            assertEquals(count, obs.getValueIntegerType().getValue());
             return this;
         }
     }
 
-    static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
+    public static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedReport parent) {
             super(value, parent);
@@ -782,36 +812,36 @@ public class Measure {
 
         public SelectedGroup hasDateOfCompliance() {
             assertEquals(
-                    CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL,
-                    this.value()
-                            .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                            .get(0)
-                            .getUrl());
+                CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL,
+                this.value()
+                    .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                    .get(0)
+                    .getUrl());
             assertFalse(this.value()
+                .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                .get(0)
+                .getValue()
+                .isEmpty());
+            assertTrue(
+                this.value()
                     .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
                     .get(0)
                     .getValue()
-                    .isEmpty());
-            assertTrue(
-                    this.value()
-                                    .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                    .get(0)
-                                    .getValue()
-                            instanceof Period);
+                    instanceof Period);
             return this;
         }
 
         public SelectedPopulation population(String name) {
             return this.population(g -> g.getPopulation().stream()
-                    .filter(x -> x.hasCode()
-                            && x.getCode().hasCoding()
-                            && x.getCode().getCoding().get(0).getCode().equals(name))
-                    .findFirst()
-                    .get());
+                .filter(x -> x.hasCode()
+                    && x.getCode().hasCoding()
+                    && x.getCode().getCoding().get(0).getCode().equals(name))
+                .findFirst()
+                .get());
         }
 
         public SelectedPopulation population(
-                Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
+            Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
             var p = populationSelector.select(value());
             return new SelectedPopulation(p, this);
         }
@@ -831,13 +861,13 @@ public class Measure {
 
         public SelectedStratifier stratifierById(String stratId) {
             return this.stratifier(g -> g.getStratifier().stream()
-                    .filter(t -> t.getId().equals(stratId))
-                    .findFirst()
-                    .get());
+                .filter(t -> t.getId().equals(stratId))
+                .findFirst()
+                .get());
         }
 
         public SelectedStratifier stratifier(
-                Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
+            Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
             var s = stratifierSelector.select(value());
             return new SelectedStratifier(s, this);
         }
@@ -852,9 +882,9 @@ public class Measure {
                 var exts = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 var extsCount = exts.size();
                 var distinctExtCount = (int) exts.stream()
-                        .map(t -> ((StringType) t.getValue()).getValue())
-                        .distinct()
-                        .count();
+                    .map(t -> ((StringType) t.getValue()).getValue())
+                    .distinct()
+                    .count();
                 assertEquals(extsCount, distinctExtCount, "extension contain duplicate values");
                 return this;
             }
@@ -863,7 +893,7 @@ public class Measure {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
                     throw new IllegalStateException(
-                            String.format("no evaluated resource extensions were found, and expected %s", extValueRef));
+                        String.format("no evaluated resource extensions were found, and expected %s", extValueRef));
                 }
                 String foundRef = null;
                 for (Extension extension : ex) {
@@ -883,20 +913,20 @@ public class Measure {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
                     throw new IllegalStateException(String.format(
-                            "no evaluated resource extensions were found, and expected %s", population.length));
+                        "no evaluated resource extensions were found, and expected %s", population.length));
                 }
 
                 @SuppressWarnings("unchecked")
                 var set = ex.stream()
-                        .map(x -> ((IPrimitiveType<String>) x.getValue()).getValue())
-                        .collect(Collectors.toSet());
+                    .map(x -> ((IPrimitiveType<String>) x.getValue()).getValue())
+                    .collect(Collectors.toSet());
 
                 for (var p : population) {
                     assertTrue(
-                            set.contains(p),
-                            String.format(
-                                    "population: %s was not found in the evaluated resources criteria reference extension list",
-                                    p));
+                        set.contains(p),
+                        String.format(
+                            "population: %s was not found in the evaluated resources criteria reference extension list",
+                            p));
                 }
 
                 return this;
@@ -904,7 +934,7 @@ public class Measure {
         }
 
         static class SelectedPopulation
-                extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
+            extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
                 super(value, parent);
@@ -921,7 +951,7 @@ public class Measure {
             }
 
             public SelectedPopulation passes(
-                    Validator<MeasureReport.MeasureReportGroupPopulationComponent> populationValidator) {
+                Validator<MeasureReport.MeasureReportGroupPopulationComponent> populationValidator) {
                 populationValidator.validate(value());
                 return this;
             }
@@ -929,7 +959,7 @@ public class Measure {
     }
 
     static class SelectedStratifier
-            extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
+        extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
             super(value, parent);
@@ -946,22 +976,22 @@ public class Measure {
 
         public SelectedStratum stratum(CodeableConcept value) {
             return stratum(s -> s.getStratum().stream()
-                    .filter(x -> x.hasValue() && x.getValue().equalsDeep(value))
-                    .findFirst()
-                    .get());
+                .filter(x -> x.hasValue() && x.getValue().equalsDeep(value))
+                .findFirst()
+                .get());
         }
 
         public SelectedStratum stratum(String textValue) {
             return stratum(s -> s.getStratum().stream()
-                    .filter(x -> x.hasValue() && x.getValue().hasText())
-                    .filter(x -> x.getValue().getText().equals(textValue))
-                    .findFirst()
-                    .get());
+                .filter(x -> x.hasValue() && x.getValue().hasText())
+                .filter(x -> x.getValue().getText().equals(textValue))
+                .findFirst()
+                .get());
         }
 
         public SelectedStratum stratum(
-                Selector<MeasureReport.StratifierGroupComponent, MeasureReport.MeasureReportGroupStratifierComponent>
-                        stratumSelector) {
+            Selector<MeasureReport.StratifierGroupComponent, MeasureReport.MeasureReportGroupStratifierComponent>
+                stratumSelector) {
             var s = stratumSelector.select(value());
             return new SelectedStratum(s, this);
         }
@@ -984,26 +1014,26 @@ public class Measure {
 
         public SelectedStratumPopulation population(String name) {
             return population(s -> s.getPopulation().stream()
-                    .filter(x -> x.hasCode()
-                            && x.getCode().hasCoding()
-                            && x.getCode().getCoding().get(0).getCode().equals(name))
-                    .findFirst()
-                    .get());
+                .filter(x -> x.hasCode()
+                    && x.getCode().hasCoding()
+                    && x.getCode().getCoding().get(0).getCode().equals(name))
+                .findFirst()
+                .get());
         }
 
         public SelectedStratumPopulation population(
-                Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent>
-                        populationSelector) {
+            Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent>
+                populationSelector) {
             var p = populationSelector.select(value());
             return new SelectedStratumPopulation(p, this);
         }
     }
 
     static class SelectedStratumPopulation
-            extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
+        extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
 
         public SelectedStratumPopulation(
-                MeasureReport.StratifierGroupPopulationComponent value, SelectedStratum parent) {
+            MeasureReport.StratifierGroupPopulationComponent value, SelectedStratum parent) {
             super(value, parent);
         }
 

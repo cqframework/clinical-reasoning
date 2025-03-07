@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.config.test;
 
 import ca.uhn.fhir.context.FhirContext;
-//import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -14,11 +13,6 @@ import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestJsonDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsHooksContextBooter;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
-//import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
-//import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrService;
-//import ca.uhn.hapi.fhir.cdshooks.svc.cr.ICdsCrServiceFactory;
-//import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryService;
-//import ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.ICrDiscoveryServiceFactory;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;

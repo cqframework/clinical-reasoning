@@ -205,7 +205,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
 
         if (action.hasSelectionBehavior()) {
             card.setSelectionBehaviour(action.getSelectionBehavior().toCode());
-            action.getAction().forEach(x -> resolveSuggestion(x));
+            action.getAction().forEach(this::resolveSuggestion);
         }
 
         // Leaving this out until  spec details how to map system actions.

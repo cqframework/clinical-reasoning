@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.r5.model.TriggerDefinition;
 
 public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
     protected PlanDefinition planDefinition;
@@ -18,16 +18,16 @@ public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
     public CdsServiceJson getCdsServiceJson() {
         if (planDefinition == null
                 || !planDefinition.hasAction()
-                || planDefinition.getAction().stream().noneMatch(a -> a.hasTrigger())) {
+                || planDefinition.getAction().stream().noneMatch(PlanDefinitionActionComponent::hasTrigger)) {
             return null;
         }
 
         var triggerDefs = planDefinition.getAction().stream()
-                .filter(a -> a.hasTrigger())
+                .filter(PlanDefinitionActionComponent::hasTrigger)
                 .flatMap(a -> a.getTrigger().stream())
                 .filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT))
-                .collect(Collectors.toList());
-        if (triggerDefs == null || triggerDefs.isEmpty()) {
+                .toList();
+        if (triggerDefs.isEmpty()) {
             return null;
         }
 
@@ -42,8 +42,8 @@ public class CrDiscoveryElementR5 implements ICrDiscoveryElement {
         }
 
         int itemNo = 0;
-        if (!prefetchUrlList.stream()
-                .anyMatch(p -> p.equals("Patient/{{context.patientId}}")
+        if (prefetchUrlList.stream()
+                .noneMatch(p -> p.equals("Patient/{{context.patientId}}")
                         || p.equals("Patient?_id={{context.patientId}}")
                         || p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
             String key = getKey(++itemNo);

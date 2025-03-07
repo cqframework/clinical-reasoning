@@ -23,6 +23,11 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
     private static final String PATIENT = "patient";
     private static final String ACTOR = "actor";
     private static final String SUBJECT = "subject";
+    private static final String MEDICATION_STATEMENT = "MedicationStatement";
+    private static final String MEDICATION_REQUEST = "MedicationRequest";
+    private static final String MEDICATION_DISPENSE = "MedicationDispense";
+    private static final String MEDICATION_ADMINISTRATION = "MedicationAdministration";
+    private static final String MEDICATION = "medication";
     protected int maxUriLength;
 
     protected final Repository repository;
@@ -128,7 +133,7 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
-        if (!isPatientCompartment(dataRequirement.getType())) return null;
+        if (!isPatientCompartment(dataRequirement.getType())) return List.of();
         String patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
@@ -169,7 +174,7 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
         if (!isEca(planDefinition)) return new PrefetchUrlList();
         Library library = resolvePrimaryLibrary(planDefinition);
         // TODO: resolve data requirements
-        if (library == null || !library.hasDataRequirement()) return null;
+        if (library == null || !library.hasDataRequirement()) return new PrefetchUrlList();
         for (DataRequirement dataRequirement : library.getDataRequirement()) {
             List<String> requestUrls = createRequestUrl(dataRequirement);
             if (requestUrls != null) {
@@ -181,17 +186,17 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
 
     protected String mapCodePathToSearchParam(String dataType, String path) {
         switch (dataType) {
-            case "MedicationAdministration":
-                if (path.equals("medication")) return "code";
+            case MEDICATION_ADMINISTRATION:
+                if (path.equals(MEDICATION)) return "code";
                 break;
-            case "MedicationDispense":
-                if (path.equals("medication")) return "code";
+            case MEDICATION_DISPENSE:
+                if (path.equals(MEDICATION)) return "code";
                 break;
-            case "MedicationRequest":
-                if (path.equals("medication")) return "code";
+            case MEDICATION_REQUEST:
+                if (path.equals(MEDICATION)) return "code";
                 break;
-            case "MedicationStatement":
-                if (path.equals("medication")) return "code";
+            case MEDICATION_STATEMENT:
+                if (path.equals(MEDICATION)) return "code";
                 break;
             default:
                 if (path.equals("vaccineCode")) return "vaccine-code";
@@ -249,10 +254,10 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
             case "List":
             case "MeasureReport":
             case "Media":
-            case "MedicationAdministration":
-            case "MedicationDispense":
-            case "MedicationRequest":
-            case "MedicationStatement":
+            case MEDICATION_ADMINISTRATION:
+            case MEDICATION_DISPENSE:
+            case MEDICATION_REQUEST:
+            case MEDICATION_STATEMENT:
             case "MolecularSequence":
             case "NutritionOrder":
             case "Observation":
@@ -361,13 +366,13 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
                 return PATIENT;
             case "Media":
                 return SUBJECT;
-            case "MedicationAdministration":
+            case MEDICATION_ADMINISTRATION:
                 return PATIENT;
-            case "MedicationDispense":
+            case MEDICATION_DISPENSE:
                 return PATIENT;
-            case "MedicationRequest":
+            case MEDICATION_REQUEST:
                 return SUBJECT;
-            case "MedicationStatement":
+            case MEDICATION_STATEMENT:
                 return SUBJECT;
             case "MolecularSequence":
                 return PATIENT;

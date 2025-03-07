@@ -25,6 +25,9 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
     private static final String MEDICATION_REQUEST = "MedicationRequest";
     private static final String MEDICATION_STATEMENT = "MedicationStatement";
     private static final String PROCEDURE_REQUEST = "ProcedureRequest";
+    private static final String MEDICATION = "medication";
+    private static final String SUBJECT = "subject";
+    private static final String PATIENT = "patient";
     protected int maxUriLength;
 
     protected Repository repository;
@@ -132,7 +135,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
-        if (!isPatientCompartment(dataRequirement.getType())) return null;
+        if (!isPatientCompartment(dataRequirement.getType())) return List.of();
         String patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
@@ -178,11 +181,11 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 
     public PrefetchUrlList getPrefetchUrlList(PlanDefinition planDefinition) {
         PrefetchUrlList prefetchList = new PrefetchUrlList();
-        if (planDefinition == null) return null;
-        if (!isEca(planDefinition)) return null;
+        if (planDefinition == null) return new PrefetchUrlList();
+        if (!isEca(planDefinition)) return new PrefetchUrlList();
         Library library = resolvePrimaryLibrary(planDefinition);
         // TODO: resolve data requirements
-        if (!library.hasDataRequirement()) return null;
+        if (!library.hasDataRequirement()) return new PrefetchUrlList();
         for (DataRequirement dataRequirement : library.getDataRequirement()) {
             List<String> requestUrls = createRequestUrl(dataRequirement);
             if (requestUrls != null) {
@@ -196,16 +199,16 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
     protected String mapCodePathToSearchParam(String dataType, String path) {
         switch (dataType) {
             case MEDICATION_ADMINISTRATION:
-                if (path.equals("medication")) return "code";
+                if (path.equals(MEDICATION)) return "code";
                 break;
             case MEDICATION_DISPENSE:
-                if (path.equals("medication")) return "code";
+                if (path.equals(MEDICATION)) return "code";
                 break;
             case MEDICATION_REQUEST:
-                if (path.equals("medication")) return "code";
+                if (path.equals(MEDICATION)) return "code";
                 break;
             case MEDICATION_STATEMENT:
-                if (path.equals("medication")) return "code";
+                if (path.equals(MEDICATION)) return "code";
                 break;
             case PROCEDURE_REQUEST:
                 if (path.equals("bodySite")) return "body-site";
@@ -294,133 +297,133 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
             case "Account":
-                return "subject";
+                return SUBJECT;
             case "AdverseEvent":
-                return "subject";
+                return SUBJECT;
             case "AllergyIntolerance":
-                return "patient";
+                return PATIENT;
             case "Appointment":
                 return "actor";
             case "AppointmentResponse":
                 return "actor";
             case "AuditEvent":
-                return "patient";
+                return PATIENT;
             case "Basic":
-                return "patient";
+                return PATIENT;
             case "BodySite":
-                return "patient";
+                return PATIENT;
             case "CarePlan":
-                return "patient";
+                return PATIENT;
             case "CareTeam":
-                return "patient";
+                return PATIENT;
             case "ChargeItem":
-                return "subject";
+                return SUBJECT;
             case "Claim":
-                return "patient";
+                return PATIENT;
             case "ClaimResponse":
-                return "patient";
+                return PATIENT;
             case "ClinicalImpression":
-                return "subject";
+                return SUBJECT;
             case "Communication":
-                return "subject";
+                return SUBJECT;
             case "CommunicationRequest":
-                return "subject";
+                return SUBJECT;
             case "Composition":
-                return "subject";
+                return SUBJECT;
             case "Condition":
-                return "patient";
+                return PATIENT;
             case "Consent":
-                return "patient";
+                return PATIENT;
             case "Coverage":
-                return "patient";
+                return PATIENT;
             case "DetectedIssue":
-                return "patient";
+                return PATIENT;
             case "DeviceRequest":
-                return "subject";
+                return SUBJECT;
             case "DeviceUseStatement":
-                return "subject";
+                return SUBJECT;
             case "DiagnosticReport":
-                return "subject";
+                return SUBJECT;
             case "DocumentManifest":
-                return "subject";
+                return SUBJECT;
             case "DocumentReference":
-                return "subject";
+                return SUBJECT;
             case "EligibilityRequest":
-                return "patient";
+                return PATIENT;
             case "Encounter":
-                return "patient";
+                return PATIENT;
             case "EnrollmentRequest":
-                return "subject";
+                return SUBJECT;
             case "EpisodeOfCare":
-                return "patient";
+                return PATIENT;
             case "ExplanationOfBenefit":
-                return "patient";
+                return PATIENT;
             case "FamilyMemberHistory":
-                return "patient";
+                return PATIENT;
             case "Flag":
-                return "patient";
+                return PATIENT;
             case "Goal":
-                return "patient";
+                return PATIENT;
             case "Group":
                 return "member";
             case "ImagingManifest":
-                return "patient";
+                return PATIENT;
             case "ImagingStudy":
-                return "patient";
+                return PATIENT;
             case "Immunization":
-                return "patient";
+                return PATIENT;
             case "ImmunizationRecommendation":
-                return "patient";
+                return PATIENT;
             case "List":
-                return "subject";
+                return SUBJECT;
             case "MeasureReport":
-                return "patient";
+                return PATIENT;
             case "Media":
-                return "subject";
+                return SUBJECT;
             case MEDICATION_ADMINISTRATION:
-                return "patient";
+                return PATIENT;
             case MEDICATION_DISPENSE:
-                return "patient";
+                return PATIENT;
             case MEDICATION_REQUEST:
-                return "subject";
+                return SUBJECT;
             case MEDICATION_STATEMENT:
-                return "subject";
+                return SUBJECT;
             case "NutritionOrder":
-                return "patient";
+                return PATIENT;
             case "Observation":
-                return "subject";
+                return SUBJECT;
             case "Patient":
                 return "_id";
             case "Person":
-                return "patient";
+                return PATIENT;
             case "Procedure":
-                return "patient";
+                return PATIENT;
             case PROCEDURE_REQUEST:
-                return "patient";
+                return PATIENT;
             case "Provenance":
-                return "patient";
+                return PATIENT;
             case "QuestionnaireResponse":
-                return "subject";
+                return SUBJECT;
             case "ReferralRequest":
-                return "patient";
+                return PATIENT;
             case "RelatedPerson":
-                return "patient";
+                return PATIENT;
             case "RequestGroup":
-                return "subject";
+                return SUBJECT;
             case "ResearchSubject":
                 return "individual";
             case "RiskAssessment":
-                return "subject";
+                return SUBJECT;
             case "Schedule":
                 return "actor";
             case "Specimen":
-                return "subject";
+                return SUBJECT;
             case "SupplyDelivery":
-                return "patient";
+                return PATIENT;
             case "SupplyRequest":
-                return "subject";
+                return SUBJECT;
             case "VisionPrescription":
-                return "patient";
+                return PATIENT;
         }
 
         return null;

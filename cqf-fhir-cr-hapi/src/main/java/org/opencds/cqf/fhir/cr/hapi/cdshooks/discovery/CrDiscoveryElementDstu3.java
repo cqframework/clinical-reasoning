@@ -3,7 +3,8 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.hl7.fhir.r4.model.TriggerDefinition;
+import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.dstu3.model.TriggerDefinition;
 
 public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
     protected PlanDefinition planDefinition;
@@ -17,16 +18,16 @@ public class CrDiscoveryElementDstu3 implements ICrDiscoveryElement {
     public CdsServiceJson getCdsServiceJson() {
         if (planDefinition == null
                 || !planDefinition.hasAction()
-                || planDefinition.getAction().stream().noneMatch(a -> a.hasTriggerDefinition())) {
+                || planDefinition.getAction().stream().noneMatch(PlanDefinitionActionComponent::hasTriggerDefinition)) {
             return null;
         }
 
         var triggerDefs = planDefinition.getAction().stream()
-                .filter(a -> a.hasTriggerDefinition())
+                .filter(PlanDefinitionActionComponent::hasTriggerDefinition)
                 .flatMap(a -> a.getTriggerDefinition().stream())
                 .filter(t -> t.getType().equals(TriggerDefinition.TriggerType.NAMEDEVENT))
                 .toList();
-        if (triggerDefs == null || triggerDefs.isEmpty()) {
+        if (triggerDefs.isEmpty()) {
             return null;
         }
 

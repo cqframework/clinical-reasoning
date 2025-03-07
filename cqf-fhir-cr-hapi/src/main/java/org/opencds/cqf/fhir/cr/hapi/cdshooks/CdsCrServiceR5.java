@@ -152,7 +152,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
     public CdsServiceResponseJson encodeResponse(Object response) {
         assert response instanceof Bundle;
         responseBundle = (Bundle) response;
-        CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
+        CdsServiceResponseJson serviceResponseInner = new CdsServiceResponseJson();
         if (responseBundle.hasEntry()) {
             RequestOrchestration mainRequest =
                     (RequestOrchestration) responseBundle.getEntry().get(0).getResource();
@@ -161,10 +161,10 @@ public class CdsCrServiceR5 implements ICdsCrService {
                     PlanDefinition.class,
                     new IdType(Canonicals.getResourceType(canonical), Canonicals.getIdPart(canonical)));
             List<CdsServiceResponseLinkJson> links = resolvePlanLinks(planDef);
-            mainRequest.getAction().forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+            mainRequest.getAction().forEach(action -> serviceResponseInner.addCard(resolveAction(action, links)));
         }
 
-        return serviceResponse;
+        return serviceResponseInner;
     }
 
     protected List<CdsServiceResponseLinkJson> resolvePlanLinks(PlanDefinition planDefinition) {
@@ -205,7 +205,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
 
         if (action.hasSelectionBehavior()) {
             card.setSelectionBehaviour(action.getSelectionBehavior().toCode());
-            action.getAction().forEach(x -> resolveSuggestion(x));
+            action.getAction().forEach(this::resolveSuggestion);
         }
 
         // Leaving this out until  spec details how to map system actions.

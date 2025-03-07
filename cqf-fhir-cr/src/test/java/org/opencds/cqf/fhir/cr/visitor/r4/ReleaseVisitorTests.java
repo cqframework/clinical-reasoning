@@ -17,6 +17,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -119,10 +119,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
         // resolvable resources get descriptors
         for (final var dependency : dependenciesOnReleasedArtifact) {
             if (dependency.getResource().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
@@ -189,10 +189,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(71, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
@@ -242,10 +242,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         // this should be 73, but we're not handling contained reference correctly
         assertEquals(72, dependenciesOnReleasedArtifact.size());
@@ -295,12 +295,12 @@ class ReleaseVisitorTests {
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
+                .map(RelatedArtifact::getResource)
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
+                .map(RelatedArtifact::getResource)
+                .toList();
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
@@ -318,7 +318,7 @@ class ReleaseVisitorTests {
         var canonicalVersionParams = expansionParameters
                 .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
                         .orElse(null))
-                .orElse(new ArrayList<String>());
+                .orElse(new ArrayList<>());
         assertEquals(0, canonicalVersionParams.size());
     }
 
@@ -424,8 +424,8 @@ class ReleaseVisitorTests {
 
         var warningMessages = logger.getLoggingEvents().stream()
                 .filter(event -> event.getLevel().equals(Level.WARN))
-                .map(event -> event.getMessage())
-                .collect(Collectors.toList());
+                .map(LoggingEvent::getMessage)
+                .toList();
 
         // SHOULD warn if the root is not experimental
         assertTrue(warningMessages.stream()
@@ -454,7 +454,7 @@ class ReleaseVisitorTests {
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
+                    if (!(resource instanceof ValueSet)) {
                         IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
                         Date start = ((Period) adapter.getEffectivePeriod()).getStart();

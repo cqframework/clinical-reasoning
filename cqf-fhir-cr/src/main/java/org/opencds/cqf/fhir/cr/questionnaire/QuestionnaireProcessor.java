@@ -75,6 +75,14 @@ public class QuestionnaireProcessor {
         this.populateProcessor = populateProcessor;
     }
 
+    public EvaluationSettings getEvaluationSettings() {
+        return evaluationSettings;
+    }
+
+    public ModelResolver getModelResolver() {
+        return modelResolver;
+    }
+
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
             Either3<C, IIdType, R> questionnaire) {
         return questionnaireResolver.resolve(questionnaire);

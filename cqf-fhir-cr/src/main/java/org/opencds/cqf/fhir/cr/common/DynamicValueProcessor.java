@@ -15,8 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DynamicValueProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DynamicValueProcessor.class);
-
-    public DynamicValueProcessor() {}
+    private static final String EXPRESSION = "expression";
 
     /**
      * Processes all dynamicValues on a definition element and sets the resulting values to the corresponding path on the resource passed in
@@ -26,7 +25,7 @@ public class DynamicValueProcessor {
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      */
     public void processDynamicValues(ICpgRequest request, IBaseResource resource, IElement definitionElement) {
-        var context = definitionElement instanceof IBaseResource ? (IBaseResource) definitionElement : resource;
+        var context = definitionElement instanceof IBaseResource baseResource ? baseResource : resource;
         processDynamicValues(request, context, resource, definitionElement, null);
     }
 
@@ -64,15 +63,15 @@ public class DynamicValueProcessor {
             case DSTU3:
                 return new CqfExpression(
                         request.resolvePathString(dynamicValue, "language"),
-                        request.resolvePathString(dynamicValue, "expression"),
+                        request.resolvePathString(dynamicValue, EXPRESSION),
                         request.getDefaultLibraryUrl());
             case R4:
                 return CqfExpression.of(
-                        request.resolvePath(dynamicValue, "expression", org.hl7.fhir.r4.model.Expression.class),
+                        request.resolvePath(dynamicValue, EXPRESSION, org.hl7.fhir.r4.model.Expression.class),
                         request.getDefaultLibraryUrl());
             case R5:
                 return CqfExpression.of(
-                        request.resolvePath(dynamicValue, "expression", org.hl7.fhir.r5.model.Expression.class),
+                        request.resolvePath(dynamicValue, EXPRESSION, org.hl7.fhir.r5.model.Expression.class),
                         request.getDefaultLibraryUrl());
             default:
                 return null;

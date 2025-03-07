@@ -1,9 +1,0 @@
-{
-  "resourceType": "Practitioner",
-  "id": "tester",
-  "name": [ {
-    "family": "Dawg",
-    "given": [ "Jay" ],
-    "prefix": [ "Dr" ]
-  } ]
-}

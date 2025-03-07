@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
+import static org.opencds.cqf.fhir.benchmark.questionnaire.TestQuestionnaire.given;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.When;
+import org.opencds.cqf.fhir.benchmark.questionnaire.TestQuestionnaire.When;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;

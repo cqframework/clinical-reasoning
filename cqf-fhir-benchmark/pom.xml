@@ -32,11 +32,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-cr-test</artifactId>
-            <version>3.19.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
             <scope>test</scope>

@@ -40,15 +40,19 @@ public class TestCdsHooksConfig {
 
     private final DaoRegistry daoRegistry;
 
+    private final IRepositoryFactory repositoryFactory;
+
     private final MatchUrlService matchUrlService;
 
     private final RestfulServer restfulServer;
 
     public TestCdsHooksConfig(
             Optional<DaoRegistry> daoRegistry,
+            Optional<IRepositoryFactory> repositoryFactory,
             Optional<MatchUrlService> matchUrlService,
             Optional<RestfulServer> restfulServer) {
         this.daoRegistry = daoRegistry.orElse(null);
+        this.repositoryFactory = repositoryFactory.orElse(null);
         this.matchUrlService = matchUrlService.orElse(null);
         this.restfulServer = restfulServer.orElse(null);
     }
@@ -82,9 +86,7 @@ public class TestCdsHooksConfig {
 
     @Bean
     public ICdsConfigService cdsConfigService(
-            FhirContext fhirContext,
-            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper,
-            IRepositoryFactory repositoryFactory) {
+            FhirContext fhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper) {
         return new CdsConfigServiceImpl(
                 fhirContext, objectMapper, CdsCrSettings.getDefault(), daoRegistry, repositoryFactory, restfulServer);
         // TODO: LD:  once we upgrade to a new version of hapi-fhir with CDS CR removed, replace

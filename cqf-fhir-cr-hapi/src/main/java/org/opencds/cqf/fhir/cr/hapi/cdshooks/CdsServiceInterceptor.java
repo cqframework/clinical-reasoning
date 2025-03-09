@@ -65,23 +65,24 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 
     private void insert(List<IIdType> createdIds) {
         for (IIdType id : createdIds) {
+            var serviceId = id.getIdPart();
             try {
                 CdsServiceJson cdsServiceJson =
-                        discoveryServiceFactory.create(id.toString()).resolveService();
+                        discoveryServiceFactory.create(serviceId).resolveService();
                 if (cdsServiceJson != null) {
                     final CdsCrServiceMethod cdsCrServiceMethod =
                             new CdsCrServiceMethod(cdsServiceJson, crServiceFactory);
 
                     cdsServiceRegistry.registerService(
-                            CDS_CR_MODULE_ID,
-                            x -> (CdsServiceResponseJson) cdsCrServiceMethod.invoke(om, cdsServiceJson, id.toString()),
+                            serviceId,
+                            x -> (CdsServiceResponseJson) cdsCrServiceMethod.invoke(om, x, serviceId),
                             cdsServiceJson,
-                            false,
+                            true,
                             CDS_CR_MODULE_ID);
                 }
 
             } catch (Exception e) {
-                ourLog.info(String.format("Failed to create service for %s", id.getIdPart()));
+                ourLog.info(String.format("Failed to create service for %s", serviceId));
             }
         }
     }

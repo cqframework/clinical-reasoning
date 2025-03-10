@@ -306,61 +306,27 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;
-            case "Claim":
+            case "Claim", "ClaimResponse":
                 return PATIENT;
-            case "ClaimResponse":
-                return PATIENT;
-            case "ClinicalImpression":
+            case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
                 return SUBJECT;
-            case "Communication":
-                return SUBJECT;
-            case "CommunicationRequest":
-                return SUBJECT;
-            case "Composition":
-                return SUBJECT;
-            case "Condition":
-                return PATIENT;
-            case "Consent":
-                return PATIENT;
-            case "Coverage":
-                return PATIENT;
-            case "DetectedIssue":
+            case "Condition", "Consent", "Coverage", "DetectedIssue":
                 return PATIENT;
             case "DeviceRequest":
                 return SUBJECT;
-            case "DeviceUseStatement":
+            case "DeviceUseStatement", "DiagnosticReport", "DocumentManifest", "DocumentReference":
                 return SUBJECT;
-            case "DiagnosticReport":
-                return SUBJECT;
-            case "DocumentManifest":
-                return SUBJECT;
-            case "DocumentReference":
-                return SUBJECT;
-            case "EligibilityRequest":
-                return PATIENT;
-            case "Encounter":
+            case "EligibilityRequest", "Encounter":
                 return PATIENT;
             case "EnrollmentRequest":
                 return SUBJECT;
             case "EpisodeOfCare":
                 return PATIENT;
-            case "ExplanationOfBenefit":
-                return PATIENT;
-            case "FamilyMemberHistory":
-                return PATIENT;
-            case "Flag":
-                return PATIENT;
-            case "Goal":
+            case "ExplanationOfBenefit", "FamilyMemberHistory", "Flag", "Goal":
                 return PATIENT;
             case "Group":
                 return "member";
-            case "ImagingManifest":
-                return PATIENT;
-            case "ImagingStudy":
-                return PATIENT;
-            case "Immunization":
-                return PATIENT;
-            case "ImmunizationRecommendation":
+            case "ImagingManifest", "ImagingStudy", "Immunization", "ImmunizationRecommendation":
                 return PATIENT;
             case "List":
                 return SUBJECT;
@@ -412,8 +378,8 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                 return SUBJECT;
             case "VisionPrescription":
                 return PATIENT;
+            default:
+                return null;
         }
-
-        return null;
     }
 }

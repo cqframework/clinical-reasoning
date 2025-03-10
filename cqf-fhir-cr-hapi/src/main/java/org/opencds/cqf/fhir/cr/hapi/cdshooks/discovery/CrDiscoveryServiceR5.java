@@ -296,35 +296,17 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;
-            case "Claim":
+            case "Claim", "ClaimResponse":
                 return PATIENT;
-            case "ClaimResponse":
-                return PATIENT;
-            case "ClinicalImpression":
+            case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
                 return SUBJECT;
-            case "Communication":
-                return SUBJECT;
-            case "CommunicationRequest":
-                return SUBJECT;
-            case "Composition":
-                return SUBJECT;
-            case "Condition":
-                return PATIENT;
-            case "Consent":
+            case "Condition", "Consent":
                 return PATIENT;
             case "Coverage":
                 return "policy-holder";
             case "DetectedIssue":
                 return PATIENT;
-            case "DeviceRequest":
-                return SUBJECT;
-            case "DeviceUseStatement":
-                return SUBJECT;
-            case "DiagnosticReport":
-                return SUBJECT;
-            case "DocumentManifest":
-                return SUBJECT;
-            case "DocumentReference":
+            case "DeviceRequest", "DeviceUseStatement", "DiagnosticReport", "DocumentManifest", "DocumentReference":
                 return SUBJECT;
             case "Encounter":
                 return PATIENT;
@@ -400,8 +382,8 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                 return SUBJECT;
             case "VisionPrescription":
                 return PATIENT;
+            default:
+                return null;
         }
-
-        return null;
     }
 }

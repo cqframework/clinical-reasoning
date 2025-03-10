@@ -294,73 +294,71 @@ class StringTimePeriodHandlerTest {
                 Arguments.of(
                         null,
                         "2024-01-01T12",
-                        new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12")),
+                        new InvalidRequestException("Unsupported Date/Time format for input: 2024-01-01T12")),
                 Arguments.of(
                         "Middle-Earth/Combe",
                         "2024-01-02",
-                        new InvalidRequestException(
-                                "HAPI-2561: Invalid value for Timezone header: Middle-Earth/Combe")),
+                        new InvalidRequestException("Invalid value for Timezone header: Middle-Earth/Combe")),
                 Arguments.of(
                         null,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         ZONE_ID_Z,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         "UTC",
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
+                                "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
                 Arguments.of(
                         null,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
                 Arguments.of(
                         ZONE_ID_Z,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
                 Arguments.of(
                         "UTC",
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
                 Arguments.of(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
                 Arguments.of(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
                 Arguments.of(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
-                                "HAPI-2559: Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")));
+                                "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")));
     }
 
     @ParameterizedTest

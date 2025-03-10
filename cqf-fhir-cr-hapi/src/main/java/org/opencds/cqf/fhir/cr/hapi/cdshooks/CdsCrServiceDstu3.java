@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
+@SuppressWarnings("squid:S125")
 public class CdsCrServiceDstu3 implements ICdsCrService {
     protected final RequestDetails requestDetails;
     protected final Repository repository;

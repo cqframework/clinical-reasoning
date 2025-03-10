@@ -308,7 +308,9 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
                     "DiagnosticReport",
                     "DocumentManifest",
                     "DocumentReference",
-                    "EnrollmentRequest":
+                    "EnrollmentRequest",
+                    "Invoice",
+                    "List":
                 return SUBJECT;
             case "AllergyIntolerance",
                     "AuditEvent",
@@ -322,32 +324,21 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
                     "Consent",
                     "DetectedIssue",
                     "Encounter",
-                    "EpisodeOfCare":
+                    "EpisodeOfCare",
+                    "ExplanationOfBenefit",
+                    "FamilyMemberHistory",
+                    "Flag",
+                    "Goal",
+                    "ImagingStudy",
+                    "Immunization",
+                    "ImmunizationRecommendation":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
             case "Coverage":
                 return "policy-holder";
-            case "ExplanationOfBenefit":
-                return PATIENT;
-            case "FamilyMemberHistory":
-                return PATIENT;
-            case "Flag":
-                return PATIENT;
-            case "Goal":
-                return PATIENT;
             case "Group":
                 return "member";
-            case "ImagingStudy":
-                return PATIENT;
-            case "Immunization":
-                return PATIENT;
-            case "ImmunizationRecommendation":
-                return PATIENT;
-            case "Invoice":
-                return SUBJECT;
-            case "List":
-                return SUBJECT;
             case "MeasureReport":
                 return PATIENT;
             case "Media":

@@ -28,6 +28,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
     private static final String MEDICATION = "medication";
     private static final String SUBJECT = "subject";
     private static final String PATIENT = "patient";
+    private static final String ACTOR = "actor";
     protected int maxUriLength;
 
     protected Repository repository;
@@ -44,9 +45,8 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                 CdsCrUtils.readPlanDefinitionFromRepository(FhirVersionEnum.DSTU3, repository, planDefinitionId));
     }
 
-    protected CdsServiceJson resolveService(IBaseResource planDefinition) {
-        if (planDefinition instanceof PlanDefinition) {
-            PlanDefinition planDef = (PlanDefinition) planDefinition;
+    protected CdsServiceJson resolveService(IBaseResource resource) {
+        if (resource instanceof PlanDefinition planDef) {
             return new CrDiscoveryElementDstu3(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
         }
         return null;
@@ -225,69 +225,69 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
             return false;
         }
         switch (dataType) {
-            case "Account":
-            case "AdverseEvent":
-            case "AllergyIntolerance":
-            case "Appointment":
-            case "AppointmentResponse":
-            case "AuditEvent":
-            case "Basic":
-            case "BodySite":
-            case "CarePlan":
-            case "CareTeam":
-            case "ChargeItem":
-            case "Claim":
-            case "ClaimResponse":
-            case "ClinicalImpression":
-            case "Communication":
-            case "CommunicationRequest":
-            case "Composition":
-            case "Condition":
-            case "Consent":
-            case "Coverage":
-            case "DetectedIssue":
-            case "DeviceRequest":
-            case "DeviceUseStatement":
-            case "DiagnosticReport":
-            case "DocumentManifest":
-            case "EligibilityRequest":
-            case "Encounter":
-            case "EnrollmentRequest":
-            case "EpisodeOfCare":
-            case "ExplanationOfBenefit":
-            case "FamilyMemberHistory":
-            case "Flag":
-            case "Goal":
-            case "Group":
-            case "ImagingManifest":
-            case "ImagingStudy":
-            case "Immunization":
-            case "ImmunizationRecommendation":
-            case "List":
-            case "MeasureReport":
-            case "Media":
-            case MEDICATION_ADMINISTRATION:
-            case MEDICATION_DISPENSE:
-            case MEDICATION_REQUEST:
-            case MEDICATION_STATEMENT:
-            case "NutritionOrder":
-            case "Observation":
-            case "Patient":
-            case "Person":
-            case "Procedure":
-            case PROCEDURE_REQUEST:
-            case "Provenance":
-            case "QuestionnaireResponse":
-            case "ReferralRequest":
-            case "RelatedPerson":
-            case "RequestGroup":
-            case "ResearchSubject":
-            case "RiskAssessment":
-            case "Schedule":
-            case "Specimen":
-            case "SupplyDelivery":
-            case "SupplyRequest":
-            case "VisionPrescription":
+            case "Account",
+             "AdverseEvent",
+             "AllergyIntolerance",
+             "Appointment",
+             "AppointmentResponse",
+             "AuditEvent",
+             "Basic",
+             "BodySite",
+             "CarePlan",
+             "CareTeam",
+             "ChargeItem",
+             "Claim",
+             "ClaimResponse",
+             "ClinicalImpression",
+             "Communication",
+             "CommunicationRequest",
+             "Composition",
+             "Condition",
+             "Consent",
+             "Coverage",
+             "DetectedIssue",
+             "DeviceRequest",
+             "DeviceUseStatement",
+             "DiagnosticReport",
+             "DocumentManifest",
+             "EligibilityRequest",
+             "Encounter",
+             "EnrollmentRequest",
+             "EpisodeOfCare",
+             "ExplanationOfBenefit",
+             "FamilyMemberHistory",
+             "Flag",
+             "Goal",
+             "Group",
+             "ImagingManifest",
+             "ImagingStudy",
+             "Immunization",
+             "ImmunizationRecommendation",
+             "List",
+             "MeasureReport",
+             "Media",
+             MEDICATION_ADMINISTRATION,
+             MEDICATION_DISPENSE,
+             MEDICATION_REQUEST,
+             MEDICATION_STATEMENT,
+             "NutritionOrder",
+             "Observation",
+             "Patient",
+             "Person",
+             "Procedure",
+             PROCEDURE_REQUEST,
+             "Provenance",
+             "QuestionnaireResponse",
+             "ReferralRequest",
+             "RelatedPerson",
+             "RequestGroup",
+             "ResearchSubject",
+             "RiskAssessment",
+             "Schedule",
+             "Specimen",
+             "SupplyDelivery",
+             "SupplyRequest",
+             "VisionPrescription":
                 return true;
             default:
                 return false;
@@ -296,25 +296,19 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account":
-                return SUBJECT;
-            case "AdverseEvent":
+            case "Account",
+                 "AdverseEvent":
                 return SUBJECT;
             case "AllergyIntolerance":
                 return PATIENT;
-            case "Appointment":
-                return "actor";
-            case "AppointmentResponse":
-                return "actor";
-            case "AuditEvent":
-                return PATIENT;
-            case "Basic":
-                return PATIENT;
-            case "BodySite":
-                return PATIENT;
-            case "CarePlan":
-                return PATIENT;
-            case "CareTeam":
+            case "Appointment",
+                 "AppointmentResponse":
+                return ACTOR;
+            case "AuditEvent",
+                 "Basic",
+                 "BodySite",
+                 "CarePlan",
+             "CareTeam":
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;
@@ -415,7 +409,7 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
             case "RiskAssessment":
                 return SUBJECT;
             case "Schedule":
-                return "actor";
+                return ACTOR;
             case "Specimen":
                 return SUBJECT;
             case "SupplyDelivery":

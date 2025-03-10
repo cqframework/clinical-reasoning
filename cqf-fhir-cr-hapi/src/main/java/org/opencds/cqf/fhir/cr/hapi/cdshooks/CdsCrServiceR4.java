@@ -15,7 +15,6 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestAuthorizationJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
@@ -95,16 +94,11 @@ public class CdsCrServiceR4 implements ICdsCrService {
         return parameters;
     }
 
-    protected String getTokenType(CdsServiceRequestAuthorizationJson json) {
-        String tokenType = json.getTokenType();
-        return tokenType == null || tokenType.isEmpty() ? "Bearer" : tokenType;
-    }
-
     protected Parameters addCqlParameters(Parameters parameters, IBaseResource contextResource, String paramName) {
         // We are making  assumption that a Library created for a hook will provide parameters for  fields
         // specified for  hook
-        if (contextResource instanceof Bundle) {
-            ((Bundle) contextResource)
+        if (contextResource instanceof Bundle bundle) {
+            bundle
                     .getEntry()
                     .forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
         } else {
@@ -139,8 +133,8 @@ public class CdsCrServiceR4 implements ICdsCrService {
             if (resource == null) {
                 continue;
             }
-            if (resource instanceof Bundle) {
-                resourceMap.putAll(getResourcesFromBundle((Bundle) resource));
+            if (resource instanceof Bundle bundle) {
+                resourceMap.putAll(getResourcesFromBundle(bundle));
             } else {
                 resourceMap.put(resource.fhirType() + resource.getId(), resource);
             }
@@ -150,8 +144,10 @@ public class CdsCrServiceR4 implements ICdsCrService {
     }
 
     public CdsServiceResponseJson encodeResponse(Object response) {
-        assert response instanceof Bundle;
-        responseBundle = (Bundle) response;
+        if (!(response instanceof Bundle bundle)) {
+            throw new IllegalArgumentException("response is not an instance of Bundle");
+        }
+        responseBundle = bundle;
         serviceResponse = new CdsServiceResponseJson();
         if (responseBundle.hasEntry()) {
             RequestGroup mainRequest =

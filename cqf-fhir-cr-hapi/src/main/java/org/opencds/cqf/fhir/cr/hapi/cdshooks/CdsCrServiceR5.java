@@ -103,8 +103,8 @@ public class CdsCrServiceR5 implements ICdsCrService {
     protected Parameters addCqlParameters(Parameters parameters, IBaseResource contextResource, String paramName) {
         // We are making  assumption that a Library created for a hook will provide parameters for  fields
         // specified for  hook
-        if (contextResource instanceof Bundle) {
-            ((Bundle) contextResource)
+        if (contextResource instanceof Bundle bundle) {
+           bundle
                     .getEntry()
                     .forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
         } else {
@@ -139,8 +139,8 @@ public class CdsCrServiceR5 implements ICdsCrService {
             if (resource == null) {
                 continue;
             }
-            if (resource instanceof Bundle) {
-                resourceMap.putAll(getResourcesFromBundle((Bundle) resource));
+            if (resource instanceof Bundle bundle) {
+                resourceMap.putAll(getResourcesFromBundle(bundle));
             } else {
                 resourceMap.put(resource.fhirType() + resource.getId(), resource);
             }
@@ -150,8 +150,10 @@ public class CdsCrServiceR5 implements ICdsCrService {
     }
 
     public CdsServiceResponseJson encodeResponse(Object response) {
-        assert response instanceof Bundle;
-        responseBundle = (Bundle) response;
+        if (!(response instanceof Bundle bundle)) {
+            throw new IllegalArgumentException("response is not an instance of Bundle");
+        }
+        responseBundle = bundle;
         CdsServiceResponseJson serviceResponseInner = new CdsServiceResponseJson();
         if (responseBundle.hasEntry()) {
             RequestOrchestration mainRequest =

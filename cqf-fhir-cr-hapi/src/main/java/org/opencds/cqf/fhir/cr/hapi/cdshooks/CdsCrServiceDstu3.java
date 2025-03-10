@@ -16,6 +16,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestAuthorizationJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
@@ -146,8 +147,9 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
     }
 
     public CdsServiceResponseJson encodeResponse(Object response) {
-        assert response instanceof CarePlan;
-        var carePlan = (CarePlan) response;
+        if (!(response instanceof CarePlan carePlan)) {
+            throw new InternalErrorException("response is not an instance of CarePlan");
+        }
         CdsServiceResponseJson serviceResponseInner = new CdsServiceResponseJson();
         if (carePlan.hasActivity()) {
             Reference requestGroupRef = carePlan.getActivity().get(0).getReference();

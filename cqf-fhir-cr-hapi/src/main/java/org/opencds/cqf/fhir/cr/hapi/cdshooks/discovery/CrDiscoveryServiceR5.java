@@ -44,9 +44,8 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                 CdsCrUtils.readPlanDefinitionFromRepository(FhirVersionEnum.R5, repository, planDefinitionId));
     }
 
-    protected CdsServiceJson resolveService(IBaseResource planDefinition) {
-        if (planDefinition instanceof PlanDefinition) {
-            PlanDefinition planDef = (PlanDefinition) planDefinition;
+    protected CdsServiceJson resolveService(IBaseResource resource) {
+        if (resource instanceof PlanDefinition planDef) {
             return new CrDiscoveryElementR5(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
         }
         return null;
@@ -133,7 +132,7 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
-        if (!isPatientCompartment(dataRequirement.getType().toCode())) return null;
+        if (!isPatientCompartment(dataRequirement.getType().toCode())) return List.of();
         String patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType().toCode())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
@@ -287,25 +286,13 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account":
-                return SUBJECT;
-            case "AdverseEvent":
+            case "Account", "AdverseEvent":
                 return SUBJECT;
             case "AllergyIntolerance":
                 return PATIENT;
-            case "Appointment":
+            case "Appointment","AppointmentResponse":
                 return ACTOR;
-            case "AppointmentResponse":
-                return ACTOR;
-            case "AuditEvent":
-                return PATIENT;
-            case "Basic":
-                return PATIENT;
-            case "BodyStructure":
-                return PATIENT;
-            case "CarePlan":
-                return PATIENT;
-            case "CareTeam":
+            case "AuditEvent", "Basic", "BodyStructure", "CarePlan","CareTeam":
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;

@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 // Then we deprecate all the cr-specific stuff in hapi
 // and remove the cr-specific config in the next release.
 @Configuration
-@SuppressWarnings({"squid:S125", "sqid:S1135"})
+@SuppressWarnings({"squid:S125", "squid:S1135"})
 public class TestCdsHooksConfig {
 
     public static final String CDS_HOOKS_OBJECT_MAPPER_FACTORY = "cdsHooksObjectMapperFactory";

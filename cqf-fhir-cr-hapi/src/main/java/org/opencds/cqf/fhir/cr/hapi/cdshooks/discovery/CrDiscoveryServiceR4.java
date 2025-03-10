@@ -16,6 +16,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrUtils;
 import org.opencds.cqf.fhir.utility.r4.SearchHelper;
 
+@SuppressWarnings("squid:S1135")
 public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
 
     protected static final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
@@ -295,16 +296,12 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account", "AdverseEvent":
+            case "Account", "AdverseEvent", "ChargeItem":
                 return SUBJECT;
-            case "AllergyIntolerance":
+            case "AllergyIntolerance", "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
-                return PATIENT;
-            case "ChargeItem":
-                return SUBJECT;
             case "Claim", "ClaimResponse":
                 return PATIENT;
             case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":

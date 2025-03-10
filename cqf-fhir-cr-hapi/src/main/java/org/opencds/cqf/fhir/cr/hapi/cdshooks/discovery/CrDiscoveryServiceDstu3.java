@@ -320,7 +320,8 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                     "DiagnosticReport",
                     "DocumentManifest",
                     "DocumentReference",
-                    "DeviceRequest":
+                    "DeviceRequest",
+                    "EnrollmentRequest":
                 return SUBJECT;
             case "AllergyIntolerance",
                     "AuditEvent",
@@ -333,18 +334,17 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                     "Condition",
                     "Consent",
                     "Coverage",
-                    "DetectedIssue":
+                    "DetectedIssue",
+                    "EligibilityRequest",
+                    "Encounter",
+                    "EpisodeOfCare",
+                    "ExplanationOfBenefit",
+                    "FamilyMemberHistory",
+                    "Flag",
+                    "Goal":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "EligibilityRequest", "Encounter":
-                return PATIENT;
-            case "EnrollmentRequest":
-                return SUBJECT;
-            case "EpisodeOfCare":
-                return PATIENT;
-            case "ExplanationOfBenefit", "FamilyMemberHistory", "Flag", "Goal":
-                return PATIENT;
             case "Group":
                 return "member";
             case "ImagingManifest", "ImagingStudy", "Immunization", "ImmunizationRecommendation":

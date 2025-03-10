@@ -300,18 +300,27 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account", "AdverseEvent", "ChargeItem":
+            case "Account",
+                    "AdverseEvent",
+                    "ChargeItem",
+                    "ClinicalImpression",
+                    "Communication",
+                    "CommunicationRequest",
+                    "Composition":
                 return SUBJECT;
-            case "AllergyIntolerance", "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
+            case "AllergyIntolerance",
+                    "AuditEvent",
+                    "Basic",
+                    "BodyStructure",
+                    "CarePlan",
+                    "CareTeam",
+                    "Claim",
+                    "ClaimResponse",
+                    "Condition",
+                    "Consent":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "Claim", "ClaimResponse":
-                return PATIENT;
-            case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
-                return SUBJECT;
-            case "Condition", "Consent":
-                return PATIENT;
             case "Coverage":
                 return "policy-holder";
             case "DetectedIssue":

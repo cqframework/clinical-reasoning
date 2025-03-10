@@ -296,30 +296,33 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account", "AdverseEvent", "ChargeItem":
+            case "Account",
+                    "AdverseEvent",
+                    "ChargeItem",
+                    "ClinicalImpression",
+                    "Communication",
+                    "CommunicationRequest",
+                    "Composition",
+                    "DeviceRequest",
+                    "DeviceUseStatement",
+                    "DiagnosticReport":
                 return SUBJECT;
-            case "AllergyIntolerance", "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
+            case "AllergyIntolerance",
+                    "AuditEvent",
+                    "Basic",
+                    "BodyStructure",
+                    "CarePlan",
+                    "CareTeam",
+                    "Claim",
+                    "ClaimResponse",
+                    "Condition",
+                    "Consent",
+                    "DetectedIssue":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "Claim", "ClaimResponse":
-                return PATIENT;
-            case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
-                return SUBJECT;
-            case "Condition":
-                return PATIENT;
-            case "Consent":
-                return PATIENT;
             case "Coverage":
                 return "policy-holder";
-            case "DetectedIssue":
-                return PATIENT;
-            case "DeviceRequest":
-                return SUBJECT;
-            case "DeviceUseStatement":
-                return SUBJECT;
-            case "DiagnosticReport":
-                return SUBJECT;
             case "DocumentManifest":
                 return SUBJECT;
             case "DocumentReference":

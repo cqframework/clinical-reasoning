@@ -306,7 +306,12 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                     "ClinicalImpression",
                     "Communication",
                     "CommunicationRequest",
-                    "Composition":
+                    "Composition",
+                    "DeviceRequest",
+                    "DeviceUseStatement",
+                    "DiagnosticReport",
+                    "DocumentManifest",
+                    "DocumentReference":
                 return SUBJECT;
             case "AllergyIntolerance",
                     "AuditEvent",
@@ -317,16 +322,13 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                     "Claim",
                     "ClaimResponse",
                     "Condition",
-                    "Consent":
+                    "Consent",
+                    "DetectedIssue":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
             case "Coverage":
                 return "policy-holder";
-            case "DetectedIssue":
-                return PATIENT;
-            case "DeviceRequest", "DeviceUseStatement", "DiagnosticReport", "DocumentManifest", "DocumentReference":
-                return SUBJECT;
             case "Encounter":
                 return PATIENT;
             case "EnrollmentRequest":

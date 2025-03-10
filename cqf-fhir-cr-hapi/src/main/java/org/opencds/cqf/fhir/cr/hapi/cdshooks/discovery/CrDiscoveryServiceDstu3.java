@@ -341,14 +341,16 @@ public class CrDiscoveryServiceDstu3 implements ICrDiscoveryService {
                     "ExplanationOfBenefit",
                     "FamilyMemberHistory",
                     "Flag",
-                    "Goal":
+                    "Goal",
+                    "ImagingManifest",
+                    "ImagingStudy",
+                    "Immunization",
+                    "ImmunizationRecommendation":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
             case "Group":
                 return "member";
-            case "ImagingManifest", "ImagingStudy", "Immunization", "ImmunizationRecommendation":
-                return PATIENT;
             case "List":
                 return SUBJECT;
             case "MeasureReport":

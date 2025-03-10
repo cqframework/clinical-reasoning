@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
@@ -400,10 +399,9 @@ public class BundleProviderUtil {
         for (IBaseResource next : resourceList) {
             if ((next.getIdElement() == null || next.getIdElement().isEmpty())
                     && !(next instanceof IBaseOperationOutcome)) {
-                throw new InternalErrorException(Msg.code(2311)
-                        + "Server method returned resource of type["
-                        + next.getClass().getSimpleName()
-                        + "] with no ID specified (IResource#setId(IdDt) must be called)");
+                throw new InternalErrorException(
+                        "Server method returned resource of type[%s] with no ID specified (IResource#setId(IdDt) must be called)"
+                            .formatted(next.getIdElement()));
             }
         }
     }

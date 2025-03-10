@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +25,7 @@ public class ProviderLoader {
     public void loadProviders() {
         var type = providerSelector.getProviderType();
         if (type == null) {
-            throw new ConfigurationException(Msg.code(1653) + "Provider not supported for the current FHIR version");
+            throw new InternalErrorException("Provider not supported for the current FHIR version");
         }
         for (Class<?> op : type) {
             logger.info("loading provider: {}", op);

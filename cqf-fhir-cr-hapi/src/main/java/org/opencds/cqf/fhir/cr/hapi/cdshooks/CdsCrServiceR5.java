@@ -13,7 +13,6 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestAuthorizationJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
@@ -46,6 +45,7 @@ import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
+@SuppressWarnings("squid:S125")
 public class CdsCrServiceR5 implements ICdsCrService {
     protected final RequestDetails requestDetails;
     protected final Repository repository;
@@ -235,8 +235,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
                 break;
         }
         if (indicator == null) {
-            // Code 2435-2440 are reserved for this error message across versions
-            throw new IllegalArgumentException(Msg.code(2436) + "Invalid priority code: " + code);
+            throw new IllegalArgumentException("Invalid priority code: " + code);
         }
 
         return indicator;
@@ -253,19 +252,17 @@ public class CdsCrServiceR5 implements ICdsCrService {
         }
     }
 
+
     protected CdsServiceResponseCardSourceJson resolveSource(
             RequestOrchestration.RequestOrchestrationActionComponent action) {
         RelatedArtifact documentation = action.getDocumentationFirstRep();
-        CdsServiceResponseCardSourceJson source = new CdsServiceResponseCardSourceJson()
-                .setLabel(documentation.getDisplay())
-                .setUrl(documentation.getDocument().getUrl());
-
         // If we use  document for  url, what do we use for  icon?
         //		if (documentation.hasDocument() && documentation.getDocument().hasUrl()) {
         //			source.setIcon(documentation.getDocument().getUrl());
         //		}
-
-        return source;
+        return new CdsServiceResponseCardSourceJson()
+                .setLabel(documentation.getDisplay())
+                .setUrl(documentation.getDocument().getUrl());
     }
 
     protected CdsServiceResponseSuggestionJson resolveSuggestion(

@@ -13,7 +13,6 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
@@ -45,6 +44,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
+@SuppressWarnings("squid:S125")
 public class CdsCrServiceR4 implements ICdsCrService {
     protected final RequestDetails requestDetails;
     protected final Repository repository;
@@ -229,8 +229,7 @@ public class CdsCrServiceR4 implements ICdsCrService {
                 break;
         }
         if (indicator == null) {
-            // Code 2435-2440 are reserved for this error message across versions
-            throw new IllegalArgumentException(Msg.code(2435) + "Invalid priority code: " + code);
+            throw new IllegalArgumentException("Invalid priority code: " + code);
         }
 
         return indicator;

@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.opencds.cqf.fhir.cr.hapi.repo.RequestDetailsCloner.startWith;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -37,6 +36,7 @@ import org.opencds.cqf.fhir.api.Repository;
 /**
  * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
  **/
+@SuppressWarnings("squid:S1135")
 public class HapiFhirRepository implements Repository {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
     private final DaoRegistry daoRegistry;
@@ -180,7 +180,7 @@ public class HapiFhirRepository implements Repository {
 
         var pagingProvider = restfulServer.getPagingProvider();
         if (pagingProvider == null) {
-            throw new InvalidRequestException(Msg.code(2312) + "This server does not support paging");
+            throw new InvalidRequestException("This server does not support paging");
         }
 
         var pagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
@@ -212,7 +212,7 @@ public class HapiFhirRepository implements Repository {
             ourLog.info("Client requested unknown paging ID[{}]", pagingAction);
             String msg =
                     fhirContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", pagingAction);
-            throw new ResourceGoneException(Msg.code(2313) + msg);
+            throw new ResourceGoneException(msg);
         }
     }
 
@@ -322,7 +322,7 @@ public class HapiFhirRepository implements Repository {
     }
 
     private void notImplemented() {
-        throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
+        throw new NotImplementedOperationException("history not yet implemented");
     }
 
     @Override
@@ -358,8 +358,8 @@ public class HapiFhirRepository implements Repository {
         try {
             return unsafeCast(
                     restfulServer.determineResourceMethod(details, null).invokeServer(restfulServer, details));
-        } catch (IOException e) {
-            throw new InternalErrorException(Msg.code(2315) + e);
+        } catch (IOException exception) {
+            throw new InternalErrorException(exception);
         }
     }
 

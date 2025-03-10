@@ -163,14 +163,10 @@ public class StringTimePeriodHandler {
         return DateUtils.parseDateTimeStringIfValid(period, dateTimeFormatter)
                 .flatMap(temporalAccessorToLocalDateTimeConverter)
                 .orElseThrow(() -> {
-                    ourLog.warn(
-                            "Period {}: {} has an unsupported format",
-                            isStart ? "start" : "end",
-                            period);
+                    ourLog.warn("Period {}: {} has an unsupported format", isStart ? "start" : "end", period);
 
                     return new InvalidRequestException(String.format(
-                            "Period %s: %s has an unsupported format",
-                            isStart ? "start" : "end", period));
+                            "Period %s: %s has an unsupported format", isStart ? "start" : "end", period));
                 });
     }
 

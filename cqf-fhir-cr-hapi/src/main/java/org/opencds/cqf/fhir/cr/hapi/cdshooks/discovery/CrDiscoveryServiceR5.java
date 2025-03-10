@@ -290,9 +290,9 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                 return SUBJECT;
             case "AllergyIntolerance":
                 return PATIENT;
-            case "Appointment","AppointmentResponse":
+            case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "AuditEvent", "Basic", "BodyStructure", "CarePlan","CareTeam":
+            case "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;

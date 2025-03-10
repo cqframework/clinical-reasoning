@@ -210,71 +210,71 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
         }
         switch (dataType) {
             case "Account",
-             "AdverseEvent",
-             "AllergyIntolerance",
-             "Appointment",
-             "AppointmentResponse",
-             "AuditEvent",
-             "Basic",
-             "BodyStructure",
-             "CarePlan",
-             "CareTeam",
-             "ChargeItem",
-             "Claim",
-             "ClaimResponse",
-             "ClinicalImpression",
-             "Communication",
-             "CommunicationRequest",
-             "Composition",
-             "Condition",
-             "Consent",
-             "Coverage",
-             "CoverageEligibilityRequest",
-             "CoverageEligibilityResponse",
-             "DetectedIssue",
-             "DeviceRequest",
-             "DeviceUseStatement",
-             "DiagnosticReport",
-             "DocumentManifest",
-             "DocumentReference",
-             "Encounter",
-             "EnrollmentRequest",
-             "EpisodeOfCare",
-             "ExplanationOfBenefit",
-             "FamilyMemberHistory",
-             "Flag",
-             "Goal",
-             "Group",
-             "ImagingStudy",
-             "Immunization",
-             "ImmunizationEvaluation",
-             "ImmunizationRecommendation",
-             "Invoice",
-             "List",
-             "MeasureReport",
-             "Media",
-             MEDICATION_ADMINISTRATION,
-             MEDICATION_DISPENSE,
-             MEDICATION_REQUEST,
-             MEDICATION_STATEMENT,
-             "MolecularSequence",
-             "NutritionOrder",
-             "Observation",
-             "Patient",
-             "Person",
-             "Procedure",
-             "Provenance",
-             "QuestionnaireResponse",
-             "RelatedPerson",
-             "RequestGroup",
-             "ResearchSubject",
-             "RiskAssessment",
-             "Schedule",
-             "ServiceRequest",
-             "Specimen",
-             "SupplyDelivery",
-             "SupplyRequest",
-              "VisionPrescription":
+                    "AdverseEvent",
+                    "AllergyIntolerance",
+                    "Appointment",
+                    "AppointmentResponse",
+                    "AuditEvent",
+                    "Basic",
+                    "BodyStructure",
+                    "CarePlan",
+                    "CareTeam",
+                    "ChargeItem",
+                    "Claim",
+                    "ClaimResponse",
+                    "ClinicalImpression",
+                    "Communication",
+                    "CommunicationRequest",
+                    "Composition",
+                    "Condition",
+                    "Consent",
+                    "Coverage",
+                    "CoverageEligibilityRequest",
+                    "CoverageEligibilityResponse",
+                    "DetectedIssue",
+                    "DeviceRequest",
+                    "DeviceUseStatement",
+                    "DiagnosticReport",
+                    "DocumentManifest",
+                    "DocumentReference",
+                    "Encounter",
+                    "EnrollmentRequest",
+                    "EpisodeOfCare",
+                    "ExplanationOfBenefit",
+                    "FamilyMemberHistory",
+                    "Flag",
+                    "Goal",
+                    "Group",
+                    "ImagingStudy",
+                    "Immunization",
+                    "ImmunizationEvaluation",
+                    "ImmunizationRecommendation",
+                    "Invoice",
+                    "List",
+                    "MeasureReport",
+                    "Media",
+                    MEDICATION_ADMINISTRATION,
+                    MEDICATION_DISPENSE,
+                    MEDICATION_REQUEST,
+                    MEDICATION_STATEMENT,
+                    "MolecularSequence",
+                    "NutritionOrder",
+                    "Observation",
+                    "Patient",
+                    "Person",
+                    "Procedure",
+                    "Provenance",
+                    "QuestionnaireResponse",
+                    "RelatedPerson",
+                    "RequestGroup",
+                    "ResearchSubject",
+                    "RiskAssessment",
+                    "Schedule",
+                    "ServiceRequest",
+                    "Specimen",
+                    "SupplyDelivery",
+                    "SupplyRequest",
+                    "VisionPrescription":
                 return true;
             default:
                 return false;
@@ -283,20 +283,19 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account",
-            "AdverseEvent":
+            case "Account", "AdverseEvent":
                 return SUBJECT;
             case "AllergyIntolerance":
                 return PATIENT;
-            case "Appointment","AppointmentResponse":
+            case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "AuditEvent","Basic","BodyStructure", "CarePlan", "CareTeam":
+            case "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
                 return PATIENT;
             case "ChargeItem":
                 return SUBJECT;
             case "Claim", "ClaimResponse":
                 return PATIENT;
-            case "ClinicalImpression","Communication","CommunicationRequest","Composition":
+            case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
                 return SUBJECT;
             case "Condition":
                 return PATIENT;

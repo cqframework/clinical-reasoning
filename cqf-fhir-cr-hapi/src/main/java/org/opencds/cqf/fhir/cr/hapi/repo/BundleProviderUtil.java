@@ -401,7 +401,7 @@ public class BundleProviderUtil {
                     && !(next instanceof IBaseOperationOutcome)) {
                 throw new InternalErrorException(
                         "Server method returned resource of type[%s] with no ID specified (IResource#setId(IdDt) must be called)"
-                            .formatted(next.getIdElement()));
+                                .formatted(next.getIdElement()));
             }
         }
     }

@@ -104,9 +104,7 @@ public class CdsCrServiceR5 implements ICdsCrService {
         // We are making  assumption that a Library created for a hook will provide parameters for  fields
         // specified for  hook
         if (contextResource instanceof Bundle bundle) {
-           bundle
-                    .getEntry()
-                    .forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
+            bundle.getEntry().forEach(x -> parameters.addParameter(part(paramName, x.getResource())));
         } else {
             parameters.addParameter(part(paramName, (Resource) contextResource));
         }
@@ -251,7 +249,6 @@ public class CdsCrServiceR5 implements ICdsCrService {
                     .setType(action.getType().getCodingFirstRep().getCode()));
         }
     }
-
 
     protected CdsServiceResponseCardSourceJson resolveSource(
             RequestOrchestration.RequestOrchestrationActionComponent action) {

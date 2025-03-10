@@ -226,72 +226,72 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
             return false;
         }
         switch (dataType) {
-            case "Account":
-            case "AdverseEvent":
-            case "AllergyIntolerance":
-            case "Appointment":
-            case "AppointmentResponse":
-            case "AuditEvent":
-            case "Basic":
-            case "BodyStructure":
-            case "CarePlan":
-            case "CareTeam":
-            case "ChargeItem":
-            case "Claim":
-            case "ClaimResponse":
-            case "ClinicalImpression":
-            case "Communication":
-            case "CommunicationRequest":
-            case "Composition":
-            case "Condition":
-            case "Consent":
-            case "Coverage":
-            case "CoverageEligibilityRequest":
-            case "CoverageEligibilityResponse":
-            case "DetectedIssue":
-            case "DeviceRequest":
-            case "DeviceUseStatement":
-            case "DiagnosticReport":
-            case "DocumentManifest":
-            case "DocumentReference":
-            case "Encounter":
-            case "EnrollmentRequest":
-            case "EpisodeOfCare":
-            case "ExplanationOfBenefit":
-            case "FamilyMemberHistory":
-            case "Flag":
-            case "Goal":
-            case "Group":
-            case "ImagingStudy":
-            case "Immunization":
-            case "ImmunizationEvaluation":
-            case "ImmunizationRecommendation":
-            case "Invoice":
-            case "List":
-            case "MeasureReport":
-            case "Media":
-            case MEDICATION_ADMINISTRATION:
-            case MEDICATION_DISPENSE:
-            case MEDICATION_REQUEST:
-            case MEDICATION_STATEMENT:
-            case "MolecularSequence":
-            case "NutritionOrder":
-            case "Observation":
-            case "Patient":
-            case "Person":
-            case "Procedure":
-            case "Provenance":
-            case "QuestionnaireResponse":
-            case "RelatedPerson":
-            case "RequestGroup":
-            case "ResearchSubject":
-            case "RiskAssessment":
-            case "Schedule":
-            case "ServiceRequest":
-            case "Specimen":
-            case "SupplyDelivery":
-            case "SupplyRequest":
-            case "VisionPrescription":
+            case "Account",
+                    "AdverseEvent",
+                    "AllergyIntolerance",
+                    "Appointment",
+                    "AppointmentResponse",
+                    "AuditEvent",
+                    "Basic",
+                    "BodyStructure",
+                    "CarePlan",
+                    "CareTeam",
+                    "ChargeItem",
+                    "Claim",
+                    "ClaimResponse",
+                    "ClinicalImpression",
+                    "Communication",
+                    "CommunicationRequest",
+                    "Composition",
+                    "Condition",
+                    "Consent",
+                    "Coverage",
+                    "CoverageEligibilityRequest",
+                    "CoverageEligibilityResponse",
+                    "DetectedIssue",
+                    "DeviceRequest",
+                    "DeviceUseStatement",
+                    "DiagnosticReport",
+                    "DocumentManifest",
+                    "DocumentReference",
+                    "Encounter",
+                    "EnrollmentRequest",
+                    "EpisodeOfCare",
+                    "ExplanationOfBenefit",
+                    "FamilyMemberHistory",
+                    "Flag",
+                    "Goal",
+                    "Group",
+                    "ImagingStudy",
+                    "Immunization",
+                    "ImmunizationEvaluation",
+                    "ImmunizationRecommendation",
+                    "Invoice",
+                    "List",
+                    "MeasureReport",
+                    "Media",
+                    MEDICATION_ADMINISTRATION,
+                    MEDICATION_DISPENSE,
+                    MEDICATION_REQUEST,
+                    MEDICATION_STATEMENT,
+                    "MolecularSequence",
+                    "NutritionOrder",
+                    "Observation",
+                    "Patient",
+                    "Person",
+                    "Procedure",
+                    "Provenance",
+                    "QuestionnaireResponse",
+                    "RelatedPerson",
+                    "RequestGroup",
+                    "ResearchSubject",
+                    "RiskAssessment",
+                    "Schedule",
+                    "ServiceRequest",
+                    "Specimen",
+                    "SupplyDelivery",
+                    "SupplyRequest",
+                    "VisionPrescription":
                 return true;
             default:
                 return false;

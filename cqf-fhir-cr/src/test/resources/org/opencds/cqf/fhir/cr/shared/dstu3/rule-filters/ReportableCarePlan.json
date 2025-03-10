@@ -1,0 +1,331 @@
+{
+  "resourceType": "CarePlan",
+  "id": "plandefinition-RuleFilters-1.0.0",
+  "contained": [
+    {
+      "resourceType": "RequestGroup",
+      "id": "plandefinition-RuleFilters-1.0.0",
+      "definition": [
+        {
+          "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "subject": {
+        "reference": "Reportable"
+      },
+      "action": [
+        {
+          "id": "start",
+          "description": "This action represents the start of the reporting workflow in response to the encounter-start event",
+          "textEquivalent": "Start the reporting workflow in response to an encounter-start event",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                  "code": "start"
+                }
+              ]
+            }
+          ],
+          "resource": {
+            "reference": "Task/start"
+          }
+        },
+        {
+          "id": "check-reportable",
+          "description": "This action represents the check for suspected reportability of the eICR.",
+          "textEquivalent": "Check Reportable",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                  "code": "check-reportable"
+                }
+              ]
+            }
+          ],
+          "resource": {
+            "reference": "Task/check-reportable"
+          }
+        },
+        {
+          "id": "create-and-report-eicr",
+          "description": "This action represents the creation and reporting of the eICR.",
+          "textEquivalent": "Create and Report eICR",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                  "code": "create-and-report-eicr"
+                }
+              ]
+            }
+          ],
+          "resource": {
+            "reference": "Task/create-and-report-eicr"
+          },
+          "action": [
+            {
+              "id": "car-report-eicr",
+              "resource": {
+                "reference": "Task/car-report-eicr"
+              }
+            }
+          ]
+        },
+        {
+          "id": "report-eicr",
+          "description": "This action represents the reporting of the eICR.",
+          "textEquivalent": "Report eICR",
+          "action": [
+            {
+              "id": "create-eicr",
+              "description": "This action represents the creation of the eICR.",
+              "textEquivalent": "Create eICR.",
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                      "code": "create-eicr"
+                    }
+                  ]
+                }
+              ],
+              "resource": {
+                "reference": "Task/create-eicr"
+              }
+            },
+            {
+              "id": "validate-eicr",
+              "description": "This action represents the validation of the eICR.",
+              "textEquivalent": "Validate eICR.",
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                      "code": "validate-eicr"
+                    }
+                  ]
+                }
+              ],
+              "resource": {
+                "reference": "Task/validate-eicr"
+              }
+            },
+            {
+              "id": "route-and-send-eicr",
+              "description": "This action represents the routing and sending of the eICR.",
+              "textEquivalent": "Route and send eICR",
+              "code": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/ecr/CodeSystem/executabletask-type",
+                      "code": "route-and-send-eicr"
+                    }
+                  ]
+                }
+              ],
+              "resource": {
+                "reference": "Task/route-and-send-eicr"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resourceType": "Task",
+      "id": "start",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/targetStatus",
+          "valueString": "ready"
+        },
+        {
+          "url": "http://hl7.org/fhir/aphl/StructureDefinition/next",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/aphl/StructureDefinition/offset",
+              "valueDuration": {
+                "value": 1,
+                "system": "http://unitsofmeasure.org",
+                "code": "h"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/aphl/StructureDefinition/target",
+              "valueReference": {
+                "reference": "Task/check-reportable"
+              }
+            }
+          ]
+        }
+      ],
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "ready",
+      "intent": "proposal",
+      "description": "This action represents the start of the reporting workflow in response to the encounter-start event",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "check-reportable",
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "This action represents the check for suspected reportability of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "car-report-eicr",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/aphl/StructureDefinition/next",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/aphl/StructureDefinition/target",
+              "valueReference": {
+                "reference": "Task/report-eicr"
+              }
+            }
+          ]
+        }
+      ],
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "Report Eicr",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "create-and-report-eicr",
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "This action represents the creation and reporting of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "create-eicr",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/aphl/StructureDefinition/next",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/aphl/StructureDefinition/target",
+              "valueReference": {
+                "reference": "Task/validate-eicr"
+              }
+            }
+          ]
+        }
+      ],
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "This action represents the creation of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "validate-eicr",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/aphl/StructureDefinition/next",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/aphl/StructureDefinition/target",
+              "valueReference": {
+                "reference": "Task/route-and-send-eicr"
+              }
+            }
+          ]
+        }
+      ],
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "This action represents the validation of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
+    },
+    {
+      "resourceType": "Task",
+      "id": "route-and-send-eicr",
+      "basedOn": [
+        {
+          "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+        }
+      ],
+      "status": "draft",
+      "intent": "proposal",
+      "description": "This action represents the routing and sending of the eICR.",
+      "for": {
+        "reference": "Reportable"
+      }
+    }
+  ],
+  "definition": [
+    {
+      "reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-RuleFilters-1.0.0"
+    }
+  ],
+  "status": "draft",
+  "intent": "proposal",
+  "subject": {
+    "reference": "Reportable"
+  },
+  "activity": [
+    {
+      "reference": {
+        "reference": "#RequestGroup/plandefinition-RuleFilters-1.0.0"
+      }
+    }
+  ]
+}

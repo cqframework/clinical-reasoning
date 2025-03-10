@@ -136,34 +136,46 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
         String patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
-        List<String> ret = new ArrayList<>();
         if (dataRequirement.hasCodeFilter()) {
-            for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent :
-                    dataRequirement.getCodeFilter()) {
-                if (!codeFilterComponent.hasPath()) continue;
-                String path = mapCodePathToSearchParam(dataRequirement.getType(), codeFilterComponent.getPath());
-                if (codeFilterComponent.hasValueSetElement()) {
-                    for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement())) {
-                        ret.add(patientRelatedResource + "&" + path + "=" + codes);
-                    }
-                } else if (codeFilterComponent.hasCode()) {
-                    List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
-                    boolean isFirstCodingInFilter = true;
-                    for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
-                        if (isFirstCodingInFilter) {
-                            ret.add(patientRelatedResource + "&" + path + "=" + code);
-                        } else {
-                            ret.add("," + code);
-                        }
-
-                        isFirstCodingInFilter = false;
-                    }
-                }
-            }
-            return ret;
+            return createRequestUrlHasFilters(dataRequirement, patientRelatedResource);
         } else {
+            List<String> ret = new ArrayList<>();
             ret.add(patientRelatedResource);
             return ret;
+        }
+    }
+
+    private List<String> createRequestUrlHasFilters(DataRequirement dataRequirement, String patientRelatedResource) {
+        List<String> ret = new ArrayList<>();
+        for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent : dataRequirement.getCodeFilter()) {
+            if (!codeFilterComponent.hasPath()) continue;
+            String path = mapCodePathToSearchParam(dataRequirement.getType(), codeFilterComponent.getPath());
+            if (codeFilterComponent.hasValueSetElement()) {
+                for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement())) {
+                    ret.add(patientRelatedResource + "&" + path + "=" + codes);
+                }
+            } else if (codeFilterComponent.hasCode()) {
+                handleCodeFilters(patientRelatedResource, codeFilterComponent, ret, path);
+            }
+        }
+        return ret;
+    }
+
+    private void handleCodeFilters(
+            String patientRelatedResource,
+            DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent,
+            List<String> ret,
+            String path) {
+        List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
+        boolean isFirstCodingInFilter = true;
+        for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
+            if (isFirstCodingInFilter) {
+                ret.add(patientRelatedResource + "&" + path + "=" + code);
+            } else {
+                ret.add("," + code);
+            }
+
+            isFirstCodingInFilter = false;
         }
     }
 
@@ -389,8 +401,8 @@ public class CrDiscoveryServiceR4 implements ICrDiscoveryService {
                 return SUBJECT;
             case "VisionPrescription":
                 return PATIENT;
+            default:
+                return null;
         }
-
-        return null;
     }
 }

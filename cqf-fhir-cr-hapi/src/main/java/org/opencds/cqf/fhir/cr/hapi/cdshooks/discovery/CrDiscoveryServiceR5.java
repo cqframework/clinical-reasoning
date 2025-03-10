@@ -16,6 +16,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrUtils;
 import org.opencds.cqf.fhir.utility.r5.SearchHelper;
 
+@SuppressWarnings("squid:S1135")
 public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 
     protected static final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
@@ -132,39 +133,52 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
-        if (!isPatientCompartment(dataRequirement.getType().toCode())) return List.of();
+        if (!isPatientCompartment(dataRequirement.getType().toCode())) {
+            return List.of();
+        }
         String patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType().toCode())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
-        List<String> ret = new ArrayList<>();
         if (dataRequirement.hasCodeFilter()) {
-            for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent :
-                    dataRequirement.getCodeFilter()) {
-                if (!codeFilterComponent.hasPath()) continue;
-                String path =
-                        mapCodePathToSearchParam(dataRequirement.getType().toCode(), codeFilterComponent.getPath());
-                if (codeFilterComponent.hasValueSetElement()) {
-                    for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement())) {
-                        ret.add(patientRelatedResource + "&" + path + "=" + codes);
-                    }
-                } else if (codeFilterComponent.hasCode()) {
-                    List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
-                    boolean isFirstCodingInFilter = true;
-                    for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
-                        if (isFirstCodingInFilter) {
-                            ret.add(patientRelatedResource + "&" + path + "=" + code);
-                        } else {
-                            ret.add("," + code);
-                        }
-
-                        isFirstCodingInFilter = false;
-                    }
-                }
-            }
-            return ret;
+            return createRequestUrlHasCodeFilter(dataRequirement, patientRelatedResource);
         } else {
+            List<String> ret = new ArrayList<>();
             ret.add(patientRelatedResource);
             return ret;
+        }
+    }
+
+    private List<String> createRequestUrlHasCodeFilter(DataRequirement dataRequirement, String patientRelatedResource) {
+        List<String> ret = new ArrayList<>();
+        for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent : dataRequirement.getCodeFilter()) {
+            if (!codeFilterComponent.hasPath()) continue;
+            String path = mapCodePathToSearchParam(dataRequirement.getType().toCode(), codeFilterComponent.getPath());
+            if (codeFilterComponent.hasValueSetElement()) {
+                for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement())) {
+                    ret.add(patientRelatedResource + "&" + path + "=" + codes);
+                }
+            } else if (codeFilterComponent.hasCode()) {
+                handleCodeFilters(patientRelatedResource, codeFilterComponent, ret, path);
+            }
+        }
+        return ret;
+    }
+
+    private void handleCodeFilters(
+            String patientRelatedResource,
+            DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent,
+            List<String> ret,
+            String path) {
+        List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
+        boolean isFirstCodingInFilter = true;
+        for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
+            if (isFirstCodingInFilter) {
+                ret.add(patientRelatedResource + "&" + path + "=" + code);
+            } else {
+                ret.add("," + code);
+            }
+
+            isFirstCodingInFilter = false;
         }
     }
 
@@ -286,16 +300,12 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
 
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
-            case "Account", "AdverseEvent":
+            case "Account", "AdverseEvent", "ChargeItem":
                 return SUBJECT;
-            case "AllergyIntolerance":
+            case "AllergyIntolerance", "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
                 return PATIENT;
             case "Appointment", "AppointmentResponse":
                 return ACTOR;
-            case "AuditEvent", "Basic", "BodyStructure", "CarePlan", "CareTeam":
-                return PATIENT;
-            case "ChargeItem":
-                return SUBJECT;
             case "Claim", "ClaimResponse":
                 return PATIENT;
             case "ClinicalImpression", "Communication", "CommunicationRequest", "Composition":
@@ -312,53 +322,29 @@ public class CrDiscoveryServiceR5 implements ICrDiscoveryService {
                 return PATIENT;
             case "EnrollmentRequest":
                 return SUBJECT;
-            case "EpisodeOfCare":
-                return PATIENT;
-            case "ExplanationOfBenefit":
-                return PATIENT;
-            case "FamilyMemberHistory":
-                return PATIENT;
-            case "Flag":
-                return PATIENT;
-            case "Goal":
+            case "EpisodeOfCare", "ExplanationOfBenefit", "FamilyMemberHistory", "Goal":
                 return PATIENT;
             case "Group":
                 return "member";
-            case "ImagingStudy":
+            case "ImagingStudy", "Immunization", "ImmunizationRecommendation":
                 return PATIENT;
-            case "Immunization":
-                return PATIENT;
-            case "ImmunizationRecommendation":
-                return PATIENT;
-            case "Invoice":
-                return SUBJECT;
-            case "List":
+            case "Invoice", "List":
                 return SUBJECT;
             case "MeasureReport":
                 return PATIENT;
             case "Media":
                 return SUBJECT;
-            case MEDICATION_ADMINISTRATION:
+            case MEDICATION_ADMINISTRATION, MEDICATION_DISPENSE:
                 return PATIENT;
-            case MEDICATION_DISPENSE:
-                return PATIENT;
-            case MEDICATION_REQUEST:
+            case MEDICATION_REQUEST, MEDICATION_STATEMENT:
                 return SUBJECT;
-            case MEDICATION_STATEMENT:
-                return SUBJECT;
-            case "MolecularSequence":
-                return PATIENT;
-            case "NutritionOrder":
+            case "MolecularSequence", "NutritionOrder":
                 return PATIENT;
             case "Observation":
                 return SUBJECT;
             case "Patient":
                 return "_id";
-            case "Person":
-                return PATIENT;
-            case "Procedure":
-                return PATIENT;
-            case "Provenance":
+            case "Person", "Procedure", "Provenance":
                 return PATIENT;
             case "QuestionnaireResponse":
                 return SUBJECT;

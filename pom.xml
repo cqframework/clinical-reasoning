@@ -96,8 +96,6 @@
         consistent state -->
         <module>cqf-fhir-cr-spring</module>
 
-        <module>cqf-fhir-cr-test</module>
-
         <!-- These don't publish a module, but ensures documentation snippets build correctly -->
         <module>docs</module>
         <module>cqf-fhir-benchmark</module>

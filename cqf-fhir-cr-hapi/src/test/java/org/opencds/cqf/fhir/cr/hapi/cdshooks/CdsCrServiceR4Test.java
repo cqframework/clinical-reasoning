@@ -24,4 +24,9 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     void fhirVersion() {
         assertEquals(FhirVersionEnum.R4, testSubject.getFhirVersion());
     }
+
+    @Test
+    void testGetRepository() {
+        assertEquals(repository, testSubject.getRepository());
+    }
 }

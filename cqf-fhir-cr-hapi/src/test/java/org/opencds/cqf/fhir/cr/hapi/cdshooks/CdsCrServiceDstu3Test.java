@@ -25,4 +25,8 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
         assertEquals(FhirVersionEnum.DSTU3, testSubject.getFhirVersion());
     }
 
+    @Test
+    void testGetRepository() {
+        assertEquals(repository, testSubject.getRepository());
+    }
 }

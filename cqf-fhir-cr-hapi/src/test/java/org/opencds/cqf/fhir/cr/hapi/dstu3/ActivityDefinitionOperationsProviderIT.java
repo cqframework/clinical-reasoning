@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.activitydefinition.ActivityDefinitionApplyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class ActivityDefinitionOperationsProviderTest extends BaseCrDstu3TestServer {
+class ActivityDefinitionOperationsProviderIT extends BaseCrDstu3TestServer {
 
     @Autowired
     ActivityDefinitionApplyProvider activityDefinitionApplyProvider;

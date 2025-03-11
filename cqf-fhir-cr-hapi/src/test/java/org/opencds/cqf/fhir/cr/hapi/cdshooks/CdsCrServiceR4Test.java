@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 

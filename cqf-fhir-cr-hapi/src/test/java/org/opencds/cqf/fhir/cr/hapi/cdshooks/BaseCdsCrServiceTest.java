@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsConfigServiceImpl;
-import ca.uhn.fhir.cr.common.IRepositoryFactory;
 
-abstract public class BaseCdsCrServiceTest extends BaseCdsCrTest {
+public abstract class BaseCdsCrServiceTest extends BaseCdsCrTest {
     protected static final RequestDetails REQUEST_DETAILS = new SystemRequestDetails();
 
     protected IRepositoryFactory repositoryFactory;

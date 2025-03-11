@@ -41,6 +41,8 @@ public class TestCdsHooksConfig {
 
     private final DaoRegistry daoRegistry;
 
+    // TODO: LD: once we're using a new version of hapi-fhir, get rid of this, the import, and all
+    // code that uses or assigns to it:
     private final IRepositoryFactory repositoryFactory;
 
     private final MatchUrlService matchUrlService;

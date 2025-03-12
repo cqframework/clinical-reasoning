@@ -12,9 +12,9 @@ public class CdsCrDiscoveryServiceRegistry implements ICdsCrDiscoveryServiceRegi
     public CdsCrDiscoveryServiceRegistry() {
         new EnumMap<>(FhirVersionEnum.class);
         crDiscoveryServices = new EnumMap<>(FhirVersionEnum.class);
-        crDiscoveryServices.put(FhirVersionEnum.DSTU3, CrDiscoveryServiceDstu3.class);
-        crDiscoveryServices.put(FhirVersionEnum.R4, CrDiscoveryServiceR4.class);
-        crDiscoveryServices.put(FhirVersionEnum.R5, CrDiscoveryServiceR5.class);
+        crDiscoveryServices.put(FhirVersionEnum.DSTU3, CrDiscoveryService.class);
+        crDiscoveryServices.put(FhirVersionEnum.R4, CrDiscoveryService.class);
+        crDiscoveryServices.put(FhirVersionEnum.R5, CrDiscoveryService.class);
     }
 
     public void register(

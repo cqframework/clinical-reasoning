@@ -11,9 +11,9 @@ public class CdsCrServiceRegistry implements ICdsCrServiceRegistry {
 
     public CdsCrServiceRegistry() {
         cdsCrServices = new EnumMap<>(FhirVersionEnum.class);
-        cdsCrServices.put(FhirVersionEnum.DSTU3, CdsCrServiceDstu3.class);
-        cdsCrServices.put(FhirVersionEnum.R4, CdsCrServiceR4.class);
-        cdsCrServices.put(FhirVersionEnum.R5, CdsCrServiceR5.class);
+        cdsCrServices.put(FhirVersionEnum.DSTU3, CdsCrService.class);
+        cdsCrServices.put(FhirVersionEnum.R4, CdsCrService.class);
+        cdsCrServices.put(FhirVersionEnum.R5, CdsCrService.class);
     }
 
     public void register(@Nonnull FhirVersionEnum fhirVersion, @Nonnull Class<? extends ICdsCrService> cdsCrService) {

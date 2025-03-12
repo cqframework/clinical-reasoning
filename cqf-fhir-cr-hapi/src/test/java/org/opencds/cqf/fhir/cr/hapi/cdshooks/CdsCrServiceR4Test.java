@@ -10,14 +10,14 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
-    private CdsCrServiceR4 testSubject;
+    private CdsCrService testSubject;
 
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forR4Cached();
         repository = new InMemoryFhirRepository(fhirContext);
         cdsConfigService = getCdsConfigService();
-        testSubject = new CdsCrServiceR4(REQUEST_DETAILS, repository, cdsConfigService);
+        testSubject = new CdsCrService(REQUEST_DETAILS, repository, cdsConfigService);
     }
 
     @Test

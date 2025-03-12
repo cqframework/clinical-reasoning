@@ -22,7 +22,9 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
 
     <T extends ICompositeType> List<T> getParameter();
 
-    <T extends ICompositeType> List<T> getDataRequirement();
+    boolean hasDataRequirement();
+
+    List<IDataRequirementAdapter> getDataRequirement();
 
     ILibraryAdapter addDataRequirement(ICompositeType dataRequirement);
 

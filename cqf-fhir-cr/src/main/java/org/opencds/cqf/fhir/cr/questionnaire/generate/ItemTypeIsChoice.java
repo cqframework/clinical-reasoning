@@ -4,7 +4,6 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.api.Repository;
@@ -12,6 +11,8 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,21 +57,11 @@ public class ItemTypeIsChoice {
 
     protected void addAnswerOptionsForValueSetWithComposeComponent(
             IValueSetAdapter valueSet, IBaseBackboneElement item) {
-        var systems = valueSet.getComposeIncludes();
-        systems.forEach(system -> {
-            String systemUri;
-            List<?> concepts;
-            if (system instanceof org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent r4System) {
-                systemUri = r4System.getSystem();
-                concepts = r4System.getConcept();
-            } else if (system instanceof org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent r5System) {
-                systemUri = r5System.getSystem();
-                concepts = r5System.getConcept();
-            } else {
-                return;
-            }
-            concepts.forEach(concept -> {
-                var coding = getCodingFromConcept((IBaseBackboneElement) concept, systemUri);
+        var conceptSets = valueSet.getComposeInclude();
+        conceptSets.forEach(conceptSet -> {
+            var systemUri = conceptSet.getSystem();
+            conceptSet.getConcept().forEach(concept -> {
+                var coding = getCodingFromConcept(concept, systemUri);
                 if (coding != null) {
                     addAnswerOption(item, coding);
                 }
@@ -86,7 +77,7 @@ public class ItemTypeIsChoice {
         }
     }
 
-    protected ICodingAdapter getCodingFromConcept(IBaseBackboneElement code, String systemUri) {
+    protected ICodingAdapter getCodingFromConcept(IValueSetConceptReferenceAdapter code, String systemUri) {
         if (code instanceof org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent r4Code) {
             return adapterFactory.createCoding(new org.hl7.fhir.r4.model.Coding()
                     .setCode(r4Code.getCode())
@@ -102,7 +93,7 @@ public class ItemTypeIsChoice {
         return null;
     }
 
-    protected ICodingAdapter getCodingFromExpansion(IBaseBackboneElement code) {
+    protected ICodingAdapter getCodingFromExpansion(IValueSetExpansionContainsAdapter code) {
         if (code instanceof org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent r4Code) {
             return adapterFactory.createCoding(new org.hl7.fhir.r4.model.Coding()
                     .setCode(r4Code.getCode())

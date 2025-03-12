@@ -10,11 +10,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionActionAdapter;
 
 public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDefinitionAdapter {
 
@@ -157,5 +160,30 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     public IBaseResource getPrimaryLibrary(Repository repository) {
         var libraries = getPlanDefinition().getLibrary();
         return libraries.isEmpty() ? null : SearchHelper.searchRepositoryByCanonical(repository, libraries.get(0));
+    }
+
+    @Override
+    public String getDescription() {
+        return get().getDescription();
+    }
+
+    @Override
+    public boolean hasLibrary() {
+        return get().hasLibrary();
+    }
+
+    @Override
+    public List<String> getLibrary() {
+        return get().getLibrary().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasAction() {
+        return get().hasAction();
+    }
+
+    @Override
+    public List<IPlanDefinitionActionAdapter> getAction() {
+        return get().getAction().stream().map(PlanDefinitionActionAdapter::new).collect(Collectors.toList());
     }
 }

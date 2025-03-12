@@ -16,7 +16,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionActionAdapter;
 
 class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDefinitionAdapter {
     public PlanDefinitionAdapter(IDomainResource planDefinition) {
@@ -151,5 +153,30 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDef
                 ? null
                 : SearchHelper.searchRepositoryByCanonical(
                         repository, libraries.get(0).getReferenceElement());
+    }
+
+    @Override
+    public String getDescription() {
+        return get().getDescription();
+    }
+
+    @Override
+    public boolean hasLibrary() {
+        return get().hasLibrary();
+    }
+
+    @Override
+    public List<String> getLibrary() {
+        return get().getLibrary().stream().map(Reference::getReference).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasAction() {
+        return get().hasAction();
+    }
+
+    @Override
+    public List<IPlanDefinitionActionAdapter> getAction() {
+        return get().getAction().stream().map(PlanDefinitionActionAdapter::new).collect(Collectors.toList());
     }
 }

@@ -76,20 +76,21 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
 
     private static final Coding CODING_ECA_RULE = new Coding("system", "eca-rule", "display");
 
-    private static final String PREFETCH_URL_PATIENT = "PATIENT?_id=Patient/{{context.patientId}}";
+    private static final String PREFETCH_URL_PATIENT = "Patient?_id=Patient/{{context.patientId}}";
     private static final String URL_PART_PATH_AND_CODE = "&123=system|code";
     private static final String PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE = PREFETCH_URL_PATIENT + URL_PART_PATH_AND_CODE;
-    private static final String PREFETCH_URL_ENCOUNTER = "ENCOUNTER?patient=Patient/{{context.patientId}}";
+    private static final String PREFETCH_URL_ENCOUNTER = "Encounter?patient=Patient/{{context.patientId}}";
     private static final String PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE =
             PREFETCH_URL_ENCOUNTER + URL_PART_PATH_AND_CODE;
 
-    private CrDiscoveryServiceR5 testSubject;
+    private CrDiscoveryService testSubject;
 
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forR5Cached();
         repository = getRepository();
         restfulServer = getRestfulServer();
+        adapterFactory = getAdapterFactory();
 
         repository.update(LIBRARY_1);
         repository.update(LIBRARY_2);
@@ -98,7 +99,7 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
         repository.update(LIBRARY_5);
         repository.update(LIBRARY_6);
 
-        testSubject = new CrDiscoveryServiceR5(PLAN_DEF_ID_TYPE, repository);
+        testSubject = new CrDiscoveryService(PLAN_DEF_ID_TYPE, repository);
     }
 
     private static Stream<Arguments> createRequestUrlParams() {
@@ -117,7 +118,8 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
     @ParameterizedTest
     @MethodSource("createRequestUrlParams")
     void createRequestUrl(DataRequirement dataRequirement, List<String> expectedUrls) {
-        final List<String> requestUrls = testSubject.createRequestUrl(dataRequirement);
+        var adapter = dataRequirement == null ? null : adapterFactory.createDataRequirement(dataRequirement);
+        final List<String> requestUrls = testSubject.createRequestUrl(adapter);
 
         assertEquals(expectedUrls, requestUrls);
     }
@@ -181,7 +183,8 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
     @ParameterizedTest
     @MethodSource("getPrefetchUrlListParams")
     void getPrefetchUrlList(PlanDefinition planDefinition, PrefetchUrlList expectedPrefetchUrlList) {
-        final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(planDefinition);
+        var adapter = planDefinition == null ? null : adapterFactory.createPlanDefinition(planDefinition);
+        final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(adapter);
 
         assertEquals(expectedPrefetchUrlList, prefetchUrlList);
     }

@@ -30,33 +30,29 @@ public interface ICdsCrService {
         var operationName = getFhirVersion() == FhirVersionEnum.R4
                 ? ProviderConstants.CR_OPERATION_R5_APPLY
                 : ProviderConstants.CR_OPERATION_APPLY;
-        switch (getFhirVersion()) {
-            case DSTU3:
-                return getRepository()
-                        .invoke(
-                                org.hl7.fhir.dstu3.model.PlanDefinition.class,
-                                operationName,
-                                params,
-                                org.hl7.fhir.dstu3.model.CarePlan.class,
-                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
-            case R4:
-                return getRepository()
-                        .invoke(
-                                org.hl7.fhir.r4.model.PlanDefinition.class,
-                                operationName,
-                                params,
-                                org.hl7.fhir.r4.model.Bundle.class,
-                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
-            case R5:
-                return getRepository()
-                        .invoke(
-                                org.hl7.fhir.r5.model.PlanDefinition.class,
-                                operationName,
-                                params,
-                                org.hl7.fhir.r5.model.Bundle.class,
-                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
-            default:
-                return null;
-        }
+        return switch (getFhirVersion()) {
+            case DSTU3 -> getRepository()
+                    .invoke(
+                            org.hl7.fhir.dstu3.model.PlanDefinition.class,
+                            operationName,
+                            params,
+                            org.hl7.fhir.dstu3.model.CarePlan.class,
+                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            case R4 -> getRepository()
+                    .invoke(
+                            org.hl7.fhir.r4.model.PlanDefinition.class,
+                            operationName,
+                            params,
+                            org.hl7.fhir.r4.model.Bundle.class,
+                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            case R5 -> getRepository()
+                    .invoke(
+                            org.hl7.fhir.r5.model.PlanDefinition.class,
+                            operationName,
+                            params,
+                            org.hl7.fhir.r5.model.Bundle.class,
+                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            default -> null;
+        };
     }
 }

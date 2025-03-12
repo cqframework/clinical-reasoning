@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -29,6 +30,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class LibraryAdapterTest {
@@ -219,7 +221,9 @@ class LibraryAdapterTest {
         adapter.setDataRequirement(dataRequirements);
         assertEquals(dataRequirements, library.getDataRequirement());
         adapter.addDataRequirement(new DataRequirement().setType("Observation"));
-        assertEquals(library.getDataRequirement(), adapter.getDataRequirement());
+        assertEquals(
+                library.getDataRequirement(),
+                adapter.getDataRequirement().stream().map(IAdapter::get).collect(Collectors.toList()));
         assertEquals(2, adapter.getDataRequirement().size());
     }
 

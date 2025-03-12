@@ -50,6 +50,13 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
                     .setPath("123")
                     .setValueCoding(List.of(CODING_NON_ECA_RULE))));
 
+    private static final String LIBRARY_CANONICAL_1 = "Library/lib1";
+    private static final String LIBRARY_CANONICAL_2 = "Library/lib2";
+    private static final String LIBRARY_CANONICAL_3 = "Library/lib3";
+    private static final String LIBRARY_CANONICAL_4 = "Library/lib4";
+    private static final String LIBRARY_CANONICAL_5 = "Library/lib5";
+    private static final String LIBRARY_CANONICAL_6 = "Library/lib6";
+
     private static final IdType LIBRARY_1_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib1");
     private static final IdType LIBRARY_2_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib2");
     private static final IdType LIBRARY_3_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib3");
@@ -57,19 +64,27 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
     private static final IdType LIBRARY_5_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib5");
     private static final IdType LIBRARY_6_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib6");
 
-    private static final Library LIBRARY_1 = (Library) new Library().setId(LIBRARY_1_ID_TYPE);
-    private static final Library LIBRARY_2 =
-            (Library) new Library().setDataRequirement(List.of()).setId(LIBRARY_2_ID_TYPE);
-    private static final Library LIBRARY_3 = (Library)
-            new Library().setDataRequirement(List.of(DATA_REQUIREMENT_PATIENT)).setId(LIBRARY_3_ID_TYPE);
+    private static final Library LIBRARY_1 =
+            (Library) new Library().setUrl(LIBRARY_CANONICAL_1).setId(LIBRARY_1_ID_TYPE);
+    private static final Library LIBRARY_2 = (Library) new Library()
+            .setDataRequirement(List.of())
+            .setUrl(LIBRARY_CANONICAL_2)
+            .setId(LIBRARY_2_ID_TYPE);
+    private static final Library LIBRARY_3 = (Library) new Library()
+            .setDataRequirement(List.of(DATA_REQUIREMENT_PATIENT))
+            .setUrl(LIBRARY_CANONICAL_3)
+            .setId(LIBRARY_3_ID_TYPE);
     private static final Library LIBRARY_4 = (Library) new Library()
             .setDataRequirement(List.of(DATA_REQUIREMENT_ENCOUNTER))
+            .setUrl(LIBRARY_CANONICAL_4)
             .setId(LIBRARY_4_ID_TYPE);
     private static final Library LIBRARY_5 = (Library) new Library()
             .setDataRequirement(List.of(DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_NON_EMPTY))
+            .setUrl(LIBRARY_CANONICAL_5)
             .setId(LIBRARY_5_ID_TYPE);
     private static final Library LIBRARY_6 = (Library) new Library()
             .setDataRequirement(List.of(DATA_REQUIREMENT_ENCOUNTER_CODE_FILTER_CODING_NON_EMPTY))
+            .setUrl(LIBRARY_CANONICAL_6)
             .setId(LIBRARY_6_ID_TYPE);
 
     private static final Coding CODING_ECA_RULE = new Coding("system", "eca-rule", "display");
@@ -81,13 +96,14 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
     private static final String PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE =
             PREFETCH_URL_ENCOUNTER + URL_PART_PATH_AND_CODE;
 
-    private CrDiscoveryServiceDstu3 testSubject;
+    private CrDiscoveryService testSubject;
 
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forDstu3Cached();
         repository = getRepository();
         restfulServer = getRestfulServer();
+        adapterFactory = getAdapterFactory();
 
         repository.update(LIBRARY_1);
         repository.update(LIBRARY_2);
@@ -96,7 +112,7 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
         repository.update(LIBRARY_5);
         repository.update(LIBRARY_6);
 
-        testSubject = new CrDiscoveryServiceDstu3(PLAN_DEF_ID_TYPE, repository);
+        testSubject = new CrDiscoveryService(PLAN_DEF_ID_TYPE, repository);
     }
 
     private static Stream<Arguments> createRequestUrlParams() {
@@ -116,7 +132,8 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
     @ParameterizedTest
     @MethodSource("createRequestUrlParams")
     void createRequestUrl(DataRequirement dataRequirement, List<String> expectedUrls) {
-        final List<String> requestUrls = testSubject.createRequestUrl(dataRequirement);
+        var adapter = dataRequirement == null ? null : adapterFactory.createDataRequirement(dataRequirement);
+        final List<String> requestUrls = testSubject.createRequestUrl(adapter);
 
         assertEquals(expectedUrls, requestUrls);
     }
@@ -180,7 +197,8 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
     @ParameterizedTest
     @MethodSource("getPrefetchUrlListParams")
     void getPrefetchUrlList(PlanDefinition planDefinition, PrefetchUrlList expectedPrefetchUrlList) {
-        final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(planDefinition);
+        var adapter = planDefinition == null ? null : adapterFactory.createPlanDefinition(planDefinition);
+        final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(adapter);
 
         assertEquals(expectedPrefetchUrlList, prefetchUrlList);
     }

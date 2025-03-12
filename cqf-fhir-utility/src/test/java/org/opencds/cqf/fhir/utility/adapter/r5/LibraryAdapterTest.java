@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -177,7 +176,7 @@ class LibraryAdapterTest {
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
@@ -223,7 +222,7 @@ class LibraryAdapterTest {
         adapter.addDataRequirement(new DataRequirement().setType(FHIRTypes.OBSERVATION));
         assertEquals(
                 library.getDataRequirement(),
-                adapter.getDataRequirement().stream().map(IAdapter::get).collect(Collectors.toList()));
+                adapter.getDataRequirement().stream().map(IAdapter::get).toList());
         assertEquals(2, adapter.getDataRequirement().size());
     }
 

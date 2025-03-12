@@ -50,13 +50,6 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
                     .setPath("123")
                     .setValueCoding(List.of(CODING_NON_ECA_RULE))));
 
-    private static final String LIBRARY_CANONICAL_1 = "Library/lib1";
-    private static final String LIBRARY_CANONICAL_2 = "Library/lib2";
-    private static final String LIBRARY_CANONICAL_3 = "Library/lib3";
-    private static final String LIBRARY_CANONICAL_4 = "Library/lib4";
-    private static final String LIBRARY_CANONICAL_5 = "Library/lib5";
-    private static final String LIBRARY_CANONICAL_6 = "Library/lib6";
-
     private static final IdType LIBRARY_1_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib1");
     private static final IdType LIBRARY_2_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib2");
     private static final IdType LIBRARY_3_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib3");

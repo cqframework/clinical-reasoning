@@ -17,12 +17,12 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
     private final FhirContext fhirContext;
     private final ModelResolver modelResolver;
 
-    public DataRequirementAdapter(ICompositeType dataRequirement) {
-        if (!(dataRequirement instanceof DataRequirement)) {
+    public DataRequirementAdapter(ICompositeType compositeType) {
+        if (!(compositeType instanceof DataRequirement dataRequirementInner)) {
             throw new IllegalArgumentException(
                     "object passed as dataRequirement argument is not a DataRequirement data type");
         }
-        this.dataRequirement = (DataRequirement) dataRequirement;
+        this.dataRequirement = dataRequirementInner;
         fhirContext = FhirContext.forR4Cached();
         modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
     }
@@ -61,6 +61,6 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
     public List<IDataRequirementCodeFilterAdapter> getCodeFilter() {
         return get().getCodeFilter().stream()
                 .map(DataRequirementCodeFilterAdapter::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 }

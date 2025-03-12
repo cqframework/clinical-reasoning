@@ -51,7 +51,7 @@ public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter
     public List<ITriggerDefinitionAdapter> getTrigger() {
         return get().getTriggerDefinition().stream()
                 .map(TriggerDefinitionAdapter::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override

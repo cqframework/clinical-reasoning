@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.ParameterDefinition;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -61,7 +62,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
     @SuppressWarnings("unchecked")
     @Override
     public List<Attachment> getContent() {
-        return getLibrary().getContent().stream().collect(Collectors.toList());
+        return getLibrary().getContent().stream().toList();
     }
 
     @Override
@@ -85,16 +86,16 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         // relatedArtifact[].resource
         getRelatedArtifact().stream()
                 .map(ra -> (RelatedArtifact) ra)
-                .filter(ra -> ra.hasResource())
+                .filter(RelatedArtifact::hasResource)
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .forEach(references::add);
-        getLibrary().getDataRequirement().stream().forEach(dr -> {
+        getLibrary().getDataRequirement().forEach(dr -> {
             dr.getProfile().stream()
                     .filter(IPrimitiveType::hasValue)
                     .forEach(profile -> references.add(new DependencyInfo(
                             referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
             dr.getCodeFilter().stream()
-                    .filter(cf -> cf.hasValueSet())
+                    .filter(DataRequirementCodeFilterComponent::hasValueSet)
                     .forEach(cf -> references.add(new DependencyInfo(
                             referenceSource,
                             cf.getValueSetReference().getReference(),
@@ -137,12 +138,11 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         return getLibrary().hasDataRequirement();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<IDataRequirementAdapter> getDataRequirement() {
         return getLibrary().getDataRequirement().stream()
                 .map(DataRequirementAdapter::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -176,8 +176,9 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                         return getLibrary().getContained().stream()
                                 .filter(containedResource ->
                                         containedResource.getId().equals(ref))
+                                .filter(IBaseParameters.class::isInstance)
+                                .map(IBaseParameters.class::cast)
                                 .findFirst()
-                                .map(r -> (IBaseParameters) r)
                                 .orElse(null);
                     }
                     return null;

@@ -49,12 +49,12 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
                     .setPath("123")
                     .setCode(List.of(CODING_NON_ECA_RULE))));
 
-    private static final CanonicalType LIBRARY_CANONICAL_1 = new CanonicalType("Library/lib1");
-    private static final CanonicalType LIBRARY_CANONICAL_2 = new CanonicalType("Library/lib2");
-    private static final CanonicalType LIBRARY_CANONICAL_3 = new CanonicalType("Library/lib3");
-    private static final CanonicalType LIBRARY_CANONICAL_4 = new CanonicalType("Library/lib4");
-    private static final CanonicalType LIBRARY_CANONICAL_5 = new CanonicalType("Library/lib5");
-    private static final CanonicalType LIBRARY_CANONICAL_6 = new CanonicalType("Library/lib6");
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_1 = new CanonicalType(LIBRARY_CANONICAL_1);
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_2 = new CanonicalType(LIBRARY_CANONICAL_2);
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_3 = new CanonicalType(LIBRARY_CANONICAL_3);
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_4 = new CanonicalType(LIBRARY_CANONICAL_4);
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_5 = new CanonicalType(LIBRARY_CANONICAL_5);
+    private static final CanonicalType LIBRARY_CANONICAL_TYPE_6 = new CanonicalType(LIBRARY_CANONICAL_6);
 
     private static final IdType LIBRARY_1_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib1");
     private static final IdType LIBRARY_2_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib2");
@@ -63,16 +63,16 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
     private static final IdType LIBRARY_5_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib5");
     private static final IdType LIBRARY_6_ID_TYPE = new IdType(ResourceType.Library.toString(), "lib6");
 
-    private static final Library LIBRARY_1 = buildLibrary(LIBRARY_1_ID_TYPE, LIBRARY_CANONICAL_1);
-    private static final Library LIBRARY_2 = buildLibrary(LIBRARY_2_ID_TYPE, LIBRARY_CANONICAL_2);
+    private static final Library LIBRARY_1 = buildLibrary(LIBRARY_1_ID_TYPE, LIBRARY_CANONICAL_TYPE_1);
+    private static final Library LIBRARY_2 = buildLibrary(LIBRARY_2_ID_TYPE, LIBRARY_CANONICAL_TYPE_2);
     private static final Library LIBRARY_3 =
-            buildLibrary(LIBRARY_3_ID_TYPE, LIBRARY_CANONICAL_3, DATA_REQUIREMENT_PATIENT);
+            buildLibrary(LIBRARY_3_ID_TYPE, LIBRARY_CANONICAL_TYPE_3, DATA_REQUIREMENT_PATIENT);
     private static final Library LIBRARY_4 =
-            buildLibrary(LIBRARY_4_ID_TYPE, LIBRARY_CANONICAL_4, DATA_REQUIREMENT_ENCOUNTER);
-    private static final Library LIBRARY_5 =
-            buildLibrary(LIBRARY_5_ID_TYPE, LIBRARY_CANONICAL_5, DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_NON_EMPTY);
+            buildLibrary(LIBRARY_4_ID_TYPE, LIBRARY_CANONICAL_TYPE_4, DATA_REQUIREMENT_ENCOUNTER);
+    private static final Library LIBRARY_5 = buildLibrary(
+            LIBRARY_5_ID_TYPE, LIBRARY_CANONICAL_TYPE_5, DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_NON_EMPTY);
     private static final Library LIBRARY_6 = buildLibrary(
-            LIBRARY_6_ID_TYPE, LIBRARY_CANONICAL_6, DATA_REQUIREMENT_ENCOUNTER_CODE_FILTER_CODING_NON_EMPTY);
+            LIBRARY_6_ID_TYPE, LIBRARY_CANONICAL_TYPE_6, DATA_REQUIREMENT_ENCOUNTER_CODE_FILTER_CODING_NON_EMPTY);
 
     private static final Coding CODING_ECA_RULE = new Coding("system", "eca-rule", "display");
 
@@ -141,42 +141,42 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_1)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_1)),
                         PREFETCH_URL_LIST_EMPTY),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_2)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_2)),
                         PREFETCH_URL_LIST_EMPTY),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_3)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_3)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT)),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_4)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_4)),
                         getPrefetchUrlList(PREFETCH_URL_ENCOUNTER)),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_3, LIBRARY_CANONICAL_4)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_3, LIBRARY_CANONICAL_TYPE_4)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT)),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_5)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_5)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_6)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_6)),
                         getPrefetchUrlList(PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE)),
                 Arguments.of(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
-                                .setLibrary(List.of(LIBRARY_CANONICAL_5, LIBRARY_CANONICAL_6)),
+                                .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_5, LIBRARY_CANONICAL_TYPE_6)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)));
     }
 

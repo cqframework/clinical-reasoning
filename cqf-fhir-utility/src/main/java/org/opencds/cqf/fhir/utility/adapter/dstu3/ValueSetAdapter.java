@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
@@ -101,12 +104,11 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         return getExpansion().hasContains();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<IValueSetExpansionContainsAdapter> getExpansionContains() {
         return getExpansion().getContains().stream()
                 .map(ValueSetExpansionContainsAdapter::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @SuppressWarnings("unchecked")
@@ -127,22 +129,21 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         return this.get().getCompose().hasInclude();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<IValueSetConceptSetAdapter> getComposeInclude() {
         return getValueSet().getCompose().getInclude().stream()
                 .map(ValueSetConceptSetAdapter::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public List<String> getValueSetIncludes() {
         return getValueSet().getCompose().getInclude().stream()
-                .map(i -> i.getValueSet())
+                .map(ConceptSetComponent::getValueSet)
                 .flatMap(Collection::stream)
-                .map(c -> c.asStringValue())
+                .map(PrimitiveType::asStringValue)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -180,7 +181,11 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     public void naiveExpand() {
         var expansion = newExpansion().addParameter(createNaiveParameter());
 
-        for (var code : getCodesInCompose(fhirContext, getValueSet())) {
+        final List<Code> codesInCompose = getCodesInCompose(fhirContext, getValueSet());
+        if (codesInCompose == null) {
+            return;
+        }
+        for (var code : codesInCompose) {
             expansion
                     .addContains()
                     .setCode(code.getCode())

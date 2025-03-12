@@ -97,7 +97,10 @@ public class CrR4Config {
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             NpmResourceHolderGetter npmResourceHolderGetter) {
         return rd -> new R4CollectDataService(
-                repositoryFactory.create(rd), measureEvaluationOptions, r4MeasureServiceUtilsFactory.create(rd), npmResourceHolderGetter);
+                repositoryFactory.create(rd),
+                measureEvaluationOptions,
+                r4MeasureServiceUtilsFactory.create(rd),
+                npmResourceHolderGetter);
     }
 
     @Bean

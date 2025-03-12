@@ -17,8 +17,6 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,6 +29,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -67,10 +66,11 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
     interface Validator<T> {
@@ -180,7 +180,6 @@ public class Measure {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4MeasureService service;
 
         When(R4MeasureService service) {
@@ -421,7 +420,7 @@ public class Measure {
                     period.getStart(),
                     String.format(
                             "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodStart), DATE_FORMAT.format(period.getStart())));
+                            formatDate(periodStart), formatDate(period.getStart())));
             return this;
         }
 
@@ -432,7 +431,7 @@ public class Measure {
                     period.getEnd(),
                     String.format(
                             "Expected period start of %s but was: %s",
-                            DATE_FORMAT.format(periodEnd), DATE_FORMAT.format(period.getEnd())));
+                            formatDate(periodEnd), formatDate(period.getEnd())));
             return this;
         }
 
@@ -480,42 +479,42 @@ public class Measure {
             return new SelectedContained(c, this);
         }
 
-        public SelectedContained containedByValue(String theCodeValue) {
+        public SelectedContained containedByValue(String codeValue) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the CodeableConcept value for individual Measure Reports
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
+                    .filter(Observation.class::isInstance)
                     .filter(y -> ((Observation) y)
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(theCodeValue))
+                            .equals(codeValue))
                     .findFirst()
                     .orElseThrow());
         }
 
-        public SelectedContained containedByCoding(String theCodeCoding) {
+        public SelectedContained containedByCoding(String codeCoding) {
             /*
              * SelectedContained will only be useful for Observation resources
              * Explanation: This will retrieve the Observation.Coding.code for Summary Measure Reports, as value then becomes a count
              * Example: "M" for 'Male' gender code
              */
             return this.contained(t -> getContainedResources(t).stream()
-                    .filter(x -> x instanceof Observation)
+                    .filter(Observation.class::isInstance)
                     .filter(y -> ((Observation) y)
                             .getCode()
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(theCodeCoding))
+                            .equals(codeCoding))
                     .findFirst()
                     .orElseThrow());
         }
 
-        private List<Resource> getContainedResources(MeasureReport theMeasureReport) {
-            return ContainedHelper.getAllContainedResources(theMeasureReport);
+        private List<Resource> getContainedResources(MeasureReport measureReport) {
+            return ContainedHelper.getAllContainedResources(measureReport);
         }
 
         public SelectedReport containedObservationsHaveMatchingExtension() {
@@ -541,8 +540,8 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport containedListHasCorrectResourceType(String theResourceType) {
-            var resourceType = ContainedHelper.getAllContainedResources(value()).stream()
+        public SelectedReport containedListHasCorrectResourceType(String resourceType) {
+            var resourceTypeToUse = ContainedHelper.getAllContainedResources(value()).stream()
                     .filter(t -> t.getResourceType().equals(ResourceType.List))
                     .map(x -> (ListResource) x)
                     .findFirst()
@@ -550,15 +549,15 @@ public class Measure {
                     .getEntryFirstRep()
                     .getItem()
                     .getReference();
-            assertTrue(resourceType.contains(theResourceType));
+            assertTrue(resourceTypeToUse.contains(resourceType));
             return this;
         }
 
-        private List<String> getContainedIdsPerResourceType(ResourceType theResourceType) {
+        private List<String> getContainedIdsPerResourceType(ResourceType resourceType) {
             List<String> containedIds = new ArrayList<>();
             List<Resource> resources = ContainedHelper.getAllContainedResources(value());
             for (Resource resource : resources) {
-                if (resource.getResourceType().equals(theResourceType)) {
+                if (resource.getResourceType().equals(resourceType)) {
                     containedIds.add(resource.getId());
                 }
             }
@@ -573,9 +572,9 @@ public class Measure {
          */
         public SelectedReport subjectResultsHaveResourceType(String resourceType) {
             var lists = value().getContained().stream()
-                    .filter(t -> t instanceof ListResource)
+                    .filter(ListResource.class::isInstance)
                     .map(x -> (ListResource) x)
-                    .collect(Collectors.toList());
+                    .toList();
             for (ListResource list : lists) {
                 // all contained lists have correct ResourceType
                 var size = list.getEntry().size();
@@ -617,46 +616,63 @@ public class Measure {
             return this;
         }
 
-        private int getPopulationCount(MeasureReport theMeasureReport, String theSubjectResultId) {
+        private int getPopulationCount(MeasureReport measureReport, String subjectResultId) {
             // find population with reference to contained List resource
-            var groups = theMeasureReport.getGroup();
+            var groups = measureReport.getGroup();
             for (MeasureReportGroupComponent group : groups) {
-                var population = group.getPopulation().stream()
-                        .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
-                        .filter(x -> x.getSubjectResults().getReference().contains(theSubjectResultId))
-                        .findFirst()
-                        .orElse(null);
-                if (population == null && group.getStratifier() != null) {
-                    var stratifiers = group.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()
-                                        && stratumPopulation
-                                                .getSubjectResults()
-                                                .getReference()
-                                                .contains(theSubjectResultId)) {
-                                    return stratumPopulation.getCount();
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // population != null
-                    return population.getCount();
+                final Integer stratumPopulation = getPopulationCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
                 }
             }
             // if reached then no match found
             return 0;
         }
 
-        private int getListEntrySize(MeasureReport theMeasureReport, String theResourceId) {
-            var entry = (ListResource) ContainedHelper.getAllContainedResources(theMeasureReport).stream()
+        @Nullable
+        private Integer getPopulationCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var population = group.getPopulation().stream()
+                    .filter(MeasureReportGroupPopulationComponent::hasSubjectResults)
+                    .filter(x -> x.getSubjectResults().getReference().contains(subjectResultId))
+                    .findFirst()
+                    .orElse(null);
+            if (population == null && group.getStratifier() != null) {
+                final Integer stratumPopulation = getStratumCount(subjectResultId, group);
+                if (stratumPopulation != null) {
+                    return stratumPopulation;
+                }
+            } else if (population != null) {
+                return population.getCount();
+            }
+            return null;
+        }
+
+        @Nullable
+        private Integer getStratumCount(String subjectResultId, MeasureReportGroupComponent group) {
+            var stratifiers = group.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()
+                                && stratumPopulation
+                                        .getSubjectResults()
+                                        .getReference()
+                                        .contains(subjectResultId)) {
+                            return stratumPopulation.getCount();
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private int getListEntrySize(MeasureReport measureReport, String resourceId) {
+            var entry = (ListResource) ContainedHelper.getAllContainedResources(measureReport).stream()
                     .filter(t -> t.getResourceType().equals(ResourceType.List))
-                    .filter(x -> x.getId().equals(theResourceId))
+                    .filter(x -> x.getId().equals(resourceId))
                     .findAny()
                     .orElseThrow();
             return entry.getEntry().size();
@@ -668,32 +684,38 @@ public class Measure {
             var groupPops = value().getGroup();
             for (MeasureReportGroupComponent groupPop : groupPops) {
                 // standard population elements
-                var pops = groupPop.getPopulation();
-                for (MeasureReportGroupPopulationComponent pop : pops) {
-                    if (pop.getSubjectResults().hasReference()) {
-                        refs.add(pop.getSubjectResults().getReference());
-                    }
+                subjectResultReference(groupPop, refs);
+            }
+            return refs;
+        }
+
+        private void subjectResultReference(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var pops = groupPop.getPopulation();
+            for (MeasureReportGroupPopulationComponent pop : pops) {
+                if (pop.getSubjectResults().hasReference()) {
+                    refs.add(pop.getSubjectResults().getReference());
                 }
-                // stratifier results have references too
-                if (groupPop.getStratifier() != null) {
-                    var stratifiers = groupPop.getStratifier();
-                    for (MeasureReportGroupStratifierComponent strat : stratifiers) {
-                        var stratifierGroups = strat.getStratum();
-                        for (StratifierGroupComponent stratGroup : stratifierGroups) {
-                            var stratumPops = stratGroup.getPopulation();
-                            for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
-                                // empty results could omit subjectResult reference
-                                if (stratumPopulation.getSubjectResults().hasReference()) {
-                                    refs.add(stratumPopulation
-                                            .getSubjectResults()
-                                            .getReference());
-                                }
-                            }
+            }
+            // stratifier results have references too
+            if (groupPop.getStratifier() != null) {
+                subjectResultReferenceStratifier(groupPop, refs);
+            }
+        }
+
+        private void subjectResultReferenceStratifier(MeasureReportGroupComponent groupPop, List<String> refs) {
+            var stratifiers = groupPop.getStratifier();
+            for (MeasureReportGroupStratifierComponent strat : stratifiers) {
+                var stratifierGroups = strat.getStratum();
+                for (StratifierGroupComponent stratGroup : stratifierGroups) {
+                    var stratumPops = stratGroup.getPopulation();
+                    for (StratifierGroupPopulationComponent stratumPopulation : stratumPops) {
+                        // empty results could omit subjectResult reference
+                        if (stratumPopulation.getSubjectResults().hasReference()) {
+                            refs.add(stratumPopulation.getSubjectResults().getReference());
                         }
                     }
                 }
             }
-            return refs;
         }
 
         public SelectedReport hasContainedOperationOutcome() {
@@ -709,6 +731,14 @@ public class Measure {
                     .map(y -> (OperationOutcome) y)
                     .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
             return this;
+        }
+
+        private static String formatDate(Date javaUtilDate) {
+            return javaUtilDate
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime()
+                    .format(FORMATTER);
         }
     }
 
@@ -758,20 +788,20 @@ public class Measure {
             return this;
         }
 
-        public SelectedContained observationHasCode(String theCode) {
+        public SelectedContained observationHasCode(String code) {
             var obs = (Observation) value();
-            assertEquals(theCode, obs.getCode().getCoding().get(0).getCode());
+            assertEquals(code, obs.getCode().getCoding().get(0).getCode());
             return this;
         }
 
-        public SelectedContained observationCount(int theCount) {
+        public SelectedContained observationCount(int count) {
             var obs = (Observation) value();
-            assertEquals(theCount, obs.getValueIntegerType().getValue());
+            assertEquals(count, obs.getValueIntegerType().getValue());
             return this;
         }
     }
 
-    static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
+    public static class SelectedGroup extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedReport parent) {
             super(value, parent);

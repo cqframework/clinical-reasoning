@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ExtensionBuildersTests {
@@ -57,7 +58,7 @@ class ExtensionBuildersTests {
                 () -> ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R4, "subject"));
 
         var r4Ext = (org.hl7.fhir.r4.model.Extension)
-                ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R4, "user", "PractitionerRole");
+                ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R4, "user", List.of("PractitionerRole"));
         assertNull(r4Ext.getValue());
         assertTrue(r4Ext.getExtensionByUrl("name").getValue() instanceof org.hl7.fhir.r4.model.Coding);
         assertTrue(r4Ext.getExtensionByUrl("type").getValue() instanceof org.hl7.fhir.r4.model.CodeType);

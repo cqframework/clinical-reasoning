@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("squid:S2699")
 class MultipleRateMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("FHIR347");

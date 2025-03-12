@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("squid:S2699")
 class Dstu3MeasureProcessorTest {
     @Test
     void exm105_fullSubjectId() {

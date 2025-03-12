@@ -117,22 +117,6 @@ class Dstu3MeasureDefBuilderTest {
     }
 
     @Test
-    void defBuilderImpNotationEmpty() {
-        var measure = new Measure();
-        measure.setId("123");
-        measure.setImprovementNotation(INCREASE);
-        measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
-        var grp = measure.addGroup().addPopulation();
-        grp.setId("pop-id");
-        grp.getCode().getCodingFirstRep().setCode(MeasurePopulationType.INITIALPOPULATION.toCode());
-        // no extension set to define basis of Measure
-        var def = BUILDER.build(measure);
-        assertFalse(def.groups().get(0).isGroupImprovementNotation());
-        assertEquals(INCREASE, def.groups().get(0).getImprovementNotation().code());
-        assertTrue(def.groups().get(0).isIncreaseImprovementNotation());
-    }
-
-    @Test
     void defBuilderMeasureScoring() {
         var measure = new Measure();
         measure.setId("123");

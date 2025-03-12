@@ -152,17 +152,6 @@ public class LibraryEngine {
             String language,
             String libraryToBeEvaluated,
             IBaseParameters parameters,
-            IBaseBundle bundle) {
-        return getExpressionResult(
-                subjectId, expression, language, libraryToBeEvaluated, parameters, bundle, null, null);
-    }
-
-    public List<IBase> getExpressionResult(
-            String subjectId,
-            String expression,
-            String language,
-            String libraryToBeEvaluated,
-            IBaseParameters parameters,
             IBaseBundle bundle,
             IBase contextParameter,
             IBase resourceParameter) {
@@ -176,8 +165,8 @@ public class LibraryEngine {
             case "text/fhirpath":
                 var libraries = new ArrayList<Pair<String, String>>();
                 if (!StringUtils.isBlank(libraryToBeEvaluated)) {
-                    libraries.add(new ImmutablePair<String, String>(
-                            libraryToBeEvaluated, Canonicals.getIdPart(libraryToBeEvaluated)));
+                    libraries.add(
+                            new ImmutablePair<>(libraryToBeEvaluated, Canonicals.getIdPart(libraryToBeEvaluated)));
                 }
                 parametersResult = this.evaluateExpression(
                         expression, parameters, subjectId, libraries, bundle, contextParameter, resourceParameter);
@@ -262,11 +251,6 @@ public class LibraryEngine {
         }
 
         return returnValues;
-    }
-
-    public List<IBase> resolveExpression(
-            String patientId, CqfExpression expression, IBaseParameters params, IBaseBundle bundle) {
-        return resolveExpression(patientId, expression, params, bundle, null, null);
     }
 
     public List<IBase> resolveExpression(

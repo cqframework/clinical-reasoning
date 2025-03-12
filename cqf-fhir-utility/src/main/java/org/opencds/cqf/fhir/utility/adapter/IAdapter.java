@@ -32,6 +32,10 @@ public interface IAdapter<T extends IBase> {
      */
     T get();
 
+    public FhirContext fhirContext();
+
+    public ModelResolver getModelResolver();
+
     public default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         try {
             getModelResolver().setValue(get(), "extension", null);
@@ -70,10 +74,6 @@ public interface IAdapter<T extends IBase> {
     public default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(String url) {
         return getExtensionsByUrl(get(), url);
     }
-
-    public FhirContext fhirContext();
-
-    public ModelResolver getModelResolver();
 
     @SuppressWarnings("unchecked")
     public default <E extends IBaseExtension<?, ?>> List<E> getExtension(IBase base) {

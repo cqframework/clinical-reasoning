@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
+@SuppressWarnings({"java:S2699"})
 class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
 
@@ -885,12 +886,7 @@ class MultiMeasureServiceTest {
                 .reporter("payer")
                 .evaluate();
 
-        assertThrows(IllegalArgumentException.class, () -> when.then()
-                .hasMeasureReportCount(1)
-                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
-                .hasReportType("Summary")
-                .hasSubjectReference("Practitioner/tester")
-                .hasReporter("Organization/payer"));
+        assertThrows(IllegalArgumentException.class, when::then);
     }
 
     @Test
@@ -925,12 +921,7 @@ class MultiMeasureServiceTest {
                 .reporter("Patient/male-2022")
                 .evaluate();
 
-        assertThrows(IllegalArgumentException.class, () -> when.then()
-                .hasMeasureReportCount(1)
-                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
-                .hasReportType("Summary")
-                .hasSubjectReference("Practitioner/tester")
-                .hasReporter("Patient/male-2022"));
+        assertThrows(IllegalArgumentException.class, when::then);
     }
 
     // This test is effectively a sanity test to ensure that Organization subjects

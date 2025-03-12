@@ -7,13 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import jakarta.annotation.Nullable;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
-public class MeasureProcessorCQLParameterTest {
+class MeasureProcessorCQLParameterTest {
 
     private static Stream<Arguments> simpleParametersParams() {
         return Stream.of(
@@ -31,7 +30,6 @@ public class MeasureProcessorCQLParameterTest {
                 Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "SimpleCqlParamsEncounter1")), 1));
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("simpleParametersParams")
     void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {
@@ -65,13 +63,14 @@ public class MeasureProcessorCQLParameterTest {
         assertTrue(population.getCode().getCodingFirstRep().hasCode());
         String code = population.getCode().getCodingFirstRep().getCode();
         switch (code) {
-            case "initial-population":
-            case "denominator":
+            case "initial-population", "denominator":
                 assertEquals(1, population.getCount());
                 break;
             case "numerator":
                 assertEquals(expectedMeasureCount, population.getCount());
                 break;
+            default:
+                throw new IllegalArgumentException("Unexpected population code: " + code);
         }
     }
 }

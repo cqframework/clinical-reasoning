@@ -1,32 +1,37 @@
 package org.opencds.cqf.fhir.cr.visitor.r5;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.booleanPart;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
@@ -37,16 +42,21 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
@@ -108,10 +118,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
         // resolvable resources get descriptors
         for (final var dependency : dependenciesOnReleasedArtifact) {
             if (dependency.getResource().equals("https://madie.cms.gov/Library/BreastCancerScreeningFHIR|0.0.001")) {
@@ -178,10 +188,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(71, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
@@ -231,10 +241,10 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .collect(Collectors.toList());
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .collect(Collectors.toList());
+                .toList();
 
         // this should be 73, but we're not handling contained reference correctly
         assertEquals(72, dependenciesOnReleasedArtifact.size());
@@ -282,12 +292,12 @@ class ReleaseVisitorTests {
                 "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1");
         var dependenciesOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
+                .map(RelatedArtifact::getResource)
+                .toList();
         var componentsOnReleasedArtifact = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getType().equals(RelatedArtifact.RelatedArtifactType.COMPOSEDOF))
-                .map(ra -> ra.getResource())
-                .collect(Collectors.toList());
+                .map(RelatedArtifact::getResource)
+                .toList();
         // check that the released artifact has all the required dependencies
         for (var dependency : expectedErsdTestArtifactDependencies) {
             assertTrue(dependenciesOnReleasedArtifact.contains(dependency));
@@ -410,8 +420,8 @@ class ReleaseVisitorTests {
 
         var warningMessages = logger.getLoggingEvents().stream()
                 .filter(event -> event.getLevel().equals(Level.WARN))
-                .map(event -> event.getMessage())
-                .collect(Collectors.toList());
+                .map(LoggingEvent::getMessage)
+                .toList();
 
         // SHOULD warn if the root is not experimental
         assertTrue(warningMessages.stream()
@@ -423,33 +433,33 @@ class ReleaseVisitorTests {
 
     @Test
     void releaseResource_propagate_effective_period() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+        var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-no-child-effective-period.json"));
         repo.transaction(bundle);
-        String effectivePeriodToPropagate = "2020-12-11";
+        var effectivePeriodToPropagate = "2020-12-11";
 
-        Parameters params =
+        var params =
                 parameters(part("version", new StringType("1.2.7")), part("versionBehavior", new CodeType("default")));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
         assertNotNull(returnResource);
         MetadataResourceHelper.forEachMetadataResource(
                 returnResource.getEntry(),
                 resource -> {
                     assertNotNull(resource);
-                    if (!resource.getClass().getSimpleName().equals("ValueSet")) {
-                        IKnowledgeArtifactAdapter adapter = new AdapterFactory().createLibrary(library);
+                    if (!(resource instanceof ValueSet)) {
+                        var adapter = new AdapterFactory().createLibrary(library);
                         assertTrue(((Period) adapter.getEffectivePeriod()).hasStart());
-                        Date start = ((Period) adapter.getEffectivePeriod()).getStart();
-                        Calendar calendar = new GregorianCalendar();
+                        var start = ((Period) adapter.getEffectivePeriod()).getStart();
+                        var calendar = new GregorianCalendar();
                         calendar.setTime(start);
                         int year = calendar.get(Calendar.YEAR);
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
-                        String startString = year + "-" + month + "-" + day;
+                        var startString = year + "-" + month + "-" + day;
                         assertEquals(startString, effectivePeriodToPropagate);
                     }
                 },
@@ -457,44 +467,91 @@ class ReleaseVisitorTests {
     }
 
     @Test
-    void releaseResource_latestFromTx_NotSupported_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+    void release_latest_from_tx_server_sets_versions() {
+        // SpecificationLibrary - root is experimental but HAS experimental children
+        final var leafOid = "2.16.840.1.113762.1.4.1146.6";
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
-
-        String actualErrorMessage = "";
-
-        Parameters params = parameters(
-                part("version", "1.2.3"),
-                part("versionBehavior", new CodeType("default")),
-                part("latestFromTxServer", new BooleanType(true)));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+        removeVersionsFromLibraryAndGrouperAndUpdate(repo, leafOid);
+        var latestVSet = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.6"));
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
-        try {
-            libraryAdapter.accept(releaseVisitor, params);
-        } catch (Exception e) {
-            actualErrorMessage = e.getMessage();
-        }
-        assertTrue(actualErrorMessage.contains("not yet implemented"));
+        var endpoint = createEndpoint(authoritativeSource);
+
+        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getLatestNonDraftResource(any(), any(), any())).thenReturn(Optional.of(latestVSet));
+        var releaseVisitor = new ReleaseVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(
+                part("version", new StringType("1.2.7")),
+                part("versionBehavior", new CodeType("default")),
+                booleanPart("latestFromTxServer", true),
+                part("terminologyEndpoint", (org.hl7.fhir.r5.model.Endpoint) endpoint.get()));
+        libraryAdapter.accept(releaseVisitor, params);
+        var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
+        var include = grouper.getCompose().getIncludeFirstRep();
+        assertNotNull(Canonicals.getVersion(include.getValueSet().get(0).getValue()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(include.getValueSet().get(0).getValue()));
+        var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
+        var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains(leafOid))
+                .findAny();
+        assertTrue(leafRelatedArtifact.isPresent());
+        assertNotNull(Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
+        assertEquals(
+                latestVSet.getVersion(),
+                Canonicals.getVersion(leafRelatedArtifact.get().getResource()));
+    }
+
+    private IEndpointAdapter createEndpoint(String authoritativeSource) {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R5);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r5.model.Endpoint());
+        endpoint.setAddress(authoritativeSource);
+        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
+                Constants.VSAC_USERNAME, new org.hl7.fhir.r5.model.StringType("username")));
+        endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
+                Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
+        return endpoint;
+    }
+
+    void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
+        // remove versions from references
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
+        library.getRelatedArtifact().forEach(ra -> {
+            if (ra.getResource().contains(leafOid)) {
+                ra.setResource(Canonicals.getUrl(ra.getResource()));
+            }
+        });
+        var grouper = repo.read(ValueSet.class, new IdType("ValueSet/dxtc"));
+        grouper.getCompose().getInclude().forEach(include -> {
+            var valueSetCanonical = include.getValueSet().get(0);
+            if (valueSetCanonical.getValue().contains(leafOid)) {
+                valueSetCanonical.setValue(Canonicals.getUrl(valueSetCanonical.getValue()));
+            }
+        });
+        repo.update(library);
+        repo.update(grouper);
     }
 
     @Test
     void release_missing_approvalDate_validation_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+        var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-release-missing-approvalDate.json"));
         repo.transaction(bundle);
 
-        String versionData = "1.2.3";
-        String actualErrorMessage = "";
+        var versionData = "1.2.3";
+        var actualErrorMessage = "";
 
-        Parameters params1 = parameters(part("version", versionData), part("versionBehavior", new CodeType("default")));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
+        var params1 = parameters(part("version", versionData), part("versionBehavior", new CodeType("default")));
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
         try {
             libraryAdapter.accept(releaseVisitor, params1);
         } catch (Exception e) {
@@ -505,16 +562,16 @@ class ReleaseVisitorTests {
 
     @Test
     void release_version_format_test() {
-        Bundle bundle = (Bundle) jsonParser.parseResource(
+        var bundle = (Bundle) jsonParser.parseResource(
                 ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
-        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;
-            Parameters params = parameters(
+            var params = parameters(
                     part("version", new StringType(version)), part("versionBehavior", new CodeType("force")));
             try {
                 libraryAdapter.accept(releaseVisitor, params);
@@ -594,9 +651,7 @@ class ReleaseVisitorTests {
                     part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType(versionBehaviour)));
             try {
                 libraryAdapter.accept(releaseVisitor, params);
-            } catch (FHIRException e) {
-                maybeException = e;
-            } catch (UnprocessableEntityException e) {
+            } catch (FHIRException | UnprocessableEntityException e) {
                 maybeException = e;
             }
             assertNotNull(maybeException);
@@ -680,6 +735,8 @@ class ReleaseVisitorTests {
         var releaseVisitor = new ReleaseVisitor(repo);
         var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
+        var retiredLeaf = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.77-old"))
+                .copy();
         var testLibrary = originalLibrary.copy();
         var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
         var params =
@@ -691,10 +748,19 @@ class ReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         var releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        var maybeLeafRA = releasedLibrary.getRelatedArtifact().stream()
+        var maybeActiveLeafRA = releasedLibrary.getRelatedArtifact().stream()
                 .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.6"))
                 .findFirst();
-        assertTrue(maybeLeafRA.isPresent());
-        assertTrue(Canonicals.getVersion(maybeLeafRA.get().getResource()).equals("1.0.1"));
+        assertTrue(maybeActiveLeafRA.isPresent());
+        assertEquals("1.0.1", Canonicals.getVersion(maybeActiveLeafRA.get().getResource()));
+        var maybeRetiredLeafRA = releasedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.77"))
+                .findFirst();
+        assertTrue(maybeRetiredLeafRA.isPresent());
+        assertEquals(
+                retiredLeaf.getUrl() + "|" + retiredLeaf.getVersion(),
+                maybeRetiredLeafRA.get().getResource());
+        assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
+        assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
     }
 }

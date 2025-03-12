@@ -1,0 +1,97 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "extract-defn-walkthrough-10",
+  "status": "in-progress",
+  "questionnaire": "https://fhir.forms-lab.com/Questionnaire/extract-defn-walkthrough-10",
+  "item": [
+    {
+      "linkId": "assessment.Demographics.sectionDemographics.Patient",
+      "text": "Patient",
+      "item": [
+        {
+          "linkId": "assessment.Demographics.sectionDemographics.Patient.name",
+          "text": "name",
+          "item": [
+            {
+              "linkId": "first-name",
+              "text": "first name",
+              "answer": [
+                {
+                  "valueString": "test"
+                },
+                {
+                  "valueString": "test2"
+                }
+              ]
+            },
+            {
+              "linkId": "family-name",
+              "text": "last",
+              "answer": [
+                {
+                  "valueString": "family"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "linkId": "nz-nhi",
+          "text": "nhi",
+          "answer": [
+            {
+              "valueString": "123"
+            }
+          ]
+        },
+        {
+          "linkId": "nz-dhb",
+          "text": "District Health Board",
+          "answer": [
+            {
+              "valueString": "dasdasd"
+            }
+          ]
+        },
+        {
+          "linkId": "patient-gender",
+          "text": "gender",
+          "answer": [
+            {
+              "valueCoding": {
+                "system": "http://example.com/fhir/CodeSystem/example",
+                "code": "male",
+                "display": "Male"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "birth-date",
+          "text": "birthDate",
+          "answer": [
+            {
+              "valueDate": "1912-12-12"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "code": "csiro:generated"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Peter James Chalmers"
+  },
+  "author": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "authored": "2024-11-01T21:28:18.432Z"
+}

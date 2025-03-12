@@ -48,7 +48,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class MultiMeasure {
+@SuppressWarnings("squid:S1135")
+class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface
@@ -159,7 +160,6 @@ public class MultiMeasure {
     }
 
     public static class When {
-        // private final R4MeasureProcessor processor;
         private final R4MultiMeasureService service;
 
         When(R4MultiMeasureService service) {
@@ -285,7 +285,7 @@ public class MultiMeasure {
             var reports = report().getEntry().stream()
                     .map(t -> (MeasureReport) t.getResource())
                     .filter(x -> x.getMeasure().equals(measureUrl))
-                    .collect(Collectors.toList());
+                    .toList();
             var msg = String.format(
                     "measureReport count: %s, does not match for measure url: %s", reports.size(), measureUrl);
             assertEquals(count, reports.size(), msg);
@@ -303,7 +303,7 @@ public class MultiMeasure {
                     g.getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
-                            .collect(Collectors.toList()),
+                            .toList(),
                     measureUrl));
         }
 

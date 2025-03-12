@@ -17,47 +17,47 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 class ParametersParameterComponentAdapter implements IParametersParameterComponentAdapter {
 
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-    private final Parameters.ParametersParameterComponent parametersParametersComponent;
+    private final Parameters.ParametersParameterComponent parametersParameterComponent;
     private final ModelResolver modelResolver;
 
-    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParametersComponent) {
-        if (parametersParametersComponent == null) {
-            throw new IllegalArgumentException("parametersParametersComponent can not be null");
+    public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParameterComponent) {
+        if (parametersParameterComponent == null) {
+            throw new IllegalArgumentException("parametersParameterComponent can not be null");
         }
 
-        if (!parametersParametersComponent.fhirType().equals("Parameters.parameter")) {
+        if (!parametersParameterComponent.fhirType().equals("Parameters.parameter")) {
             throw new IllegalArgumentException(
-                    "element passed as parametersParametersComponent argument is not a ParametersParameterComponent Element");
+                    "element passed as parametersParameterComponent argument is not a ParametersParameterComponent Element");
         }
 
-        this.parametersParametersComponent = (ParametersParameterComponent) parametersParametersComponent;
+        this.parametersParameterComponent = (ParametersParameterComponent) parametersParameterComponent;
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }
 
     @Override
     public IBaseBackboneElement get() {
-        return this.parametersParametersComponent;
+        return this.parametersParameterComponent;
     }
 
     @Override
     public String getName() {
-        return this.parametersParametersComponent.getName();
+        return this.parametersParameterComponent.getName();
     }
 
     @Override
     public void setName(String name) {
-        this.parametersParametersComponent.setName(name);
+        this.parametersParameterComponent.setName(name);
     }
 
     @Override
     public List<IBaseBackboneElement> getPart() {
-        return this.parametersParametersComponent.getPart().stream().collect(Collectors.toList());
+        return this.parametersParameterComponent.getPart().stream().collect(Collectors.toList());
     }
 
     @Override
     public List<IBaseDatatype> getPartValues(String name) {
-        return this.parametersParametersComponent.getPart().stream()
+        return this.parametersParameterComponent.getPart().stream()
                 .filter(p -> p.getName().equals(name))
                 .map(p -> p.getValue())
                 .collect(Collectors.toList());
@@ -65,54 +65,54 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
 
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.parametersParametersComponent.setPart(parametersParameterComponents.stream()
+        this.parametersParameterComponent.setPart(parametersParameterComponents.stream()
                 .map(x -> (ParametersParameterComponent) x)
                 .collect(Collectors.toList()));
     }
 
     @Override
     public IBaseBackboneElement addPart() {
-        return this.parametersParametersComponent.addPart();
+        return this.parametersParameterComponent.addPart();
     }
 
     @Override
     public boolean hasPart() {
-        return this.parametersParametersComponent.hasPart();
+        return this.parametersParameterComponent.hasPart();
     }
 
     @Override
     public boolean hasResource() {
-        return this.parametersParametersComponent.hasResource();
+        return this.parametersParameterComponent.hasResource();
     }
 
     @Override
     public IBaseResource getResource() {
-        return this.parametersParametersComponent.getResource();
+        return this.parametersParameterComponent.getResource();
     }
 
     @Override
     public void setResource(IBaseResource resource) {
-        this.parametersParametersComponent.setResource((Resource) resource);
+        this.parametersParameterComponent.setResource((Resource) resource);
     }
 
     @Override
     public boolean hasValue() {
-        return this.parametersParametersComponent.hasValue();
+        return this.parametersParameterComponent.hasValue();
     }
 
     @Override
     public boolean hasPrimitiveValue() {
-        return this.parametersParametersComponent.hasPrimitiveValue();
+        return this.parametersParameterComponent.hasPrimitiveValue();
     }
 
     @Override
     public void setValue(IBaseDatatype value) {
-        this.parametersParametersComponent.setValue((Type) value);
+        this.parametersParameterComponent.setValue((Type) value);
     }
 
     @Override
     public IBaseDatatype getValue() {
-        return this.parametersParametersComponent.getValue();
+        return this.parametersParameterComponent.getValue();
     }
 
     @Override

@@ -25,7 +25,7 @@
             ]
           },
           "resource": {
-            "reference": "Task/careplan-activity"
+            "reference": "#careplan-activity"
           }
         }
       ]
@@ -116,7 +116,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#RequestGroup/AncVisit-PlanDefinition"
+        "reference": "#AncVisit-PlanDefinition"
       }
     }
   ]

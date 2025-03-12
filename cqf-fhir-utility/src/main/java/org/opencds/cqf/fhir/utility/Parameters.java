@@ -493,7 +493,7 @@ public class Parameters {
         checkNotNull(parameters);
         checkNotNull(name);
 
-        var ctx = parameters.getStructureFhirVersionEnum().newContextCached();
+        var ctx = FhirContext.forCached(parameters.getStructureFhirVersionEnum());
         var child = getParameterChild(ctx);
 
         var values = child.getAccessor().getValues(parameters);

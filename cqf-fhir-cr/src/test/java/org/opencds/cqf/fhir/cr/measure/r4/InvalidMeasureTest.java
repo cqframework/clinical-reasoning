@@ -27,7 +27,7 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("LibraryUnavailable")
                 .evaluate();
-        assertThrows(ResourceNotFoundException.class, () -> when.then());
+        assertThrows(ResourceNotFoundException.class, when::then);
     }
 
     @Test
@@ -36,7 +36,7 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("LibraryMissingContent")
                 .evaluate();
-        var e = assertThrows(IllegalStateException.class, () -> when.then());
+        var e = assertThrows(IllegalStateException.class, when::then);
         assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
     }
 }

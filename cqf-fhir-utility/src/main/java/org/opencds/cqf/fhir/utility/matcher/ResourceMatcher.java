@@ -125,9 +125,9 @@ public interface ResourceMatcher {
             for (var r : pathResult) {
                 if (param instanceof ReferenceParam) {
                     match = isMatchReference(param, r);
-                } else if (param instanceof DateParam) {
-                    match = isMatchDate((DateParam) param, r);
-                } else if (param instanceof TokenParam) {
+                } else if (param instanceof DateParam date) {
+                    match = isMatchDate(date, r);
+                } else if (param instanceof TokenParam token) {
                     // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of
                     // the value of the system property
                     // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and
@@ -136,15 +136,15 @@ public interface ResourceMatcher {
                     // Coding/Identifier has no system property
                     // [parameter]=[system]|: any element where the value of [system] matches the system property of the
                     // Identifier or Coding
-                    match = isMatchToken((TokenParam) param, r);
+                    match = applyModifiers(isMatchToken(token, r), token);
                     if (!match) {
                         var codes = getCodes(r);
-                        match = isMatchCoding((TokenParam) param, r, codes);
+                        match = isMatchCoding(token, r, codes);
                     }
-                } else if (param instanceof UriParam) {
-                    match = isMatchUri((UriParam) param, r);
-                } else if (param instanceof StringParam) {
-                    match = isMatchString((StringParam) param, r);
+                } else if (param instanceof UriParam uri) {
+                    match = isMatchUri(uri, r);
+                } else if (param instanceof StringParam string) {
+                    match = isMatchString(string, r);
                 } else {
                     throw new NotImplementedException("Resource matching not implemented for search params of type "
                             + param.getClass().getSimpleName());
@@ -157,6 +157,16 @@ public interface ResourceMatcher {
         }
 
         return false;
+    }
+
+    private static boolean applyModifiers(boolean input, TokenParam token) {
+        if (token.getModifier() != null && token.getModifier() != TokenParamModifier.NOT) {
+            throw new NotImplementedException("Only the NOT modifier is supported on tokens at this time");
+        }
+        if (token.getModifier() == TokenParamModifier.NOT) {
+            return !input;
+        }
+        return input;
     }
 
     default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {

@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-public class MeasureMultipleSdeTest {
+class MeasureMultipleSdeTest {
     private static final Given GIVEN_MULTIPLE_SDE_MEASURE_REPO =
             Measure.given().repositoryFor("BreastCancerScreeningFHIR");
 

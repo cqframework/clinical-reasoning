@@ -51,12 +51,20 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(Repository repository) {
-        this(repository, null);
+        this(repository, null, null);
     }
 
-    public PackageVisitor(Repository repository, IValueSetExpansionCache cache) {
+    public PackageVisitor(Repository repository, TerminologyServerClient client) {
+        this(repository, client, null);
+    }
+
+    public PackageVisitor(Repository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
         super(repository, cache);
-        terminologyServerClient = new TerminologyServerClient(fhirContext());
+        if (client == null) {
+            terminologyServerClient = new TerminologyServerClient(fhirContext());
+        } else {
+            terminologyServerClient = client;
+        }
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
         setupResourceTypes();
     }
@@ -108,9 +116,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
         Optional<String> artifactRoute = VisitorHelper.getStringParameter("artifactRoute", packageParameters);
         Optional<String> endpointUri = VisitorHelper.getStringParameter("endpointUri", packageParameters);
-        Optional<IBaseResource> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters);
-        Optional<IBaseResource> terminologyEndpoint =
-                VisitorHelper.getResourceParameter("terminologyEndpoint", packageParameters);
+        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters)
+                .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
+        Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
+                        "terminologyEndpoint", packageParameters)
+                .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
         Optional<Integer> count = VisitorHelper.getIntegerParameter("count", packageParameters);
         Optional<Integer> offset = VisitorHelper.getIntegerParameter("offset", packageParameters);
@@ -157,7 +167,14 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
-            recursiveGather(adapter, packagedResources, capability, include, versionTuple);
+            recursiveGather(
+                    adapter,
+                    packagedResources,
+                    capability,
+                    include,
+                    versionTuple,
+                    terminologyEndpoint.orElse(null),
+                    terminologyServerClient);
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
@@ -174,7 +191,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // what is dependency, where did it originate? potentially the package?
     }
 
-    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IBaseResource> terminologyEndpoint) {
+    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IEndpointAdapter> terminologyEndpoint) {
         var expansionParams = newParameters(fhirContext());
         var rootSpecificationLibrary = getRootSpecificationLibrary(packagedBundle);
         if (rootSpecificationLibrary != null) {
@@ -189,7 +206,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             }
         }
         var params = (IParametersAdapter) createAdapterForResource(expansionParams);
-        var expandedList = new ArrayList<String>();
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals("ValueSet"))
@@ -199,6 +215,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
         var missingInCache = new ArrayList<>(valueSets);
+        var expandedList = new ArrayList<String>();
         if (expansionCache.isPresent()) {
             var startCache = (new Date()).getTime();
             valueSets.forEach(v -> {
@@ -212,18 +229,12 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             });
             var elapsed = String.valueOf(((new Date()).getTime() - startCache) / 1000);
-            myLogger.info("retrieved cached ValueSet Expansions in: {}s", elapsed);
+            myLogger.info("retrieved {} cached ValueSet Expansions in: {}s", expandedList.size(), elapsed);
         }
         missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();
             var expansionStartTime = new Date().getTime();
-            expandHelper.expandValueSet(
-                    valueSet,
-                    params,
-                    terminologyEndpoint.map(e -> (IEndpointAdapter) createAdapterForResource(e)),
-                    valueSets,
-                    expandedList,
-                    new Date());
+            expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
             var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
             myLogger.info("Expanded {} in {}s", url, elapsed);
             if (expansionCache.isPresent()) {
@@ -232,7 +243,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         });
     }
 
-    protected void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
+    public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
         // if not, set type = transaction
         // special case of count = 0 -> set type = searchset so we can display bundle.total
@@ -261,7 +272,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
      * @param offset the number of resources to skip beginning from the start of the bundle (starts from 1)
      * @param bundle the bundle to page
      */
-    protected void pageBundleBasedOnCountAndOffset(
+    public static void pageBundleBasedOnCountAndOffset(
             Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
         if (offset.isPresent()) {
             var entries = BundleHelper.getEntry(bundle);

@@ -56,7 +56,7 @@
   "activity": [
     {
       "reference": {
-        "reference": "#RequestGroup/CdsHooksMultipleActions-PlanDefinition-1.0.0"
+        "reference": "#CdsHooksMultipleActions-PlanDefinition-1.0.0"
       }
     }
   ]

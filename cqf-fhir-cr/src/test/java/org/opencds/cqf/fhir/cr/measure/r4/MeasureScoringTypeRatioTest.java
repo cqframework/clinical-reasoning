@@ -17,7 +17,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 /**
  * the purpose of this test is to validate the output and required fields for evaluating MeasureScoring type Ratio
  */
-public class MeasureScoringTypeRatioTest {
+@SuppressWarnings("squid:S2699")
+class MeasureScoringTypeRatioTest {
     // req'd populations
     // exception works
     // exclusion works

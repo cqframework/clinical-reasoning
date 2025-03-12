@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.search;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +67,12 @@ public class Searches {
         return builder().withTokenParam("status", status).build();
     }
 
+    public static Map<String, List<IQueryParameterType>> exceptStatus(String status) {
+        return builder()
+                .withModifiedTokenParam("status", TokenParamModifier.NOT, status)
+                .build();
+    }
+
     public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
         if (version == null || version.isEmpty()) {
             return builder().withStringParam("name", name).build();
@@ -99,6 +106,17 @@ public class Searches {
                 values = new HashMap<>();
             }
             values.put(name, Collections.singletonList(new TokenParam(value)));
+
+            return this;
+        }
+
+        public SearchBuilder withModifiedTokenParam(String name, TokenParamModifier modifier, String value) {
+            if (values == null) {
+                values = new HashMap<>();
+            }
+            var token = new TokenParam(value);
+            token.setModifier(modifier);
+            values.put(name, Collections.singletonList(token));
 
             return this;
         }

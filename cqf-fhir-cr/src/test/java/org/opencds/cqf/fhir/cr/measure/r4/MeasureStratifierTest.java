@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -24,6 +25,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  * Mainly using a Cohort Measure as the example scoringType for simplicity of parsing results.
  *
  */
+@SuppressWarnings("squid:S2699")
 class MeasureStratifierTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(
@@ -173,8 +175,9 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanNoIdStrat() {
+        final When evaluate = given.when().measureId("CohortBooleanStratNoId").evaluate();
         try {
-            given.when().measureId("CohortBooleanStratNoId").evaluate().then().report();
+            evaluate.then();
             fail("should throw a missing Id scenario");
         } catch (NullPointerException e) {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));

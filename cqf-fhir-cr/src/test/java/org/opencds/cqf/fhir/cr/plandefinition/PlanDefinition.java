@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -27,13 +28,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
@@ -319,6 +318,7 @@ public class PlanDefinition {
         final IParser jsonParser;
         final ModelResolver modelResolver;
         IBaseResource questionnaire;
+        IBaseResource questionnaireResponse;
         Map<String, IBaseBackboneElement> items;
 
         public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {
@@ -327,17 +327,14 @@ public class PlanDefinition {
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            var questionnaireResponse = getEntryResources(this.generatedBundle).stream()
+            questionnaireResponse = getEntryResources(this.generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
                     .findFirst()
                     .orElse(null);
-            questionnaire = questionnaireResponse == null
-                    ? null
-                    : ((IDomainResource) questionnaireResponse)
-                            .getContained().stream()
-                                    .filter(c -> c.fhirType().equals("Questionnaire"))
-                                    .findFirst()
-                                    .orElse(null);
+            questionnaire = getEntryResources(this.generatedBundle).stream()
+                    .filter(r -> r.fhirType().equals("Questionnaire"))
+                    .findFirst()
+                    .orElse(null);
             if (questionnaireResponse != null) {
                 items = new HashMap<>();
                 populateItems(getItems(questionnaireResponse));
@@ -393,14 +390,21 @@ public class PlanDefinition {
         }
 
         public GeneratedBundle hasCommunicationRequestPayload() {
-            assertTrue(getEntryResources(generatedBundle).stream()
+            var communications = getEntryResources(generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                    .allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+                    .toList();
+            assertFalse(communications.isEmpty());
+            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
         }
 
         public GeneratedBundle hasQuestionnaire() {
             assertNotNull(questionnaire);
+            return this;
+        }
+
+        public GeneratedBundle hasQuestionnaireResponse() {
+            assertNotNull(questionnaireResponse);
             return this;
         }
 
@@ -411,7 +415,7 @@ public class PlanDefinition {
                     ? ((List<?>) answerPath)
                             .stream()
                                     .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                                    .collect(Collectors.toList())
+                                    .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(
@@ -496,6 +500,17 @@ public class PlanDefinition {
         public GeneratedCarePlan hasQuestionnaire() {
             assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
                     .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedCarePlan hasCommunicationRequestPayload() {
+            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlan, "contained"))
+                    .stream()
+                            .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                            .toList();
+            assertFalse(communications.isEmpty());
+            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
             return this;
         }
     }

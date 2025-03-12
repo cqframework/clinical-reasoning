@@ -140,7 +140,7 @@ public class CqlFhirParametersConverter {
 
     protected IParametersParameterComponentAdapter addPart(IParametersAdapter pa, String name) {
         IBaseBackboneElement ppc = pa.addParameter();
-        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameter(ppc);
         ppca.setName(name);
 
         return ppca;
@@ -166,17 +166,17 @@ public class CqlFhirParametersConverter {
             value = this.fhirTypeConverter.toFhirType(value);
         }
 
-        // Likely already a parameter part
-        if (value instanceof IBaseBackboneElement) {
-            var ppca = this.adapterFactory.createParametersParameters((IBaseBackboneElement) value);
+        if (value instanceof IBaseDatatype dataType) {
+            var ppca = this.addPart(pa, name);
+            ppca.setValue(dataType);
+        } else if (value instanceof IBaseBackboneElement backboneValue) {
+            // Likely already a parameter part
+            var ppca = this.adapterFactory.createParametersParameter(backboneValue);
             ppca.setName(name);
             pa.addParameter(ppca.get());
-        } else if (value instanceof IBaseDatatype) {
+        } else if (value instanceof IBaseResource resource) {
             var ppca = this.addPart(pa, name);
-            ppca.setValue((IBaseDatatype) value);
-        } else if (value instanceof IBaseResource) {
-            var ppca = this.addPart(pa, name);
-            ppca.setResource((IBaseResource) value);
+            ppca.setResource(resource);
         } else {
             throw new IllegalArgumentException(String.format(
                     "unknown type when trying to convert to parameters: %s",
@@ -187,7 +187,7 @@ public class CqlFhirParametersConverter {
     protected IParametersParameterComponentAdapter addSubPart(
             IParametersParameterComponentAdapter ppcAdapter, String name) {
         IBaseBackboneElement ppc = ppcAdapter.addPart();
-        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameters(ppc);
+        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameter(ppc);
         ppca.setName(name);
 
         return ppca;
@@ -233,7 +233,7 @@ public class CqlFhirParametersConverter {
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
         Map<String, List<IParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameters(x))
+                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(IParametersParameterComponentAdapter::getName));
 

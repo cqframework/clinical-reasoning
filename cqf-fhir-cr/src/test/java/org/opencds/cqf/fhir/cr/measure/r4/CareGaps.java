@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants.CARE_GAPS_DETECTED_ISSUE_MR_GROUP_ID;
@@ -15,7 +16,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -41,7 +41,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -304,7 +303,7 @@ public class CareGaps {
                     bundleReport().getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("DetectedIssue"))
-                            .collect(Collectors.toList())
+                            .toList()
                             .size());
             return this;
         }
@@ -318,6 +317,7 @@ public class CareGaps {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
             return (DetectedIssue) parser.parseResource(parser.encodeResourceToString(theResource));
         }
+
         // Composition getters
         public SelectedComposition composition() {
             return this.composition(g -> resourceToComposition(g.getEntry().stream()
@@ -326,7 +326,6 @@ public class CareGaps {
                     .get()
                     .getResource()));
         }
-        ;
 
         public SelectedComposition composition(Selector<Composition, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -345,11 +344,10 @@ public class CareGaps {
                     bundleReport().getEntry().stream()
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
-                            .collect(Collectors.toList())
+                            .toList()
                             .size());
             return this;
         }
-        ;
 
         public SelectedMeasureReport measureReport(Selector<MeasureReport, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -370,13 +368,13 @@ public class CareGaps {
             List<String> bundleResourceReferences = bundleReport().getEntry().stream()
                     .map(BundleEntryComponent::getResource)
                     .map(x -> x.getResourceType().toString().concat("/" + x.getIdPart()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             // get resource References from evaluatedResources on Measure Report
             List<MeasureReport> measureReports = bundleReport().getEntry().stream()
                     .filter(x -> x.getResource() instanceof MeasureReport)
                     .map(g -> (MeasureReport) g.getResource())
-                    .collect(Collectors.toList());
+                    .toList();
 
             // check all references are found in patient bundle
             for (MeasureReport report : measureReports) {
@@ -403,7 +401,6 @@ public class CareGaps {
                     .get()
                     .getResource()));
         }
-        ;
 
         public SelectedOrganization organization(Selector<Organization, Bundle> bundleSelector) {
             var p = bundleSelector.select(value());
@@ -448,7 +445,7 @@ public class CareGaps {
 
         public SelectedDetectedIssue hasContainedMeasureReport() {
             var containedResource = detectedIssueReport().getContained().get(0);
-            assertTrue(containedResource instanceof MeasureReport);
+            assertInstanceOf(MeasureReport.class, containedResource);
             return this;
         }
 
@@ -462,9 +459,7 @@ public class CareGaps {
         }
 
         public SelectedDetectedIssue hasPatientReference(String patientRef) {
-            assertEquals(
-                    patientRef,
-                    detectedIssueReport().getPatient().getReference().toString());
+            assertEquals(patientRef, detectedIssueReport().getPatient().getReference());
             return this;
         }
 
@@ -499,12 +494,12 @@ public class CareGaps {
             return this;
         }
         // author
-        public SelectedComposition hasAuthor(String OrgReference) {
+        public SelectedComposition hasAuthor(String orgReference) {
             // author not empty
             assertNotNull(compositionReport().getAuthor().get(0));
             // author was found
             assertNotNull(compositionReport().getAuthor().stream()
-                    .filter(x -> x.getReference().contains(OrgReference))
+                    .filter(x -> x.getReference().contains(orgReference))
                     .findFirst()
                     .get());
             return this;

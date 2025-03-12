@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.exception.InvalidInterval;
 import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.When;
 
+@SuppressWarnings({"java:S2699"})
 class R4CareGapsTest {
     private static final Given given = CareGaps.given().repositoryFor("BreastCancerScreeningFHIR");
     private static final Given GIVEN_REPO = CareGaps.given().repositoryFor("MinimalMeasureEvaluation");
@@ -253,19 +255,17 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_wrongSubjectParam() {
+        final When when = given.when()
+                .subject("Patient/numer-EXM124")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .status("closed-gap")
+                .status("open-gap")
+                .measureId("BreastCancerScreeningFHIR")
+                .getCareGapsReport();
+
         try {
-            given.when()
-                    .subject("Patient/numer-EXM124")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .measureId("BreastCancerScreeningFHIR")
-                    .getCareGapsReport()
-                    .then();
+            when.then();
             fail("this should fail with no resource found");
         } catch (ResourceNotFoundException e) {
             Assertions.assertTrue(e.getMessage().contains("Resource Patient/numer-EXM124 is not known"));
@@ -274,55 +274,45 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_wrongMeasureParam() {
-        assertThrows(ResourceNotFoundException.class, () -> {
-            given.when()
-                    .subject("Patient/numer-EXM125")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .measureId("BreastCancerScreeningFHI")
-                    .getCareGapsReport()
-                    .then();
-        });
+        final When when = given.when()
+                .subject("Patient/numer-EXM125")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .status("closed-gap")
+                .status("open-gap")
+                .measureId("BreastCancerScreeningFHI")
+                .getCareGapsReport();
+
+        assertThrows(ResourceNotFoundException.class, when::then);
     }
 
     @Test
     void exm125_careGaps_error_wrongPeriodParam() {
-        assertThrows(InvalidInterval.class, () -> {
-            given.when()
-                    .subject("Patient/numer-EXM125")
-                    .periodStart(
-                            LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .measureId("BreastCancerScreeningFHIR")
-                    .getCareGapsReport()
-                    .then();
-        });
+        final When when = given.when()
+                .subject("Patient/numer-EXM125")
+                .periodStart(LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .status("closed-gap")
+                .status("open-gap")
+                .measureId("BreastCancerScreeningFHIR")
+                .getCareGapsReport();
+
+        assertThrows(InvalidInterval.class, when::then);
     }
 
     @Test
     void exm125_careGaps_error_wrongsStatusParam() {
+        final When when = given.when()
+                .subject("Patient/numer-EXM125")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .status("closed-ga")
+                .status("open-gap")
+                .measureId("BreastCancerScreeningFHIR")
+                .getCareGapsReport();
+
         try {
-            given.when()
-                    .subject("Patient/numer-EXM125")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .status("closed-ga")
-                    .status("open-gap")
-                    .measureId("BreastCancerScreeningFHIR")
-                    .getCareGapsReport()
-                    .then();
+            when.then();
             fail("this should fail with no resource found");
         } catch (InvalidRequestException e) {
             Assertions.assertTrue(
@@ -334,18 +324,14 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_noStatusParam() {
-        assertThrows(RuntimeException.class, () -> {
-            given.when()
-                    .subject("Patient/numer-EXM125")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("BreastCancerScreeningFHIR")
-                    .getCareGapsReport()
-                    .then();
-        });
+        final When when = given.when()
+                .subject("Patient/numer-EXM125")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("BreastCancerScreeningFHIR")
+                .getCareGapsReport();
+
+        assertThrows(RuntimeException.class, when::then);
     }
 
     @Test
@@ -383,18 +369,16 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_invalidPatient() {
+        final When when = given.when()
+                .subject("Patient/numer-EXM126") // invalid
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("BreastCancerScreeningFHIR")
+                .status("open-gap")
+                .getCareGapsReport();
+
         try {
-            given.when()
-                    .subject("Patient/numer-EXM126") // invalid
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("BreastCancerScreeningFHIR")
-                    .status("open-gap")
-                    .getCareGapsReport()
-                    .then();
+            when.then();
             fail("this should fail with no resource found");
         } catch (ResourceNotFoundException e) {
             Assertions.assertTrue(e.getMessage().contains("Resource Patient/numer-EXM126 is not known"));
@@ -403,18 +387,16 @@ class R4CareGapsTest {
 
     @Test
     void exm125_careGaps_error_invalidGroup() {
+        final When when = given.when()
+                .subject("Group/numer-EXM126") // invalid
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("BreastCancerScreeningFHIR")
+                .status("closed-gap")
+                .getCareGapsReport();
+
         try {
-            given.when()
-                    .subject("Group/numer-EXM126") // invalid
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("BreastCancerScreeningFHIR")
-                    .status("closed-gap")
-                    .getCareGapsReport()
-                    .then();
+            when.then();
             fail("this should fail with no resource found");
         } catch (ResourceNotFoundException e) {
             Assertions.assertTrue(e.getMessage().contains("Resource Group/numer-EXM126 is not known"));
@@ -516,22 +498,19 @@ class R4CareGapsTest {
 
     @Test
     void Cohort_ScoringTypeError() {
+        final When when = GIVEN_REPO
+                .when()
+                .subject("Practitioner/tester")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalCohortResourceBasisSingleGroup")
+                .status("closed-gap")
+                .status("open-gap")
+                .status("not-applicable")
+                .getCareGapsReport();
+
         try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Practitioner/tester")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalCohortResourceBasisSingleGroup")
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .status("not-applicable")
-                    .getCareGapsReport()
-                    .then()
-                    .hasBundleCount(1);
+            when.then();
 
             fail("method should error");
         } catch (InvalidRequestException e) {
@@ -542,21 +521,18 @@ class R4CareGapsTest {
 
     @Test
     void ContinuousVariable_ScoringTypeError() {
+        final When when = GIVEN_REPO
+                .when()
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
+                .status("closed-gap")
+                .status("open-gap")
+                .status("not-applicable")
+                .getCareGapsReport();
+
         try {
-            GIVEN_REPO
-                    .when()
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalContinuousVariableResourceBasisSingleGroup")
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .status("not-applicable")
-                    .getCareGapsReport()
-                    .then()
-                    .hasBundleCount(1);
+            when.then();
 
             fail("method should error");
         } catch (InvalidRequestException e) {
@@ -569,21 +545,18 @@ class R4CareGapsTest {
     // MinimalProportionResourceBasisSingleGroup
     @Test
     void MinimalProportionResourceBasisSingleGroup_Subject() {
+        final When when = GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionResourceBasisSingleGroup")
+                .status("closed-gap")
+                .status("open-gap")
+                .getCareGapsReport();
+
         try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Patient/female-1988")
-                    .periodStart(
-                            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalProportionResourceBasisSingleGroup")
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .getCareGapsReport()
-                    .then()
-                    .hasBundleCount(1);
+            when.then();
             fail("resource based measures should fail");
         } catch (InvalidRequestException e) {
             Assertions.assertTrue(
@@ -630,24 +603,19 @@ class R4CareGapsTest {
 
     @Test
     void MinimalProportionBooleanBasisMultiGroup_NoId() {
+        final When when = GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId("MinimalProportionBooleanBasisMultiGroupNoGroupId")
+                .status("closed-gap")
+                .status("open-gap")
+                .status("not-applicable")
+                .getCareGapsReport();
+
         try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Patient/female-1988")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId("MinimalProportionBooleanBasisMultiGroupNoGroupId")
-                    .status("closed-gap")
-                    .status("open-gap")
-                    .status("not-applicable")
-                    .getCareGapsReport()
-                    .then()
-                    .hasBundleCount(1)
-                    .firstParameter()
-                    .detectedIssueCount(2); // 1 Detected issue per groupId
+            when.then();
             fail("this should fail without a groupId");
         } catch (InvalidRequestException e) {
             Assertions.assertTrue(
@@ -770,31 +738,24 @@ class R4CareGapsTest {
 
     @Test
     void noMeasureSpecified() {
+        final When when = GIVEN_REPO
+                .when()
+                .subject("Patient/female-1988")
+                .periodStart(LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .measureId(null)
+                .measureIdentifier(null)
+                .measureUrl(null)
+                .status("closed-gap")
+                .getCareGapsReport();
         try {
-            GIVEN_REPO
-                    .when()
-                    .subject("Patient/female-1988")
-                    .periodStart(
-                            LocalDate.of(2019, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
-                    .periodEnd(LocalDate.of(2019, Month.DECEMBER, 31)
-                            .atStartOfDay()
-                            .atZone(ZoneId.systemDefault()))
-                    .measureId(null)
-                    .measureIdentifier(null)
-                    .measureUrl(null)
-                    .status("closed-gap")
-                    .getCareGapsReport()
-                    .then()
-                    .hasBundleCount(1)
-                    .firstParameter()
-                    .detectedIssueCount(1)
-                    .detectedIssue()
-                    .hasGroupIdReportExtension("group-2");
+            when.then();
             fail();
         } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("no measure resolving parameter was specified"));
         }
     }
+
     // MinimalProportionDenominatorExclusion
     @Test
     void InInitalPopulationAndDenominatorExclusion() {

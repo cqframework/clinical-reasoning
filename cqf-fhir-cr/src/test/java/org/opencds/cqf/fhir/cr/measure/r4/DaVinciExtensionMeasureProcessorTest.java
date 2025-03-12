@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings({"squid:S2699", "squid:S1135"})
 class DaVinciExtensionMeasureProcessorTest {
 
     protected static Given given = Measure.given().repositoryFor("BreastCancerScreeningFHIR");

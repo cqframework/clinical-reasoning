@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 /**
  * Test MeasureDefBuilder on different scenarios around group level Measure settings and if they are properly being set
  */
-public class MeasureDefBuilderTest {
+class MeasureDefBuilderTest {
     private final CodeableConcept increase = new CodeableConcept(new Coding(
             MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
             IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
@@ -337,10 +338,23 @@ public class MeasureDefBuilderTest {
         }
     }
 
-    @Test
-    void scoringMeasureScoringAndGroup() {
+    private static Stream<Arguments> scoringMeasureScoringAndGroupParams() {
+        return Stream.of(
+                Arguments.of("cohort", "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION),
+                Arguments.of("cohort", null, null, MeasureScoring.COHORT, MeasureScoring.COHORT),
+                Arguments.of(null, "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION));
+    }
+
+    @ParameterizedTest
+    @MethodSource("scoringMeasureScoringAndGroupParams")
+    void scoringMeasureScoringAndGroup(
+            String measureScoring,
+            @Nullable String group1Scoring,
+            @Nullable String group2Scoring,
+            MeasureScoring expectedGroup1MeasureScoring,
+            MeasureScoring expectedGroup2MeasureScoring) {
         var def = measureDefBuilder(
-                null, "ratio", null, null, null, "proportion", null, null, "boolean", "cohort", decrease);
+                null, group1Scoring, null, null, null, group2Scoring, null, null, "boolean", measureScoring, decrease);
 
         validateMeasureDef(
                 def,
@@ -348,54 +362,13 @@ public class MeasureDefBuilderTest {
                 "boolean",
                 false,
                 "decrease",
-                MeasureScoring.RATIO,
+                expectedGroup1MeasureScoring,
                 null,
                 true,
                 "boolean",
                 false,
                 "decrease",
-                MeasureScoring.PROPORTION,
-                null);
-    }
-
-    @Test
-    void scoringMeasure() {
-        var def = measureDefBuilder(null, null, null, null, null, null, null, null, "boolean", "cohort", decrease);
-
-        validateMeasureDef(
-                def,
-                true,
-                "boolean",
-                false,
-                "decrease",
-                MeasureScoring.COHORT,
-                null,
-                true,
-                "boolean",
-                false,
-                "decrease",
-                MeasureScoring.COHORT,
-                null);
-    }
-
-    @Test
-    void groupScoring() {
-        var def =
-                measureDefBuilder(null, "ratio", null, null, null, "proportion", null, null, "boolean", null, decrease);
-
-        validateMeasureDef(
-                def,
-                true,
-                "boolean",
-                false,
-                "decrease",
-                MeasureScoring.RATIO,
-                null,
-                true,
-                "boolean",
-                false,
-                "decrease",
-                MeasureScoring.PROPORTION,
+                expectedGroup2MeasureScoring,
                 null);
     }
 
@@ -473,27 +446,6 @@ public class MeasureDefBuilderTest {
                 "boolean",
                 true,
                 "increase",
-                MeasureScoring.PROPORTION,
-                null);
-    }
-
-    @Test
-    void measureImprovementNotation() {
-        var def =
-                measureDefBuilder(null, "ratio", null, null, null, "proportion", null, null, "boolean", null, decrease);
-
-        validateMeasureDef(
-                def,
-                true,
-                "boolean",
-                false,
-                "decrease",
-                MeasureScoring.RATIO,
-                null,
-                true,
-                "boolean",
-                false,
-                "decrease",
                 MeasureScoring.PROPORTION,
                 null);
     }

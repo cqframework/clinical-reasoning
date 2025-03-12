@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -89,6 +90,11 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public String getOperationName() {
         return "apply";
+    }
+
+    @Override
+    public IBase getContext() {
+        return getActivityDefinition();
     }
 
     @Override

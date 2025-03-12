@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.CollectData.Given;
 
+@SuppressWarnings("squid:S2699")
 class CollectDataTest {
 
     @Test

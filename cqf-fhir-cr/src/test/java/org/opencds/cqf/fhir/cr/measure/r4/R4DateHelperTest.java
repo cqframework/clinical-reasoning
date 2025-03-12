@@ -24,10 +24,10 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Precision;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
-public class R4DateHelperTest {
+class R4DateHelperTest {
 
     @Test
-    public void checkDate() {
+    void checkDate() {
         var date = new Interval(new Date("2019-01-01"), true, new Date("2019-12-31"), true);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -45,7 +45,7 @@ public class R4DateHelperTest {
     }
 
     @Test
-    public void checkDateTime() {
+    void checkDateTime() {
         ZoneOffset offset = ZonedDateTime.now().getOffset();
 
         DateTime start = new DateTime("2019-01-01", offset);
@@ -66,10 +66,11 @@ public class R4DateHelperTest {
     }
 
     @Test
-    public void checkNull() {
+    void checkNull() {
         var helper = new R4DateHelper();
+        final Interval measurementPeriodInterval = new Interval(new java.util.Date(), true, new java.util.Date(), true);
         try {
-            helper.buildMeasurementPeriod(new Interval(new java.util.Date(), true, new java.util.Date(), true));
+            helper.buildMeasurementPeriod(measurementPeriodInterval);
             fail();
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or Date"));
@@ -102,7 +103,7 @@ public class R4DateHelperTest {
 
     @ParameterizedTest
     @MethodSource("zonedDateTimesParams")
-    public void zonedDateTimes(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {
+    void zonedDateTimes(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {
         final Interval interval = new R4DateHelper().buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
         final Object start = interval.getStart();
         final Object end = interval.getEnd();

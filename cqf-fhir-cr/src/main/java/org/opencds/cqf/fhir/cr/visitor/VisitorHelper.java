@@ -32,7 +32,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> (T) parametersParameters.getValue());
     }
 
@@ -43,7 +43,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> (T) parametersParameters.getResource());
     }
 
@@ -74,7 +74,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Boolean>) parametersParameters.getValue()).getValue());
     }
 
@@ -84,7 +84,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Date>) parametersParameters.getValue()).getValue());
     }
 
@@ -94,7 +94,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<Integer>) parametersParameters.getValue()).getValue());
     }
 
@@ -104,7 +104,7 @@ public class VisitorHelper {
         return Optional.ofNullable(operationParameters)
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
-                .map(factory::createParametersParameters)
+                .map(factory::createParametersParameter)
                 .map(parametersParameters -> ((IPrimitiveType<String>) parametersParameters.getValue()).getValue());
     }
 
@@ -205,6 +205,14 @@ public class VisitorHelper {
             String inputReference, Repository repository, String status) {
         return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
                         repository, inputReference, Searches.byStatus(status)))
+                .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
+                        .createKnowledgeArtifactAdapter(res));
+    }
+
+    public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersionExceptStatus(
+            String inputReference, Repository repository, String status) {
+        return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+                        repository, inputReference, Searches.exceptStatus(status)))
                 .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
                         .createKnowledgeArtifactAdapter(res));
     }

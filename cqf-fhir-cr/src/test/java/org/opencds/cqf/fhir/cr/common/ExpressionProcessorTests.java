@@ -48,13 +48,18 @@ class ExpressionProcessorTests {
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpressionResult() {
-        var request =
-                RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
+        var questionnaire = new Questionnaire();
+        var request = RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var expression = new CqfExpression();
         doReturn(null)
                 .when(libraryEngine)
                 .resolveExpression(
-                        request.getSubjectId().getIdPart(), expression, request.getParameters(), request.getData());
+                        request.getSubjectId().getIdPart(),
+                        expression,
+                        request.getParameters(),
+                        request.getData(),
+                        questionnaire,
+                        null);
         var result = fixture.getExpressionResult(request, expression);
         assertNotNull(result);
         assertEquals(0, result.size());

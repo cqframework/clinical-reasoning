@@ -25,10 +25,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionTests {
-    private final String ACTIVITYDEFINITION = "http://test.fhir.org/fhir/ActivityDefinition/test";
-    private final String PLANDEFINITION = "http://test.fhir.org/fhir/PlanDefinition/test";
-    private final String QUESTIONNAIRE = "http://test.fhir.org/fhir/Questionnaire/test";
-    private final String TASK = "http://test.fhir.org/fhir/Task/test";
+    private static final String ACTIVITYDEFINITION = "http://test.fhir.org/fhir/ActivityDefinition/test";
+    private static final String PLANDEFINITION = "http://test.fhir.org/fhir/PlanDefinition/test";
+    private static final String QUESTIONNAIRE = "http://test.fhir.org/fhir/Questionnaire/test";
+    private static final String TASK = "http://test.fhir.org/fhir/Task/test";
 
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
@@ -121,8 +121,7 @@ class ProcessDefinitionTests {
     @Test
     void resolveResourceNameShouldFailIfCanonicalHasNoValue() {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
-        assertThrows(FHIRException.class, () -> {
-            fixture.resolveResourceName(request, new CanonicalType());
-        });
+        final CanonicalType canonical = new CanonicalType();
+        assertThrows(FHIRException.class, () -> fixture.resolveResourceName(request, canonical));
     }
 }

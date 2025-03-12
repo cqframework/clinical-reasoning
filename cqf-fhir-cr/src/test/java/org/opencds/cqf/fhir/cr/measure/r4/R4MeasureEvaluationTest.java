@@ -80,7 +80,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
+@SuppressWarnings("squid:S1135")
+class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
 
     private static final CodeType POPULATION_BASIS_BOOLEAN = new CodeType("boolean");
     private static final CodeType POPULATION_BASIS_ENCOUNTER = new CodeType("Encounter");
@@ -94,39 +95,8 @@ public class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
             Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/r4/FHIR347/"));
     private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
-    private final R4PopulationBasisValidator populationBasisValidator = new R4PopulationBasisValidator();
-
     @Test
     void cohortMeasureEvaluation() {
-        Patient patient = john_doe();
-
-        RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);
-        when(retrieveProvider.retrieve(
-                        eq("Patient"),
-                        anyString(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any()))
-                .thenReturn(List.of(patient));
-
-        String cql = cql_with_dateTime() + sde_race() + "define InitialPopulation: 'Doe' in Patient.name.family\n";
-
-        Measure measure = cohort_measure();
-
-        MeasureReport report =
-                runTest(cql, Collections.singletonList(patient.getId()), measure, retrieveProvider, null);
-        checkEvidence(report);
-    }
-
-    @Test
-    void sdeInMeasureEvaluation() {
         Patient patient = john_doe();
 
         RetrieveProvider retrieveProvider = mock(RetrieveProvider.class);

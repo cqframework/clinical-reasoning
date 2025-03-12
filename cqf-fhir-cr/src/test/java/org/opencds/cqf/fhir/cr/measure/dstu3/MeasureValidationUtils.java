@@ -4,15 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 public class MeasureValidationUtils {
 
@@ -105,27 +101,6 @@ public class MeasureValidationUtils {
         for (ListResource.ListEntryComponent comp : expected.getEntry()) {
             assertTrue(actual.getEntry().stream()
                     .anyMatch(x -> listItems.contains(comp.getItem().getReference())));
-        }
-    }
-
-    public static void validateMeasureReportContained(MeasureReport actual, MeasureReport expected) {
-        assertEquals(actual.getContained().size(), expected.getContained().size());
-
-        Map<String, Resource> listResources = new HashMap<>();
-
-        for (Resource resource : actual.getContained()) {
-            if (resource.hasId()) {
-                listResources.put(resource.getId(), resource);
-            }
-        }
-
-        for (Resource resource : expected.getContained()) {
-            if (resource.hasId() && listResources.containsKey(resource.getId())) {
-                if (resource.getResourceType().equals(ResourceType.List)) {
-                    validateListEquality((ListResource) listResources.get(resource.getId()), (ListResource) resource);
-                    validateListEquality((ListResource) resource, (ListResource) listResources.get(resource.getId()));
-                }
-            }
         }
     }
 }

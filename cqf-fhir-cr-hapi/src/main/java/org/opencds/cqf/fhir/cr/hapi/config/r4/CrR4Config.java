@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
@@ -42,6 +43,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import static org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig.npmResourceHolderGetter;
+
 @Configuration
 @Import({RepositoryConfig.class, CrBaseConfig.class})
 public class CrR4Config {
@@ -52,13 +55,13 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
         return rd -> new R4MeasureService(
                 repositoryFactory.create(rd),
                 evaluationOptions,
                 measurePeriodValidator,
                 r4MeasureServiceUtilsFactory.create(rd),
-                npmResourceHolderGetter);
+                npmResourceHolderGetter(optNpmResourceHolderGetter));
     }
 
     @Bean
@@ -95,12 +98,12 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
         return rd -> new R4CollectDataService(
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 r4MeasureServiceUtilsFactory.create(rd),
-                npmResourceHolderGetter);
+                npmResourceHolderGetter(optNpmResourceHolderGetter));
     }
 
     @Bean
@@ -121,14 +124,14 @@ public class CrR4Config {
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 rd.getFhirServerBase(),
                 measurePeriodValidator,
-                npmResourceHolderGetter);
+                npmResourceHolderGetter(optNpmResourceHolderGetter));
     }
 
     @Bean

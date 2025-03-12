@@ -8,13 +8,16 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.CrProviderConstants;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
@@ -83,5 +86,52 @@ public class MeasureOperationsProvider {
                         parameters,
                         productLine,
                         practitioner);
+    }
+
+    // LUKETODO:  new operation with URL for now...
+    // LUKETODO:  merge with proper $evaluate-measure later
+    @Operation(name = CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL, idempotent = true, type = Measure.class)
+    public MeasureReport evaluateMeasureWithUrl(
+            @OperationParam(name = "measureUrl") String measureUrl,
+            @OperationParam(name = "periodStart") String periodStart,
+            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "reportType") String reportType,
+            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
+            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "additionalData") Bundle additionalData,
+            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "parameters") Parameters parameters,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return r4MeasureServiceFactory
+                .create(requestDetails)
+                .evaluate(
+                        Eithers.forLeft3(new CanonicalType(measureUrl)),
+                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                        reportType,
+                        subject,
+                        lastReceivedOn,
+                        null,
+                        terminologyEndpoint,
+                        null,
+                        additionalData,
+                        parameters,
+                        productLine,
+                        practitioner);
+    }
+
+    // LUKETODO: figure out how this will work
+    private Either3<CanonicalType, IdType, Measure> either(IdType id, String measureUrl) {
+        if (id != null) {
+            return Eithers.forMiddle3(id);
+        } else if (measureUrl != null) {
+            return Eithers.forLeft3(new CanonicalType(measureUrl));
+        } else {
+            throw new IllegalArgumentException(
+                    "One of the following parameters must be provided: measureId, measureIdentifier, or measureUrl");
+        }
     }
 }

@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -62,14 +61,14 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, null);
+        return forRepository(repository, settings, null, NpmResourceHolder.EMPTY);
     }
 
     public static CqlEngine forRepository(
             Repository repository,
             EvaluationSettings settings,
             IBaseBundle additionalData,
-            @Nullable NpmResourceHolder npmResourceHolder) {
+            NpmResourceHolder npmResourceHolder) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -86,7 +85,7 @@ public class Engines {
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
-            @Nullable NpmResourceHolder npmResourceHolder) {
+            NpmResourceHolder npmResourceHolder) {
 
         var modelManager =
                 settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
@@ -102,13 +101,7 @@ public class Engines {
     }
 
     private static void registerNpmResourceHolderGetter(
-            LibraryManager libraryManager, ModelManager modelManager, @Nullable NpmResourceHolder npmResourceHolder) {
-
-        // LUKETODO:  what to do here?
-        // LUKETODO:  default to a no-op NpmResourceHolder instead?
-        if (npmResourceHolder == null) {
-            return;
-        }
+            LibraryManager libraryManager, ModelManager modelManager, NpmResourceHolder npmResourceHolder) {
 
         var loader = libraryManager.getLibrarySourceLoader();
         // LUKETODO:  hwo to handle this?

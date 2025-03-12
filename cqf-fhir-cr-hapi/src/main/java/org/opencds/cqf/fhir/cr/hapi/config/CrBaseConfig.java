@@ -28,7 +28,8 @@ public class CrBaseConfig {
      * @param optNpmResourceHolderGetter The NpmResourceHolderGetter, if injected by the downstream app, otherwise empty.
      * @return Either the downstream app's NpmResourceHolderGetter or a no-op implementation.
      */
-    public static NpmResourceHolderGetter npmResourceHolderGetter(Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
+    public static NpmResourceHolderGetter npmResourceHolderGetter(
+            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
         return optNpmResourceHolderGetter.orElse(NpmResourceHolderGetterNoOp.INSTANCE);
     }
 }

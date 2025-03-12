@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
+import static org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig.npmResourceHolderGetter;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -42,8 +44,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import static org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig.npmResourceHolderGetter;
 
 @Configuration
 @Import({RepositoryConfig.class, CrBaseConfig.class})

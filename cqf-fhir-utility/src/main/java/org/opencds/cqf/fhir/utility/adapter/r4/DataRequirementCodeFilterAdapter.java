@@ -65,11 +65,11 @@ public class DataRequirementCodeFilterAdapter implements IDataRequirementCodeFil
 
     @Override
     public boolean hasValueSet() {
-        return false;
+        return get().hasValueSet();
     }
 
     @Override
     public IPrimitiveType<String> getValueSet() {
-        return null;
+        return get().getValueSetElement();
     }
 }

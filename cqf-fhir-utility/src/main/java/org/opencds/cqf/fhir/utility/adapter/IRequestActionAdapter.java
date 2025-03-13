@@ -38,5 +38,7 @@ public interface IRequestActionAdapter extends IAdapter<IBaseBackboneElement> {
 
     IBaseReference getResource();
 
+    boolean hasAction();
+
     List<IRequestActionAdapter> getAction();
 }

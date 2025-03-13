@@ -54,6 +54,6 @@ public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter
 
     @Override
     public List<String> getTriggerType() {
-        return List.of();
+        return get().getTrigger().stream().map(t -> t.getType().toCode()).collect(Collectors.toUnmodifiableList());
     }
 }

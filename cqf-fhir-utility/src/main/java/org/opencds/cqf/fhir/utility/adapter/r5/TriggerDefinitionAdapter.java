@@ -20,8 +20,8 @@ public class TriggerDefinitionAdapter implements ITriggerDefinitionAdapter {
                     "object passed as triggerDefinition argument is not a TriggerDefinition data type");
         }
         this.triggerDefinition = (TriggerDefinition) triggerDefinition;
-        fhirContext = FhirContext.forR4Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
+        fhirContext = FhirContext.forR5Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
     }
 
     @Override
@@ -40,8 +40,18 @@ public class TriggerDefinitionAdapter implements ITriggerDefinitionAdapter {
     }
 
     @Override
+    public boolean hasName() {
+        return get().hasName();
+    }
+
+    @Override
     public String getName() {
         return get().getName();
+    }
+
+    @Override
+    public boolean hasType() {
+        return get().hasType();
     }
 
     @Override

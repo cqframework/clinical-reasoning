@@ -20,8 +20,8 @@ public class ValueSetConceptReferenceAdapter implements IValueSetConceptReferenc
                     "element passed as conceptReference argument is not a ConceptReferenceComponent element");
         }
         this.conceptReference = (ConceptReferenceComponent) conceptReference;
-        fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        fhirContext = FhirContext.forR4Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
     }
 
     @Override
@@ -37,6 +37,11 @@ public class ValueSetConceptReferenceAdapter implements IValueSetConceptReferenc
     @Override
     public ModelResolver getModelResolver() {
         return modelResolver;
+    }
+
+    @Override
+    public boolean hasCode() {
+        return get().hasCode();
     }
 
     @Override

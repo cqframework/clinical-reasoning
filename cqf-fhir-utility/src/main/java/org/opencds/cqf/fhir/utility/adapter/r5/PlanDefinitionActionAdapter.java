@@ -23,8 +23,8 @@ public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter
                     "object passed as action argument is not a PlanDefinitionActionComponent data type");
         }
         this.action = (PlanDefinitionActionComponent) action;
-        fhirContext = FhirContext.forR4Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
+        fhirContext = FhirContext.forR5Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
     }
 
     @Override
@@ -54,6 +54,6 @@ public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter
 
     @Override
     public List<String> getTriggerType() {
-        return List.of();
+        return get().getTrigger().stream().map(t -> t.getType().toCode()).collect(Collectors.toUnmodifiableList());
     }
 }

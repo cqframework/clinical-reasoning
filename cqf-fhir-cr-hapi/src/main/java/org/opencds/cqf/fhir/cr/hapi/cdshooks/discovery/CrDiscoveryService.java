@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("squid:S1135")
 public class CrDiscoveryService implements ICrDiscoveryService {
@@ -62,15 +65,26 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     }
 
     public ILibraryAdapter resolvePrimaryLibrary(IPlanDefinitionAdapter planDefinition) {
-        //  CPGComputablePlanDefinition profile limits  cardinality of library to 1
-        ILibraryAdapter library = null;
-        if (planDefinition.hasLibrary() && !planDefinition.getLibrary().isEmpty()) {
-            library = adapterFactory.createLibrary(SearchHelper.searchRepositoryByCanonical(
+        IPrimitiveType<?> canonical = null;
+        var dataReqExt = planDefinition.getExtensionByUrl(CRMI_EFFECTIVE_DATA_REQUIREMENTS);
+        var dataReqExtValue = dataReqExt == null ? null : dataReqExt.getValue();
+        // Use a Module Definition Library with Effective Data Requirements for the Plan Definition if it exists
+        if (dataReqExtValue instanceof IPrimitiveType<?> moduleDefCanonical) {
+            canonical = moduleDefCanonical;
+        }
+        // Otherwise use the primary Library
+        if (canonical == null && planDefinition.hasLibrary()) {
+            // The CPGComputablePlanDefinition profile limits the cardinality of library to 1
+            canonical = VersionUtilities.canonicalTypeForVersion(
+                    fhirVersion(), planDefinition.getLibrary().get(0));
+        }
+        if (canonical != null) {
+            return adapterFactory.createLibrary(SearchHelper.searchRepositoryByCanonical(
                     repository,
                     VersionUtilities.canonicalTypeForVersion(
                             fhirVersion(), planDefinition.getLibrary().get(0))));
         }
-        return library;
+        return null;
     }
 
     public List<String> resolveValueCodingCodes(List<ICodingAdapter> valueCodings) {
@@ -209,7 +223,8 @@ public class CrDiscoveryService implements ICrDiscoveryService {
         return path.replace('.', '-').toLowerCase();
     }
 
-    public static boolean isPatientCompartment(String dataType) {
+    public boolean isPatientCompartment(String dataType) {
+        var modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion());
         return switch (dataType) {
             case "Account",
                     "AdverseEvent",

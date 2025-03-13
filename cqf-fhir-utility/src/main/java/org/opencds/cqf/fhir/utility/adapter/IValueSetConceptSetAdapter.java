@@ -8,5 +8,7 @@ public interface IValueSetConceptSetAdapter extends IAdapter<IBaseBackboneElemen
 
     List<IValueSetConceptReferenceAdapter> getConcept();
 
+    boolean hasSystem();
+
     String getSystem();
 }

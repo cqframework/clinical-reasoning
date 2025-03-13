@@ -40,8 +40,18 @@ public class TriggerDefinitionAdapter implements ITriggerDefinitionAdapter {
     }
 
     @Override
+    public boolean hasName() {
+        return get().hasName();
+    }
+
+    @Override
     public String getName() {
         return get().getName();
+    }
+
+    @Override
+    public boolean hasType() {
+        return get().hasType();
     }
 
     @Override

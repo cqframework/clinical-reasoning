@@ -24,7 +24,7 @@ public class ValueSetConceptSetAdapter implements IValueSetConceptSetAdapter {
         }
         this.conceptSet = (ConceptSetComponent) conceptSet;
         fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
     }
 
     @Override
@@ -52,6 +52,11 @@ public class ValueSetConceptSetAdapter implements IValueSetConceptSetAdapter {
         return get().getConcept().stream()
                 .map(ValueSetConceptReferenceAdapter::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasSystem() {
+        return get().hasSystem();
     }
 
     @Override

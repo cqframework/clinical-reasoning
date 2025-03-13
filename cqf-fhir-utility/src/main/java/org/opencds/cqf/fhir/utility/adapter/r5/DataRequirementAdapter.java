@@ -23,7 +23,7 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
                     "object passed as dataRequirement argument is not a DataRequirement data type");
         }
         this.dataRequirement = dataRequirementInner;
-        fhirContext = FhirContext.forR4Cached();
+        fhirContext = FhirContext.forR5Cached();
         modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
     }
 

@@ -24,8 +24,8 @@ public class DataRequirementCodeFilterAdapter implements IDataRequirementCodeFil
                     "object passed as codeFilter argument is not a DataRequirementCodeFilterComponent data type");
         }
         this.codeFilter = (DataRequirementCodeFilterComponent) codeFilter;
-        fhirContext = FhirContext.forR4Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
+        fhirContext = FhirContext.forR5Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
     }
 
     @Override
@@ -65,11 +65,11 @@ public class DataRequirementCodeFilterAdapter implements IDataRequirementCodeFil
 
     @Override
     public boolean hasValueSet() {
-        return false;
+        return get().hasValueSet();
     }
 
     @Override
     public IPrimitiveType<String> getValueSet() {
-        return null;
+        return get().getValueSetElement();
     }
 }

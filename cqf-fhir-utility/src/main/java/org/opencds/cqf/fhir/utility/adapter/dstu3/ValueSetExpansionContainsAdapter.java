@@ -21,7 +21,7 @@ public class ValueSetExpansionContainsAdapter implements IValueSetExpansionConta
         }
         this.contains = (ValueSetExpansionContainsComponent) contains;
         fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
     }
 
     @Override
@@ -40,8 +40,18 @@ public class ValueSetExpansionContainsAdapter implements IValueSetExpansionConta
     }
 
     @Override
+    public boolean hasCode() {
+        return get().hasCode();
+    }
+
+    @Override
     public String getCode() {
         return get().getCode();
+    }
+
+    @Override
+    public boolean hasSystem() {
+        return get().hasSystem();
     }
 
     @Override

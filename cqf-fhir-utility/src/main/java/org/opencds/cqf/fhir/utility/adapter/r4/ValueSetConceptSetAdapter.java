@@ -23,8 +23,8 @@ public class ValueSetConceptSetAdapter implements IValueSetConceptSetAdapter {
                     "element passed as conceptSet argument is not a ConceptSetComponent element");
         }
         this.conceptSet = (ConceptSetComponent) conceptSet;
-        fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        fhirContext = FhirContext.forR4Cached();
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
     }
 
     @Override
@@ -52,6 +52,10 @@ public class ValueSetConceptSetAdapter implements IValueSetConceptSetAdapter {
         return get().getConcept().stream()
                 .map(ValueSetConceptReferenceAdapter::new)
                 .collect(Collectors.toList());
+    }
+
+    public boolean hasSystem() {
+        return get().hasSystem();
     }
 
     @Override

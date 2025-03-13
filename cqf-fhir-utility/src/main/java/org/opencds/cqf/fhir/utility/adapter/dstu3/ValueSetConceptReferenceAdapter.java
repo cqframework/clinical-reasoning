@@ -21,7 +21,7 @@ public class ValueSetConceptReferenceAdapter implements IValueSetConceptReferenc
         }
         this.conceptReference = (ConceptReferenceComponent) conceptReference;
         fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
     }
 
     @Override
@@ -37,6 +37,11 @@ public class ValueSetConceptReferenceAdapter implements IValueSetConceptReferenc
     @Override
     public ModelResolver getModelResolver() {
         return modelResolver;
+    }
+
+    @Override
+    public boolean hasCode() {
+        return get().hasCode();
     }
 
     @Override

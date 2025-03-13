@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
-import static org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig.npmResourceHolderGetter;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -9,7 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.RepositoryFactoryForRepositoryInterface;
@@ -168,5 +166,10 @@ public class CrR4Config {
                                 DataRequirementsOperationProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
+    }
+
+    private NpmResourceHolderGetter npmResourceHolderGetter(
+            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
+        return NpmResourceHolderGetter.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
     }
 }

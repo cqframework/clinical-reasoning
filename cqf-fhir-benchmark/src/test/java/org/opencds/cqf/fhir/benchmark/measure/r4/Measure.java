@@ -10,11 +10,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
-import org.opencds.cqf.fhir.cql.NpmResourceHolderGetterNoOp;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
@@ -70,7 +69,7 @@ public class Measure {
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
 
-            this.npmResourceHolderGetter = NpmResourceHolderGetterNoOp.INSTANCE;
+            this.npmResourceHolderGetter = NpmResourceHolderGetter.DEFAULT;
         }
 
         public Given repositoryFor(String repositoryPath) {

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.spring.measure;
 
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;

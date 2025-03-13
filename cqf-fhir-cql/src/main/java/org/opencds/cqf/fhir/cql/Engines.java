@@ -3,16 +3,10 @@ package org.opencds.cqf.fhir.cql;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import jakarta.xml.bind.JAXB;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -22,12 +16,7 @@ import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.utilities.LoggerAdapter;
-import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -43,6 +32,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
+import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -52,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public class Engines {
 
-    private static Logger logger = LoggerFactory.getLogger(Engines.class);
+    private static final Logger logger = LoggerFactory.getLogger(Engines.class);
 
     private Engines() {}
 
@@ -95,132 +86,9 @@ public class Engines {
 
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
-        registerNpmResourceHolderGetter(libraryManager, modelManager, npmResourceHolder);
+        EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(libraryManager, modelManager, npmResourceHolder);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
-    }
-
-    private static void registerNpmResourceHolderGetter(
-            LibraryManager libraryManager, ModelManager modelManager, NpmResourceHolder npmResourceHolder) {
-
-        var loader = libraryManager.getLibrarySourceLoader();
-        // LUKETODO:  hwo to handle this?
-        // LUKETODO:  only the main Library at this point, no need for multiples
-        var optMainLibrary = npmResourceHolder.getOptMainLibrary();
-
-        // LUKETODO:  figure out how to properly derive the FHIR version later
-        var reader = new org.cqframework.fhir.npm.LibraryLoader(FhirVersionEnum.R4.getFhirVersionString());
-
-        // LUKETODO:  if we have the exact match for the version, then pass it down
-
-        //        byte[] getLibrarySource(VersionedIdentifier identifier) {
-        //            var url = toUrl(identifier); // TODO
-        //            var results = npmSearch.byUrl(url);
-        //            var lib = latestVersion(results); // pass in "latest"
-        //
-        //            for (var a : lib.attachments) {
-        //                if (a.contentType == "text/cql") {
-        //                    return a.data;
-        //                }
-        //            }
-        //
-        //            return null;
-        //        final String url = toUrl(versionedIdentifier);
-        //        }
-
-        loader.registerProvider(versionedIdentifier -> {
-            if (optMainLibrary.isEmpty()) {
-                return null;
-            }
-
-            final Library library = optMainLibrary.get();
-            if (!doesLibraryMatch(versionedIdentifier, library)) {
-                return null;
-            }
-
-            final List<Attachment> content = library.getContent();
-
-            final Optional<Attachment> optCqlData = content.stream()
-                    .filter(c -> c.getContentType().equals("text/cql"))
-                    .findFirst();
-
-            if (optCqlData.isEmpty()) {
-                return null;
-            }
-
-            final Attachment attachment = optCqlData.get();
-
-            return new ByteArrayInputStream(attachment.getData());
-        });
-
-        modelManager.getModelInfoLoader().registerModelInfoProvider(modelIdentifier -> {
-            if (optMainLibrary.isEmpty()) {
-                return null;
-            }
-
-            final Library library = optMainLibrary.get();
-
-            if (!doesLibraryMatch(modelIdentifier, library)) {
-                return null;
-            }
-
-            final List<Attachment> content = library.getContent();
-
-            final Optional<Attachment> optCqlData = content.stream()
-                    .filter(c -> c.getContentType().equals("application/xml"))
-                    .findFirst();
-
-            if (optCqlData.isEmpty()) {
-                return null;
-            }
-
-            final Attachment attachment = optCqlData.get();
-
-            final InputStream inputStream = new ByteArrayInputStream(attachment.getData());
-
-            return JAXB.unmarshal(inputStream, ModelInfo.class);
-        });
-    }
-
-    private static String toUrl(VersionedIdentifier versionedIdentifier) {
-        //        org.hl7.fhir
-        //
-        //        {https://hl7.org/fhir}/Library/{id}
-        // org.hl7.fhir....
-        // LUKETODO:  convert sytem to URL
-
-        // org.hl7.fhir  // from CQL  Use NamespaceManager and NamespaceInfo to conver
-        return "https://" + versionedIdentifier.getSystem() + "/Library/" + versionedIdentifier.getId();
-    }
-
-    private static boolean doesLibraryMatch(VersionedIdentifier versionedIdentifier, Library libraryCandidate) {
-        // LUKETODO:  this doesn't work
-
-        if (versionedIdentifier.getId().equals(libraryCandidate.getIdPart())) {
-            final Optional<Attachment> optCqlData = libraryCandidate.getContent().stream()
-                    .filter(content -> content.getContentType().equals("text/cql"))
-                    .findFirst();
-
-            if (optCqlData.isPresent()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean doesLibraryMatch(ModelIdentifier modelIdentifier, Library libraryCandidate) {
-        if (modelIdentifier.getId().equals(libraryCandidate.getIdPart())) {
-            final Optional<Attachment> optCqlData = libraryCandidate.getContent().stream()
-                    .filter(content -> content.getContentType().equals("text/cql"))
-                    .findFirst();
-
-            if (optCqlData.isPresent()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static void registerLibrarySourceProviders(
@@ -262,8 +130,8 @@ public class Engines {
         // list, and b) there are packages with different package ids but the same base canonical (e.g.
         // fhir.r4.examples has the same base canonical as fhir.r4)
         // NOTE: Using ensureNamespaceRegistered works around a but not b
-        Set<String> keys = new HashSet<String>();
-        Set<String> uris = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
+        Set<String> uris = new HashSet<>();
         for (var n : npmProcessor.getNamespaces()) {
             if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
                 libraryManager.getNamespaceManager().addNamespace(n);

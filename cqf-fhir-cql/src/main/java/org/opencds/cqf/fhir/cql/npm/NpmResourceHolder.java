@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql.npm;
 
 import jakarta.annotation.Nullable;
 import java.util.Optional;

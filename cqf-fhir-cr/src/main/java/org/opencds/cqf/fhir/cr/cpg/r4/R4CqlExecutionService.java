@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 

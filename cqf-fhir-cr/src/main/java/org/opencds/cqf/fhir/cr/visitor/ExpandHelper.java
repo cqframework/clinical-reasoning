@@ -87,7 +87,7 @@ public class ExpandHelper {
             for (var attempt = 1; true; attempt++) {
                 try {
                     var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
-                        terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
+                            terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
                     // expansions are only valid for a particular version
                     if (!valueSet.hasVersion()) {
                         valueSet.setVersion(expandedValueSet.getVersion());
@@ -97,15 +97,16 @@ public class ExpandHelper {
                 } catch (Exception ex) {
                     if (ex instanceof NullPointerException) {
                         throw new UnprocessableEntityException(String.format(
-                            "Terminology Server expansion failed for ValueSet (%s): %s",
-                            valueSet.getId(), ex.getMessage()));
+                                "Terminology Server expansion failed for ValueSet (%s): %s",
+                                valueSet.getId(), ex.getMessage()));
                     } else {
                         if (attempt == MAX_RETRIES) {
                             throw new UnprocessableEntityException(String.format(
-                                "Terminology Server expansion failed for ValueSet (%s): %s",
-                                valueSet.getId(), ex.getMessage()));
+                                    "Terminology Server expansion failed for ValueSet (%s): %s",
+                                    valueSet.getId(), ex.getMessage()));
                         }
-                        myLogger.error(String.format("Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
+                        myLogger.error(String.format(
+                                "Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
                         try {
                             Thread.sleep(attempt * 1000L);
                         } catch (InterruptedException ie) {

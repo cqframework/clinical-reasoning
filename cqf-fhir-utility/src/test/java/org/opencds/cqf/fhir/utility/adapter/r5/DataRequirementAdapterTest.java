@@ -16,8 +16,9 @@ class DataRequirementAdapterTest {
 
     @Test
     void invalid_object_fails() {
+        var adapterFactory = new AdapterFactory();
         var coding = new Coding();
-        assertThrows(IllegalArgumentException.class, () -> new DataRequirementAdapter(coding));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createDataRequirement(coding));
     }
 
     @Test

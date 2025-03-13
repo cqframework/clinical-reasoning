@@ -31,7 +31,7 @@ class PlanDefinitionAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(IllegalArgumentException.class, () -> new PlanDefinitionAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createPlanDefinition(library));
     }
 
     @Test

@@ -22,8 +22,9 @@ class RequestActionAdapterTest {
 
     @Test
     void invalid_object_fails() {
+        var adapterFactory = new AdapterFactory();
         var action = new PlanDefinitionActionComponent();
-        assertThrows(IllegalArgumentException.class, () -> new AdapterFactory().createRequestAction(action));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createRequestAction(action));
     }
 
     @Test

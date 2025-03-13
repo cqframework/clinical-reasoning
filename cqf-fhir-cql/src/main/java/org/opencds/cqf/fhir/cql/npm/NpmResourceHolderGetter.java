@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql.npm;
 import jakarta.annotation.Nullable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Library;
 
 // LUKETODO:  javadoc
 // LUKETODO:  better name?
@@ -13,6 +14,10 @@ public interface NpmResourceHolderGetter {
     // LUKETODO:  unit test this:
     default NpmResourceHolder loadNpmResources(CanonicalType measureUrl) {
         return NpmResourceHolder.EMPTY;
+    }
+
+    default Optional<Library> loadLibrary(String url) {
+        return Optional.empty();
     }
 
     /**

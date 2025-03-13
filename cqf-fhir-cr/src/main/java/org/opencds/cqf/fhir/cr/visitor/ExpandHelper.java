@@ -84,37 +84,7 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
-            for (var attempt = 1; true; attempt++) {
-                try {
-                    var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
-                            terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
-                    // expansions are only valid for a particular version
-                    if (!valueSet.hasVersion()) {
-                        valueSet.setVersion(expandedValueSet.getVersion());
-                    }
-                    valueSet.setExpansion(expandedValueSet.getExpansion());
-                    break;
-                } catch (Exception ex) {
-                    if (ex instanceof NullPointerException) {
-                        throw new UnprocessableEntityException(String.format(
-                                "Terminology Server expansion failed for ValueSet (%s): %s",
-                                valueSet.getId(), ex.getMessage()));
-                    } else {
-                        if (attempt == MAX_RETRIES) {
-                            throw new UnprocessableEntityException(String.format(
-                                    "Terminology Server expansion failed for ValueSet (%s): %s",
-                                    valueSet.getId(), ex.getMessage()));
-                        }
-                        myLogger.error(String.format(
-                                "Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
-                        try {
-                            Thread.sleep(attempt * 1000L);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                }
-            }
+            terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint);
         }
         // Else if the ValueSet has a simple compose then we will perform naive expansion.
         else if (valueSet.hasSimpleCompose()) {
@@ -135,6 +105,41 @@ public class ExpandHelper {
                     "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
         }
         expandedList.add(valueSet.getUrl());
+    }
+
+    private void terminologyServerExpand(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            Optional<IEndpointAdapter> terminologyEndpoint) {
+        for (var attempt = 1; true; attempt++) {
+            try {
+                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
+                        terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
+                // expansions are only valid for a particular version
+                if (!valueSet.hasVersion()) {
+                    valueSet.setVersion(expandedValueSet.getVersion());
+                }
+                valueSet.setExpansion(expandedValueSet.getExpansion());
+                break;
+            } catch (NullPointerException ex) {
+                throw new UnprocessableEntityException(String.format(
+                        "Terminology Server expansion failed for ValueSet (%s): %s",
+                        valueSet.getId(), ex.getMessage()));
+            } catch (Exception ex) {
+                if (attempt == MAX_RETRIES) {
+                    throw new UnprocessableEntityException(String.format(
+                            "Terminology Server expansion failed for ValueSet (%s): %s",
+                            valueSet.getId(), ex.getMessage()));
+                }
+                myLogger.error(
+                        String.format("Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
+                try {
+                    Thread.sleep(attempt * 1000L);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     private void groupExpand(

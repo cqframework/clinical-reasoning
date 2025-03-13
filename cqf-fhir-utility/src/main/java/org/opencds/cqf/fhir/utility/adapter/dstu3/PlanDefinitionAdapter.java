@@ -18,7 +18,6 @@ import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.PlanDefinitionActionAdapter;
 
 class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDefinitionAdapter {
     public PlanDefinitionAdapter(IDomainResource planDefinition) {

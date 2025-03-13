@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,9 +15,11 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -345,6 +348,130 @@ class ExpandHelperTest {
         // trivial checks
         verify(rep, never()).search(any(), any(), any());
         verify(client, times(1)).expand(eq(adapter), any(), any());
+    }
+
+    @Test
+    void expandRetrySuccessful() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+        // setup ValueSets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        // ensure that the grouper is not expanded using the Tx Server
+        var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
+        var grouper = new ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
+        grouper.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType(grouperUrl));
+        var leaf = createLeafWithUrl(leafUrl);
+
+        // shouldn't be used
+        var rep = mockRepositoryWithValueSetR4(leaf);
+
+        // should be used
+        // Important part - successful response on 3rd attempt to expand
+        var client = mock(TerminologyServerClient.class);
+        when(client.expand(any(IValueSetAdapter.class), any(), any()))
+            .thenThrow(new UnprocessableEntityException())
+            .thenThrow(new UnprocessableEntityException())
+            .thenReturn(leaf);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        expandHelper.expandValueSet(
+            (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+            factory.createParameters(new Parameters()),
+            Optional.of(factory.createEndpoint(endpoint)),
+            new ArrayList<IValueSetAdapter>(),
+            new ArrayList<String>(),
+            new Date());
+        assertEquals(3, grouper.getExpansion().getContains().size());
+        verify(rep, never()).search(any(), any(), any());
+        verify(client, never()).getResource(any(), any(), any());
+        verify(client, times(3)).expand(any(IValueSetAdapter.class), any(), any());
+    }
+
+    @Test
+    void expandRetryFail() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+        // setup ValueSets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        // ensure that the grouper is not expanded using the Tx Server
+        var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
+        var grouper = new ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
+        grouper.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType(grouperUrl));
+        var leaf = createLeafWithUrl(leafUrl);
+
+        // shouldn't be used
+        var rep = mockRepositoryWithValueSetR4(leaf);
+
+        // should be used
+        // important part - expand fails all 3 attempts
+        var client = mock(TerminologyServerClient.class);
+        when(client.expand(any(IValueSetAdapter.class), any(), any()))
+            .thenThrow(new UnprocessableEntityException())
+            .thenThrow(new UnprocessableEntityException())
+            .thenThrow(new UnprocessableEntityException());
+
+
+        var expandHelper = new ExpandHelper(rep, client);
+        assertThrows(UnprocessableEntityException.class, () -> {
+            expandHelper.expandValueSet(
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                new ArrayList<String>(),
+                new Date());
+        });
+        verify(rep, never()).search(any(), any(), any());
+        verify(client, never()).getResource(any(), any(), any());
+        verify(client, times(3)).expand(any(IValueSetAdapter.class), any(), any());
+    }
+
+    @Test
+    void expandDontRetryFail() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+        // setup ValueSets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        // ensure that the grouper is not expanded using the Tx Server
+        var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
+        var grouper = new ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new CanonicalType(leafUrl));
+        grouper.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType(grouperUrl));
+        var leaf = createLeafWithUrl(leafUrl);
+
+        // shouldn't be used
+        var rep = mockRepositoryWithValueSetR4(leaf);
+
+        // should be used
+        // important part - expand throws an exception we don't retry for
+        var client = mock(TerminologyServerClient.class);
+        when(client.expand(any(IValueSetAdapter.class), any(), any()))
+            .thenThrow(new NullPointerException());
+
+        var expandHelper = new ExpandHelper(rep, client);
+        assertThrows(UnprocessableEntityException.class, () -> {
+            expandHelper.expandValueSet(
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                new ArrayList<String>(),
+                new Date());
+        });
+        verify(rep, never()).search(any(), any(), any());
+        verify(client, never()).getResource(any(), any(), any());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
     }
 
     ValueSet createLeafWithUrl(String url) {

@@ -119,7 +119,7 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IRequestActionAdapter createRequestAction(IBaseBackboneElement action) {
-        return null;
+        return new RequestActionAdapter(action);
     }
 
     @Override

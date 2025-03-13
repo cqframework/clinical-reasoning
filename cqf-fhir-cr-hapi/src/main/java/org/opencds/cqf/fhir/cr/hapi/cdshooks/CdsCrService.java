@@ -40,8 +40,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
@@ -111,10 +113,14 @@ public class CdsCrService implements ICdsCrService {
         }
         if (parameters.getParameter().size() == 1) {
             var listExtension = parameters.getParameter().get(0).addExtension();
-            listExtension.setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition");
+            listExtension.setUrl(Constants.CPG_PARAMETER_DEFINITION);
             var paramDef = (IBaseDatatype) Resources.newBaseForVersion("ParameterDefinition", getFhirVersion());
-            parameters.getModelResolver().setValue(paramDef, "max", "*");
-            parameters.getModelResolver().setValue(paramDef, "name", paramName);
+            parameters
+                    .getModelResolver()
+                    .setValue(paramDef, "max", VersionUtilities.stringTypeForVersion(getFhirVersion(), "*"));
+            parameters
+                    .getModelResolver()
+                    .setValue(paramDef, "name", VersionUtilities.codeTypeForVersion(getFhirVersion(), paramName));
             listExtension.setValue(paramDef);
         }
     }

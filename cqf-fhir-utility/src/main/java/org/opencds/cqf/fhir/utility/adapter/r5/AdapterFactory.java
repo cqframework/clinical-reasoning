@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.RequestActionAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
 
@@ -119,7 +120,7 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IRequestActionAdapter createRequestAction(IBaseBackboneElement action) {
-        return null;
+        return new RequestActionAdapter(action);
     }
 
     @Override

@@ -15,11 +15,10 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.io.IOException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -373,18 +372,18 @@ class ExpandHelperTest {
         // Important part - successful response on 3rd attempt to expand
         var client = mock(TerminologyServerClient.class);
         when(client.expand(any(IValueSetAdapter.class), any(), any()))
-            .thenThrow(new UnprocessableEntityException())
-            .thenThrow(new UnprocessableEntityException())
-            .thenReturn(leaf);
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException())
+                .thenReturn(leaf);
 
         var expandHelper = new ExpandHelper(rep, client);
         expandHelper.expandValueSet(
-            (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
-            factory.createParameters(new Parameters()),
-            Optional.of(factory.createEndpoint(endpoint)),
-            new ArrayList<IValueSetAdapter>(),
-            new ArrayList<String>(),
-            new Date());
+                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                new ArrayList<String>(),
+                new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -414,20 +413,19 @@ class ExpandHelperTest {
         // important part - expand fails all 3 attempts
         var client = mock(TerminologyServerClient.class);
         when(client.expand(any(IValueSetAdapter.class), any(), any()))
-            .thenThrow(new UnprocessableEntityException())
-            .thenThrow(new UnprocessableEntityException())
-            .thenThrow(new UnprocessableEntityException());
-
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException());
 
         var expandHelper = new ExpandHelper(rep, client);
         assertThrows(UnprocessableEntityException.class, () -> {
             expandHelper.expandValueSet(
-                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
-                factory.createParameters(new Parameters()),
-                Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<IValueSetAdapter>(),
-                new ArrayList<String>(),
-                new Date());
+                    (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<IValueSetAdapter>(),
+                    new ArrayList<String>(),
+                    new Date());
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -456,18 +454,17 @@ class ExpandHelperTest {
         // should be used
         // important part - expand throws an exception we don't retry for
         var client = mock(TerminologyServerClient.class);
-        when(client.expand(any(IValueSetAdapter.class), any(), any()))
-            .thenThrow(new NullPointerException());
+        when(client.expand(any(IValueSetAdapter.class), any(), any())).thenThrow(new NullPointerException());
 
         var expandHelper = new ExpandHelper(rep, client);
         assertThrows(UnprocessableEntityException.class, () -> {
             expandHelper.expandValueSet(
-                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
-                factory.createParameters(new Parameters()),
-                Optional.of(factory.createEndpoint(endpoint)),
-                new ArrayList<IValueSetAdapter>(),
-                new ArrayList<String>(),
-                new Date());
+                    (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<IValueSetAdapter>(),
+                    new ArrayList<String>(),
+                    new Date());
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());

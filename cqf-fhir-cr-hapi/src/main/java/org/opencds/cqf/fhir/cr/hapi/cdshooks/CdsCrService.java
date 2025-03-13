@@ -233,7 +233,7 @@ public class CdsCrService implements ICdsCrService {
             action.getAction().forEach(this::resolveSuggestion);
         }
 
-        // Leaving this out until  spec details how to map system actions.
+        // Leaving this out until spec details how to map system actions.
         //		if (Action.hasType() && Action.hasResource()) {
         //			resolveSystemAction(Action);
         //		}

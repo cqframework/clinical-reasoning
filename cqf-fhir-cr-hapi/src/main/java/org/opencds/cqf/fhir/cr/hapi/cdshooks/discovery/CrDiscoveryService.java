@@ -19,7 +19,6 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("squid:S1135")
 public class CrDiscoveryService implements ICrDiscoveryService {
@@ -224,7 +223,6 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     }
 
     public boolean isPatientCompartment(String dataType) {
-        var modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion());
         return switch (dataType) {
             case "Account",
                     "AdverseEvent",

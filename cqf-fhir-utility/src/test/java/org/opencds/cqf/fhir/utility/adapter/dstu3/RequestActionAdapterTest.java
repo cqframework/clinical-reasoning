@@ -65,7 +65,6 @@ class RequestActionAdapterTest {
 
     @Test
     void testPriority() {
-        var priority = "routine";
         var action = new RequestGroupActionComponent();
         var adapter = new RequestActionAdapter(action);
         assertFalse(adapter.hasPriority());

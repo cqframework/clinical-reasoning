@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
     private static final Logger myLogger = LoggerFactory.getLogger(ExpandHelper.class);
+    private static final int MAX_RETRIES = 3;
     private final Repository repository;
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove =
@@ -83,18 +84,35 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
-            try {
-                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
+            for (var attempt = 1; true; attempt++) {
+                try {
+                    var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
                         terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
-                // expansions are only valid for a particular version
-                if (!valueSet.hasVersion()) {
-                    valueSet.setVersion(expandedValueSet.getVersion());
+                    // expansions are only valid for a particular version
+                    if (!valueSet.hasVersion()) {
+                        valueSet.setVersion(expandedValueSet.getVersion());
+                    }
+                    valueSet.setExpansion(expandedValueSet.getExpansion());
+                    break;
+                } catch (Exception ex) {
+                    if (ex instanceof NullPointerException) {
+                        throw new UnprocessableEntityException(String.format(
+                            "Terminology Server expansion failed for ValueSet (%s): %s",
+                            valueSet.getId(), ex.getMessage()));
+                    } else {
+                        if (attempt == MAX_RETRIES) {
+                            throw new UnprocessableEntityException(String.format(
+                                "Terminology Server expansion failed for ValueSet (%s): %s",
+                                valueSet.getId(), ex.getMessage()));
+                        }
+                        myLogger.error(String.format("Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
+                        try {
+                            Thread.sleep(attempt * 1000L);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
                 }
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-            } catch (Exception ex) {
-                throw new UnprocessableEntityException(String.format(
-                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                        valueSet.getId(), ex.getMessage()));
             }
         }
         // Else if the ValueSet has a simple compose then we will perform naive expansion.

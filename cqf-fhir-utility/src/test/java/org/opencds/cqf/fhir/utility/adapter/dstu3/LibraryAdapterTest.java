@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class LibraryAdapterTest {
@@ -175,7 +176,7 @@ class LibraryAdapterTest {
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
@@ -219,7 +220,9 @@ class LibraryAdapterTest {
         adapter.setDataRequirement(dataRequirements);
         assertEquals(dataRequirements, library.getDataRequirement());
         adapter.addDataRequirement(new DataRequirement().setType("Observation"));
-        assertEquals(library.getDataRequirement(), adapter.getDataRequirement());
+        assertEquals(
+                library.getDataRequirement(),
+                adapter.getDataRequirement().stream().map(IAdapter::get).toList());
         assertEquals(2, adapter.getDataRequirement().size());
     }
 

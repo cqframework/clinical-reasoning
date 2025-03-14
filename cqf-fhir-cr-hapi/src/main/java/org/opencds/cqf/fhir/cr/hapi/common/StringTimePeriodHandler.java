@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.common;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -164,15 +163,10 @@ public class StringTimePeriodHandler {
         return DateUtils.parseDateTimeStringIfValid(period, dateTimeFormatter)
                 .flatMap(temporalAccessorToLocalDateTimeConverter)
                 .orElseThrow(() -> {
-                    ourLog.warn(
-                            "{}Period {}: {} has an unsupported format",
-                            Msg.code(2558),
-                            isStart ? "start" : "end",
-                            period);
+                    ourLog.warn("Period {}: {} has an unsupported format", isStart ? "start" : "end", period);
 
                     return new InvalidRequestException(String.format(
-                            "%sPeriod %s: %s has an unsupported format",
-                            Msg.code(2558), isStart ? "start" : "end", period));
+                            "Period %s: %s has an unsupported format", isStart ? "start" : "end", period));
                 });
     }
 
@@ -184,7 +178,7 @@ public class StringTimePeriodHandler {
             ourLog.warn("Unsupported Date/Time format for input: {}", inputDateTimeString);
 
             throw new InvalidRequestException(
-                    String.format("%sUnsupported Date/Time format for input: %s", Msg.code(2559), inputDateTimeString));
+                    String.format("Unsupported Date/Time format for input: %s", inputDateTimeString));
         }
 
         return dateTimeFormatter;
@@ -197,9 +191,9 @@ public class StringTimePeriodHandler {
             try {
                 return ZoneId.of(clientTimezoneString);
             } catch (Exception exception) {
-                ourLog.warn("{}Invalid value for Timezone header: {}", Msg.code(2561), clientTimezoneString);
+                ourLog.warn("Invalid value for Timezone header: {}", clientTimezoneString);
                 throw new InvalidRequestException(
-                        String.format("%sInvalid value for Timezone header: %s", Msg.code(2561), clientTimezoneString));
+                        String.format("Invalid value for Timezone header: %s", clientTimezoneString));
             }
         }
 

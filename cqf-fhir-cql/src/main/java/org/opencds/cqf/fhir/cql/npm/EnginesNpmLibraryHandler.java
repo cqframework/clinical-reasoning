@@ -11,6 +11,18 @@ import org.slf4j.LoggerFactory;
 public class EnginesNpmLibraryHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnginesNpmLibraryHandler.class);
 
+    public static void registerNpmResourceHolderGetter(
+            LibraryManager libraryManager,
+            ModelManager modelManager,
+            NpmResourceHolderGetter npmResourceHolderGetter,
+            NpmResourceHolder npmResourceHolder) {
+
+        var loader = libraryManager.getLibrarySourceLoader();
+        // LUKETODO:  hwo to handle this?
+        // LUKETODO:  only the main Library at this point, no need for multiples
+        var optMainLibrary = npmResourceHolder.getOptMainLibrary();
+    }
+
     // LUKETODO:  somehow pass the main Library and the NpmResourceHolderGetter, or just the NpmResourceHolderGetter?
     public static void registerNpmResourceHolderGetter(
             LibraryManager libraryManager, ModelManager modelManager, NpmResourceHolder npmResourceHolder) {
@@ -28,7 +40,7 @@ public class EnginesNpmLibraryHandler {
 
         loader.registerProvider(new NpmLibraryProvider(library));
 
-        modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(library));
+        //        modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(library));
     }
 
     public static void registerNpmResourceHolderGetter(
@@ -38,7 +50,8 @@ public class EnginesNpmLibraryHandler {
 
         loader.registerProvider(new NpmLibraryProvider2(npmResourceHolderGetter));
 
-        modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider2(npmResourceHolderGetter));
+        //        modelManager.getModelInfoLoader().registerModelInfoProvider(new
+        // NpmModelInfoProvider2(npmResourceHolderGetter));
     }
 
     private static String toUrl(VersionedIdentifier versionedIdentifier) {

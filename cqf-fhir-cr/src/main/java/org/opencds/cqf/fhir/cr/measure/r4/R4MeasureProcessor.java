@@ -157,6 +157,7 @@ public class R4MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
+                npmResourceHolderGetter,
                 npmResourceHolder);
 
         CompiledLibrary lib;

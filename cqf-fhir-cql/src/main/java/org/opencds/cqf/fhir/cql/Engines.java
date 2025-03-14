@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
 import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -52,13 +53,14 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, NpmResourceHolder.EMPTY);
+        return forRepository(repository, settings, null, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
     }
 
     public static CqlEngine forRepository(
             Repository repository,
             EvaluationSettings settings,
             IBaseBundle additionalData,
+            NpmResourceHolderGetter npmResourceHolderGetter,
             NpmResourceHolder npmResourceHolder) {
         checkNotNull(settings);
         checkNotNull(repository);
@@ -67,7 +69,8 @@ public class Engines {
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders, npmResourceHolder);
+        var environment = buildEnvironment(
+                repository, settings, terminologyProvider, dataProviders, npmResourceHolderGetter, npmResourceHolder);
         return createEngine(environment, settings);
     }
 
@@ -76,6 +79,7 @@ public class Engines {
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
+            NpmResourceHolderGetter npmResourceHolderGetter,
             NpmResourceHolder npmResourceHolder) {
 
         var modelManager =
@@ -86,7 +90,8 @@ public class Engines {
 
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
-        EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(libraryManager, modelManager, npmResourceHolder);
+        EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(
+                libraryManager, modelManager, npmResourceHolderGetter, npmResourceHolder);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

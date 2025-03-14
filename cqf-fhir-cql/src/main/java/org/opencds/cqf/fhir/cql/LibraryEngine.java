@@ -25,6 +25,8 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class LibraryEngine {
 
-    private static Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
     protected final Repository repository;
     protected final FhirContext fhirContext;
@@ -132,7 +134,9 @@ public class LibraryEngine {
 
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        // LUKETODO:  can we ever get a non-empty value here?
+        var engine = Engines.forRepository(
+                repository, requestSettings, bundle, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -298,7 +302,9 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            engine = Engines.forRepository(repository, settings, additionalData);
+            // LUKETODO:  can we ever get a non-empty value here?
+            engine = Engines.forRepository(
+                    repository, settings, additionalData, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

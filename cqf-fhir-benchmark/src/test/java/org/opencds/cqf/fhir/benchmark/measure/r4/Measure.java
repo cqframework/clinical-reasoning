@@ -13,6 +13,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
@@ -49,6 +50,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private final NpmResourceHolderGetter npmResourceHolderGetter;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -66,6 +68,8 @@ public class Measure {
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+
+            this.npmResourceHolderGetter = NpmResourceHolderGetter.DEFAULT;
         }
 
         public Given repositoryFor(String repositoryPath) {
@@ -82,7 +86,12 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
+            return new R4MeasureService(
+                    repository,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    measureServiceUtils,
+                    npmResourceHolderGetter);
         }
 
         public When when() {

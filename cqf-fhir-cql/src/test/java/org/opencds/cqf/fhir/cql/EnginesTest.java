@@ -36,6 +36,8 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
@@ -308,7 +310,9 @@ class EnginesTest {
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));
         var additionalData = bundleBuilder.getBundle();
 
-        var engine = Engines.forRepository(repository, settings, additionalData);
+        // LUKETODO:  pass a non-empty value?
+        var engine = Engines.forRepository(
+                repository, settings, additionalData, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
 
         assertNotNull(engine.getState());
 
@@ -394,6 +398,8 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
-        return Engines.forRepository(repository, settings, bundle);
+        // LUKETODO:  pass a non-empty value?
+        return Engines.forRepository(
+                repository, settings, bundle, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
     }
 }

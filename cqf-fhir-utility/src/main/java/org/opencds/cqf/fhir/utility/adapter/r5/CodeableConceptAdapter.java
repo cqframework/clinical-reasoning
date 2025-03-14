@@ -44,6 +44,11 @@ public class CodeableConceptAdapter implements ICodeableConceptAdapter {
     }
 
     @Override
+    public boolean hasCoding() {
+        return get().hasCoding();
+    }
+
+    @Override
     public List<ICodingAdapter> getCoding() {
         return get().getCoding().stream().map(adapterFactory::createCoding).toList();
     }

@@ -29,7 +29,7 @@ public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
         }
         this.elementDefinition = (ElementDefinition) elementDefinition;
         fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
         adapterFactory = new AdapterFactory();
     }
 

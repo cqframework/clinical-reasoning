@@ -61,6 +61,8 @@ public class Constants {
     public static final String CPG_INPUT_TEXT = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
     public static final String CPG_INPUT_DESCRIPTION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
+    public static final String CPG_PARAMETER_DEFINITION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition";
 
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";

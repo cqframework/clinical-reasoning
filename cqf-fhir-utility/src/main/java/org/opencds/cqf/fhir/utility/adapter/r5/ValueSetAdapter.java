@@ -12,13 +12,16 @@ import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
 
 public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueSetAdapter {
 
@@ -45,11 +48,6 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     @Override
     public ValueSet copy() {
         return get().copy();
-    }
-
-    @Override
-    public boolean hasCompose() {
-        return this.get().hasCompose();
     }
 
     @Override
@@ -101,10 +99,16 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         return getValueSet().hasExpansion();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ValueSetExpansionContainsComponent> getExpansionContains() {
-        return getExpansion().getContains();
+    public boolean hasExpansionContains() {
+        return getExpansion().hasContains();
+    }
+
+    @Override
+    public List<IValueSetExpansionContainsAdapter> getExpansionContains() {
+        return getExpansion().getContains().stream()
+                .map(ValueSetExpansionContainsAdapter::new)
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -115,20 +119,31 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         return expansion;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ConceptSetComponent> getComposeIncludes() {
-        return getValueSet().getCompose().getInclude();
+    public boolean hasCompose() {
+        return this.get().hasCompose();
+    }
+
+    @Override
+    public boolean hasComposeInclude() {
+        return this.get().getCompose().hasInclude();
+    }
+
+    @Override
+    public List<IValueSetConceptSetAdapter> getComposeInclude() {
+        return getValueSet().getCompose().getInclude().stream()
+                .map(ValueSetConceptSetAdapter::new)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public List<String> getValueSetIncludes() {
         return getValueSet().getCompose().getInclude().stream()
-                .map(i -> i.getValueSet())
+                .map(ConceptSetComponent::getValueSet)
                 .flatMap(Collection::stream)
-                .map(c -> c.asStringValue())
+                .map(PrimitiveType::asStringValue)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -166,7 +181,11 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     public void naiveExpand() {
         var expansion = newExpansion().addParameter(createNaiveParameter());
 
-        for (var code : getCodesInCompose(fhirContext, getValueSet())) {
+        final List<Code> codesInCompose = getCodesInCompose(fhirContext, getValueSet());
+        if (codesInCompose == null) {
+            return;
+        }
+        for (var code : codesInCompose) {
             expansion
                     .addContains()
                     .setCode(code.getCode())

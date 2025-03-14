@@ -13,6 +13,8 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 
 class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
+    private final Parameters parameters;
+
     public ParametersAdapter(IBaseResource parameters) {
         super(parameters);
 
@@ -23,10 +25,13 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         this.parameters = (Parameters) parameters;
     }
 
-    private Parameters parameters;
-
     protected Parameters getParameters() {
         return this.parameters;
+    }
+
+    @Override
+    public boolean hasParameter() {
+        return parameters.hasParameter();
     }
 
     @SuppressWarnings("unchecked")
@@ -52,6 +57,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
                 .setParameter(parametersParameterComponents.stream()
                         .map(x -> (ParametersParameterComponent) x)
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addParameter(String name, String value) {
+        getParameters().addParameter(name, value);
     }
 
     @Override

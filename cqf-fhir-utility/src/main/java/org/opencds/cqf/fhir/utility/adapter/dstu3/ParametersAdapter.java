@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -29,6 +30,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         return this.parameters;
     }
 
+    @Override
+    public boolean hasParameter() {
+        return parameters.hasParameter();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<ParametersParameterComponent> getParameter() {
@@ -41,6 +47,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
                 .setParameter(parametersParameterComponents.stream()
                         .map(x -> (ParametersParameterComponent) x)
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addParameter(String name, String value) {
+        getParameters().addParameter().setName(name).setValue(new StringType(value));
     }
 
     @Override

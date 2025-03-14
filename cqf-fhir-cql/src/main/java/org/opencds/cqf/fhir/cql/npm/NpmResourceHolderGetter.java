@@ -16,6 +16,7 @@ public interface NpmResourceHolderGetter {
         return NpmResourceHolder.EMPTY;
     }
 
+    // LUKETODO:  think about this API:  are we getting a Library or an InputStream?
     default Optional<Library> loadLibrary(String url) {
         return Optional.empty();
     }

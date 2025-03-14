@@ -1,10 +1,9 @@
 package org.opencds.cqf.fhir.cql.npm;
 
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
@@ -15,26 +14,25 @@ import org.hl7.fhir.r4.model.Library;
 // LUKETODO:  javadoc
 public class NpmModelInfoProvider implements ModelInfoProvider {
 
-    @Nullable
-    private final Library library;
+    private final NpmResourceHolder npmResourceHolder;
+    private final NpmResourceHolderGetter npmResourceHolderGetter;
 
-    public NpmModelInfoProvider(@Nullable Library library) {
-        this.library = library;
+    public NpmModelInfoProvider(NpmResourceHolderGetter npmResourceHolderGetter, NpmResourceHolder npmResourceHolder) {
+        this.npmResourceHolder = npmResourceHolder;
+        this.npmResourceHolderGetter = npmResourceHolderGetter;
     }
 
     @Override
     public ModelInfo load(ModelIdentifier modelIdentifier) {
-        if (library == null) {
+
+        final Optional<Library> optLibrary = findLibrary(modelIdentifier);
+
+        if (optLibrary.isEmpty()) {
             return null;
         }
 
-        if (!doesLibraryMatch(modelIdentifier, library)) {
-            return null;
-        }
-
-        final List<Attachment> content = library.getContent();
-
-        final Optional<Attachment> optCqlData = content.stream()
+        final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
+                .flatMap(Collection::stream)
                 .filter(attachment -> "application/xml".equals(attachment.getContentType()))
                 .findFirst();
 
@@ -49,10 +47,20 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
         return JAXB.unmarshal(inputStream, ModelInfo.class);
     }
 
-    private static boolean doesLibraryMatch(ModelIdentifier modelIdentifier, Library libraryCandidate) {
-        return LibraryMatcher.doesLibraryMatch(modelIdentifier.getId(), libraryCandidate);
+    private Optional<Library> findLibrary(ModelIdentifier modelIdentifier) {
+
+        final String url = toUrl(modelIdentifier);
+
+        final Optional<Library> optMainLibrary = npmResourceHolder.getOptMainLibrary();
+
+        if (npmResourceHolder.doesLibraryMatch(modelIdentifier)) {
+            return optMainLibrary;
+        }
+
+        return npmResourceHolderGetter.loadLibrary(url);
     }
 
+    // LUKETODO:  this is not correct:
     private static String toUrl(ModelIdentifier modelIdentifier) {
         //        org.hl7.fhir
         //

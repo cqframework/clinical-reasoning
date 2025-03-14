@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cql.npm;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.hl7.fhir.r4.model.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ public class EnginesNpmLibraryHandler {
         var loader = libraryManager.getLibrarySourceLoader();
         // LUKETODO:  hwo to handle this?
         // LUKETODO:  only the main Library at this point, no need for multiples
-        var optMainLibrary = npmResourceHolder.getOptMainLibrary();
 
         addNamespacesToNamespaceManager(npmResourceHolder, libraryManager);
 
@@ -27,13 +25,11 @@ public class EnginesNpmLibraryHandler {
         // LUKETODO:  what's this reader for?
         var reader = new org.cqframework.fhir.npm.LibraryLoader(FhirVersionEnum.R4.getFhirVersionString());
 
-        final Library library = optMainLibrary.orElse(null);
-
-        loader.registerProvider(new NpmLibraryProvider2(npmResourceHolderGetter, npmResourceHolder));
+        loader.registerProvider(new NpmLibraryProvider(npmResourceHolderGetter, npmResourceHolder));
 
         modelManager
                 .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider2(npmResourceHolderGetter, npmResourceHolder));
+                .registerModelInfoProvider(new NpmModelInfoProvider(npmResourceHolderGetter, npmResourceHolder));
     }
 
     // LUKETODO:  why do we need to do this?  good question for JP

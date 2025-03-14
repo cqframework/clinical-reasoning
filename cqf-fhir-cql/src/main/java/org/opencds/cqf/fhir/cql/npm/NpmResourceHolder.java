@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 
 // LUKETODO:  find a proper home for this later
 // LUKETODO:  javadoc
@@ -18,13 +19,12 @@ public class NpmResourceHolder {
     @Nullable
     private final Library mainLibrary;
 
-    private final List<NamespaceInfo> namespaceInfos;
+    private final List<NpmPackage> npmPackages;
 
-    public NpmResourceHolder(
-            @Nullable Measure measure, @Nullable Library mainLibrary, List<NamespaceInfo> namespaceInfos) {
+    public NpmResourceHolder(@Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
         this.measure = measure;
         this.mainLibrary = mainLibrary;
-        this.namespaceInfos = namespaceInfos;
+        this.npmPackages = npmPackages;
     }
 
     public Optional<Measure> getMeasure() {
@@ -36,6 +36,8 @@ public class NpmResourceHolder {
     }
 
     public List<NamespaceInfo> getNamespaceInfos() {
-        return namespaceInfos;
+        return npmPackages.stream()
+                .map(npmPackage -> new NamespaceInfo(npmPackage.name(), npmPackage.canonical()))
+                .toList();
     }
 }

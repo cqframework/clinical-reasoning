@@ -26,11 +26,10 @@ public class NpmModelInfoProvider2 implements ModelInfoProvider {
 
         final Optional<Library> optLoadedLibrary = npmResourceHolderGetter.loadLibrary(url);
 
-        final Optional<Attachment> optCqlData = optLoadedLibrary.map(Library::getContent)
-            .stream()
-            .flatMap(Collection::stream)
-            .filter(attachment -> "application/xml".equals(attachment.getContentType()))
-            .findFirst();
+        final Optional<Attachment> optCqlData = optLoadedLibrary.map(Library::getContent).stream()
+                .flatMap(Collection::stream)
+                .filter(attachment -> "application/xml".equals(attachment.getContentType()))
+                .findFirst();
 
         if (optCqlData.isEmpty()) {
             return null;

@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cql.npm;
 import jakarta.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -35,8 +34,8 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
         final List<Attachment> content = library.getContent();
 
         final Optional<Attachment> optCqlData = content.stream()
-            .filter(c -> c.getContentType().equals(TEXT_CQL))
-            .findFirst();
+                .filter(c -> c.getContentType().equals(TEXT_CQL))
+                .findFirst();
 
         if (optCqlData.isEmpty()) {
             return null;

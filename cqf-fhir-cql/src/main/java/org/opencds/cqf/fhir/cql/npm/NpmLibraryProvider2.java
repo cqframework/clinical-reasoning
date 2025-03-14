@@ -25,11 +25,10 @@ public class NpmLibraryProvider2 implements LibrarySourceProvider {
 
         final Optional<Library> optLoadedLibrary = npmResourceHolderGetter.loadLibrary(url);
 
-        final Optional<Attachment> optCqlData = optLoadedLibrary.map(Library::getContent)
-            .stream()
-            .flatMap(Collection::stream)
-            .filter(content -> content.getContentType().equals(TEXT_CQL))
-            .findFirst();
+        final Optional<Attachment> optCqlData = optLoadedLibrary.map(Library::getContent).stream()
+                .flatMap(Collection::stream)
+                .filter(content -> content.getContentType().equals(TEXT_CQL))
+                .findFirst();
 
         if (optCqlData.isEmpty()) {
             return null;

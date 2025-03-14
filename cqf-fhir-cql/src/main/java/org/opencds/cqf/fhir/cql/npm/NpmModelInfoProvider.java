@@ -35,8 +35,8 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
         final List<Attachment> content = library.getContent();
 
         final Optional<Attachment> optCqlData = content.stream()
-            .filter(attachment -> "application/xml".equals(attachment.getContentType()))
-            .findFirst();
+                .filter(attachment -> "application/xml".equals(attachment.getContentType()))
+                .findFirst();
 
         if (optCqlData.isEmpty()) {
             return null;

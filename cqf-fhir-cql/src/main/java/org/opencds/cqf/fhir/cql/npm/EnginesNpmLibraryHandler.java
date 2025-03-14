@@ -32,7 +32,7 @@ public class EnginesNpmLibraryHandler {
     }
 
     public static void registerNpmResourceHolderGetter(
-        LibraryManager libraryManager, ModelManager modelManager, NpmResourceHolderGetter npmResourceHolderGetter) {
+            LibraryManager libraryManager, ModelManager modelManager, NpmResourceHolderGetter npmResourceHolderGetter) {
 
         var loader = libraryManager.getLibrarySourceLoader();
 

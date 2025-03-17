@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql.engine.retrieve;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private static final Logger logger = LoggerFactory.getLogger(BaseRetrieveProvider.class);
+    private final FhirContext fhirContext;
     private final CodeExtractor codeUtil;
     private final IFhirPath fhirPath;
     private final RetrieveSettings retrieveSettings;
@@ -55,7 +57,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             final FhirContext fhirContext,
             final TerminologyProvider terminologyProvider,
             final RetrieveSettings retrieveSettings) {
-        requireNonNull(fhirContext, "fhirContext can not be null.");
+        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null.");
         this.retrieveSettings = requireNonNull(retrieveSettings, "retrieveSettings can not be null");
         this.terminologyProvider = requireNonNull(terminologyProvider, "terminologyProvider can not be null");
         this.codeUtil = new CodeExtractor(fhirContext);
@@ -303,7 +305,10 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // supports the _profile
         // parameter, we should add it.
         if (this.getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF && StringUtils.isNotBlank(templateId)) {
-            searchParams.put("_profile", Collections.singletonList(new UriParam(templateId)));
+            var profileParam = fhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R5)
+                    ? new UriParam(templateId)
+                    : new ReferenceParam(templateId);
+            searchParams.put("_profile", Collections.singletonList(profileParam));
         }
     }
 

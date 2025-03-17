@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.ExtensionUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -302,7 +303,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // supports the _profile
         // parameter, we should add it.
         if (this.getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF && StringUtils.isNotBlank(templateId)) {
-            searchParams.put("_profile", Collections.singletonList(new ReferenceParam(templateId)));
+            searchParams.put("_profile", Collections.singletonList(new UriParam(templateId)));
         }
     }
 

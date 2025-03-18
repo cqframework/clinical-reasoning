@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -17,7 +19,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -213,17 +214,34 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
     }
 
     @Test
-    public void testR4DiscoveryServiceWithEffectiveDataRequirements() {
+    void testResolveService() {
+        var planDefinition = new PlanDefinition();
+        planDefinition.setId("test");
+        planDefinition.setUrl("test");
+        repository.update(planDefinition);
+        var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
+        var response = fixture.resolveService();
+        // PlanDefinition has no trigger so no service will be resolved
+        assertNull(response);
+        var library = new Library();
+        var invalidResourceTypeResponse = fixture.resolveService(library);
+        assertNull(invalidResourceTypeResponse);
+    }
+
+    @Test
+    void testDiscoveryServiceWithEffectiveDataRequirements() {
         var planDefinition = new PlanDefinition();
         planDefinition.addExtension(
                 CRMI_EFFECTIVE_DATA_REQUIREMENTS,
                 new CanonicalType("http://hl7.org/fhir/uv/crmi/Library/moduledefinition-example"));
         planDefinition.setId("ModuleDefinitionTest");
-        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
+        repository.update(planDefinition);
         repository.update(ClasspathUtil.loadResource(fhirContext, Library.class, "ModuleDefinitionExample.json"));
-        var fixture = new CrDiscoveryService(planDefAdapter.getId(), repository);
+        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
         var actual = fixture.getPrefetchUrlList(planDefAdapter);
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
         ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList expected =
                 new ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList();
         expected.addAll(

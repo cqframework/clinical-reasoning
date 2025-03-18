@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
+import static org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.CrDiscoveryElement.getCdsServiceJson;
 import static org.opencds.cqf.fhir.utility.Constants.CQF_FHIR_QUERY_PATTERN;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
@@ -59,7 +60,7 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     protected CdsServiceJson resolveService(IBaseResource resource) {
         if (resource != null && resource.fhirType().equals("PlanDefinition")) {
             var planDef = (IPlanDefinitionAdapter) adapterFactory.createResource(resource);
-            return new CrDiscoveryElement(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
+            return getCdsServiceJson(planDef, getPrefetchUrlList(planDef));
         }
         return null;
     }

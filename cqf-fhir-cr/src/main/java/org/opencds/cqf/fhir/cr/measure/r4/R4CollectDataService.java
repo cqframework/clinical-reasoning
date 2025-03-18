@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -27,18 +27,18 @@ public class R4CollectDataService {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
-    private final NpmResourceHolderGetter npmResourceHolderGetter;
+    private final R4NpmPackageLoader r4NpmPackageLoader;
 
     public R4CollectDataService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtils measureServiceUtils,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            R4NpmPackageLoader r4NpmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
-        this.npmResourceHolderGetter = npmResourceHolderGetter;
+        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
     /**
@@ -75,7 +75,7 @@ public class R4CollectDataService {
                 this.measureEvaluationOptions,
                 this.subjectProvider,
                 this.measureServiceUtils,
-                this.npmResourceHolderGetter);
+                this.r4NpmPackageLoader);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);

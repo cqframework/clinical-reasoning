@@ -28,8 +28,8 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -46,20 +46,20 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
-    private final NpmResourceHolderGetter npmResourceHolderGetter;
+    private final R4NpmPackageLoader r4NpmPackageLoader;
 
     public R4MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
             R4MeasureServiceUtils r4MeasureServiceUtils,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            R4NpmPackageLoader r4NpmPackageLoader) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
-        this.npmResourceHolderGetter = npmResourceHolderGetter;
+        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
     public MeasureReport evaluateMeasure(
@@ -94,8 +94,8 @@ public class R4MeasureProcessor {
             Parameters parameters,
             MeasureEvalType evalType) {
         var npmResourceHolder = measure.isLeft()
-                ? npmResourceHolderGetter.loadNpmResources(measure.leftOrThrow())
-                : NpmResourceHolder.EMPTY;
+                ? r4NpmPackageLoader.loadNpmResources(measure.leftOrThrow())
+                : R4NpmResourceHolder.EMPTY;
 
         var retrievedMeasure = getMeasure(measure, npmResourceHolder);
 
@@ -111,9 +111,10 @@ public class R4MeasureProcessor {
                 npmResourceHolder);
     }
 
-    private Measure getMeasure(Either3<CanonicalType, IdType, Measure> measure, NpmResourceHolder npmResourceHolder) {
-        if (npmResourceHolder.getMeasure().isPresent()) {
-            return npmResourceHolder.getMeasure().get();
+    private Measure getMeasure(
+            Either3<CanonicalType, IdType, Measure> measure, R4NpmResourceHolder r4NpmResourceHolder) {
+        if (r4NpmResourceHolder.getMeasure().isPresent()) {
+            return r4NpmResourceHolder.getMeasure().get();
         }
 
         return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
@@ -128,7 +129,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
-            NpmResourceHolder npmResourceHolder) {
+            R4NpmResourceHolder r4NpmResourceHolder) {
 
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -144,7 +145,7 @@ public class R4MeasureProcessor {
         var url = measure.getLibrary().get(0).asStringValue();
 
         // LUKETODO:  we try to find the Library, so try the Holder first
-        if (npmResourceHolder.getOptMainLibrary().isEmpty()) {
+        if (r4NpmResourceHolder.getOptMainLibrary().isEmpty()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
                 var errorMsg = String.format("Unable to find Library with url: %s", url);
@@ -157,11 +158,12 @@ public class R4MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                npmResourceHolderGetter,
-                npmResourceHolder);
+                r4NpmPackageLoader,
+                r4NpmResourceHolder);
 
         CompiledLibrary lib;
         try {
+            // LUKETODO:  this is one code path where we trigger the R4NpmResourceHolder to load the Library
             lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(

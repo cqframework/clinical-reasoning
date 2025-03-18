@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -45,28 +45,24 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private R4MeasureProcessor r4Processor;
 
     private R4MeasureServiceUtils r4MeasureServiceUtils;
-    private NpmResourceHolderGetter npmResourceHolderGetter;
+    private R4NpmPackageLoader r4NpmPackageLoader;
 
     public R4MultiMeasureService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            R4NpmPackageLoader r4NpmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
-        this.npmResourceHolderGetter = npmResourceHolderGetter;
+        this.r4NpmPackageLoader = r4NpmPackageLoader;
 
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(
-                repository,
-                this.measureEvaluationOptions,
-                subjectProvider,
-                r4MeasureServiceUtils,
-                npmResourceHolderGetter);
+                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils, r4NpmPackageLoader);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -99,7 +95,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     this.measureEvaluationOptions,
                     subjectProvider,
                     r4MeasureServiceUtils,
-                    npmResourceHolderGetter);
+                    r4NpmPackageLoader);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }

@@ -12,30 +12,24 @@ public class EnginesNpmLibraryHandler {
     public static void registerNpmResourceHolderGetter(
             LibraryManager libraryManager,
             ModelManager modelManager,
-            NpmResourceHolderGetter npmResourceHolderGetter,
-            NpmResourceHolder npmResourceHolder) {
+            R4NpmPackageLoader r4NpmPackageLoader,
+            R4NpmResourceHolder r4NpmResourceHolder) {
 
         var loader = libraryManager.getLibrarySourceLoader();
-        // LUKETODO:  hwo to handle this?
-        // LUKETODO:  only the main Library at this point, no need for multiples
 
-        addNamespacesToNamespaceManager(npmResourceHolder, libraryManager);
+        addNamespacesToNamespaceManager(r4NpmResourceHolder, libraryManager);
 
-        // LUKETODO:  figure out how to properly derive the FHIR version later
-        // LUKETODO:  what's this reader for?
-        var reader = new org.cqframework.fhir.npm.LibraryLoader(FhirVersionEnum.R4.getFhirVersionString());
-
-        loader.registerProvider(new NpmLibraryProvider(npmResourceHolderGetter, npmResourceHolder));
+        loader.registerProvider(new NpmLibraryProvider(r4NpmPackageLoader, r4NpmResourceHolder));
 
         modelManager
                 .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(npmResourceHolderGetter, npmResourceHolder));
+                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader, r4NpmResourceHolder));
     }
 
     // LUKETODO:  why do we need to do this?  good question for JP
     private static void addNamespacesToNamespaceManager(
-            NpmResourceHolder npmResourceHolder, LibraryManager libraryManager) {
-        npmResourceHolder
+            R4NpmResourceHolder r4NpmResourceHolder, LibraryManager libraryManager) {
+        r4NpmResourceHolder
                 .getNamespaceInfos()
                 .forEach(namespaceInfo -> libraryManager.getNamespaceManager().addNamespace(namespaceInfo));
     }

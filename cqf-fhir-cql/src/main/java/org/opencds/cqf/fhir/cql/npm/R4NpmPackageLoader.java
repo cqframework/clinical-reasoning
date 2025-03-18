@@ -7,13 +7,14 @@ import org.hl7.fhir.r4.model.Library;
 
 // LUKETODO:  javadoc
 // LUKETODO:  better name?
-public interface NpmResourceHolderGetter {
+// LUKETODO:  should we try to account for other FHIR versions?  should these be FHIR version specific?
+public interface R4NpmPackageLoader {
 
-    NpmResourceHolderGetter DEFAULT = new NpmResourceHolderGetter() {};
+    R4NpmPackageLoader DEFAULT = new R4NpmPackageLoader() {};
 
     // LUKETODO:  unit test this:
-    default NpmResourceHolder loadNpmResources(CanonicalType measureUrl) {
-        return NpmResourceHolder.EMPTY;
+    default R4NpmResourceHolder loadNpmResources(CanonicalType measureUrl) {
+        return R4NpmResourceHolder.EMPTY;
     }
 
     // LUKETODO:  think about this API:  are we getting a Library or an InputStream?
@@ -24,10 +25,10 @@ public interface NpmResourceHolderGetter {
     /**
      * Hackish:  Either the downstream app injected this or we default to a NO-OP implementation.
      *
-     * @param npmResourceHolderGetter The NpmResourceHolderGetter, if injected by the downstream app, otherwise null.
+     * @param r4NpmPackageLoader The NpmResourceHolderGetter, if injected by the downstream app, otherwise null.
      * @return Either the downstream app's NpmResourceHolderGetter or a no-op implementation.
      */
-    static NpmResourceHolderGetter getDefaultIfEmpty(@Nullable NpmResourceHolderGetter npmResourceHolderGetter) {
-        return Optional.ofNullable(npmResourceHolderGetter).orElse(NpmResourceHolderGetter.DEFAULT);
+    static R4NpmPackageLoader getDefaultIfEmpty(@Nullable R4NpmPackageLoader r4NpmPackageLoader) {
+        return Optional.ofNullable(r4NpmPackageLoader).orElse(R4NpmPackageLoader.DEFAULT);
     }
 }

@@ -20,8 +20,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -70,7 +69,7 @@ public class CollectData {
         private Repository repository;
         private final MeasureEvaluationOptions evaluationOptions;
         private final R4MeasureServiceUtils measureServiceUtils;
-        private final NpmResourceHolderGetter npmResourceHolderGetter;
+        private final R4NpmPackageLoader r4NpmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -87,13 +86,7 @@ public class CollectData {
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
 
-            // LUKETODO: implement this:
-            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
-                @Override
-                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
-                    return null;
-                }
-            };
+            this.r4NpmPackageLoader = R4NpmPackageLoader.DEFAULT;
         }
 
         public Given repository(Repository repository) {
@@ -109,8 +102,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(
-                    repository, evaluationOptions, measureServiceUtils, npmResourceHolderGetter);
+            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils, r4NpmPackageLoader);
         }
 
         public When when() {

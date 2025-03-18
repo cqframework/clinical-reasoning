@@ -36,8 +36,8 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
@@ -312,7 +312,7 @@ class EnginesTest {
 
         // LUKETODO:  pass a non-empty value?
         var engine = Engines.forRepository(
-                repository, settings, additionalData, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
+                repository, settings, additionalData, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
 
         assertNotNull(engine.getState());
 
@@ -400,6 +400,6 @@ class EnginesTest {
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
         // LUKETODO:  pass a non-empty value?
         return Engines.forRepository(
-                repository, settings, bundle, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
+                repository, settings, bundle, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
     }
 }

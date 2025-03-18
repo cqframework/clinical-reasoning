@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.spring.measure;
 
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;
@@ -27,8 +27,8 @@ public class MeasureConfiguration {
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
             R4MeasureServiceUtils measureServiceUtils,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            R4NpmPackageLoader r4NpmPackageLoader) {
         return new R4MeasureProcessor(
-                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, npmResourceHolderGetter);
+                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, r4NpmPackageLoader);
     }
 }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,10 @@ import org.cqframework.fhir.npm.ILibraryReader;
 import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.utilities.LoggerAdapter;
+import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.cql.model.ModelInfoProvider;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -33,8 +38,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -53,15 +58,15 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, NpmResourceHolderGetter.DEFAULT, NpmResourceHolder.EMPTY);
+        return forRepository(repository, settings, null, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
     }
 
     public static CqlEngine forRepository(
             Repository repository,
             EvaluationSettings settings,
             IBaseBundle additionalData,
-            NpmResourceHolderGetter npmResourceHolderGetter,
-            NpmResourceHolder npmResourceHolder) {
+            R4NpmPackageLoader r4NpmPackageLoader,
+            R4NpmResourceHolder r4NpmResourceHolder) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -70,7 +75,7 @@ public class Engines {
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(
-                repository, settings, terminologyProvider, dataProviders, npmResourceHolderGetter, npmResourceHolder);
+                repository, settings, terminologyProvider, dataProviders, r4NpmPackageLoader, r4NpmResourceHolder);
         return createEngine(environment, settings);
     }
 
@@ -79,8 +84,8 @@ public class Engines {
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
-            NpmResourceHolderGetter npmResourceHolderGetter,
-            NpmResourceHolder npmResourceHolder) {
+            R4NpmPackageLoader r4NpmPackageLoader,
+            R4NpmResourceHolder r4NpmResourceHolder) {
 
         var modelManager =
                 settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
@@ -91,7 +96,7 @@ public class Engines {
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
         EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(
-                libraryManager, modelManager, npmResourceHolderGetter, npmResourceHolder);
+                libraryManager, modelManager, r4NpmPackageLoader, r4NpmResourceHolder);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }
@@ -122,14 +127,32 @@ public class Engines {
         ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
                 npmProcessor.getIgContext().getFhirVersion());
         LoggerAdapter adapter = new LoggerAdapter(logger);
-        libraryManager
-                .getLibrarySourceLoader()
-                .registerProvider(new NpmLibrarySourceProvider(
-                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-        modelManager
-                .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(
-                        npmProcessor.getPackageManager().getNpmList(), reader, adapter));
+
+        // LUKETODO:  reverse all of this:
+        final NpmLibrarySourceProvider librarySourceProvider =
+                new NpmLibrarySourceProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter);
+        final NpmModelInfoProvider modelInfoProvider =
+                new NpmModelInfoProvider(npmProcessor.getPackageManager().getNpmList(), reader, adapter);
+
+        final LibrarySourceProvider loggingLibrarySourceProvider = new LibrarySourceProvider() {
+            @Override
+            public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
+                logger.info("1234: Find matching library for " + versionedIdentifier);
+                return librarySourceProvider.getLibrarySource(versionedIdentifier);
+            }
+        };
+
+        final ModelInfoProvider loggingModelInfoProvider = new ModelInfoProvider() {
+            @Override
+            public ModelInfo load(ModelIdentifier modelIdentifier) {
+                logger.info("1234: Find matching library for " + modelIdentifier);
+                return modelInfoProvider.load(modelIdentifier);
+            }
+        };
+
+        libraryManager.getLibrarySourceLoader().registerProvider(loggingLibrarySourceProvider);
+
+        modelManager.getModelInfoLoader().registerModelInfoProvider(loggingModelInfoProvider);
 
         // TODO: This is a workaround for: a) multiple packages with the same package id will be in the dependency
         // list, and b) there are packages with different package ids but the same base canonical (e.g.

@@ -13,7 +13,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
@@ -50,7 +50,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
-        private final NpmResourceHolderGetter npmResourceHolderGetter;
+        private final R4NpmPackageLoader r4NpmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -69,7 +69,7 @@ public class Measure {
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
 
-            this.npmResourceHolderGetter = NpmResourceHolderGetter.DEFAULT;
+            this.r4NpmPackageLoader = R4NpmPackageLoader.DEFAULT;
         }
 
         public Given repositoryFor(String repositoryPath) {
@@ -87,11 +87,7 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(
-                    repository,
-                    evaluationOptions,
-                    measurePeriodValidator,
-                    measureServiceUtils,
-                    npmResourceHolderGetter);
+                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, r4NpmPackageLoader);
         }
 
         public When when() {

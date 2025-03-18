@@ -12,8 +12,12 @@ import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryFhirLibrarySourceProvider.class);
 
     private final Repository repository;
     private final FhirContext fhirContext;
@@ -37,6 +41,8 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
 
     @Override
     protected IBaseResource getLibrary(VersionedIdentifier libraryIdentifier) {
+
+        logger.info("1234: Get library for " + libraryIdentifier);
 
         @SuppressWarnings("unchecked")
         var bt = (Class<IBaseBundle>)

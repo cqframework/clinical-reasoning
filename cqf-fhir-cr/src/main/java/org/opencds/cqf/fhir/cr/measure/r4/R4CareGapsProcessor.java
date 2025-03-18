@@ -22,7 +22,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -54,7 +54,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
-            NpmResourceHolderGetter npmResourceHolderGetter) {
+            R4NpmPackageLoader r4NpmPackageLoader) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 
@@ -66,7 +66,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
                 serverBase,
                 configuredResources,
                 measurePeriodValidator,
-                npmResourceHolderGetter);
+                r4NpmPackageLoader);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 

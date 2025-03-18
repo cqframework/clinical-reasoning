@@ -41,8 +41,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolder;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -99,7 +98,7 @@ class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
-        private NpmResourceHolderGetter npmResourceHolderGetter;
+        private R4NpmPackageLoader r4NpmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -118,13 +117,7 @@ class MultiMeasure {
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
-            // LUKETODO:  implement
-            this.npmResourceHolderGetter = new NpmResourceHolderGetter() {
-                @Override
-                public NpmResourceHolder loadNpmResources(CanonicalType theMeasureUrl) {
-                    return null;
-                }
-            };
+            this.r4NpmPackageLoader = R4NpmPackageLoader.DEFAULT;
         }
 
         public MultiMeasure.Given repository(Repository repository) {
@@ -151,7 +144,7 @@ class MultiMeasure {
 
         private R4MultiMeasureService buildMeasureService() {
             return new R4MultiMeasureService(
-                    repository, evaluationOptions, serverBase, measurePeriodValidator, npmResourceHolderGetter);
+                    repository, evaluationOptions, serverBase, measurePeriodValidator, r4NpmPackageLoader);
         }
 
         public MultiMeasure.When when() {

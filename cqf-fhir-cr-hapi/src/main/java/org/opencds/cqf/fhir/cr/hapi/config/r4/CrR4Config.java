@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.RepositoryFactoryForRepositoryInterface;
@@ -53,7 +53,7 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
+            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4MeasureService(
                 repositoryFactory.create(rd),
                 evaluationOptions,
@@ -96,7 +96,7 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
+            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4CollectDataService(
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
@@ -122,7 +122,7 @@ public class CrR4Config {
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
+            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
@@ -168,8 +168,7 @@ public class CrR4Config {
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }
 
-    private NpmResourceHolderGetter npmResourceHolderGetter(
-            Optional<NpmResourceHolderGetter> optNpmResourceHolderGetter) {
-        return NpmResourceHolderGetter.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
+    private R4NpmPackageLoader npmResourceHolderGetter(Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
+        return R4NpmPackageLoader.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
     }
 }

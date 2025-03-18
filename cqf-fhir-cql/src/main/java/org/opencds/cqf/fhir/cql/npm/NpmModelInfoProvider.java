@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql.npm;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -14,26 +15,26 @@ import org.hl7.fhir.r4.model.Library;
 // LUKETODO:  javadoc
 public class NpmModelInfoProvider implements ModelInfoProvider {
 
-    private final NpmResourceHolder npmResourceHolder;
-    private final NpmResourceHolderGetter npmResourceHolderGetter;
+    private static final String APPLICATION_XML = "application/xml";
 
-    public NpmModelInfoProvider(NpmResourceHolderGetter npmResourceHolderGetter, NpmResourceHolder npmResourceHolder) {
-        this.npmResourceHolder = npmResourceHolder;
-        this.npmResourceHolderGetter = npmResourceHolderGetter;
+    private final R4NpmResourceHolder r4NpmResourceHolder;
+    // LUKETODO: do we need this anymore?
+    private final R4NpmPackageLoader r4NpmPackageLoader;
+
+    public NpmModelInfoProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceHolder r4NpmResourceHolder) {
+        this.r4NpmResourceHolder = r4NpmResourceHolder;
+        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
     @Override
+    @Nullable
     public ModelInfo load(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> optLibrary = findLibrary(modelIdentifier);
-
-        if (optLibrary.isEmpty()) {
-            return null;
-        }
+        final Optional<Library> optLibrary = r4NpmResourceHolder.findMatchingLibrary(modelIdentifier);
 
         final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
                 .flatMap(Collection::stream)
-                .filter(attachment -> "application/xml".equals(attachment.getContentType()))
+                .filter(attachment -> APPLICATION_XML.equals(attachment.getContentType()))
                 .findFirst();
 
         if (optCqlData.isEmpty()) {
@@ -45,30 +46,5 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
         final InputStream inputStream = new ByteArrayInputStream(attachment.getData());
 
         return JAXB.unmarshal(inputStream, ModelInfo.class);
-    }
-
-    private Optional<Library> findLibrary(ModelIdentifier modelIdentifier) {
-
-        final String url = toUrl(modelIdentifier);
-
-        final Optional<Library> optMainLibrary = npmResourceHolder.getOptMainLibrary();
-
-        if (npmResourceHolder.doesLibraryMatch(modelIdentifier)) {
-            return optMainLibrary;
-        }
-
-        return npmResourceHolderGetter.loadLibrary(url);
-    }
-
-    // LUKETODO:  this is not correct:
-    private static String toUrl(ModelIdentifier modelIdentifier) {
-        //        org.hl7.fhir
-        //
-        //        {https://hl7.org/fhir}/Library/{id}
-        // org.hl7.fhir....
-        // LUKETODO:  convert system to URL
-
-        // org.hl7.fhir  // from CQL  Use NamespaceManager and NamespaceInfo to conver
-        return "https://" + modelIdentifier.getSystem() + "/Library/" + modelIdentifier.getId();
     }
 }

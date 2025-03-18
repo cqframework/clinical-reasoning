@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.NpmResourceHolderGetter;
+import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -25,14 +25,14 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
-    private final NpmResourceHolderGetter resourceHolderGetter;
+    private final R4NpmPackageLoader resourceHolderGetter;
 
     public R4MeasureService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtils measureServiceUtils,
-            NpmResourceHolderGetter resourceHolderGetter) {
+            R4NpmPackageLoader resourceHolderGetter) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;

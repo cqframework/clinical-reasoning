@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cql.npm;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.slf4j.Logger;

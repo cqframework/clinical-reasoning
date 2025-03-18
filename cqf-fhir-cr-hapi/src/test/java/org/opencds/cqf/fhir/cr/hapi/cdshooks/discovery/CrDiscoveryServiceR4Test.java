@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ClasspathUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -15,12 +17,15 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
+
     private static final IdType PLAN_DEF_ID_TYPE = new IdType(PLAN_DEF_ID);
 
     private static final PrefetchUrlList PREFETCH_URL_LIST_EMPTY = new PrefetchUrlList();
@@ -205,5 +210,27 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
                 .setUrl(url.getValue())
                 .setDataRequirement(dataRequirement.length > 0 ? Arrays.asList(dataRequirement) : null)
                 .setId(libraryId);
+    }
+
+    @Test
+    public void testR4DiscoveryServiceWithEffectiveDataRequirements() {
+        var planDefinition = new PlanDefinition();
+        planDefinition.addExtension(
+                CRMI_EFFECTIVE_DATA_REQUIREMENTS,
+                new CanonicalType("http://hl7.org/fhir/uv/crmi/Library/moduledefinition-example"));
+        planDefinition.setId("ModuleDefinitionTest");
+        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        repository.update(ClasspathUtil.loadResource(fhirContext, Library.class, "ModuleDefinitionExample.json"));
+        var fixture = new CrDiscoveryService(planDefAdapter.getId(), repository);
+        var actual = fixture.getPrefetchUrlList(planDefAdapter);
+        Assertions.assertNotNull(actual);
+        ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList expected =
+                new ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList();
+        expected.addAll(
+                Arrays.asList(
+                        "Patient?_id={{context.patientId}}",
+                        "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+                        "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"));
+        assertEquals(expected, actual);
     }
 }

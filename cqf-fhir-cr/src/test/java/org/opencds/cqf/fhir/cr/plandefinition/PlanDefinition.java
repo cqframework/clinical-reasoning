@@ -145,6 +145,7 @@ public class PlanDefinition {
         public When(Repository repository, PlanDefinitionProcessor processor) {
             this.repository = repository;
             this.processor = processor;
+            useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
 

@@ -39,7 +39,7 @@ class CrDiscoveryElementTest extends BaseCdsCrTest {
         var planDefActionInvalidTrigger = adapterFactory.createPlanDefinition(new PlanDefinition()
                 .addAction(new PlanDefinitionActionComponent()
                         .setDescription("test")
-                        .addTrigger(new TriggerDefinition())));
+                        .addTrigger(new TriggerDefinition().setType(TriggerType.DATAADDED))));
         assertNull(getCdsServiceJson(planDefActionInvalidTrigger, null));
         var planDefActionTriggerNoInfo = adapterFactory.createPlanDefinition(new PlanDefinition()
                 .addAction(new PlanDefinitionActionComponent()
@@ -67,7 +67,8 @@ class CrDiscoveryElementTest extends BaseCdsCrTest {
         planDefinition.setId("ModuleDefinitionTest");
         planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
         repository.update(planDefinition);
-        repository.update(ClasspathUtil.loadResource(fhirContext, Library.class, "ModuleDefinitionExample.json"));
+        repository.update(ClasspathUtil.loadResource(
+                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json"));
         var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
         var prefetchList =
                 new CrDiscoveryService(planDefinition.getIdElement(), repository).getPrefetchUrlList(planDefAdapter);

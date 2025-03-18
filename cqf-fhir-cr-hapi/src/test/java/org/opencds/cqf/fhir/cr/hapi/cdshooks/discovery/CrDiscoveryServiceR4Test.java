@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -237,7 +238,8 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
         planDefinition.setId("ModuleDefinitionTest");
         planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
         repository.update(planDefinition);
-        repository.update(ClasspathUtil.loadResource(fhirContext, Library.class, "ModuleDefinitionExample.json"));
+        repository.update(ClasspathUtil.loadResource(
+                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json"));
         var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
         var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
         var actual = fixture.getPrefetchUrlList(planDefAdapter);
@@ -250,5 +252,29 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
                         "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
                         "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"));
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void testResolveValueSetCodesWithComposeInclude() {
+        var activeCondition = ClasspathUtil.loadResource(
+                fhirContext, ValueSet.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ValueSet-active-condition.json");
+        repository.update(activeCondition);
+        var response = testSubject.resolveValueSetCodes(activeCondition.getUrlElement());
+        assertEquals(1, response.size());
+        var codes = response.get(0).split(",");
+        assertEquals(3, codes.length);
+    }
+
+    @Test
+    void testResolveValueSetCodesWithExpansionContains() {
+        var grouper = ClasspathUtil.loadResource(
+                fhirContext,
+                ValueSet.class,
+                "org/opencds/cqf/fhir/cr/hapi/cdshooks/ValueSet-aslp-a1-de1-codes-grouper.json");
+        repository.update(grouper);
+        var response = testSubject.resolveValueSetCodes(grouper.getUrlElement());
+        assertEquals(1, response.size());
+        var codes = response.get(0).split(",");
+        assertEquals(13, codes.length);
     }
 }

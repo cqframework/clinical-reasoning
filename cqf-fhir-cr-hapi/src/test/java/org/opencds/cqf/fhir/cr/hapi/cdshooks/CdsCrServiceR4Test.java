@@ -49,10 +49,12 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
     @Test
     public void testR4Params() throws IOException {
-        final String rawRequest = ClasspathUtil.loadResource("ASLPCrdServiceRequest.json");
+        final String rawRequest =
+                ClasspathUtil.loadResource("org/opencds/cqf/fhir/cr/hapi/cdshooks/ASLPCrdServiceRequest.json");
         final CdsServiceRequestJson cdsServiceRequestJson =
                 objectMapper.readValue(rawRequest, CdsServiceRequestJson.class);
-        final Bundle bundle = ClasspathUtil.loadResource(fhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
+        final Bundle bundle = ClasspathUtil.loadResource(
+                fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
         final Repository repository = new InMemoryFhirRepository(fhirContext, bundle);
         final RequestDetails requestDetails = new SystemRequestDetails();
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
@@ -66,10 +68,11 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
     @Test
     public void testR4Response() {
-        final Bundle bundle = ClasspathUtil.loadResource(fhirContext, Bundle.class, "Bundle-ASLPCrd-Content.json");
+        final Bundle bundle = ClasspathUtil.loadResource(
+                fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
         final Repository repository = new InMemoryFhirRepository(fhirContext, bundle);
-        final Bundle responseBundle =
-                ClasspathUtil.loadResource(fhirContext, Bundle.class, "Bundle-ASLPCrd-Response.json");
+        final Bundle responseBundle = ClasspathUtil.loadResource(
+                fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Response.json");
         final RequestDetails requestDetails = new SystemRequestDetails();
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);

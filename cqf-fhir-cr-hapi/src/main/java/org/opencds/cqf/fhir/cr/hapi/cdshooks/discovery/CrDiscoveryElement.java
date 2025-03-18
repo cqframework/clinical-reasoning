@@ -6,6 +6,9 @@ import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 
 public class CrDiscoveryElement {
+
+    private CrDiscoveryElement() {}
+
     protected static String getKey(int itemNo) {
         return "item" + itemNo;
     }

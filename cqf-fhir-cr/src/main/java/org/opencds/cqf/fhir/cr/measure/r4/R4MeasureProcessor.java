@@ -29,7 +29,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -95,7 +95,7 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType) {
         var npmResourceHolder = measure.isLeft()
                 ? r4NpmPackageLoader.loadNpmResources(measure.leftOrThrow())
-                : R4NpmResourceHolder.EMPTY;
+                : R4NpmResourceInfoForCql.EMPTY;
 
         var retrievedMeasure = getMeasure(measure, npmResourceHolder);
 
@@ -112,9 +112,9 @@ public class R4MeasureProcessor {
     }
 
     private Measure getMeasure(
-            Either3<CanonicalType, IdType, Measure> measure, R4NpmResourceHolder r4NpmResourceHolder) {
-        if (r4NpmResourceHolder.getMeasure().isPresent()) {
-            return r4NpmResourceHolder.getMeasure().get();
+            Either3<CanonicalType, IdType, Measure> measure, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+        if (r4NpmResourceInfoForCql.getMeasure().isPresent()) {
+            return r4NpmResourceInfoForCql.getMeasure().get();
         }
 
         return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
@@ -129,7 +129,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
-            R4NpmResourceHolder r4NpmResourceHolder) {
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
 
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -145,7 +145,7 @@ public class R4MeasureProcessor {
         var url = measure.getLibrary().get(0).asStringValue();
 
         // LUKETODO:  we try to find the Library, so try the Holder first
-        if (r4NpmResourceHolder.getOptMainLibrary().isEmpty()) {
+        if (r4NpmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
                 var errorMsg = String.format("Unable to find Library with url: %s", url);
@@ -159,7 +159,7 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
                 r4NpmPackageLoader,
-                r4NpmResourceHolder);
+            r4NpmResourceInfoForCql);
 
         CompiledLibrary lib;
         try {

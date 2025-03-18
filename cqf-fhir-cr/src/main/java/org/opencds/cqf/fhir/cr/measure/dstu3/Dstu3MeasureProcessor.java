@@ -24,7 +24,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -96,7 +96,7 @@ public class Dstu3MeasureProcessor {
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
                 R4NpmPackageLoader.DEFAULT,
-                R4NpmResourceHolder.EMPTY);
+                R4NpmResourceInfoForCql.EMPTY);
 
         CompiledLibrary lib;
         try {

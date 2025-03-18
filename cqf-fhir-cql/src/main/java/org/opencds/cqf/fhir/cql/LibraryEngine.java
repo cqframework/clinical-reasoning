@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
@@ -136,7 +136,7 @@ public class LibraryEngine {
 
         // LUKETODO:  can we ever get a non-empty value here?
         var engine = Engines.forRepository(
-                repository, requestSettings, bundle, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
+                repository, requestSettings, bundle, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -304,7 +304,7 @@ public class LibraryEngine {
         if (engine == null) {
             // LUKETODO:  can we ever get a non-empty value here?
             engine = Engines.forRepository(
-                    repository, settings, additionalData, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
+                    repository, settings, additionalData, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

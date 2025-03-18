@@ -17,12 +17,12 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
 
     private static final String APPLICATION_XML = "application/xml";
 
-    private final R4NpmResourceHolder r4NpmResourceHolder;
+    private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
     // LUKETODO: do we need this anymore?
     private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmModelInfoProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceHolder r4NpmResourceHolder) {
-        this.r4NpmResourceHolder = r4NpmResourceHolder;
+    public NpmModelInfoProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+        this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
         this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
@@ -30,7 +30,7 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     @Nullable
     public ModelInfo load(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> optLibrary = r4NpmResourceHolder.findMatchingLibrary(modelIdentifier);
+        final Optional<Library> optLibrary = r4NpmResourceInfoForCql.findMatchingLibrary(modelIdentifier);
 
         final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
                 .flatMap(Collection::stream)

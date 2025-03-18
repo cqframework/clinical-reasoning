@@ -39,7 +39,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
 import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceHolder;
+import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -58,7 +58,7 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, R4NpmPackageLoader.DEFAULT, R4NpmResourceHolder.EMPTY);
+        return forRepository(repository, settings, null, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
     }
 
     public static CqlEngine forRepository(
@@ -66,7 +66,7 @@ public class Engines {
             EvaluationSettings settings,
             IBaseBundle additionalData,
             R4NpmPackageLoader r4NpmPackageLoader,
-            R4NpmResourceHolder r4NpmResourceHolder) {
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -75,7 +75,8 @@ public class Engines {
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(
-                repository, settings, terminologyProvider, dataProviders, r4NpmPackageLoader, r4NpmResourceHolder);
+                repository, settings, terminologyProvider, dataProviders, r4NpmPackageLoader,
+            r4NpmResourceInfoForCql);
         return createEngine(environment, settings);
     }
 
@@ -85,7 +86,7 @@ public class Engines {
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
             R4NpmPackageLoader r4NpmPackageLoader,
-            R4NpmResourceHolder r4NpmResourceHolder) {
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
 
         var modelManager =
                 settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
@@ -96,7 +97,7 @@ public class Engines {
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
         EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(
-                libraryManager, modelManager, r4NpmPackageLoader, r4NpmResourceHolder);
+                libraryManager, modelManager, r4NpmPackageLoader, r4NpmResourceInfoForCql);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

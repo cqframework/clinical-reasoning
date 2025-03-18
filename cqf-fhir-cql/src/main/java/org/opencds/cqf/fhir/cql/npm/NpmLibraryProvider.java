@@ -18,12 +18,12 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
 
     private static final String TEXT_CQL = "text/cql";
 
-    private final R4NpmResourceHolder r4NpmResourceHolder;
+    private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
     // LUKETODO:  do we need this anymore?
     private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmLibraryProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceHolder r4NpmResourceHolder) {
-        this.r4NpmResourceHolder = r4NpmResourceHolder;
+    public NpmLibraryProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+        this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
         this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
@@ -39,7 +39,7 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        final Optional<Library> optLibrary = r4NpmResourceHolder.findMatchingLibrary(versionedIdentifier);
+        final Optional<Library> optLibrary = r4NpmResourceInfoForCql.findMatchingLibrary(versionedIdentifier);
 
         final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
                 .flatMap(Collection::stream)

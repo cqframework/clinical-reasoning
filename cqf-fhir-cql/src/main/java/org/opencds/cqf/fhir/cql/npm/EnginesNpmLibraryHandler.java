@@ -12,23 +12,24 @@ public class EnginesNpmLibraryHandler {
             LibraryManager libraryManager,
             ModelManager modelManager,
             R4NpmPackageLoader r4NpmPackageLoader,
-            R4NpmResourceHolder r4NpmResourceHolder) {
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
 
         var loader = libraryManager.getLibrarySourceLoader();
 
-        addNamespacesToNamespaceManager(r4NpmResourceHolder, libraryManager);
+        addNamespacesToNamespaceManager(r4NpmResourceInfoForCql, libraryManager);
 
-        loader.registerProvider(new NpmLibraryProvider(r4NpmPackageLoader, r4NpmResourceHolder));
+        loader.registerProvider(new NpmLibraryProvider(r4NpmPackageLoader, r4NpmResourceInfoForCql));
 
         modelManager
                 .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader, r4NpmResourceHolder));
+                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader,
+                    r4NpmResourceInfoForCql));
     }
 
     // LUKETODO:  why do we need to do this?  good question for JP
     private static void addNamespacesToNamespaceManager(
-            R4NpmResourceHolder r4NpmResourceHolder, LibraryManager libraryManager) {
-        r4NpmResourceHolder
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql, LibraryManager libraryManager) {
+        r4NpmResourceInfoForCql
                 .getNamespaceInfos()
                 .forEach(namespaceInfo -> libraryManager.getNamespaceManager().addNamespace(namespaceInfo));
     }

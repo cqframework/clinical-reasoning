@@ -19,15 +19,11 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  find a proper home for this later
 // LUKETODO:  javadoc
-// LUKETODO:  rename
-// LUKETODO: do the NpmPackages live on the local filesytems so will this work on a cluster?
-// LUKETODO:  do we want to bother with other FHIR versions?  If so, how to design for this?
-public class R4NpmResourceHolder {
-    private static final Logger logger = LoggerFactory.getLogger(R4NpmResourceHolder.class);
+public class R4NpmResourceInfoForCql {
+    private static final Logger logger = LoggerFactory.getLogger(R4NpmResourceInfoForCql.class);
 
-    public static final R4NpmResourceHolder EMPTY = new R4NpmResourceHolder(null, null, List.of());
+    public static final R4NpmResourceInfoForCql EMPTY = new R4NpmResourceInfoForCql(null, null, List.of());
 
     @Nullable
     private final Measure measure;
@@ -37,7 +33,7 @@ public class R4NpmResourceHolder {
 
     private final List<NpmPackage> npmPackages;
 
-    public R4NpmResourceHolder(@Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
+    public R4NpmResourceInfoForCql(@Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
         this.measure = measure;
         this.mainLibrary = mainLibrary;
         this.npmPackages = npmPackages;
@@ -52,7 +48,6 @@ public class R4NpmResourceHolder {
     }
 
     public Optional<Library> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
-        logger.info("1234: Find matching library for " + versionedIdentifier);
 
         final Optional<Library> mainLibrary = getOptMainLibrary();
         final Optional<Library> derivedLibrary = loadNpmLibrary(versionedIdentifier);
@@ -65,7 +60,6 @@ public class R4NpmResourceHolder {
     }
 
     public Optional<Library> findMatchingLibrary(ModelIdentifier modelIdentifier) {
-        logger.info("1234: Find matching library for " + modelIdentifier);
 
         final Optional<Library> mainLibrary = getOptMainLibrary();
         final Optional<Library> derivedLibrary = loadNpmLibrary(modelIdentifier);
@@ -82,9 +76,19 @@ public class R4NpmResourceHolder {
                 .map(npmPackage -> loadLibraryAsInputStream(npmPackage, versionedIdentifier))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(R4NpmResourceHolder::convertInputStreamToLibrary)
+                .map(R4NpmResourceInfoForCql::convertInputStreamToLibrary)
                 .flatMap(Optional::stream)
                 .findFirst();
+    }
+
+    public List<NamespaceInfo> getNamespaceInfos() {
+        return npmPackages.stream().map(this::getNamespaceInfo).toList();
+    }
+
+    @Nonnull
+    private NamespaceInfo getNamespaceInfo(NpmPackage npmPackage) {
+        // LUKETODO:  verify we want a canonical and not a url here:
+        return new NamespaceInfo(npmPackage.name(), npmPackage.canonical());
     }
 
     private Optional<Library> loadNpmLibrary(ModelIdentifier modelIdentifier) {
@@ -92,7 +96,7 @@ public class R4NpmResourceHolder {
                 .map(npmPackage -> loadLibraryAsInputStream(npmPackage, modelIdentifier))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(R4NpmResourceHolder::convertInputStreamToLibrary)
+                .map(R4NpmResourceInfoForCql::convertInputStreamToLibrary)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
@@ -105,54 +109,17 @@ public class R4NpmResourceHolder {
         }
     }
 
-    public boolean doesLibraryMatch(VersionedIdentifier versionedIdentifier) {
+    private boolean doesLibraryMatch(VersionedIdentifier versionedIdentifier) {
         return doesLibraryMatch(versionedIdentifier.getId());
     }
 
-    public boolean doesLibraryMatch(ModelIdentifier modelIdentifier) {
+    private boolean doesLibraryMatch(ModelIdentifier modelIdentifier) {
         return doesLibraryMatch(modelIdentifier.getId());
-    }
-
-    // LUKETODO:  this is the secret sauce:  how do we effectively transform an identifier into a URL that we can use to
-    // load
-    // LUKETODO:  how do we get http://example.com/Library/simple-alpha ?????
-    // This doesn't work:  we need the domain name and we can't get that from the versioned identifier
-    public String toUrl(VersionedIdentifier versionedIdentifier) {
-        //        org.hl7.fhir
-        //
-        //        {https://hl7.org/fhir}/Library/{id}
-        // org.hl7.fhir....
-        // LUKETODO:  convert system to URL
-
-        // LUKETODO:  get url info from NpmPackages.
-
-        // org.hl7.fhir  // from CQL  Use NamespaceManager and NamespaceInfo to conver
-        //        return "https://" + versionedIdentifier.getSystem() + "/Library/" + versionedIdentifier.getId();
-        // org.hl7.fhir  // from CQL  Use NamespaceManager and NamespaceInfo to convert
-        final List<NamespaceInfo> namespaceInfos = getNamespaceInfos();
-
-        // LUKETODO:  what if we have more than one?
-
-        final NamespaceInfo namespaceInfo = namespaceInfos.get(0);
-
-        final String uri = namespaceInfo.getUri();
-        final String name = namespaceInfo.getName();
-        return uri + "/Library/" + versionedIdentifier.getId();
-    }
-
-    public List<NamespaceInfo> getNamespaceInfos() {
-        return npmPackages.stream().map(this::getNamespaceInfo).toList();
-    }
-
-    @Nonnull
-    private NamespaceInfo getNamespaceInfo(NpmPackage npmPackage) {
-        // LUKETODO:  do we get a
-        return new NamespaceInfo(npmPackage.name(), npmPackage.canonical());
     }
 
     private static final String TEXT_CQL = "text/cql";
 
-    boolean doesLibraryMatch(String id) {
+    private boolean doesLibraryMatch(String id) {
         if (mainLibrary == null) {
             return false;
         }
@@ -169,41 +136,6 @@ public class R4NpmResourceHolder {
 
         return false;
     }
-
-    // LUKETODO:  do we?
-    // 1) Do the magic below with the NpmPackage class?
-    // 2) Pass in the NpmResourceHolderGetter instead and call loadLibraryByUrl?
-    // LUKETODO:  in order to get an ILibraryReader, we need to know the FHIR version, which we can get for a given
-    // NpmPackage
-    //    private static InputStream doSomethingWithNpmAndVersionedIdentifier(
-    //            VersionedIdentifier versionedIdentifier, NpmPackage npmPackage, ILibraryReader libraryReader)
-    //        throws IOException {
-    //
-    //        // Massage the versioned identifier using the NpmPackage
-    //        final VersionedIdentifier libraryIdentifier = deriveLibraryIdentifier(versionedIdentifier, npmPackage);
-    //
-    //        // Get the package file as an input stream
-    //        final Optional<InputStream> packageAsInputStream = loadLibraryAsInputStream(npmPackage,
-    //            libraryIdentifier);
-    //
-    //        if (packageAsInputStream.isPresent()) {
-    //            final InputStream stream = packageAsInputStream.get();
-    //            // For some reason, we load the Library as R5, not R4
-    //            org.hl7.fhir.r5.model.Library l = libraryReader.readLibrary(stream);
-    //
-    //            for (org.hl7.fhir.r5.model.Attachment attachment : l.getContent()) {
-    //                if (attachment.getContentType() != null && TEXT_CQL.equals(attachment.getContentType())) {
-    //                    // LUKETODO: why did they do this?  why do they to mutate the thing?????
-    //                    if (versionedIdentifier.getSystem() == null) {
-    //                        versionedIdentifier.setSystem(libraryIdentifier.getSystem());
-    //                    }
-    //
-    //                    return new ByteArrayInputStream(attachment.getData());
-    //                }
-    //            }
-    //        }
-    //        return null;
-    //    }
 
     private static Optional<Library> convertInputStreamToLibrary(@Nullable InputStream libraryInputStream) {
         try {
@@ -264,18 +196,5 @@ public class R4NpmResourceHolder {
         //        return "%s/Library/%s-ModelInfo".formatted(npmPackage.url(),modelIdentifier.getId());
         // LUKETODO: fudge it for now
         return "%s/Library/%s-ModelInfo".formatted("http://example.com", modelIdentifier.getId());
-    }
-
-    @Nonnull
-    private static VersionedIdentifier deriveLibraryIdentifier(
-            VersionedIdentifier versionedIdentifier, NpmPackage npmPackage) {
-
-        return new VersionedIdentifier()
-                .withId(versionedIdentifier.getId())
-                .withVersion(versionedIdentifier.getVersion())
-                .withSystem(
-                        versionedIdentifier.getSystem() == null
-                                ? npmPackage.canonical()
-                                : versionedIdentifier.getSystem());
     }
 }

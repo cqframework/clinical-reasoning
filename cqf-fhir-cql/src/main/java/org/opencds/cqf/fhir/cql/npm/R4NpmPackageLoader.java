@@ -13,8 +13,8 @@ public interface R4NpmPackageLoader {
     R4NpmPackageLoader DEFAULT = new R4NpmPackageLoader() {};
 
     // LUKETODO:  unit test this:
-    default R4NpmResourceHolder loadNpmResources(CanonicalType measureUrl) {
-        return R4NpmResourceHolder.EMPTY;
+    default R4NpmResourceInfoForCql loadNpmResources(CanonicalType measureUrl) {
+        return R4NpmResourceInfoForCql.EMPTY;
     }
 
     // LUKETODO:  think about this API:  are we getting a Library or an InputStream?

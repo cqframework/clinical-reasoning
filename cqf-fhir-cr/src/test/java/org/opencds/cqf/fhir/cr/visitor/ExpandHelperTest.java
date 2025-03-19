@@ -350,7 +350,7 @@ class ExpandHelperTest {
     }
 
     @Test
-    void expandRetrySuccessful() {
+    void expandRetrySuccessful() throws InterruptedException {
         // setup tx server endpoint
         var baseUrl = "www.test.com/fhir";
         var endpoint = new Endpoint();
@@ -384,6 +384,8 @@ class ExpandHelperTest {
                 new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 new Date());
+
+        Thread.sleep(3000);
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -426,6 +428,7 @@ class ExpandHelperTest {
                     new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     new Date());
+            Thread.sleep(3000);
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -465,6 +468,7 @@ class ExpandHelperTest {
                     new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     new Date());
+            Thread.sleep(3000);
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());

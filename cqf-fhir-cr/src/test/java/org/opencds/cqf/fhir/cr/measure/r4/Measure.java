@@ -986,6 +986,14 @@ public class Measure {
                     .filter(x -> x.hasValue() && x.getValue().hasText())
                     .filter(x -> x.getValue().getText().equals(textValue))
                     .findFirst()
+                    .orElse(null));
+        }
+
+        public SelectedStratum stratumByComponentText(String textValue) {
+            return stratum(s -> s.getStratum().stream()
+                    .filter(x -> x.getComponent().stream()
+                            .anyMatch(t -> t.getCode().getText().equals(textValue)))
+                    .findFirst()
                     .get());
         }
 
@@ -1005,6 +1013,11 @@ public class Measure {
 
         public SelectedStratum hasScore(String score) {
             MeasureValidationUtils.validateStratumScore(value(), score);
+            return this;
+        }
+
+        public SelectedStratum hasComponentStratifierCount(int count) {
+            assertEquals(count, value().getComponent().size());
             return this;
         }
 

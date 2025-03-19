@@ -43,6 +43,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             Coding.class,
             Enumeration.class,
             Boolean.class,
+            // added Integer and String for examples like age or gender
+            Integer.class,
+            String.class,
             // CQL type returned by some stratifier expression that don't map neatly to FHIR types
             Code.class));
 
@@ -93,12 +96,18 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
 
         if (!stratifierDef.components().isEmpty()) {
-            throw new UnsupportedOperationException("multi-component stratifiers are not yet supported.");
+            for (var component : stratifierDef.components()) {
+                validateExpressionResultType(groupDef, component.expression(), evaluationResult, url);
+            }
+        } else {
+            validateExpressionResultType(groupDef, stratifierDef.expression(), evaluationResult, url);
         }
+    }
 
-        var stratifierExpression = stratifierDef.expression();
+    private void validateExpressionResultType(
+            GroupDef groupDef, String expression, EvaluationResult evaluationResult, String url) {
 
-        var expressionResult = evaluationResult.forExpression(stratifierExpression);
+        var expressionResult = evaluationResult.forExpression(expression);
 
         if (expressionResult == null || expressionResult.value() == null) {
             return;
@@ -107,35 +116,20 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
-            var resultMatchingClassCount = resultClasses.stream()
-                    .filter(resultClass -> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass)
-                            || Boolean.class == resultClass)
-                    .count();
+        // if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+        var resultMatchingClassCount = resultClasses.stream()
+                .filter(resultClass ->
+                        ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass) || Boolean.class == resultClass)
+                .count();
 
-            if (resultMatchingClassCount != resultClasses.size()) {
-                throw new InvalidRequestException(String.format(
-                        "stratifier expression criteria results for expression: [%s] must fall within accepted types for boolean population basis: [%s] for Measure: %s",
-                        stratifierExpression, groupPopulationBasisCode, url));
-            }
-
-            return;
+        if (resultMatchingClassCount != resultClasses.size()) {
+            throw new InvalidRequestException(String.format(
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for boolean population basis: [%s] for Measure: %s",
+                    expression, groupPopulationBasisCode, url));
         }
 
-        var optResourceClass = extractResourceType(groupPopulationBasisCode);
-
-        if (optResourceClass.isPresent()) {
-
-            var resultMatchingClassCount = resultClasses.stream()
-                    .filter(it -> optResourceClass.get().isAssignableFrom(it))
-                    .count();
-
-            if (resultMatchingClassCount != resultClasses.size()) {
-                throw new InvalidRequestException(String.format(
-                        "stratifier expression criteria results for expression: [%s] must fall within accepted types for population basis: [%s] for Measure: %s",
-                        stratifierExpression, groupPopulationBasisCode, url));
-            }
-        }
+        return;
+        // }
     }
 
     private Optional<? extends Class<?>> extractResourceType(String groupPopulationBasisCode) {

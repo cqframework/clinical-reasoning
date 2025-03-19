@@ -129,6 +129,10 @@ define "Encounter Cancelled":
     [Encounter] E
        where E.status = 'cancelled'
 
+define "Encounter Status":
+    [Encounter] E
+         return E.status
+
 define "Encounter InProgress":
     [Encounter] E
        where E.status = 'in-progress'
@@ -144,3 +148,6 @@ define "Encounter Not Finished":
 define "Matching General Practitioner":
     [Patient] p
        where Last(Split(First(p.generalPractitioner.reference),'/')) = Last(Split(practitionerParam,'/'))
+
+define "Age":
+    AgeInYearsAt(start of "Measurement Period")

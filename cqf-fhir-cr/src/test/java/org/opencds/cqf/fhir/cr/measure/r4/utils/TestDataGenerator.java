@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import java.util.Calendar;
 import java.util.Collections;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
@@ -63,12 +64,17 @@ public class TestDataGenerator {
         // Patient Creation
         Patient patient = new Patient();
         patient.setId(patientId);
+        Calendar calendar = Calendar.getInstance();
         // set gender, half male, half female
         if (count % 2 == 0) {
             patient.setGender(AdministrativeGender.FEMALE);
+            calendar.set(1985, Calendar.JUNE, 16, 14, 30, 0); // Year, Month (0-based), Day, Hour, Minute, Second
         } else {
             patient.setGender(AdministrativeGender.MALE);
+            calendar.set(1988, Calendar.JANUARY, 11, 14, 30, 0); // Year, Month (0-based), Day, Hour, Minute, Second
         }
+        var date = calendar.getTime();
+        patient.setBirthDate(date);
         // if testing attribution to generalPractitioner
         if (practitionerId != null) {
             patient.setGeneralPractitioner(Collections.singletonList(new Reference("Practitioner/" + practitionerId)));

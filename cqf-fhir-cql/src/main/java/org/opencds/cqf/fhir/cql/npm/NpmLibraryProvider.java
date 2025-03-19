@@ -9,6 +9,8 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

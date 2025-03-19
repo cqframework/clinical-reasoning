@@ -23,13 +23,13 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 

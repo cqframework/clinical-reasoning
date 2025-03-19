@@ -1,9 +1,15 @@
-package org.opencds.cqf.fhir.cql.npm;
+package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,20 +20,54 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
-// LUKETODO:  outer util class?
-class R4NpmPackageLoaderForTests implements R4NpmPackageLoader {
+// LUKETODO:  comment that this is for tests
+// LUKETODO:  figure out where this will utlimately live
+public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
 
     private final Map<String, R4NpmResourceInfoForCql> urlToResourceInfo = new HashMap<>();
 
-    public R4NpmPackageLoaderForTests(NpmPackage npmPackage) {
-        setup(npmPackage);
+    public static R4NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
+        final List<NpmPackage> npmPackages = buildNpmPackage(clazz, tgzPaths);
+
+        return new R4NpmPackageLoaderInMemory(npmPackages);
+    }
+
+    public static R4NpmPackageLoaderInMemory fromNpmPackages(NpmPackage... npmPackage) {
+        return new R4NpmPackageLoaderInMemory(Arrays.asList(npmPackage));
+    }
+
+    @Override
+    public R4NpmResourceInfoForCql loadNpmResources(CanonicalType measureUrl) {
+        return urlToResourceInfo.computeIfAbsent(measureUrl.asStringValue(), input -> R4NpmResourceInfoForCql.EMPTY);
+    }
+
+    @Nonnull
+    private static List<NpmPackage> buildNpmPackage(Class<?> clazz, Path... tgzPaths) {
+        return Arrays.stream(tgzPaths).map(path -> getNpmPackage(clazz, path)).toList();
+    }
+
+    @Nonnull
+    private static NpmPackage getNpmPackage(Class<?> clazz, Path tgzPath) {
+        try (final InputStream simpleAlphaStream = clazz.getResourceAsStream(tgzPath.toString())) {
+            if (simpleAlphaStream == null) {
+                throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath));
+            }
+
+            return NpmPackage.fromPackage(simpleAlphaStream);
+        } catch (IOException e) {
+            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath), e);
+        }
+    }
+
+    private R4NpmPackageLoaderInMemory(List<NpmPackage> npmPackages) {
+        npmPackages.forEach(this::setup);
     }
 
     private void setup(NpmPackage npmPackage) {
         try {
             trySetup(npmPackage);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to setup NpmPackage:  " + npmPackage.name(), e);
+            throw new InternalErrorException("Failed to setup NpmPackage:  " + npmPackage.name(), e);
         }
     }
 
@@ -72,10 +112,5 @@ class R4NpmPackageLoaderForTests implements R4NpmPackageLoader {
                         measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
             }
         }
-    }
-
-    @Override
-    public R4NpmResourceInfoForCql loadNpmResources(CanonicalType measureUrl) {
-        return urlToResourceInfo.computeIfAbsent(measureUrl.asStringValue(), input -> R4NpmResourceInfoForCql.EMPTY);
     }
 }

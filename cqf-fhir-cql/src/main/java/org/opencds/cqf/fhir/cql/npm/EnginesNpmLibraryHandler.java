@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cql.npm;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

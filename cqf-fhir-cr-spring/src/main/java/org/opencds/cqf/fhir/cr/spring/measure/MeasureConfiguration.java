@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.spring.measure;
 
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

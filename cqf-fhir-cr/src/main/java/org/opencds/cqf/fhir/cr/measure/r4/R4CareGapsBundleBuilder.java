@@ -42,7 +42,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -57,6 +56,7 @@ import org.opencds.cqf.fhir.utility.builder.CompositionBuilder;
 import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 
 /**
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested

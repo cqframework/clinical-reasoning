@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cql.npm;
+package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;

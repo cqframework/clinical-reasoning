@@ -25,10 +25,10 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
-import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.cql.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -11,6 +11,8 @@ import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 
 // LUKETODO:  javadoc
 public class NpmModelInfoProvider implements ModelInfoProvider {

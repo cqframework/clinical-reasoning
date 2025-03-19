@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cql.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -32,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

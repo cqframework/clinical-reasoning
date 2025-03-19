@@ -95,33 +95,33 @@ public class PopulationDef {
         this.subjectResources = subjectResources;
     }
 
-    // ✅ Get Set<Object> by key (Returns an empty set if key is missing)
+    // Get Set<Object> by key (Returns an empty set if key is missing)
     public Set<Object> getResourcesByKey(String key) {
         return subjectResources.getOrDefault(key, Collections.emptySet());
     }
 
-    // ✅ Add an element to Set<Object> under a key (Creates a new set if key is missing)
+    // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources.computeIfAbsent(key, k -> new HashSet<>()).add(value);
     }
 
-    // ✅ Remove an element from Set<Object> under a key (Removes key if set is empty)
+    // Remove an element from Set<Object> under a key (Removes key if set is empty)
     public boolean removeResource(String key, Object value) {
-        Set<Object> resources = subjectResources.get(key);
-        if (resources != null) {
-            boolean removed = resources.remove(value);
-            if (resources.isEmpty()) {
+        Set<Object> resourceObjects = subjectResources.get(key);
+        if (resourceObjects != null) {
+            boolean removed = resourceObjects.remove(value);
+            if (resourceObjects.isEmpty()) {
                 subjectResources.remove(key); // Clean up empty keys
             }
             return removed;
         }
         return false; // Key does not exist
     }
-    // ✅ Remove a specific object from the Set without removing the entire Set
+    // Remove a specific object from the Set without removing the entire Set
     public boolean removeObjectFromSet(String key, Object value) {
-        Set<Object> resources = subjectResources.get(key);
-        if (resources != null) {
-            return resources.remove(value); // Returns true if object was in the set and removed, false otherwise
+        Set<Object> resourceObjects = subjectResources.get(key);
+        if (resourceObjects != null) {
+            return resourceObjects.remove(value); // Returns true if object was in the set and removed, false otherwise
         }
         return false; // Key does not exist or object was not found
     }

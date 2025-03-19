@@ -116,7 +116,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        // if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
         var resultMatchingClassCount = resultClasses.stream()
                 .filter(resultClass ->
                         ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass) || Boolean.class == resultClass)
@@ -124,7 +123,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         if (resultMatchingClassCount != resultClasses.size()) {
             throw new InvalidRequestException(String.format(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for boolean population basis: [%s] for Measure: %s",
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: %s",
                     expression, groupPopulationBasisCode, url));
         }
     }

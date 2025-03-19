@@ -397,9 +397,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
                     new StringType(measureStratifier.getDescription()));
         }
-        // TODO: check if stratfier has both component and standard stratifier defined, should not be allowed
 
-        if (stratifierDef.components().size() > 0) {
+        if (!stratifierDef.components().isEmpty()) {
             // Component Stratifier
             // one or more criteria expression defined, one set of criteria results per component specified
             // results of component stratifier are an intersection of membership to both component result sets
@@ -440,11 +439,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // Process each subject map
         for (Map<String, CriteriaResult> subjectMap : subjectCompValues) {
-            // Convert values to a Set<ValueWrapper>
-            Set<ValueWrapper> valueSet = subjectMap.values().stream()
-                    .map(criteriaResult -> new ValueWrapper(criteriaResult.rawValue()))
-                    .collect(Collectors.toSet());
-
             // Extract and store subject IDs based on their criteria results
             subjectMap.forEach((subjectId, criteriaResult) -> {
                 String patientReference = ResourceType.Patient + "/" + subjectId;
@@ -582,9 +576,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .findFirst()
                 .orElse(null);
 
-        // This is a temporary resource that was carried by the population component
-        //        @SuppressWarnings("unchecked")
-        //        Set<String> popSubjectIds = (Set<String>) population.getUserData(POPULATION_SUBJECT_SET);
         if (groupDef.isBooleanBasis()) {
             var popSubjectIds = populationDef.getSubjects().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))

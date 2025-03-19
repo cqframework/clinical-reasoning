@@ -75,8 +75,7 @@ public class Engines {
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(
-                repository, settings, terminologyProvider, dataProviders, r4NpmPackageLoader,
-            r4NpmResourceInfoForCql);
+                repository, settings, terminologyProvider, dataProviders, r4NpmPackageLoader, r4NpmResourceInfoForCql);
         return createEngine(environment, settings);
     }
 

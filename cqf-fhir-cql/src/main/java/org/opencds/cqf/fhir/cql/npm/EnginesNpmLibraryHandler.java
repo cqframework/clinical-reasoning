@@ -22,8 +22,7 @@ public class EnginesNpmLibraryHandler {
 
         modelManager
                 .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader,
-                    r4NpmResourceInfoForCql));
+                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader, r4NpmResourceInfoForCql));
     }
 
     // LUKETODO:  why do we need to do this?  good question for JP

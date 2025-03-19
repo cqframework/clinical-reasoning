@@ -1,0 +1,179 @@
+package org.opencds.cqf.fhir.cql.npm;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+class R4NpmResourceInfoForCqlTest {
+    private static final String DOT_TGZ = ".tgz";
+
+    private static final String EXPECTED_CQL_ALPHA =
+            "library SimpleAlpha  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+    private static final String EXPECTED_CQL_BRAVO =
+            "library SimpleBravo  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+    private static final String EXPECTED_CQL_WITH_DERIVED =
+            "library WithDerivedLibrary version '0.1'  using FHIR version '4.0.1'  include DerivedLibrary version '0.1'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
+    private static final String EXPECTED_CQL_DERIVED =
+            "library DerivedLibrary version '0.1'  define \"Has Initial Population\": true ";
+
+    private static final String SIMPLE_ALPHA = "simple-alpha";
+    private static final String SIMPLE_BRAVO = "simple-bravo";
+    private static final String WITH_DERIVED_LIBRARY = "with-derived-library";
+    private static final String WITH_DERIVED_LIBRARY_UPPER = "WithDerivedLibrary";
+    private static final String DERIVED_LIBRARY = "DerivedLibrary";
+
+    private static final String SIMPLE_ALPHA_TGZ = SIMPLE_ALPHA + DOT_TGZ;
+    private static final String SIMPLE_BRAVO_TGZ = SIMPLE_BRAVO + DOT_TGZ;
+    private static final String WITH_DERIVED_LIBRARY_TGZ = WITH_DERIVED_LIBRARY + DOT_TGZ;
+
+    private static final String SLASH_MEASURE_SLASH = "/Measure/";
+    private static final String SLASH_LIBRARY_SLASH = "/Library/";
+
+    private static final String SIMPLE_URL = "http://example.com";
+    private static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
+
+    private static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
+    private static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
+    private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
+            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+    private static final String LIBRARY_URL_ALPHA = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA;
+    private static final String LIBRARY_URL_BRAVO = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO;
+    private static final String LIBRARY_URL_WITH_DERIVED_LIBRARY =
+            DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+    private static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
+
+    private static Stream<Arguments> simplePackagesParams() {
+        return Stream.of(
+                Arguments.of(SIMPLE_ALPHA_TGZ, MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, EXPECTED_CQL_ALPHA),
+                Arguments.of(SIMPLE_BRAVO_TGZ, MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, EXPECTED_CQL_BRAVO));
+    }
+
+    @ParameterizedTest
+    @MethodSource("simplePackagesParams")
+    void simple(String tgzPath, String measureUrl, String expectedLibraryUrl, String expectedCql) {
+        final R4NpmPackageLoaderForTests loader = setup(tgzPath);
+
+        final R4NpmResourceInfoForCql r4NpmResourceInfoForCql = loader.loadNpmResources(new CanonicalType(measureUrl));
+
+        verifyMeasure(measureUrl, expectedLibraryUrl, r4NpmResourceInfoForCql);
+        verifyLibrary(
+                expectedLibraryUrl,
+                expectedCql,
+                r4NpmResourceInfoForCql.getOptMainLibrary().orElse(null));
+    }
+
+    @Test
+    void derivedLibrary() {
+        final String tgzPath = WITH_DERIVED_LIBRARY_TGZ;
+        final String measureUrl = MEASURE_URL_WITH_DERIVED_LIBRARY;
+        final String withDerivedLibraryUrl = LIBRARY_URL_WITH_DERIVED_LIBRARY;
+        final String derivedLibraryUrl = LIBRARY_URL_DERIVED_LIBRARY;
+        final String libraryUrlWithVersion = LIBRARY_URL_WITH_DERIVED_LIBRARY + "|0.1";
+        final String expectedCql = EXPECTED_CQL_WITH_DERIVED;
+
+        final R4NpmPackageLoaderForTests loader = setup(tgzPath);
+
+        final R4NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
+
+        verifyMeasure(measureUrl, libraryUrlWithVersion, resourceInfo);
+        verifyLibrary(
+                withDerivedLibraryUrl,
+                expectedCql,
+                resourceInfo.getOptMainLibrary().orElse(null));
+
+        final Library derivedLibrary = resourceInfo
+                .findMatchingLibrary(
+                        new VersionedIdentifier().withId("DerivedLibrary").withVersion("0.1"))
+                .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl, EXPECTED_CQL_DERIVED, derivedLibrary);
+    }
+
+    private void verifyLibrary(String expectedLibraryUrl, String expectedCql, @Nullable Library library) {
+        assertNotNull(library);
+
+        assertEquals(expectedLibraryUrl, library.getUrl());
+
+        final List<Attachment> attachments = library.getContent();
+
+        assertEquals(1, attachments.size());
+
+        final Attachment attachment = attachments.get(0);
+
+        assertEquals("text/cql", attachment.getContentType());
+        final byte[] attachmentData = attachment.getData();
+        final String cql = new String(attachmentData, StandardCharsets.UTF_8);
+
+        assertEquals(expectedCql, cql);
+    }
+
+    private void verifyMeasure(
+            String measureUrl, String expectedLibraryUrl, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+        final Optional<Measure> optMeasure = r4NpmResourceInfoForCql.getMeasure();
+        assertTrue(optMeasure.isPresent());
+        final Measure measure = optMeasure.get();
+        assertEquals(measureUrl, measure.getUrl());
+        final List<CanonicalType> libraryCanonicals = measure.getLibrary();
+        assertEquals(1, libraryCanonicals.size());
+
+        final CanonicalType libraryCanonical = libraryCanonicals.get(0);
+
+        assertEquals(expectedLibraryUrl, libraryCanonical.asStringValue());
+        assertEquals("canonical", libraryCanonicals.get(0).fhirType());
+    }
+
+    private static List<NpmPackage> setupPackages(String... tgzPaths) {
+        return Arrays.stream(tgzPaths)
+                .map(R4NpmResourceInfoForCqlTest::setupPackage)
+                .toList();
+    }
+
+    @Nonnull
+    private R4NpmPackageLoaderForTests setup(String tgzPath) {
+        final NpmPackage npmPackage = setupPackage(tgzPath);
+
+        return new R4NpmPackageLoaderForTests(npmPackage);
+    }
+
+    private static NpmPackage setupPackage(String tgzPath) {
+        try {
+            return trySetupPackage(tgzPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static NpmPackage trySetupPackage(String tgzPath) throws IOException {
+        try (final InputStream simpleAlphaStream = R4NpmResourceInfoForCql.class.getResourceAsStream(tgzPath)) {
+            if (simpleAlphaStream == null) {
+                fail("Failed to load resource: %s".formatted(tgzPath));
+            }
+
+            return NpmPackage.fromPackage(simpleAlphaStream);
+        }
+    }
+
+    // LUKETODO:  test derived library both with and without versions?
+
+}

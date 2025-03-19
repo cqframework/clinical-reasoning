@@ -31,9 +31,11 @@ public class R4NpmResourceInfoForCql {
     @Nullable
     private final Library mainLibrary;
 
+    // LUKETODO:  can we ever have more than one?
     private final List<NpmPackage> npmPackages;
 
-    public R4NpmResourceInfoForCql(@Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
+    public R4NpmResourceInfoForCql(
+            @Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
         this.measure = measure;
         this.mainLibrary = mainLibrary;
         this.npmPackages = npmPackages;
@@ -91,6 +93,7 @@ public class R4NpmResourceInfoForCql {
         return new NamespaceInfo(npmPackage.name(), npmPackage.canonical());
     }
 
+    // LUKETODO: Don't need to worry about this for now... just comment accordingly
     private Optional<Library> loadNpmLibrary(ModelIdentifier modelIdentifier) {
         return npmPackages.stream()
                 .map(npmPackage -> loadLibraryAsInputStream(npmPackage, modelIdentifier))
@@ -160,9 +163,9 @@ public class R4NpmResourceInfoForCql {
         try {
             return Optional.ofNullable(
                     // LUKETODO:  figure out how to set up version in tgz
-                    //                    npmPackage.loadByCanonicalVersion(buildUrl(npmPackage, libraryIdentifier),
-                    // libraryIdentifier.getVersion()));
-                    npmPackage.loadByCanonical(buildUrl(npmPackage, libraryIdentifier)));
+                    npmPackage.loadByCanonicalVersion(
+                            buildUrl(npmPackage, libraryIdentifier), libraryIdentifier.getVersion()));
+            //                    npmPackage.loadByCanonical(buildUrl(npmPackage, libraryIdentifier)));
         } catch (IOException exception) {
             throw new InternalErrorException("Failed to load NPM package: " + libraryIdentifier.getId(), exception);
         }
@@ -174,9 +177,9 @@ public class R4NpmResourceInfoForCql {
         try {
             return Optional.ofNullable(
                     // LUKETODO:  figure out how to set up version in tgz
-                    //                    npmPackage.loadByCanonicalVersion(buildUrl(npmPackage, modelIdentifier),
-                    // modelIdentifier.getVersion()));
-                    npmPackage.loadByCanonical(buildUrl(npmPackage, modelIdentifier)));
+                    npmPackage.loadByCanonicalVersion(
+                            buildUrl(npmPackage, modelIdentifier), modelIdentifier.getVersion()));
+            //                    npmPackage.loadByCanonical(buildUrl(npmPackage, modelIdentifier)));
         } catch (IOException exception) {
             throw new InternalErrorException("Failed to load NPM package: " + modelIdentifier.getId(), exception);
         }
@@ -185,16 +188,35 @@ public class R4NpmResourceInfoForCql {
     // LUKETODO:  which is it?  url()?  canonical?  system()?
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
-        //        return "%s/Library/%s".formatted(npmPackage.url(), libraryIdentifier.getId());
-        //        return "%s/Library/%s".formatted(libraryIdentifier.getSystem(), libraryIdentifier.getId());
-        // LUKETODO: fudge it for now
-        return "%s/Library/%s".formatted("http://example.com", libraryIdentifier.getId());
+        return "%s/Library/%s".formatted(npmPackage.canonical(), libraryIdentifier.getId());
     }
+
+    /*
+        https://build.fhir.org/ig/HL7/cql-ig/conformance.html#library-name-and-url
+        Conformance Requirement 4.2 (Library Name and URL):
+
+    The identifying elements of a library SHALL conform to the following requirements:
+    Library.url SHALL be <CQL namespace url>/Library/<CQL library name>
+    Library.name SHALL be <CQL library name>, SHALL be 64 characters or less, and SHOULD be 30 characters or less
+    Library.version SHALL be <CQL library version>
+    For libraries included in FHIR implementation guides, the CQL namespace is defined by the implementation guide as follows:
+    CQL namespace name SHALL be IG.packageId
+    CQL namespace url SHALL be IG.canonicalBase
+    CQL library source files SHOULD be named <CQLLibraryName>-<version>.cql
+    To avoid issues with characters between web ids and names, library names SHALL NOT have underscores.
+         */
+
+    /*
+        https://build.fhir.org/ig/HL7/cql-ig/using-cql.html#library-namespaces
+        Conformance Requirement 2.4 (Library Namespaces):
+
+    CQL libraries SHOULD use namespaces.
+    When a namespace is not used, the library SHALL be considered part of a "public" global namespace for the purposes of resolution within a given environment.
+    The root of the CQL namespace SHALL match the root of the url of the Library resource housing the CQL library.
+         */
 
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, ModelIdentifier modelIdentifier) {
-        //        return "%s/Library/%s-ModelInfo".formatted(npmPackage.url(),modelIdentifier.getId());
-        // LUKETODO: fudge it for now
-        return "%s/Library/%s-ModelInfo".formatted("http://example.com", modelIdentifier.getId());
+        return "%s/Library/%s-ModelInfo".formatted(npmPackage.canonical(), modelIdentifier.getId());
     }
 }

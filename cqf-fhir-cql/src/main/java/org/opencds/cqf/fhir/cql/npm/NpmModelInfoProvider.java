@@ -21,7 +21,8 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     // LUKETODO: do we need this anymore?
     private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmModelInfoProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+    public NpmModelInfoProvider(
+            R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
         this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
         this.r4NpmPackageLoader = r4NpmPackageLoader;
     }

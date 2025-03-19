@@ -247,7 +247,7 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
         ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList expected =
                 new ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery.PrefetchUrlList();
         expected.addAll(
-                Arrays.asList(
+                List.of(
                         "Patient?_id={{context.patientId}}",
                         "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
                         "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"));

@@ -151,13 +151,10 @@ public class CrDiscoveryService implements ICrDiscoveryService {
         // if we have a fhirQueryPattern extensions, use them
         var fhirQueryExtList = dataRequirement.getExtension().stream()
                 .filter(e -> e.getUrl().equals(CQF_FHIR_QUERY_PATTERN) && e.getValue() != null)
+                .map(e -> ((IPrimitiveType<?>) e.getValue()).getValueAsString())
                 .toList();
         if (!fhirQueryExtList.isEmpty()) {
-            List<String> urlList = new ArrayList<>();
-            for (var fhirQueryExt : fhirQueryExtList) {
-                urlList.add(((IPrimitiveType<?>) fhirQueryExt.getValue()).getValueAsString());
-            }
-            return urlList;
+            return fhirQueryExtList;
         }
 
         // else build the query
@@ -168,15 +165,13 @@ public class CrDiscoveryService implements ICrDiscoveryService {
                 + getPatientSearchParam(dataRequirement.getType())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
 
-        // TODO: Add valueFilter extension resolution
+        // In the future we should consider adding support for the valueFilter extension
         // http://hl7.org/fhir/extensions/5.1.0/StructureDefinition-cqf-valueFilter.html
 
         if (dataRequirement.hasCodeFilter()) {
             return createRequestUrlHasFilters(dataRequirement, patientRelatedResource);
         } else {
-            List<String> urlList = new ArrayList<>();
-            urlList.add(patientRelatedResource);
-            return urlList;
+            return List.of(patientRelatedResource);
         }
     }
 

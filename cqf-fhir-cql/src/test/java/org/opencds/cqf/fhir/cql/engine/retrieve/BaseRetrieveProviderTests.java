@@ -17,7 +17,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
 class BaseRetrieveProviderTests {
 
     @Test
-    public void testProfileParameterTypeIsCorrectForVersion() {
+    void testProfileParameterTypeIsCorrectForVersion() {
         var retrieveSettings = new RetrieveSettings().setProfileMode(PROFILE_MODE.DECLARED);
         var fixture = Mockito.mock(BaseRetrieveProvider.class, Mockito.CALLS_REAL_METHODS);
         doReturn(retrieveSettings).when(fixture).getRetrieveSettings();

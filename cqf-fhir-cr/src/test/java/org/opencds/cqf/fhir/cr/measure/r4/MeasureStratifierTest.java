@@ -309,4 +309,25 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+    /**
+     * Cannot define a Stratifier with both component criteria and expression criteria
+     * You can only define one or the other
+     */
+    @Test
+    void twoStatifierCriteria() {
+        try {
+            given.when()
+                    .measureId("CohortBooleanStratComponentInvalid")
+                    .evaluate()
+                    .then()
+                    .report();
+            fail("should throw an exception");
+        } catch (InvalidRequestException exception) {
+            assertTrue(
+                    exception
+                            .getMessage()
+                            .contains(
+                                    "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
+        }
+    }
 }

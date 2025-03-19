@@ -51,16 +51,16 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     @Override
     public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
-        groupDef.populations().forEach(population -> {
-            validateGroupPopulationBasisType(measureDef.url(), groupDef, population, evaluationResult);
-        });
+        groupDef.populations()
+                .forEach(population ->
+                        validateGroupPopulationBasisType(measureDef.url(), groupDef, population, evaluationResult));
     }
 
     @Override
     public void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
-        groupDef.stratifiers().forEach(stratifier -> {
-            validateStratifierPopulationBasisType(measureDef.url(), groupDef, stratifier, evaluationResult);
-        });
+        groupDef.stratifiers()
+                .forEach(stratifier -> validateStratifierPopulationBasisType(
+                        measureDef.url(), groupDef, stratifier, evaluationResult));
     }
 
     private void validateGroupPopulationBasisType(
@@ -127,9 +127,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                     "stratifier expression criteria results for expression: [%s] must fall within accepted types for boolean population basis: [%s] for Measure: %s",
                     expression, groupPopulationBasisCode, url));
         }
-
-        return;
-        // }
     }
 
     private Optional<? extends Class<?>> extractResourceType(String groupPopulationBasisCode) {
@@ -161,11 +158,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.emptyList();
         }
 
-        if (!(result instanceof List<?>)) {
+        if (!(result instanceof List<?> list)) {
             return Collections.singletonList(result.getClass());
         }
-
-        var list = (List<?>) result;
 
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
     }

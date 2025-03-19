@@ -29,6 +29,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         return this.parameters;
     }
 
+    @Override
+    public boolean hasParameter() {
+        return parameters.hasParameter();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<ParametersParameterComponent> getParameter() {
@@ -52,6 +57,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
                 .setParameter(parametersParameterComponents.stream()
                         .map(x -> (ParametersParameterComponent) x)
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addParameter(String name, String value) {
+        getParameters().addParameter(name, value);
     }
 
     @Override

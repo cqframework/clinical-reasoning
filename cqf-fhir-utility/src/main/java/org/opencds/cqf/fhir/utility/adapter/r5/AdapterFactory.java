@@ -19,13 +19,17 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.RequestActionAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
 
@@ -107,5 +111,20 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IElementDefinitionAdapter createElementDefinition(ICompositeType element) {
         return new ElementDefinitionAdapter(element);
+    }
+
+    @Override
+    public IPlanDefinitionAdapter createPlanDefinition(IBaseResource library) {
+        return new PlanDefinitionAdapter((IDomainResource) library);
+    }
+
+    @Override
+    public IRequestActionAdapter createRequestAction(IBaseBackboneElement action) {
+        return new RequestActionAdapter(action);
+    }
+
+    @Override
+    public IDataRequirementAdapter createDataRequirement(ICompositeType dataRequirement) {
+        return new DataRequirementAdapter(dataRequirement);
     }
 }

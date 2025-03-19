@@ -61,6 +61,8 @@ public class Constants {
     public static final String CPG_INPUT_TEXT = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-text";
     public static final String CPG_INPUT_DESCRIPTION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-input-description";
+    public static final String CPG_PARAMETER_DEFINITION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition";
 
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
@@ -77,6 +79,7 @@ public class Constants {
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
     public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";
+    public static final String CQF_FHIR_QUERY_PATTERN = "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern";
 
     public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";

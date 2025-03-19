@@ -19,7 +19,11 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class ValueSetAdapterTest {
@@ -162,5 +166,29 @@ class ValueSetAdapterTest {
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
         });
+    }
+
+    @Test
+    void testExpansion() {
+        var contains = new ValueSetExpansionContainsComponent().setCode("test");
+        var expansion = new ValueSetExpansionComponent().addContains(contains);
+        expansion.setId("test-expansion");
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+        assertTrue(adapter.hasExpansion());
+        assertTrue(adapter.hasExpansionContains());
+        assertEquals(expansion, adapter.getExpansion());
+        assertEquals(contains, adapter.getExpansionContains().get(0).get());
+    }
+
+    @Test
+    void testCompose() {
+        var set = new ValueSet.ConceptSetComponent().addValueSet("test");
+        var compose = new ValueSetComposeComponent().addInclude(set);
+        var valueSet = new ValueSet().setCompose(compose);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+        assertTrue(adapter.hasCompose());
+        assertTrue(adapter.hasComposeInclude());
+        assertEquals(set, adapter.getComposeInclude().get(0).get());
     }
 }

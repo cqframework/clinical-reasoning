@@ -8,8 +8,12 @@ public class PrefetchUrlList extends CopyOnWriteArrayList<String> {
     @Override
     public boolean add(String element) {
         for (String s : this) {
-            if (s.equals(element)) return false;
-            if (element.startsWith(s)) return false;
+            if (s.equals(element)) {
+                return true;
+            }
+            if (element.startsWith(s)) {
+                return true;
+            }
         }
         return super.add(element);
     }

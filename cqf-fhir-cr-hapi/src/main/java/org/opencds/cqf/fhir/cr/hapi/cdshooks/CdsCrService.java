@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -327,7 +326,7 @@ public class CdsCrService implements ICdsCrService {
             var results = BundleHelper.getEntryResources(bundle).stream()
                     .filter(r -> r.fhirType().equals(resourceType)
                             && r.getIdElement().getIdPart().equals(id))
-                    .collect(Collectors.toList());
+                    .toList();
             return results.isEmpty() ? null : results.get(0);
         } else {
             return responseAdapter.getContained().stream()

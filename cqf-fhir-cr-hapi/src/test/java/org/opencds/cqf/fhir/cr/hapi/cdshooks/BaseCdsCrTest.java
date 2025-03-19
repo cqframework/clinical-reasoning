@@ -15,7 +15,7 @@ public abstract class BaseCdsCrTest {
     protected IAdapterFactory adapterFactory;
 
     protected final ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings cdsSettings = new CdsCrSettings();
-    protected final ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
     protected Repository getRepository() {
         return new InMemoryFhirRepository(fhirContext);

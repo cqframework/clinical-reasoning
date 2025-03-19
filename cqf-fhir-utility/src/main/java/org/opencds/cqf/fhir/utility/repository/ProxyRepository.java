@@ -23,19 +23,29 @@ public class ProxyRepository implements Repository {
     // One data server, one content server (terminology defaults to data)
     // One data server, one content server, one terminology server
 
-    private Repository local;
-    private Repository data;
-    private Repository content;
-    private Repository terminology;
+    private final Repository data;
+    private final Repository content;
+    private final Repository terminology;
 
     public ProxyRepository(
             Repository local, Boolean useLocalData, Repository data, Repository content, Repository terminology) {
         checkNotNull(local);
 
-        this.local = local;
-        this.data = data == null ? this.local : useLocalData ? new FederatedRepository(local, data) : data;
-        this.content = content == null ? this.local : content;
-        this.terminology = terminology == null ? this.local : terminology;
+        if (data == null) {
+            if (Boolean.TRUE.equals(useLocalData)) {
+                this.data = local;
+            } else {
+                this.data = new InMemoryFhirRepository(local.fhirContext());
+            }
+        } else {
+            if (Boolean.TRUE.equals(useLocalData)) {
+                this.data = new FederatedRepository(local, data);
+            } else {
+                this.data = data;
+            }
+        }
+        this.content = content == null ? local : content;
+        this.terminology = terminology == null ? local : terminology;
     }
 
     public ProxyRepository(Repository data, Repository content, Repository terminology) {

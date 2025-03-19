@@ -22,16 +22,14 @@ public class Repositories {
     }
 
     private static IGenericClient createClient(FhirContext fhirContext, IBaseResource endpoint) {
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                return Clients.forEndpoint(fhirContext, (org.hl7.fhir.dstu3.model.Endpoint) endpoint);
-            case R4:
-                return Clients.forEndpoint(fhirContext, (org.hl7.fhir.r4.model.Endpoint) endpoint);
-            case R5:
-                return Clients.forEndpoint(fhirContext, (org.hl7.fhir.r5.model.Endpoint) endpoint);
-            default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
-        }
+        var fhirVersion = fhirContext.getVersion().getVersion();
+        return switch (fhirVersion) {
+            case DSTU3 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.dstu3.model.Endpoint) endpoint);
+            case R4 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r4.model.Endpoint) endpoint);
+            case R5 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r5.model.Endpoint) endpoint);
+            default -> throw new IllegalArgumentException(
+                    String.format("unsupported FHIR version: %s", fhirVersion.getFhirVersionString()));
+        };
     }
 
     public static Repository createRestRepository(FhirContext fhirContext, IBaseResource endpoint) {
@@ -44,10 +42,7 @@ public class Repositories {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        if (dataEndpoint == null && contentEndpoint == null && terminologyEndpoint == null) {
-            return localRepository;
-        }
-        return new ProxyRepository(
+        return proxy(
                 localRepository,
                 useLocalData,
                 createRestRepository(localRepository.fhirContext(), dataEndpoint),
@@ -61,29 +56,25 @@ public class Repositories {
             Repository dataRepository,
             Repository contentRepository,
             Repository terminologyRepository) {
-        if (dataRepository == null && contentRepository == null && terminologyRepository == null) {
+        var useLocalData = useServerData == null ? Boolean.TRUE : useServerData;
+        if (dataRepository == null
+                && contentRepository == null
+                && terminologyRepository == null
+                && Boolean.TRUE.equals(useLocalData)) {
             return localRepository;
         }
         return new ProxyRepository(
-                localRepository,
-                useServerData == null ? Boolean.TRUE : useServerData,
-                dataRepository,
-                contentRepository,
-                terminologyRepository);
+                localRepository, useLocalData, dataRepository, contentRepository, terminologyRepository);
     }
 
     public static ResourceMatcher getResourceMatcher(FhirContext context) {
         var fhirVersion = context.getVersion().getVersion();
-        switch (fhirVersion) {
-            case DSTU3:
-                return new ResourceMatcherDSTU3();
-            case R4:
-                return new ResourceMatcherR4();
-            case R5:
-                return new ResourceMatcherR5();
-            default:
-                throw new NotImplementedException(
-                        "Resource matching is not implemented for FHIR version " + fhirVersion.getFhirVersionString());
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new ResourceMatcherDSTU3();
+            case R4 -> new ResourceMatcherR4();
+            case R5 -> new ResourceMatcherR5();
+            default -> throw new NotImplementedException(String.format(
+                    "Resource matching is not implemented for FHIR version: %s", fhirVersion.getFhirVersionString()));
+        };
     }
 }

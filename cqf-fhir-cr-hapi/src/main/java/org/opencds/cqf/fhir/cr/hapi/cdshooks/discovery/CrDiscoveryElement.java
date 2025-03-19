@@ -6,19 +6,15 @@ import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 
 public class CrDiscoveryElement {
-    protected IPlanDefinitionAdapter planDefinition;
-    protected PrefetchUrlList prefetchUrlList;
 
-    public CrDiscoveryElement(IPlanDefinitionAdapter planDefinition, PrefetchUrlList prefetchUrlList) {
-        this.planDefinition = planDefinition;
-        this.prefetchUrlList = prefetchUrlList;
-    }
+    private CrDiscoveryElement() {}
 
-    public String getKey(int itemNo) {
+    protected static String getKey(int itemNo) {
         return "item" + itemNo;
     }
 
-    public CdsServiceJson getCdsServiceJson() {
+    public static CdsServiceJson getCdsServiceJson(
+            IPlanDefinitionAdapter planDefinition, PrefetchUrlList prefetchUrlList) {
         if (planDefinition == null
                 || !planDefinition.hasAction()
                 || planDefinition.getAction().stream().noneMatch(IPlanDefinitionActionAdapter::hasTrigger)) {

@@ -15,10 +15,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
@@ -37,6 +43,9 @@ public class ExpandHelper {
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove =
             Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private int expansionAttempt = 0;
+    private TerminologySettings terminologySettings = new TerminologySettings();
 
     public ExpandHelper(Repository repository, TerminologyServerClient server) {
         this.repository = repository;
@@ -111,33 +120,52 @@ public class ExpandHelper {
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint) {
-        for (var attempt = 1; true; attempt++) {
-            try {
-                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
-                        terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
-                // expansions are only valid for a particular version
-                if (!valueSet.hasVersion()) {
-                    valueSet.setVersion(expandedValueSet.getVersion());
-                }
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-                break;
-            } catch (NullPointerException ex) {
-                throw new UnprocessableEntityException(String.format(
-                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                        valueSet.getId(), ex.getMessage()));
-            } catch (Exception ex) {
-                if (attempt == MAX_RETRIES) {
-                    throw new UnprocessableEntityException(String.format(
-                            "Terminology Server expansion failed for ValueSet (%s): %s",
-                            valueSet.getId(), ex.getMessage()));
-                }
-                myLogger.error(
-                        String.format("Attempt %s to expand ValueSet %s failed, retrying.", attempt, valueSet.getId()));
-                try {
-                    Thread.sleep(attempt * 1000L);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
+        expansionAttempt = 0;
+        ScheduledFuture<?> result = scheduler.schedule(
+                new Runnable() {
+                    @Override
+                    public void run() throws UnprocessableEntityException {
+                        try {
+                            expansionAttempt++;
+                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
+                                myLogger.info(
+                                        "Expansion attempt:" + expansionAttempt + " for ValueSet: " + valueSet.getId());
+                                var expandedValueSet =
+                                        (IValueSetAdapter) createAdapterForResource(terminologyServerClient.expand(
+                                                valueSet, terminologyEndpoint.get(), expansionParameters));
+                                // expansions are only valid for a particular version
+                                if (!valueSet.hasVersion()) {
+                                    valueSet.setVersion(expandedValueSet.getVersion());
+                                }
+                                valueSet.setExpansion(expandedValueSet.getExpansion());
+                                scheduler.shutdown();
+                            }
+                        } catch (NullPointerException ex) {
+                            throw new UnprocessableEntityException(String.format(
+                                    "Terminology Server expansion failed for ValueSet (%s): %s",
+                                    valueSet.getId(), ex.getMessage()));
+                        } catch (Exception ex) {
+                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
+                                myLogger.info("Expansion attempt:" + expansionAttempt + " failed.");
+                                scheduler.schedule(
+                                        this, terminologySettings.getRetryIntervalMillis(), TimeUnit.MILLISECONDS);
+                            } else {
+                                scheduler.shutdown();
+                                throw new UnprocessableEntityException(String.format(
+                                        "Terminology Server expansion failed for ValueSet (%s): %s",
+                                        valueSet.getId(), ex.getMessage()));
+                            }
+                        }
+                    }
+                },
+                0,
+                TimeUnit.SECONDS);
+
+        try {
+            result.get();
+        } catch (ExecutionException | InterruptedException e) {
+            if (e.getCause() instanceof UnprocessableEntityException) {
+                throw (UnprocessableEntityException) e.getCause();
             }
         }
     }

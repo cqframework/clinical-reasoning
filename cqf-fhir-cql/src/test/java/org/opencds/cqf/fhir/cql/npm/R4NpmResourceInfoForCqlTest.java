@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cql.npm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -37,31 +38,64 @@ class R4NpmResourceInfoForCqlTest {
     private static final String EXPECTED_CQL_DERIVED =
             "library DerivedLibrary version '0.1'  define \"Has Initial Population\": true ";
 
+    private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS = "library with-two-layers-derived-libraries '0.1'  using FHIR version '4.0.1'  include derived-layer-1a version '0.1.a' include derived-layer-1b version '0.1.b'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)   context Patient  define \"Initial Population\":     derived-layer-1a.\"Has Initial Population\"  define \"Denominator\":     derived-layer-1a.\"Has Denominator\"  define \"Numerator\":     derived-layer-1b.\"Has Numerator\" ";
+
+    private static final String EXPECTED_CQL_DERIVED_1_A = "library derived-layer-1a version '0.1.a'  include derived-layer-2a version '0.2.a' include derived-layer-2b version '0.2.b'  define \"Has Initial Population\":     derived-layer-2a.\"Has Initial Population\"  define \"Has Denominator\":     derived-layer-2b.\"Has Denominator\" ";
+
+    private static final String EXPECTED_CQL_DERIVED_1_B =
+        "library derived-layer-1b version '0.1.b'  include derived-layer-2a version '0.2.a' include derived-layer-2b version '0.2.b'  define \"Has Numerator\":     derived-layer-2a.\"Has Numerator\" ";
+
+    private static final String EXPECTED_CQL_DERIVED_2_A =
+        "library derived-layer-2a version '0.2.a'  define \"Has Initial Population\": true ";
+
+    private static final String EXPECTED_CQL_DERIVED_2_B =
+        "library derived-layer-2b version '0.2.b'  define \"Has Numerator\": true ";
+
     private static final String SIMPLE_ALPHA = "simple-alpha";
     private static final String SIMPLE_BRAVO = "simple-bravo";
     private static final String WITH_DERIVED_LIBRARY = "with-derived-library";
     private static final String WITH_DERIVED_LIBRARY_UPPER = "WithDerivedLibrary";
-    private static final String DERIVED_LIBRARY = "DerivedLibrary";
+    private static final String DERIVED_LIBRARY_ID = "DerivedLibrary";
+    private static final String DERIVED_LIBRARY = DERIVED_LIBRARY_ID;
+
+    private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "with-two-layers-derived-libraries";
 
     private static final String SIMPLE_ALPHA_TGZ = SIMPLE_ALPHA + DOT_TGZ;
     private static final String SIMPLE_BRAVO_TGZ = SIMPLE_BRAVO + DOT_TGZ;
     private static final String WITH_DERIVED_LIBRARY_TGZ = WITH_DERIVED_LIBRARY + DOT_TGZ;
+    private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ = WITH_TWO_LAYERS_DERIVED_LIBRARIES + DOT_TGZ;
 
     private static final String SLASH_MEASURE_SLASH = "/Measure/";
     private static final String SLASH_LIBRARY_SLASH = "/Library/";
 
     private static final String SIMPLE_URL = "http://example.com";
     private static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
+    private static final String DERIVED_TWO_LAYERS_URL = "http://with-two-layers-derived-libraries.npm.opencds.org";
 
     private static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
     private static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+    private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
+        DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES;
+
     private static final String LIBRARY_URL_ALPHA = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA;
     private static final String LIBRARY_URL_BRAVO = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO;
     private static final String LIBRARY_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     private static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
+
+    private static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
+        DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES;
+
+    private static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A =
+        DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + "derived-layer-1a";
+    private static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1B =
+        DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + "derived-layer-1b";
+    private static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2A =
+        DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + "derived-layer-2a";
+    private static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B =
+        DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + "derived-layer-2b";
 
     private static Stream<Arguments> simplePackagesParams() {
         return Stream.of(
@@ -83,14 +117,16 @@ class R4NpmResourceInfoForCqlTest {
                 r4NpmResourceInfoForCql.getOptMainLibrary().orElse(null));
     }
 
+    // LUKETODO:  think of additional test cases
     @Test
     void derivedLibrary() {
         final String tgzPath = WITH_DERIVED_LIBRARY_TGZ;
         final String measureUrl = MEASURE_URL_WITH_DERIVED_LIBRARY;
         final String withDerivedLibraryUrl = LIBRARY_URL_WITH_DERIVED_LIBRARY;
         final String derivedLibraryUrl = LIBRARY_URL_DERIVED_LIBRARY;
-        final String libraryUrlWithVersion = LIBRARY_URL_WITH_DERIVED_LIBRARY + "|0.1";
+        final String libraryUrlWithVersion = withDerivedLibraryUrl + "|0.1";
         final String expectedCql = EXPECTED_CQL_WITH_DERIVED;
+        final String expectedCqlDerived = EXPECTED_CQL_DERIVED;
 
         final R4NpmPackageLoaderForTests loader = setup(tgzPath);
 
@@ -102,12 +138,81 @@ class R4NpmResourceInfoForCqlTest {
                 expectedCql,
                 resourceInfo.getOptMainLibrary().orElse(null));
 
-        final Library derivedLibrary = resourceInfo
+        final Library derivedLibraryFromNoVersion = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId(DERIVED_LIBRARY_ID))
+            .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl, expectedCqlDerived, derivedLibraryFromNoVersion);
+
+        final Library derivedLibraryFromVersion = resourceInfo
                 .findMatchingLibrary(
-                        new VersionedIdentifier().withId("DerivedLibrary").withVersion("0.1"))
+                        new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("0.1"))
                 .orElse(null);
 
-        verifyLibrary(derivedLibraryUrl, EXPECTED_CQL_DERIVED, derivedLibrary);
+        verifyLibrary(derivedLibraryUrl, expectedCqlDerived, derivedLibraryFromVersion);
+
+        final Library derivedLibraryFromBadVersion = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("bad"))
+            .orElse(null);
+
+        assertNull(derivedLibraryFromBadVersion);
+    }
+
+    @Test
+    void derivedLibraryTwoLayers() {
+        final String tgzPath = WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ;
+        final String measureUrl = MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES;
+        final String withDerivedLibraryUrl = LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES;
+        final String derivedLibraryUrl1a = LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A;
+        final String derivedLibraryUrl1b = LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1B;
+        final String derivedLibraryUrl2a = LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2A;
+        final String derivedLibraryUrl2b = LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B;
+        final String libraryUrlWithVersion = withDerivedLibraryUrl + "|0.1";
+        final String expectedCql = EXPECTED_CQL_DERIVED_TWO_LAYERS;
+        final String expectedCqlDerived1a = EXPECTED_CQL_DERIVED_1_A;
+        final String expectedCqlDerived1b = EXPECTED_CQL_DERIVED_1_B;
+        final String expectedCqlDerived2a = EXPECTED_CQL_DERIVED_2_A;
+        final String expectedCqlDerived2b = EXPECTED_CQL_DERIVED_2_B;
+
+        final R4NpmPackageLoaderForTests loader = setup(tgzPath);
+
+        final R4NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
+
+        verifyMeasure(measureUrl, libraryUrlWithVersion, resourceInfo);
+        verifyLibrary(
+            withDerivedLibraryUrl,
+            expectedCql,
+            resourceInfo.getOptMainLibrary().orElse(null));
+
+        final Library derivedLibrary1a = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId("derived-layer-1a").withVersion("0.1.a"))
+            .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl1a, expectedCqlDerived1a, derivedLibrary1a);
+
+        final Library derivedLibrary1b = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId("derived-layer-1b").withVersion("0.1.b"))
+            .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl1b, expectedCqlDerived1b, derivedLibrary1b);
+
+        final Library derivedLibrary2a = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId("derived-layer-2a").withVersion("0.2.a"))
+            .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl2a, expectedCqlDerived2a, derivedLibrary2a);
+
+        final Library derivedLibrary2b = resourceInfo
+            .findMatchingLibrary(
+                new VersionedIdentifier().withId("derived-layer-2b").withVersion("0.2.b"))
+            .orElse(null);
+
+        verifyLibrary(derivedLibraryUrl2b, expectedCqlDerived2b, derivedLibrary2b);
     }
 
     private void verifyLibrary(String expectedLibraryUrl, String expectedCql, @Nullable Library library) {

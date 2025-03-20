@@ -177,10 +177,6 @@ class MeasureWithNpmTest {
         npmRepo.getRepository().update(new Patient().setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
     }
 
-    // LUKETODO:  test Measure with groups/populations so we can assert the initial population and other counts
-    // LUKETODO:  test one layer of derived libraries
-    // LUKETODO:  test two layers of derived libraries
-
     private Given initNpmRepos(String... tgzFileNames) {
         return Measure.given()
                 .r4NpmPackageLoader(

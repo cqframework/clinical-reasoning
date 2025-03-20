@@ -973,7 +973,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {

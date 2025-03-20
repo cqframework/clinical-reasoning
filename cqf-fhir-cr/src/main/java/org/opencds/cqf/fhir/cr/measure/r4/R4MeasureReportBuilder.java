@@ -517,7 +517,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void buildStratum(
+    private void buildStratum(
             BuilderContext bc,
             StratifierGroupComponent stratum,
             Set<ValueWrapper> values,
@@ -553,7 +553,77 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void buildStratumPopulation(
+    private void buildBooleanBasisStratumPopulation(
+            BuilderContext bc,
+            StratifierGroupPopulationComponent sgpc,
+            List<String> subjectIds,
+            PopulationDef populationDef) {
+        var popSubjectIds = populationDef.getSubjects().stream()
+                .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                .toList();
+        if (popSubjectIds.isEmpty()) {
+            sgpc.setCount(0);
+            return;
+        }
+        // intersect population subjects to stratifier.value subjects
+        Set<String> intersection = new HashSet<>(subjectIds);
+        intersection.retainAll(popSubjectIds);
+        sgpc.setCount(intersection.size());
+
+        // subject-list ListResource to match intersection of results
+        if (!intersection.isEmpty()
+                && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
+            ListResource popSubjectList = this.createIdList(UUID.randomUUID().toString(), intersection);
+            bc.addContained(popSubjectList);
+            sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
+        }
+    }
+
+    private void buildResourceBasisStratumPopulation(
+            BuilderContext bc,
+            StratifierGroupPopulationComponent sgpc,
+            List<String> subjectIds,
+            PopulationDef populationDef,
+            GroupDef groupDef) {
+        var resourceType =
+                ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+        assert populationDef != null;
+        if (populationDef.getSubjectResources() != null) {
+            for (String subjectId : subjectIds) {
+                // retrieve criteria results by subject Key
+                var resources = populationDef
+                        .getSubjectResources()
+                        .get(subjectId.replace(ResourceType.Patient.toString().concat("/"), ""));
+                if (resources != null) {
+                    if (isResourceType) {
+                        resourceIds.addAll(resources.stream()
+                                .map(this::getPopulationResourceIds) // get resource id
+                                .toList());
+                    } else {
+                        resourceIds.addAll(
+                                resources.stream().map(Object::toString).toList());
+                    }
+                }
+            }
+        }
+        if (resourceIds.isEmpty()) {
+            sgpc.setCount(0);
+            return;
+        }
+
+        sgpc.setCount(resourceIds.size());
+
+        // subject-list ListResource to match intersection of results
+        if (bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
+            ListResource popSubjectList = this.createIdList(UUID.randomUUID().toString(), resourceIds);
+            bc.addContained(popSubjectList);
+            sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
+        }
+    }
+
+    private void buildStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
@@ -575,67 +645,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         .equals(population.getCode().getCodingFirstRep().getCode()))
                 .findFirst()
                 .orElse(null);
-
+        assert populationDef != null;
         if (groupDef.isBooleanBasis()) {
-            var popSubjectIds = populationDef.getSubjects().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
-                    .toList();
-            if (popSubjectIds.isEmpty()) {
-                sgpc.setCount(0);
-                return;
-            }
-            // intersect population subjects to stratifier.value subjects
-            Set<String> intersection = new HashSet<>(subjectIds);
-            intersection.retainAll(popSubjectIds);
-            sgpc.setCount(intersection.size());
-
-            // subject-list ListResource to match intersection of results
-            if (!intersection.isEmpty()
-                    && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
-                ListResource popSubjectList =
-                        this.createIdList(UUID.randomUUID().toString(), intersection);
-                bc.addContained(popSubjectList);
-                sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
-            }
+            buildBooleanBasisStratumPopulation(bc, sgpc, subjectIds, populationDef);
         } else {
-            var resourceType =
-                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
-            boolean isResourceType = resourceType != null;
-            List<String> resourceIds = new ArrayList<>();
-            assert populationDef != null;
-            if (populationDef.getSubjectResources() != null) {
-                for (String subjectId : subjectIds) {
-                    // retrieve criteria results by subject Key
-                    var resources = populationDef
-                            .getSubjectResources()
-                            .get(subjectId.replace(
-                                    ResourceType.Patient.toString().concat("/"), ""));
-                    if (resources != null) {
-                        if (isResourceType) {
-                            resourceIds.addAll(resources.stream()
-                                    .map(this::getPopulationResourceIds) // get resource id
-                                    .toList());
-                        } else {
-                            resourceIds.addAll(
-                                    resources.stream().map(Object::toString).toList());
-                        }
-                    }
-                }
-            }
-            if (resourceIds.isEmpty()) {
-                sgpc.setCount(0);
-                return;
-            }
-
-            sgpc.setCount(resourceIds.size());
-
-            // subject-list ListResource to match intersection of results
-            if (bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
-                ListResource popSubjectList =
-                        this.createIdList(UUID.randomUUID().toString(), resourceIds);
-                bc.addContained(popSubjectList);
-                sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
-            }
+            buildResourceBasisStratumPopulation(bc, sgpc, subjectIds, populationDef, groupDef);
         }
     }
 
@@ -644,7 +658,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return resource.getId();
     }
 
-    protected void buildPopulation(
+    private void buildPopulation(
             BuilderContext bc,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,

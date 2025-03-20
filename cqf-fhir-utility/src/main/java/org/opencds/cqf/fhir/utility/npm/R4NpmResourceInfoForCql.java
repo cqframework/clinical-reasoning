@@ -54,26 +54,26 @@ public class R4NpmResourceInfoForCql {
 
     public Optional<Library> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
 
-        final Optional<Library> mainLibrary = getOptMainLibrary();
-        final Optional<Library> derivedLibrary = loadNpmLibrary(versionedIdentifier);
+        final Optional<Library> optMainLibrary = getOptMainLibrary();
+        final Optional<Library> optDerivedLibrary = loadNpmLibrary(versionedIdentifier);
 
         if (doesLibraryMatch(versionedIdentifier)) {
-            return mainLibrary;
+            return optMainLibrary;
         }
 
-        return derivedLibrary;
+        return optDerivedLibrary;
     }
 
     public Optional<Library> findMatchingLibrary(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> mainLibrary = getOptMainLibrary();
-        final Optional<Library> derivedLibrary = loadNpmLibrary(modelIdentifier);
+        final Optional<Library> optMainLibrary = getOptMainLibrary();
+        final Optional<Library> optDerivedLibrary = loadNpmLibrary(modelIdentifier);
 
         if (doesLibraryMatch(modelIdentifier)) {
-            return mainLibrary;
+            return optMainLibrary;
         }
 
-        return derivedLibrary;
+        return optDerivedLibrary;
     }
 
     private Optional<Library> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {

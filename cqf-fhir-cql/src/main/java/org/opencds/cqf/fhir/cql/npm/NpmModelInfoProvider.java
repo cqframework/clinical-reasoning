@@ -13,7 +13,9 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 
-// LUKETODO:  javadoc
+/**
+ * {@link ModelInfoProvider} to provide a ELM ModelInfo from an NPM package.
+ */
 public class NpmModelInfoProvider implements ModelInfoProvider {
 
     private static final String APPLICATION_XML = "application/xml";

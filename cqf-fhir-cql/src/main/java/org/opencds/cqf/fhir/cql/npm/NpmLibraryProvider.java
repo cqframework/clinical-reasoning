@@ -13,7 +13,9 @@ import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  javadoc
+/**
+ * {@link LibrarySourceProvider} to provide a CQL Library Stream from an NPM package.
+ */
 public class NpmLibraryProvider implements LibrarySourceProvider {
     private static final Logger logger = LoggerFactory.getLogger(NpmLibraryProvider.class);
 

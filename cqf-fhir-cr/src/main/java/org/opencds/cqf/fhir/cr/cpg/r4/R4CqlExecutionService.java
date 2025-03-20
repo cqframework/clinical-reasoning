@@ -16,6 +16,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
@@ -23,6 +24,7 @@ public class R4CqlExecutionService {
 
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
+    protected R4NpmPackageLoader r4NpmPackageLoader;
 
     public R4CqlExecutionService(Repository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
@@ -30,7 +32,6 @@ public class R4CqlExecutionService {
     }
 
     public Parameters evaluate(
-            // RequestDetails requestDetails,
             String subject,
             String expression,
             Parameters parameters,
@@ -78,7 +79,9 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            // LUKETODO:  pass a non-empty value?
+            // LUKETODO:  is this a use case for retrieving an NPM package by library URL?
+            // LUKETODO:  pass a non-empty value?  I think we need to hard code this before we need to query by Measure
+            // URL and we have none here
             var engine = Engines.forRepository(repository, evaluationSettings, null, R4NpmResourceInfoForCql.EMPTY);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);

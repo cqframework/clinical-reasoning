@@ -3,11 +3,12 @@ package org.opencds.cqf.fhir.cql.npm;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EnginesNpmLibraryHandler {
-    private static final Logger logger = LoggerFactory.getLogger(EnginesNpmLibraryHandler.class);
+
+    private EnginesNpmLibraryHandler() {
+        // private constructor
+    }
 
     public static void registerNpmResourceHolderGetter(
             LibraryManager libraryManager, ModelManager modelManager, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {

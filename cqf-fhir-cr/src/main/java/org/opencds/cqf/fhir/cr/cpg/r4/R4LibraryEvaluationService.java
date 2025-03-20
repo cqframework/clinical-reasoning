@@ -53,7 +53,7 @@ public class R4LibraryEvaluationService {
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);
-        // LUKETODO:  pass a non-empty value?
+        // LUKETODO:  is this a use case for retrieving an NPM package by library URL?
         var engine = Engines.forRepository(repository, evaluationSettings, data, R4NpmResourceInfoForCql.EMPTY);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);

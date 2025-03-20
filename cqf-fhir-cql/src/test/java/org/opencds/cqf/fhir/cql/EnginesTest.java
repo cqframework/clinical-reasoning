@@ -309,7 +309,6 @@ class EnginesTest {
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));
         var additionalData = bundleBuilder.getBundle();
 
-        // LUKETODO:  pass a non-empty value?
         var engine = Engines.forRepository(repository, settings, additionalData, R4NpmResourceInfoForCql.EMPTY);
 
         assertNotNull(engine.getState());
@@ -396,7 +395,6 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
-        // LUKETODO:  pass a non-empty value?
         return Engines.forRepository(repository, settings, bundle, R4NpmResourceInfoForCql.EMPTY);
     }
 }

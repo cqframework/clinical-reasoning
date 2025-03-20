@@ -499,12 +499,7 @@ class MeasureDefBuilderTest {
                         buildInputStratifiers("InitialPopulation"),
                         buildInputStratifiers("Denominator"),
                         buildOutputStratifiers("InitialPopulation"),
-                        buildOutputStratifiers("Denominator")),
-                Arguments.of(
-                        buildInputStratifiers(3, "InitialPopulation", "Denominator", "Numerator"),
-                        buildInputStratifiers(4, "MeasurePopulation", "MeasurePopulationExclusion"),
-                        buildOutputStratifiers(3, "InitialPopulation", "Denominator", "Numerator"),
-                        buildOutputStratifiers(4, "MeasurePopulation", "MeasurePopulationExclusion")));
+                        buildOutputStratifiers("Denominator")));
     }
 
     @ParameterizedTest

@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,10 +68,6 @@ public class PopulationDef {
         this.getResources().add(resource);
     }
 
-    public void removeResource(Object resource) {
-        this.getResources().remove(resource);
-    }
-
     public Set<Object> getResources() {
         if (this.resources == null) {
             this.resources = new HashSet<>();
@@ -90,40 +85,9 @@ public class PopulationDef {
         return subjectResources;
     }
 
-    // Setter method
-    public void setSubjectResources(Map<String, Set<Object>> subjectResources) {
-        this.subjectResources = subjectResources;
-    }
-
-    // Get Set<Object> by key (Returns an empty set if key is missing)
-    public Set<Object> getResourcesByKey(String key) {
-        return subjectResources.getOrDefault(key, Collections.emptySet());
-    }
-
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources.computeIfAbsent(key, k -> new HashSet<>()).add(value);
-    }
-
-    // Remove an element from Set<Object> under a key (Removes key if set is empty)
-    public boolean removeResource(String key, Object value) {
-        Set<Object> resourceObjects = subjectResources.get(key);
-        if (resourceObjects != null) {
-            boolean removed = resourceObjects.remove(value);
-            if (resourceObjects.isEmpty()) {
-                subjectResources.remove(key); // Clean up empty keys
-            }
-            return removed;
-        }
-        return false; // Key does not exist
-    }
-    // Remove a specific object from the Set without removing the entire Set
-    public boolean removeObjectFromSet(String key, Object value) {
-        Set<Object> resourceObjects = subjectResources.get(key);
-        if (resourceObjects != null) {
-            return resourceObjects.remove(value); // Returns true if object was in the set and removed, false otherwise
-        }
-        return false; // Key does not exist or object was not found
     }
 
     public void removeOverlaps(Map<String, Set<Object>> overlap) {

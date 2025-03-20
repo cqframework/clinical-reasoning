@@ -84,36 +84,41 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
                 .findFirst();
 
         if (optPackageFolder.isPresent()) {
-            final NpmPackage.NpmPackageFolder packageFolder = optPackageFolder.get();
-            final Map<String, List<String>> types = packageFolder.getTypes();
+            setupNpmPackageInfo(npmPackage, optPackageFolder.get(), fhirContext);
+        }
+    }
 
-            Measure measure = null;
-            Library library = null;
+    private void setupNpmPackageInfo(NpmPackage npmPackage,
+            NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext) throws IOException {
+        final Map<String, List<String>> types = packageFolder.getTypes();
 
-            for (Map.Entry<String, List<String>> typeToFiles : types.entrySet()) {
-                for (String nextFile : typeToFiles.getValue()) {
-                    final byte[] fileBytes = packageFolder.fetchFile(nextFile);
-                    final String fileContents = new String(fileBytes, StandardCharsets.UTF_8);
+        Measure measure = null;
+        Library library = null;
 
-                    if (nextFile.toLowerCase().endsWith(".json")) {
-                        final IBaseResource resource =
-                                fhirContext.newJsonParser().parseResource(fileContents);
+        for (Map.Entry<String, List<String>> typeToFiles : types.entrySet()) {
+            for (String nextFile : typeToFiles.getValue()) {
+                final byte[] fileBytes = packageFolder.fetchFile(nextFile);
+                final String fileContents = new String(fileBytes, StandardCharsets.UTF_8);
 
-                        if (resource instanceof Library libraryToUse) {
-                            library = libraryToUse;
-                        }
+                if (nextFile.toLowerCase().endsWith(".json")) {
+                    final IBaseResource resource =
+                            fhirContext.newJsonParser().parseResource(fileContents);
 
-                        if (resource instanceof Measure measureToUse) {
-                            measure = measureToUse;
-                        }
+                    if (resource instanceof Library libraryToUse) {
+                        library = libraryToUse;
+                    }
+
+                    if (resource instanceof Measure measureToUse) {
+                        measure = measureToUse;
                     }
                 }
             }
+        }
 
-            if (measure != null) {
-                urlToResourceInfo.put(
-                        measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
-            }
+        if (measure != null) {
+            urlToResourceInfo.put(
+                    measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(
+                    npmPackage)));
         }
     }
 }

@@ -93,8 +93,7 @@ public class Dstu3MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                // TODO: LD: stub this for now until we have a use case for support NPM packages in
-                // DSTU3
+                // we currently don't have a need for NPM Packages in DSTU3
                 R4NpmResourceInfoForCql.EMPTY);
 
         CompiledLibrary lib;

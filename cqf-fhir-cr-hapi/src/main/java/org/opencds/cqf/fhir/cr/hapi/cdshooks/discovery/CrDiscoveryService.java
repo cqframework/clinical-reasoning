@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 
+import static org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.CrDiscoveryElement.getCdsServiceJson;
+import static org.opencds.cqf.fhir.utility.Constants.CQF_FHIR_QUERY_PATTERN;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -58,18 +60,19 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     protected CdsServiceJson resolveService(IBaseResource resource) {
         if (resource != null && resource.fhirType().equals("PlanDefinition")) {
             var planDef = (IPlanDefinitionAdapter) adapterFactory.createResource(resource);
-            return new CrDiscoveryElement(planDef, getPrefetchUrlList(planDef)).getCdsServiceJson();
+            return getCdsServiceJson(planDef, getPrefetchUrlList(planDef));
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public ILibraryAdapter resolvePrimaryLibrary(IPlanDefinitionAdapter planDefinition) {
-        IPrimitiveType<?> canonical = null;
+        IPrimitiveType<String> canonical = null;
         var dataReqExt = planDefinition.getExtensionByUrl(CRMI_EFFECTIVE_DATA_REQUIREMENTS);
         var dataReqExtValue = dataReqExt == null ? null : dataReqExt.getValue();
         // Use a Module Definition Library with Effective Data Requirements for the Plan Definition if it exists
         if (dataReqExtValue instanceof IPrimitiveType<?> moduleDefCanonical) {
-            canonical = moduleDefCanonical;
+            canonical = (IPrimitiveType<String>) moduleDefCanonical;
         }
         // Otherwise use the primary Library
         if (canonical == null && planDefinition.hasLibrary()) {
@@ -78,10 +81,7 @@ public class CrDiscoveryService implements ICrDiscoveryService {
                     fhirVersion(), planDefinition.getLibrary().get(0));
         }
         if (canonical != null) {
-            return adapterFactory.createLibrary(SearchHelper.searchRepositoryByCanonical(
-                    repository,
-                    VersionUtilities.canonicalTypeForVersion(
-                            fhirVersion(), planDefinition.getLibrary().get(0))));
+            return adapterFactory.createLibrary(SearchHelper.searchRepositoryByCanonical(repository, canonical));
         }
         return null;
     }
@@ -144,17 +144,34 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     }
 
     public List<String> createRequestUrl(IDataRequirementAdapter dataRequirement) {
-        if (dataRequirement == null || !dataRequirement.hasType() || !isPatientCompartment(dataRequirement.getType()))
+        if (dataRequirement == null) {
             return List.of();
+        }
+
+        // if we have a fhirQueryPattern extensions, use them
+        var fhirQueryExtList = dataRequirement.getExtension().stream()
+                .filter(e -> e.getUrl().equals(CQF_FHIR_QUERY_PATTERN) && e.getValue() != null)
+                .map(e -> ((IPrimitiveType<?>) e.getValue()).getValueAsString())
+                .toList();
+        if (!fhirQueryExtList.isEmpty()) {
+            return fhirQueryExtList;
+        }
+
+        // else build the query
+        if (!dataRequirement.hasType() || !isPatientCompartment(dataRequirement.getType())) {
+            return List.of();
+        }
         var patientRelatedResource = dataRequirement.getType() + "?"
                 + getPatientSearchParam(dataRequirement.getType())
                 + "=Patient/" + PATIENT_ID_CONTEXT;
+
+        // In the future we should consider adding support for the valueFilter extension
+        // http://hl7.org/fhir/extensions/5.1.0/StructureDefinition-cqf-valueFilter.html
+
         if (dataRequirement.hasCodeFilter()) {
             return createRequestUrlHasFilters(dataRequirement, patientRelatedResource);
         } else {
-            List<String> ret = new ArrayList<>();
-            ret.add(patientRelatedResource);
-            return ret;
+            return List.of(patientRelatedResource);
         }
     }
 

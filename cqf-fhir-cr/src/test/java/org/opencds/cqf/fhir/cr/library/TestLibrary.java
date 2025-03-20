@@ -134,6 +134,7 @@ public class TestLibrary {
         public When(Repository repository, LibraryProcessor processor) {
             this.repository = repository;
             this.processor = processor;
+            useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
 

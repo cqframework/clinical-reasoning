@@ -92,7 +92,6 @@ public class PopulationDef {
 
     public void removeOverlaps(Map<String, Set<Object>> overlap) {
         var iterator = subjectResources.entrySet().iterator();
-
         while (iterator.hasNext()) {
             Map.Entry<String, Set<Object>> entry = iterator.next();
             String key = entry.getKey();

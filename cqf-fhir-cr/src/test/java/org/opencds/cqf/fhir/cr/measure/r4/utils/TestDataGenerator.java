@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -64,16 +67,18 @@ public class TestDataGenerator {
         // Patient Creation
         Patient patient = new Patient();
         patient.setId(patientId);
-        Calendar calendar = Calendar.getInstance();
+        LocalDateTime localDateTime;
+
         // set gender, half male, half female
         if (count % 2 == 0) {
             patient.setGender(AdministrativeGender.FEMALE);
-            calendar.set(1985, Calendar.JUNE, 16, 14, 30, 0); // Year, Month (0-based), Day, Hour, Minute, Second
+            localDateTime = LocalDateTime.of(1985, Month.JUNE, 16, 14, 30, 0);
         } else {
             patient.setGender(AdministrativeGender.MALE);
-            calendar.set(1988, Calendar.JANUARY, 11, 14, 30, 0); // Year, Month (0-based), Day, Hour, Minute, Second
+            localDateTime = LocalDateTime.of(1988, Month.JANUARY, 11, 14, 30, 0);
         }
-        var date = calendar.getTime();
+        var date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
         patient.setBirthDate(date);
         // if testing attribution to generalPractitioner
         if (practitionerId != null) {
